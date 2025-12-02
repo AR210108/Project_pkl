@@ -29,6 +29,18 @@ Route::middleware(['auth', 'role:karyawan'])->group(function () {
     Route::view('/detail', 'karyawan.list_detail');
 });
 
+Route::middleware(['auth', 'role:karyawan'])->group(function () {
+
+    Route::get('/karyawan/home', [KaryawanController::class, 'home'])->name('karyawan.home');
+
+    Route::get('/karyawan/absensi', [KaryawanController::class, 'absensiPage'])->name('karyawan.absen.page');
+
+    Route::post('/karyawan/absen-masuk', [KaryawanController::class, 'absenMasuk'])->name('karyawan.absen.masuk');
+
+    Route::post('/karyawan/absen-pulang', [KaryawanController::class, 'absenPulang'])->name('karyawan.absen.pulang');
+});
+
+
 // Logout
 Route::post('/logout', function () {
     auth()->logout();
