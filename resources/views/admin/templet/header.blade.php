@@ -6,28 +6,41 @@
     </div>
     
     <nav class="flex-1 space-y-2">
-        <a class="flex items-center gap-3 p-3 rounded-lg bg-primary bg-opacity-10 text-primary font-medium" href="#">
+        {{-- Menu Beranda --}}
+        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('/admin') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/admin">
             <span class="material-icons-outlined">home</span>
             Beranda
         </a>
-        <a class="flex items-center gap-3 p-3 rounded-lg text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark transition-colors" href="#">
+        
+        {{-- Menu Data Karyawan --}}
+        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_karyawan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/data_karyawan">
             <span class="material-icons-outlined">groups</span>
             Data Karyawan
         </a>
-        <a class="flex items-center gap-3 p-3 rounded-lg text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark transition-colors" href="#">
+        
+        {{-- Menu Data Layanan --}}
+        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_layanan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/data_layanan">
             <span class="material-icons-outlined">list_alt</span>
             Data Layanan
         </a>
-        <a class="flex items-center gap-3 p-3 rounded-lg text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark transition-colors" href="#">
+        
+        {{-- Menu Absensi --}}
+        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_absen*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/data_absen">
             <span class="material-icons-outlined">person</span>
             Absensi
         </a>
     </nav>
     
     <div class="mt-auto pt-6 border-t border-surface-light dark:border-surface-dark">
-        <a class="flex items-center gap-3 p-3 rounded-lg text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark transition-colors" href="#">
+        {{-- Menu Logout --}}
+        <a class="flex items-center gap-3 p-3 rounded-lg text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark transition-colors" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             <span class="material-icons-outlined">logout</span>
             Log Out
         </a>
+        
+        {{-- Form Logout (Hidden) --}}
+        <form id="logout-form" action="/logout" method="POST" style="display: none;">
+            @csrf
+        </form>
     </div>
 </aside>

@@ -42,3 +42,13 @@ Route::post('/logout', function () {
 Route::get('/admin', function () {
     return view('admin/home');
 });
+
+Route::get('/data_karyawan', function () {
+    return view('admin/data_karyawan');
+});
+Route::get('/data_layanan', function () {
+    return view('admin/data_layanan');
+});
+Route::get('/data_absen', function () {
+    return view('admin/absensi');
+});
