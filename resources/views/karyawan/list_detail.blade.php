@@ -34,26 +34,7 @@
 
 <body class="bg-white text-gray-800">
     <div class="flex flex-col min-h-screen">
-        <header class="bg-white/80 backdrop-blur-sm sticky top-0 border-b border-gray-200">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-16">
-                    <div class="flex-shrink-0">
-                        <h1 class="text-2xl font-bold text-gray-900">Brand</h1>
-                    </div>
-                    <nav class="hidden md:flex md:items-center md:space-x-8">
-                        <a class="text-gray-600 hover:text-gray-900 font-medium" href="#">Beranda</a>
-                        <a class="text-gray-600 hover:text-gray-900 font-medium" href="#">Absensi</a>
-                        <a class="text-gray-900 font-semibold" href="#">Manage Tugas</a>
-                    </nav>
-                    <div>
-                        <button
-                            class="bg-gray-100 text-gray-800 font-medium py-2 px-5 rounded-lg hover:bg-gray-200 transition-colors">
-                            Logout
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </header>
+        @include('karyawan.templet.header')
         <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Detail Tugas</h2>
             <div class="bg-gray-50 p-6 sm:p-8 rounded-xl border border-gray-200">
