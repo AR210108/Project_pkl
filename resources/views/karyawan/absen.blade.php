@@ -56,7 +56,7 @@
 
 <body class="bg-background text-text-secondary">
     <div class="min-h-screen flex flex-col p-3 sm:p-4 md:p-6 lg:p-8">
-        @include('karyawan.templet.header')
+         @include('karyawan.templet.header')
         
         <main class="flex-grow w-full max-w-7xl mx-auto">
             <h2 class="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6 text-text-primary">ABSENSI KARYAWAN</h2>
