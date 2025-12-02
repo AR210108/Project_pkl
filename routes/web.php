@@ -18,3 +18,6 @@ Route::get('/absensi', function () {
 Route::get('/list', function () {
     return view('karyawan/list');
 });
+Route::get('/detail', function () {
+    return view('karyawan/list_detail');
+});
