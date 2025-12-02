@@ -46,22 +46,8 @@
 
 <body class="bg-background-light dark:bg-background-dark font-display">
     <div class="flex flex-col min-h-screen p-4 sm:p-6 lg:p-8">
-        <header
-            class="bg-white dark:bg-gray-800 rounded-lg shadow-sm px-6 py-4 flex items-center justify-between w-full">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Brand</h1>
-            <nav class="hidden md:flex items-center space-x-8">
-                <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
-                    href="#">Beranda</a>
-                <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
-                    href="#">Absensi</a>
-                <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
-                    href="#">Manage Tugas</a>
-            </nav>
-            <button
-                class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-5 py-2 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                Logout
-            </button>
-        </header>
+       @include('karyawan.templet.header')
+        
         <main class="flex-grow my-8">
             <section class="bg-white dark:bg-gray-800 rounded-lg p-8 sm:p-12 lg:p-16 shadow-sm">
                 <div class="max-w-4xl mx-auto">
@@ -123,6 +109,23 @@
         </footer>
     </div>
 
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            
+            if (!mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target)) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+    </script>
 </body>
 
 </html>

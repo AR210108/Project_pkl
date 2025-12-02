@@ -46,19 +46,8 @@
 
 <body class="bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <header class="flex justify-between items-center py-4 border-b border-border-light dark:border-border-dark">
-            <h1 class="text-3xl font-bold text-text-primary-light dark:text-text-primary-dark">Brand</h1>
-            <nav class="hidden md:flex items-center space-x-8">
-                <a class="text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark transition"
-                    href="#">Beranda</a>
-                <a class="text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark transition"
-                    href="#">Absensi</a>
-                <a class="font-semibold text-text-primary-light dark:text-text-primary-dark" href="#">Manage
-                    Tugas</a>
-            </nav>
-            <button
-                class="bg-surface-light dark:bg-surface-dark text-text-primary-light dark:text-text-primary-dark px-6 py-2 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition">Logout</button>
-        </header>
+        @include('karyawan.templet.header')
+        
         <main class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg">
