@@ -34,3 +34,7 @@ Route::post('/logout', function () {
     request()->session()->regenerateToken();
     return redirect('/');
 });
+
+Route::get('/admin', function () {
+    return view('admin/home');
+});
