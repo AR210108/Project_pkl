@@ -12,7 +12,7 @@ Route::get('/home', function () {
 });
 
 Route::get('/karyawan', function () {
-    return view('karyawan/beranda');
+    return view('karyawan/home');
 });
 
 Route::get('/absensi', function () {
