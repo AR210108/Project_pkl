@@ -8,12 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('absensis', function (Blueprint $table) {
+        Schema::create('attendances', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->date('tanggal');
-            $table->time('jam_masuk')->nullable();
-            $table->time('jam_pulang')->nullable();
+            $table->string('employee_id', 50)->default('EMP001');
+            $table->date('date');
+            $table->time('check_in')->nullable();
+            $table->time('check_out')->nullable();
             $table->enum('status', ['Tepat Waktu', 'Terlambat', 'Tidak Masuk', 'Cuti', 'Sakit', 'Izin', 'Dinas Luar']);
             $table->enum('status_type', ['on-time', 'late', 'no-show', 'absent']);
             $table->integer('late_minutes')->default(0);
@@ -23,17 +23,17 @@ return new class extends Migration
             $table->timestamps();
             
             // Unique constraint
-            $table->unique(['user_id', 'tanggal']);
+            $table->unique(['employee_id', 'date']);
             
             // Indexes
-            $table->index(['user_id', 'tanggal']);
-            $table->index('tanggal');
+            $table->index('date');
             $table->index('status_type');
+            $table->index('employee_id');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('absensis');
+        Schema::dropIfExists('attendances');
     }
 };

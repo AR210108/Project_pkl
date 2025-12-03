@@ -19,8 +19,14 @@ class DatabaseSeeder extends Seeder
 
         // Karyawan default
         User::create([
-            'name' => 'Karyawan Satu',
+            'name' => 'Ikhsan',
             'email' => 'karyawan@mail.com',
+            'password' => bcrypt('karyawan123'),
+            'role' => 'karyawan'
+        ]);
+        User::create([
+            'name' => 'Pajar',
+            'email' => 'karyawan1@mail.com',
             'password' => bcrypt('karyawan123'),
             'role' => 'karyawan'
         ]);
