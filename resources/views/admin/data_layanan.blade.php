@@ -76,7 +76,7 @@
 <body class="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200">
     <div class="flex min-h-screen">
         <!-- Menggunakan template header -->
-
+        @include('admin/templet/header')
         <div class="flex-1 flex flex-col">
             <div class="flex-1 p-8">
                 <header class="mb-8">
