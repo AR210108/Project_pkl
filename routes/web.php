@@ -64,3 +64,21 @@ Route::get('/data_layanan', function () {
 Route::get('/data_absen', function () {
     return view('admin/absensi');
 });
+
+
+
+Route::get('/pemilik', function () {
+    return view('pemilik/home');
+});
+Route::get('/rekap_absen', function () {
+    return view('pemilik/rekap_absen');
+});
+Route::get('/laporan', function () {
+    return view('pemilik/laporan');
+});
+Route::get('/monitoring', function () {
+    return view('pemilik/monitoring_progres');
+});
+Route::get('/surat', function () {
+    return view('pemilik/surat_kerjasama');
+});
