@@ -99,4 +99,34 @@ Route::middleware(['auth', 'role:karyawan'])->prefix('api/karyawan')->group(func
     Route::post('/submit-dinas', [KaryawanController::class, 'submitDinasApi'])->name('karyawan.api.dinas');
 });
 
-// ... (kode Anda yang lain) ...
+
+Route::get('/karyawan', function () {
+    return view('karyawan/home');
+});
+
+Route::get('/absensi', function () {
+    return view('karyawan/absen');
+});
+
+Route::get('/list', function () {
+    return view('karyawan/list');
+});
+
+Route::get('/detail', function () {
+    return view('karyawan/list_detail');
+});
+
+Route::get('/owner', function () {
+    return view('owner/index');
+});
+Route::get('/pm', function () {
+    return view('pm/index');
+});
+
+// Tambahkan route untuk logout
+Route::post('/logout', function () {
+    auth()->logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/');
+});
