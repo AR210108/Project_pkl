@@ -1,17 +1,18 @@
     <?php
 
     use Illuminate\Support\Facades\Route;
+    use Illuminate\Support\Facades\Auth;
     use App\Http\Controllers\KaryawanController;
     use App\Http\Controllers\Auth\LoginController;
     use App\Http\Controllers\Auth\AdminLoginController;
+    use App\Http\Controllers\LayananController;
 
     //
     Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
     Route::post('/admin/login', [AdminLoginController::class, 'login'])->name('admin.login.process');
-
     Route::middleware(['auth'])->group(function () {
     Route::get('/admin/home', function () {
-        if (auth()->user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin') {
             abort(403, 'Anda bukan Admin');
         }
         return view('admin.home');
@@ -57,14 +58,14 @@
 
     // Logout
     Route::post('/logout', function () {
-        auth()->logout();
+        Auth::logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
 
         return redirect('/');
     });
 
-
+    // ADMIN
     Route::get('/admin', function () {
         return view('admin/home');
     });
@@ -72,12 +73,15 @@
     Route::get('/data_karyawan', function () {
         return view('admin/data_karyawan');
     });
-    Route::get('/data_layanan', function () {
-        return view('admin/data_layanan');
-    });
-    Route::get('/data_absen', function () {
+        Route::get('/data_absen', function () {
         return view('admin/absensi');
     });
+
+    Route::get('admin/data_layanan', [LayananController::class, 'index'])->name('layanan.index');
+    Route::post('admin/data_layanan', [LayananController::class, 'store'])->name('layanan.store');
+    Route::put('admin/data_layanan/{id}', [LayananController::class, 'update'])->name('layanan.update');
+    Route::delete('admin/data_layanan/{id}', [LayananController::class, 'destroy'])->name('layanan.delete');
+
 // routes/web.php
 
 // ... (kode Anda yang lain) ...
