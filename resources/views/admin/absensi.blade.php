@@ -128,10 +128,6 @@
                 <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg shadow-sm mb-8">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold text-text-light-primary dark:text-dark-primary">Absensi</h3>
-                        <button id="tambahAbsensiBtn" class="flex items-center bg-gray-200 dark:bg-gray-700 text-text-light-primary dark:text-dark-primary px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                            <span class="material-icons-outlined text-xl mr-2">add</span>
-                            Tambah Absensi
-                        </button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
@@ -194,11 +190,7 @@
                 
                 <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg shadow-sm">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-semibold text-text-light-primary dark:text-dark-primary">Daftar Cuti</h3>
-                        <button id="tambahCutiBtn" class="flex items-center bg-gray-200 dark:bg-gray-700 text-text-light-primary dark:text-dark-primary px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                            <span class="material-icons-outlined text-xl mr-2">add</span>
-                            Tambah Cuti
-                        </button>
+                        <h3 class="text-xl font-semibold text-text-light-primary dark:text-dark-primary">Daftar Ketidakhadiran</h3>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
