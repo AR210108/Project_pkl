@@ -3,6 +3,20 @@
     use Illuminate\Support\Facades\Route;
     use App\Http\Controllers\KaryawanController;
     use App\Http\Controllers\Auth\LoginController;
+    use App\Http\Controllers\Auth\AdminLoginController;
+
+    //
+    Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
+    Route::post('/admin/login', [AdminLoginController::class, 'login'])->name('admin.login.process');
+
+    Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/home', function () {
+        if (auth()->user()->role !== 'admin') {
+            abort(403, 'Anda bukan Admin');
+        }
+        return view('admin.home');
+    })->name('admin.home');
+});
 
     // Halaman login
     Route::get('/login', [LoginController::class, 'show'])->name('login');
