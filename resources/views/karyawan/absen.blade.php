@@ -40,6 +40,8 @@ body { font-family: 'Roboto', sans-serif; background: linear-gradient(135deg, va
 .status-late { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; }
 .status-absent { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
 .status-no-show { background-color: rgba(156, 163, 175, 0.1); color: #9ca3af; }
+/* --- REVISI: Tambahkan CSS untuk status pending --- */
+.status-pending { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
 .late-time-badge { display: inline-flex; align-items: center; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 500; background-color: rgba(239, 68, 68, 0.1); color: #ef4444; margin-left: 0.5rem; }
 .pagination-container { display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
 .pagination-btn { background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); padding: 0.5rem 0.75rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.3s ease; font-size: 0.875rem; min-width: 36px; text-align: center; }
@@ -161,6 +163,28 @@ function formatTime(timeString) {
     }
 }
 
+/**
+ * Memeriksa apakah waktu saat ini sebelum waktu pulang kerja
+ * @returns {boolean} - True jika waktu saat ini sebelum waktu pulang kerja
+ */
+function isBeforeCheckoutTime() {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    
+    // Waktu pulang kerja adalah 17:00 (5 PM)
+    // Ubah nilai ini sesuai dengan kebijakan perusahaan Anda
+    const checkoutHour = 17;
+    const checkoutMinute = 0;
+    
+    // Jika waktu saat ini sebelum waktu pulang kerja
+    if (currentHour < checkoutHour || (currentHour === checkoutHour && currentMinute < checkoutMinute)) {
+        return true;
+    }
+    
+    return false;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     document.documentElement.classList.toggle('dark', localStorage.getItem('theme') === 'dark');
     fetchAndDisplayTodayStatus();
@@ -188,8 +212,12 @@ async function fetchAndDisplayTodayStatus() {
         document.getElementById('today-checkout').textContent = formatTime(data.jam_pulang);
         
         const statusEl = document.getElementById('today-status');
-        // Gunakan fungsi formatLateTime di sini
-        if (data.status_type === 'late' && data.late_minutes > 0) {
+        
+        // --- REVISI: Tambahkan logika untuk status pending ---
+        if (data.status_type === 'absent' && data.approval_status === 'pending') {
+            statusEl.textContent = 'Menunggu Persetujuan';
+            statusEl.className = 'font-medium text-warning';
+        } else if (data.status_type === 'late' && data.late_minutes > 0) {
             const formattedLateTime = formatLateTime(data.late_minutes);
             statusEl.innerHTML = `Terlambat <span class="late-time-badge">+${formattedLateTime}</span>`;
             statusEl.className = 'font-medium text-warning';
@@ -200,6 +228,26 @@ async function fetchAndDisplayTodayStatus() {
             statusEl.textContent = data.status || 'Belum Absen';
             statusEl.className = 'font-medium text-success';
         }
+
+        // --- PERUBAHAN: NONAKTIFKAN TOMBOL ABSEN MASUK JIKA IZIN/DINAS ---
+        const checkinBtn = document.querySelector('.absensi-btn[data-action="Absen Masuk"]');
+        if (checkinBtn) {
+            // Cek apakah statusnya adalah 'Sakit' atau 'Dinas Luar'
+            if (data.status === 'Sakit' || data.status === 'Dinas Luar') {
+                checkinBtn.disabled = true; // Nonaktifkan tombol
+                checkinBtn.style.opacity = '0.5'; // Buat terlihat redup
+                checkinBtn.style.cursor = 'not-allowed'; // Ubah kursor
+                checkinBtn.title = `Tidak dapat absen karena status: ${data.status}`; // Tambahkan tooltip
+            } else {
+                // Pastikan tombol aktif jika statusnya memungkinkan
+                checkinBtn.disabled = false;
+                checkinBtn.style.opacity = '1';
+                checkinBtn.style.cursor = 'pointer';
+                checkinBtn.removeAttribute('title');
+            }
+        }
+        // --- AKHIR PERUBAHAN ---
+
     } catch (error) {
         console.error('Gagal memuat status hari ini:', error);
         Swal.fire('Error', error.message, 'error');
@@ -258,14 +306,19 @@ function renderHistoryTable() {
     pageData.forEach((record, index) => {
         const displayNo = (currentPage - 1) * recordsPerPage + index + 1;
         
-        // Tentukan class dan status berdasarkan data dari backend
-        const statusClass = `status-${record.statusType}`;
-        let statusHTML = `<span class="status-badge ${statusClass}">${record.status}</span>`;
-        
-        // Gunakan fungsi formatLateTime di sini
-        if (record.statusType === 'late' && record.lateMinutes > 0) {
-            const formattedLateTime = formatLateTime(record.lateMinutes);
-            statusHTML += `<span class="late-time-badge">+${formattedLateTime}</span>`;
+        let statusHTML = '';
+
+        // --- REVISI: Tambahkan logika untuk status pending ---
+        if (record.statusType === 'absent' && record.approvalStatus === 'pending') {
+            statusHTML = `<span class="status-badge status-pending">Menunggu Persetujuan</span>`;
+        } else {
+            const statusClass = `status-${record.statusType}`;
+            statusHTML = `<span class="status-badge ${statusClass}">${record.status}</span>`;
+            
+            if (record.statusType === 'late' && record.lateMinutes > 0) {
+                const formattedLateTime = formatLateTime(record.lateMinutes);
+                statusHTML += `<span class="late-time-badge">+${formattedLateTime}</span>`;
+            }
         }
         
         const row = tbody.insertRow();
@@ -289,18 +342,89 @@ setInterval(updateClock, 1000); updateClock();
 document.querySelectorAll('.absensi-btn').forEach(btn => {
     btn.addEventListener('click', async function() {
         const action = this.dataset.action;
-        const endpoint = action === 'Absen Masuk' ? '/absen-masuk' : '/absen-pulang';
-        if (action === 'Absen Pulang') { 
-            const todayStatus = await apiFetch('/today-status');
-            if (todayStatus.jam_masuk === null) {
-                Swal.fire('Perhatian', 'Anda belum melakukan absen masuk hari ini.', 'warning'); return;
+        
+        // Untuk Absen Pulang, periksa apakah sudah waktunya pulang
+        if (action === 'Absen Pulang') {
+            // Periksa apakah sudah absen masuk hari ini
+            try {
+                const todayStatus = await apiFetch('/today-status');
+                if (todayStatus.jam_masuk === null) {
+                    Swal.fire('Perhatian', 'Anda belum melakukan absen masuk hari ini.', 'warning');
+                    return;
+                }
+                
+                // Periksa apakah sudah waktunya pulang
+                if (isBeforeCheckoutTime()) {
+                    // Tampilkan form alasan pulang cepat
+                    const result = await Swal.fire({
+                        title: '<span class="material-icons">warning</span> Pulang Lebih Awal',
+                        html: `<p>Anda mencoba untuk pulang lebih awal dari waktu yang ditentukan. Silakan berikan alasan Anda.</p>
+                               <div class="form-group">
+                                   <label><span class="material-icons">description</span> Alasan Pulang Cepat <span class="required">*</span></label>
+                                   <textarea id="early-checkout-reason" class="uniform-textarea" placeholder="Jelaskan alasan Anda pulang lebih awal..."></textarea>
+                               </div>`,
+                        focusConfirm: false,
+                        showCancelButton: true,
+                        confirmButtonText: 'Kirim',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#3b82f6',
+                        preConfirm: () => {
+                            const reason = document.getElementById('early-checkout-reason').value;
+                            if (!reason) {
+                                Swal.showValidationMessage('Alasan harus diisi');
+                                return false;
+                            }
+                            return { reason };
+                        }
+                    });
+                    
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await apiFetch('/absen-pulang', {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                    reason: result.value.reason
+                                })
+                            });
+                            
+                            Swal.fire('Berhasil!', response.message, 'success');
+                            
+                            // Perbarui UI
+                            const time = formatTime(response.data.time);
+                            document.getElementById('today-checkout').textContent = time;
+                            
+                            await fetchAndRenderHistory();
+                        } catch (error) {
+                            Swal.fire('Gagal', error.message, 'error');
+                        }
+                    }
+                    
+                    return; // Keluar dari fungsi jika sudah menampilkan form alasan
+                }
+            } catch (error) {
+                Swal.fire('Error', error.message, 'error');
+                return;
             }
         }
-        const result = await Swal.fire({ title: 'Konfirmasi', html: `<p>Apakah kamu yakin ingin melakukan <strong>${action}</strong>?</p>`, icon: 'question', showCancelButton: true, confirmButtonText: 'Ya, Lanjutkan', cancelButtonText: 'Batal', confirmButtonColor: '#3b82f6', cancelButtonColor: '#64748b' });
+        
+        // Proses normal untuk Absen Masuk atau Absen Pulang (jika sudah waktunya)
+        const endpoint = action === 'Absen Masuk' ? '/absen-masuk' : '/absen-pulang';
+        const result = await Swal.fire({
+            title: 'Konfirmasi',
+            html: `<p>Apakah kamu yakin ingin melakukan <strong>${action}</strong>?</p>`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Lanjutkan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#64748b'
+        });
+        
         if (result.isConfirmed) {
             try {
                 const response = await apiFetch(endpoint, { method: 'POST' });
                 Swal.fire('Berhasil!', response.message, 'success');
+                
                 // Perbarui UI berdasarkan response dari backend
                 if (action === 'Absen Masuk') {
                     const time = formatTime(response.data.time);
@@ -308,6 +432,7 @@ document.querySelectorAll('.absensi-btn').forEach(btn => {
                     const lateMinutes = response.data.late_minutes;
                     document.getElementById('today-checkin').textContent = time;
                     const statusEl = document.getElementById('today-status');
+                    
                     // Gunakan fungsi formatLateTime di sini
                     if (status === 'Terlambat' && lateMinutes > 0) {
                         const formattedLateTime = formatLateTime(lateMinutes);
@@ -321,6 +446,7 @@ document.querySelectorAll('.absensi-btn').forEach(btn => {
                     const time = formatTime(response.data.time);
                     document.getElementById('today-checkout').textContent = time;
                 }
+                
                 await fetchAndRenderHistory();
             } catch (error) {
                 Swal.fire('Gagal', error.message, 'error');
@@ -382,12 +508,19 @@ document.getElementById('view-all-btn').addEventListener('click', () => {
     }
     let tableHTML = `<table class="w-full text-left"><thead><tr><th>No</th><th>Tanggal</th><th>Jam Masuk</th><th>Jam Pulang</th><th>Status</th></tr></thead><tbody>`;
     attendanceData.forEach((r, i) => {
-        const statusClass = `status-${r.statusType}`;
-        let statusHTML = `<span class="status-badge ${statusClass}">${r.status}</span>`;
-        // Gunakan fungsi formatLateTime di sini juga
-        if (r.statusType === 'late' && r.lateMinutes > 0) {
-            const formattedLateTime = formatLateTime(r.lateMinutes);
-            statusHTML += `<span class="late-time-badge">+${formattedLateTime}</span>`;
+        let statusHTML = '';
+
+        // --- REVISI: Tambahkan logika untuk status pending di modal ---
+        if (r.statusType === 'absent' && r.approvalStatus === 'pending') {
+            statusHTML = `<span class="status-badge status-pending">Menunggu Persetujuan</span>`;
+        } else {
+            const statusClass = `status-${r.statusType}`;
+            statusHTML = `<span class="status-badge ${statusClass}">${r.status}</span>`;
+            // Gunakan fungsi formatLateTime di sini juga
+            if (r.statusType === 'late' && r.lateMinutes > 0) {
+                const formattedLateTime = formatLateTime(r.lateMinutes);
+                statusHTML += `<span class="late-time-badge">+${formattedLateTime}</span>`;
+            }
         }
         tableHTML += `<tr><td>${i + 1}</td><td>${r.date}</td><td>${formatTime(r.checkIn)}</td><td>${formatTime(r.checkOut)}</td><td>${statusHTML}</td></tr>`;
     });

@@ -5,9 +5,11 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Employee Dashboard</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
         tailwind.config = {
@@ -33,7 +35,6 @@
         body {
             font-family: 'Poppins', sans-serif;
         }
-
         .material-symbols-outlined {
             font-variation-settings:
                 'FILL' 0,
@@ -72,11 +73,12 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Status Absensi</p>
-                        <p class="text-lg font-semibold text-gray-900 dark:text-white" id="attendance-status">{{ $attendanceStatus ?? 'Belum Absen' }}</p>
+                        <p class="text-lg font-semibold text-gray-900 dark:text-white" id="attendance-status">Memuat...</p>
                     </div>
                 </div>
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <div class="bg-green-100 dark:bg-green-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
+                    <div
+                        class="bg-green-100 dark:bg-green-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
                         <span class="material-symbols-outlined text-green-500">schedule</span>
                     </div>
                     <div>
@@ -85,21 +87,26 @@
                     </div>
                 </div>
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <div class="bg-yellow-100 dark:bg-yellow-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-yellow-500">description</span>
+                    <div
+                        class="bg-yellow-100 dark:bg-yellow-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-yellow-500">event_busy</span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Jumlah Cuti</p>
-                        <p class="text-lg font-semibold text-gray-900 dark:text-white" id="leave-count">{{ $leaveCount ?? 3 }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Jumlah Ketidakhadiran</p>
+                        <p class="text-lg font-semibold text-gray-900 dark:text-white" id="ketidakhadiran-count">{{ $ketidakhadiran_count ?? 0 }}</p>
                     </div>
                 </div>
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <div class="bg-purple-100 dark:bg-purple-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-purple-500">checklist</span>
+                    <div
+                        class="bg-purple-100 dark:bg-purple-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
+                        <!-- PERUBAHAN: Ikon diganti menjadi 'assignment' -->
+                        <span class="material-symbols-outlined text-purple-500">assignment</span>
                     </div>
                     <div>
+                        <!-- PERUBAHAN: Label diubah -->
                         <p class="text-sm text-gray-500 dark:text-gray-400">Jumlah Tugas</p>
-                        <p class="text-lg font-semibold text-gray-900 dark:text-white" id="task-count">{{ $taskCount ?? 5 }}</p>
+                        <!-- PERUBAHAN: ID dan variabel diubah -->
+                        <p class="text-lg font-semibold text-gray-900 dark:text-white" id="tugas-count">{{ $tugas_count ?? 0 }}</p>
                     </div>
                 </div>
             </section>
@@ -111,55 +118,93 @@
     </div>
 
     <script>
-        document.getElementById('mobile-menu-button').addEventListener('click', function() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            mobileMenu.classList.toggle('hidden');
-        });
+        window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', function() {
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (mobileMenu) {
+                    mobileMenu.classList.toggle('hidden');
+                }
+            });
+        }
 
         document.addEventListener('click', function(event) {
             const mobileMenu = document.getElementById('mobile-menu');
             const mobileMenuButton = document.getElementById('mobile-menu-button');
 
-            if (!mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target)) {
+            if (mobileMenu && mobileMenuButton && !mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target)) {
                 mobileMenu.classList.add('hidden');
             }
         });
 
-        // Jika perlu update data secara dinamis setelah halaman dimuat
-        document.addEventListener('DOMContentLoaded', function() {
-            // Ambil data tambahan jika diperlukan
-            fetchEmployeeData();
-        });
-
-        function fetchEmployeeData() {
-            // Ambil data karyawan dari API endpoint
-            fetch('/api/karyawan/profile')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Update UI dengan data dari database
-                    if (data.name) {
-                        document.getElementById('employee-name').textContent = data.name;
-                    }
-                    if (data.attendance_status) {
-                        document.getElementById('attendance-status').textContent = data.attendance_status;
-                    }
-                    if (data.leave_count !== undefined) {
-                        document.getElementById('leave-count').textContent = data.leave_count;
-                    }
-                    if (data.task_count !== undefined) {
-                        document.getElementById('task-count').textContent = data.task_count;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching employee data:', error);
-                });
+        function formatAttendanceStatus(status) {
+            if (status === 'Belum Absen') {
+                return 'Belum Absen';
+            } else if (status === 'Tepat Waktu') {
+                return '<span class="text-green-500">Tepat Waktu</span>';
+            } else if (status === 'Terlambat') {
+                return '<span class="text-red-500">Terlambat</span>';
+            } else if (status === 'Sakit' || status === 'Izin' || status === 'Dinas Luar') {
+                return '<span class="text-yellow-500">' + status + '</span>';
+            } else {
+                return status;
+            }
         }
+
+        async function apiFetch(endpoint, options = {}) {
+            const cacheBuster = `_t=${Date.now()}`;
+            const url = `/api/karyawan${endpoint}${endpoint.includes('?') ? '&' : '?'}${cacheBuster}`;
+            
+            const defaultOptions = { 
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Accept': 'application/json', 
+                    'X-CSRF-TOKEN': window.csrfToken 
+                } 
+            };
+            const finalOptions = { ...defaultOptions, ...options };
+            const response = await fetch(url, finalOptions);
+            
+            if (response.status === 419) throw new Error('CSRF token mismatch. Silakan muat ulang halaman.');
+            if (!response.ok) { 
+                const errorData = await response.json().catch(() => ({})); 
+                throw new Error(errorData.message || 'Something went wrong'); 
+            }
+            return response.json();
+        }
+
+        async function fetchDashboardData() {
+            try {
+                const data = await apiFetch('/dashboard-data');
+                
+                if (data.attendance_status) {
+                    const statusElement = document.getElementById('attendance-status');
+                    if(statusElement) statusElement.innerHTML = formatAttendanceStatus(data.attendance_status);
+                }
+                
+                // PERUBAHAN: Update elemen ketidakhadiran
+                if (data.ketidakhadiran_count !== undefined) {
+                    const ketidakhadiranElement = document.getElementById('ketidakhadiran-count');
+                    if(ketidakhadiranElement) ketidakhadiranElement.textContent = data.ketidakhadiran_count;
+                }
+                
+                // PERUBAHAN: Update elemen tugas
+                if (data.tugas_count !== undefined) {
+                    const tugasElement = document.getElementById('tugas-count');
+                    if(tugasElement) tugasElement.textContent = data.tugas_count;
+                }
+                
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+                Swal.fire('Error', error.message, 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchDashboardData();
+        });
     </script>
 </body>
-
 </html>
