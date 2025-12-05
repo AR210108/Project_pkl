@@ -78,7 +78,7 @@
 
     <div class="flex min-h-screen">
         <!-- Menggunakan template header -->
-        @include('admin/templet/header')
+        @include('admin/templet/sider')
         <div class="flex-1 flex flex-col">
             <div class="flex-1 p-8">
                 <header class="mb-8">

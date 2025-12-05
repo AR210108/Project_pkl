@@ -1,184 +1,135 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\Auth\LoginController;
-    use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\LayananController;
+use App\Http\Controllers\AdminController;
 
-    use App\Http\Controllers\Auth\AdminLoginController;
-    use App\Http\Controllers\LayananController;
+/*
+|--------------------------------------------------------------------------
+| Guest Routes (Rute untuk Tamu/Pengunjung yang Belum Login)
+|--------------------------------------------------------------------------
+*/
 
-    //
-    Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('/admin/login', [AdminLoginController::class, 'login'])->name('admin.login.process');
-    Route::middleware(['auth'])->group(function () {
-    Route::get('/admin/home', function () {
-        if (Auth::user()->role !== 'admin') {
-            abort(403, 'Anda bukan Admin');
-        }
-        return view('admin.home');
-    })->name('admin.home');
-});
-
-// Halaman login
-Route::get('/login', [LoginController::class, 'show'])->name('login');
-Route::post('/login-process', [LoginController::class, 'login'])->name('login.process');
-
-// Redirect default
+// Redirect default ke halaman login
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Halaman umum
-Route::get('/home', function () {
-    return view('home');
-})->middleware('auth');
+// --- Rute Autentikasi (Satu untuk Semua Role) ---
+Route::get('/login', [LoginController::class, 'show'])->name('login');
+Route::post('/login-process', [LoginController::class, 'login'])->name('login.process');
 
-// --- Kelompok Rute Karyawan ---
-Route::middleware(['auth', 'role:karyawan'])->group(function () {
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes (Rute untuk Pengguna yang Sudah Login)
+|--------------------------------------------------------------------------
+*/
 
-    // Halaman (return view)
-    Route::get('/karyawan/home', [KaryawanController::class, 'home'])->name('karyawan.home');
-    Route::get('/karyawan/absensi', [KaryawanController::class, 'absensiPage'])->name('karyawan.absen.page');
-    Route::view('/karyawan', 'karyawan.home');
-    Route::view('/absensi', 'karyawan.absen');
-    Route::view('/list', 'karyawan.list');
-    Route::view('/detail', 'karyawan.list_detail');
-
-    // API untuk JavaScript (return JSON)
-    Route::prefix('api/karyawan')->group(function () {
-        // PERBAIKAN: Ini adalah rute yang sebelumnya HILANG
-        Route::get('/dashboard-data', [KaryawanController::class, 'getDashboardData']);
-        
-        Route::get('/today-status', [KaryawanController::class, 'getTodayStatus']);
-        Route::get('/history', [KaryawanController::class, 'getHistory']);
-        Route::post('/absen-masuk', [KaryawanController::class, 'absenMasukApi']);
-        Route::post('/absen-pulang', [KaryawanController::class, 'absenPulangApi']);
-        Route::post('/submit-izin', [KaryawanController::class, 'submitIzinApi']);
-        Route::post('/submit-dinas', [KaryawanController::class, 'submitDinasApi']);
-    });
+Route::middleware('auth')->group(function () {
+    // Rute Logout (berlaku untuk semua role)
+    Route::post('/logout', function () {
+        auth()->logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        return redirect('/');
+    })->name('logout');
 });
 
-// Logout
-Route::post('/logout', function () {
-    auth()->logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
+/*
+|--------------------------------------------------------------------------
+| Role-Based Routes (Rute Berdasarkan Peran)
+|--------------------------------------------------------------------------
+*/
 
-    return redirect('/');
+// --- Kelompok Rute Karyawan (API) ---
+Route::middleware(['auth', 'role:karyawan'])->prefix('api/karyawan')->name('api.karyawan.')->group(function () {
+    Route::get('/dashboard-data', [KaryawanController::class, 'getDashboardData'])->name('dashboard');
+    Route::get('/today-status', [KaryawanController::class, 'getTodayStatus'])->name('today');
+    Route::get('/history', [KaryawanController::class, 'getHistory'])->name('history');
+    Route::post('/absen-masuk', [KaryawanController::class, 'absenMasukApi'])->name('absen.masuk');
+    Route::post('/absen-pulang', [KaryawanController::class, 'absenPulangApi'])->name('absen.pulang');
+    Route::post('/submit-izin', [KaryawanController::class, 'submitIzinApi'])->name('izin');
+    Route::post('/submit-dinas', [KaryawanController::class, 'submitDinasApi'])->name('dinas');
+});
+
+// --- Kelompok Rute Karyawan (Halaman) ---
+Route::middleware(['auth', 'role:karyawan'])->prefix('karyawan')->name('karyawan.')->group(function () {
+    Route::get('/home', [KaryawanController::class, 'home'])->name('home');
+    Route::get('/absensi', [KaryawanController::class, 'absensiPage'])->name('absensi.page');
+    Route::view('/list', 'karyawan.list')->name('list');
+    Route::view('/detail', 'karyawan.list_detail')->name('detail');
 });
 
 // --- Kelompok Rute Admin ---
-// REKOMENDASI: Tambahkan middleware untuk keamanan
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
-    Route::get('/', function () {
-        return redirect()->route('login');
-    });
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard Admin
+    Route::get('/home', [AdminController::class, 'home'])->name('home');
+    
+    // Data Karyawan
+    Route::get('/data_karyawan', [AdminController::class, 'dataKaryawan'])->name('data_karyawan');
+    
+    // Data PM (tidak perlu controller, hanya menampilkan modal)
+    // Route::get('/data_pm', [PMController::class, 'index'])->name('data_pm');
+    
+    // Data Absensi
+    Route::get('/absensi', function () {
+        return view('admin.absensi');
+    })->name('absensi.index');
+    
+    // Data Keuangan
+    Route::get('/keuangan', function () {
+        return view('admin.keuangan');
+    })->name('keuangan.index');
 
-    // Halaman umum
-    Route::get('/home', function () {
-        return view('home');
-    })->middleware('auth');
-
-    // Halaman karyawan
-    Route::middleware(['auth', 'role:karyawan'])->group(function () {
-        Route::get('/karyawan/home', [KaryawanController::class, 'home'])
-            ->name('karyawan.home');
-
-        Route::view('/karyawan', 'karyawan.home');
-        Route::view('/absensi', 'karyawan.absen');
-        Route::view('/list', 'karyawan.list');
-        Route::view('/detail', 'karyawan.list_detail');
-    });
-
-    Route::middleware(['auth', 'role:karyawan'])->group(function () {
-
-        Route::get('/karyawan/home', [KaryawanController::class, 'home'])->name('karyawan.home');
-
-        Route::get('/karyawan/absensi', [KaryawanController::class, 'absensiPage'])->name('karyawan.absen.page');
-
-        Route::post('/karyawan/absen-masuk', [KaryawanController::class, 'absenMasuk'])->name('karyawan.absen.masuk');
-
-        Route::post('/karyawan/absen-pulang', [KaryawanController::class, 'absenPulang'])->name('karyawan.absen.pulang');
-    });
-
-
-    // Logout
-    Route::post('/logout', function () {
-        Auth::logout();
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
-
-        return redirect('/');
-    });
-
-    // ADMIN
-    Route::get('/admin', function () {
-        return view('admin/home');
-    });
-    Route::get('/data_karyawan', function () {
-        return view('admin/data_karyawan');
-    });
-        Route::get('/data_absen', function () {
-        return view('admin/absensi');
+    // Layanan
+    Route::prefix('layanan')->name('layanan.')->group(function () {
+        Route::get('/', [LayananController::class, 'index'])->name('index');
+        Route::post('/', [LayananController::class, 'store'])->name('store');
+        Route::put('/{id}', [LayananController::class, 'update'])->name('update');
+        Route::delete('/{id}', [LayananController::class, 'destroy'])->name('delete');
     });
 });
 
-    Route::get('admin/data_layanan', [LayananController::class, 'index'])->name('layanan.index');
-    Route::post('admin/data_layanan', [LayananController::class, 'store'])->name('layanan.store');
-    Route::put('admin/data_layanan/{id}', [LayananController::class, 'update'])->name('layanan.update');
-    Route::delete('admin/data_layanan/{id}', [LayananController::class, 'destroy'])->name('layanan.delete');
+// --- Kelompok Rute Lainnya ---
+Route::middleware('auth')->group(function () {
+    Route::get('/owner', function () {
+        return view('owner.index');
+    })->name('owner.home');
 
-// routes/web.php
-
-// ... (kode Anda yang lain) ...
-
-// Route khusus untuk API yang dipanggil oleh JavaScript
-Route::middleware(['auth', 'role:karyawan'])->prefix('api/karyawan')->group(function () {
-    // Untuk mengambil data status hari ini
-    Route::get('/today-status', [KaryawanController::class, 'getTodayStatus'])->name('karyawan.api.today');
-    
-    // Untuk mengambil data riwayat absensi
-    Route::get('/history', [KaryawanController::class, 'getHistory'])->name('karyawan.api.history');
-
-    // Untuk proses absen
-    Route::post('/absen-masuk', [KaryawanController::class, 'absenMasukApi'])->name('karyawan.api.absen.masuk');
-    Route::post('/absen-pulang', [KaryawanController::class, 'absenPulangApi'])->name('karyawan.api.absen.pulang');
-    
-    // Untuk pengajuan izin dan dinas
-    Route::post('/submit-izin', [KaryawanController::class, 'submitIzinApi'])->name('karyawan.api.izin');
-    Route::post('/submit-dinas', [KaryawanController::class, 'submitDinasApi'])->name('karyawan.api.dinas');
+    Route::get('/pm', function () {
+        return view('pm.index');
+    })->name('pm.home');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Aliases / Shortcuts (Rute Singkat)
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/karyawan', function () {
-    return view('karyawan/home');
+    return redirect()->route('karyawan.home');
 });
 
 Route::get('/absensi', function () {
-    return view('karyawan/absen');
+    // Jika pengguna adalah admin, arahkan ke halaman absensi admin
+    if (auth()->check() && auth()->user()->hasRole('admin')) {
+        return redirect()->route('admin.absensi.index');
+    }
+    // Jika bukan, arahkan ke halaman absensi karyawan
+    return redirect()->route('karyawan.absensi.page');
 });
 
 Route::get('/list', function () {
-    return view('karyawan/list');
+    return redirect()->route('karyawan.list');
 });
 
 Route::get('/detail', function () {
-    return view('karyawan/list_detail');
+    return redirect()->route('karyawan.detail');
 });
 
-Route::get('/owner', function () {
-    return view('owner/index');
+Route::get('/admin', function () {
+    return redirect()->route('admin.home');
 });
-Route::get('/pm', function () {
-    return view('pm/index');
-});
-
-// Tambahkan route untuk logout
-Route::post('/logout', function () {
-    auth::logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-    return redirect('/');
-});
-

@@ -95,6 +95,14 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
+        /* Style untuk link agar tidak terlihat seperti link default */
+        .card-link {
+            display: block; /* Membuat <a> memenuhi seluruh area div */
+            color: inherit; /* Mewarisi warna link default */
+            text-decoration: none; /* Menghilangkan underline */
+        }
+        
+        /* Icon gradient styles */
         .icon-gradient-1 {
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
         }
@@ -104,33 +112,24 @@
         }
         
         .icon-gradient-3 {
-            background: linear-gradient(135deg, #ec4899, #f43f5e);
+            background: linear-gradient(135deg, #ec4899, #f97316);
         }
         
         .icon-gradient-4 {
-            background: linear-gradient(135deg, #f43f5e, #f97316);
+            background: linear-gradient(135deg, #f97316, #ef4444);
         }
         
-        .pattern-bg {
-            background-color: rgba(255, 255, 255, 0.05);
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        /* Table row hover effect */
+        .table-row {
+            transition: all 0.2s ease;
         }
         
-        .dark .pattern-bg {
+        .table-row:hover {
             background-color: rgba(0, 0, 0, 0.05);
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
         
-        .modal {
-            transition: opacity 0.3s ease-in-out;
-        }
-        
-        .chart-bar {
-            transition: height 0.5s ease-in-out;
-        }
-        
-        .chart-bar:hover {
-            opacity: 0.8;
+        .dark .table-row:hover {
+            background-color: rgba(255, 255, 255, 0.05);
         }
     </style>
 </head>
@@ -138,10 +137,10 @@
 <body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark min-h-screen">
     <div class="flex h-screen">
         <!-- Include Sidebar -->
-        @include('admin/templet/header')
+        @include('admin/templet/sider')
         
         <!-- Main content with artistic design -->
-        <main class="flex-1 flex flex-col p-8 overflow-y-auto pattern-bg">
+        <main class="flex-1 flex-col p-8 overflow-y-auto pattern-bg">
             <div class="flex-1">
                 <div class="flex justify-between items-center mb-8">
                     <div>
@@ -160,8 +159,8 @@
                 
                 <!-- Stats cards with artistic design -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <!-- Karyawan Card -->
-                    <div id="karyawan-card" class="card-hover bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-lg cursor-pointer overflow-hidden relative">
+                    <!-- Karyawan Card (Clickable) -->
+                    <a href="{{ route('admin.data_karyawan') }}" class="card-link card-hover bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-lg cursor-pointer overflow-hidden relative">
                         <div class="absolute top-0 right-0 w-20 h-20 bg-primary bg-opacity-10 rounded-full -mr-10 -mt-10"></div>
                         <div class="relative z-10">
                             <div class="icon-gradient-1 w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-md">
@@ -174,9 +173,9 @@
                                 <span class="ml-1">12% dari bulan lalu</span>
                             </div>
                         </div>
-                    </div>
+                    </a>
                     
-                    <!-- PM Card -->
+                    <!-- PM Card (Not Clickable) -->
                     <div id="pm-card" class="card-hover bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-lg cursor-pointer overflow-hidden relative">
                         <div class="absolute top-0 right-0 w-20 h-20 bg-secondary bg-opacity-10 rounded-full -mr-10 -mt-10"></div>
                         <div class="relative z-10">
@@ -192,7 +191,7 @@
                         </div>
                     </div>
                     
-                    <!-- Layanan Card -->
+                    <!-- Layanan Card (Not Clickable) -->
                     <div id="layanan-card" class="card-hover bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-lg cursor-pointer overflow-hidden relative">
                         <div class="absolute top-0 right-0 w-20 h-20 bg-accent bg-opacity-10 rounded-full -mr-10 -mt-10"></div>
                         <div class="relative z-10">
@@ -208,8 +207,8 @@
                         </div>
                     </div>
                     
-                    <!-- Keuangan Card -->
-                    <div id="keuangan-card" class="card-hover bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-lg cursor-pointer overflow-hidden relative">
+                    <!-- Keuangan Card (Clickable) -->
+                    <a href="{{ route('admin.keuangan.index') }}" class="card-link card-hover bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-lg cursor-pointer overflow-hidden relative">
                         <div class="absolute top-0 right-0 w-20 h-20 bg-orange-500 bg-opacity-10 rounded-full -mr-10 -mt-10"></div>
                         <div class="relative z-10">
                             <div class="icon-gradient-4 w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-md">
@@ -222,7 +221,29 @@
                                 <span class="ml-1">5% dari bulan lalu</span>
                             </div>
                         </div>
-                    </div>
+                    </a>
+                </div>
+                
+                <!-- Absensi Card (Clickable) -->
+                <div class="grid grid-cols-1 mb-8">
+                    <a href="{{ route('admin.absensi.index') }}" class="card-link card-hover bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-lg cursor-pointer overflow-hidden relative">
+                        <div class="absolute top-0 right-0 w-20 h-20 bg-green-500 bg-opacity-10 rounded-full -mr-10 -mt-10"></div>
+                        <div class="relative z-10 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-md bg-green-500">
+                                    <span class="material-icons-outlined text-white text-2xl">fact_check</span>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm text-subtle-light dark:text-subtle-dark mb-1">Data Absensi</p>
+                                    <p class="text-lg font-medium text-green-500">Klik untuk detail</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-sm text-subtle-light dark:text-subtle-dark">
+                                <span class="material-icons-outlined text-xs">trending_up</span>
+                                <span class="ml-1">10% dari bulan lalu</span>
+                            </div>
+                        </div>
+                    </a>
                 </div>
                 
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
@@ -240,27 +261,27 @@
                             </div>
                         </div>
                         <div class="flex items-end gap-4 sm:gap-6 h-64">
-                            <div class="flex-1 flex flex-col items-center">
+                            <div class="flex-1 flex-col items-center">
                                 <div class="w-full chart-bar bg-gradient-to-t from-primary to-primary bg-opacity-70 rounded-t-lg" style="height: 65%;"></div>
                                 <p class="text-sm mt-3 text-subtle-light dark:text-subtle-dark">Jan</p>
                             </div>
-                            <div class="flex-1 flex flex-col items-center">
+                            <div class="flex-1 flex-col items-center">
                                 <div class="w-full chart-bar bg-gradient-to-t from-primary to-primary bg-opacity-70 rounded-t-lg" style="height: 40%;"></div>
                                 <p class="text-sm mt-3 text-subtle-light dark:text-subtle-dark">Feb</p>
                             </div>
-                            <div class="flex-1 flex flex-col items-center">
+                            <div class="flex-1 flex-col items-center">
                                 <div class="w-full chart-bar bg-gradient-to-t from-primary to-primary bg-opacity-70 rounded-t-lg" style="height: 85%;"></div>
                                 <p class="text-sm mt-3 text-subtle-light dark:text-subtle-dark">Mar</p>
                             </div>
-                            <div class="flex-1 flex flex-col items-center">
+                            <div class="flex-1 flex-col items-center">
                                 <div class="w-full chart-bar bg-gradient-to-t from-primary to-primary bg-opacity-70 rounded-t-lg" style="height: 68%;"></div>
                                 <p class="text-sm mt-3 text-subtle-light dark:text-subtle-dark">Apr</p>
                             </div>
-                            <div class="flex-1 flex flex-col items-center">
+                            <div class="flex-1 flex-col items-center">
                                 <div class="w-full chart-bar bg-gradient-to-t from-primary to-primary bg-opacity-70 rounded-t-lg" style="height: 70%;"></div>
                                 <p class="text-sm mt-3 text-subtle-light dark:text-subtle-dark">May</p>
                             </div>
-                            <div class="flex-1 flex flex-col items-center">
+                            <div class="flex-1 flex-col items-center">
                                 <div class="w-full chart-bar bg-gradient-to-t from-primary to-primary bg-opacity-70 rounded-t-lg" style="height: 20%;"></div>
                                 <p class="text-sm mt-3 text-subtle-light dark:text-subtle-dark">Jun</p>
                             </div>
@@ -327,7 +348,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="border-b border-surface-light dark:border-surface-dark hover:bg-surface-light dark:hover:bg-surface-dark transition-colors">
+                                <!-- Baris data contoh, Anda bisa generate ini dari database -->
+                                <tr class="table-row cursor-pointer">
                                     <td class="p-3 font-medium">Alya Chan</td>
                                     <td class="p-3 text-subtle-light dark:text-subtle-dark">25 November</td>
                                     <td class="p-3 text-subtle-light dark:text-subtle-dark">09:00</td>
@@ -336,22 +358,22 @@
                                         <span class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">Valid</span>
                                     </td>
                                 </tr>
-                                <tr class="border-b border-surface-light dark:border-surface-dark hover:bg-surface-light dark:hover:bg-surface-dark transition-colors">
+                                <tr class="table-row cursor-pointer">
                                     <td class="p-3 font-medium">Budi Santoso</td>
                                     <td class="p-3 text-subtle-light dark:text-subtle-dark">24 November</td>
                                     <td class="p-3 text-subtle-light dark:text-subtle-dark">08:45</td>
                                     <td class="p-3 text-subtle-light dark:text-subtle-dark">17:15</td>
                                     <td class="p-3">
-                                        <span class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">Valid</span>
+                                        <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">Terlambat</span>
                                     </td>
                                 </tr>
-                                <tr class="hover:bg-surface-light dark:hover:bg-surface-dark transition-colors">
+                                <tr class="table-row cursor-pointer">
                                     <td class="p-3 font-medium">Citra Dewi</td>
                                     <td class="p-3 text-subtle-light dark:text-subtle-dark">23 November</td>
                                     <td class="p-3 text-subtle-light dark:text-subtle-dark">09:30</td>
                                     <td class="p-3 text-subtle-light dark:text-subtle-dark">17:00</td>
                                     <td class="p-3">
-                                        <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">Terlambat</span>
+                                        <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">Sakit</span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -396,11 +418,6 @@
                         <span class="font-bold text-xl gradient-text">25</span>
                     </div>
                 </div>
-                <div class="mt-8 flex justify-end">
-                    <button class="close-modal-btn bg-gradient-to-r from-primary to-secondary text-white px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-                        Tutup
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -430,11 +447,6 @@
                         <span class="font-medium text-text-light dark:text-text-dark">Total PM</span>
                         <span class="font-bold text-xl gradient-text">5</span>
                     </div>
-                </div>
-                <div class="mt-8 flex justify-end">
-                    <button class="close-modal-btn bg-gradient-to-r from-secondary to-accent text-white px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-                        Tutup
-                    </button>
                 </div>
             </div>
         </div>
@@ -470,11 +482,6 @@
                         <span class="font-bold text-xl gradient-text">20</span>
                     </div>
                 </div>
-                <div class="mt-8 flex justify-end">
-                    <button class="close-modal-btn bg-gradient-to-r from-accent to-orange-500 text-white px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-                        Tutup
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -509,11 +516,6 @@
                         <span class="font-bold text-xl gradient-text">Rp 1.000.000</span>
                     </div>
                 </div>
-                <div class="mt-8 flex justify-end">
-                    <button class="close-modal-btn bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-                        Tutup
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -521,42 +523,34 @@
     <script>
         // Modal functionality
         document.addEventListener('DOMContentLoaded', function() {
-            // Card elements
-            const karyawanCard = document.getElementById('karyawan-card');
-            const pmCard = document.getElementById('pm-card');
-            const layananCard = document.getElementById('layanan-card');
-            const keuanganCard = document.getElementById('keuangan-card');
-            
-            // Modal elements
-            const karyawanModal = document.getElementById('karyawan-modal');
+            // Get modal elements
             const pmModal = document.getElementById('pm-modal');
             const layananModal = document.getElementById('layanan-modal');
-            const keuanganModal = document.getElementById('keuangan-modal');
+            
+            // Get card elements
+            const pmCard = document.getElementById('pm-card');
+            const layananCard = document.getElementById('layanan-card');
+            
+            // Add click event for PM card to show modal
+            if (pmCard) {
+                pmCard.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    pmModal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+            
+            // Add click event for Layanan card to show modal
+            if (layananCard) {
+                layananCard.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    layananModal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
             
             // Close modal buttons
             const closeModals = document.querySelectorAll('.close-modal');
-            const closeModalBtns = document.querySelectorAll('.close-modal-btn');
-            
-            // Open modal when card is clicked
-            karyawanCard.addEventListener('click', function() {
-                karyawanModal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            });
-            
-            pmCard.addEventListener('click', function() {
-                pmModal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            });
-            
-            layananCard.addEventListener('click', function() {
-                layananModal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            });
-            
-            keuanganCard.addEventListener('click', function() {
-                keuanganModal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            });
             
             // Close modal when close button is clicked
             closeModals.forEach(button => {
@@ -567,17 +561,9 @@
                 });
             });
             
-            // Close modal when close button in modal is clicked
-            closeModalBtns.forEach(button => {
-                button.addEventListener('click', function() {
-                    const modal = this.closest('.modal');
-                    modal.classList.add('hidden');
-                    document.body.style.overflow = 'auto';
-                });
-            });
-            
             // Close modal when clicking outside of modal content
-            [karyawanModal, pmModal, layananModal, keuanganModal].forEach(modal => {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
                 modal.addEventListener('click', function(e) {
                     if (e.target === modal) {
                         modal.classList.add('hidden');
@@ -585,8 +571,16 @@
                     }
                 });
             });
+            
+            // Add click event to table rows
+            const tableRows = document.querySelectorAll('.table-row');
+            tableRows.forEach(row => {
+                row.addEventListener('click', function() {
+                    // You can add functionality here to view details of the selected row
+                    console.log('Row clicked:', this);
+                });
+            });
         });
     </script>
 </body>
-
 </html>

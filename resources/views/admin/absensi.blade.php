@@ -81,7 +81,7 @@
 <body class="font-display bg-background-light dark:bg-background-dark text-text-light-primary dark:text-dark-primary">
     <div class="flex h-screen">
         <!-- Menggunakan template header -->
-        @include('admin/templet/header')
+        @include('admin/templet/sider')
         
         <main class="flex-1 flex flex-col">
             <div class="flex-1 p-8 overflow-y-auto">
