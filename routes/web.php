@@ -55,16 +55,36 @@ Route::get('/admin', function () {
     return view('admin/home');
 });
 
-Route::get('/data_karyawan', function () {
+Route::get('/data_karyawan_admin', function () {
     return view('admin/data_karyawan');
 });
-Route::get('/data_layanan', function () {
+Route::get('/data_layanan_admin', function () {
     return view('admin/data_layanan');
+});
+Route::get('/data_user', function () {
+    return view('admin/user');
 });
 Route::get('/data_absen', function () {
     return view('admin/absensi');
 });
-
+Route::get('/template_surat', function () {
+    return view('admin/templet_surat');
+});
+Route::get('/list_surat', function () {
+    return view('admin/list_surat');
+});
+Route::get('/invoice', function () {
+    return view('admin/invoice');
+});
+Route::get('/kwitansi', function () {
+    return view('admin/kwitansi');
+});
+Route::get('/catatan_rapat', function () {
+    return view('admin/catatan_rapat');
+});
+Route::get('/pengumuman', function () {
+    return view('admin/pengumuman');
+});
 
 
 Route::get('/pemilik', function () {
@@ -81,4 +101,45 @@ Route::get('/monitoring', function () {
 });
 Route::get('/surat', function () {
     return view('pemilik/surat_kerjasama');
+});
+
+
+// finance
+Route::get('/finance', function () {
+    return view('finance/beranda');
+});
+Route::get('/data', function () {
+    return view('finance/data_layanan');
+});
+Route::get('/pembayaran', function () {
+    return view('finance/data_pembayaran');
+});
+Route::get('/data_in_out', function () {
+    return view('finance/data_in_out');
+});
+
+
+
+Route::get('/manager_divisi', function () {
+    return view('manager_divisi/home');
+});
+Route::get('/pengelola_tugas', function () {
+    return view('manager_divisi/pengelola_tugas');
+});
+
+
+Route::get('/general_manajer', function () {
+    return view('general_manajer/home');
+});
+Route::get('/data_karyawan', function () {
+    return view('general_manajer/data_karyawan');
+});
+Route::get('/layanan', function () {
+    return view('general_manajer/data_layanan');
+});
+Route::get('/kelola_tugas', function () {
+    return view('general_manajer/kelola_tugas');
+});
+Route::get('/kelola_absen', function () {
+    return view('general_manajer/kelola_absen');
 });
