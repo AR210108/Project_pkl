@@ -131,7 +131,7 @@ Route::get('/absensi', function () {
 Route::get('/list', fn() => redirect()->route('karyawan.list'));
 Route::get('/detail', fn() => redirect()->route('karyawan.detail'));
 
-<<<<<<< HEAD
+
 // Logout
 Route::post('/logout', function () {
     auth()->logout();
@@ -234,6 +234,4 @@ Route::get('/kelola_tugas', function () {
 Route::get('/kelola_absen', function () {
     return view('general_manajer/kelola_absen');
 });
-=======
-Route::get('/admin', fn() => redirect()->route('admin.home'));
->>>>>>> e06043e28018ff58677d94f63615914a83656c76
+
