@@ -19,13 +19,21 @@
         </a>
         
         {{-- Menu Data Karyawan --}}
+<<<<<<< HEAD:resources/views/admin/templet/header.blade.php
         <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_karyawan_admin*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/data_karyawan_admin">
+=======
+        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_karyawan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/admin/data_karyawan">
+>>>>>>> e06043e28018ff58677d94f63615914a83656c76:resources/views/admin/templet/sider.blade.php
             <span class="material-icons-outlined">groups</span>
             Data Karyawan
         </a>
         
         {{-- Menu Data Layanan --}}
+<<<<<<< HEAD:resources/views/admin/templet/header.blade.php
         <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_layanan_admin*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/data_layanan_admin">
+=======
+        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_layanan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/admin/data_layanan">
+>>>>>>> e06043e28018ff58677d94f63615914a83656c76:resources/views/admin/templet/sider.blade.php
             <span class="material-icons-outlined">list_alt</span>
             Data Layanan
         </a>

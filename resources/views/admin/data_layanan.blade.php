@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -74,9 +75,10 @@
 </head>
 
 <body class="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200">
+
     <div class="flex min-h-screen">
         <!-- Menggunakan template header -->
-        @include('admin/templet/header')
+        @include('admin/templet/sider')
         <div class="flex-1 flex flex-col">
             <div class="flex-1 p-8">
                 <header class="mb-8">
@@ -110,26 +112,35 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 text-gray-900 dark:text-white">
-                                <td class="px-6 py-4">1.</td>
-                                <td class="px-6 py-4">Website</td>
-                                <td class="px-6 py-4">NGAWI NGAJAJAR</td>
-                                <td class="px-6 py-4">5M</td>
-                                <td class="px-6 py-4"></td>
-                                <td class="px-6 py-4"></td>
-                                <td class="px-6 py-4">+999</td>
+                            @foreach ($layanan as $layanan)
+                            <tr class="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
+                                <td class="px-6 py-4">{{ $loop->iteration }}</td>
+                                <td class="px-6 py-4">{{ $layanan->nama_layanan }}</td>
+                                <td class="px-6 py-4">{{ $layanan->deskripsi }}</td>
+                                <td class="px-6 py-4">{{ number_format($layanan->harga) }}</td>
+                                <td class="px-6 py-4">{{ $layanan->deadline }}</td>
+                                <td class="px-6 py-4">{{ $layanan->progres }}</td>
+                                <td class="px-6 py-4">{{ $layanan->status }}</td>
                                 <td class="px-6 py-4">
-                                    <div class="flex space-x-2">
-                                        <button class="edit-btn text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" data-id="1">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300" data-id="1">
-                                            <span class="material-icons-outlined">delete</span>
-                                        </button>
-                                    </div>
+                                    <button class="edit-btn" 
+                                        data-id="{{ $layanan->id }}"
+                                        data-nama="{{ $layanan->nama_layanan }}"
+                                        data-deskripsi="{{ $layanan->deskripsi }}"
+                                        data-harga="{{ $layanan->harga }}"
+                                        data-deadline="{{ $layanan->deadline }}"
+                                        data-progres="{{ $layanan->progres }}"
+                                        data-status="{{ $layanan->status }}">
+                                        Edit
+                                    </button>
+
+                                    <button class="delete-btn" data-id="{{ $layanan->id }}">
+                                        Hapus
+                                    </button>
                                 </td>
                             </tr>
-                        </tbody>
+                            @endforeach
+                            </tbody>
+
                     </table>
                 </div>
                 <div class="flex justify-center items-center mt-6">
@@ -158,11 +169,12 @@
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Tambah Layanan Baru</h2>
             </div>
-            <form id="tambahLayananForm" class="p-6">
+            <form action="{{ route('layanan.store') }}" method="POST" id="tambahLayananForm" class="p-6">
+                @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Layanan</label>
-                        <input type="text" name="namaLayanan" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white" placeholder="Masukkan nama layanan">
+                        <input type="text" name="nama_layanan" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white" placeholder="Masukkan nama layanan">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Harga</label>
@@ -208,12 +220,14 @@
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Edit Layanan</h2>
             </div>
-            <form id="editLayananForm" class="p-6">
+            <form method="POST" action="{{ route('layanan.update', '') }}" id="editLayananForm" class="p-6">
+                 @csrf
+                @method('PUT')
                 <input type="hidden" id="editId" name="id">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Layanan</label>
-                        <input type="text" id="editNamaLayanan" name="namaLayanan" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white" placeholder="Masukkan nama layanan">
+                        <input type="text" id="editNamaLayanan" name="nama_layanan" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white" placeholder="Masukkan nama layanan">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Harga</label>
@@ -253,137 +267,150 @@
         </div>
     </div>
 
-    <!-- Modal Delete Konfirmasi -->
-    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-4">
-            <div class="p-6">
-                <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-900 rounded-full mb-4">
-                    <span class="material-icons-outlined text-red-600 dark:text-red-400">warning</span>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white text-center mb-2">Konfirmasi Hapus</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">Apakah Anda yakin ingin menghapus layanan ini? Tindakan ini tidak dapat dibatalkan.</p>
-                <input type="hidden" id="deleteId">
-                <div class="flex justify-center space-x-3">
-                    <button id="batalDeleteBtn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                        Batal
-                    </button>
-                    <button id="konfirmasiDeleteBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                        Hapus
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- Modal Delete Konfirmasi -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-4">
 
-    <script>
-        // Get modal elements
-        const tambahLayananModal = document.getElementById('tambahLayananModal');
-        const editLayananModal = document.getElementById('editLayananModal');
-        const deleteModal = document.getElementById('deleteModal');
-        
-        // Get button elements
-        const tambahLayananBtn = document.getElementById('tambahLayananBtn');
-        const batalTambahBtn = document.getElementById('batalTambahBtn');
-        const batalEditBtn = document.getElementById('batalEditBtn');
-        const batalDeleteBtn = document.getElementById('batalDeleteBtn');
-        const konfirmasiDeleteBtn = document.getElementById('konfirmasiDeleteBtn');
-        
-        // Get form elements
-        const tambahLayananForm = document.getElementById('tambahLayananForm');
-        const editLayananForm = document.getElementById('editLayananForm');
-        
-        // Open tambah modal when button is clicked
-        tambahLayananBtn.addEventListener('click', () => {
-            tambahLayananModal.classList.remove('hidden');
-        });
-        
-        // Close tambah modal when cancel button is clicked
-        batalTambahBtn.addEventListener('click', () => {
-            tambahLayananModal.classList.add('hidden');
-            tambahLayananForm.reset();
-        });
-        
-        // Close edit modal when cancel button is clicked
-        batalEditBtn.addEventListener('click', () => {
-            editLayananModal.classList.add('hidden');
-            editLayananForm.reset();
-        });
-        
-        // Close delete modal when cancel button is clicked
-        batalDeleteBtn.addEventListener('click', () => {
-            deleteModal.classList.add('hidden');
-        });
-        
-        // Close modals when clicking outside the modal
-        window.addEventListener('click', (event) => {
-            if (event.target === tambahLayananModal) {
-                tambahLayananModal.classList.add('hidden');
-                tambahLayananForm.reset();
-            }
-            if (event.target === editLayananModal) {
-                editLayananModal.classList.add('hidden');
-                editLayananForm.reset();
-            }
-            if (event.target === deleteModal) {
-                deleteModal.classList.add('hidden');
-            }
-        });
-        
-        // Handle tambah form submission
-        tambahLayananForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            // Here you would typically send the form data to a server
-            // For demo purposes, we'll just close the modal and show a message
-            tambahLayananModal.classList.add('hidden');
-            tambahLayananForm.reset();
-            alert('Layanan berhasil ditambahkan!');
-        });
-        
-        // Handle edit form submission
-        editLayananForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            // Here you would typically send the form data to a server
-            // For demo purposes, we'll just close the modal and show a message
-            const id = document.getElementById('editId').value;
-            editLayananModal.classList.add('hidden');
-            editLayananForm.reset();
-            alert(`Layanan dengan ID ${id} berhasil diperbarui!`);
-        });
-        
-        // Handle delete confirmation
-        konfirmasiDeleteBtn.addEventListener('click', () => {
-            const id = document.getElementById('deleteId').value;
-            // Here you would typically send a delete request to the server
-            // For demo purposes, we'll just close the modal and show a message
-            deleteModal.classList.add('hidden');
-            alert(`Layanan dengan ID ${id} berhasil dihapus!`);
-        });
-        
-        // Handle edit button clicks
-        document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const id = button.getAttribute('data-id');
-                // In a real application, you would fetch the data for this ID from the server
-                // For demo purposes, we'll just show the modal with some placeholder data
-                document.getElementById('editId').value = id;
-                document.getElementById('editNamaLayanan').value = 'Website';
-                document.getElementById('editDeskripsi').value = 'NGAWI NGAJAJAR';
-                document.getElementById('editHarga').value = '5M';
-                document.getElementById('editStatus').value = 'selesai';
-                
-                editLayananModal.classList.remove('hidden');
-            });
-        });
-        
-        // Handle delete button clicks
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const id = button.getAttribute('data-id');
-                document.getElementById('deleteId').value = id;
-                deleteModal.classList.remove('hidden');
-            });
-        });
-    </script>
+        <div class="p-6">
+
+            <!-- Icon Warning -->
+            <div class="flex items-center justify-center w-16 h-16 mx-auto bg-red-100 dark:bg-red-900 rounded-full mb-4">
+                <span class="material-icons-outlined text-red-600 dark:text-red-400 text-4xl">
+                    warning
+                </span>
+            </div>
+
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white text-center mb-2">
+                Konfirmasi Hapus
+            </h3>
+
+            <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">
+                Apakah Anda yakin ingin menghapus layanan ini?
+            </p>
+
+            <!-- FORM DELETE -->
+            <form id="deleteForm" method="POST" class="flex justify-center space-x-6">
+                @csrf
+                @method('DELETE')
+
+                <!-- Tombol Batal (ikon X) -->
+                <button type="button" id="batalDeleteBtn"
+                    class="flex items-center justify-center w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                    <span class="material-icons-outlined text-gray-700 dark:text-gray-300 text-3xl">
+                        close
+                    </span>
+                </button>
+
+                <!-- Tombol Hapus (ikon trash) -->
+                <button type="submit" id="konfirmasiDeleteBtn"
+                    class="flex items-center justify-center w-12 h-12 bg-red-600 rounded-full hover:bg-red-700 transition">
+                    <span class="material-icons-outlined text-white text-3xl">
+                        delete
+                    </span>
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+
+    
+
+<script>
+    // Modal elements
+    const tambahLayananModal = document.getElementById('tambahLayananModal');
+    const editLayananModal = document.getElementById('editLayananModal');
+    const deleteModal = document.getElementById('deleteModal');
+
+    // Buttons
+    const tambahLayananBtn = document.getElementById('tambahLayananBtn');
+    const batalTambahBtn = document.getElementById('batalTambahBtn');
+    const batalEditBtn = document.getElementById('batalEditBtn');
+    const batalDeleteBtn = document.getElementById('batalDeleteBtn');
+
+    // Forms
+    const tambahLayananForm = document.getElementById('tambahLayananForm');
+    const editLayananForm = document.getElementById('editLayananForm');
+
+    // Open tambah modal
+    tambahLayananBtn.addEventListener('click', () => {
+        tambahLayananModal.classList.remove('hidden');
+    });
+
+    // Close tambah modal
+    batalTambahBtn.addEventListener('click', () => {
+        tambahLayananModal.classList.add('hidden');
+        tambahLayananForm.reset();
+    });
+
+    // Close edit modal
+    batalEditBtn.addEventListener('click', () => {
+        editLayananModal.classList.add('hidden');
+        editLayananForm.reset();
+    });
+
+    // Close delete modal
+    batalDeleteBtn.addEventListener('click', () => {
+        deleteModal.classList.add('hidden');
+    });
+
+    // ============================
+    // HANDLE EDIT BUTTON
+    // ============================
+document.querySelectorAll('.edit-btn').forEach(button => {
+    button.addEventListener('click', () => {
+
+        // SET VALUE
+        document.getElementById('editId').value = button.dataset.id;
+        document.getElementById('editNamaLayanan').value = button.dataset.nama;
+        document.getElementById('editDeskripsi').value = button.dataset.deskripsi;
+        document.getElementById('editHarga').value = button.dataset.harga;
+        document.getElementById('editDeadline').value = button.dataset.deadline;
+        document.getElementById('editProgres').value = button.dataset.progres;
+        document.getElementById('editStatus').value = button.dataset.status;
+
+        // ⬅️ SET ACTION URL DINAMIS
+        editLayananForm.action = `/admin/data_layanan/${button.dataset.id}`;
+
+        editLayananModal.classList.remove('hidden');
+    });
+});
+
+
+    // ============================
+    // HANDLE DELETE BUTTON
+    // ============================
+document.querySelectorAll('.delete-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const id = button.dataset.id;
+
+        // Set ID ke hidden input (opsional untuk JS lain)
+        document.getElementById('deleteId').value = id;
+
+        // Set action URL form delete
+        document.getElementById('deleteForm').action = `/admin/data_layanan/${id}`;
+
+        deleteModal.classList.remove('hidden');
+    });
+});
+
+
+    // ============================
+    // SUBMIT FORM EDIT
+    // (untuk Laravel biarkan form submit saja)
+    // ============================
+    editLayananForm.addEventListener('submit', (e) => {
+        // Jangan prevent kalau mau kirim ke backend
+        // e.preventDefault();
+        // editLayananForm.submit();  // opsional
+
+        editLayananModal.classList.add('hidden');
+    });
+
+</script>
+
 </body>
 
 </html>
