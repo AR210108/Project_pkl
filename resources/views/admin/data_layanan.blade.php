@@ -372,7 +372,7 @@ document.querySelectorAll('.edit-btn').forEach(button => {
         document.getElementById('editStatus').value = button.dataset.status;
 
         // ⬅️ SET ACTION URL DINAMIS
-        editLayananForm.action = `/admin/data_layanan/${button.dataset.id}`;
+        editLayananForm.action = `/admin/layanan/${button.dataset.id}`;
 
         editLayananModal.classList.remove('hidden');
     });
@@ -386,15 +386,14 @@ document.querySelectorAll('.delete-btn').forEach(button => {
     button.addEventListener('click', () => {
         const id = button.dataset.id;
 
-        // Set ID ke hidden input (opsional untuk JS lain)
-        document.getElementById('deleteId').value = id;
+        // Set action form delete
+        document.getElementById('deleteForm').action = `/admin/layanan/${id}`;
 
-        // Set action URL form delete
-        document.getElementById('deleteForm').action = `/admin/data_layanan/${id}`;
-
+        // Tampilkan modal
         deleteModal.classList.remove('hidden');
     });
 });
+
 
 
     // ============================
