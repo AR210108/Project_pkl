@@ -39,7 +39,7 @@
 
 <body class="bg-dark-blue text-white font-display">
     <div class="flex min-h-screen">
-        @include('finance/templet/header')
+        @include('finance/templet/sider')
         <main class="flex-1">
             <div class="flex flex-col h-full">
                 <div class="flex-grow p-10">

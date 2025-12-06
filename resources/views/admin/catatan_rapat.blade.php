@@ -73,7 +73,7 @@
 <body
     class="font-display bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark">
     <div class="flex h-screen">
-        @include('admin/templet/header')
+        @include('admin/templet/sider')
         <div class="flex-1 flex flex-col">
             <header
                 class="h-20 flex-shrink-0 border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">

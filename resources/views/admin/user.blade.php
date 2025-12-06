@@ -81,7 +81,7 @@
 <body class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200">
     <div class="flex min-h-screen">
         <aside class="w-64 flex-shrink-0 bg-surface-light dark:bg-surface-dark flex flex-col p-6">
-            @include('admin/templet/header')
+            @include('admin/templet/sider')
         </aside>
         <main class="flex-1 flex flex-col">
             <div class="flex-grow p-8">

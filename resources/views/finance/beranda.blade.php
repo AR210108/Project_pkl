@@ -48,7 +48,7 @@
 
 <body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
     <div class="flex min-h-screen">
-        @include('finance.templet.header')
+        @include('finance.templet.sider')
         <main class="flex-1 flex flex-col">
             <div class="flex-1 p-8">
                 <h2 class="text-4xl font-bold mb-8">Beranda</h2>

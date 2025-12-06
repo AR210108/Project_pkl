@@ -67,7 +67,7 @@
 
 <body class="font-display bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100">
     <div class="flex min-h-screen flex-col md:flex-row">
-        @include('finance/templet/header')
+        @include('finance/templet/sider')
         <div class="flex-1 flex flex-col">
             <main class="flex-1 p-4 md:p-8">
                 <h2 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-4 md:mb-6">Data Layanan</h2>
