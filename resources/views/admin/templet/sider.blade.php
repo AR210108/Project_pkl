@@ -19,13 +19,15 @@
         </a>
         
         {{-- Menu Data Karyawan --}}
-        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_karyawan_admin*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/data_karyawan_admin">
+        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('admin/karyawan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="{{ route('admin.data_karyawan') }}">
             <span class="material-icons-outlined">groups</span>
             Data Karyawan
         </a>
         
-        {{-- Menu Data Layanan --}}
-        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_layanan_admin*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/data_layanan_admin">
+<a class="flex items-center gap-3 p-3 rounded-lg 
+    {{ request()->is('admin/layanan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} 
+    transition-colors" 
+    href="{{ route('admin.layanan.index') }}">
 
             <span class="material-icons-outlined">list_alt</span>
             Data Layanan

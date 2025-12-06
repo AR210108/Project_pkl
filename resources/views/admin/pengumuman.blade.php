@@ -109,7 +109,7 @@
 
 <body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
     <div class="flex h-screen">
-        @include('admin/templet/header')
+        @include('admin/templet/sider')
         <main class="flex-1 flex flex-col">
             <div class="p-8 flex-1 overflow-y-auto">
                 <div class="flex justify-between items-center mb-6">

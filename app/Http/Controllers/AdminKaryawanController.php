@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
 
-class adminKaryawanController extends Controller
+class AdminKaryawanController extends Controller
 {
     /**
      * Display a listing of the resource.

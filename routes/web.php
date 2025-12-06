@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminKaryawanController as AdminAdminKaryawanController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
@@ -7,7 +8,6 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\Admin\AdminKaryawanController;
 
 
 /*
@@ -98,13 +98,11 @@ Route::middleware(['auth', 'role:admin'])
     
     
         // Data Karyawan
-        Route::get('/data_karyawan', [AdminController::class, 'dataKaryawan'])->name('data_karyawan');
-
-        Route::get('/data_karyawan_admin', [AdminKaryawanController::class, 'index'])->name('admin.karyawan.index');
+        // Data Karyawan
+        Route::get('/data_karyawan', [AdminAdminKaryawanController::class, 'index'])->name('data_karyawan');
 
         // Data Absensi
         Route::get('/absensi', fn() => view('admin.absensi'))->name('absensi.index');
-
         // Data Keuangan
         Route::get('/keuangan', fn() => view('admin.keuangan'))->name('keuangan.index');
 
@@ -151,7 +149,7 @@ Route::get('/detail', fn() => redirect()->route('karyawan.detail'));
 
 // Logout
 Route::post('/logout', function () {
-    auth()->logout();
+    auth::logout();
     request()->session()->invalidate();
     request()->session()->regenerateToken();
 
@@ -159,16 +157,14 @@ Route::post('/logout', function () {
 });
 
 
+Route::get('/home', function () {
+    return view('home');
+});
+
 Route::get('/admin', function () {
     return view('admin/home');
 });
 
-Route::get('/data_karyawan_admin', function () {
-    return view('admin/data_karyawan');
-});
-Route::get('/data_layanan_admin', function () {
-    return view('admin/data_layanan');
-});
 Route::get('/data_user', function () {
     return redirect()->route('admin.user');
 });
