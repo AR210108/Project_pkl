@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\AdminKaryawanController as AdminAdminKaryawanController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
@@ -98,8 +97,10 @@ Route::middleware(['auth', 'role:admin'])
     
     
         // Data Karyawan
-        // Data Karyawan
-        Route::get('/data_karyawan', [AdminAdminKaryawanController::class, 'index'])->name('data_karyawan');
+
+        Route::get('/data_karyawan', [AdminController::class, 'dataKaryawan'])->name('data_karyawan');
+
+        Route::resource('karyawan', KaryawanController::class);
 
         // Data Absensi
         Route::get('/absensi', fn() => view('admin.absensi'))->name('absensi.index');

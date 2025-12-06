@@ -4,151 +4,55 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- TAMBAHKAN INI -->
     <title>Daftar Karyawan</title>
-    <!-- ... sisa head tetap sama ... -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
         rel="stylesheet" />
     <!-- Tambahkan library Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
-    // Mendapatkan elemen-elemen yang diperlukan
-    const tambahKaryawanBtn = document.getElementById('tambahKaryawanBtn');
-    const tambahKaryawanModal = document.getElementById('tambahKaryawanModal');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const tambahKaryawanForm = document.getElementById('tambahKaryawanForm');
-
-    const editKaryawanModal = document.getElementById('editKaryawanModal');
-    const closeEditModalBtn = document.getElementById('closeEditModalBtn');
-    const cancelEditBtn = document.getElementById('cancelEditBtn');
-    const editKaryawanForm = document.getElementById('editKaryawanForm');
-
-    const deleteKaryawanModal = document.getElementById('deleteKaryawanModal');
-    const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
-    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-
-    // Fungsi pembuka/penutup modal (tetap sama)
-    function openTambahModal() { /* ... */ }
-    function closeTambahModal() { /* ... */ }
-    function openEditModal() { /* ... */ }
-    function closeEditModal() { /* ... */ }
-    function openDeleteModal() { /* ... */ }
-    function closeDeleteModal() { /* ... */ }
-
-    // Event listener untuk modal (tetap sama)
-    tambahKaryawanBtn.addEventListener('click', openTambahModal);
-    closeModalBtn.addEventListener('click', closeTambahModal);
-    // ... dan seterusnya untuk semua tombol close/cancel ...
-
-    // --- FUNGSIONALITAS UTAMA ---
-
-    // 1. TAMBAH KARYAWAN
-    tambahKaryawanForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-
-        fetch('/karyawan', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#333333", // Using a dark gray as primary
+                        "background-light": "#FFFFFF",
+                        "background-dark": "#121212",
+                        "surface-light": "#F3F4F6", // Lighter gray for backgrounds
+                        "surface-dark": "#1F1F1F", // Darker gray for backgrounds
+                        "text-light-primary": "#111827",
+                        "text-dark-primary": "#F9FAFB",
+                        "text-light-secondary": "#6B7280",
+                        "text-dark-secondary": "#9CA3AF",
+                        "border-light": "#E5E7EB",
+                        "border-dark": "#374151",
+                        // Tambahkan warna untuk glass effect
+                        "primary": "#6366f1", // indigo-500
+                        "secondary": "#8b5cf6", // violet-500
+                        "accent": "#ec4899", // pink-500
+                        "background-light": "#f8fafc", // slate-50
+                        "background-dark": "#0f172a", // slate-900
+                        "surface-light": "#ffffff", // white
+                        "surface-dark": "#1e293b", // slate-800
+                        "text-light": "#0f172a", // slate-900
+                        "text-dark": "#f1f5f9", // slate-100
+                        "subtle-light": "#64748b", // slate-500
+                        "subtle-dark": "#94a3b8", // slate-400
+                    },
+                    fontFamily: {
+                        display: ["Plus Jakarta Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem", // 8px
+                        "lg": "0.75rem", // 12px
+                        "xl": "1rem", // 16px
+                        "full": "9999px",
+                    },
+                },
             },
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.success);
-                closeTambahModal();
-                window.location.reload(); // Reload untuk melihat perubahan
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    });
-
-    // 2. EDIT KARYAWAN
-    document.querySelectorAll('.edit-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            
-            // Ambil data dari server
-            fetch(`/karyawan/${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    // Isi form dengan data yang ada
-                    document.getElementById('editId').value = data.id;
-                    document.getElementById('editNama').value = data.nama;
-                    document.getElementById('editJabatanId').value = data.jabatan_id;
-                    document.getElementById('editGaji').value = data.gaji;
-                    document.getElementById('editKontak').value = data.kontak;
-                    document.getElementById('editAlamat').value = data.alamat;
-                    
-                    // Buka modal
-                    editKaryawanModal.classList.remove('hidden');
-                    document.body.style.overflow = 'hidden';
-                });
-        });
-    });
-
-    editKaryawanForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const id = document.getElementById('editId').value;
-        const formData = new FormData(this);
-
-        fetch(`/karyawan/${id}`, {
-            method: 'POST', // Laravel menggunakan method spoofing
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'X-HTTP-Method-Override': 'PUT' // Header untuk mengubah method menjadi PUT
-            },
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.success);
-                closeEditModal();
-                window.location.reload();
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    });
-
-
-    // 3. HAPUS KARYAWAN
-    let deleteId = null; // Variabel untuk menyimpan ID yang akan dihapus
-
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            deleteId = this.getAttribute('data-id');
-            openDeleteModal();
-        });
-    });
-
-    confirmDeleteBtn.addEventListener('click', function() {
-        if (deleteId) {
-            fetch(`/karyawan/${deleteId}`, {
-                method: 'POST', // Laravel menggunakan method spoofing
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'X-HTTP-Method-Override': 'DELETE' // Header untuk mengubah method menjadi DELETE
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.success);
-                    closeDeleteModal();
-                    window.location.reload();
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-    });
-
-</script>
+        };
+    </script>
     <style>
         /* Tambahkan style untuk glass effect */
         .glass-effect {
@@ -217,44 +121,40 @@
                             </tr>
                         </thead>
                         <tbody class="text-text-light-primary dark:text-dark-primary">
-    @forelse ($karyawan as $item)
-    <tr class="border-b border-border-light dark:border-border-dark {{ $loop->odd ? '' : 'bg-surface-light dark:bg-surface-dark' }}">
-        <td class="px-6 py-4">{{ $karyawan->firstItem() + $loop->index - 1 }}.</td>
-        <td class="px-6 py-4">{{ $item->nama }}</td>
-        <td class="px-6 py-4">{{ $item->jabatan->nama_jabatan }}</td>
-        <td class="px-6 py-4">{{ $item->gaji }}</td>
-        <td class="px-6 py-4">{{ $item->alamat }}</td>
-        <td class="px-6 py-4">{{ $item->kontak }}</td>
-        <td class="px-6 py-4">
-            @if($item->foto)
-                <img src="{{ asset('storage/foto_karyawan/' . $item->foto) }}" alt="Foto" class="w-10 h-10 rounded-full object-cover">
-            @else
-                <div class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-                    <span class="material-icons-outlined text-gray-500 dark:text-gray-400 text-xl">person</span>
-                </div>
-            @endif
-        </td>
-        <td class="px-6 py-4">
-            <div class="flex space-x-2">
-                <button class="edit-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-blue-500"
-                    data-id="{{ $item->id }}">
-                    <span class="material-icons-outlined text-lg">edit</span>
-                </button>
-                <button class="delete-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-red-500"
-                    data-id="{{ $item->id }}">
-                    <span class="material-icons-outlined text-lg">delete</span>
-                </button>
-            </div>
-        </td>
-    </tr>
-    @empty
-    <tr>
-        <td colspan="8" class="px-6 py-4 text-center text-text-light-secondary dark:text-dark-secondary">
-            Tidak ada data karyawan.
-        </td>
-    </tr>
-    @endforelse
+@foreach ($karyawan as $no => $k)
+<tr class="border-b border-border-light dark:border-border-dark">
+    <td class="px-6 py-4">{{ $no + 1 }}</td>
+    <td class="px-6 py-4">{{ $k->nama }}</td>
+    <td class="px-6 py-4">{{ $k->jabatan }}</td>
+    <td class="px-6 py-4">{{ $k->gaji }}</td>
+    <td class="px-6 py-4">{{ $k->alamat }}</td>
+    <td class="px-6 py-4">{{ $k->kontak }}</td>
+    <td class="px-6 py-4">
+        @if($k->foto)
+            <img src="{{ asset('storage/'.$k->foto) }}" class="w-10 h-10 rounded-full object-cover">
+        @else
+            -
+        @endif
+    </td>
+    <td class="px-6 py-4">
+        <div class="flex space-x-2">
+            <button
+                class="edit-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-blue-500"
+                data-id="{{ $k->id }}">
+                <span class="material-icons-outlined text-lg">edit</span>
+            </button>
+
+            <button
+                class="delete-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-red-500"
+                data-id="{{ $k->id }}">
+                <span class="material-icons-outlined text-lg">delete</span>
+            </button>
+        </div>
+    </td>
+</tr>
+@endforeach
 </tbody>
+
                     </table>
                 </div>
                 <div class="flex justify-center mt-6">
@@ -314,20 +214,13 @@
                             placeholder="Masukkan nama karyawan" required>
                     </div>
 
-                    <!-- Tambahkan input tersembunyi untuk ID -->
-<input type="hidden" id="editId" name="id">
-
-                    <!-- Ganti input jabatan -->
-<div>
-    <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Jabatan</label>
-    <select name="jabatan_id" required
-        class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-        <option value="">-- Pilih Jabatan --</option>
-        @foreach (App\Models\Jabatan::all() as $jabatan)
-            <option value="{{ $jabatan->id }}">{{ $jabatan->nama_jabatan }}</option>
-        @endforeach
-    </select>
-</div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Jabatan</label>
+                        <input type="text" name="jabatan"
+                            class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary"
+                            placeholder="Masukkan jabatan" required>
+                    </div>
 
                     <div>
                         <label

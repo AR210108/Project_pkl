@@ -19,7 +19,7 @@
         </a>
         
         {{-- Menu Data Karyawan --}}
-        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('admin/karyawan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="{{ route('admin.data_karyawan') }}">
+        <a class="flex items-center gap-3 p-3 rounded-lg 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' transition-colors" href="admin/data_karyawan">
             <span class="material-icons-outlined">groups</span>
             Data Karyawan
         </a>
