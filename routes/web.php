@@ -7,7 +7,6 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\Admin\AdminKaryawanController;
 
 
 /*
@@ -100,7 +99,7 @@ Route::middleware(['auth', 'role:admin'])
         // Data Karyawan
         Route::get('/data_karyawan', [AdminController::class, 'dataKaryawan'])->name('data_karyawan');
 
-        Route::get('/data_karyawan_admin', [AdminKaryawanController::class, 'index'])->name('admin.karyawan.index');
+        Route::resource('karyawan', KaryawanController::class);
 
         // Data Absensi
         Route::get('/absensi', fn() => view('admin.absensi'))->name('absensi.index');
