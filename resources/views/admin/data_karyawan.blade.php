@@ -121,101 +121,40 @@
                             </tr>
                         </thead>
                         <tbody class="text-text-light-primary dark:text-dark-primary">
-                            <tr class="border-b border-border-light dark:border-border-dark">
-                                <td class="px-6 py-4">1.</td>
-                                <td class="px-6 py-4">PAJAR</td>
-                                <td class="px-6 py-4">RAJA</td>
-                                <td class="px-6 py-4">5M</td>
-                                <td class="px-6 py-4">NGAWI NGAJAJAR</td>
-                                <td class="px-6 py-4">+999</td>
-                                <td class="px-6 py-4"></td>
-                                <td class="px-6 py-4">
-                                    <div class="flex space-x-2">
-                                        <button
-                                            class="edit-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-blue-500"
-                                            data-id="1">
-                                            <span class="material-icons-outlined text-lg">edit</span>
-                                        </button>
-                                        <button
-                                            class="delete-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-red-500"
-                                            data-id="1">
-                                            <span class="material-icons-outlined text-lg">delete</span>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr
-                                class="border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">
-                                <td class="px-6 py-4">2.</td>
-                                <td class="px-6 py-4">PAJAR</td>
-                                <td class="px-6 py-4">RAJA</td>
-                                <td class="px-6 py-4">5M</td>
-                                <td class="px-6 py-4">NGAWI NGAJAJAR</td>
-                                <td class="px-6 py-4">+999</td>
-                                <td class="px-6 py-4"></td>
-                                <td class="px-6 py-4">
-                                    <div class="flex space-x-2">
-                                        <button
-                                            class="edit-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-blue-500"
-                                            data-id="2">
-                                            <span class="material-icons-outlined text-lg">edit</span>
-                                        </button>
-                                        <button
-                                            class="delete-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-red-500"
-                                            data-id="2">
-                                            <span class="material-icons-outlined text-lg">delete</span>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr class="border-b border-border-light dark:border-border-dark">
-                                <td class="px-6 py-4">3.</td>
-                                <td class="px-6 py-4">PAJAR</td>
-                                <td class="px-6 py-4">RAJA</td>
-                                <td class="px-6 py-4">5M</td>
-                                <td class="px-6 py-4">NGAWI NGAJAJAR</td>
-                                <td class="px-6 py-4">+999</td>
-                                <td class="px-6 py-4"></td>
-                                <td class="px-6 py-4">
-                                    <div class="flex space-x-2">
-                                        <button
-                                            class="edit-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-blue-500"
-                                            data-id="3">
-                                            <span class="material-icons-outlined text-lg">edit</span>
-                                        </button>
-                                        <button
-                                            class="delete-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-red-500"
-                                            data-id="3">
-                                            <span class="material-icons-outlined text-lg">delete</span>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr
-                                class="border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">
-                                <td class="px-6 py-4">4.</td>
-                                <td class="px-6 py-4">PAJAR</td>
-                                <td class="px-6 py-4">RAJA</td>
-                                <td class="px-6 py-4">5M</td>
-                                <td class="px-6 py-4">NGAWI NGAJAJAR</td>
-                                <td class="px-6 py-4">+999</td>
-                                <td class="px-6 py-4"></td>
-                                <td class="px-6 py-4">
-                                    <div class="flex space-x-2">
-                                        <button
-                                            class="edit-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-blue-500"
-                                            data-id="4">
-                                            <span class="material-icons-outlined text-lg">edit</span>
-                                        </button>
-                                        <button
-                                            class="delete-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-red-500"
-                                            data-id="4">
-                                            <span class="material-icons-outlined text-lg">delete</span>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
+@foreach ($karyawan as $no => $k)
+<tr class="border-b border-border-light dark:border-border-dark">
+    <td class="px-6 py-4">{{ $no + 1 }}</td>
+    <td class="px-6 py-4">{{ $k->nama }}</td>
+    <td class="px-6 py-4">{{ $k->jabatan }}</td>
+    <td class="px-6 py-4">{{ $k->gaji }}</td>
+    <td class="px-6 py-4">{{ $k->alamat }}</td>
+    <td class="px-6 py-4">{{ $k->kontak }}</td>
+    <td class="px-6 py-4">
+        @if($k->foto)
+            <img src="{{ asset('storage/'.$k->foto) }}" class="w-10 h-10 rounded-full object-cover">
+        @else
+            -
+        @endif
+    </td>
+    <td class="px-6 py-4">
+        <div class="flex space-x-2">
+            <button
+                class="edit-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-blue-500"
+                data-id="{{ $k->id }}">
+                <span class="material-icons-outlined text-lg">edit</span>
+            </button>
+
+            <button
+                class="delete-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-red-500"
+                data-id="{{ $k->id }}">
+                <span class="material-icons-outlined text-lg">delete</span>
+            </button>
+        </div>
+    </td>
+</tr>
+@endforeach
+</tbody>
+
                     </table>
                 </div>
                 <div class="flex justify-center mt-6">

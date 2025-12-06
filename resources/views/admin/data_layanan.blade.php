@@ -112,7 +112,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($layanan as $layanan)
+                            @foreach ($layanans as $layanan)
                             <tr class="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
                                 <td class="px-6 py-4">{{ $loop->iteration }}</td>
                                 <td class="px-6 py-4">{{ $layanan->nama_layanan }}</td>
@@ -169,7 +169,7 @@
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Tambah Layanan Baru</h2>
             </div>
-            <form action="{{ route('layanan.store') }}" method="POST" id="tambahLayananForm" class="p-6">
+            <form action="{{ route('admin.layanan.store') }}" method="POST" id="tambahLayananForm" class="p-6">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -220,7 +220,7 @@
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Edit Layanan</h2>
             </div>
-            <form method="POST" action="{{ route('layanan.update', '') }}" id="editLayananForm" class="p-6">
+            <form method="POST" action="{{ route('admin.layanan.update', '') }}" id="editLayananForm" class="p-6">
                  @csrf
                 @method('PUT')
                 <input type="hidden" id="editId" name="id">

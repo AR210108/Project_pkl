@@ -6,6 +6,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -79,15 +81,29 @@ Route::middleware(['auth', 'role:admin'])
     ->name('admin.')
     ->group(function () {
 
-        // Dashboard Admin
         Route::get('/home', [AdminController::class, 'home'])->name('home');
 
+        // USER LIST
+        Route::get('/user', [UserController::class, 'index'])->name('user');
+
+        // STORE USER
+        Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
+
+        // UPDATE USER
+        Route::post('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
+
+        // HAPUS USER
+        Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
+    
+    
         // Data Karyawan
+
         Route::get('/data_karyawan', [AdminController::class, 'dataKaryawan'])->name('data_karyawan');
+
+        Route::resource('karyawan', KaryawanController::class);
 
         // Data Absensi
         Route::get('/absensi', fn() => view('admin.absensi'))->name('absensi.index');
-
         // Data Keuangan
         Route::get('/keuangan', fn() => view('admin.keuangan'))->name('keuangan.index');
 
@@ -134,7 +150,7 @@ Route::get('/detail', fn() => redirect()->route('karyawan.detail'));
 
 // Logout
 Route::post('/logout', function () {
-    auth()->logout();
+    auth::logout();
     request()->session()->invalidate();
     request()->session()->regenerateToken();
 
@@ -145,19 +161,17 @@ Route::post('/logout', function () {
 Route::get('/home', function () {
     return view('home');
 });
+
 Route::get('/admin', function () {
     return view('admin/home');
 });
 
-Route::get('/data_karyawan_admin', function () {
-    return view('admin/data_karyawan');
-});
-Route::get('/data_layanan_admin', function () {
-    return view('admin/data_layanan');
-});
 Route::get('/data_user', function () {
-    return view('admin/user');
+    return redirect()->route('admin.user');
 });
+
+
+
 Route::get('/data_absen', function () {
     return view('admin/absensi');
 });
