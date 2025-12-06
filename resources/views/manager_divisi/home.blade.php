@@ -41,7 +41,7 @@
 
 <body class="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200">
     <div class="flex h-screen">
-        @include('manager_divisi/templet/header')
+        @include('manager_divisi/templet/sider')
         <main class="flex-1 flex flex-col">
             <div class="flex-1 overflow-y-auto p-8">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

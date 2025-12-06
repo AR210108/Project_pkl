@@ -104,7 +104,7 @@
 
 <body class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200">
     <div class="flex h-screen">
-        @include('admin/templet/header')
+        @include('admin/templet/sider')
         <main class="flex-1 flex flex-col">
             <div class="flex-grow p-8">
                 <!-- Baris pertama: Judul -->

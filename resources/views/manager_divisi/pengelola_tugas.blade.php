@@ -79,7 +79,7 @@
 <body class="h-full font-display bg-gray-50 dark:bg-background-dark text-slate-800 dark:text-slate-200">
     <div class="flex h-screen flex-col">
         <div class="flex flex-1 overflow-hidden">
-            @include('manager_divisi/templet/header')
+            @include('manager_divisi/templet/sider')
             <main class="flex-1 overflow-y-auto bg-white">
                 <div class="p-8">
                     <!-- Judul -->

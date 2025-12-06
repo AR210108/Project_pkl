@@ -51,7 +51,7 @@
 <body
     class="bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark font-display">
     <div class="flex h-screen">
-        @include('finance/templet/header')
+        @include('finance/templet/sider')
         <div class="flex-1 flex flex-col">
             <main class="flex-1 p-8 overflow-y-auto">
                 <h2 class="text-3xl font-bold mb-8">Data Order</h2>

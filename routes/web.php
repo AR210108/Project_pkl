@@ -7,7 +7,7 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\DataKaryawanController;
+
 
 
 /*
@@ -164,14 +164,6 @@ Route::get('/admin', function () {
 Route::get('/data_karyawan_admin', function () {
     return view('admin/data_karyawan');
 });
-
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/data_karyawan', [DataKaryawanController::class, 'index'])->name('data_karyawan');
-    Route::post('/data_karyawan', [DataKaryawanController::class, 'store'])->name('data_karyawan.store');
-    Route::put('/data_karyawan/{id}', [DataKaryawanController::class, 'update'])->name('data_karyawan.update');
-    Route::delete('/data_karyawan/{id}', [DataKaryawanController::class, 'destroy'])->name('data_karyawan.destroy');
-});
-
 Route::get('/data_layanan_admin', function () {
     return view('admin/data_layanan');
 });

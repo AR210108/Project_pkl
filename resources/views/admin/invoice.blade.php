@@ -107,7 +107,7 @@
 
 <body class="font-display bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100">
     <div class="flex h-screen">
-       @include('admin/templet/header')
+       @include('admin/templet/sider')
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col overflow-hidden">
