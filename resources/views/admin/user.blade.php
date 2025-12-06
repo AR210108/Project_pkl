@@ -5,206 +5,214 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Daftar User</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#3b82f6",
-                        "background-light": "#f1f5f9",
-                        "background-dark": "#1e293b",
-                        "surface-light": "#F3F4F6",
-                        "surface-dark": "#1E1E1E",
-                        "text-light": "#111827",
-                        "text-dark": "#E5E7EB",
-                        "subtle-light": "#6B7280",
-                        "subtle-dark": "#9CA3AF",
-                    },
-                    fontFamily: {
-                        display: ["Poppins", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "0.5rem",
-                    },
-                },
-            },
-        };
-    </script>
-    <style>
-        .material-icons {
-            font-size: 20px;
-        }
-        
-        .material-icons-outlined {
-            font-family: 'Material Icons Outlined';
-            font-weight: normal;
-            font-style: normal;
-            font-size: 24px;
-            line-height: 1;
-            letter-spacing: normal;
-            text-transform: none;
-            display: inline-block;
-            white-space: nowrap;
-            word-wrap: normal;
-            direction: ltr;
-            -webkit-font-feature-settings: 'liga';
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .material-symbols-outlined {
-            font-variation-settings:
-                'FILL' 0,
-                'wght' 400,
-                'GRAD' 0,
-                'opsz' 24
-        }
-
-        .material-symbols-outlined.filled {
-            font-variation-settings:
-                'FILL' 1,
-                'wght' 400,
-                'GRAD' 0,
-                'opsz' 24
-        }
-    </style>
 </head>
 
 <body class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200">
     <div class="flex min-h-screen">
+
+        <!-- SIDER -->
         <aside class="w-64 flex-shrink-0 bg-surface-light dark:bg-surface-dark flex flex-col p-6">
-            @include('admin/templet/header')
+            @include('admin/templet/sider')
         </aside>
+
+        <!-- MAIN -->
         <main class="flex-1 flex flex-col">
             <div class="flex-grow p-8">
-                <h2 class="text-4xl font-bold mb-8 text-slate-900 dark:text-white">Daftar User</h2>
-                <div class="flex justify-between items-center mb-6">
-                    <button
+
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-4xl font-bold text-slate-900 dark:text-white">Daftar User</h2>
+
+                    <!-- TOMBOL ADD USER -->
+                    <button onclick="openModalTambah()"
                         class="flex items-center gap-2 px-4 py-2 bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg hover:bg-slate-400 dark:hover:bg-slate-600 transition-colors">
-                        <span class="material-symbols-outlined text-2xl">add</span>
+                        <span class="material-icons-outlined text-2xl">add</span>
                         tambah User
                     </button>
-                    <div class="flex items-center gap-4">
-                        <div class="relative">
-                            <span
-                                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                            <input
-                                class="w-80 pl-10 pr-4 py-2 bg-slate-200 dark:bg-slate-700 border-transparent rounded-lg focus:ring-primary focus:border-primary text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500"
-                                placeholder="Search..." type="text" />
-                        </div>
-                        <button
-                            class="px-6 py-2 bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg hover:bg-slate-400 dark:hover:bg-slate-600 transition-colors">
-                            Filter
-                        </button>
-                    </div>
                 </div>
+
                 <div class="bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden">
                     <table class="w-full text-left">
-                        <thead
-                            class="bg-slate-200 dark:bg-slate-700 text-xs text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                        <thead class="bg-slate-200 dark:bg-slate-700 text-xs text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                             <tr>
                                 <th class="p-4">No</th>
                                 <th class="p-4">Username</th>
                                 <th class="p-4">Email</th>
                                 <th class="p-4">Role</th>
-                                <th class="p-4">Password</th>
                                 <th class="p-4">Aksi</th>
                             </tr>
                         </thead>
+
                         <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                                <td class="p-4">1.</td>
-                                <td class="p-4">john.doe</td>
-                                <td class="p-4">john.doe@example.com</td>
-                                <td class="p-4">Admin</td>
-                                <td class="p-4">********</td>
-                                <td class="p-4">
-                                    <div class="flex gap-2">
-                                        <button
-                                            class="p-1 text-slate-500 hover:text-primary dark:hover:text-primary transition-colors"><span
-                                                class="material-symbols-outlined">edit</span></button>
-                                        <button class="p-1 text-slate-500 hover:text-red-500 transition-colors"><span
-                                                class="material-symbols-outlined">delete</span></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                                <td class="p-4">2.</td>
-                                <td class="p-4">jane.smith</td>
-                                <td class="p-4">jane.smith@example.com</td>
-                                <td class="p-4">User</td>
-                                <td class="p-4">********</td>
-                                <td class="p-4">
-                                    <div class="flex gap-2">
-                                        <button
-                                            class="p-1 text-slate-500 hover:text-primary dark:hover:text-primary transition-colors"><span
-                                                class="material-symbols-outlined">edit</span></button>
-                                        <button class="p-1 text-slate-500 hover:text-red-500 transition-colors"><span
-                                                class="material-symbols-outlined">delete</span></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                                <td class="p-4">3.</td>
-                                <td class="p-4">alex.jones</td>
-                                <td class="p-4">alex.jones@example.com</td>
-                                <td class="p-4">User</td>
-                                <td class="p-4">********</td>
-                                <td class="p-4">
-                                    <div class="flex gap-2">
-                                        <button
-                                            class="p-1 text-slate-500 hover:text-primary dark:hover:text-primary transition-colors"><span
-                                                class="material-symbols-outlined">edit</span></button>
-                                        <button class="p-1 text-slate-500 hover:text-red-500 transition-colors"><span
-                                                class="material-symbols-outlined">delete</span></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                                <td class="p-4">4.</td>
-                                <td class="p-4">sam.wilson</td>
-                                <td class="p-4">sam.wilson@example.com</td>
-                                <td class="p-4">Manager</td>
-                                <td class="p-4">********</td>
-                                <td class="p-4">
-                                    <div class="flex gap-2">
-                                        <button
-                                            class="p-1 text-slate-500 hover:text-primary dark:hover:text-primary transition-colors"><span
-                                                class="material-symbols-outlined">edit</span></button>
-                                        <button class="p-1 text-slate-500 hover:text-red-500 transition-colors"><span
-                                                class="material-symbols-outlined">delete</span></button>
-                                    </div>
-                                </td>
-                            </tr>
+                            @foreach ($users as $i => $u)
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td class="p-4">{{ $i+1 }}.</td>
+                                    <td class="p-4">{{ $u->name }}</td>
+                                    <td class="p-4">{{ $u->email }}</td>
+                                    <td class="p-4">{{ $u->role }}</td>
+                                    <td class="p-4">
+                                        <div class="flex gap-2">
+                                            <button onclick="openModalEdit({{ $u->id }}, '{{ $u->name }}', '{{ $u->email }}', '{{ $u->role }}')"
+                                                class="p-1 text-slate-500 hover:text-primary transition-colors">
+                                                <span class="material-icons-outlined">edit</span>
+                                            </button>
+
+                                            <form action="{{ route('admin.user.delete', $u->id) }}" method="POST" onsubmit="return confirm('Yakin hapus user?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="p-1 text-slate-500 hover:text-red-500 transition-colors">
+                                                    <span class="material-icons-outlined">delete</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
                         </tbody>
+
                     </table>
                 </div>
-                <div class="flex justify-between items-center mt-6 text-sm">
-                    <a class="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors"
-                        href="#">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                        Previous
-                    </a>
-                    <a class="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors"
-                        href="#">
-                        Next
-                        <span class="material-symbols-outlined">arrow_forward</span>
-                    </a>
-                </div>
             </div>
+
             <footer class="bg-slate-200 dark:bg-slate-800 text-center p-4 text-sm text-slate-500 dark:text-slate-400">
                 Copyright ©2025 by digicity.id
             </footer>
         </main>
+
     </div>
+
+    <!-- MODAL TAMBAH -->
+    <div id="modalTambah" class="fixed inset-0 bg-black/40 hidden justify-center items-center z-50 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-800 rounded-xl w-[600px] max-h-[90vh] overflow-y-auto p-8">
+
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-semibold">Tambah User Baru</h3>
+                <button onclick="closeModalTambah()" class="text-slate-500 hover:text-red-500">
+                    <span class="material-icons-outlined text-xl">close</span>
+                </button>
+            </div>
+
+            <form action="{{ route('admin.user.store') }}" method="POST">
+                @csrf
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label>Nama Lengkap</label>
+                        <input name="name" required class="w-full px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700" placeholder="Masukkan nama user">
+                    </div>
+
+                    <div>
+                        <label>Email</label>
+                        <input name="email" required type="email" class="w-full px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700" placeholder="Masukkan email">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label>Role</label>
+                        <select name="role" class="w-full px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700">
+                            <option value="admin">Admin</option>
+                            <option value="user">User</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Password</label>
+                        <input name="password" required type="password" class="w-full px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700" placeholder="Masukkan password">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-8">
+                    <button type="button" onclick="closeModalTambah()" class="px-6 py-2 rounded-lg bg-slate-300 dark:bg-slate-700">Batal</button>
+                    <button type="submit" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Simpan Data</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- MODAL EDIT -->
+    <div id="modalEdit" class="fixed inset-0 bg-black/40 hidden justify-center items-center z-50 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-800 rounded-xl w-[600px] max-h-[90vh] overflow-y-auto p-8">
+
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-semibold">Edit User</h3>
+                <button onclick="closeModalEdit()" class="text-slate-500 hover:text-red-500">
+                    <span class="material-icons-outlined text-xl">close</span>
+                </button>
+            </div>
+
+            <form id="formEdit" method="POST">
+                @csrf
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label>Nama Lengkap</label>
+                        <input id="edit_name" name="name" class="w-full px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700">
+                    </div>
+
+                    <div>
+                        <label>Email</label>
+                        <input id="edit_email" name="email" type="email" class="w-full px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label>Role</label>
+                        <select id="edit_role" name="role" class="w-full px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700">
+                            <option value="admin">Admin</option>
+                            <option value="user">User</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Password (kosongkan jika tidak diubah)</label>
+                        <input name="password" type="password" class="w-full px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-8">
+                    <button type="button" onclick="closeModalEdit()" class="px-6 py-2 rounded-lg bg-slate-300 dark:bg-slate-700">Batal</button>
+                    <button type="submit" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Update Data</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <script>
+        // === MODAL TAMBAH ===
+        const modalTambah = document.getElementById('modalTambah');
+        function openModalTambah() {
+            modalTambah.classList.remove('hidden');
+            modalTambah.classList.add('flex');
+        }
+        function closeModalTambah() {
+            modalTambah.classList.add('hidden');
+            modalTambah.classList.remove('flex');
+        }
+
+        // === MODAL EDIT ===
+        const modalEdit = document.getElementById('modalEdit');
+        function openModalEdit(id, name, email, role) {
+            modalEdit.classList.remove('hidden');
+            modalEdit.classList.add('flex');
+
+            document.getElementById("edit_name").value = name;
+            document.getElementById("edit_email").value = email;
+            document.getElementById("edit_role").value = role;
+
+            document.getElementById("formEdit").action = "/admin/user/update/" + id;
+        }
+        function closeModalEdit() {
+            modalEdit.classList.add('hidden');
+            modalEdit.classList.remove('flex');
+        }
+    </script>
 
 </body>
 
