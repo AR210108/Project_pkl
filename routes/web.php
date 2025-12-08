@@ -7,8 +7,7 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
-
-
+use App\Http\Controllers\AdminKaryawanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -96,9 +95,16 @@ Route::middleware(['auth', 'role:admin'])
         // HAPUS USER
         Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
     
-    
         // Data Karyawan
-        Route::get('/data_karyawan', [AdminController::class, 'dataKaryawan'])->name('data_karyawan');
+       Route::get('/data_karyawan', [AdminKaryawanController::class, 'index'])->name('data_karyawan');
+        
+        // Routes untuk AdminKaryawanController - PERBAIKAN
+        Route::controller(AdminKaryawanController::class)->group(function () {
+            Route::get('/karyawan', 'index')->name('karyawan.index');
+            Route::post('/karyawan/store', 'store')->name('karyawan.store');
+            Route::post('/karyawan/update/{id}', 'update')->name('karyawan.update');
+            Route::delete('/karyawan/delete/{id}', 'destroy')->name('karyawan.delete');
+        });
 
         // Data Absensi
         Route::get('/absensi', fn() => view('admin.absensi'))->name('absensi.index');
@@ -252,4 +258,3 @@ Route::get('/kelola_tugas', function () {
 Route::get('/kelola_absen', function () {
     return view('general_manajer/kelola_absen');
 });
-

@@ -2,21 +2,17 @@
 
 namespace App\Models;
 
-// Tambahkan baris ini
-use Spatie\Permission\Traits\HasRoles;
-
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+use App\Models\Karyawan; // <-- TAMBAHKAN BARIS INI
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
-    
-    // Tambahkan baris ini juga
-    use HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -48,4 +44,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /**
+     * Relasi ke Model Karyawan.
+     * Satu user bisa memiliki satu data karyawan.
+     */
+    public function karyawan()
+    {
+        return $this->hasOne(Karyawan::class, 'user_id');
+    }
 }

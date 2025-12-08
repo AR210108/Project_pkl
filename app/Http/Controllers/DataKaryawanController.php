@@ -18,26 +18,50 @@ class DataKaryawanController extends Controller
         $request->validate([
             'nama' => 'required',
             'jabatan' => 'required',
-            'gaji' => 'required',
+            'gaji' => 'required|numeric',
             'alamat' => 'required',
             'kontak' => 'required',
         ]);
 
-        Karyawan::create($request->only('nama','jabatan','gaji','alamat','kontak'));
+        Karyawan::create([
+            'nama'      => $request->nama,
+            'jabatan'   => $request->jabatan,
+            'gaji'      => $request->gaji,
+            'alamat'    => $request->alamat,
+            'kontak'    => $request->kontak,
+        ]);
 
-        return redirect()->back()->with('success','Data disimpan');
+        return redirect()->back()->with('success','Data berhasil disimpan');
     }
 
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'nama' => 'required',
+            'jabatan' => 'required',
+            'gaji' => 'required|numeric',
+            'alamat' => 'required',
+            'kontak' => 'required',
+        ]);
+
         $k = Karyawan::findOrFail($id);
-        $k->update($request->only('nama','jabatan','gaji','alamat','kontak'));
-        return redirect()->back()->with('success','Data diperbarui');
+
+        $k->update([
+            'nama'      => $request->nama,
+            'jabatan'   => $request->jabatan,
+            'gaji'      => $request->gaji,
+            'alamat'    => $request->alamat,
+            'kontak'    => $request->kontak,
+        ]);
+
+        return redirect()->back()->with('success','Data berhasil diperbarui');
     }
 
     public function destroy($id)
     {
-        Karyawan::findOrFail($id)->delete();
-        return redirect()->back()->with('success','Data dihapus');
+        $k = Karyawan::findOrFail($id);
+        $k->delete();
+
+        return redirect()->back()->with('success','Data berhasil dihapus');
     }
 }
