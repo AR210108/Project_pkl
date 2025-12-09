@@ -1,797 +1,832 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Kelola Absensi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
-        rel="stylesheet" />
-    <!-- Tambahkan library Material Icons -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        primary: "#333333", // Using a dark gray as primary
-                        "background-light": "#FFFFFF",
-                        "background-dark": "#121212",
-                        "surface-light": "#F3F4F6", // Lighter gray for backgrounds
-                        "surface-dark": "#1F1F1F", // Darker gray for backgrounds
-                        "text-light-primary": "#111827",
-                        "text-dark-primary": "#F9FAFB",
-                        "text-light-secondary": "#6B7280",
-                        "text-dark-secondary": "#9CA3AF",
-                        "border-light": "#E5E7EB",
-                        "border-dark": "#374151",
-                        // Tambahkan warna untuk glass effect
-                        "primary": "#6366f1", // indigo-500
-                        "secondary": "#8b5cf6", // violet-500
-                        "accent": "#ec4899", // pink-500
-                        "background-light": "#f8fafc", // slate-50
-                        "background-dark": "#0f172a", // slate-900
-                        "surface-light": "#ffffff", // white
-                        "surface-dark": "#1e293b", // slate-800
-                        "text-light": "#0f172a", // slate-900
-                        "text-dark": "#f1f5f9", // slate-100
-                        "subtle-light": "#64748b", // slate-500
-                        "subtle-dark": "#94a3b8", // slate-400
-                    },
-                    fontFamily: {
-                        display: ["Plus Jakarta Sans", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "0.5rem", // 8px
-                        "lg": "0.75rem", // 12px
-                        "xl": "1rem", // 16px
-                        "full": "9999px",
+                        primary: '#4F46E5',
+                        secondary: '#7C3AED',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                        info: '#3B82F6',
                     },
                 },
             },
         };
     </script>
     <style>
-        /* Tambahkan style untuk glass effect */
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+        .card {
+            transition: all 0.3s ease;
         }
-        
-        .dark .glass-effect {
-            background: rgba(30, 41, 59, 0.25);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(30, 41, 59, 0.18);
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
-        
-        .gradient-text {
-            background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .btn {
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        .modal {
+            backdrop-filter: blur(5px);
+        }
+        .notification {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        /* Custom responsive styles */
+        @media (max-width: 768px) {
+            .table-container {
+                overflow-x: auto;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        @media (max-width: 640px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 
-<body class="font-display bg-background-light dark:bg-background-dark text-text-light-primary dark:text-dark-primary">
-    <div class="flex h-screen">
-        <!-- Menggunakan template header -->
+<body class="font-plus-jakarta bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+    <div class="flex flex-col md:flex-row h-screen">
+        <!-- Sidebar -->
         @include('admin/templet/sider')
         
-        <main class="flex-1 flex flex-col">
-            <div class="flex-1 p-8 overflow-y-auto">
-                <h2 class="text-3xl font-bold mb-8 text-text-light-primary dark:text-dark-primary">Kelola Absensi</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg shadow-sm flex items-center">
-                        <div class="bg-gray-200 dark:bg-gray-600 h-16 w-16 rounded-md mr-4 flex items-center justify-center">
-                            <span class="material-icons-outlined text-3xl text-gray-500 dark:text-gray-300">people</span>
-                        </div>
-                        <div>
-                            <p class="text-sm text-text-light-secondary dark:text-dark-secondary">Total Kehadiran</p>
-                            <p class="text-3xl font-bold text-text-light-primary dark:text-dark-primary">50</p>
-                        </div>
-                    </div>
-                    <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg shadow-sm flex items-center">
-                        <div class="bg-gray-200 dark:bg-gray-600 h-16 w-16 rounded-md mr-4 flex items-center justify-center">
-                            <span class="material-icons-outlined text-3xl text-gray-500 dark:text-gray-300">person_off</span>
-                        </div>
-                        <div>
-                            <p class="text-sm text-text-light-secondary dark:text-dark-secondary">Tidak Hadir</p>
-                            <p class="text-3xl font-bold text-text-light-primary dark:text-dark-primary">50</p>
+        <main class="flex-1 overflow-y-auto">
+            <div class="p-4 md:p-6 lg:p-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-0">Kelola Absensi</h2>
+                </div>
+                
+                <!-- Statistics Cards -->
+                <div class="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+                    <!-- Baris 1 -->
+                    <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 dark:bg-blue-900 h-12 w-12 md:h-16 md:w-16 rounded-xl mr-3 md:mr-4 flex items-center justify-center">
+                                <i class="fas fa-users text-blue-600 dark:text-blue-300 text-lg md:text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Total Kehadiran</p>
+                                <p class="text-xl md:text-2xl font-bold">{{ $stats['total_tepat_waktu'] + $stats['total_terlambat'] }}</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg shadow-sm flex items-center">
-                        <div class="bg-gray-200 dark:bg-gray-600 h-16 w-16 rounded-md mr-4 flex items-center justify-center">
-                            <span class="material-icons-outlined text-3xl text-gray-500 dark:text-gray-300">event_busy</span>
-                        </div>
-                        <div>
-                            <p class="text-sm text-text-light-secondary dark:text-dark-secondary">Izin</p>
-                            <p class="text-3xl font-bold text-text-light-primary dark:text-dark-primary">50</p>
+                    <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
+                        <div class="flex items-center">
+                            <div class="bg-red-100 dark:bg-red-900 h-12 w-12 md:h-16 md:w-16 rounded-xl mr-3 md:mr-4 flex items-center justify-center">
+                                <i class="fas fa-user-times text-red-600 dark:text-red-300 text-lg md:text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Tidak Hadir</p>
+                                <p class="text-xl md:text-2xl font-bold">{{ $stats['total_tidak_masuk'] }}</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg shadow-sm flex items-center">
-                        <div class="bg-gray-200 dark:bg-gray-600 h-16 w-16 rounded-md mr-4 flex items-center justify-center">
-                            <span class="material-icons-outlined text-3xl text-gray-500 dark:text-gray-300">beach_access</span>
+                    <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
+                        <div class="flex items-center">
+                            <div class="bg-yellow-100 dark:bg-yellow-900 h-12 w-12 md:h-16 md:w-16 rounded-xl mr-3 md:mr-4 flex items-center justify-center">
+                                <i class="fas fa-calendar-times text-yellow-600 dark:text-yellow-300 text-lg md:text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Izin</p>
+                                <p class="text-xl md:text-2xl font-bold">{{ $stats['total_izin'] }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-sm text-text-light-secondary dark:text-dark-secondary">Cuti</p>
-                            <p class="text-3xl font-bold text-text-light-primary dark:text-dark-primary">50</p>
+                    </div>
+
+                    <!-- Baris 2 -->
+                    <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
+                        <div class="flex items-center">
+                            <div class="bg-green-100 dark:bg-green-900 h-12 w-12 md:h-16 md:w-16 rounded-xl mr-3 md:mr-4 flex items-center justify-center">
+                                <i class="fas fa-umbrella-beach text-green-600 dark:text-green-300 text-lg md:text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Cuti</p>
+                                <p class="text-xl md:text-2xl font-bold">{{ $stats['total_cuti'] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
+                        <div class="flex items-center">
+                            <div class="bg-purple-100 dark:bg-purple-900 h-12 w-12 md:h-16 md:w-16 rounded-xl mr-3 md:mr-4 flex items-center justify-center">
+                                <i class="fas fa-briefcase text-purple-600 dark:text-purple-300 text-lg md:text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Dinas Luar</p>
+                                <p class="text-xl md:text-2xl font-bold">{{ $stats['total_dinas_luar'] ?? 0 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
+                        <div class="flex items-center">
+                            <div class="bg-indigo-100 dark:bg-indigo-900 h-12 w-12 md:h-16 md:w-16 rounded-xl mr-3 md:mr-4 flex items-center justify-center">
+                                <i class="fas fa-thermometer text-indigo-600 dark:text-indigo-300 text-lg md:text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Sakit</p>
+                                <p class="text-xl md:text-2xl font-bold">{{ $stats['total_sakit'] ?? 0 }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg shadow-sm mb-8">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-semibold text-text-light-primary dark:text-dark-primary">Absensi</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-200 dark:bg-gray-700 text-text-light-secondary dark:text-dark-secondary uppercase">
+                <!-- Attendance Table -->
+                <div class="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md mb-6 md:mb-8">
+                    <h3 class="text-lg md:text-xl font-semibold mb-4">Absensi</h3>
+                    <div class="table-container overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 uppercase">
                                 <tr>
-                                    <th class="px-6 py-3" scope="col">NO</th>
-                                    <th class="px-6 py-3" scope="col">NAMA</th>
-                                    <th class="px-6 py-3" scope="col">TANGGAL</th>
-                                    <th class="px-6 py-3" scope="col">JAM MASUK</th>
-                                    <th class="px-6 py-3" scope="col">JAM KELUAR</th>
-                                    <th class="px-6 py-3" scope="col">STATUS</th>
-                                    <th class="px-6 py-3" scope="col">AKSI</th>
+                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">No</th>
+                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Nama</th>
+                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Tanggal</th>
+                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Jam Masuk</th>
+                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Jam Keluar</th>
+                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="border-b border-border-light dark:border-border-dark">
-                                    <td class="px-6 py-4">1.</td>
-                                    <td class="px-6 py-4">John Doe</td>
-                                    <td class="px-6 py-4">20/10/2025</td>
-                                    <td class="px-6 py-4">09:00</td>
-                                    <td class="px-6 py-4">17:00</td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">VALID</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex space-x-2">
-                                            <button class="edit-absensi-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-blue-500" data-id="1">
-                                                <span class="material-icons-outlined text-lg">edit</span>
-                                            </button>
-                                            <button class="delete-absensi-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-red-500" data-id="1">
-                                                <span class="material-icons-outlined text-lg">delete</span>
-                                            </button>
-                                        </div>
-                                    </td>
+                                @php
+                                $index = 0;
+                                @endphp
+                                @forelse ($attendances as $attendance)
+                                    @if(!in_array($attendance->status, ['Sakit', 'Cuti', 'Izin', 'Tidak Masuk', 'Dinas Luar']))
+                                        @php
+                                        $index++;
+                                        @endphp
+                                        <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ $index }}</td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4 font-medium">{{ $attendance->user->name }}</td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ \Carbon\Carbon::parse($attendance->tanggal)->format('d/m/Y') }}</td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ $attendance->jam_masuk ? \Carbon\Carbon::parse($attendance->jam_masuk)->format('H:i') : '-' }}</td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ $attendance->jam_pulang ? \Carbon\Carbon::parse($attendance->jam_pulang)->format('H:i') : '-' }}</td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4">
+                                                <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium
+                                                    @if($attendance->status == 'Tepat Waktu') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                                    @elseif($attendance->status == 'Terlambat') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                                    @else bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                                    @endif">
+                                                    {{ $attendance->status }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endif
+                                @empty
+                                <tr>
+                                    <td colspan="6" class="px-4 md:px-6 py-2 md:py-4 text-center">Tidak ada data absensi.</td>
                                 </tr>
-                                <tr class="border-b border-border-light dark:border-border-dark">
-                                    <td class="px-6 py-4">2.</td>
-                                    <td class="px-6 py-4">Jane Smith</td>
-                                    <td class="px-6 py-4">20/10/2025</td>
-                                    <td class="px-6 py-4">08:45</td>
-                                    <td class="px-6 py-4">17:15</td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">VALID</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex space-x-2">
-                                            <button class="edit-absensi-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-blue-500" data-id="2">
-                                                <span class="material-icons-outlined text-lg">edit</span>
-                                            </button>
-                                            <button class="delete-absensi-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-red-500" data-id="2">
-                                                <span class="material-icons-outlined text-lg">delete</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
                 </div>
                 
-                <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg shadow-sm">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-semibold text-text-light-primary dark:text-dark-primary">Daftar Ketidakhadiran</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-200 dark:bg-gray-700 text-text-light-secondary dark:text-dark-secondary uppercase">
+                <!-- Leave/Absence Table -->
+                <div class="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
+                    <h3 class="text-lg md:text-xl font-semibold mb-4">Daftar Ketidakhadiran</h3>
+                    <div class="table-container overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 uppercase">
                                 <tr>
-                                    <th class="px-6 py-3" scope="col">NO</th>
-                                    <th class="px-6 py-3" scope="col">NAMA</th>
-                                    <th class="px-6 py-3" scope="col">TANGGAL MULAI</th>
-                                    <th class="px-6 py-3" scope="col">TANGGAL AKHIR</th>
-                                    <th class="px-6 py-3" scope="col">ALASAN</th>
-                                    <th class="px-6 py-3" scope="col">STATUS</th>
-                                    <th class="px-6 py-3" scope="col">AKSI</th>
+                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">No</th>
+                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Nama</th>
+                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Tanggal Mulai</th>
+                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Tanggal Akhir</th>
+                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Alasan</th>
+                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Status</th>
+                                    <th class="px-4 md:px-6 py-2 md:py-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="border-b border-border-light dark:border-border-dark">
-                                    <td class="px-6 py-4">1.</td>
-                                    <td class="px-6 py-4">Michael Johnson</td>
-                                    <td class="px-6 py-4">20/10/2025</td>
-                                    <td class="px-6 py-4">25/10/2025</td>
-                                    <td class="px-6 py-4">Cuti Tahunan</td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">PENDING</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex space-x-2">
-                                            <button class="edit-cuti-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-blue-500" data-id="1">
-                                                <span class="material-icons-outlined text-lg">edit</span>
-                                            </button>
-                                            <button class="delete-cuti-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-red-500" data-id="1">
-                                                <span class="material-icons-outlined text-lg">delete</span>
-                                            </button>
-                                        </div>
-                                    </td>
+                                @php
+                                $index = 0;
+                                @endphp
+                                <!-- Data dari tabel ketidakhadiran (tanpa status Tidak Masuk) -->
+                                @forelse ($ketidakhadiran as $item)
+                                    @if($item->status !== 'Tidak Masuk')
+                                        @php
+                                        $index++;
+                                        @endphp
+                                        <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ $index }}</td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4 font-medium">{{ $item->user->name }}</td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ $item->tanggal_akhir ? \Carbon\Carbon::parse($item->tanggal_akhir)->format('d/m/Y') : \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4">
+                                                @if($item->status === 'Cuti')
+                                                    {{ $item->jenis_cuti }} - {{ $item->alasan_cuti }}
+                                                @else
+                                                    {{ $item->status }} - {{ $item->reason }}
+                                                @endif
+                                            </td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4">
+                                                <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium
+                                                    @if($item->approval_status == 'approved') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                                    @elseif($item->approval_status == 'rejected') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                                    @else bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                                    @endif">
+                                                    {{ strtoupper($item->approval_status) }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4">
+                                                <div class="flex justify-center space-x-2">
+                                                    <button class="edit-cuti-btn text-blue-500 hover:text-blue-700" data-id="{{ $item->id }}" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    @if($item->approval_status == 'pending')
+                                                    <button class="verify-btn text-yellow-500 hover:text-yellow-700" data-id="{{ $item->id }}" data-type="{{ $item->status }}" title="Verifikasi">
+                                                        <i class="fas fa-check-double"></i>
+                                                    </button>
+                                                    @endif
+                                                    <button class="delete-cuti-btn text-red-500 hover:text-red-700" data-id="{{ $item->id }}" title="Hapus">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endif
+                                @empty
+                                @endphp
+                                @endforelse
+                                
+                                <!-- Data dari tabel absensi dengan status Sakit, Cuti, Izin, atau Dinas Luar -->
+                                @forelse ($attendances as $attendance)
+                                    @if(in_array($attendance->status, ['Sakit', 'Cuti', 'Izin', 'Dinas Luar']))
+                                        @php
+                                        $index++;
+                                        @endphp
+                                        <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ $index }}</td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4 font-medium">{{ $attendance->user->name }}</td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ \Carbon\Carbon::parse($attendance->tanggal)->format('d/m/Y') }}</td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ \Carbon\Carbon::parse($attendance->tanggal)->format('d/m/Y') }}</td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ $attendance->status }}</td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4">
+                                                <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium
+                                                    @if($attendance->status == 'Sakit') bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200
+                                                    @elseif($attendance->status == 'Cuti') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                                    @elseif($attendance->status == 'Izin') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                                    @elseif($attendance->status == 'Dinas Luar') bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+                                                    @endif">
+                                                    {{ $attendance->status }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 md:px-6 py-2 md:py-4">
+                                                <div class="flex justify-center space-x-2">
+                                                    <button class="edit-absensi-btn text-blue-500 hover:text-blue-700" data-id="{{ $attendance->id }}" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="delete-absensi-btn text-red-500 hover:text-red-700" data-id="{{ $attendance->id }}" title="Hapus">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endif
+                                @empty
+                               
+                                @endforelse
+                                
+                                @if($index == 0)
+                                <tr>
+                                    <td colspan="7" class="px-4 md:px-6 py-2 md:py-4 text-center">Tidak ada data ketidakhadiran.</td>
                                 </tr>
-                                <tr class="border-b border-border-light dark:border-border-dark">
-                                    <td class="px-6 py-4">2.</td>
-                                    <td class="px-6 py-4">Sarah Williams</td>
-                                    <td class="px-6 py-4">22/10/2025</td>
-                                    <td class="px-6 py-4">24/10/2025</td>
-                                    <td class="px-6 py-4">Cuti Sakit</td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">APPROVED</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex space-x-2">
-                                            <button class="edit-cuti-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-blue-500" data-id="2">
-                                                <span class="material-icons-outlined text-lg">edit</span>
-                                            </button>
-                                            <button class="delete-cuti-btn p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-red-500" data-id="2">
-                                                <span class="material-icons-outlined text-lg">delete</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                @endif
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-            <footer class="bg-surface-light dark:bg-surface-dark border-t border-border-light dark:border-border-dark px-8 py-4 text-center">
-                <p class="text-sm text-text-light-secondary dark:text-dark-secondary">Copyright ©2025 by digicity.id</p>
+            <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 md:px-8 py-4 text-center">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Copyright ©2025 by digicity.id</p>
             </footer>
         </main>
     </div>
 
-    <!-- Modal Tambah Absensi -->
-    <div id="tambahAbsensiModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-border-light dark:border-border-dark">
+    <!-- Edit Cuti Modal -->
+    <div id="editCutiModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-text-light-primary dark:text-dark-primary">Tambah Absensi Baru</h3>
-                    <button id="closeTambahAbsensiModalBtn" class="text-text-light-secondary dark:text-dark-secondary hover:text-text-light-primary dark:hover:text-dark-primary">
-                        <span class="material-icons-outlined text-2xl">close</span>
+                    <h3 class="text-xl font-bold">Edit Cuti/Izin</h3>
+                    <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
             </div>
-
-            <form id="tambahAbsensiForm" class="p-6 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Nama Karyawan</label>
-                        <select name="namaKaryawan" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                            <option value="">Pilih karyawan</option>
-                            <option value="John Doe">John Doe</option>
-                            <option value="Jane Smith">Jane Smith</option>
-                            <option value="Michael Johnson">Michael Johnson</option>
-                            <option value="Sarah Williams">Sarah Williams</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Tanggal</label>
-                        <input type="date" name="tanggal" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Jam Masuk</label>
-                        <input type="time" name="jamMasuk" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Jam Keluar</label>
-                        <input type="time" name="jamKeluar" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Status</label>
-                        <select name="status" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                            <option value="">Pilih status</option>
-                            <option value="VALID">VALID</option>
-                            <option value="INVALID">INVALID</option>
-                            <option value="LATE">LATE</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-3 pt-4">
-                    <button type="button" id="cancelTambahAbsensiBtn" class="px-6 py-2.5 rounded-lg text-sm font-medium text-text-light-primary dark:text-dark-primary bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-6 py-2.5 rounded-lg text-sm font-medium text-white bg-primary hover:bg-opacity-90 transition-colors">
-                        Simpan Data
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Edit Absensi -->
-    <div id="editAbsensiModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-border-light dark:border-border-dark">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-text-light-primary dark:text-dark-primary">Edit Absensi</h3>
-                    <button id="closeEditAbsensiModalBtn" class="text-text-light-secondary dark:text-dark-secondary hover:text-text-light-primary dark:hover:text-dark-primary">
-                        <span class="material-icons-outlined text-2xl">close</span>
-                    </button>
-                </div>
-            </div>
-
-            <form id="editAbsensiForm" class="p-6 space-y-6">
-                <input type="hidden" id="editAbsensiId" name="id">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Nama Karyawan</label>
-                        <select id="editNamaKaryawan" name="namaKaryawan" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                            <option value="">Pilih karyawan</option>
-                            <option value="John Doe">John Doe</option>
-                            <option value="Jane Smith">Jane Smith</option>
-                            <option value="Michael Johnson">Michael Johnson</option>
-                            <option value="Sarah Williams">Sarah Williams</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Tanggal</label>
-                        <input type="date" id="editTanggal" name="tanggal" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Jam Masuk</label>
-                        <input type="time" id="editJamMasuk" name="jamMasuk" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Jam Keluar</label>
-                        <input type="time" id="editJamKeluar" name="jamKeluar" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Status</label>
-                        <select id="editStatus" name="status" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                            <option value="">Pilih status</option>
-                            <option value="VALID">VALID</option>
-                            <option value="INVALID">INVALID</option>
-                            <option value="LATE">LATE</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-3 pt-4">
-                    <button type="button" id="cancelEditAbsensiBtn" class="px-6 py-2.5 rounded-lg text-sm font-medium text-text-light-primary dark:text-dark-primary bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-6 py-2.5 rounded-lg text-sm font-medium text-white bg-primary hover:bg-opacity-90 transition-colors">
-                        Update Data
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Tambah Cuti -->
-    <div id="tambahCutiModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-border-light dark:border-border-dark">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-text-light-primary dark:text-dark-primary">Tambah Cuti Baru</h3>
-                    <button id="closeTambahCutiModalBtn" class="text-text-light-secondary dark:text-dark-secondary hover:text-text-light-primary dark:hover:text-dark-primary">
-                        <span class="material-icons-outlined text-2xl">close</span>
-                    </button>
-                </div>
-            </div>
-
-            <form id="tambahCutiForm" class="p-6 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Nama Karyawan</label>
-                        <select name="namaKaryawan" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                            <option value="">Pilih karyawan</option>
-                            <option value="John Doe">John Doe</option>
-                            <option value="Jane Smith">Jane Smith</option>
-                            <option value="Michael Johnson">Michael Johnson</option>
-                            <option value="Sarah Williams">Sarah Williams</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Jenis Cuti</label>
-                        <select name="jenisCuti" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                            <option value="">Pilih jenis cuti</option>
-                            <option value="Cuti Tahunan">Cuti Tahunan</option>
-                            <option value="Cuti Sakit">Cuti Sakit</option>
-                            <option value="Cuti Melahirkan">Cuti Melahirkan</option>
-                            <option value="Cuti Penting">Cuti Penting</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Tanggal Mulai</label>
-                        <input type="date" name="tanggalMulai" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Tanggal Akhir</label>
-                        <input type="date" name="tanggalAkhir" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Status</label>
-                        <select name="status" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                            <option value="">Pilih status</option>
-                            <option value="PENDING">PENDING</option>
-                            <option value="APPROVED">APPROVED</option>
-                            <option value="REJECTED">REJECTED</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Alasan</label>
-                    <textarea name="alasan" rows="3" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary" placeholder="Masukkan alasan cuti"></textarea>
-                </div>
-                <div class="flex justify-end space-x-3 pt-4">
-                    <button type="button" id="cancelTambahCutiBtn" class="px-6 py-2.5 rounded-lg text-sm font-medium text-text-light-primary dark:text-dark-primary bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-6 py-2.5 rounded-lg text-sm font-medium text-white bg-primary hover:bg-opacity-90 transition-colors">
-                        Simpan Data
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Edit Cuti -->
-    <div id="editCutiModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-border-light dark:border-border-dark">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-text-light-primary dark:text-dark-primary">Edit Cuti</h3>
-                    <button id="closeEditCutiModalBtn" class="text-text-light-secondary dark:text-dark-secondary hover:text-text-light-primary dark:hover:text-dark-primary">
-                        <span class="material-icons-outlined text-2xl">close</span>
-                    </button>
-                </div>
-            </div>
-
-            <form id="editCutiForm" class="p-6 space-y-6">
+            <form id="editCutiForm" class="p-6">
                 <input type="hidden" id="editCutiId" name="id">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Nama Karyawan</label>
-                        <select id="editCutiNamaKaryawan" name="namaKaryawan" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
+                        <label class="block text-sm font-medium mb-2">Nama Karyawan</label>
+                        <select id="editCutiNamaKaryawan" name="user_id" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                             <option value="">Pilih karyawan</option>
-                            <option value="John Doe">John Doe</option>
-                            <option value="Jane Smith">Jane Smith</option>
-                            <option value="Michael Johnson">Michael Johnson</option>
-                            <option value="Sarah Williams">Sarah Williams</option>
+                            @foreach ($users as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Jenis Cuti</label>
-                        <select id="editCutiJenisCuti" name="jenisCuti" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
+                        <label class="block text-sm font-medium mb-2">Jenis Cuti/Izin</label>
+                        <select id="editCutiJenisCuti" name="jenis_cuti" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                             <option value="">Pilih jenis cuti</option>
                             <option value="Cuti Tahunan">Cuti Tahunan</option>
                             <option value="Cuti Sakit">Cuti Sakit</option>
-                            <option value="Cuti Melahirkan">Cuti Melahirkan</option>
-                            <option value="Cuti Penting">Cuti Penting</option>
+                            <option value="Sakit">Sakit</option>
+                            <option value="Izin">Izin</option>
+                            <option value="Dinas Luar">Dinas Luar</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Tanggal Mulai</label>
-                        <input type="date" id="editCutiTanggalMulai" name="tanggalMulai" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
+                        <label class="block text-sm font-medium mb-2">Tanggal Mulai</label>
+                        <input type="date" id="editCutiTanggalMulai" name="tanggal" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Tanggal Akhir</label>
-                        <input type="date" id="editCutiTanggalAkhir" name="tanggalAkhir" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
+                        <label class="block text-sm font-medium mb-2">Tanggal Akhir</label>
+                        <input type="date" id="editCutiTanggalAkhir" name="tanggal_akhir" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-2">Alasan</label>
+                        <textarea id="editCutiAlasan" name="alasan_cuti" rows="3" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary" placeholder="Masukkan alasan cuti"></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Status</label>
-                        <select id="editCutiStatus" name="status" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary">
-                            <option value="">Pilih status</option>
-                            <option value="PENDING">PENDING</option>
-                            <option value="APPROVED">APPROVED</option>
-                            <option value="REJECTED">REJECTED</option>
+                        <label class="block text-sm font-medium mb-2">Status Persetujuan</label>
+                        <select id="editCutiStatus" name="approval_status" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                            <option value="pending">Pending</option>
+                            <option value="approved">Disetujui</option>
+                            <option value="rejected">Ditolak</option>
                         </select>
                     </div>
+                    <div id="editRejectionReasonWrapper" class="hidden">
+                        <label class="block text-sm font-medium mb-2">Alasan Penolakan</label>
+                        <textarea id="editRejectionReason" name="rejection_reason" rows="3" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary"></textarea>
+                    </div>
                 </div>
-                <div class="mt-4">
-                    <label class="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-2">Alasan</label>
-                    <textarea id="editCutiAlasan" name="alasan" rows="3" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:ring-opacity-50 text-text-light-primary dark:text-dark-primary" placeholder="Masukkan alasan cuti"></textarea>
-                </div>
-                <div class="flex justify-end space-x-3 pt-4">
-                    <button type="button" id="cancelEditCutiBtn" class="px-6 py-2.5 rounded-lg text-sm font-medium text-text-light-primary dark:text-dark-primary bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-6 py-2.5 rounded-lg text-sm font-medium text-white bg-primary hover:bg-opacity-90 transition-colors">
-                        Update Data
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" class="cancel-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-secondary text-white rounded-lg">
+                        <i class="fas fa-save mr-2"></i>Simpan
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal Delete Konfirmasi -->
-    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-xl w-full max-w-md">
-            <div class="p-6 border-b border-border-light dark:border-border-dark">
+    <!-- Verify Modal -->
+    <div id="verifyModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-text-light-primary dark:text-dark-primary">Konfirmasi Hapus</h3>
-                    <button id="closeDeleteModalBtn" class="text-text-light-secondary dark:text-dark-secondary hover:text-text-light-primary dark:hover:text-dark-primary">
-                        <span class="material-icons-outlined text-2xl">close</span>
+                    <h3 class="text-xl font-bold">Verifikasi Pengajuan</h3>
+                    <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
             </div>
+            <form id="verifyForm" class="p-6">
+                <input type="hidden" id="verifyId">
+                <input type="hidden" id="verifyType">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Status Persetujuan</label>
+                    <select id="verifyStatus" name="approval_status" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                        <option value="approved">Disetujui</option>
+                        <option value="rejected">Ditolak</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6" id="rejectionReasonContainer" style="display: none;">
+                    <label class="block text-sm font-medium mb-2">Alasan Penolakan</label>
+                    <textarea id="rejectionReason" name="rejection_reason" rows="3" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary" placeholder="Masukkan alasan penolakan"></textarea>
+                </div>
 
+                <div class="flex justify-end space-x-3">
+                    <button type="button" class="cancel-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-info text-white rounded-lg">
+                        <i class="fas fa-check mr-2"></i>Verifikasi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold">Konfirmasi Hapus</h3>
+                    <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
             <div class="p-6">
-                <p class="text-text-light-primary dark:text-dark-primary mb-6">Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</p>
+                <div class="flex items-center mb-4">
+                    <div class="bg-red-100 dark:bg-red-900 h-16 w-16 rounded-full mr-4 flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-300 text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold">Apakah Anda yakin?</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Tindakan ini tidak dapat dibatalkan.</p>
+                    </div>
+                </div>
 
                 <input type="hidden" id="deleteId">
                 <input type="hidden" id="deleteType">
 
                 <div class="flex justify-end space-x-3">
-                    <button id="cancelDeleteBtn" class="px-6 py-2.5 rounded-lg text-sm font-medium text-text-light-primary dark:text-dark-primary bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                        Batal
-                    </button>
-                    <button id="confirmDeleteBtn" class="px-6 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">
-                        Hapus
+                    <button class="cancel-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">Batal</button>
+                    <button id="confirmDeleteBtn" class="px-4 py-2 bg-danger text-white rounded-lg">
+                        <i class="fas fa-trash mr-2"></i>Hapus
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="fixed top-4 right-4 z-50"></div>
+
     <script>
-        // Mendapatkan elemen-elemen yang diperlukan
-        const tambahAbsensiBtn = document.getElementById('tambahAbsensiBtn');
-        const tambahAbsensiModal = document.getElementById('tambahAbsensiModal');
-        const closeTambahAbsensiModalBtn = document.getElementById('closeTambahAbsensiModalBtn');
-        const cancelTambahAbsensiBtn = document.getElementById('cancelTambahAbsensiBtn');
-        const tambahAbsensiForm = document.getElementById('tambahAbsensiForm');
-
-        // Elemen untuk modal edit absensi
-        const editAbsensiModal = document.getElementById('editAbsensiModal');
-        const closeEditAbsensiModalBtn = document.getElementById('closeEditAbsensiModalBtn');
-        const cancelEditAbsensiBtn = document.getElementById('cancelEditAbsensiBtn');
-        const editAbsensiForm = document.getElementById('editAbsensiForm');
-
-        // Elemen untuk modal tambah cuti
-        const tambahCutiBtn = document.getElementById('tambahCutiBtn');
-        const tambahCutiModal = document.getElementById('tambahCutiModal');
-        const closeTambahCutiModalBtn = document.getElementById('closeTambahCutiModalBtn');
-        const cancelTambahCutiBtn = document.getElementById('cancelTambahCutiBtn');
-        const tambahCutiForm = document.getElementById('tambahCutiForm');
-
-        // Elemen untuk modal edit cuti
-        const editCutiModal = document.getElementById('editCutiModal');
-        const closeEditCutiModalBtn = document.getElementById('closeEditCutiModalBtn');
-        const cancelEditCutiBtn = document.getElementById('cancelEditCutiBtn');
-        const editCutiForm = document.getElementById('editCutiForm');
-
-        // Elemen untuk modal delete
-        const deleteModal = document.getElementById('deleteModal');
-        const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
-        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-
-        // Fungsi untuk membuka modal tambah absensi
-        function openTambahAbsensiModal() {
-            tambahAbsensiModal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Fungsi untuk menutup modal tambah absensi
-        function closeTambahAbsensiModal() {
-            tambahAbsensiModal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            tambahAbsensiForm.reset();
-        }
-
-        // Fungsi untuk membuka modal edit absensi
-        function openEditAbsensiModal(id) {
-            // Di sini biasanya Anda akan mengambil data dari server berdasarkan ID
-            // Untuk contoh, kita akan mengisi dengan data dummy
-            document.getElementById('editAbsensiId').value = id;
-            document.getElementById('editNamaKaryawan').value = 'John Doe';
-            document.getElementById('editTanggal').value = '2025-10-20';
-            document.getElementById('editJamMasuk').value = '09:00';
-            document.getElementById('editJamKeluar').value = '17:00';
-            document.getElementById('editStatus').value = 'VALID';
-
-            editAbsensiModal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Fungsi untuk menutup modal edit absensi
-        function closeEditAbsensiModal() {
-            editAbsensiModal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            editAbsensiForm.reset();
-        }
-
-        // Fungsi untuk membuka modal tambah cuti
-        function openTambahCutiModal() {
-            tambahCutiModal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Fungsi untuk menutup modal tambah cuti
-        function closeTambahCutiModal() {
-            tambahCutiModal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            tambahCutiForm.reset();
-        }
-
-        // Fungsi untuk membuka modal edit cuti
-        function openEditCutiModal(id) {
-            // Di sini biasanya Anda akan mengambil data dari server berdasarkan ID
-            // Untuk contoh, kita akan mengisi dengan data dummy
-            document.getElementById('editCutiId').value = id;
-            document.getElementById('editCutiNamaKaryawan').value = 'Michael Johnson';
-            document.getElementById('editCutiJenisCuti').value = 'Cuti Tahunan';
-            document.getElementById('editCutiTanggalMulai').value = '2025-10-20';
-            document.getElementById('editCutiTanggalAkhir').value = '2025-10-25';
-            document.getElementById('editCutiStatus').value = 'PENDING';
-            document.getElementById('editCutiAlasan').value = 'Cuti tahunan untuk liburan keluarga';
-
-            editCutiModal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Fungsi untuk menutup modal edit cuti
-        function closeEditCutiModal() {
-            editCutiModal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            editCutiForm.reset();
-        }
-
-        // Fungsi untuk membuka modal delete
-        function openDeleteModal(id, type) {
-            document.getElementById('deleteId').value = id;
-            document.getElementById('deleteType').value = type;
-            deleteModal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Fungsi untuk menutup modal delete
-        function closeDeleteModal() {
-            deleteModal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        // Event listener untuk membuka modal tambah absensi
-        tambahAbsensiBtn.addEventListener('click', openTambahAbsensiModal);
-
-        // Event listener untuk menutup modal tambah absensi
-        closeTambahAbsensiModalBtn.addEventListener('click', closeTambahAbsensiModal);
-        cancelTambahAbsensiBtn.addEventListener('click', closeTambahAbsensiModal);
-
-        // Event listener untuk modal edit absensi
-        closeEditAbsensiModalBtn.addEventListener('click', closeEditAbsensiModal);
-        cancelEditAbsensiBtn.addEventListener('click', closeEditAbsensiModal);
-
-        // Event listener untuk membuka modal tambah cuti
-        tambahCutiBtn.addEventListener('click', openTambahCutiModal);
-
-        // Event listener untuk menutup modal tambah cuti
-        closeTambahCutiModalBtn.addEventListener('click', closeTambahCutiModal);
-        cancelTambahCutiBtn.addEventListener('click', closeTambahCutiModal);
-
-        // Event listener untuk modal edit cuti
-        closeEditCutiModalBtn.addEventListener('click', closeEditCutiModal);
-        cancelEditCutiBtn.addEventListener('click', closeEditCutiModal);
-
-        // Event listener untuk modal delete
-        closeDeleteModalBtn.addEventListener('click', closeDeleteModal);
-        cancelDeleteBtn.addEventListener('click', closeDeleteModal);
-
-        // Menutup modal saat klik di luar area modal
-        tambahAbsensiModal.addEventListener('click', function(event) {
-            if (event.target === tambahAbsensiModal) {
-                closeTambahAbsensiModal();
+        document.addEventListener('DOMContentLoaded', function() {
+            // Helper untuk menampilkan notifikasi
+            function showNotification(message, type = 'success') {
+                const container = document.getElementById('notificationContainer');
+                const notification = document.createElement('div');
+                
+                // Set icon dan warna berdasarkan tipe
+                let icon, bgColor;
+                switch(type) {
+                    case 'success':
+                        icon = 'fa-check-circle';
+                        bgColor = 'bg-green-500';
+                        break;
+                    case 'error':
+                        icon = 'fa-exclamation-circle';
+                        bgColor = 'bg-red-500';
+                        break;
+                    case 'warning':
+                        icon = 'fa-exclamation-triangle';
+                        bgColor = 'bg-yellow-500';
+                        break;
+                    default:
+                        icon = 'fa-info-circle';
+                        bgColor = 'bg-blue-500';
+                }
+                
+                notification.className = `notification ${bgColor} text-white p-4 rounded-lg shadow-lg mb-3 flex items-center`;
+                notification.innerHTML = `
+                    <i class="fas ${icon} mr-3"></i>
+                    <span>${message}</span>
+                `;
+                
+                container.appendChild(notification);
+                
+                // Hapus notifikasi setelah 3 detik
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
             }
-        });
 
-        editAbsensiModal.addEventListener('click', function(event) {
-            if (event.target === editAbsensiModal) {
-                closeEditAbsensiModal();
+            // Fungsi untuk membuka modal
+            function openModal(modalId) { 
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('hidden'); 
+                    document.body.style.overflow = 'hidden'; 
+                }
             }
-        });
 
-        tambahCutiModal.addEventListener('click', function(event) {
-            if (event.target === tambahCutiModal) {
-                closeTambahCutiModal();
+            // Fungsi untuk menutup modal
+            function closeModal(modalId) { 
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.add('hidden'); 
+                    document.body.style.overflow = 'auto'; 
+                    // Reset form saat modal ditutup
+                    const form = modal.querySelector('form');
+                    if (form) {
+                        form.reset();
+                    }
+                    // Sembunyikan container alasan penolakan jika ada
+                    const rejectionContainer = document.getElementById('rejectionReasonContainer');
+                    if (rejectionContainer) {
+                        rejectionContainer.style.display = 'none';
+                    }
+                    // Sembunyikan wrapper alasan penolakan edit jika ada
+                    const editRejectionWrapper = document.getElementById('editRejectionReasonWrapper');
+                    if (editRejectionWrapper) {
+                        editRejectionWrapper.classList.add('hidden');
+                    }
+                }
             }
-        });
 
-        editCutiModal.addEventListener('click', function(event) {
-            if (event.target === editCutiModal) {
-                closeEditCutiModal();
-            }
-        });
-
-        deleteModal.addEventListener('click', function(event) {
-            if (event.target === deleteModal) {
-                closeDeleteModal();
-            }
-        });
-
-        // Menangani submit form tambah absensi
-        tambahAbsensiForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Di sini Anda bisa menambahkan logika untuk menyimpan data absensi
-            alert('Data absensi berhasil ditambahkan!');
-            closeTambahAbsensiModal();
-        });
-
-        // Menangani submit form edit absensi
-        editAbsensiForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const id = document.getElementById('editAbsensiId').value;
-            // Di sini Anda bisa menambahkan logika untuk update data absensi
-            alert(`Data absensi dengan ID ${id} berhasil diperbarui!`);
-            closeEditAbsensiModal();
-        });
-
-        // Menangani submit form tambah cuti
-        tambahCutiForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Di sini Anda bisa menambahkan logika untuk menyimpan data cuti
-            alert('Data cuti berhasil ditambahkan!');
-            closeTambahCutiModal();
-        });
-
-        // Menangani submit form edit cuti
-        editCutiForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const id = document.getElementById('editCutiId').value;
-            // Di sini Anda bisa menambahkan logika untuk update data cuti
-            alert(`Data cuti dengan ID ${id} berhasil diperbarui!`);
-            closeEditCutiModal();
-        });
-
-        // Menangani tombol delete
-        confirmDeleteBtn.addEventListener('click', function() {
-            const id = document.getElementById('deleteId').value;
-            const type = document.getElementById('deleteType').value;
-            // Di sini Anda bisa menambahkan logika untuk menghapus data
-            alert(`Data ${type} dengan ID ${id} berhasil dihapus!`);
-            closeDeleteModal();
-        });
-
-        // Event listener untuk tombol edit absensi
-        document.querySelectorAll('.edit-absensi-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                openEditAbsensiModal(id);
+            // Event listeners untuk tombol tutup modal
+            document.querySelectorAll('.close-modal, .cancel-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const modal = e.target.closest('[id$="Modal"]');
+                    if (modal) {
+                        closeModal(modal.id);
+                    }
+                });
             });
-        });
 
-        // Event listener untuk tombol delete absensi
-        document.querySelectorAll('.delete-absensi-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                openDeleteModal(id, 'absensi');
+            // Menutup modal saat klik di luar area modal
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) { 
+                        closeModal(modal.id); 
+                    }
+                });
             });
-        });
 
-        // Event listener untuk tombol edit cuti
-        document.querySelectorAll('.edit-cuti-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                openEditCutiModal(id);
+            // Event listener untuk status persetujuan di modal edit cuti
+            document.getElementById('editCutiStatus')?.addEventListener('change', function() {
+                const wrap = document.getElementById('editRejectionReasonWrapper');
+                if (this.value === 'rejected') {
+                    wrap.classList.remove('hidden');
+                } else {
+                    wrap.classList.add('hidden');
+                    document.getElementById('editRejectionReason').value = '';
+                }
             });
-        });
 
-        // Event listener untuk tombol delete cuti
-        document.querySelectorAll('.delete-cuti-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                openDeleteModal(id, 'cuti');
+            // Event listener untuk status persetujuan di modal verifikasi
+            document.getElementById('verifyStatus')?.addEventListener('change', function() {
+                const rejectionReasonContainer = document.getElementById('rejectionReasonContainer');
+                if (this.value === 'rejected') {
+                    rejectionReasonContainer.style.display = 'block';
+                } else {
+                    rejectionReasonContainer.style.display = 'none';
+                    document.getElementById('rejectionReason').value = '';
+                }
+            });
+
+            // Fungsi untuk memuat ulang halaman
+            function reloadPage() {
+                window.location.reload();
+            }
+
+            // Event listeners untuk tombol edit cuti
+            document.querySelectorAll('.edit-cuti-btn').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const id = this.getAttribute('data-id');
+                    try {
+                        const response = await fetch(`/api/absensi/${id}`);
+                        const result = await response.json();
+                        if (result.success) {
+                            const data = result.data;
+                            document.getElementById('editCutiId').value = data.id;
+                            document.getElementById('editCutiNamaKaryawan').value = data.user_id;
+                            document.getElementById('editCutiJenisCuti').value = data.jenis_cuti;
+                            document.getElementById('editCutiTanggalMulai').value = data.tanggal;
+                            document.getElementById('editCutiTanggalAkhir').value = data.tanggal_akhir;
+                            document.getElementById('editCutiAlasan').value = data.alasan_cuti;
+                            
+                            const editStatus = document.getElementById('editCutiStatus');
+                            editStatus.value = data.approval_status;
+                            
+                            // Tampilkan atau sembunyikan field alasan penolakan
+                            const editRejectionWrapper = document.getElementById('editRejectionReasonWrapper');
+                            if(data.approval_status === 'rejected') {
+                                editRejectionWrapper.classList.remove('hidden');
+                                document.getElementById('editRejectionReason').value = data.rejection_reason || '';
+                            } else {
+                                editRejectionWrapper.classList.add('hidden');
+                            }
+                            
+                            openModal('editCutiModal');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showNotification('Gagal mengambil data', 'error');
+                    }
+                });
+            });
+
+            // Event listener untuk submit form edit cuti
+            document.getElementById('editCutiForm')?.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const id = document.getElementById('editCutiId').value;
+                if (!id) {
+                    showNotification('ID cuti tidak ditemukan', 'error');
+                    return;
+                }
+
+                const formData = new FormData(this);
+                formData.append('_method', 'PUT');
+                try {
+                    const response = await fetch(`/api/absensi/${id}/cuti`, {
+                        method: 'POST',
+                        headers: { 
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        showNotification(result.message);
+                        closeModal('editCutiModal');
+                        reloadPage();
+                    } else {
+                        showNotification(result.message || 'Gagal memperbarui data', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('Terjadi kesalahan pada server', 'error');
+                }
+            });
+
+            // Event listeners untuk tombol verifikasi
+            document.querySelectorAll('.verify-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const type = this.getAttribute('data-type');
+                    
+                    document.getElementById('verifyId').value = id;
+                    document.getElementById('verifyType').value = type;
+                    
+                    // Reset form
+                    document.getElementById('verifyStatus').value = 'approved';
+                    document.getElementById('rejectionReason').value = '';
+                    document.getElementById('rejectionReasonContainer').style.display = 'none';
+                    
+                    openModal('verifyModal');
+                });
+            });
+
+            // Event listener untuk submit form verifikasi
+            document.getElementById('verifyForm')?.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const id = document.getElementById('verifyId').value;
+                if (!id) {
+                    showNotification('ID verifikasi tidak ditemukan', 'error');
+                    return;
+                }
+
+                const status = document.getElementById('verifyStatus').value;
+                const rejectionReason = document.getElementById('rejectionReason').value;
+                
+                // Buat FormData manual untuk mengontrol field yang dikirim
+                const formData = new FormData();
+                formData.append('approval_status', status);
+                
+                // Hanya tambahkan rejection_reason jika status adalah "rejected"
+                if (status === 'rejected') {
+                    if (!rejectionReason || rejectionReason.trim() === '') {
+                        showNotification('Alasan penolakan harus diisi', 'error');
+                        return;
+                    }
+                    formData.append('rejection_reason', rejectionReason.trim());
+                }
+                
+                try {
+                    const response = await fetch(`/api/absensi/${id}/verify`, {
+                        method: 'POST',
+                        headers: { 
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        showNotification(result.message);
+                        closeModal('verifyModal');
+                        reloadPage();
+                    } else {
+                        showNotification(result.message || 'Gagal memverifikasi data', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('Terjadi kesalahan pada server', 'error');
+                }
+            });
+
+            // Event listeners untuk tombol delete
+            document.querySelectorAll('.delete-cuti-btn, .delete-absensi-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const type = this.classList.contains('delete-absensi-btn') ? 'absensi' : 'cuti';
+                    
+                    document.getElementById('deleteId').value = id;
+                    document.getElementById('deleteType').value = type;
+                    
+                    openModal('deleteModal');
+                });
+            });
+
+            // Event listener untuk tombol konfirmasi hapus
+            document.getElementById('confirmDeleteBtn')?.addEventListener('click', async function() {
+                const id = document.getElementById('deleteId').value;
+                const type = document.getElementById('deleteType').value;
+                if (!id) {
+                    showNotification('ID hapus tidak ditemukan', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/absensi/${id}`, {
+                        method: 'DELETE',
+                        headers: { 
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        showNotification(result.message);
+                        closeModal('deleteModal');
+                        reloadPage();
+                    } else {
+                        showNotification(result.message || 'Gagal menghapus data', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('Terjadi kesalahan pada server', 'error');
+                }
+            });
+
+            // Event listeners untuk tombol edit absensi (untuk data yang dipindahkan ke tabel ketidakhadiran)
+            document.querySelectorAll('.edit-absensi-btn').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const id = this.getAttribute('data-id');
+                    try {
+                        const response = await fetch(`/api/absensi/${id}`);
+                        const result = await response.json();
+                        if (result.success) {
+                            const data = result.data;
+                            document.getElementById('editCutiId').value = data.id;
+                            document.getElementById('editCutiNamaKaryawan').value = data.user_id;
+                            
+                            // Set jenis cuti berdasarkan status
+                            const jenisCuti = document.getElementById('editCutiJenisCuti');
+                            if (data.status === 'Sakit') {
+                                jenisCuti.value = 'Sakit';
+                            } else if (data.status === 'Cuti') {
+                                jenisCuti.value = 'Cuti Tahunan';
+                            } else if (data.status === 'Izin') {
+                                jenisCuti.value = 'Izin';
+                            } else if (data.status === 'Dinas Luar') {
+                                jenisCuti.value = 'Dinas Luar';
+                            }
+                            
+                            document.getElementById('editCutiTanggalMulai').value = data.tanggal;
+                            document.getElementById('editCutiTanggalAkhir').value = data.tanggal;
+                            document.getElementById('editCutiAlasan').value = data.status;
+                            
+                            // Set status persetujuan
+                            const editStatus = document.getElementById('editCutiStatus');
+                            editStatus.value = data.approval_status || 'pending';
+                            
+                            // Tampilkan atau sembunyikan field alasan penolakan
+                            const editRejectionWrapper = document.getElementById('editRejectionReasonWrapper');
+                            if(data.approval_status === 'rejected') {
+                                editRejectionWrapper.classList.remove('hidden');
+                                document.getElementById('editRejectionReason').value = data.rejection_reason || '';
+                            } else {
+                                editRejectionWrapper.classList.add('hidden');
+                            }
+                            
+                            openModal('editCutiModal');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showNotification('Gagal mengambil data', 'error');
+                    }
+                });
             });
         });
     </script>
-
 </body>
-
 </html>

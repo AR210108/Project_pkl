@@ -8,25 +8,25 @@
     <nav class="flex-1 space-y-2">
         {{-- Menu Beranda --}}
         <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('/admin') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/admin">
-            <span class="material-icons-outlined">home</span>
+            <i class="fas fa-home"></i>
             Beranda
         </a>
         
         {{-- Menu Data Karyawan --}}
         <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_karyawan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/admin/data_karyawan">
-            <span class="material-icons-outlined">groups</span>
+            <i class="fas fa-users"></i>
             Data Karyawan
         </a>
         
         {{-- Menu Data Layanan --}}
         <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_layanan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/admin/data_layanan">
-            <span class="material-icons-outlined">list_alt</span>
+            <i class="fas fa-list-alt"></i>
             Data Layanan
         </a>
         
         {{-- Menu Absensi --}}
-        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_absen*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/data_absen">
-            <span class="material-icons-outlined">person</span>
+        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_absen*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/admin/absensi">
+            <i class="fas fa-user-clock"></i>
             Absensi
         </a>
     </nav>
@@ -34,7 +34,7 @@
     <div class="mt-auto pt-6 border-t border-surface-light dark:border-surface-dark">
         {{-- Menu Logout --}}
         <a class="flex items-center gap-3 p-3 rounded-lg text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark transition-colors" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <span class="material-icons-outlined">logout</span>
+            <i class="fas fa-sign-out-alt"></i>
             Log Out
         </a>
         
