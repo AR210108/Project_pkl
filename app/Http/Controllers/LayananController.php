@@ -9,8 +9,8 @@ class LayananController extends Controller
 {
     public function index()
     {
-        $layanan = Layanan::latest()->paginate(10);
-        return view('admin/data_layanan', compact('layanan'));
+        $layanans = Layanan::latest()->paginate(10);
+        return view('admin/data_layanan', compact('layanans'));
     }
 
     public function store(Request $request)
