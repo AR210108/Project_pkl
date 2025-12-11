@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminKaryawanController;
+use App\Http\Controllers\PengumumanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -305,3 +306,6 @@ Route::get('/kelola_tugas', function () {
 Route::get('/kelola_absen', function () {
     return view('general_manajer/kelola_absen');
 });
+
+
+Route::resource('pengumuman', PengumumanController::class);
