@@ -10,6 +10,7 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminKaryawanController;
 use App\Http\Controllers\Auth\AdminLoginController;
+use App\Http\Controllers\InvoiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -203,3 +204,5 @@ Route::view('/data_karyawan', 'general_manajer/data_karyawan');
 Route::view('/layanan', 'general_manajer/data_layanan');
 Route::view('/kelola_tugas', 'general_manajer/kelola_tugas');
 Route::view('/kelola_absen', 'general_manajer/kelola_absen');
+
+Route::resource('invoices', InvoiceController::class);
