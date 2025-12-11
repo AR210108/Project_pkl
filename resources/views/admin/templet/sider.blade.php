@@ -6,128 +6,168 @@
     </div>
     
     <nav class="flex-1 space-y-2">
+
         {{-- Menu Beranda --}}
-        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('/admin') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/admin">
-            <i class="fas fa-home"></i>
+        <a class="flex items-center gap-3 p-3 rounded-lg 
+            {{ request()->is('/admin') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
+            'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
+            href="/admin">
+            <i class='bx bx-home'></i>
             Beranda
         </a>
-        
+
         {{-- Menu Data User --}}
-        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_user*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/data_user">
-            <span class="material-icons-outlined">person</span>
+        <a class="flex items-center gap-3 p-3 rounded-lg 
+            {{ request()->is('data_user*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
+            'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
+            href="/data_user">
+            <i class='bx bx-user'></i>
             Data User
         </a>
-        
-        {{-- Menu Data Karyawan --}}
-        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_karyawan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/admin/data_karyawan">
-            <i class="fas fa-users"></i>
-            Data Karyawan
-        </a>
-        
-        {{-- Menu Data Layanan --}}
-        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_layanan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/admin/data_layanan">
-            <i class="fas fa-list-alt"></i>
-        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('admin/data_karyawan*') || request()->is('admin/karyawan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/admin/data_karyawan">
-            <span class="material-icons-outlined">groups</span>
-            Data Karyawan
-        </a>
-        
-        <a class="flex items-center gap-3 p-3 rounded-lg 
-            {{ request()->is('admin/layanan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} 
-            transition-colors" 
-            href="{{ route('admin.layanan.index') }}">
 
-            <span class="material-icons-outlined">list_alt</span>
+        {{-- Menu Data Karyawan --}}
+        <a class="flex items-center gap-3 p-3 rounded-lg 
+            {{ request()->is('admin/data_karyawan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
+            'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
+            href="/admin/data_karyawan">
+            <i class='bx bx-group'></i>
+            Data Karyawan
+        </a>
+
+        {{-- Menu Data Layanan --}}
+        <a class="flex items-center gap-3 p-3 rounded-lg 
+            {{ request()->is('admin/layanan*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
+            'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
+            href="{{ route('admin.layanan.index') }}">
+            <i class='bx bx-list-ul'></i>
             Data Layanan
         </a>
-        
+
         {{-- Menu Absensi --}}
-        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('data_absen*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/admin/absensi">
-            <i class="fas fa-user-clock"></i>
+        <a class="flex items-center gap-3 p-3 rounded-lg 
+            {{ request()->is('data_absen*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
+            'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
+            href="/admin/absensi">
+            <i class='bx bx-time'></i>
             Absensi
         </a>
-        
+
         {{-- Menu Surat Kerjasama (Dropdown) --}}
         <div class="relative">
-            <button class="flex items-center gap-3 p-3 rounded-lg w-full text-left {{ request()->is('surat_kerjasama*') || request()->is('template_surat*') || request()->is('list_tugos*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" onclick="toggleDropdown('surat-kerjasama-dropdown')">
-                <span class="material-icons-outlined">description</span>
+            <button class="flex items-center gap-3 p-3 rounded-lg w-full text-left 
+                {{ request()->is('surat_kerjasama*') || request()->is('template_surat*') || request()->is('list_surat*') 
+                ? 'bg-primary bg-opacity-10 text-primary font-medium' 
+                : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
+                onclick="toggleDropdown('surat-kerjasama-dropdown')">
+
+                <i class='bx bx-file'></i>
                 Surat Kerjasama
-                <span class="material-icons-outlined ml-auto transition-transform duration-200" id="surat-kerjasama-icon">expand_more</span>
+                <i class='bx bx-chevron-down ml-auto transition-transform duration-200' id="surat-kerjasama-icon"></i>
             </button>
-            
-            {{-- Dropdown Submenu --}}
-            <div id="surat-kerjasama-dropdown" class="pl-6 mt-1 space-y-1 {{ request()->is('surat_kerjasama*') || request()->is('template_surat*') || request()->is('list_tugos*') ? 'block' : 'hidden' }}">
-                <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('template_surat*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/template_surat">
-                    <span class="material-icons-outlined">article</span>
+
+            {{-- Dropdown --}}
+            <div id="surat-kerjasama-dropdown" 
+                class="pl-6 mt-1 space-y-1 
+                {{ request()->is('surat_kerjasama*') || request()->is('template_surat*') || request()->is('list_surat*') ? 'block' : 'hidden' }}">
+
+                <a class="flex items-center gap-3 p-3 rounded-lg 
+                    {{ request()->is('template_surat*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
+                    'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
+                    href="/template_surat">
+                    <i class='bx bx-file-blank'></i>
                     Template Surat
                 </a>
-                <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('list_tugos*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/list_surat">
-                    <span class="material-icons-outlined">list</span>
+
+                <a class="flex items-center gap-3 p-3 rounded-lg 
+                    {{ request()->is('list_surat*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
+                    'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
+                    href="/list_surat">
+                    <i class='bx bx-list-check'></i>
                     List Surat
                 </a>
             </div>
         </div>
-        
-        {{-- Menu Invoice & Kwitansi (Dropdown) --}}
+
+        {{-- Menu Invoice & Kwitansi --}}
         <div class="relative">
-            <button class="flex items-center gap-3 p-3 rounded-lg w-full text-left {{ request()->is('invoice*') || request()->is('kwitansi*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" onclick="toggleDropdown('invoice-kwitansi-dropdown')">
-                <span class="material-icons-outlined">receipt</span>
+            <button class="flex items-center gap-3 p-3 rounded-lg w-full text-left 
+                {{ request()->is('invoice*') || request()->is('kwitansi*') ? 
+                'bg-primary bg-opacity-10 text-primary font-medium' : 
+                'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
+                onclick="toggleDropdown('invoice-kwitansi-dropdown')">
+
+                <i class='bx bx-receipt'></i>
                 Invoice & Kwitansi
-                <span class="material-icons-outlined ml-auto transition-transform duration-200" id="invoice-kwitansi-icon">expand_more</span>
+                <i class='bx bx-chevron-down ml-auto transition-transform duration-200' id="invoice-kwitansi-icon"></i>
             </button>
-            
-            {{-- Dropdown Submenu --}}
-            <div id="invoice-kwitansi-dropdown" class="pl-6 mt-1 space-y-1 {{ request()->is('invoice*') || request()->is('kwitansi*') ? 'block' : 'hidden' }}">
-                <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('invoice*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/invoice">
-                    <span class="material-icons-outlined">receipt_long</span>
+
+            <div id="invoice-kwitansi-dropdown" 
+                class="pl-6 mt-1 space-y-1 {{ request()->is('invoice*') || request()->is('kwitansi*') ? 'block' : 'hidden' }}">
+
+                <a class="flex items-center gap-3 p-3 rounded-lg 
+                    {{ request()->is('invoice*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
+                    'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
+                    href="/invoice">
+                    <i class='bx bx-detail'></i>
                     Invoice
                 </a>
-                <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('kwitansi*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/kwitansi">
-                    <span class="material-icons-outlined">request_quote</span>
+
+                <a class="flex items-center gap-3 p-3 rounded-lg 
+                    {{ request()->is('kwitansi*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
+                    'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
+                    href="/kwitansi">
+                    <i class='bx bx-money'></i>
                     Kwitansi
                 </a>
             </div>
         </div>
-        
-        {{-- Menu Catatan Rapat --}}
-        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('catatan_rapat*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/catatan_rapat">
-            <span class="material-icons-outlined">summarize</span>
+
+        {{-- Catatan Rapat --}}
+        <a class="flex items-center gap-3 p-3 rounded-lg 
+            {{ request()->is('catatan_rapat*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
+            'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
+            href="/catatan_rapat">
+            <i class='bx bx-notepad'></i>
             Catatan Rapat
         </a>
-        
-        {{-- Menu Pengumuman --}}
-        <a class="flex items-center gap-3 p-3 rounded-lg {{ request()->is('pengumuman*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }} transition-colors" href="/pengumuman">
-            <span class="material-icons-outlined">campaign</span>
+
+        {{-- Pengumuman --}}
+        <a class="flex items-center gap-3 p-3 rounded-lg 
+            {{ request()->is('pengumuman*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
+            'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
+            href="/pengumuman">
+            <i class='bx bx-megaphone'></i>
             Pengumuman
         </a>
     </nav>
-    
+
     <div class="mt-auto pt-6 border-t border-surface-light dark:border-surface-dark">
-        {{-- Menu Logout --}}
-        <a class="flex items-center gap-3 p-3 rounded-lg text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark transition-colors" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="fas fa-sign-out-alt"></i>
+        {{-- Logout --}}
+        <a class="flex items-center gap-3 p-3 rounded-lg text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark" 
+            href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+            <i class='bx bx-log-out'></i>
             Log Out
         </a>
-        
-        {{-- Form Logout (Hidden) --}}
-        <form id="logout-form" action="/logout" method="POST" style="display: none;">
+
+        <form id="logout-form" action="/logout" method="POST" class="hidden">
             @csrf
         </form>
     </div>
 </aside>
 
 <script>
-function toggleDropdown(dropdownId) {
-    const dropdown = document.getElementById(dropdownId);
-    const icon = document.getElementById(dropdownId.replace('-dropdown', '-icon'));
-    
+function toggleDropdown(id) {
+    const dropdown = document.getElementById(id);
+    const icon = document.getElementById(id.replace('-dropdown', '-icon'));
+
     dropdown.classList.toggle('hidden');
-    
-    // Rotate the icon
+
     if (dropdown.classList.contains('hidden')) {
-        icon.textContent = 'expand_more';
+        icon.classList.remove('bx-chevron-up');
+        icon.classList.add('bx-chevron-down');
     } else {
-        icon.textContent = 'expand_less';
+        icon.classList.remove('bx-chevron-down');
+        icon.classList.add('bx-chevron-up');
     }
 }
 </script>
