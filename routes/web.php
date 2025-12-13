@@ -11,7 +11,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminKaryawanController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\PengumumanController;
+use App\Http\Controllers\CatatanRapatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -294,3 +294,11 @@ Route::get('/kelola_absen', function () {
 
 
 Route::resource('pengumuman', PengumumanController::class);
+// === ROUTE UNTUK CATATAN RAPAT ANDA ===
+// Semua route di dalam group ini memerlukan user sudah login
+Route::middleware(['auth'])->group(function () {
+    Route::get('/catatan_rapat', [CatatanRapatController::class, 'index'])->name('catatan_rapat.index');
+    Route::post('/catatan_rapat', [CatatanRapatController::class, 'store'])->name('catatan_rapat.store');
+    Route::put('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'update'])->name('catatan_rapat.update');
+    Route::delete('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'destroy'])->name('catatan_rapat.destroy');
+});
