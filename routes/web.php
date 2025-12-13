@@ -207,6 +207,10 @@ Route::view('/kelola_tugas', 'general_manajer/kelola_tugas');
 Route::view('/kelola_absen', 'general_manajer/kelola_absen');
 
 Route::resource('invoices', InvoiceController::class);
+Route::get('/invoices/{invoice}/print', function (Invoice $invoice) {
+    return view('invoices.print', compact('invoice'));
+})->name('invoices.print');
+
 
 Route::get('/data_absen', function () {
     return view('admin/absensi');

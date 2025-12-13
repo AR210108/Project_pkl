@@ -314,6 +314,28 @@
         </button>
     </div>
 
+    <!-- Modal Print Invoice -->
+    <div id="printInvoiceModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 transition-opacity duration-300">
+        <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full mx-4 max-h-[95vh] overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Cetak Invoice</h3>
+                <button onclick="closePrintInvoiceModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div id="printContent" class="flex-grow overflow-auto p-6 bg-white">
+                <!-- Content akan di-generate oleh JavaScript -->
+            </div>
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3 bg-gray-50 dark:bg-gray-900">
+                <button onclick="closePrintInvoiceModal()" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Tutup</button>
+                <button onclick="printInvoice()" class="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                    <span class="material-icons mr-2 text-lg">print</span>
+                    Cetak
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ======================================================= -->
     <!-- ======================= JAVASCRIPT ==================== -->
     <!-- ======================================================= -->
@@ -393,6 +415,11 @@
                         <td class="p-4">${invoice.metodeBayar}</td>
                         <td class="p-4">
                             <div class="flex items-center justify-center space-x-2">
+                                <button class="print-invoice-btn tooltip p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                    data-id="${invoice.id}"
+                                    data-tooltip="Cetak">
+                                    <span class="material-icons text-green-600 dark:text-green-400">print</span>
+                                </button>
                                 <button class="edit-invoice-btn tooltip p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                                     data-id="${invoice.id}"
                                     data-tooltip="Edit">
@@ -414,8 +441,20 @@
             attachRowEventListeners();
         }
         
-        /** Lampirkan event listener ke tombol edit/hapus di baris tabel */
+        /** Lampirkan event listener ke tombol edit/hapus/cetak di baris tabel */
         function attachRowEventListeners() {
+            // Event listeners untuk tombol Cetak
+            const printBtns = document.querySelectorAll('.print-invoice-btn');
+            printBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const invoiceData = invoices.find(inv => inv.id === id);
+                    if (invoiceData) {
+                        openPrintInvoiceModal(invoiceData);
+                    }
+                });
+            });
+            
             // Event listeners untuk tombol Edit
             const editBtns = document.querySelectorAll('.edit-invoice-btn');
             editBtns.forEach(btn => {
@@ -496,6 +535,215 @@
             document.getElementById('deleteInvoiceModal').classList.add('hidden');
             document.getElementById('deleteInvoiceModal').classList.remove('flex');
             document.body.style.overflow = 'auto';
+        }
+
+        function openPrintInvoiceModal(invoiceData) {
+            // Generate print content dengan desain profesional
+            const total = invoiceData.harga * invoiceData.qty;
+            const pajak = total * (invoiceData.pajak / 100);
+            const totalFinal = total + pajak;
+            const tanggalFormat = new Date(invoiceData.tanggal).toLocaleDateString('id-ID', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            });
+
+            const printContent = `
+                <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; max-width: 900px; margin: 0 auto;">
+                    <!-- HEADER -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #1f2937;">
+                        <div style="flex: 1;">
+                            <h1 style="font-size: 28px; color: #1f2937; margin-bottom: 8px; font-weight: 700;">DIGICITY</h1>
+                            <div style="font-size: 11px; line-height: 1.6; color: #666;">
+                                <p style="margin: 2px 0;"><strong>PT. Digicity Indonesia</strong></p>
+                                <p style="margin: 2px 0;">Jln. Raya Gatot Subroto No. 123</p>
+                                <p style="margin: 2px 0;">Jakarta Selatan 12930</p>
+                                <p style="margin: 2px 0;">Telp: +62 21 1234 5678</p>
+                                <p style="margin: 2px 0;">Email: invoice@digicity.id</p>
+                            </div>
+                        </div>
+                        <div style="flex: 1; text-align: right;">
+                            <h2 style="font-size: 32px; color: #1f2937; margin-bottom: 10px; font-weight: 700;">INVOICE</h2>
+                            <div style="font-size: 12px; line-height: 1.8; color: #555;">
+                                <p style="margin: 5px 0;"><span style="font-weight: 600; color: #1f2937;">No. Invoice:</span> ${invoiceData.nomorOrder}</p>
+                                <p style="margin: 5px 0;">Tanggal: ${tanggalFormat}</p>
+                                <p style="margin: 5px 0;">Jatuh Tempo: 30 hari</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BILL TO / CLIENT INFO -->
+                    <div style="margin-bottom: 20px;">
+                        <p style="font-size: 12px; font-weight: 700; color: #1f2937; margin-top: 20px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Tagihan Kepada:</p>
+                        <div style="padding: 12px; background: #f8f9fa; border-left: 4px solid #3b82f6; border-radius: 2px;">
+                            <p style="font-weight: 600; color: #1f2937; font-size: 13px; margin-bottom: 5px;">${invoiceData.namaKlien}</p>
+                            <p style="font-size: 12px; margin: 4px 0; line-height: 1.5;"><strong>Perusahaan:</strong> ${invoiceData.namaPerusahaan}</p>
+                            <p style="font-size: 12px; margin: 4px 0; line-height: 1.5;"><strong>Alamat:</strong> ${invoiceData.alamat}</p>
+                        </div>
+                    </div>
+
+                    <!-- ITEMS TABLE -->
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <thead>
+                            <tr style="background: #1f2937; color: white;">
+                                <th style="padding: 12px 8px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #1f2937; width: 5%;">No</th>
+                                <th style="padding: 12px 8px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #1f2937; width: 50%;">Deskripsi Layanan</th>
+                                <th style="padding: 12px 8px; text-align: right; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #1f2937; width: 15%;">Harga Unit</th>
+                                <th style="padding: 12px 8px; text-align: center; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #1f2937; width: 10%;">Qty</th>
+                                <th style="padding: 12px 8px; text-align: right; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #1f2937; width: 20%;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 12px 8px; font-size: 12px; border: 1px solid #ddd; text-align: center;">1</td>
+                                <td style="padding: 12px 8px; font-size: 12px; border: 1px solid #ddd; line-height: 1.5;">${invoiceData.deskripsi}</td>
+                                <td style="padding: 12px 8px; font-size: 12px; border: 1px solid #ddd; text-align: right;">${formatRupiah(invoiceData.harga)}</td>
+                                <td style="padding: 12px 8px; font-size: 12px; border: 1px solid #ddd; text-align: center;">${invoiceData.qty}</td>
+                                <td style="padding: 12px 8px; font-size: 12px; border: 1px solid #ddd; text-align: right;">${formatRupiah(total)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- SUMMARY -->
+                    <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                        <div style="width: 350px;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 10px 12px; font-size: 12px; text-align: right; font-weight: 500; width: 60%; color: #555;">Subtotal</td>
+                                    <td style="padding: 10px 12px; font-size: 12px; text-align: right; font-weight: 500; width: 40%; color: #1f2937;">${formatRupiah(total)}</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 10px 12px; font-size: 12px; text-align: right; font-weight: 500; color: #555;">Pajak (${invoiceData.pajak}%)</td>
+                                    <td style="padding: 10px 12px; font-size: 12px; text-align: right; font-weight: 500; color: #1f2937;">${formatRupiah(pajak)}</td>
+                                </tr>
+                                <tr style="border-bottom: 2px solid #ddd;">
+                                    <td style="padding: 10px 12px; font-size: 12px; text-align: right; font-weight: 500; color: #555;">Diskon</td>
+                                    <td style="padding: 10px 12px; font-size: 12px; text-align: right; font-weight: 500; color: #1f2937;">Rp 0</td>
+                                </tr>
+                                <tr style="border-top: 2px solid #1f2937; border-bottom: 2px solid #1f2937; background: #f8f9fa; font-size: 14px; font-weight: 700;">
+                                    <td style="padding: 10px 12px; text-align: right; color: #555;">TOTAL</td>
+                                    <td style="padding: 10px 12px; text-align: right; color: #1f2937;">${formatRupiah(totalFinal)}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- PAYMENT METHOD -->
+                    <div style="margin-top: 25px; padding: 12px; background: #e3f2fd; border-left: 4px solid #3b82f6; border-radius: 2px;">
+                        <p style="font-weight: 600; color: #1f2937; font-size: 13px;">Metode Pembayaran</p>
+                        <p style="font-size: 12px; margin: 4px 0; line-height: 1.5;">${invoiceData.metodeBayar}</p>
+                        <p style="margin-top: 8px; font-size: 10px; color: #666; line-height: 1.5;">Mohon lakukan pembayaran dalam 30 hari sejak tanggal invoice.</p>
+                    </div>
+
+                    <!-- NOTES -->
+                    <div style="margin-top: 25px; padding: 12px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 2px;">
+                        <p style="font-weight: 600; margin: 0 0 5px 0;"><strong>Catatan:</strong></p>
+                        <p style="font-size: 11px; margin: 3px 0; line-height: 1.4; color: #666;">Terima kasih atas kepercayaan Anda. Apabila ada pertanyaan mengenai invoice ini, silakan hubungi kami.</p>
+                    </div>
+
+                    <!-- FOOTER -->
+                    <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; text-align: center; font-size: 10px; color: #999; line-height: 1.6;">
+                        <p>Dokumen ini adalah bukti transaksi yang sah. Terima kasih telah berbisnis dengan kami.</p>
+                        <p>© 2025 PT. Digicity Indonesia. All rights reserved.</p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('printContent').innerHTML = printContent;
+            document.getElementById('printInvoiceModal').classList.remove('hidden');
+            document.getElementById('printInvoiceModal').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePrintInvoiceModal() {
+            document.getElementById('printInvoiceModal').classList.add('hidden');
+            document.getElementById('printInvoiceModal').classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        function printInvoice() {
+            const printContent = document.getElementById('printContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="id">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Invoice</title>
+                    <style>
+                        body {
+                            font-family: Arial, Helvetica, sans-serif;
+                            color: #000;
+                            margin: 0;
+                            padding: 0;
+                            background: #fff;
+                        }
+                        .max-w-4xl {
+                            max-width: 56rem;
+                            margin: auto;
+                        }
+                        .mx-auto { margin-left: auto; margin-right: auto; }
+                        .p-8 { padding: 2rem; }
+                        .p-3 { padding: 0.75rem; }
+                        .mb-8 { margin-bottom: 2rem; }
+                        .mb-2 { margin-bottom: 0.5rem; }
+                        .mt-1 { margin-top: 0.25rem; }
+                        .mt-2 { margin-top: 0.5rem; }
+                        .mt-12 { margin-top: 3rem; }
+                        .pb-6 { padding-bottom: 1.5rem; }
+                        .pt-8 { padding-top: 2rem; }
+                        .flex { display: flex; }
+                        .justify-between { justify-content: space-between; }
+                        .items-start { align-items: flex-start; }
+                        .text-right { text-align: right; }
+                        .text-left { text-align: left; }
+                        .text-2xl { font-size: 1.5rem; }
+                        .text-4xl { font-size: 2.25rem; }
+                        .text-sm { font-size: 0.875rem; }
+                        .text-lg { font-size: 1.125rem; }
+                        .font-bold { font-weight: bold; }
+                        .font-semibold { font-weight: 600; }
+                        .text-gray-900 { color: #111827; }
+                        .text-gray-600 { color: #4b5563; }
+                        .border-b-2 { border-bottom: 2px solid; }
+                        .border-b { border-bottom: 1px solid; }
+                        .border-t { border-top: 1px solid; }
+                        .border-t-2 { border-top: 2px solid; }
+                        .border-gray-800 { border-color: #1f2937; }
+                        .border-gray-300 { border-color: #d1d5db; }
+                        .bg-gray-100 { background-color: #f3f4f6; }
+                        .w-full { width: 100%; }
+                        .w-3-4 { width: 75%; }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        td {
+                            padding: 0.75rem;
+                        }
+                        tr {
+                            border: 1px solid #1f2937;
+                        }
+                        thead tr {
+                            border: 1px solid #1f2937;
+                            background-color: #f3f4f6;
+                        }
+                        @media print {
+                            body {
+                                margin: 0;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${printContent}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            setTimeout(() => {
+                printWindow.print();
+            }, 250);
         }
 
         // ============================================
@@ -598,13 +846,14 @@
             });
 
             // Modal close on outside click
-            ['buatInvoiceModal', 'editInvoiceModal', 'deleteInvoiceModal'].forEach(modalId => {
+            ['buatInvoiceModal', 'editInvoiceModal', 'deleteInvoiceModal', 'printInvoiceModal'].forEach(modalId => {
                 const modal = document.getElementById(modalId);
                 modal.addEventListener('click', function(e) {
                     if (e.target === this) {
                         if (modalId === 'buatInvoiceModal') closeBuatInvoiceModal();
                         else if (modalId === 'editInvoiceModal') closeEditInvoiceModal();
                         else if (modalId === 'deleteInvoiceModal') closeDeleteInvoiceModal();
+                        else if (modalId === 'printInvoiceModal') closePrintInvoiceModal();
                     }
                 });
             });
