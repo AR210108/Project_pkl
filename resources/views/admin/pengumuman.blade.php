@@ -11,6 +11,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         rel="stylesheet" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
         tailwind.config = {
@@ -105,11 +106,13 @@
             opacity: 1;
         }
     </style>
+    <!-- Add CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
     <div class="flex h-screen">
-        @include('admin/templet/sider')
+        @include('admin.templet.sider')
         <main class="flex-1 flex flex-col">
             <div class="p-8 flex-1 overflow-y-auto">
                 <div class="flex justify-between items-center mb-6">
@@ -125,11 +128,11 @@
                         <div class="relative flex-1">
                             <span
                                 class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-light dark:text-muted-dark">search</span>
-                            <input
+                            <input id="searchInput"
                                 class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg pl-10 pr-4 py-2.5 text-text-light dark:text-text-dark placeholder-muted-light dark:placeholder-muted-dark focus:ring-2 focus:ring-primary"
                                 placeholder="Search..." type="text" />
                         </div>
-                        <button
+                        <button id="filterBtn"
                             class="flex items-center justify-center gap-2 bg-gray-200 dark:bg-gray-700 text-text-light dark:text-text-dark font-medium py-2.5 px-5 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                             Filter
                         </button>
@@ -143,86 +146,39 @@
                                 class="bg-gray-200 dark:bg-gray-700 text-xs uppercase text-muted-light dark:text-muted-dark font-semibold">
                                 <tr>
                                     <th class="px-6 py-4">No</th>
-                                    <th class="px-6 py-4">Judul</th>
                                     <th class="px-6 py-4">Judul Informasi</th>
                                     <th class="px-6 py-4">Isi Pesan</th>
+                                    <th class="px-6 py-4">Kepada</th>
                                     <th class="px-6 py-4">Lampiran</th>
                                     <th class="px-6 py-4">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-border-light dark:divide-border-dark">
+                            <tbody id="pengumumanTableBody" class="divide-y divide-border-light dark:divide-border-dark">
+                                @foreach($pengumuman as $index => $item)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                    <td class="px-6 py-4">1.</td>
-                                    <td class="px-6 py-4">Rapat Tahunan</td>
-                                    <td class="px-6 py-4">Jadwal Rapat Tahunan 2025</td>
-                                    <td class="px-6 py-4">Diharapkan kehadiran seluruh...</td>
+                                    <td class="px-6 py-4">{{ $index + 1 }}.</td>
+                                    <td class="px-6 py-4">{{ $item->judul_informasi }}</td>
+                                    <td class="px-6 py-4">{{ Str::limit($item->isi_pesan, 50) }}</td>
+                                    <td class="px-6 py-4">{{ $item->judul }}</td>
                                     <td class="px-6 py-4">
-                                        <a class="text-primary hover:underline" href="#">document.pdf</a>
+                                        @if($item->lampiran)
+                                            <a class="text-primary hover:underline" href="{{ asset('storage/pengumuman/' . $item->lampiran) }}" target="_blank">{{ $item->lampiran }}</a>
+                                        @else
+                                            -
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex justify-center items-center gap-2">
-                                            <button class="edit-btn tooltip p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-id="1" data-tooltip="Edit">
+                                            <button class="edit-btn tooltip p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-id="{{ $item->id }}" data-tooltip="Edit">
                                                 <span class="material-icons-outlined text-blue-500">edit</span>
                                             </button>
-                                            <button class="delete-btn tooltip p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-id="1" data-tooltip="Hapus">
+                                            <button class="delete-btn tooltip p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-id="{{ $item->id }}" data-tooltip="Hapus">
                                                 <span class="material-icons-outlined text-red-500">delete</span>
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                    <td class="px-6 py-4">2.</td>
-                                    <td class="px-6 py-4">Libur Nasional</td>
-                                    <td class="px-6 py-4">Pengumuman Hari Libur</td>
-                                    <td class="px-6 py-4">Kantor akan libur pada tanggal...</td>
-                                    <td class="px-6 py-4">-</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex justify-center items-center gap-2">
-                                            <button class="edit-btn tooltip p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-id="2" data-tooltip="Edit">
-                                                <span class="material-icons-outlined text-blue-500">edit</span>
-                                            </button>
-                                            <button class="delete-btn tooltip p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-id="2" data-tooltip="Hapus">
-                                                <span class="material-icons-outlined text-red-500">delete</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                    <td class="px-6 py-4">3.</td>
-                                    <td class="px-6 py-4">Maintenance Sistem</td>
-                                    <td class="px-6 py-4">Jadwal Pemeliharaan Sistem</td>
-                                    <td class="px-6 py-4">Akan dilakukan pemeliharaan...</td>
-                                    <td class="px-6 py-4">-</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex justify-center items-center gap-2">
-                                            <button class="edit-btn tooltip p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-id="3" data-tooltip="Edit">
-                                                <span class="material-icons-outlined text-blue-500">edit</span>
-                                            </button>
-                                            <button class="delete-btn tooltip p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-id="3" data-tooltip="Hapus">
-                                                <span class="material-icons-outlined text-red-500">delete</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                    <td class="px-6 py-4">4.</td>
-                                    <td class="px-6 py-4">Acara Perusahaan</td>
-                                    <td class="px-6 py-4">Family Gathering 2025</td>
-                                    <td class="px-6 py-4">Mari bergabung dalam acara...</td>
-                                    <td class="px-6 py-4">
-                                        <a class="text-primary hover:underline" href="#">brosur.jpg</a>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex justify-center items-center gap-2">
-                                            <button class="edit-btn tooltip p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-id="4" data-tooltip="Edit">
-                                                <span class="material-icons-outlined text-blue-500">edit</span>
-                                            </button>
-                                            <button class="delete-btn tooltip p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-id="4" data-tooltip="Hapus">
-                                                <span class="material-icons-outlined text-red-500">delete</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -275,6 +231,10 @@
         const editBtns = document.querySelectorAll('.edit-btn');
         const deleteBtns = document.querySelectorAll('.delete-btn');
         
+        // Current action (create, edit, delete)
+        let currentAction = '';
+        let currentId = null;
+        
         // Show modal function
         function showModal(title, content, confirmText = 'Simpan', confirmClass = 'bg-primary') {
             modalTitle.textContent = title;
@@ -287,77 +247,111 @@
         // Hide modal function
         function hideModal() {
             modal.classList.add('hidden');
+            currentAction = '';
+            currentId = null;
         }
         
         // Create button event
         createBtn.addEventListener('click', function() {
+            currentAction = 'create';
             const content = `
-                <form class="space-y-4">
+                <form id="pengumumanForm" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Judul</label>
-                        <input type="text" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
+                        <input type="text" name="judul" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none" required>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Judul Informasi</label>
-                        <input type="text" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
+                        <input type="text" name="judul_informasi" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none" required>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Isi Pesan</label>
-                        <textarea rows="4" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none"></textarea>
+                        <textarea name="isi_pesan" rows="4" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none" required></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Lampiran</label>
                         <div class="flex items-center gap-3">
-                            <button type="button" class="flex items-center gap-2 bg-gray-200 dark:bg-gray-700 text-text-light dark:text-text-dark font-medium py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                            <input type="file" name="lampiran" id="lampiranInput" class="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                            <button type="button" id="selectFileBtn" class="flex items-center gap-2 bg-gray-200 dark:bg-gray-700 text-text-light dark:text-text-dark font-medium py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                 <span class="material-icons-outlined">upload_file</span>
                                 Pilih File
                             </button>
-                            <span class="text-sm text-muted-light dark:text-muted-dark">Tidak ada file yang dipilih</span>
+                            <span id="fileName" class="text-sm text-muted-light dark:text-muted-dark">Tidak ada file yang dipilih</span>
                         </div>
                     </div>
                 </form>
             `;
             showModal('Buat Pengumuman Baru', content, 'Simpan', 'bg-primary');
+            
+            // File input handling
+            document.getElementById('selectFileBtn').addEventListener('click', function() {
+                document.getElementById('lampiranInput').click();
+            });
+            
+            document.getElementById('lampiranInput').addEventListener('change', function() {
+                const fileName = this.files[0] ? this.files[0].name : 'Tidak ada file yang dipilih';
+                document.getElementById('fileName').textContent = fileName;
+            });
         });
         
         // Edit buttons event
         editBtns.forEach(btn => {
             btn.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                const content = `
-                    <form class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Judul</label>
-                            <input type="text" value="Rapat Tahunan" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Judul Informasi</label>
-                            <input type="text" value="Jadwal Rapat Tahunan 2025" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Isi Pesan</label>
-                            <textarea rows="4" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none">Diharapkan kehadiran seluruh karyawan dalam rapat tahunan yang akan diselenggarakan pada tanggal 20 Juni 2025 di ruang rapat utama.</textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Lampiran</label>
-                            <div class="flex items-center gap-3">
-                                <button type="button" class="flex items-center gap-2 bg-gray-200 dark:bg-gray-700 text-text-light dark:text-text-dark font-medium py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                                    <span class="material-icons-outlined">upload_file</span>
-                                    Ganti File
-                                </button>
-                                <span class="text-sm text-muted-light dark:text-muted-dark">document.pdf</span>
-                            </div>
-                        </div>
-                    </form>
-                `;
-                showModal('Edit Pengumuman', content, 'Update', 'bg-blue-500');
+                currentAction = 'edit';
+                currentId = this.getAttribute('data-id');
+                
+                // Fetch pengumuman data
+                fetch(`/pengumuman/${currentId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const content = `
+                            <form id="pengumumanForm" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Judul</label>
+                                    <input type="text" name="judul" value="${data.judul}" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Judul Informasi</label>
+                                    <input type="text" name="judul_informasi" value="${data.judul_informasi}" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Isi Pesan</label>
+                                    <textarea name="isi_pesan" rows="4" class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none" required>${data.isi_pesan}</textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">Lampiran</label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="file" name="lampiran" id="lampiranInput" class="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                        <button type="button" id="selectFileBtn" class="flex items-center gap-2 bg-gray-200 dark:bg-gray-700 text-text-light dark:text-text-dark font-medium py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                            <span class="material-icons-outlined">upload_file</span>
+                                            Ganti File
+                                        </button>
+                                        <span id="fileName" class="text-sm text-muted-light dark:text-muted-dark">${data.lampiran || 'Tidak ada file'}</span>
+                                    </div>
+                                </div>
+                            </form>
+                        `;
+                        showModal('Edit Pengumuman', content, 'Update', 'bg-blue-500');
+                        
+                        // File input handling
+                        document.getElementById('selectFileBtn').addEventListener('click', function() {
+                            document.getElementById('lampiranInput').click();
+                        });
+                        
+                        document.getElementById('lampiranInput').addEventListener('change', function() {
+                            const fileName = this.files[0] ? this.files[0].name : 'Tidak ada file';
+                            document.getElementById('fileName').textContent = fileName;
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
             });
         });
         
         // Delete buttons event
         deleteBtns.forEach(btn => {
             btn.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
+                currentAction = 'delete';
+                currentId = this.getAttribute('data-id');
                 const content = `
                     <div class="text-center py-4">
                         <span class="material-icons-outlined text-red-500 text-5xl mb-4">warning</span>
@@ -380,12 +374,132 @@
             }
         });
         
-        // Confirm button event (placeholder for actual functionality)
+        // Confirm button event
         confirmBtn.addEventListener('click', function() {
-            // In a real application, this would submit the form or send a request to the server
-            alert('Aksi telah dikonfirmasi!');
-            hideModal();
+            if (currentAction === 'create') {
+                const form = document.getElementById('pengumumanForm');
+                const formData = new FormData(form);
+                
+                fetch('/pengumuman', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        showNotification(data.message, 'success');
+                        // Reload page to show updated data
+                        location.reload();
+                    } else {
+                        // Handle validation errors
+                        if (data.errors) {
+                            let errorMessage = '';
+                            for (const [key, value] of Object.entries(data.errors)) {
+                                errorMessage += `${value.join(', ')}\n`;
+                            }
+                            showNotification(errorMessage, 'error');
+                        } else {
+                            showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+                });
+            } else if (currentAction === 'edit') {
+                const form = document.getElementById('pengumumanForm');
+                const formData = new FormData(form);
+                
+                fetch(`/pengumuman/${currentId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-HTTP-Method-Override': 'PUT'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        showNotification(data.message, 'success');
+                        // Reload page to show updated data
+                        location.reload();
+                    } else {
+                        // Handle validation errors
+                        if (data.errors) {
+                            let errorMessage = '';
+                            for (const [key, value] of Object.entries(data.errors)) {
+                                errorMessage += `${value.join(', ')}\n`;
+                            }
+                            showNotification(errorMessage, 'error');
+                        } else {
+                            showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+                });
+            } else if (currentAction === 'delete') {
+                fetch(`/pengumuman/${currentId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        showNotification(data.message, 'success');
+                        // Reload page to show updated data
+                        location.reload();
+                    } else {
+                        showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+                });
+            }
         });
+        
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#pengumumanTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+        
+        // Notification function
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            } text-white`;
+            notification.textContent = message;
+            
+            // Add to body
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
     </script>
 
 </body>

@@ -9,6 +9,7 @@ class Invoice extends Model
 {
     use HasFactory;
 
+<<<<<<< HEAD
     /**
      * The attributes that are mass assignable.
      *
@@ -96,5 +97,27 @@ class Invoice extends Model
         }
         
         return parent::save($options);
+=======
+    protected $fillable = [
+        'nama_klien',
+        'nomor_order',
+        'detail_layanan',
+        'harga',
+        'pajak',
+        'metode_pembayaran',
+    ];
+
+    protected $casts = [
+        'harga' => 'decimal:2',
+        'pajak' => 'decimal:2',
+    ];
+
+    /**
+     * Get the total amount including tax
+     */
+    public function getTotalAttribute()
+    {
+        return $this->harga + $this->pajak;
+>>>>>>> b95b75188879664b43829d263e4d9b0bbda4bb64
     }
 }

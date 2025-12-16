@@ -8,6 +8,7 @@
     <title>Data Layanan</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined" rel="stylesheet" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
         tailwind.config = {
@@ -105,8 +106,6 @@
                                 <th class="px-6 py-3 font-medium" scope="col">Nama Layanan</th>
                                 <th class="px-6 py-3 font-medium" scope="col">Deskripsi</th>
                                 <th class="px-6 py-3 font-medium" scope="col">Harga</th>
-                                <th class="px-6 py-3 font-medium" scope="col">Deadline</th>
-                                <th class="px-6 py-3 font-medium" scope="col">Progres</th>
                                 <th class="px-6 py-3 font-medium" scope="col">Status</th>
                                 <th class="px-6 py-3 font-medium" scope="col">Aksi</th>
                             </tr>
@@ -118,8 +117,6 @@
                                 <td class="px-6 py-4">{{ $layanan->nama_layanan }}</td>
                                 <td class="px-6 py-4">{{ $layanan->deskripsi }}</td>
                                 <td class="px-6 py-4">{{ number_format($layanan->harga) }}</td>
-                                <td class="px-6 py-4">{{ $layanan->deadline }}</td>
-                                <td class="px-6 py-4">{{ $layanan->progres }}</td>
                                 <td class="px-6 py-4">{{ $layanan->status }}</td>
                                 <td class="px-6 py-4">
                                     <button class="edit-btn" 
@@ -127,8 +124,6 @@
                                         data-nama="{{ $layanan->nama_layanan }}"
                                         data-deskripsi="{{ $layanan->deskripsi }}"
                                         data-harga="{{ $layanan->harga }}"
-                                        data-deadline="{{ $layanan->deadline }}"
-                                        data-progres="{{ $layanan->progres }}"
                                         data-status="{{ $layanan->status }}">
                                         Edit
                                     </button>
@@ -181,14 +176,6 @@
                         <input type="text" name="harga" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white" placeholder="Masukkan harga">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deadline</label>
-                        <input type="date" name="deadline" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Progres</label>
-                        <input type="text" name="progres" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white" placeholder="Masukkan progres">
-                    </div>
-                    <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
                         <select name="status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white">
                             <option value="">Pilih status</option>
@@ -232,14 +219,6 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Harga</label>
                         <input type="text" id="editHarga" name="harga" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white" placeholder="Masukkan harga">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deadline</label>
-                        <input type="date" id="editDeadline" name="deadline" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Progres</label>
-                        <input type="text" id="editProgres" name="progres" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white" placeholder="Masukkan progres">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
@@ -367,8 +346,6 @@ document.querySelectorAll('.edit-btn').forEach(button => {
         document.getElementById('editNamaLayanan').value = button.dataset.nama;
         document.getElementById('editDeskripsi').value = button.dataset.deskripsi;
         document.getElementById('editHarga').value = button.dataset.harga;
-        document.getElementById('editDeadline').value = button.dataset.deadline;
-        document.getElementById('editProgres').value = button.dataset.progres;
         document.getElementById('editStatus').value = button.dataset.status;
 
         // ⬅️ SET ACTION URL DINAMIS
