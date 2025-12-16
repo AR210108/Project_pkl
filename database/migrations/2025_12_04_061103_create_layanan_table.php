@@ -16,8 +16,6 @@ public function up()
         $table->string('nama_layanan');
         $table->text('deskripsi')->nullable();
         $table->integer('harga')->nullable();
-        $table->date('deadline')->nullable();
-        $table->string('progres')->nullable();
         $table->string('status')->default('pending'); // pending | proses | selesai
         $table->timestamps();
     });
