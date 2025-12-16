@@ -6,7 +6,6 @@ use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
@@ -18,12 +17,12 @@ class InvoiceController extends Controller
         $query = Invoice::latest();
 
         // Fitur pencarian
-        if ($request->filled('search')) {
+        if ($request->has('search') && $request->search != '') {
             $searchTerm = $request->search;
-            $query->where(function ($q) use ($searchTerm) {
+            $query->where(function($q) use ($searchTerm) {
                 $q->where('nama_perusahaan', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('nomor_order', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('nama_klien', 'LIKE', "%{$searchTerm}%");
+                  ->orWhere('nomor_order', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('nama_klien', 'LIKE', "%{$searchTerm}%");
             });
         }
 
@@ -34,16 +33,16 @@ class InvoiceController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $invoices->items(),
-                'current_page' => $invoices->currentPage(),
-                'last_page' => $invoices->lastPage(),
-                'per_page' => $invoices->perPage(),
-                'total' => $invoices->total(),
-                'prev_page_url' => $invoices->previousPageUrl(),
-                'next_page_url' => $invoices->nextPageUrl(),
+                'pagination' => [
+                    'total' => $invoices->total(),
+                    'per_page' => $invoices->perPage(),
+                    'current_page' => $invoices->currentPage(),
+                    'last_page' => $invoices->lastPage(),
+                ]
             ]);
         }
 
-        return view('admin.invoice', compact('invoices'));
+        return view('invoices.index', compact('invoices'));
     }
 
     /**
@@ -62,59 +61,53 @@ class InvoiceController extends Controller
         // Validasi input
         $validator = Validator::make($request->all(), [
             'nomor_order' => 'required|string|unique:invoices,nomor_order',
-            'nama_perusahaan' => 'nullable|string|max:255',
+            'nama_perusahaan' => 'required|string|max:255',
             'nama_klien' => 'required|string|max:255',
-            'alamat' => 'nullable|string',
-            'deskripsi' => 'nullable|string',
-            'detail_layanan' => 'nullable|string',
+            'alamat' => 'required|string',
+            'deskripsi' => 'required|string',
             'harga' => 'required|numeric|min:0',
-            'qty' => 'nullable|integer|min:1',
-            'pajak' => 'nullable|numeric|min:0|max:100',
+            'qty' => 'required|integer|min:1',
+            'pajak' => 'required|numeric|min:0|max:100',
             'metode_pembayaran' => 'required|string|in:Bank Transfer,E-Wallet,Credit Card,Cash',
-            'tanggal' => 'nullable|date',
+            'tanggal' => 'required|date',
         ]);
 
         // Jika validasi gagal
         if ($validator->fails()) {
+            // Jika request adalah AJAX, kembalikan error JSON
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Validation error',
-                    'errors' => $validator->errors(),
+                    'errors' => $validator->errors()
                 ], 422);
             }
-
+            
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
 
         // Siapkan data
-        $data = $validator->validated();
+        $validated = $validator->validated();
         
-        // Set default values
-        $qty = isset($data['qty']) ? (int)$data['qty'] : 1;
-        $pajak = isset($data['pajak']) ? (float)$data['pajak'] : 0.0;
-
         // Hitung total (harga * qty + pajak)
-        $subtotal = $data['harga'] * $qty;
-        $data['qty'] = $qty;
-        $data['pajak'] = $pajak;
-        $data['total'] = $subtotal + ($subtotal * $pajak / 100);
+        $subtotal = $validated['harga'] * $validated['qty'];
+        $validated['total'] = $subtotal + ($subtotal * $validated['pajak'] / 100);
 
         // Buat invoice
-        $invoice = Invoice::create($data);
+        $invoice = Invoice::create($validated);
 
         // Jika request adalah AJAX, kembalikan sukses JSON
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Invoice berhasil dibuat!',
-                'data' => $invoice,
+                'data' => $invoice
             ], 201);
         }
 
-        return redirect()->route('admin.invoice.index')
+        return redirect()->route('invoices.show', $invoice->id)
             ->with('success', 'Invoice berhasil dibuat!');
     }
 
@@ -124,15 +117,15 @@ class InvoiceController extends Controller
     public function show(Request $request, string $id)
     {
         $invoice = Invoice::with('kwitansis')->findOrFail($id);
-
+        
         // Jika request adalah AJAX, kembalikan JSON
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'data' => $invoice,
+                'data' => $invoice
             ]);
         }
-
+        
         return view('invoices.show', compact('invoice'));
     }
 
@@ -142,6 +135,7 @@ class InvoiceController extends Controller
     public function edit(string $id)
     {
         $invoice = Invoice::findOrFail($id);
+        
         return view('invoices.edit', compact('invoice'));
     }
 
@@ -155,59 +149,53 @@ class InvoiceController extends Controller
         // Validasi input
         $validator = Validator::make($request->all(), [
             'nomor_order' => 'required|string|unique:invoices,nomor_order,' . $id,
-            'nama_perusahaan' => 'nullable|string|max:255',
+            'nama_perusahaan' => 'required|string|max:255',
             'nama_klien' => 'required|string|max:255',
-            'alamat' => 'nullable|string',
-            'deskripsi' => 'nullable|string',
-            'detail_layanan' => 'nullable|string',
+            'alamat' => 'required|string',
+            'deskripsi' => 'required|string',
             'harga' => 'required|numeric|min:0',
-            'qty' => 'nullable|integer|min:1',
-            'pajak' => 'nullable|numeric|min:0|max:100',
+            'qty' => 'required|integer|min:1',
+            'pajak' => 'required|numeric|min:0|max:100',
             'metode_pembayaran' => 'required|string|in:Bank Transfer,E-Wallet,Credit Card,Cash',
-            'tanggal' => 'nullable|date',
+            'tanggal' => 'required|date',
         ]);
 
         // Jika validasi gagal
         if ($validator->fails()) {
+            // Jika request adalah AJAX, kembalikan error JSON
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Validation error',
-                    'errors' => $validator->errors(),
+                    'errors' => $validator->errors()
                 ], 422);
             }
-
+            
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
 
         // Siapkan data
-        $data = $validator->validated();
+        $validated = $validator->validated();
         
-        // Set default values
-        $qty = isset($data['qty']) ? (int)$data['qty'] : 1;
-        $pajak = isset($data['pajak']) ? (float)$data['pajak'] : 0.0;
-
         // Hitung total
-        $subtotal = $data['harga'] * $qty;
-        $data['qty'] = $qty;
-        $data['pajak'] = $pajak;
-        $data['total'] = $subtotal + ($subtotal * $pajak / 100);
+        $subtotal = $validated['harga'] * $validated['qty'];
+        $validated['total'] = $subtotal + ($subtotal * $validated['pajak'] / 100);
 
         // Update invoice
-        $invoice->update($data);
+        $invoice->update($validated);
 
         // Jika request adalah AJAX, kembalikan sukses JSON
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Invoice berhasil diperbarui!',
-                'data' => $invoice,
+                'data' => $invoice
             ]);
         }
 
-        return redirect()->route('admin.invoice.index')
+        return redirect()->route('invoices.show', $invoice->id)
             ->with('success', 'Invoice berhasil diperbarui!');
     }
 
@@ -223,28 +211,31 @@ class InvoiceController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Invoice berhasil dihapus!',
+                'message' => 'Invoice berhasil dihapus!'
             ]);
         }
 
-        return redirect()->route('admin.invoice.index')
+        return redirect()->route('invoices.index')
             ->with('success', 'Invoice berhasil dihapus!');
     }
-
+    
     /**
      * Get statistics for invoices
      */
     public function statistics(): JsonResponse
     {
         $totalInvoices = Invoice::count();
+        
         $totalRevenue = Invoice::sum('total');
         $averageInvoice = Invoice::avg('total');
-
+        
         // Group by payment method
-        $paymentMethods = Invoice::select('metode_pembayaran', DB::raw('count(*) as count'), DB::raw('sum(total) as total'))
-            ->groupBy('metode_pembayaran')
-            ->get();
-
+        $paymentMethods = Invoice::select('metode_pembayaran', 
+                                \DB::raw('count(*) as count'), 
+                                \DB::raw('sum(total) as total'))
+                            ->groupBy('metode_pembayaran')
+                            ->get();
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -252,7 +243,7 @@ class InvoiceController extends Controller
                 'total_revenue' => $totalRevenue,
                 'average_invoice' => $averageInvoice,
                 'payment_methods' => $paymentMethods,
-            ],
+            ]
         ]);
     }
 }
