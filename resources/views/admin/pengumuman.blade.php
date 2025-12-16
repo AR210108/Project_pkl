@@ -146,9 +146,9 @@
                                 class="bg-gray-200 dark:bg-gray-700 text-xs uppercase text-muted-light dark:text-muted-dark font-semibold">
                                 <tr>
                                     <th class="px-6 py-4">No</th>
-                                    <th class="px-6 py-4">Judul</th>
                                     <th class="px-6 py-4">Judul Informasi</th>
                                     <th class="px-6 py-4">Isi Pesan</th>
+                                    <th class="px-6 py-4">Kepada</th>
                                     <th class="px-6 py-4">Lampiran</th>
                                     <th class="px-6 py-4">Aksi</th>
                                 </tr>
@@ -157,9 +157,9 @@
                                 @foreach($pengumuman as $index => $item)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                                     <td class="px-6 py-4">{{ $index + 1 }}.</td>
-                                    <td class="px-6 py-4">{{ $item->judul }}</td>
                                     <td class="px-6 py-4">{{ $item->judul_informasi }}</td>
                                     <td class="px-6 py-4">{{ Str::limit($item->isi_pesan, 50) }}</td>
+                                    <td class="px-6 py-4">{{ $item->judul }}</td>
                                     <td class="px-6 py-4">
                                         @if($item->lampiran)
                                             <a class="text-primary hover:underline" href="{{ asset('storage/pengumuman/' . $item->lampiran) }}" target="_blank">{{ $item->lampiran }}</a>
