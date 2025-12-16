@@ -14,12 +14,12 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#4F46E5',
-                        secondary: '#7C3AED',
-                        success: '#10B981',
-                        warning: '#F59E0B',
-                        danger: '#EF4444',
-                        info: '#3B82F6',
+                        primary: '#000000',
+                        secondary: '#333333',
+                        success: '#666666',
+                        warning: '#999999',
+                        danger: '#000000',
+                        info: '#333333',
                     },
                 },
             },
@@ -69,6 +69,86 @@
                 grid-template-columns: 1fr;
             }
         }
+        /* Black and white theme overrides */
+        .bg-blue-100, .bg-red-100, .bg-yellow-100, .bg-green-100, .bg-purple-100, .bg-indigo-100 {
+            background-color: #f0f0f0 !important;
+        }
+        .dark .bg-blue-900, .dark .bg-red-900, .dark .bg-yellow-900, .dark .bg-green-900, .dark .bg-purple-900, .dark .bg-indigo-900 {
+            background-color: #333333 !important;
+        }
+        .text-blue-600, .text-red-600, .text-yellow-600, .text-green-600, .text-purple-600, .text-indigo-600 {
+            color: #333333 !important;
+        }
+        .dark .text-blue-300, .dark .text-red-300, .dark .text-yellow-300, .dark .text-green-300, .dark .text-purple-300, .dark .text-indigo-300 {
+            color: #cccccc !important;
+        }
+        .bg-blue-500, .bg-red-500, .bg-yellow-500, .bg-green-500, .bg-purple-500, .bg-indigo-500 {
+            background-color: #333333 !important;
+        }
+        .text-blue-500, .text-red-500, .text-yellow-500, .text-green-500, .text-purple-500, .text-indigo-500 {
+            color: #333333 !important;
+        }
+        .text-blue-700, .text-red-700, .text-yellow-700, .text-green-700, .text-purple-700, .text-indigo-700 {
+            color: #000000 !important;
+        }
+        .bg-green-100, .dark .bg-green-900 {
+            background-color: #f0f0f0 !important;
+        }
+        .text-green-800, .dark .text-green-200 {
+            color: #333333 !important;
+        }
+        .bg-yellow-100, .dark .bg-yellow-900 {
+            background-color: #f0f0f0 !important;
+        }
+        .text-yellow-800, .dark .text-yellow-200 {
+            color: #333333 !important;
+        }
+        .bg-red-100, .dark .bg-red-900 {
+            background-color: #f0f0f0 !important;
+        }
+        .text-red-800, .dark .text-red-200 {
+            color: #333333 !important;
+        }
+        .bg-purple-100, .dark .bg-purple-900 {
+            background-color: #f0f0f0 !important;
+        }
+        .text-purple-800, .dark .text-purple-200 {
+            color: #333333 !important;
+        }
+        .bg-indigo-100, .dark .bg-indigo-900 {
+            background-color: #f0f0f0 !important;
+        }
+        .text-indigo-800, .dark .text-indigo-200 {
+            color: #333333 !important;
+        }
+        /* Icon styling */
+        .icon-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.5rem;
+        }
+        .icon-lg {
+            width: 3rem;
+            height: 3rem;
+        }
+        .icon-sm {
+            width: 2rem;
+            height: 2rem;
+        }
+        .icon-action {
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s ease;
+        }
+        .icon-action:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        .dark .icon-action:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 
@@ -88,8 +168,8 @@
                     <!-- Baris 1 -->
                     <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
-                            <div class="bg-blue-100 dark:bg-blue-900 h-12 w-12 md:h-16 md:w-16 rounded-xl mr-3 md:mr-4 flex items-center justify-center">
-                                <i class="fas fa-users text-blue-600 dark:text-blue-300 text-lg md:text-2xl"></i>
+                            <div class="icon-container bg-gray-100 dark:bg-gray-700 mr-3 md:mr-4">
+                                <i class="fas fa-users text-gray-600 dark:text-gray-300 text-lg md:text-xl"></i>
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Total Kehadiran</p>
@@ -99,8 +179,8 @@
                     </div>
                     <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
-                            <div class="bg-red-100 dark:bg-red-900 h-12 w-12 md:h-16 md:w-16 rounded-xl mr-3 md:mr-4 flex items-center justify-center">
-                                <i class="fas fa-user-times text-red-600 dark:text-red-300 text-lg md:text-2xl"></i>
+                            <div class="icon-container bg-gray-100 dark:bg-gray-700 mr-3 md:mr-4">
+                                <i class="fas fa-user-times text-gray-600 dark:text-gray-300 text-lg md:text-xl"></i>
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Tidak Hadir</p>
@@ -110,8 +190,8 @@
                     </div>
                     <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
-                            <div class="bg-yellow-100 dark:bg-yellow-900 h-12 w-12 md:h-16 md:w-16 rounded-xl mr-3 md:mr-4 flex items-center justify-center">
-                                <i class="fas fa-calendar-times text-yellow-600 dark:text-yellow-300 text-lg md:text-2xl"></i>
+                            <div class="icon-container bg-gray-100 dark:bg-gray-700 mr-3 md:mr-4">
+                                <i class="fas fa-calendar-times text-gray-600 dark:text-gray-300 text-lg md:text-xl"></i>
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Izin</p>
@@ -123,8 +203,8 @@
                     <!-- Baris 2 -->
                     <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
-                            <div class="bg-green-100 dark:bg-green-900 h-12 w-12 md:h-16 md:w-16 rounded-xl mr-3 md:mr-4 flex items-center justify-center">
-                                <i class="fas fa-umbrella-beach text-green-600 dark:text-green-300 text-lg md:text-2xl"></i>
+                            <div class="icon-container bg-gray-100 dark:bg-gray-700 mr-3 md:mr-4">
+                                <i class="fas fa-umbrella-beach text-gray-600 dark:text-gray-300 text-lg md:text-xl"></i>
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Cuti</p>
@@ -134,8 +214,8 @@
                     </div>
                     <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
-                            <div class="bg-purple-100 dark:bg-purple-900 h-12 w-12 md:h-16 md:w-16 rounded-xl mr-3 md:mr-4 flex items-center justify-center">
-                                <i class="fas fa-briefcase text-purple-600 dark:text-purple-300 text-lg md:text-2xl"></i>
+                            <div class="icon-container bg-gray-100 dark:bg-gray-700 mr-3 md:mr-4">
+                                <i class="fas fa-briefcase text-gray-600 dark:text-gray-300 text-lg md:text-xl"></i>
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Dinas Luar</p>
@@ -145,8 +225,8 @@
                     </div>
                     <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
-                            <div class="bg-indigo-100 dark:bg-indigo-900 h-12 w-12 md:h-16 md:w-16 rounded-xl mr-3 md:mr-4 flex items-center justify-center">
-                                <i class="fas fa-thermometer text-indigo-600 dark:text-indigo-300 text-lg md:text-2xl"></i>
+                            <div class="icon-container bg-gray-100 dark:bg-gray-700 mr-3 md:mr-4">
+                                <i class="fas fa-thermometer text-gray-600 dark:text-gray-300 text-lg md:text-xl"></i>
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Sakit</p>
@@ -188,9 +268,9 @@
                                             <td class="px-4 md:px-6 py-2 md:py-4">{{ $attendance->jam_pulang ? \Carbon\Carbon::parse($attendance->jam_pulang)->format('H:i') : '-' }}</td>
                                             <td class="px-4 md:px-6 py-2 md:py-4">
                                                 <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium
-                                                    @if($attendance->status == 'Tepat Waktu') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                                    @elseif($attendance->status == 'Terlambat') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                                    @else bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                                    @if($attendance->status == 'Tepat Waktu') bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
+                                                    @elseif($attendance->status == 'Terlambat') bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
+                                                    @else bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
                                                     @endif">
                                                     {{ $attendance->status }}
                                                 </span>
@@ -247,24 +327,24 @@
                                             </td>
                                             <td class="px-4 md:px-6 py-2 md:py-4">
                                                 <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium
-                                                    @if($item->approval_status == 'approved') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                                    @elseif($item->approval_status == 'rejected') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                                    @else bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                                    @if($item->approval_status == 'approved') bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
+                                                    @elseif($item->approval_status == 'rejected') bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
+                                                    @else bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
                                                     @endif">
                                                     {{ strtoupper($item->approval_status) }}
                                                 </span>
                                             </td>
                                             <td class="px-4 md:px-6 py-2 md:py-4">
                                                 <div class="flex justify-center space-x-2">
-                                                    <button class="edit-cuti-btn text-blue-500 hover:text-blue-700" data-id="{{ $item->id }}" title="Edit">
+                                                    <button class="icon-action edit-cuti-btn text-gray-600 dark:text-gray-400" data-id="{{ $item->id }}" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     @if($item->approval_status == 'pending')
-                                                    <button class="verify-btn text-yellow-500 hover:text-yellow-700" data-id="{{ $item->id }}" data-type="{{ $item->status }}" title="Verifikasi">
+                                                    <button class="icon-action verify-btn text-gray-600 dark:text-gray-400" data-id="{{ $item->id }}" data-type="{{ $item->status }}" title="Verifikasi">
                                                         <i class="fas fa-check-double"></i>
                                                     </button>
                                                     @endif
-                                                    <button class="delete-cuti-btn text-red-500 hover:text-red-700" data-id="{{ $item->id }}" title="Hapus">
+                                                    <button class="icon-action delete-cuti-btn text-gray-600 dark:text-gray-400" data-id="{{ $item->id }}" title="Hapus">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </div>
@@ -288,21 +368,16 @@
                                             <td class="px-4 md:px-6 py-2 md:py-4">{{ \Carbon\Carbon::parse($attendance->tanggal)->format('d/m/Y') }}</td>
                                             <td class="px-4 md:px-6 py-2 md:py-4">{{ $attendance->status }}</td>
                                             <td class="px-4 md:px-6 py-2 md:py-4">
-                                                <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium
-                                                    @if($attendance->status == 'Sakit') bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200
-                                                    @elseif($attendance->status == 'Cuti') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                                    @elseif($attendance->status == 'Izin') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                                    @elseif($attendance->status == 'Dinas Luar') bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
-                                                    @endif">
+                                                <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
                                                     {{ $attendance->status }}
                                                 </span>
                                             </td>
                                             <td class="px-4 md:px-6 py-2 md:py-4">
                                                 <div class="flex justify-center space-x-2">
-                                                    <button class="edit-absensi-btn text-blue-500 hover:text-blue-700" data-id="{{ $attendance->id }}" title="Edit">
+                                                    <button class="icon-action edit-absensi-btn text-gray-600 dark:text-gray-400" data-id="{{ $attendance->id }}" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
-                                                    <button class="delete-absensi-btn text-red-500 hover:text-red-700" data-id="{{ $attendance->id }}" title="Hapus">
+                                                    <button class="icon-action delete-absensi-btn text-gray-600 dark:text-gray-400" data-id="{{ $attendance->id }}" title="Hapus">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </div>
@@ -390,7 +465,7 @@
                 </div>
                 <div class="flex justify-end space-x-3 mt-6">
                     <button type="button" class="cancel-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-secondary text-white rounded-lg">
+                    <button type="submit" class="px-4 py-2 bg-gray-800 dark:bg-gray-600 text-white rounded-lg">
                         <i class="fas fa-save mr-2"></i>Simpan
                     </button>
                 </div>
@@ -428,7 +503,7 @@
 
                 <div class="flex justify-end space-x-3">
                     <button type="button" class="cancel-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-info text-white rounded-lg">
+                    <button type="submit" class="px-4 py-2 bg-gray-800 dark:bg-gray-600 text-white rounded-lg">
                         <i class="fas fa-check mr-2"></i>Verifikasi
                     </button>
                 </div>
@@ -449,8 +524,8 @@
             </div>
             <div class="p-6">
                 <div class="flex items-center mb-4">
-                    <div class="bg-red-100 dark:bg-red-900 h-16 w-16 rounded-full mr-4 flex items-center justify-center">
-                        <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-300 text-2xl"></i>
+                    <div class="icon-container icon-lg bg-gray-100 dark:bg-gray-700 mr-4">
+                        <i class="fas fa-exclamation-triangle text-gray-600 dark:text-gray-300 text-2xl"></i>
                     </div>
                     <div>
                         <p class="font-semibold">Apakah Anda yakin?</p>
@@ -463,7 +538,7 @@
 
                 <div class="flex justify-end space-x-3">
                     <button class="cancel-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">Batal</button>
-                    <button id="confirmDeleteBtn" class="px-4 py-2 bg-danger text-white rounded-lg">
+                    <button id="confirmDeleteBtn" class="px-4 py-2 bg-gray-800 dark:bg-gray-600 text-white rounded-lg">
                         <i class="fas fa-trash mr-2"></i>Hapus
                     </button>
                 </div>
@@ -486,19 +561,19 @@
                 switch(type) {
                     case 'success':
                         icon = 'fa-check-circle';
-                        bgColor = 'bg-green-500';
+                        bgColor = 'bg-gray-700';
                         break;
                     case 'error':
                         icon = 'fa-exclamation-circle';
-                        bgColor = 'bg-red-500';
+                        bgColor = 'bg-gray-900';
                         break;
                     case 'warning':
                         icon = 'fa-exclamation-triangle';
-                        bgColor = 'bg-yellow-500';
+                        bgColor = 'bg-gray-600';
                         break;
                     default:
                         icon = 'fa-info-circle';
-                        bgColor = 'bg-blue-500';
+                        bgColor = 'bg-gray-700';
                 }
                 
                 notification.className = `notification ${bgColor} text-white p-4 rounded-lg shadow-lg mb-3 flex items-center`;
