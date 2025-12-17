@@ -1,143 +1,383 @@
-<header class="py-4 md:py-6 flex justify-center items-center border-b border-border-light dark:border-border-dark relative">
-    <div class="flex items-center justify-between w-full max-w-7xl px-4">
-        <div class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex items-center">
-            <span class="bg-primary text-white p-2 rounded-lg mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-            </span>
-            Brand
-        </div>
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Brand Navigation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0f172a", // Biru sangat tua mendekati hitam
+                        "background-light": "#ffffff", // Putih untuk background utama
+                        "background-dark": "#f8fafc", // Putih sangat terang untuk mode gelap
+                        "card-light": "#111827", // Hitam untuk kartu
+                        "card-dark": "#1f2937", // Abu-abu untuk kartu mode gelap
+                        "text-light": "#111827", // Hitam untuk teks
+                        "text-dark": "#f9fafb", // Putih terang untuk teks mode gelap
+                        "border-light": "#e5e7eb", // Abu-abu terang untuk border
+                        "border-dark": "#4b5563", // Abu-abu untuk border mode gelap
+                    },
+                    fontFamily: {
+                        display: ["Poppins", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1rem",
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
         
-        <!-- Menu untuk desktop -->
-        <nav class="hidden md:flex items-center space-x-4 lg:space-x-8 text-subtext-light dark:text-subtext-dark">
-            <a class="text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors relative group" href="{{ url('/pemilik') }}">
-                Beranda
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-            </a>
-            <a class="text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors relative group" href="{{ url('/rekap_absen') }}">
-                Rekap Absensi
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-            </a>
-            <a class="text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors relative group" href="{{ url('/laporan') }}">
-                Laporan
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-            </a>
-            <a class="text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors relative group" href="{{ url('/monitoring') }}">
-                Monitoring Progres
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-            </a>
-            <a class="text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors relative group" href="#">
-                Surat Kerjasama
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-            </a>
-        </nav>
+        /* Smooth Scrolling untuk seluruh halaman */
+        html {
+            scroll-behavior: smooth;
+        }
         
-        <!-- Tombol logout dan menu mobile -->
-        <div class="flex items-center space-x-3">
-            <button class="hidden md:flex items-center bg-primary text-white px-4 md:px-6 py-1 md:py-2 rounded-full text-sm md:text-base font-semibold hover:bg-primary-dark transition-colors shadow-md hover:shadow-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                Log Out
-            </button>
-            
-            <!-- Tombol menu untuk mobile -->
-            <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-subtext-light dark:text-subtext-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
-        </div>
-    </div>
-    
-    <!-- Menu mobile dropdown -->
-    <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-white dark:bg-gray-900 shadow-lg z-50 transition-all duration-300 transform origin-top">
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            <nav class="flex flex-col space-y-3 text-subtext-light dark:text-subtext-dark">
-                <a class="text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center" href="{{ url('/pemilik') }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    Beranda
-                </a>
-                <a class="text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center" href="{{ url('/rekap_absen') }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                    </svg>
-                    Rekap Absensi
-                </a>
-                <a class="text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center" href="{{ url('/laporan') }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Laporan
-                </a>
-                <a class="text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center" href="{{ url('/monitoring') }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    Monitoring Progres
-                </a>
-                <a class="text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center"  href="{{ url('/surat') }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Surat Kerjasama
-                </a>
-                <button class="flex items-center justify-center bg-primary text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-colors shadow-md hover:shadow-lg w-full mt-4">
+        /* Sticky Navigation */
+        .sticky-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .sticky-header.scrolled {
+            background-color: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Padding untuk konten agar tidak tertutup header */
+        .main-content {
+            padding-top: 80px;
+        }
+        
+        /* Hamburger Menu Animation */
+        .hamburger-line {
+            transition: all 0.3s ease;
+        }
+        
+        .hamburger.active .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .hamburger.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .hamburger.active .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+        
+        /* Mobile Navigation - Menyatu dengan Header */
+        .mobile-nav {
+            max-height: 0;
+            overflow: hidden;
+            background-color: rgba(255, 255, 255, 0.95); /* Warna sama dengan header */
+            transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border-radius: 0 0 1rem 1rem; /* Border radius hanya di bagian bawah */
+        }
+        
+        .mobile-nav.active {
+            max-height: 70vh; /* Tinggi maksimum saat aktif */
+        }
+        
+        .mobile-nav-content {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .mobile-nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.1); /* Border dengan warna primary */
+            margin-bottom: 1rem;
+        }
+        
+        .mobile-nav .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a; /* Warna primary */
+        }
+        
+        .mobile-nav nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .mobile-nav .nav-link {
+            color: #0f172a; /* Warna primary */
+            font-size: 1.125rem;
+            font-weight: 500;
+            text-decoration: none;
+            position: relative;
+            transition: color 0.3s ease;
+            padding: 0.75rem 0;
+            display: block;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-nav .nav-link:hover,
+        .mobile-nav .nav-link.active {
+            color: #0f172a; /* Warna primary */
+            background-color: rgba(15, 23, 42, 0.1); /* Background dengan warna primary */
+        }
+        
+        .mobile-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 1rem;
+            width: 0;
+            height: 2px;
+            background-color: #0f172a; /* Warna primary */
+            transition: width 0.3s ease;
+        }
+        
+        .mobile-nav .nav-link:hover::after,
+        .mobile-nav .nav-link.active::after {
+            width: 30px;
+        }
+        
+        .mobile-nav .login-btn {
+            background-color: #0f172a; /* Warna primary */
+            color: white; /* Teks putih */
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            display: inline-block;
+            transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .mobile-nav .login-btn:hover {
+            background-color: rgba(15, 23, 42, 0.9); /* Warna primary dengan opacity */
+            transform: translateY(-2px);
+        }
+        
+        .mobile-nav .close-btn {
+            color: #0f172a; /* Warna primary */
+            font-size: 1.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .mobile-nav .close-btn:hover {
+            background-color: rgba(15, 23, 42, 0.1); /* Background dengan warna primary */
+            transform: rotate(90deg);
+        }
+        
+        /* Active navigation link */
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #0f172a; /* Biru sangat tua mendekati hitam */
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: #0f172a; /* Biru sangat tua mendekati hitam */
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .nav-link.active {
+            color: #0f172a; /* Biru sangat tua mendekati hitam */
+        }
+        
+        .nav-link.active::after {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light text-text-light">
+    <!-- Sticky Header -->
+    <header id="header" class="sticky-header">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex justify-between items-center">
+                <!-- Brand Logo -->
+                <div class="text-xl md:text-2xl font-bold text-black flex items-center">
+                    <span class="bg-primary text-white p-2 rounded-lg mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                    </span>
+                    Brand
+                </div>
+                
+                <!-- Desktop Navigation - Centered -->
+                <nav class="hidden md:flex items-center space-x-4 lg:space-x-8 absolute left-1/2 transform -translate-x-1/2">
+                    <a class="nav-link text-sm font-medium text-gray-700 active" href="{{ url('/pemilik') }}">Beranda</a>
+                    <a class="nav-link text-sm font-medium text-gray-700" href="{{ url('/rekap_absen') }}">Rekap Absensi</a>
+                    <a class="nav-link text-sm font-medium text-gray-700" href="{{ url('/laporan') }}">Laporan</a>
+                    <a class="nav-link text-sm font-medium text-gray-700" href="{{ url('/monitoring') }}">Monitoring Progres</a>
+                    <a class="nav-link text-sm font-medium text-gray-700" href="{{ url('/surat') }}">Surat Kerjasama</a>
+                </nav>
+                
+                <!-- Login Button -->
+                <a class="hidden md:flex items-center bg-black text-white text-sm font-medium py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors"
+                    href="{{ url('/login') }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
                     Log Out
-                </button>
-            </nav>
-        </div>
-    </div>
-
-    <!-- Script untuk toggle menu mobile -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-            
-            if (mobileMenuButton && mobileMenu) {
-                mobileMenuButton.addEventListener('click', function() {
-                    mobileMenu.classList.toggle('hidden');
-                    
-                    // Animasi saat menu dibuka
-                    if (!mobileMenu.classList.contains('hidden')) {
-                        mobileMenu.classList.add('animate-fadeIn');
-                        setTimeout(() => {
-                            mobileMenu.classList.remove('animate-fadeIn');
-                        }, 300);
-                    }
-                });
+                </a>
                 
-                // Tutup menu saat klik di luar
-                document.addEventListener('click', function(event) {
-                    if (!mobileMenuButton.contains(event.target) && !mobileMenu.contains(event.target)) {
-                        mobileMenu.classList.add('hidden');
-                    }
-                });
+                <!-- Mobile Menu Button -->
+                <button id="mobileMenuBtn" class="md:hidden flex flex-col justify-center items-center w-8 h-8 hamburger">
+                    <span class="hamburger-line w-6 h-0.5 bg-black mb-1.5"></span>
+                    <span class="hamburger-line w-6 h-0.5 bg-black mb-1.5"></span>
+                    <span class="hamburger-line w-6 h-0.5 bg-black"></span>
+                </button>
+            </div>
+            
+            <!-- Mobile Navigation - Menyatu dengan Header -->
+            <div id="mobileNav" class="mobile-nav">
+                <div class="mobile-nav-content">
+                    <nav>
+                        <a class="nav-link active" href="{{ url('/pemilik') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            Beranda
+                        </a>
+                        <a class="nav-link" href="{{ url('/rekap_absen') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                            Rekap Absensi
+                        </a>
+                        <a class="nav-link" href="{{ url('/laporan') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Laporan
+                        </a>
+                        <a class="nav-link" href="{{ url('/monitoring') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Monitoring Progres
+                        </a>
+                        <a class="nav-link" href="{{ url('/surat') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Surat Kerjasama
+                        </a>
+                    </nav>
+                    <a class="login-btn" href="{{ url('/login') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Log Out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+        </div>
+    </main>
+
+    <script>
+        // Sticky Header
+        const header = document.getElementById('header');
+        
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
             }
         });
-    </script>
-    
-    <style>
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
         
-        .animate-fadeIn {
-            animation: fadeIn 0.3s ease-out forwards;
-        }
-    </style>
-</header>
+        // Mobile Navigation
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileNav = document.getElementById('mobileNav');
+        
+        // Pastikan navigasi mobile tersembunyi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            mobileNav.classList.remove('active');
+            mobileMenuBtn.classList.remove('active');
+        });
+        
+        mobileMenuBtn.addEventListener('click', function() {
+            mobileMenuBtn.classList.toggle('active');
+            mobileNav.classList.toggle('active');
+        });
+        
+        // Close mobile nav when clicking on a link
+        const mobileNavLinks = mobileNav.querySelectorAll('.nav-link');
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                mobileMenuBtn.classList.remove('active');
+                mobileNav.classList.remove('active');
+            });
+        });
+        
+        // Also close when clicking on login button
+        const mobileLoginBtn = mobileNav.querySelector('.login-btn');
+        mobileLoginBtn.addEventListener('click', function() {
+            mobileMenuBtn.classList.remove('active');
+            mobileNav.classList.remove('active');
+        });
+        
+        // Navigation active state
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        // Add click event to navigation links
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Remove active class from all links
+                navLinks.forEach(l => l.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

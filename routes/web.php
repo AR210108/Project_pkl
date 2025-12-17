@@ -18,8 +18,11 @@ use App\Http\Controllers\InvoiceController;
 |--------------------------------------------------------------------------
 */
 
-// Redirect default ke halaman login
-Route::get('/', fn() => redirect()->route('login'));
+
+// Redirect default ke halaman home
+Route::get('/', function () {
+    return view('home');
+})->name('home');
 
 // Rute untuk menampilkan halaman login
 Route::get('/login', [LoginController::class, 'show'])->name('login');
@@ -255,3 +258,135 @@ Route::middleware('auth')->group(function () {
     Route::get('/kelola_absen', fn() => view('general_manajer/kelola_absen'));
   
 });
+/*
+|--------------------------------------------------------------------------
+| Banyak Route View Langsung (admin, pemilik, finance, dsb)
+|--------------------------------------------------------------------------
+*/
+
+Route::view('/admin', 'admin/home');
+Route::view('/data_karyawan_admin', 'admin/data_karyawan');
+Route::view('/data_layanan_admin', 'admin/data_layanan');
+Route::get('/data_user', fn() => redirect()->route('admin.user'));
+
+Route::view('/data_absen', 'admin/absensi');
+Route::view('/template_surat', 'admin/templet_surat');
+Route::view('/list_surat', 'admin/list_surat');
+Route::view('/invoice', 'admin/invoice');
+Route::view('/kwitansi', 'admin/kwitansi');
+Route::view('/catatan_rapat', 'admin/catatan_rapat');
+Route::view('/pengumuman', 'admin/pengumuman');
+
+Route::view('/pemilik', 'pemilik/home');
+Route::view('/rekap_absen', 'pemilik/rekap_absen');
+Route::view('/laporan', 'pemilik/laporan');
+Route::view('/monitoring', 'pemilik/monitoring_progres');
+Route::view('/surat', 'pemilik/surat_kerjasama');
+
+Route::view('/finance', 'finance/beranda');
+Route::view('/data', 'finance/data_layanan');
+Route::view('/pembayaran', 'finance/data_pembayaran');
+
+Route::view('/manager_divisi', 'manager_divisi/home');
+Route::view('/pengelola_tugas', 'manager_divisi/pengelola_tugas');
+
+Route::view('/general_manajer', 'general_manajer/home');
+Route::view('/data_karyawan', 'general_manajer/data_karyawan');
+Route::view('/layanan', 'general_manajer/data_layanan');
+Route::view('/kelola_tugas', 'general_manajer/kelola_tugas');
+Route::view('/kelola_absen', 'general_manajer/kelola_absen');
+
+Route::resource('invoices', InvoiceController::class);
+Route::get('/invoices/{invoice}/print', function (Invoice $invoice) {
+    return view('invoices.print', compact('invoice'));
+})->name('invoices.print');
+
+
+Route::get('/data_absen', function () {
+    return view('admin/absensi');
+});
+Route::get('/template_surat', function () {
+    return view('admin/templet_surat');
+});
+Route::get('/list_surat', function () {
+    return view('admin/list_surat');
+});
+Route::get('/invoice', function () {
+    return view('admin/invoice');
+});
+Route::get('/kwitansi', function () {
+    return view('admin/kwitansi');
+});
+Route::get('/catatan_rapat', function () {
+    return view('admin/catatan_rapat');
+});
+Route::get('/pengumuman', function () {
+    return view('admin/pengumuman');
+});
+
+
+Route::get('/pemilik', function () {
+    return view('pemilik/home');
+});
+Route::get('/rekap_absen', function () {
+    return view('pemilik/rekap_absen');
+});
+Route::get('/laporan', function () {
+    return view('pemilik/laporan');
+});
+Route::get('/monitoring', function () {
+    return view('pemilik/monitoring_progres');
+});
+Route::get('/surat', function () {
+    return view('pemilik/surat_kerjasama');
+});
+
+
+// finance
+Route::get('/finance', function () {
+    return view('finance/beranda');
+});
+Route::get('/data', function () {
+    return view('finance/data_layanan');
+});
+Route::get('/pembayaran', function () {
+    return view('finance/data_pembayaran');
+});
+
+
+
+Route::get('/manager_divisi', function () {
+    return view('manager_divisi/home');
+});
+Route::get('/pengelola_tugas', function () {
+    return view('manager_divisi/pengelola_tugas');
+});
+
+
+Route::get('/general_manajer', function () {
+    return view('general_manajer/home');
+});
+Route::get('/data_karyawan', function () {
+    return view('general_manajer/data_karyawan');
+});
+Route::get('/layanan', function () {
+    return view('general_manajer/data_layanan');
+});
+Route::get('/kelola_tugas', function () {
+    return view('general_manajer/kelola_tugas');
+});
+Route::get('/kelola_absen', function () {
+    return view('general_manajer/kelola_absen');
+});
+
+
+Route::resource('pengumuman', PengumumanController::class);
+// === ROUTE UNTUK CATATAN RAPAT ANDA ===
+// Semua route di dalam group ini memerlukan user sudah login
+Route::middleware(['auth'])->group(function () {
+    Route::get('/catatan_rapat', [CatatanRapatController::class, 'index'])->name('catatan_rapat.index');
+    Route::post('/catatan_rapat', [CatatanRapatController::class, 'store'])->name('catatan_rapat.store');
+    Route::put('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'update'])->name('catatan_rapat.update');
+    Route::delete('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'destroy'])->name('catatan_rapat.destroy');
+});
+
