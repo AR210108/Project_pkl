@@ -1,804 +1,1116 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="id">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Kelola Absensi (Manage Attendance) - List</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap"
-        rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <title>Kelola Absensi - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
         tailwind.config = {
-            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        primary: "#1d4ed8", // Using a blue shade as a sample primary
-                        "background-light": "#f3f4f6",
-                        "background-dark": "#111827",
+                        primary: "#3b82f6",
+                        "background-light": "#ffffff",
+                        "background-dark": "#f8fafc",
+                        "sidebar-light": "#f3f4f6",
+                        "sidebar-dark": "#1e293b",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e293b",
+                        "text-light": "#1e293b",
+                        "text-dark": "#f8fafc",
+                        "text-muted-light": "#64748b",
+                        "text-muted-dark": "#94a3b8",
+                        "border-light": "#e2e8f0",
+                        "border-dark": "#334155",
+                        "success": "#10b981",
+                        "warning": "#f59e0b",
+                        "danger": "#ef4444"
                     },
                     fontFamily: {
                         display: ["Poppins", "sans-serif"],
                     },
                     borderRadius: {
-                        DEFAULT: "0.5rem",
+                        DEFAULT: "0.75rem",
+                    },
+                    boxShadow: {
+                        card: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                        "card-hover": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
                     },
                 },
             },
         };
     </script>
     <style>
-        .material-icons {
-            font-size: 20px;
+        body {
+            font-family: 'Poppins', sans-serif;
         }
         
-        /* CSS untuk modal */
-        .modal {
-            transition: opacity 0.25s ease;
+        .material-icons-outlined {
+            font-size: 24px;
+            vertical-align: middle;
         }
         
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
+        /* Card hover effects - updated to match reference */
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Table styles */
+        .order-table {
+            transition: all 0.2s ease;
+        }
+        
+        .order-table tr:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        
+        /* Button styles */
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+        
+        /* Status Badge Styles */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-hadir {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #065f46;
+        }
+        
+        .status-terlambat {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #92400e;
+        }
+        
+        .status-izin {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #1e40af;
+        }
+        
+        .status-cuti {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #991b1b;
+        }
+        
+        /* Custom styles untuk transisi */
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        /* Animasi hamburger */
+        .hamburger-line {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .hamburger-active .line1 {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .hamburger-active .line2 {
+            opacity: 0;
+        }
+        
+        .hamburger-active .line3 {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+        
+        /* Style untuk efek hover yang lebih menonjol */
+        .nav-item {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Gaya untuk indikator aktif/hover */
+        /* Default untuk mobile: di sebelah kanan */
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background-color: #3b82f6;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        /* Override untuk desktop: di sebelah kiri */
+        @media (min-width: 768px) {
+            .nav-item::before {
+                right: auto;
+                left: 0;
+                transform: translateX(-100%);
+            }
+        }
+        
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            transform: translateX(0);
+        }
+        
+        /* Memastikan sidebar tetap di posisinya saat scroll */
+        .sidebar-fixed {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 40;
+        }
+        
+        /* Menyesuaikan konten utama agar tidak tertutup sidebar */
+        .main-content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        @media (min-width: 768px) {
+            .main-content {
+                margin-left: 256px; /* Lebar sidebar */
+            }
+        }
+        
+        /* Scrollbar kustom untuk sidebar */
+        .sidebar-fixed::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar-fixed::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .sidebar-fixed::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        
+        .sidebar-fixed::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Form input styles */
+        .form-input {
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        
+        .form-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Pagination styles */
+        .page-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .page-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Desktop pagination styles */
+        .desktop-pagination {
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+        
+        /* Show desktop pagination on medium screens and up */
+        @media (min-width: 768px) {
+            .desktop-pagination {
+                display: flex;
+            }
+        }
+        
+        .desktop-page-btn {
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .desktop-page-btn.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .desktop-page-btn:not(.active) {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .desktop-page-btn:not(.active):hover {
+            background-color: #e2e8f0;
+        }
+        
+        .desktop-nav-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            color: #64748b;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .desktop-nav-btn:hover:not(:disabled) {
+            background-color: #e2e8f0;
+        }
+        
+        .desktop-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Panel Styles */
+        .panel {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .panel-header {
+            background: #f8fafc;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .panel-body {
+            padding: 1.5rem;
+        }
+        
+        /* SCROLLABLE TABLE - TANPA INDICATOR */
+        .scrollable-table-container {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background: white;
+        }
+        
+        /* Force scrollbar to be visible */
+        .scrollable-table-container {
+            scrollbar-width: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .scrollable-table-container::-webkit-scrollbar {
+            height: 12px;
+            width: 12px;
+        }
+        
+        .scrollable-table-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 6px;
+        }
+        
+        .scrollable-table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 6px;
+            border: 2px solid #f1f5f9;
+        }
+        
+        .scrollable-table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Table with fixed width to ensure scrolling */
+        .data-table {
+            width: 100%;
+            min-width: 1200px; /* Fixed minimum width */
+            border-collapse: collapse;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .data-table tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        
+        .data-table tbody tr:hover {
+            background: #f3f4f6;
+        }
+        
+        /* Shadow effect */
+        .table-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Tab Navigation Styles */
+        .tab-nav {
+            display: flex;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            color: #64748b;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-button:hover {
+            color: #3b82f6;
+        }
+
+        .tab-button.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        
+        /* Icon styling - added to match reference */
+        .icon-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.5rem;
+        }
+        
+        /* Mobile pagination styles */
+        .mobile-pagination {
+            display: flex; /* Visible by default */
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        /* Hide mobile pagination on medium screens and up */
+        @media (min-width: 768px) {
+            .mobile-pagination {
+                display: none;
+            }
+        }
+        
+        .mobile-page-btn {
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .mobile-page-btn.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .mobile-page-btn:not(.active) {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .mobile-page-btn:not(.active):hover {
+            background-color: #e2e8f0;
+        }
+        
+        .mobile-nav-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            color: #64748b;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .mobile-nav-btn:hover:not(:disabled) {
+            background-color: #e2e8f0;
+        }
+        
+        .mobile-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     </style>
 </head>
 
-<body class="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200">
-    <div class="flex h-screen">
-       @include('general_manajer/templet/header')
-        <div class="flex-1 flex flex-col">
-            <main class="flex-1 overflow-y-auto bg-white dark:bg-gray-900">
-                <div class="p-8">
-                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Kelola Absensi</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div class="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg flex items-center gap-4">
-                            <div class="bg-gray-300 dark:bg-gray-700 p-3 rounded">
-                                <span class="material-icons text-gray-600 dark:text-gray-400">check_circle</span>
+<body class="font-display bg-background-light text-text-light">
+    @include('general_manajer/templet/header')
+    
+    <!-- Main Content Container -->
+    <div class="main-content">
+        <main class="flex-1 flex flex-col bg-background-light">
+            <div class="flex-1 p-3 sm:p-8">
+
+                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Kelola Absensi</h2>
+                
+                <!-- Stats Cards - Modified to match reference style -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+                    <!-- Total Kehadiran Card -->
+                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
+                        <div class="flex items-center">
+                            <div class="icon-container bg-green-100 mr-3 md:mr-4">
+                                <span class="material-icons-outlined text-green-600 text-lg md:text-xl">check_circle</span>
                             </div>
                             <div>
-                                <p class="text-gray-500 dark:text-gray-400">Total Kehadiran</p>
-                                <p class="text-3xl font-bold text-gray-900 dark:text-white">50</p>
-                            </div>
-                        </div>
-                        <div class="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg flex items-center gap-4">
-                            <div class="bg-gray-300 dark:bg-gray-700 p-3 rounded">
-                                <span class="material-icons text-gray-600 dark:text-gray-400">cancel</span>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 dark:text-gray-400">Tidak Hadir</p>
-                                <p class="text-3xl font-bold text-gray-900 dark:text-white">50</p>
-                            </div>
-                        </div>
-                        <div class="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg flex items-center gap-4">
-                            <div class="bg-gray-300 dark:bg-gray-700 p-3 rounded">
-                                <span class="material-icons text-gray-600 dark:text-gray-400">error</span>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 dark:text-gray-400">Izin</p>
-                                <p class="text-3xl font-bold text-gray-900 dark:text-white">50</p>
-                            </div>
-                        </div>
-                        <div class="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg flex items-center gap-4">
-                            <div class="bg-gray-300 dark:bg-gray-700 p-3 rounded">
-                                <span class="material-icons text-gray-600 dark:text-gray-400">event_busy</span>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 dark:text-gray-400">Cuti</p>
-                                <p class="text-3xl font-bold text-gray-900 dark:text-white">50</p>
+                                <p class="text-xs md:text-sm text-gray-500">Total Kehadiran</p>
+                                <p class="text-xl md:text-2xl font-bold text-green-600">1</p>
                             </div>
                         </div>
                     </div>
-                    <div class="mb-8">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Absensi</h3>
-                            <button id="tambahAbsensiBtn"
-                                class="bg-primary hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded flex items-center">
-                                <span class="material-icons mr-2">add</span>
-                                Tambah Absensi
-                            </button>
-                        </div>
-                        <div
-                            class="overflow-x-auto bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                            <table class="w-full text-sm text-left">
-                                <thead
-                                    class="bg-gray-200 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 uppercase">
-                                    <tr>
-                                        <th class="px-6 py-3" scope="col">No</th>
-                                        <th class="px-6 py-3" scope="col">Nama</th>
-                                        <th class="px-6 py-3" scope="col">Tanggal</th>
-                                        <th class="px-6 py-3" scope="col">Jam Masuk</th>
-                                        <th class="px-6 py-3" scope="col">Jam Keluar</th>
-                                        <th class="px-6 py-3" scope="col">Status</th>
-                                        <th class="px-6 py-3" scope="col">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="border-b border-gray-200 dark:border-gray-700">
-                                        <td class="px-6 py-4">1.</td>
-                                        <td class="px-6 py-4">Budi Santoso</td>
-                                        <td class="px-6 py-4">2024-10-15</td>
-                                        <td class="px-6 py-4">08:00</td>
-                                        <td class="px-6 py-4">17:00</td>
-                                        <td class="px-6 py-4">
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">Hadir</span>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center space-x-2">
-                                                <button class="edit-absensi-btn"
-                                                    data-id="1"
-                                                    data-nama="Budi Santoso"
-                                                    data-tanggal="2024-10-15"
-                                                    data-jam-masuk="08:00"
-                                                    data-jam-keluar="17:00"
-                                                    data-status="Hadir"
-                                                    class="p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">
-                                                    <span class="material-icons text-blue-500">edit</span>
-                                                </button>
-                                                <button class="delete-absensi-btn"
-                                                    data-id="1"
-                                                    data-nama="Budi Santoso"
-                                                    data-tanggal="2024-10-15"
-                                                    class="p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900 transition-colors">
-                                                    <span class="material-icons text-red-500">delete</span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr class="bg-white dark:bg-gray-900">
-                                        <td class="px-6 py-4">2.</td>
-                                        <td class="px-6 py-4">Citra Lestari</td>
-                                        <td class="px-6 py-4">2024-10-15</td>
-                                        <td class="px-6 py-4">08:30</td>
-                                        <td class="px-6 py-4">17:30</td>
-                                        <td class="px-6 py-4">
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">Hadir</span>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center space-x-2">
-                                                <button class="edit-absensi-btn"
-                                                    data-id="2"
-                                                    data-nama="Citra Lestari"
-                                                    data-tanggal="2024-10-15"
-                                                    data-jam-masuk="08:30"
-                                                    data-jam-keluar="17:30"
-                                                    data-status="Hadir"
-                                                    class="p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">
-                                                    <span class="material-icons text-blue-500">edit</span>
-                                                </button>
-                                                <button class="delete-absensi-btn"
-                                                    data-id="2"
-                                                    data-nama="Citra Lestari"
-                                                    data-tanggal="2024-10-15"
-                                                    class="p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900 transition-colors">
-                                                    <span class="material-icons text-red-500">delete</span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr class="border-b border-gray-200 dark:border-gray-700">
-                                        <td class="px-6 py-4">3.</td>
-                                        <td class="px-6 py-4">Eko Prabowo</td>
-                                        <td class="px-6 py-4">2024-10-15</td>
-                                        <td class="px-6 py-4">09:15</td>
-                                        <td class="px-6 py-4">17:00</td>
-                                        <td class="px-6 py-4">
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">Terlambat</span>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center space-x-2">
-                                                <button class="edit-absensi-btn"
-                                                    data-id="3"
-                                                    data-nama="Eko Prabowo"
-                                                    data-tanggal="2024-10-15"
-                                                    data-jam-masuk="09:15"
-                                                    data-jam-keluar="17:00"
-                                                    data-status="Terlambat"
-                                                    class="p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">
-                                                    <span class="material-icons text-blue-500">edit</span>
-                                                </button>
-                                                <button class="delete-absensi-btn"
-                                                    data-id="3"
-                                                    data-nama="Eko Prabowo"
-                                                    data-tanggal="2024-10-15"
-                                                    class="p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900 transition-colors">
-                                                    <span class="material-icons text-red-500">delete</span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    
+                    <!-- Tidak Hadir Card -->
+                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
+                        <div class="flex items-center">
+                            <div class="icon-container bg-red-100 mr-3 md:mr-4">
+                                <span class="material-icons-outlined text-red-600 text-lg md:text-xl">cancel</span>
+                            </div>
+                            <div>
+                                <p class="text-xs md:text-sm text-gray-500">Tidak Hadir</p>
+                                <p class="text-xl md:text-2xl font-bold text-red-600">11</p>
+                            </div>
                         </div>
                     </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Daftar Ketidakhadiran</h3>
-                            <button id="tambahKetidakhadiranBtn"
-                                class="bg-primary hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded flex items-center">
-                                <span class="material-icons mr-2">add</span>
-                                Tambah Ketidakhadiran
-                            </button>
+                    
+                    <!-- Izin Card -->
+                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
+                        <div class="flex items-center">
+                            <div class="icon-container bg-blue-100 mr-3 md:mr-4">
+                                <span class="material-icons-outlined text-blue-600 text-lg md:text-xl">error</span>
+                            </div>
+                            <div>
+                                <p class="text-xs md:text-sm text-gray-500">Izin</p>
+                                <p class="text-xl md:text-2xl font-bold text-blue-600">0</p>
+                            </div>
                         </div>
-                        <div
-                            class="overflow-x-auto bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                            <table class="w-full text-sm text-left">
-                                <thead
-                                    class="bg-gray-200 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 uppercase">
-                                    <tr>
-                                        <th class="px-6 py-3" scope="col">No</th>
-                                        <th class="px-6 py-3" scope="col">Nama</th>
-                                        <th class="px-6 py-3" scope="col">Tanggal Mulai</th>
-                                        <th class="px-6 py-3" scope="col">Tanggal Akhir</th>
-                                        <th class="px-6 py-3" scope="col">Alasan</th>
-                                        <th class="px-6 py-3" scope="col">Status</th>
-                                        <th class="px-6 py-3" scope="col">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="border-b border-gray-200 dark:border-gray-700">
-                                        <td class="px-6 py-4">1.</td>
-                                        <td class="px-6 py-4">Dewi Anggraini</td>
-                                        <td class="px-6 py-4">2024-10-10</td>
-                                        <td class="px-6 py-4">2024-10-12</td>
-                                        <td class="px-6 py-4">Sakit</td>
-                                        <td class="px-6 py-4">
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">Izin</span>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center space-x-2">
-                                                <button class="edit-ketidakhadiran-btn"
-                                                    data-id="1"
-                                                    data-nama="Dewi Anggraini"
-                                                    data-tanggal-mulai="2024-10-10"
-                                                    data-tanggal-akhir="2024-10-12"
-                                                    data-alasan="Sakit"
-                                                    data-status="Izin"
-                                                    class="p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">
-                                                    <span class="material-icons text-blue-500">edit</span>
-                                                </button>
-                                                <button class="delete-ketidakhadiran-btn"
-                                                    data-id="1"
-                                                    data-nama="Dewi Anggraini"
-                                                    data-tanggal-mulai="2024-10-10"
-                                                    class="p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900 transition-colors">
-                                                    <span class="material-icons text-red-500">delete</span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr class="bg-white dark:bg-gray-900">
-                                        <td class="px-6 py-4">2.</td>
-                                        <td class="px-6 py-4">Ani Yudhoyono</td>
-                                        <td class="px-6 py-4">2024-10-05</td>
-                                        <td class="px-6 py-4">2024-10-15</td>
-                                        <td class="px-6 py-4">Liburan keluarga</td>
-                                        <td class="px-6 py-4">
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">Cuti</span>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center space-x-2">
-                                                <button class="edit-ketidakhadiran-btn"
-                                                    data-id="2"
-                                                    data-nama="Ani Yudhoyono"
-                                                    data-tanggal-mulai="2024-10-05"
-                                                    data-tanggal-akhir="2024-10-15"
-                                                    data-alasan="Liburan keluarga"
-                                                    data-status="Cuti"
-                                                    class="p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">
-                                                    <span class="material-icons text-blue-500">edit</span>
-                                                </button>
-                                                <button class="delete-ketidakhadiran-btn"
-                                                    data-id="2"
-                                                    data-nama="Ani Yudhoyono"
-                                                    data-tanggal-mulai="2024-10-05"
-                                                    class="p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900 transition-colors">
-                                                    <span class="material-icons text-red-500">delete</span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    </div>
+                    
+                    <!-- Cuti Card -->
+                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
+                        <div class="flex items-center">
+                            <div class="icon-container bg-yellow-100 mr-3 md:mr-4">
+                                <span class="material-icons-outlined text-yellow-600 text-lg md:text-xl">event_busy</span>
+                            </div>
+                            <div>
+                                <p class="text-xs md:text-sm text-gray-500">Cuti</p>
+                                <p class="text-xl md:text-2xl font-bold text-yellow-600">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dinas Luar Card -->
+                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
+                        <div class="flex items-center">
+                            <div class="icon-container bg-purple-100 mr-3 md:mr-4">
+                                <span class="material-icons-outlined text-purple-600 text-lg md:text-xl">directions_car</span>
+                            </div>
+                            <div>
+                                <p class="text-xs md:text-sm text-gray-500">Dinas Luar</p>
+                                <p class="text-xl md:text-2xl font-bold text-purple-600">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sakit Card -->
+                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
+                        <div class="flex items-center">
+                            <div class="icon-container bg-orange-100 mr-3 md:mr-4">
+                                <span class="material-icons-outlined text-orange-600 text-lg md:text-xl">healing</span>
+                            </div>
+                            <div>
+                                <p class="text-xs md:text-sm text-gray-500">Sakit</p>
+                                <p class="text-xl md:text-2xl font-bold text-orange-600">0</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </main>
-            <footer class="bg-gray-200 dark:bg-gray-800 text-center p-4 text-sm text-gray-600 dark:text-gray-400">
+                
+                <!-- Tab Navigation -->
+                <div class="tab-nav">
+                    <button id="absensiTab" class="tab-button active" onclick="switchTab('absensi')">
+                        <span class="material-icons-outlined align-middle mr-2">fact_check</span>
+                        Data Absensi
+                    </button>
+                    <button id="ketidakhadiranTab" class="tab-button" onclick="switchTab('ketidakhadiran')">
+                        <span class="material-icons-outlined align-middle mr-2">assignment_late</span>
+                        Daftar Ketidakhadiran
+                    </button>
+                </div>
+                
+                <!-- Data Absensi Panel -->
+                <div id="absensiPanel" class="panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <span class="material-icons-outlined text-primary">fact_check</span>
+                            Data Absensi
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="absensiCount">3</span> data</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <!-- SCROLLABLE TABLE -->
+                        <div class="scrollable-table-container table-shadow" id="scrollableTable">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="min-width: 60px;">No</th>
+                                        <th style="min-width: 200px;">Nama</th>
+                                        <th style="min-width: 120px;">Tanggal</th>
+                                        <th style="min-width: 120px;">Jam Masuk</th>
+                                        <th style="min-width: 120px;">Jam Keluar</th>
+                                        <th style="min-width: 120px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="absensiTableBody">
+                                    <!-- Data rows will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Desktop Pagination -->
+                        <div id="absensiPaginationContainer" class="desktop-pagination">
+                            <button id="absensiPrevPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_left</span>
+                            </button>
+                            <div id="absensiPageNumbers" class="flex gap-1">
+                                <!-- Page numbers will be generated by JavaScript -->
+                            </div>
+                            <button id="absensiNextPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_right</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Mobile Pagination -->
+                        <div class="mobile-pagination">
+                            <button id="absensiPrevPageMobile" class="mobile-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_left</span>
+                            </button>
+                            <div id="absensiPageNumbersMobile" class="flex gap-1">
+                                <!-- Page numbers will be generated by JavaScript -->
+                            </div>
+                            <button id="absensiNextPageMobile" class="mobile-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Ketidakhadiran Panel (Initially Hidden) -->
+                <div id="ketidakhadiranPanel" class="panel hidden">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <span class="material-icons-outlined text-primary">assignment_late</span>
+                            Daftar Ketidakhadiran
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="ketidakhadiranCount">2</span> data</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <!-- SCROLLABLE TABLE -->
+                        <div class="scrollable-table-container table-shadow" id="scrollableTableKetidakhadiran">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="min-width: 60px;">No</th>
+                                        <th style="min-width: 200px;">Nama</th>
+                                        <th style="min-width: 120px;">Tanggal Mulai</th>
+                                        <th style="min-width: 120px;">Tanggal Akhir</th>
+                                        <th style="min-width: 200px;">Alasan</th>
+                                        <th style="min-width: 120px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ketidakhadiranTableBody">
+                                    <!-- Data rows will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Desktop Pagination -->
+                        <div id="ketidakhadiranPaginationContainer" class="desktop-pagination">
+                            <button id="ketidakhadiranPrevPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_left</span>
+                            </button>
+                            <div id="ketidakhadiranPageNumbers" class="flex gap-1">
+                                <!-- Page numbers will be generated by JavaScript -->
+                            </div>
+                            <button id="ketidakhadiranNextPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_right</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Mobile Pagination -->
+                        <div class="mobile-pagination">
+                            <button id="ketidakhadiranPrevPageMobile" class="mobile-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_left</span>
+                            </button>
+                            <div id="ketidakhadiranPageNumbersMobile" class="flex gap-1">
+                                <!-- Page numbers will be generated by JavaScript -->
+                            </div>
+                            <button id="ketidakhadiranNextPageMobile" class="mobile-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light">
                 Copyright ©2025 by digicity.id
             </footer>
-        </div>
-    </div>
-
-    <!-- Modal Tambah Absensi -->
-    <div id="tambahAbsensiModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Tambah Absensi</h3>
-                    <button class="close-modal text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                        <span class="material-icons text-2xl">close</span>
-                    </button>
-                </div>
-                <form id="tambahAbsensiForm">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Karyawan</label>
-                        <select id="tambahAbsensiNama" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="">Pilih Karyawan</option>
-                            <option value="Budi Santoso">Budi Santoso</option>
-                            <option value="Citra Lestari">Citra Lestari</option>
-                            <option value="Eko Prabowo">Eko Prabowo</option>
-                            <option value="Dewi Anggraini">Dewi Anggraini</option>
-                            <option value="Ani Yudhoyono">Ani Yudhoyono</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tanggal</label>
-                        <input type="date" id="tambahAbsensiTanggal" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jam Masuk</label>
-                            <input type="time" id="tambahAbsensiJamMasuk" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jam Keluar</label>
-                            <input type="time" id="tambahAbsensiJamKeluar" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                        </div>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                        <select id="tambahAbsensiStatus" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="Hadir">Hadir</option>
-                            <option value="Terlambat">Terlambat</option>
-                            </select>
-                    </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" class="close-modal px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">Batal</button>
-                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">Simpan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Edit Absensi -->
-    <div id="editAbsensiModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Edit Absensi</h3>
-                    <button class="close-modal text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                        <span class="material-icons text-2xl">close</span>
-                    </button>
-                </div>
-                <form id="editAbsensiForm">
-                    <input type="hidden" id="editAbsensiId">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Karyawan</label>
-                        <select id="editAbsensiNama" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="Budi Santoso">Budi Santoso</option>
-                            <option value="Citra Lestari">Citra Lestari</option>
-                            <option value="Eko Prabowo">Eko Prabowo</option>
-                            <option value="Dewi Anggraini">Dewi Anggraini</option>
-                            <option value="Ani Yudhoyono">Ani Yudhoyono</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tanggal</label>
-                        <input type="date" id="editAbsensiTanggal" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jam Masuk</label>
-                            <input type="time" id="editAbsensiJamMasuk" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jam Keluar</label>
-                            <input type="time" id="editAbsensiJamKeluar" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                        </div>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                        <select id="editAbsensiStatus" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="Hadir">Hadir</option>
-                            <option value="Terlambat">Terlambat</option>
-                        </select>
-                    </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" class="close-modal px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">Batal</button>
-                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">Update</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Hapus Absensi -->
-    <div id="deleteAbsensiModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Konfirmasi Hapus</h3>
-                    <button class="close-modal text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                        <span class="material-icons text-2xl">close</span>
-                    </button>
-                </div>
-                <div class="mb-6">
-                    <p class="text-gray-900 dark:text-white">Apakah Anda yakin ingin menghapus absensi <span id="deleteAbsensiNama" class="font-semibold"></span> pada tanggal <span id="deleteAbsensiTanggal" class="font-semibold"></span>?</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Tindakan ini tidak dapat dibatalkan.</p>
-                </div>
-                <input type="hidden" id="deleteAbsensiId">
-                <div class="flex justify-end gap-2">
-                    <button type="button" class="close-modal px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">Batal</button>
-                    <button id="confirmDeleteAbsensi" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Hapus</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Tambah Ketidakhadiran -->
-    <div id="tambahKetidakhadiranModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Tambah Ketidakhadiran</h3>
-                    <button class="close-modal text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                        <span class="material-icons text-2xl">close</span>
-                    </button>
-                </div>
-                <form id="tambahKetidakhadiranForm">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Karyawan</label>
-                        <select id="tambahKetidakhadiranNama" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="">Pilih Karyawan</option>
-                            <option value="Budi Santoso">Budi Santoso</option>
-                            <option value="Citra Lestari">Citra Lestari</option>
-                            <option value="Eko Prabowo">Eko Prabowo</option>
-                            <option value="Dewi Anggraini">Dewi Anggraini</option>
-                            <option value="Ani Yudhoyono">Ani Yudhoyono</option>
-                        </select>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tanggal Mulai</label>
-                            <input type="date" id="tambahKetidakhadiranTanggalMulai" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tanggal Akhir</label>
-                            <input type="date" id="tambahKetidakhadiranTanggalAkhir" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Alasan</label>
-                        <textarea id="tambahKetidakhadiranAlasan" rows="3" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                        <select id="tambahKetidakhadiranStatus" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="Izin">Izin</option>
-                            <option value="Cuti">Cuti</option>
-                        </select>
-                    </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" class="close-modal px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">Batal</button>
-                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">Simpan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Edit Ketidakhadiran -->
-    <div id="editKetidakhadiranModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Edit Ketidakhadiran</h3>
-                    <button class="close-modal text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                        <span class="material-icons text-2xl">close</span>
-                    </button>
-                </div>
-                <form id="editKetidakhadiranForm">
-                    <input type="hidden" id="editKetidakhadiranId">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Karyawan</label>
-                        <select id="editKetidakhadiranNama" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="Budi Santoso">Budi Santoso</option>
-                            <option value="Citra Lestari">Citra Lestari</option>
-                            <option value="Eko Prabowo">Eko Prabowo</option>
-                            <option value="Dewi Anggraini">Dewi Anggraini</option>
-                            <option value="Ani Yudhoyono">Ani Yudhoyono</option>
-                        </select>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tanggal Mulai</label>
-                            <input type="date" id="editKetidakhadiranTanggalMulai" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tanggal Akhir</label>
-                            <input type="date" id="editKetidakhadiranTanggalAkhir" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Alasan</label>
-                        <textarea id="editKetidakhadiranAlasan" rows="3" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                        <select id="editKetidakhadiranStatus" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="Izin">Izin</option>
-                            <option value="Cuti">Cuti</option>
-                        </select>
-                    </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" class="close-modal px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">Batal</button>
-                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">Update</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Hapus Ketidakhadiran -->
-    <div id="deleteKetidakhadiranModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Konfirmasi Hapus</h3>
-                    <button class="close-modal text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                        <span class="material-icons text-2xl">close</span>
-                    </button>
-                </div>
-                <div class="mb-6">
-                    <p class="text-gray-900 dark:text-white">Apakah Anda yakin ingin menghapus ketidakhadiran <span id="deleteKetidakhadiranNama" class="font-semibold"></span>?</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Tindakan ini tidak dapat dibatalkan.</p>
-                </div>
-                <input type="hidden" id="deleteKetidakhadiranId">
-                <div class="flex justify-end gap-2">
-                    <button type="button" class="close-modal px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">Batal</button>
-                    <button id="confirmDeleteKetidakhadiran" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Hapus</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center">
-        <span id="toastMessage" class="mr-2"></span>
-        <button id="closeToast" class="ml-2 text-white hover:text-gray-200">
-            <span class="material-icons text-lg">close</span>
-        </button>
+        </main>
     </div>
 
     <script>
+        // Sample data for absensi
+        const absensiData = [
+            { id: 1, nama: "Budi Santoso", tanggal: "2024-10-15", jamMasuk: "08:00", jamKeluar: "17:00", status: "Hadir" },
+            { id: 2, nama: "Citra Lestari", tanggal: "2024-10-15", jamMasuk: "08:30", jamKeluar: "17:30", status: "Hadir" },
+            { id: 3, nama: "Eko Prabowo", tanggal: "2024-10-15", jamMasuk: "09:15", jamKeluar: "17:00", status: "Terlambat" }
+        ];
+
+        // Sample data for ketidakhadiran
+        const ketidakhadiranData = [
+            { id: 1, nama: "Dewi Anggraini", tanggalMulai: "2024-10-10", tanggalAkhir: "2024-10-12", alasan: "Sakit", status: "Izin" },
+            { id: 2, nama: "Ani Yudhoyono", tanggalMulai: "2024-10-05", tanggalAkhir: "2024-10-15", alasan: "Liburan keluarga", status: "Cuti" }
+        ];
+
+        // Pagination variables for absensi
+        const absensiItemsPerPage = 2; // Dikurangi agar pagination terlihat
+        let absensiCurrentPage = 1;
+        const absensiTotalPages = Math.ceil(absensiData.length / absensiItemsPerPage);
+
+        // Pagination variables for ketidakhadiran
+        const ketidakhadiranItemsPerPage = 2; // Dikurangi agar pagination terlihat
+        let ketidakhadiranCurrentPage = 1;
+        const ketidakhadiranTotalPages = Math.ceil(ketidakhadiranData.length / ketidakhadiranItemsPerPage);
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Modal elements
-            const tambahAbsensiModal = document.getElementById('tambahAbsensiModal');
-            const editAbsensiModal = document.getElementById('editAbsensiModal');
-            const deleteAbsensiModal = document.getElementById('deleteAbsensiModal');
-            const tambahKetidakhadiranModal = document.getElementById('tambahKetidakhadiranModal');
-            const editKetidakhadiranModal = document.getElementById('editKetidakhadiranModal');
-            const deleteKetidakhadiranModal = document.getElementById('deleteKetidakhadiranModal');
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
+            // Initialize pagination for absensi
+            initializeAbsensiPagination();
             
-            // Buttons
-            const tambahAbsensiBtn = document.getElementById('tambahAbsensiBtn');
-            const tambahKetidakhadiranBtn = document.getElementById('tambahKetidakhadiranBtn');
-            const editAbsensiBtns = document.querySelectorAll('.edit-absensi-btn');
-            const deleteAbsensiBtns = document.querySelectorAll('.delete-absensi-btn');
-            const editKetidakhadiranBtns = document.querySelectorAll('.edit-ketidakhadiran-btn');
-            const deleteKetidakhadiranBtns = document.querySelectorAll('.delete-ketidakhadiran-btn');
-            const closeModals = document.querySelectorAll('.close-modal');
-            const confirmDeleteAbsensiBtn = document.getElementById('confirmDeleteAbsensi');
-            const confirmDeleteKetidakhadiranBtn = document.getElementById('confirmDeleteKetidakhadiran');
-            const closeToastBtn = document.getElementById('closeToast');
-            
-            // Forms
-            const tambahAbsensiForm = document.getElementById('tambahAbsensiForm');
-            const editAbsensiForm = document.getElementById('editAbsensiForm');
-            const tambahKetidakhadiranForm = document.getElementById('tambahKetidakhadiranForm');
-            const editKetidakhadiranForm = document.getElementById('editKetidakhadiranForm');
-            
-            // Show tambah absensi modal
-            tambahAbsensiBtn.addEventListener('click', function() {
-                tambahAbsensiModal.classList.remove('hidden');
-                tambahAbsensiForm.reset();
-            });
-            
-            // Show tambah ketidakhadiran modal
-            tambahKetidakhadiranBtn.addEventListener('click', function() {
-                tambahKetidakhadiranModal.classList.remove('hidden');
-                tambahKetidakhadiranForm.reset();
-            });
-            
-            // Show edit absensi modal with data
-            editAbsensiBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    const nama = this.getAttribute('data-nama');
-                    const tanggal = this.getAttribute('data-tanggal');
-                    const jamMasuk = this.getAttribute('data-jam-masuk');
-                    const jamKeluar = this.getAttribute('data-jam-keluar');
-                    const status = this.getAttribute('data-status');
-                    
-                    document.getElementById('editAbsensiId').value = id;
-                    document.getElementById('editAbsensiNama').value = nama;
-                    document.getElementById('editAbsensiTanggal').value = tanggal;
-                    document.getElementById('editAbsensiJamMasuk').value = jamMasuk;
-                    document.getElementById('editAbsensiJamKeluar').value = jamKeluar;
-                    document.getElementById('editAbsensiStatus').value = status;
-                    
-                    editAbsensiModal.classList.remove('hidden');
-                });
-            });
-            
-            // Show delete absensi modal with data
-            deleteAbsensiBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    const nama = this.getAttribute('data-nama');
-                    const tanggal = this.getAttribute('data-tanggal');
-                    
-                    document.getElementById('deleteAbsensiId').value = id;
-                    document.getElementById('deleteAbsensiNama').textContent = nama;
-                    document.getElementById('deleteAbsensiTanggal').textContent = tanggal;
-                    
-                    deleteAbsensiModal.classList.remove('hidden');
-                });
-            });
-            
-            // Show edit ketidakhadiran modal with data
-            editKetidakhadiranBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    const nama = this.getAttribute('data-nama');
-                    const tanggalMulai = this.getAttribute('data-tanggal-mulai');
-                    const tanggalAkhir = this.getAttribute('data-tanggal-akhir');
-                    const alasan = this.getAttribute('data-alasan');
-                    const status = this.getAttribute('data-status');
-                    
-                    document.getElementById('editKetidakhadiranId').value = id;
-                    document.getElementById('editKetidakhadiranNama').value = nama;
-                    document.getElementById('editKetidakhadiranTanggalMulai').value = tanggalMulai;
-                    document.getElementById('editKetidakhadiranTanggalAkhir').value = tanggalAkhir;
-                    document.getElementById('editKetidakhadiranAlasan').value = alasan;
-                    document.getElementById('editKetidakhadiranStatus').value = status;
-                    
-                    editKetidakhadiranModal.classList.remove('hidden');
-                });
-            });
-            
-            // Show delete ketidakhadiran modal with data
-            deleteKetidakhadiranBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    const nama = this.getAttribute('data-nama');
-                    
-                    document.getElementById('deleteKetidakhadiranId').value = id;
-                    document.getElementById('deleteKetidakhadiranNama').textContent = nama;
-                    
-                    deleteKetidakhadiranModal.classList.remove('hidden');
-                });
-            });
-            
-            // Close modals
-            closeModals.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    tambahAbsensiModal.classList.add('hidden');
-                    editAbsensiModal.classList.add('hidden');
-                    deleteAbsensiModal.classList.add('hidden');
-                    tambahKetidakhadiranModal.classList.add('hidden');
-                    editKetidakhadiranModal.classList.add('hidden');
-                    deleteKetidakhadiranModal.classList.add('hidden');
-                });
-            });
-            
-            // Close modal when clicking outside
-            window.addEventListener('click', function(event) {
-                if (event.target === tambahAbsensiModal) {
-                    tambahAbsensiModal.classList.add('hidden');
-                }
-                if (event.target === editAbsensiModal) {
-                    editAbsensiModal.classList.add('hidden');
-                }
-                if (event.target === deleteAbsensiModal) {
-                    deleteAbsensiModal.classList.add('hidden');
-                }
-                if (event.target === tambahKetidakhadiranModal) {
-                    tambahKetidakhadiranModal.classList.add('hidden');
-                }
-                if (event.target === editKetidakhadiranModal) {
-                    editKetidakhadiranModal.classList.add('hidden');
-                }
-                if (event.target === deleteKetidakhadiranModal) {
-                    deleteKetidakhadiranModal.classList.add('hidden');
-                }
-            });
-            
-            // Handle tambah absensi form submission
-            tambahAbsensiForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // In a real application, you would send the form data to the server
-                // For demo purposes, we'll just show a success message
-                showToast('Data absensi berhasil ditambahkan!');
-                tambahAbsensiModal.classList.add('hidden');
-                tambahAbsensiForm.reset();
-            });
-            
-            // Handle edit absensi form submission
-            editAbsensiForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // In a real application, you would send the form data to the server
-                // For demo purposes, we'll just show a success message
-                showToast('Data absensi berhasil diperbarui!');
-                editAbsensiModal.classList.add('hidden');
-            });
-            
-            // Handle delete absensi confirmation
-            confirmDeleteAbsensiBtn.addEventListener('click', function() {
-                const id = document.getElementById('deleteAbsensiId').value;
-                
-                // In a real application, you would send a delete request to the server
-                // For demo purposes, we'll just show a success message
-                showToast('Data absensi berhasil dihapus!');
-                deleteAbsensiModal.classList.add('hidden');
-            });
-            
-            // Handle tambah ketidakhadiran form submission
-            tambahKetidakhadiranForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // In a real application, you would send the form data to the server
-                // For demo purposes, we'll just show a success message
-                showToast('Data ketidakhadiran berhasil ditambahkan!');
-                tambahKetidakhadiranModal.classList.add('hidden');
-                tambahKetidakhadiranForm.reset();
-            });
-            
-            // Handle edit ketidakhadiran form submission
-            editKetidakhadiranForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // In a real application, you would send the form data to the server
-                // For demo purposes, we'll just show a success message
-                showToast('Data ketidakhadiran berhasil diperbarui!');
-                editKetidakhadiranModal.classList.add('hidden');
-            });
-            
-            // Handle delete ketidakhadiran confirmation
-            confirmDeleteKetidakhadiranBtn.addEventListener('click', function() {
-                const id = document.getElementById('deleteKetidakhadiranId').value;
-                
-                // In a real application, you would send a delete request to the server
-                // For demo purposes, we'll just show a success message
-                showToast('Data ketidakhadiran berhasil dihapus!');
-                deleteKetidakhadiranModal.classList.add('hidden');
-            });
-            
-            // Close toast notification
-            closeToastBtn.addEventListener('click', function() {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            });
-            
-            // Function to show toast notification
-            function showToast(message) {
-                toastMessage.textContent = message;
-                toast.classList.remove('translate-y-20', 'opacity-0');
-                
-                // Auto hide after 3 seconds
-                setTimeout(() => {
-                    toast.classList.add('translate-y-20', 'opacity-0');
-                }, 3000);
-            }
+            // Initialize pagination for ketidakhadiran
+            initializeKetidakhadiranPagination();
         });
+
+        // Function to switch between tabs
+        function switchTab(tabName) {
+            // Get tab buttons and panels
+            const absensiTab = document.getElementById('absensiTab');
+            const ketidakhadiranTab = document.getElementById('ketidakhadiranTab');
+            const absensiPanel = document.getElementById('absensiPanel');
+            const ketidakhadiranPanel = document.getElementById('ketidakhadiranPanel');
+
+            // Hide all panels and remove active class from all tabs
+            absensiPanel.classList.add('hidden');
+            ketidakhadiranPanel.classList.add('hidden');
+            absensiTab.classList.remove('active');
+            ketidakhadiranTab.classList.remove('active');
+
+            // Show selected panel and add active class to clicked tab
+            if (tabName === 'absensi') {
+                absensiPanel.classList.remove('hidden');
+                absensiTab.classList.add('active');
+            } else if (tabName === 'ketidakhadiran') {
+                ketidakhadiranPanel.classList.remove('hidden');
+                ketidakhadiranTab.classList.add('active');
+            }
+        }
+
+        // Initialize pagination for absensi
+        function initializeAbsensiPagination() {
+            // Update total count
+            document.getElementById('absensiCount').textContent = absensiData.length;
+            
+            // SELALU tampilkan pagination
+            initAbsensiDesktopPagination();
+            initAbsensiMobilePagination();
+            
+            // Render first page
+            renderAbsensiTable(1);
+        }
+
+        // Initialize pagination for ketidakhadiran
+        function initializeKetidakhadiranPagination() {
+            // Update total count
+            document.getElementById('ketidakhadiranCount').textContent = ketidakhadiranData.length;
+            
+            // SELALU tampilkan pagination
+            initKetidakhadiranDesktopPagination();
+            initKetidakhadiranMobilePagination();
+            
+            // Render first page
+            renderKetidakhadiranTable(1);
+        }
+
+        // Desktop pagination functionality for absensi
+        function initAbsensiDesktopPagination() {
+            const pageNumbersContainer = document.getElementById('absensiPageNumbers');
+            const prevButton = document.getElementById('absensiPrevPage');
+            const nextButton = document.getElementById('absensiNextPage');
+            
+            // Clear existing page numbers
+            pageNumbersContainer.innerHTML = '';
+            
+            // Generate page numbers
+            for (let i = 1; i <= absensiTotalPages; i++) {
+                const pageNumber = document.createElement('button');
+                pageNumber.textContent = i;
+                pageNumber.className = `desktop-page-btn ${
+                    i === absensiCurrentPage ? 'active' : ''
+                }`;
+                pageNumber.addEventListener('click', () => goToAbsensiDesktopPage(i));
+                pageNumbersContainer.appendChild(pageNumber);
+            }
+            
+            // Event listeners for navigation buttons
+            prevButton.addEventListener('click', () => {
+                if (absensiCurrentPage > 1) goToAbsensiDesktopPage(absensiCurrentPage - 1);
+            });
+            
+            nextButton.addEventListener('click', () => {
+                if (absensiCurrentPage < absensiTotalPages) goToAbsensiDesktopPage(absensiCurrentPage + 1);
+            });
+        }
+
+        // Mobile pagination functionality for absensi
+        function initAbsensiMobilePagination() {
+            const pageNumbersContainer = document.getElementById('absensiPageNumbersMobile');
+            const prevButton = document.getElementById('absensiPrevPageMobile');
+            const nextButton = document.getElementById('absensiNextPageMobile');
+            
+            // Clear existing page numbers
+            pageNumbersContainer.innerHTML = '';
+            
+            // Generate page numbers
+            for (let i = 1; i <= absensiTotalPages; i++) {
+                const pageNumber = document.createElement('button');
+                pageNumber.textContent = i;
+                pageNumber.className = `mobile-page-btn ${
+                    i === absensiCurrentPage ? 'active' : ''
+                }`;
+                pageNumber.addEventListener('click', () => goToAbsensiMobilePage(i));
+                pageNumbersContainer.appendChild(pageNumber);
+            }
+            
+            // Event listeners for navigation buttons
+            prevButton.addEventListener('click', () => {
+                if (absensiCurrentPage > 1) goToAbsensiMobilePage(absensiCurrentPage - 1);
+            });
+            
+            nextButton.addEventListener('click', () => {
+                if (absensiCurrentPage < absensiTotalPages) goToAbsensiMobilePage(absensiCurrentPage + 1);
+            });
+        }
+
+        // Desktop pagination functionality for ketidakhadiran
+        function initKetidakhadiranDesktopPagination() {
+            const pageNumbersContainer = document.getElementById('ketidakhadiranPageNumbers');
+            const prevButton = document.getElementById('ketidakhadiranPrevPage');
+            const nextButton = document.getElementById('ketidakhadiranNextPage');
+            
+            // Clear existing page numbers
+            pageNumbersContainer.innerHTML = '';
+            
+            // Generate page numbers
+            for (let i = 1; i <= ketidakhadiranTotalPages; i++) {
+                const pageNumber = document.createElement('button');
+                pageNumber.textContent = i;
+                pageNumber.className = `desktop-page-btn ${
+                    i === ketidakhadiranCurrentPage ? 'active' : ''
+                }`;
+                pageNumber.addEventListener('click', () => goToKetidakhadiranDesktopPage(i));
+                pageNumbersContainer.appendChild(pageNumber);
+            }
+            
+            // Event listeners for navigation buttons
+            prevButton.addEventListener('click', () => {
+                if (ketidakhadiranCurrentPage > 1) goToKetidakhadiranDesktopPage(ketidakhadiranCurrentPage - 1);
+            });
+            
+            nextButton.addEventListener('click', () => {
+                if (ketidakhadiranCurrentPage < ketidakhadiranTotalPages) goToKetidakhadiranDesktopPage(ketidakhadiranCurrentPage + 1);
+            });
+        }
+
+        // Mobile pagination functionality for ketidakhadiran
+        function initKetidakhadiranMobilePagination() {
+            const pageNumbersContainer = document.getElementById('ketidakhadiranPageNumbersMobile');
+            const prevButton = document.getElementById('ketidakhadiranPrevPageMobile');
+            const nextButton = document.getElementById('ketidakhadiranNextPageMobile');
+            
+            // Clear existing page numbers
+            pageNumbersContainer.innerHTML = '';
+            
+            // Generate page numbers
+            for (let i = 1; i <= ketidakhadiranTotalPages; i++) {
+                const pageNumber = document.createElement('button');
+                pageNumber.textContent = i;
+                pageNumber.className = `mobile-page-btn ${
+                    i === ketidakhadiranCurrentPage ? 'active' : ''
+                }`;
+                pageNumber.addEventListener('click', () => goToKetidakhadiranMobilePage(i));
+                pageNumbersContainer.appendChild(pageNumber);
+            }
+            
+            // Event listeners for navigation buttons
+            prevButton.addEventListener('click', () => {
+                if (ketidakhadiranCurrentPage > 1) goToKetidakhadiranMobilePage(ketidakhadiranCurrentPage - 1);
+            });
+            
+            nextButton.addEventListener('click', () => {
+                if (ketidakhadiranCurrentPage < ketidakhadiranTotalPages) goToKetidakhadiranMobilePage(ketidakhadiranCurrentPage + 1);
+            });
+        }
+
+        // Go to specific desktop page for absensi
+        function goToAbsensiDesktopPage(page) {
+            absensiCurrentPage = page;
+            renderAbsensiTable(page);
+            updateAbsensiDesktopPaginationButtons();
+            updateAbsensiMobilePaginationButtons();
+        }
+
+        // Go to specific mobile page for absensi
+        function goToAbsensiMobilePage(page) {
+            absensiCurrentPage = page;
+            renderAbsensiTable(page);
+            updateAbsensiDesktopPaginationButtons();
+            updateAbsensiMobilePaginationButtons();
+        }
+
+        // Go to specific desktop page for ketidakhadiran
+        function goToKetidakhadiranDesktopPage(page) {
+            ketidakhadiranCurrentPage = page;
+            renderKetidakhadiranTable(page);
+            updateKetidakhadiranDesktopPaginationButtons();
+            updateKetidakhadiranMobilePaginationButtons();
+        }
+
+        // Go to specific mobile page for ketidakhadiran
+        function goToKetidakhadiranMobilePage(page) {
+            ketidakhadiranCurrentPage = page;
+            renderKetidakhadiranTable(page);
+            updateKetidakhadiranDesktopPaginationButtons();
+            updateKetidakhadiranMobilePaginationButtons();
+        }
+
+        // Render table for absensi (used for both desktop and mobile)
+        function renderAbsensiTable(page) {
+            const tbody = document.getElementById('absensiTableBody');
+            tbody.innerHTML = '';
+            
+            const startIndex = (page - 1) * absensiItemsPerPage;
+            const endIndex = Math.min(startIndex + absensiItemsPerPage, absensiData.length);
+            
+            for (let i = startIndex; i < endIndex; i++) {
+                const absensi = absensiData[i];
+                const row = document.createElement('tr');
+                
+                // Determine status class
+                let statusClass = '';
+                if (absensi.status === 'Hadir') {
+                    statusClass = 'status-hadir';
+                } else if (absensi.status === 'Terlambat') {
+                    statusClass = 'status-terlambat';
+                }
+                
+                row.innerHTML = `
+                    <td style="min-width: 60px;">${i + 1}</td>
+                    <td style="min-width: 200px;">${absensi.nama}</td>
+                    <td style="min-width: 120px;">${absensi.tanggal}</td>
+                    <td style="min-width: 120px;">${absensi.jamMasuk}</td>
+                    <td style="min-width: 120px;">${absensi.jamKeluar}</td>
+                    <td style="min-width: 120px;"><span class="status-badge ${statusClass}">${absensi.status}</span></td>
+                `;
+                tbody.appendChild(row);
+            }
+        }
+
+        // Render table for ketidakhadiran (used for both desktop and mobile)
+        function renderKetidakhadiranTable(page) {
+            const tbody = document.getElementById('ketidakhadiranTableBody');
+            tbody.innerHTML = '';
+            
+            const startIndex = (page - 1) * ketidakhadiranItemsPerPage;
+            const endIndex = Math.min(startIndex + ketidakhadiranItemsPerPage, ketidakhadiranData.length);
+            
+            for (let i = startIndex; i < endIndex; i++) {
+                const ketidakhadiran = ketidakhadiranData[i];
+                const row = document.createElement('tr');
+                
+                // Determine status class
+                let statusClass = '';
+                if (ketidakhadiran.status === 'Izin') {
+                    statusClass = 'status-izin';
+                } else if (ketidakhadiran.status === 'Cuti') {
+                    statusClass = 'status-cuti';
+                }
+                
+                row.innerHTML = `
+                    <td style="min-width: 60px;">${i + 1}</td>
+                    <td style="min-width: 200px;">${ketidakhadiran.nama}</td>
+                    <td style="min-width: 120px;">${ketidakhadiran.tanggalMulai}</td>
+                    <td style="min-width: 120px;">${ketidakhadiran.tanggalAkhir}</td>
+                    <td style="min-width: 200px;">${ketidakhadiran.alasan}</td>
+                    <td style="min-width: 120px;"><span class="status-badge ${statusClass}">${ketidakhadiran.status}</span></td>
+                `;
+                tbody.appendChild(row);
+            }
+        }
+
+        // Update desktop pagination buttons for absensi
+        function updateAbsensiDesktopPaginationButtons() {
+            const prevButton = document.getElementById('absensiPrevPage');
+            const nextButton = document.getElementById('absensiNextPage');
+            const pageButtons = document.querySelectorAll('#absensiPageNumbers button');
+            
+            prevButton.disabled = absensiCurrentPage === 1;
+            nextButton.disabled = absensiCurrentPage === absensiTotalPages;
+            
+            pageButtons.forEach((btn, index) => {
+                if (index + 1 === absensiCurrentPage) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Update mobile pagination buttons for absensi
+        function updateAbsensiMobilePaginationButtons() {
+            const prevButton = document.getElementById('absensiPrevPageMobile');
+            const nextButton = document.getElementById('absensiNextPageMobile');
+            const pageButtons = document.querySelectorAll('#absensiPageNumbersMobile button');
+            
+            prevButton.disabled = absensiCurrentPage === 1;
+            nextButton.disabled = absensiCurrentPage === absensiTotalPages;
+            
+            pageButtons.forEach((btn, index) => {
+                if (index + 1 === absensiCurrentPage) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Update desktop pagination buttons for ketidakhadiran
+        function updateKetidakhadiranDesktopPaginationButtons() {
+            const prevButton = document.getElementById('ketidakhadiranPrevPage');
+            const nextButton = document.getElementById('ketidakhadiranNextPage');
+            const pageButtons = document.querySelectorAll('#ketidakhadiranPageNumbers button');
+            
+            prevButton.disabled = ketidakhadiranCurrentPage === 1;
+            nextButton.disabled = ketidakhadiranCurrentPage === ketidakhadiranTotalPages;
+            
+            pageButtons.forEach((btn, index) => {
+                if (index + 1 === ketidakhadiranCurrentPage) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Update mobile pagination buttons for ketidakhadiran
+        function updateKetidakhadiranMobilePaginationButtons() {
+            const prevButton = document.getElementById('ketidakhadiranPrevPageMobile');
+            const nextButton = document.getElementById('ketidakhadiranNextPageMobile');
+            const pageButtons = document.querySelectorAll('#ketidakhadiranPageNumbersMobile button');
+            
+            prevButton.disabled = ketidakhadiranCurrentPage === 1;
+            nextButton.disabled = ketidakhadiranCurrentPage === ketidakhadiranTotalPages;
+            
+            pageButtons.forEach((btn, index) => {
+                if (index + 1 === ketidakhadiranCurrentPage) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
     </script>
 </body>
-
 </html>
