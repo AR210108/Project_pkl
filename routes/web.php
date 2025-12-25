@@ -11,6 +11,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminKaryawanController;
 use App\Http\Controllers\KwitansiController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\CatatanRapatController;
+use App\Http\Controllers\PengumumanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -222,16 +224,19 @@ Route::get('/detail', fn() => redirect()->route('karyawan.detail'));
 // Halaman-halaman lain yang tidak memerlukan controller
 Route::middleware('auth')->group(function () {
     // Admin
-    Route::get('/data_karyawan_admin', fn() => view('admin/data_karyawan'));
-    Route::get('/data_layanan_admin', fn() => view('admin/data_layanan'));
-    Route::get('/data_user', fn() => redirect()->route('admin.user'));
-    Route::get('/data_absen', fn() => view('admin/absensi'));
-    Route::get('/template_surat', fn() => view('admin/templet_surat'));
-    Route::get('/list_surat', fn() => view('admin/list_surat'));
-    Route::get('/invoice', fn() => view('admin/invoice'));
-    Route::get('/kwitansi', fn() => view('admin/kwitansi'));
-    Route::get('/catatan_rapat', fn() => view('admin/catatan_rapat'));
-    Route::get('/pengumuman', fn() => view('admin/pengumuman'));
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/data-karyawan', fn() => view('admin.data_karyawan'))->name('karyawan');
+    Route::get('/data-layanan', fn() => view('admin.data_layanan'))->name('layanan');
+    Route::get('/data-user', fn() => view('admin.data_user'))->name('user');
+    Route::get('/absensi', fn() => view('admin.absensi'))->name('absen');
+    Route::get('/template-surat', fn() => view('admin.templet_surat'))->name('template_surat');
+    Route::get('/list-surat', fn() => view('admin.list_surat'))->name('list_surat');
+    Route::get('/invoice', fn() => view('admin.invoice'))->name('invoice');
+    Route::get('/kwitansi', fn() => view('admin.kwitansi'))->name('kwitansi');
+    Route::get('/catatan-rapat', fn() => view('admin.catatan_rapat'))->name('rapat');
+    Route::get('/pengumuman', fn() => view('admin.pengumuman'))->name('pengumuman');
+});
+
     
     // Pemilik
     Route::get('/pemilik', fn() => view('pemilik/home'));
@@ -240,16 +245,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/monitoring', fn() => view('pemilik/monitoring_progres'));
     Route::get('/surat', fn() => view('pemilik/surat_kerjasama'));
     
-    // Finance
-    Route::get('/finance', fn() => view('finance/beranda'));
-    Route::get('/data', fn() => view('finance/data_layanan'));
-    Route::get('/pembayaran', fn() => view('finance/data_pembayaran'));
-    Route::get('/data_in_out', fn() => view('finance/data_in_out'));
-    Route::get('/invoice', fn() => view('finance/invoice'));
-    Route::get('/kwitansi', fn() => view('finance/kwitansi'));
-    Route::get('/daftar_karyawan', fn() => view('finance/daftar_karyawan'));
-    Route::get('/pemasukan', fn() => view('finance/pemasukan'));
-    Route::get('/pengeluaran', fn() => view('finance/pengeluaran'));
+
+
 
     // Manager Divisi
     Route::get('/manager_divisi', fn() => view('manager_divisi/home'));
@@ -263,6 +260,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/kelola_absen', fn() => view('general_manajer/kelola_absen'));
   
 });
+
+  // Finance
+Route::prefix('finance')->name('finance.')->group(function () {
+    Route::get('/', fn () => view('finance.beranda'))->name('beranda');
+    Route::get('/pemasukan', fn () => view('finance.pemasukan'))->name('pemasukan');
+    Route::get('/pengeluaran', fn () => view('finance.pengeluaran'))->name('pengeluaran');
+    Route::get('/invoice', fn () => view('finance.invoice'))->name('invoice');
+    Route::get('/kwitansi', fn () => view('finance.kwitansi'))->name('kwitansi');
+    Route::get('/data_layanan', fn () => view('finance.data_layanan'))->name('data_layanan');
+    Route::get('/data_pembayaran', fn () => view('finance.data_pembayaran'))->name('data_pembayaran');
+    Route::get('/daftar_karyawan', fn () => view('finance.daftar_karyawan'))->name('daftar_karyawan');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Banyak Route View Langsung (admin, pemilik, finance, dsb)
