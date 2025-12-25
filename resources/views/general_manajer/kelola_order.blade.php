@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Data Layanan - Dashboard</title>
+    <title>Data Orderan - Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
@@ -113,22 +113,27 @@
             font-weight: 600;
         }
         
-        .status-teknologi {
+        .status-todo {
             background-color: rgba(59, 130, 246, 0.15);
             color: #1e40af;
         }
         
-        .status-desain {
-            background-color: rgba(168, 85, 247, 0.15);
-            color: #6b21a8;
+        .status-progress {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #92400e;
         }
         
-        .status-marketing {
+        .status-done {
             background-color: rgba(16, 185, 129, 0.15);
             color: #065f46;
         }
         
-        .status-konsultasi {
+        .status-active {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #065f46;
+        }
+        
+        .status-inprogress {
             background-color: rgba(245, 158, 11, 0.15);
             color: #92400e;
         }
@@ -373,7 +378,7 @@
             padding: 1.5rem;
         }
         
-        /* SCROLLABLE TABLE - TANPA INDICATOR */
+        /* SCROLLABLE TABLE - TANPA TEKS SCROLL */
         .scrollable-table-container {
             width: 100%;
             overflow-x: auto;
@@ -412,7 +417,7 @@
         /* Table with fixed width to ensure scrolling */
         .data-table {
             width: 100%;
-            min-width: 1200px; /* Fixed minimum width */
+            min-width: 1400px; /* Fixed minimum width */
             border-collapse: collapse;
         }
         
@@ -446,6 +451,19 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         
+        /* Progress bar styles */
+        .progress-bar {
+            width: 100%;
+            background-color: #e2e8f0;
+            border-radius: 9999px;
+            height: 8px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 9999px;
+        }
+        
         /* Truncate text style */
         .truncate-text {
             max-width: 300px;
@@ -457,144 +475,148 @@
 </head>
 
 <body class="font-display bg-background-light text-text-light">
-    @include('general_manajer/templet/header')
-    
-    <!-- Main Content Container -->
-    <div class="main-content">
-        <main class="flex-1 flex flex-col bg-background-light">
-            <div class="flex-1 p-3 sm:p-8">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+       @include('general_manajer/templet/header')
+        
+        <!-- Main Content Container -->
+        <div class="main-content flex-1 flex flex-col overflow-y-auto bg-background-light">
+            <main class="flex-1 flex flex-col bg-background-light">
+                <div class="flex-1 p-3 sm:p-8">
 
-                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Data Layanan</h2>
-                
-                <!-- Search and Filter Section -->
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <div class="relative w-full md:w-1/3">
-                        <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Search..." type="text" />
+                    <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Data Orderan</h2>
+                    
+                    <!-- Search and Filter Section -->
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <div class="relative w-full md:w-1/3">
+                            <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                            <input class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Search..." type="text" />
+                        </div>
+                        <div class="flex flex-wrap gap-3 w-full md:w-auto">
+                            <button class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
+                                Filter
+                            </button>
+                            <button id="tambahOrderanBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
+                                <span class="material-icons-outlined">add</span>
+                                <span class="hidden sm:inline">Tambah Orderan</span>
+                                <span class="sm:hidden">Tambah</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                        <button class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
-                            Filter
-                        </button>
-                        <button id="tambahLayananBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
-                            <span class="material-icons-outlined">add</span>
-                            <span class="hidden sm:inline">Tambah Layanan</span>
-                            <span class="sm:hidden">Tambah</span>
-                        </button>
+                    
+                    <!-- Data Table Panel -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">
+                                <span class="material-icons-outlined text-primary">view_list</span>
+                                Daftar Orderan
+                            </h3>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="totalCount">2</span> orderan</span>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <!-- SCROLLABLE TABLE - TANPA INDICATOR -->
+                            <div class="desktop-table">
+                                <div class="scrollable-table-container table-shadow" id="scrollableTable">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="min-width: 60px;">No</th>
+                                                <th style="min-width: 200px;">Nama Orderan</th>
+                                                <th style="min-width: 300px;">Deskripsi</th>
+                                                <th style="min-width: 120px;">Harga</th>
+                                                <th style="min-width: 120px;">Deadline</th>
+                                                <th style="min-width: 150px;">Progres</th>
+                                                <th style="min-width: 120px;">Status</th>
+                                                <th style="min-width: 180px; text-align: center;">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="desktopTableBody">
+                                            <!-- Data rows will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Mobile Card View -->
+                            <div class="mobile-cards space-y-4" id="mobile-cards">
+                                <!-- Mobile cards will be populated by JavaScript -->
+                            </div>
+                            
+                            <!-- Desktop Pagination - SELALU DITAMPILKAN -->
+                            <div id="desktopPaginationContainer" class="desktop-pagination">
+                                <button id="desktopPrevPage" class="desktop-nav-btn">
+                                    <span class="material-icons-outlined text-sm">chevron_left</span>
+                                </button>
+                                <div id="desktopPageNumbers" class="flex gap-1">
+                                    <!-- Page numbers will be generated by JavaScript -->
+                                </div>
+                                <button id="desktopNextPage" class="desktop-nav-btn">
+                                    <span class="material-icons-outlined text-sm">chevron_right</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Mobile Pagination -->
+                            <div class="mobile-pagination md:hidden flex justify-center items-center gap-2 mt-4">
+                                <button id="prevPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span class="material-icons-outlined text-sm">chevron_left</span>
+                                </button>
+                                <div id="pageNumbers" class="flex gap-1">
+                                    <!-- Page numbers will be generated by JavaScript -->
+                                </div>
+                                <button id="nextPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span class="material-icons-outlined text-sm">chevron_right</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- Data Table Panel -->
-                <div class="panel">
-                    <div class="panel-header">
-                        <h3 class="panel-title">
-                            <span class="material-icons-outlined text-primary">miscellaneous_services</span>
-                            Daftar Layanan
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="totalCount">4</span> layanan</span>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <!-- SCROLLABLE TABLE - TANPA INDICATOR -->
-                        <div class="desktop-table">
-                            <div class="scrollable-table-container table-shadow" id="scrollableTable">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th style="min-width: 60px;">No</th>
-                                            <th style="min-width: 200px;">Nama Layanan</th>
-                                            <th style="min-width: 120px;">Harga</th>
-                                            <th style="min-width: 100px;">Durasi</th>
-                                            <th style="min-width: 300px;">Deskripsi</th>
-                                            <th style="min-width: 120px;">Kategori</th>
-                                            <th style="min-width: 150px; text-align: center;">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="desktopTableBody">
-                                        <!-- Data rows will be populated by JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        
-                        <!-- Mobile Card View -->
-                        <div class="mobile-cards space-y-4" id="mobile-cards">
-                            <!-- Mobile cards will be populated by JavaScript -->
-                        </div>
-                        
-                        <!-- Desktop Pagination - SELALU DITAMPILKAN -->
-                        <div id="desktopPaginationContainer" class="desktop-pagination">
-                            <button id="desktopPrevPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="desktopPageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="desktopNextPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
-                        </div>
-                        
-                        <!-- Mobile Pagination -->
-                        <div class="mobile-pagination md:hidden flex justify-center items-center gap-2 mt-4">
-                            <button id="prevPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="pageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="nextPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light">
-                Copyright ©2025 by digicity.id
-            </footer>
-        </main>
+                <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light">
+                    Copyright ©2025 by digicity.id
+                </footer>
+            </main>
+        </div>
     </div>
 
-    <!-- Modal Tambah Layanan -->
+    <!-- Modal Tambah Orderan -->
     <div id="tambahModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Tambah Layanan</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Tambah Orderan Baru</h3>
                     <button class="close-modal text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
                 <form id="tambahForm">
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
                         <input type="text" id="tambahNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700">Rp</span>
-                            <input type="number" id="tambahHarga" class="w-full pl-10 pr-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Durasi</label>
-                        <input type="text" id="tambahDurasi" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Contoh: 30 Hari" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                         <textarea id="tambahDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
                     </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
+                        <input type="text" id="tambahHarga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
+                        <input type="date" id="tambahDeadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
+                        <input type="number" id="tambahProgres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                        <select id="tambahKategori" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="">Pilih Kategori</option>
-                            <option value="Teknologi">Teknologi</option>
-                            <option value="Desain">Desain</option>
-                            <option value="Marketing">Marketing</option>
-                            <option value="Konsultasi">Konsultasi</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select id="tambahStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Active">Active</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
                         </select>
                     </div>
                     <div class="flex justify-end gap-2">
@@ -606,12 +628,12 @@
         </div>
     </div>
 
-    <!-- Modal Edit Layanan -->
+    <!-- Modal Edit Orderan -->
     <div id="editModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Layanan</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Edit Orderan</h3>
                     <button class="close-modal text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
@@ -619,31 +641,32 @@
                 <form id="editForm">
                     <input type="hidden" id="editId">
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
                         <input type="text" id="editNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700">Rp</span>
-                            <input type="number" id="editHarga" class="w-full pl-10 pr-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Durasi</label>
-                        <input type="text" id="editDurasi" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                         <textarea id="editDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
                     </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
+                        <input type="text" id="editHarga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
+                        <input type="date" id="editDeadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
+                        <input type="number" id="editProgres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                        <select id="editKategori" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="Teknologi">Teknologi</option>
-                            <option value="Desain">Desain</option>
-                            <option value="Marketing">Marketing</option>
-                            <option value="Konsultasi">Konsultasi</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select id="editStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Active">Active</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
                         </select>
                     </div>
                     <div class="flex justify-end gap-2">
@@ -655,21 +678,21 @@
         </div>
     </div>
 
-    <!-- Modal Detail Layanan -->
+    <!-- Modal Detail Orderan -->
     <div id="detailModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Detail Layanan</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Detail Orderan</h3>
                 </div>
                 <div class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-1">ID Layanan</h4>
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">ID Orderan</h4>
                             <p class="text-base font-medium" id="detailId"></p>
                         </div>
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-1">Nama Layanan</h4>
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Nama Orderan</h4>
                             <p class="text-base font-medium" id="detailNama"></p>
                         </div>
                         <div>
@@ -677,12 +700,21 @@
                             <p class="text-base font-medium" id="detailHarga"></p>
                         </div>
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-1">Durasi</h4>
-                            <p class="text-base font-medium" id="detailDurasi"></p>
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Deadline</h4>
+                            <p class="text-base font-medium" id="detailDeadline"></p>
                         </div>
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-1">Kategori</h4>
-                            <p id="detailKategori"></p>
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Status</h4>
+                            <p id="detailStatus"></p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Progres</h4>
+                            <div class="flex items-center gap-2">
+                                <div class="progress-bar flex-1">
+                                    <div class="progress-fill" id="detailProgressBar"></div>
+                                </div>
+                                <span class="text-sm font-medium" id="detailProgres"></span>
+                            </div>
                         </div>
                     </div>
                     <div>
@@ -697,7 +729,7 @@
         </div>
     </div>
 
-    <!-- Modal Hapus Layanan -->
+    <!-- Modal Hapus Orderan -->
     <div id="deleteModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
             <div class="p-6">
@@ -708,7 +740,7 @@
                     </button>
                 </div>
                 <div class="mb-6">
-                    <p class="text-gray-700">Apakah Anda yakin ingin menghapus layanan <span id="deleteNama" class="font-semibold"></span>?</p>
+                    <p class="text-gray-700">Apakah Anda yakin ingin menghapus orderan <span id="deleteNama" class="font-semibold"></span>?</p>
                     <p class="text-sm text-gray-500 mt-2">Tindakan ini tidak dapat dibatalkan.</p>
                 </div>
                 <input type="hidden" id="deleteId">
@@ -729,46 +761,32 @@
     </div>
 
     <script>
-        // Sample data for layanan
-        const layananData = [
+        // Sample data for orderan
+        const orderanData = [
             { 
                 id: 1, 
-                nama: "Jasa Pembuatan Website", 
-                harga: 5000000, 
-                durasi: "30 Hari", 
-                deskripsi: "Website company profile dengan desain modern dan responsif. Paket ini mencakup desain UI/UX, pengembangan frontend dan backend, optimasi SEO dasar, dan pelatihan penggunaan sistem website.", 
-                kategori: "Teknologi" 
+                nama: "Website Company Profile", 
+                deskripsi: "Redesign corporate branding dengan tampilan modern dan responsif. Meliputi pembuatan ulang UI/UX, optimasi performa, dan integrasi dengan sistem manajemen konten yang sudah ada. Proyek ini bertujuan untuk meningkatkan citra perusahaan di dunia digital dan meningkatkan konversi pengunjung menjadi pelanggan potensial.", 
+                harga: "Rp 5.000.000",
+                deadline: "2025-12-25", 
+                progres: 70,
+                status: "In Progress" 
             },
             { 
                 id: 2, 
-                nama: "Desain Logo", 
-                harga: 1500000, 
-                durasi: "7 Hari", 
-                deskripsi: "Desain logo profesional dengan konsep sesuai brand Anda. Kami akan menyediakan 3 konsep desain awal, revisi hingga 3 kali, dan file akhir dalam berbagai format (PNG, JPG, SVG, AI).", 
-                kategori: "Desain" 
-            },
-            { 
-                id: 3, 
-                nama: "Manajemen Sosial Media", 
-                harga: 3000000, 
-                durasi: "30 Hari", 
-                deskripsi: "Kelola akun sosmed dengan konten berkualitas dan strategi yang efektif. Layanan ini mencakup pembuatan konten, penjadwalan posting, monitoring engagement, dan laporan bulanan.", 
-                kategori: "Marketing" 
-            },
-            { 
-                id: 4, 
-                nama: "Konsultasi SEO", 
-                harga: 2000000, 
-                durasi: "14 Hari", 
-                deskripsi: "Analisis dan strategi SEO untuk meningkatkan visibilitas website. Kami akan melakukan audit SEO, analisis kompetitor, riset kata kunci, dan memberikan rekomendasi implementasi.", 
-                kategori: "Marketing" 
+                nama: "Aplikasi Kasir Mobile", 
+                deskripsi: "Pengembangan sistem POS android dengan fitur lengkap untuk kebutuhan retail. Aplikasi ini akan memiliki kemampuan untuk mengelola inventaris, melacak penjualan, menghasilkan laporan, dan sinkronisasi data dengan sistem backend. Dengan antarmuka yang intuitif, aplikasi ini dirancang untuk memudahkan proses transaksi dan manajemen toko.", 
+                harga: "Rp 12.500.000",
+                deadline: "2026-01-10", 
+                progres: 45,
+                status: "Active" 
             }
         ];
 
         // Pagination variables
-        const itemsPerPage = 3; // Dikurangi jadi 3 agar pagination terlihat
+        const itemsPerPage = 3;
         let currentPage = 1;
-        const totalPages = Math.ceil(layananData.length / itemsPerPage);
+        const totalPages = Math.ceil(orderanData.length / itemsPerPage);
 
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize pagination - SELALU DIJALANKAN
@@ -783,7 +801,7 @@
             const toastMessage = document.getElementById('toastMessage');
             
             // Buttons
-            const tambahLayananBtn = document.getElementById('tambahLayananBtn');
+            const tambahOrderanBtn = document.getElementById('tambahOrderanBtn');
             const closeModals = document.querySelectorAll('.close-modal');
             const confirmDeleteBtn = document.getElementById('confirmDelete');
             const closeToastBtn = document.getElementById('closeToast');
@@ -793,7 +811,7 @@
             const editForm = document.getElementById('editForm');
             
             // Show tambah modal
-            tambahLayananBtn.addEventListener('click', function() {
+            tambahOrderanBtn.addEventListener('click', function() {
                 tambahModal.classList.remove('hidden');
                 tambahForm.reset();
             });
@@ -827,7 +845,7 @@
             // Handle tambah form submission
             tambahForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                showToast('Layanan berhasil ditambahkan!');
+                showToast('Orderan berhasil ditambahkan!');
                 tambahModal.classList.add('hidden');
                 tambahForm.reset();
                 
@@ -839,7 +857,7 @@
             // Handle edit form submission
             editForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                showToast('Data layanan berhasil diperbarui!');
+                showToast('Orderan berhasil diperbarui!');
                 editModal.classList.add('hidden');
                 
                 // Refresh data
@@ -850,7 +868,7 @@
             // Handle delete confirmation
             confirmDeleteBtn.addEventListener('click', function() {
                 const id = document.getElementById('deleteId').value;
-                showToast('Layanan berhasil dihapus!');
+                showToast('Orderan berhasil dihapus!');
                 deleteModal.classList.add('hidden');
                 
                 // Refresh data
@@ -878,7 +896,7 @@
         // Initialize pagination - SELALU DIJALANKAN
         function initializePagination() {
             // Update total count
-            document.getElementById('totalCount').textContent = layananData.length;
+            document.getElementById('totalCount').textContent = orderanData.length;
             
             // SELALU tampilkan pagination
             initDesktopPagination();
@@ -975,38 +993,66 @@
             tbody.innerHTML = '';
             
             const startIndex = (page - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, layananData.length);
+            const endIndex = Math.min(startIndex + itemsPerPage, orderanData.length);
             
             for (let i = startIndex; i < endIndex; i++) {
-                const layanan = layananData[i];
+                const orderan = orderanData[i];
                 const row = document.createElement('tr');
                 
+                // Determine status class
+                let statusClass = '';
+                if (orderan.status === 'In Progress') {
+                    statusClass = 'status-inprogress';
+                } else if (orderan.status === 'Active') {
+                    statusClass = 'status-active';
+                } else if (orderan.status === 'Completed') {
+                    statusClass = 'status-done';
+                } else if (orderan.status === 'Cancelled') {
+                    statusClass = 'status-todo';
+                }
+                
+                // Determine progress bar color
+                let progressColor = '';
+                if (orderan.progres < 50) {
+                    progressColor = 'bg-red-500';
+                } else if (orderan.progres < 80) {
+                    progressColor = 'bg-yellow-500';
+                } else {
+                    progressColor = 'bg-green-500';
+                }
+                
                 // Truncate description for table view
-                const truncatedDesc = layanan.deskripsi.length > 50 
-                    ? layanan.deskripsi.substring(0, 50) + '...' 
-                    : layanan.deskripsi;
+                const truncatedDesc = orderan.deskripsi.length > 50 
+                    ? orderan.deskripsi.substring(0, 50) + '...' 
+                    : orderan.deskripsi;
                 
                 row.innerHTML = `
                     <td style="min-width: 60px;">${i + 1}</td>
-                    <td style="min-width: 200px;">${layanan.nama}</td>
-                    <td style="min-width: 120px;">Rp ${layanan.harga.toLocaleString('id-ID')}</td>
-                    <td style="min-width: 100px;">${layanan.durasi}</td>
-                    <td style="min-width: 300px;" class="truncate-text" title="${layanan.deskripsi}">${truncatedDesc}</td>
-                    <td style="min-width: 120px;"><span class="status-badge status-${layanan.kategori.toLowerCase()}">${layanan.kategori}</span></td>
-                    <td style="min-width: 150px; text-align: center;">
+                    <td style="min-width: 200px;">${orderan.nama}</td>
+                    <td style="min-width: 300px;" class="truncate-text" title="${orderan.deskripsi}">${truncatedDesc}</td>
+                    <td style="min-width: 120px;">${orderan.harga}</td>
+                    <td style="min-width: 120px;">${orderan.deadline}</td>
+                    <td style="min-width: 150px;">
+                        <div class="progress-bar">
+                            <div class="progress-fill ${progressColor}" style="width: ${orderan.progres}%"></div>
+                        </div>
+                        <span class="text-xs text-gray-600 dark:text-gray-400 mt-1 block">${orderan.progres}%</span>
+                    </td>
+                    <td style="min-width: 120px;"><span class="status-badge ${statusClass}">${orderan.status}</span></td>
+                    <td style="min-width: 180px; text-align: center;">
                         <div class="flex justify-center gap-2">
                             <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openDetailModal(${layanan.id}, '${layanan.nama}', ${layanan.harga}, '${layanan.durasi}', '${layanan.deskripsi}', '${layanan.kategori}')"
+                                onclick="openDetailModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')"
                                 title="Lihat Detail">
                                 <span class="material-icons-outlined">visibility</span>
                             </button>
                             <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openEditModal(${layanan.id}, '${layanan.nama}', ${layanan.harga}, '${layanan.durasi}', '${layanan.deskripsi}', '${layanan.kategori}')"
+                                onclick="openEditModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')"
                                 title="Edit">
                                 <span class="material-icons-outlined">edit</span>
                             </button>
                             <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                onclick="openDeleteModal(${layanan.id}, '${layanan.nama}')"
+                                onclick="openDeleteModal(${orderan.id}, '${orderan.nama}')"
                                 title="Hapus">
                                 <span class="material-icons-outlined">delete</span>
                             </button>
@@ -1023,32 +1069,58 @@
             container.innerHTML = '';
             
             const startIndex = (page - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, layananData.length);
+            const endIndex = Math.min(startIndex + itemsPerPage, orderanData.length);
             
             for (let i = startIndex; i < endIndex; i++) {
-                const layanan = layananData[i];
+                const orderan = orderanData[i];
+                
+                // Determine status class
+                let statusClass = '';
+                if (orderan.status === 'In Progress') {
+                    statusClass = 'status-inprogress';
+                } else if (orderan.status === 'Active') {
+                    statusClass = 'status-active';
+                } else if (orderan.status === 'Completed') {
+                    statusClass = 'status-done';
+                } else if (orderan.status === 'Cancelled') {
+                    statusClass = 'status-todo';
+                }
+                
+                // Determine progress bar color
+                let progressColor = '';
+                if (orderan.progres < 50) {
+                    progressColor = 'bg-red-500';
+                } else if (orderan.progres < 80) {
+                    progressColor = 'bg-yellow-500';
+                } else {
+                    progressColor = 'bg-green-500';
+                }
                 
                 // Truncate description for mobile card view
-                const truncatedDesc = layanan.deskripsi.length > 80 
-                    ? layanan.deskripsi.substring(0, 80) + '...' 
-                    : layanan.deskripsi;
+                const truncatedDesc = orderan.deskripsi.length > 80 
+                    ? orderan.deskripsi.substring(0, 80) + '...' 
+                    : orderan.deskripsi;
                 
                 const card = document.createElement('div');
                 card.className = 'bg-white rounded-lg border border-border-light p-4 shadow-sm';
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-3">
                         <div>
-                            <h4 class="font-semibold text-base">${layanan.nama}</h4>
-                            <p class="text-sm text-text-muted-light">Rp ${layanan.harga.toLocaleString('id-ID')}</p>
+                            <h4 class="font-semibold text-base">${orderan.nama}</h4>
+                            <p class="text-sm text-text-muted-light">Deadline: ${orderan.deadline}</p>
                         </div>
                         <div class="flex gap-2">
+                            <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                onclick="openDetailModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')"
+                                title="Lihat Detail">
+                            </button>
                             <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openEditModal(${layanan.id}, '${layanan.nama}', ${layanan.harga}, '${layanan.durasi}', '${layanan.deskripsi}', '${layanan.kategori}')"
+                                onclick="openEditModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')"
                                 title="Edit">
                                 <span class="material-icons-outlined">edit</span>
                             </button>
                             <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                onclick="openDeleteModal(${layanan.id}, '${layanan.nama}')"
+                                onclick="openDeleteModal(${orderan.id}, '${orderan.nama}')"
                                 title="Hapus">
                                 <span class="material-icons-outlined">delete</span>
                             </button>
@@ -1056,20 +1128,27 @@
                     </div>
                     <div class="grid grid-cols-2 gap-2 text-sm">
                         <div>
-                            <p class="text-text-muted-light">Durasi</p>
-                            <p class="font-medium">${layanan.durasi}</p>
+                            <p class="text-text-muted-light">Harga</p>
+                            <p class="font-medium">${orderan.harga}</p>
                         </div>
                         <div>
-                            <p class="text-text-muted-light">Kategori</p>
-                            <p><span class="status-badge status-${layanan.kategori.toLowerCase()}">${layanan.kategori}</span></p>
+                            <p class="text-text-muted-light">Status</p>
+                            <p><span class="status-badge ${statusClass}">${orderan.status}</span></p>
+                        </div>
+                        <div class="col-span-2">
+                            <p class="text-text-muted-light">Progres</p>
+                            <div class="progress-bar mt-1">
+                                <div class="progress-fill ${progressColor}" style="width: ${orderan.progres}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">${orderan.progres}%</p>
                         </div>
                     </div>
                     <div class="mt-3">
                         <p class="text-text-muted-light">Deskripsi</p>
                         <p class="font-medium">${truncatedDesc}</p>
-                        ${layanan.deskripsi.length > 80 ? `
+                        ${orderan.deskripsi.length > 80 ? `
                         <button class="text-primary text-sm mt-1" 
-                            onclick="openDetailModal(${layanan.id}, '${layanan.nama}', ${layanan.harga}, '${layanan.durasi}', '${layanan.deskripsi}', '${layanan.kategori}')">
+                            onclick="openDetailModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')">
                             Lihat selengkapnya
                         </button>` : ''}
                     </div>
@@ -1115,28 +1194,53 @@
         }
 
         // Open detail modal with data
-        function openDetailModal(id, nama, harga, durasi, deskripsi, kategori) {
+        function openDetailModal(id, nama, deskripsi, harga, deadline, progres, status) {
             document.getElementById('detailId').textContent = '#' + id;
             document.getElementById('detailNama').textContent = nama;
-            document.getElementById('detailHarga').textContent = 'Rp ' + harga.toLocaleString('id-ID');
-            document.getElementById('detailDurasi').textContent = durasi;
             document.getElementById('detailDeskripsi').textContent = deskripsi;
+            document.getElementById('detailHarga').textContent = harga;
+            document.getElementById('detailDeadline').textContent = deadline;
+            document.getElementById('detailProgres').textContent = progres + '%';
             
-            // Set kategori badge
-            const kategoriElement = document.getElementById('detailKategori');
-            kategoriElement.innerHTML = `<span class="status-badge status-${kategori.toLowerCase()}">${kategori}</span>`;
+            // Set status badge
+            const statusElement = document.getElementById('detailStatus');
+            let statusClass = '';
+            if (status === 'In Progress') {
+                statusClass = 'status-inprogress';
+            } else if (status === 'Active') {
+                statusClass = 'status-active';
+            } else if (status === 'Completed') {
+                statusClass = 'status-done';
+            } else if (status === 'Cancelled') {
+                statusClass = 'status-todo';
+            }
+            statusElement.innerHTML = `<span class="status-badge ${statusClass}">${status}</span>`;
+            
+            // Set progress bar
+            const progressBar = document.getElementById('detailProgressBar');
+            let progressColor = '';
+            if (progres < 50) {
+                progressColor = 'bg-red-500';
+            } else if (progres < 80) {
+                progressColor = 'bg-yellow-500';
+            } else {
+                progressColor = 'bg-green-500';
+            }
+            progressBar.className = `progress-fill ${progressColor}`;
+            progressBar.style.width = progres + '%';
             
             document.getElementById('detailModal').classList.remove('hidden');
         }
 
         // Open edit modal with data
-        function openEditModal(id, nama, harga, durasi, deskripsi, kategori) {
+        function openEditModal(id, nama, deskripsi, harga, deadline, progres, status) {
             document.getElementById('editId').value = id;
             document.getElementById('editNama').value = nama;
-            document.getElementById('editHarga').value = harga;
-            document.getElementById('editDurasi').value = durasi;
             document.getElementById('editDeskripsi').value = deskripsi;
-            document.getElementById('editKategori').value = kategori;
+            document.getElementById('editHarga').value = harga;
+            document.getElementById('editDeadline').value = deadline;
+            document.getElementById('editProgres').value = progres;
+            document.getElementById('editStatus').value = status;
             
             document.getElementById('editModal').classList.remove('hidden');
         }

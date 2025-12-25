@@ -6,6 +6,7 @@
     <title>Brand Navigation</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
         tailwind.config = {
@@ -168,6 +169,7 @@
             transition: all 0.3s ease;
             text-align: center;
             width: 100%;
+            text-decoration: none;
         }
         
         .mobile-nav .login-btn:hover {
@@ -193,7 +195,7 @@
             transform: rotate(90deg);
         }
         
-        /* Active navigation link */
+        /* Active navigation link - Perbaikan CSS */
         .nav-link {
             position: relative;
             transition: color 0.3s ease;
@@ -206,12 +208,12 @@
             left: 0;
             width: 0;
             height: 2px;
-            background-color: #0f172a; /* Biru sangat tua mendekati hitam */
+            background-color: #0f172a;
             transition: width 0.3s ease;
         }
         
         .nav-link:hover {
-            color: #0f172a; /* Biru sangat tua mendekati hitam */
+            color: #0f172a;
         }
         
         .nav-link:hover::after {
@@ -219,11 +221,19 @@
         }
         
         .nav-link.active {
-            color: #0f172a; /* Biru sangat tua mendekati hitam */
+            color: #0f172a;
+            font-weight: 600; /* Teks lebih tebal untuk link aktif */
         }
         
         .nav-link.active::after {
-            width: 100%;
+            width: 100%; /* Garis bawah selalu muncul untuk link aktif */
+        }
+        
+        /* Mobile navigation clickable area */
+        .mobile-nav-clickable {
+            cursor: pointer;
+            position: relative;
+            z-index: 10;
         }
     </style>
 </head>
@@ -236,33 +246,27 @@
                 <!-- Brand Logo -->
                 <div class="text-xl md:text-2xl font-bold text-black flex items-center">
                     <span class="bg-primary text-white p-2 rounded-lg mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
+                        <i class='bx bx-buildings text-2xl'></i>
                     </span>
                     Brand
                 </div>
                 
                 <!-- Desktop Navigation - Centered -->
                 <nav class="hidden md:flex items-center space-x-4 lg:space-x-8 absolute left-1/2 transform -translate-x-1/2">
-                    <a class="nav-link text-sm font-medium text-gray-700 active" href="{{ url('/pemilik') }}">Beranda</a>
-                    <a class="nav-link text-sm font-medium text-gray-700" href="{{ url('/rekap_absen') }}">Rekap Absensi</a>
-                    <a class="nav-link text-sm font-medium text-gray-700" href="{{ url('/laporan') }}">Laporan</a>
-                    <a class="nav-link text-sm font-medium text-gray-700" href="{{ url('/monitoring') }}">Monitoring Progres</a>
-                    <a class="nav-link text-sm font-medium text-gray-700" href="{{ url('/surat') }}">Surat Kerjasama</a>
+                    <a class="nav-link text-sm font-medium text-gray-700" data-page="home" href="/pemilik">Beranda</a>
+                    <a class="nav-link text-sm font-medium text-gray-700" data-page="rekap" href="/rekap_absen">Rekap Absensi</a>
+                    <a class="nav-link text-sm font-medium text-gray-700" data-page="laporan" href="/laporan">Laporan</a>
                 </nav>
                 
                 <!-- Login Button -->
                 <a class="hidden md:flex items-center bg-black text-white text-sm font-medium py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors"
-                    href="{{ url('/login') }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
+                    href="/login">
+                    <i class='bx bx-log-out-circle text-xl mr-2'></i>
                     Log Out
                 </a>
                 
                 <!-- Mobile Menu Button -->
-                <button id="mobileMenuBtn" class="md:hidden flex flex-col justify-center items-center w-8 h-8 hamburger">
+                <button id="mobileMenuBtn" class="md:hidden flex flex-col justify-center items-center w-8 h-8 hamburger mobile-nav-clickable">
                     <span class="hamburger-line w-6 h-0.5 bg-black mb-1.5"></span>
                     <span class="hamburger-line w-6 h-0.5 bg-black mb-1.5"></span>
                     <span class="hamburger-line w-6 h-0.5 bg-black"></span>
@@ -273,41 +277,21 @@
             <div id="mobileNav" class="mobile-nav">
                 <div class="mobile-nav-content">
                     <nav>
-                        <a class="nav-link active" href="{{ url('/pemilik') }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
+                        <a class="nav-link" data-page="home" href="/pemilik">
+                            <i class='bx bx-home-alt text-xl mr-2'></i>
                             Beranda
                         </a>
-                        <a class="nav-link" href="{{ url('/rekap_absen') }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                            </svg>
+                        <a class="nav-link" data-page="rekap" href="/rekap_absen">
+                            <i class='bx bx-calendar-check text-xl mr-2'></i>
                             Rekap Absensi
                         </a>
-                        <a class="nav-link" href="{{ url('/laporan') }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
+                        <a class="nav-link" data-page="laporan" href="/laporan">
+                            <i class='bx bx-file text-xl mr-2'></i>
                             Laporan
                         </a>
-                        <a class="nav-link" href="{{ url('/monitoring') }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                            Monitoring Progres
-                        </a>
-                        <a class="nav-link" href="{{ url('/surat') }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Surat Kerjasama
-                        </a>
                     </nav>
-                    <a class="login-btn" href="{{ url('/login') }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
+                    <a class="login-btn" href="/login">
+                        <i class='bx bx-log-out-circle text-xl mr-1'></i>
                         Log Out
                     </a>
                 </div>
@@ -342,42 +326,85 @@
         document.addEventListener('DOMContentLoaded', function() {
             mobileNav.classList.remove('active');
             mobileMenuBtn.classList.remove('active');
+            
+            // Set active navigation link based on current page
+            setActiveNavLink();
         });
         
-        mobileMenuBtn.addEventListener('click', function() {
+        // Toggle mobile navigation
+        mobileMenuBtn.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent event bubbling
             mobileMenuBtn.classList.toggle('active');
             mobileNav.classList.toggle('active');
+        });
+        
+        // Close mobile nav when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!mobileNav.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                mobileMenuBtn.classList.remove('active');
+                mobileNav.classList.remove('active');
+            }
         });
         
         // Close mobile nav when clicking on a link
         const mobileNavLinks = mobileNav.querySelectorAll('.nav-link');
         mobileNavLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                mobileMenuBtn.classList.remove('active');
-                mobileNav.classList.remove('active');
+            link.addEventListener('click', function(e) {
+                // Allow the default link behavior to proceed (navigation)
+                // Close the menu after a short delay to allow navigation to start
+                setTimeout(() => {
+                    mobileMenuBtn.classList.remove('active');
+                    mobileNav.classList.remove('active');
+                }, 300);
             });
         });
         
         // Also close when clicking on login button
         const mobileLoginBtn = mobileNav.querySelector('.login-btn');
-        mobileLoginBtn.addEventListener('click', function() {
+        mobileLoginBtn.addEventListener('click', function(e) {
+            // Allow the default link behavior to proceed (navigation)
+            // Close the menu immediately
             mobileMenuBtn.classList.remove('active');
             mobileNav.classList.remove('active');
         });
         
-        // Navigation active state
-        const navLinks = document.querySelectorAll('.nav-link');
-        
-        // Add click event to navigation links
-        navLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Remove active class from all links
-                navLinks.forEach(l => l.classList.remove('active'));
-                
-                // Add active class to clicked link
-                this.classList.add('active');
+        // Function to set active navigation link based on current page
+        function setActiveNavLink() {
+            // Get current page path
+            const currentPath = window.location.pathname;
+            
+            // Get all navigation links (both desktop and mobile)
+            const allNavLinks = document.querySelectorAll('.nav-link');
+            
+            // Remove active class from all links
+            allNavLinks.forEach(link => {
+                link.classList.remove('active');
             });
+            
+            // Determine which page we're on based on URL
+            let currentPage = '';
+            if (currentPath.includes('/pemilik') || currentPath === '/') {
+                currentPage = 'home';
+            } else if (currentPath.includes('/rekap_absen')) {
+                currentPage = 'rekap';
+            } else if (currentPath.includes('/laporan')) {
+                currentPage = 'laporan';
+            }
+            
+            // Add active class to the link that matches the current page
+            allNavLinks.forEach(link => {
+                const pageAttr = link.getAttribute('data-page');
+                if (pageAttr === currentPage) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        // Prevent event propagation inside mobile nav
+        mobileNav.addEventListener('click', function(e) {
+            e.stopPropagation();
         });
     </script>
 </body>
+
 </html>

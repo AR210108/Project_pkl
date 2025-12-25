@@ -258,6 +258,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/layanan', fn() => view('general_manajer/data_layanan'));
     Route::get('/kelola_tugas', fn() => view('general_manajer/kelola_tugas'));
     Route::get('/kelola_absen', fn() => view('general_manajer/kelola_absen'));
+    Route::get('/kelola_order', fn() => view('general_manajer/kelola_order'));
   
 });
 
