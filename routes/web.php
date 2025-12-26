@@ -13,7 +13,7 @@ use App\Http\Controllers\KwitansiController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\CatatanRapatController;
 use App\Http\Controllers\PengumumanController;
-
+use App\Http\Controllers\PegawaiController;
 /*
 |--------------------------------------------------------------------------
 | Guest Routes (Pengunjung Belum Login)
@@ -406,3 +406,14 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'destroy'])->name('catatan_rapat.destroy');
 });
 
+// ==========================================================
+// == TAMBAHKAN KODE INI DI BAGIAN PALING BAWAH FILE ==
+// ==========================================================
+// Routes untuk PegawaiController
+Route::controller(PegawaiController::class)->group(function () {
+    Route::get('/data_karyawan', 'index')->name('pegawai.index');
+    Route::post('/data_karyawan', 'store')->name('pegawai.store');
+    Route::get('/data_karyawan/{id}/edit', 'edit')->name('pegawai.edit');
+    Route::put('/data_karyawan/{id}', 'update')->name('pegawai.update');
+    Route::delete('/data_karyawan/{id}', 'destroy')->name('pegawai.destroy');
+});
