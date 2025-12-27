@@ -374,35 +374,10 @@
     <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
 
     <!-- Sidebar -->
-    <!-- 
-      - Mobile: di kanan, tersembunyi dengan translate-x-full
-      - Desktop: di kiri, terlihat dengan md:translate-x-0
-    -->
-    <aside id="sidebar" class="sidebar-fixed w-64 bg-white flex flex-col sidebar-transition transform translate-x-full md:translate-x-0 right-0 md:left-0 md:right-auto shadow-lg">
-        <div class="flex-grow p-6">
-            <h1 class="text-3xl font-bold mb-12 text-gray-800">Brand</h1>
-            <nav class="space-y-2">
-                <a class="nav-item flex items-center space-x-3 text-gray-700 font-medium hover:bg-gray-100 p-3 rounded-lg transition-colors" href="/finance">
-                    <span class="material-icons-outlined">home</span>
-                    <span>Beranda</span>
-                </a>
-                <a class="nav-item flex items-center space-x-3 text-gray-700 font-medium hover:bg-gray-100 p-3 rounded-lg transition-colors active" href="/data">
-                    <span class="material-icons-outlined">list_alt</span>
-                    <span>Data Layanan</span>
-                </a>
-                <a class="nav-item flex items-center space-x-3 text-gray-700 font-medium hover:bg-gray-100 p-3 rounded-lg transition-colors" href="/pembayaran">
-                    <span class="material-icons-outlined">payment</span>
-                    <span>Data Pembayaran</span>
-                </a>
-            </nav>
-        </div>
-        <div class="p-6 border-t border-gray-200">
-            <a class="nav-item flex items-center space-x-3 text-gray-700 font-medium hover:bg-gray-100 p-3 rounded-lg transition-colors" href="#">
-                <span class="material-icons-outlined">logout</span>
-                <span>Log Out</span>
-            </a>
-        </div>
-    </aside>
+  <body class="font-display bg-background-light text-text-light">
+    <div class="flex min-h-screen">
+        <!-- Container untuk sidebar yang akan dimuat -->
+        @include('finance.templet.sider')
 
     <!-- Konten Utama -->
     <div id="main-content" class="main-content min-h-screen md:ml-64">
