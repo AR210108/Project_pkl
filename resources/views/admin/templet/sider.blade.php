@@ -52,41 +52,13 @@
             Absensi
         </a>
 
-        {{-- Menu Surat Kerjasama (Dropdown) --}}
-        <div class="relative">
-            <button class="flex items-center gap-3 p-3 rounded-lg w-full text-left 
-                {{ request()->is('surat_kerjasama*') || request()->is('template_surat*') || request()->is('list_surat*') 
-                ? 'bg-primary bg-opacity-10 text-primary font-medium' 
-                : 'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
-                onclick="toggleDropdown('surat-kerjasama-dropdown')">
-
-                <i class='bx bx-file'></i>
-                Surat Kerjasama
-                <i class='bx bx-chevron-down ml-auto transition-transform duration-200' id="surat-kerjasama-icon"></i>
-            </button>
-
-            {{-- Dropdown --}}
-            <div id="surat-kerjasama-dropdown" 
-                class="pl-6 mt-1 space-y-1 
-                {{ request()->is('surat_kerjasama*') || request()->is('template_surat*') || request()->is('list_surat*') ? 'block' : 'hidden' }}">
-
-                <a class="flex items-center gap-3 p-3 rounded-lg 
-                    {{ request()->is('template_surat*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
-                    'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
-                    href="/template_surat">
-                    <i class='bx bx-file-blank'></i>
-                    Template Surat
-                </a>
-
-                <a class="flex items-center gap-3 p-3 rounded-lg 
-                    {{ request()->is('list_surat*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
-                    'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
-                    href="/list_surat">
-                    <i class='bx bx-list-check'></i>
-                    List Surat
-                </a>
-            </div>
-        </div>
+        {{-- Menu Surat Kerjasama--}}
+            <a class="flex items-center gap-3 p-3 rounded-lg 'bg-primary bg-opacity-10 text-primary font-medium' 
+            'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark'" 
+            href="{{ route('admin.surat_kerjasama.index') }}">
+            <i class='bx bx-time'></i>
+            Surat Kerjasama
+        </a>
 
         {{-- Menu Invoice & Kwitansi --}}
         <div class="relative">
