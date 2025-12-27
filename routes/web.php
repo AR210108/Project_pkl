@@ -235,10 +235,11 @@ Route::middleware('auth')->group(function () {
     
     // Pemilik
     Route::get('/pemilik', fn() => view('pemilik/home'));
-    Route::get('/rekap_absen', fn() => view('pemilik/rekap_absen'));
+    Route::get('/rekap_absensi', fn() => view('pemilik/rekap_absensi'));
     Route::get('/laporan', fn() => view('pemilik/laporan'));
     Route::get('/monitoring', fn() => view('pemilik/monitoring_progres'));
     Route::get('/surat', fn() => view('pemilik/surat_kerjasama'));
+    
     
     // Finance
     Route::get('/finance', fn() => view('finance/beranda'));
@@ -284,7 +285,7 @@ Route::view('/catatan_rapat', 'admin/catatan_rapat');
 Route::view('/pengumuman', 'admin/pengumuman');
 
 Route::view('/pemilik', 'pemilik/home');
-Route::view('/rekap_absen', 'pemilik/rekap_absen');
+Route::view('/rekap_absensi', 'pemilik/rekap_absensi');
 Route::view('/laporan', 'pemilik/laporan');
 Route::view('/monitoring', 'pemilik/monitoring_progres');
 Route::view('/surat', 'pemilik/surat_kerjasama');
@@ -334,8 +335,8 @@ Route::get('/pengumuman', function () {
 Route::get('/pemilik', function () {
     return view('pemilik/home');
 });
-Route::get('/rekap_absen', function () {
-    return view('pemilik/rekap_absen');
+Route::get('/rekap_absensi', function () {
+    return view('pemilik/rekap_absensi');
 });
 Route::get('/laporan', function () {
     return view('pemilik/laporan');
@@ -396,3 +397,6 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'destroy'])->name('catatan_rapat.destroy');
 });
 
+// Rekap
+Route::get('/kelola_absen', [AbsensiController::class, 'kelolaAbsen'])->name('kelola.absen');
+Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');

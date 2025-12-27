@@ -49,6 +49,60 @@ class AbsensiController extends Controller
     }
 
     /**
+     * Menampilkan halaman kelola absensi
+     * 
+     * @return \Illuminate\View\View
+     */
+    public function kelolaAbsen()
+    {
+        // Mengambil statistik dari API
+        $statsResponse = $this->apiStatistics();
+        $stats = $statsResponse->getData(true)['data'];
+        
+        // Mengambil semua user dengan role 'karyawan' untuk dropdown
+        $users = User::where('role', 'karyawan')->get();
+        
+        return view('general_manajer.kelola_absen', compact('stats', 'users'));
+    }
+
+/**
+ * Menampilkan halaman rekap absensi
+ * 
+ * @return \Illuminate\View\View
+ */
+public function rekapAbsensi()
+{
+    // Mengambil semua data absensi dengan relasi user
+    $absensis = Absensi::with('user')->get();
+    
+    // Mengambil data kehadiran (tanpa status Tidak Masuk, Cuti, Sakit, Izin)
+    $dataKehadiran = Absensi::with('user')
+        ->where('status', '!=', 'Tidak Masuk')
+        ->whereNotIn('status', ['Cuti', 'Sakit', 'Izin'])
+        ->orderBy('tanggal', 'desc')
+        ->get();
+        
+    // Mengambil data ketidakhadiran (termasuk Tidak Masuk, Cuti, Sakit, Izin)
+    $dataKetidakhadiran = Absensi::with('user')
+        ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Tidak Masuk'])
+        ->orderBy('tanggal', 'desc')
+        ->get();
+    
+    // Menghitung statistik
+    $statistik = [
+        'hadir' => Absensi::where('status', 'Tepat Waktu')->count(),
+        'terlambat' => Absensi::where('status', 'Terlambat')->count(),
+        'tidakMasuk' => Absensi::where('status', 'Tidak Masuk')->count(),
+        'cuti' => Absensi::where('status', 'Cuti')->count(),
+        'sakit' => Absensi::where('status', 'Sakit')->count(),
+        'izin' => Absensi::where('status', 'Izin')->count(),
+        'dinas' => Absensi::where('status', 'Dinas Luar')->count(),
+    ];
+    
+    return view('pemilik.rekap_absensi', compact('statistik', 'absensis', 'dataKehadiran', 'dataKetidakhadiran'));
+}
+
+    /**
      * Menandai karyawan yang tidak hadir pada tanggal tertentu
      * 
      * @param string $date
@@ -562,4 +616,4 @@ class AbsensiController extends Controller
         
         return $data;
     }
-}
+} 
