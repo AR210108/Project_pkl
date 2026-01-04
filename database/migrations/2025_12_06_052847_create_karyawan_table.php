@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('karyawan', function (Blueprint $table) {
+        // Ubah 'karyawan' menjadi 'karyawans' di sini
+        Schema::create('karyawans', function (Blueprint $table) {
             $table->id();
             $table->string('nama', 100);
             $table->string('jabatan', 100);
@@ -22,6 +23,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('karyawan');
+        // Dan juga ubah 'karyawan' menjadi 'karyawans' di sini
+        Schema::dropIfExists('karyawans');
     }
 };

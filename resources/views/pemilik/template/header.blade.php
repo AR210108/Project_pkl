@@ -254,7 +254,7 @@
                 <!-- Desktop Navigation - Centered -->
                 <nav class="hidden md:flex items-center space-x-4 lg:space-x-8 absolute left-1/2 transform -translate-x-1/2">
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="home" href="/pemilik">Beranda</a>
-                    <a class="nav-link text-sm font-medium text-gray-700" data-page="rekap" href="/rekap_absen">Rekap Absensi</a>
+                    <a class="nav-link text-sm font-medium text-gray-700" data-page="rekap" href="/rekap_absensi">Rekap Absensi</a>
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="laporan" href="/laporan">Laporan</a>
                 </nav>
                 
@@ -281,7 +281,7 @@
                             <i class='bx bx-home-alt text-xl mr-2'></i>
                             Beranda
                         </a>
-                        <a class="nav-link" data-page="rekap" href="/rekap_absen">
+                        <a class="nav-link" data-page="rekap" href="/rekap_absensi">
                             <i class='bx bx-calendar-check text-xl mr-2'></i>
                             Rekap Absensi
                         </a>
@@ -385,7 +385,7 @@
             let currentPage = '';
             if (currentPath.includes('/pemilik') || currentPath === '/') {
                 currentPage = 'home';
-            } else if (currentPath.includes('/rekap_absen')) {
+            } else if (currentPath.includes('/rekap_absensi')) {
                 currentPage = 'rekap';
             } else if (currentPath.includes('/laporan')) {
                 currentPage = 'laporan';
