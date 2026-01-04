@@ -79,7 +79,7 @@
                 <a class="flex items-center gap-3 p-3 rounded-lg 
                     {{ request()->is('invoice*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
                     'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
-                    href="/invoice">
+                    href="{{ route('admin.invoice.index') }}">
                     <i class='bx bx-detail'></i>
                     Invoice
                 </a>
@@ -87,7 +87,7 @@
                 <a class="flex items-center gap-3 p-3 rounded-lg 
                     {{ request()->is('kwitansi*') ? 'bg-primary bg-opacity-10 text-primary font-medium' : 
                     'text-subtle-light dark:text-subtle-dark hover:bg-surface-light dark:hover:bg-surface-dark' }}" 
-                    href="/kwitansi">
+                    href="{{ route('admin.kwitansi.index') }}">
                     <i class='bx bx-money'></i>
                     Kwitansi
                 </a>

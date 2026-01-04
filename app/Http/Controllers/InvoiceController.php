@@ -42,7 +42,7 @@ class InvoiceController extends Controller
             ]);
         }
 
-        return view('invoices.index', compact('invoices'));
+        return view('admin.invoice', compact('invoices'));
     }
 
     /**

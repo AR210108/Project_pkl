@@ -189,12 +189,216 @@
         .dark .focus\:ring-primary:focus {
             --tw-ring-color: #666666 !important;
         }
+        /* Print styles */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-modal {
+                position: static !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .print-content {
+                padding: 20px !important;
+            }
+            @page {
+                size: A4;
+                margin: 0;
+            }
+        }
+        /* Kwitansi Styles */
+        .kwitansi-container {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+            padding: 15mm 20mm;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            min-height: 297mm;
+        }
+
+        .kwitansi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10mm;
+        }
+
+        .kwitansi-left-section {
+            text-align: left;
+        }
+
+        .kwitansi-company-name {
+            font-size: 18pt;
+            font-weight: bold;
+            margin-bottom: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .kwitansi-company-tagline {
+            font-size: 8pt;
+            color: #666;
+            letter-spacing: 4px;
+            margin-bottom: 5mm;
+        }
+
+        .kwitansi-title {
+            font-size: 28pt;
+            font-weight: bold;
+            margin-bottom: 0;
+            line-height: 1;
+        }
+
+        .kwitansi-right-section {
+            text-align: right;
+        }
+
+        .kwitansi-invoice-number {
+            font-size: 10pt;
+            margin-bottom: 2mm;
+        }
+
+        .kwitansi-date-row {
+            font-size: 10pt;
+        }
+
+        .kwitansi-main-content {
+            margin: 8mm 0;
+        }
+
+        .kwitansi-info-row {
+            display: flex;
+            margin-bottom: 4mm;
+            font-size: 11pt;
+            line-height: 1.4;
+        }
+
+        .kwitansi-info-label {
+            font-weight: normal;
+            min-width: 45mm;
+            flex-shrink: 0;
+        }
+
+        .kwitansi-info-separator {
+            margin: 0 3mm;
+        }
+
+        .kwitansi-info-value {
+            flex: 1;
+            font-weight: normal;
+        }
+
+        .kwitansi-keterangan-section {
+            margin: 10mm 0;
+            border: 1.5pt solid #000;
+            padding: 0;
+        }
+
+        .kwitansi-keterangan-header {
+            background: #000;
+            color: white;
+            padding: 2mm 4mm;
+            font-weight: bold;
+            font-size: 10pt;
+        }
+
+        .kwitansi-keterangan-content {
+            padding: 5mm 4mm;
+        }
+
+        .kwitansi-keterangan-row {
+            display: flex;
+            margin-bottom: 3mm;
+            font-size: 11pt;
+            line-height: 1.4;
+        }
+
+        .kwitansi-keterangan-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .kwitansi-keterangan-label {
+            min-width: 40mm;
+            flex-shrink: 0;
+        }
+
+        .kwitansi-keterangan-separator {
+            margin: 0 3mm;
+        }
+
+        .kwitansi-keterangan-value {
+            flex: 1;
+        }
+
+        .kwitansi-totals-section {
+            margin: 8mm 0;
+            text-align: right;
+        }
+
+        .kwitansi-total-row {
+            display: flex;
+            justify-content: flex-end;
+            font-size: 12pt;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        .kwitansi-total-label {
+            margin-right: 3mm;
+        }
+
+        .kwitansi-total-separator {
+            margin: 0 3mm;
+        }
+
+        .kwitansi-total-value {
+            min-width: 35mm;
+            text-align: left;
+        }
+
+        .kwitansi-payment-info {
+            margin-top: 12mm;
+            border: 1pt solid #ccc;
+            padding: 5mm;
+        }
+
+        .kwitansi-payment-info-title {
+            font-weight: bold;
+            margin-bottom: 3mm;
+            font-size: 10pt;
+        }
+
+        .kwitansi-bank-info {
+            font-size: 10pt;
+        }
+
+        .kwitansi-bank-row {
+            margin-bottom: 2mm;
+            display: flex;
+        }
+
+        .kwitansi-bank-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .kwitansi-bank-label {
+            display: inline-block;
+            min-width: 30mm;
+        }
     </style>
 </head>
 
 <body class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200">
     <div class="flex h-screen">
+        <!-- Include sider from template -->
         @include('admin/templet/sider')
+        
         <main class="flex-1 flex flex-col">
             <div class="flex-grow p-8">
                 <div class="mb-4">
@@ -431,6 +635,34 @@
         </div>
     </div>
 
+    <!-- Modal Cetak Kwitansi -->
+    <div id="cetakKwitansiModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700 print-modal">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center no-print">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-slate-50">Cetak Kwitansi</h3>
+                    <p class="text-slate-600 dark:text-slate-400">Pratinjau kwitansi sebelum mencetak</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="window.print()" class="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-gray-800 transition-colors flex items-center">
+                        <span class="material-symbols-outlined mr-2">print</span>
+                        Cetak
+                    </button>
+                    <button onclick="toggleModal('cetakKwitansiModal')" class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+            </div>
+            <div class="flex-grow overflow-auto p-4 print-content" id="kwitansiPrintContent">
+                <!-- Kwitansi content will be loaded here -->
+                <div class="text-center py-8">
+                    <div class="spinner mx-auto mb-4"></div>
+                    <p class="text-slate-600 dark:text-slate-400">Memuat data kwitansi...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center">
         <span id="toastMessage" class="mr-2"></span>
@@ -561,7 +793,7 @@
             // Close modal with Escape key
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
-                    ['buatKwitansiModal', 'editKwitansiModal', 'deleteKwitansiModal'].forEach(id => {
+                    ['buatKwitansiModal', 'editKwitansiModal', 'deleteKwitansiModal', 'cetakKwitansiModal'].forEach(id => {
                         if (!document.getElementById(id).classList.contains('hidden')) {
                             toggleModal(id);
                         }
@@ -577,6 +809,20 @@
             
             console.log("Inisialisasi selesai.");
         });
+        
+        // Function to format number to Rupiah
+        function formatToRupiah(number) {
+            if (isNaN(number)) return 'Rp 0';
+            return 'Rp ' + parseFloat(number).toLocaleString('id-ID');
+        }
+        
+        // Function to parse Rupiah string back to number
+        function parseRupiah(rupiahString) {
+            if (typeof rupiahString !== 'string') return 0;
+            // Remove "Rp " and all non-digit characters except decimal point
+            const cleanString = rupiahString.replace(/Rp\s/g, '').replace(/[^\d.-]/g, '');
+            return parseFloat(cleanString) || 0;
+        }
         
         // Load invoice options from database
         function loadInvoiceOptions() {
@@ -665,10 +911,10 @@
                         const rowNumber = (data.current_page - 1) * data.per_page + index + 1;
                         
                         // Format price with thousand separator
-                        const formattedHarga = new Intl.NumberFormat('id-ID').format(kwitansi.harga);
-                        const formattedSubTotal = new Intl.NumberFormat('id-ID').format(kwitansi.sub_total);
-                        const formattedFeeMaintenance = new Intl.NumberFormat('id-ID').format(kwitansi.fee_maintenance);
-                        const formattedTotal = new Intl.NumberFormat('id-ID').format(kwitansi.total);
+                        const formattedHarga = formatToRupiah(kwitansi.harga);
+                        const formattedSubTotal = formatToRupiah(kwitansi.sub_total);
+                        const formattedFeeMaintenance = formatToRupiah(kwitansi.fee_maintenance);
+                        const formattedTotal = formatToRupiah(kwitansi.total);
                         
                         // Format date
                         let formattedDate = '';
@@ -694,10 +940,10 @@
                             <td class="p-4">${kwitansi.nomor_order}</td>
                             <td class="p-4">${kwitansi.nama_klien}</td>
                             <td class="p-4" title="${kwitansi.deskripsi || ''}">${deskripsiDisplay}</td>
-                            <td class="p-4">Rp ${formattedHarga}</td>
-                            <td class="p-4">Rp ${formattedSubTotal}</td>
-                            <td class="p-4">Rp ${formattedFeeMaintenance}</td>
-                            <td class="p-4">Rp ${formattedTotal}</td>
+                            <td class="p-4">${formattedHarga}</td>
+                            <td class="p-4">${formattedSubTotal}</td>
+                            <td class="p-4">${formattedFeeMaintenance}</td>
+                            <td class="p-4">${formattedTotal}</td>
                             <td class="p-4">
                                 <div class="flex justify-center gap-2">
                                     <button class="edit-kwitansi-btn tooltip p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" 
@@ -759,7 +1005,7 @@
                             
                             // Set both the display and the actual value for total
                             const totalValue = this.getAttribute('data-total');
-                            document.getElementById('editTotal').value = parseFloat(totalValue).toLocaleString('id-ID');
+                            document.getElementById('editTotal').value = formatToRupiah(totalValue);
                             document.getElementById('editTotalValue').value = totalValue;
                             
                             toggleModal('editKwitansiModal');
@@ -884,7 +1130,7 @@
             const total = subTotal + feeMaintenance;
             
             // Set both the display and the actual value
-            document.getElementById('total').value = total.toLocaleString('id-ID');
+            document.getElementById('total').value = formatToRupiah(total);
             document.getElementById('totalValue').value = total;
         }
         
@@ -895,15 +1141,186 @@
             const total = subTotal + feeMaintenance;
             
             // Set both the display and the actual value
-            document.getElementById('editTotal').value = total.toLocaleString('id-ID');
+            document.getElementById('editTotal').value = formatToRupiah(total);
             document.getElementById('editTotalValue').value = total;
         }
         
         // Function to print kwitansi
-      // Function to print kwitansi
-function cetakKwitansi(id) {
-    window.open(`/admin/kwitansi/${id}/cetak`, '_blank');
-}
+        function cetakKwitansi(id) {
+            // Show modal first
+            toggleModal('cetakKwitansiModal');
+            
+            // Fetch kwitansi data
+            fetch(`/api/kwitansi/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    const kwitansi = data.data;
+                    
+                    // Format date
+                    let formattedDate = '';
+                    if (kwitansi.tanggal) {
+                        const date = new Date(kwitansi.tanggal);
+                        formattedDate = date.toLocaleDateString('id-ID', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        });
+                    }
+                    
+                    // Format price with thousand separator
+                    const formattedHarga = formatToRupiah(kwitansi.harga);
+                    const formattedSubTotal = formatToRupiah(kwitansi.sub_total);
+                    const formattedFeeMaintenance = formatToRupiah(kwitansi.fee_maintenance);
+                    const formattedTotal = formatToRupiah(kwitansi.total);
+                    
+                    // Format total in ribuan (K) instead of juta (jt)
+                    const totalInRibuan = (kwitansi.total / 1000).toFixed(0);
+                    
+                    // Format sub total in ribuan (K) instead of juta (jt)
+                    const subTotalInRibuan = (kwitansi.sub_total / 1000).toFixed(0);
+                    
+                    // Calculate fee maintenance percentage
+                    const feeMaintenancePercentage = kwitansi.sub_total > 0 ? 
+                        Math.round((kwitansi.fee_maintenance / kwitansi.sub_total) * 100) : 0;
+                    
+                    // Create kwitansi HTML
+                    const kwitansiHTML = `
+                        <div class="kwitansi-container">
+                            <div class="kwitansi-header">
+                                <div class="kwitansi-left-section">
+                                    <div class="kwitansi-company-name">Udizital</div>
+                                    <div class="kwitansi-company-tagline">C R E A T I V E&nbsp;&nbsp;&nbsp;A G E N C Y</div>
+                                    <h1 class="kwitansi-title">Kwitansi</h1>
+                                </div>
+                                <div class="kwitansi-right-section">
+                                    <div class="kwitansi-invoice-number">#${kwitansi.nomor_order}</div>
+                                    <div class="kwitansi-date-row">Tgl: ${formattedDate}</div>
+                                </div>
+                            </div>
+
+                            <div class="kwitansi-main-content">
+                                <div class="kwitansi-info-row">
+                                    <div class="kwitansi-info-label">Telah Diterima dari</div>
+                                    <div class="kwitansi-info-separator">:</div>
+                                    <div class="kwitansi-info-value">${kwitansi.nama_klien}</div>
+                                </div>
+
+                                <div class="kwitansi-info-row">
+                                    <div class="kwitansi-info-label">Uang Sejumlah</div>
+                                    <div class="kwitansi-info-separator">:</div>
+                                    <div class="kwitansi-info-value">${totalInRibuan}K</div>
+                                </div>
+
+                                <div class="kwitansi-info-row">
+                                    <div class="kwitansi-info-label">Untuk</div>
+                                    <div class="kwitansi-info-separator">:</div>
+                                    <div class="kwitansi-info-value">${kwitansi.deskripsi}</div>
+                                </div>
+                            </div>
+
+                            <div class="kwitansi-keterangan-section">
+                                <div class="kwitansi-keterangan-header">KETERANGAN</div>
+                                <div class="kwitansi-keterangan-content">
+                                    <div class="kwitansi-keterangan-row">
+                                        <div class="kwitansi-keterangan-label">SUB-TOTAL</div>
+                                        <div class="kwitansi-keterangan-separator">:</div>
+                                        <div class="kwitansi-keterangan-value">${subTotalInRibuan}K</div>
+                                    </div>
+                                    <div class="kwitansi-keterangan-row">
+                                        <div class="kwitansi-keterangan-label">FEE MAINTENANCE</div>
+                                        <div class="kwitansi-keterangan-separator">:</div>
+                                        <div class="kwitansi-keterangan-value">${feeMaintenancePercentage}%</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="kwitansi-totals-section">
+                                <div class="kwitansi-total-row">
+                                    <div class="kwitansi-total-label">TOTAL</div>
+                                    <div class="kwitansi-total-separator">:</div>
+                                    <div class="kwitansi-total-value">${formattedTotal}</div>
+                                </div>
+                            </div>
+
+                            <div class="kwitansi-payment-info">
+                                <div class="kwitansi-payment-info-title">INFO PEMBAYARAN :</div>
+                                <div class="kwitansi-bank-info">
+                                    <div class="kwitansi-bank-row">
+                                        <span class="kwitansi-bank-label">BANK</span>
+                                        <span>: BRI</span>
+                                    </div>
+                                    <div class="kwitansi-bank-row">
+                                        <span class="kwitansi-bank-label">No. Rekening</span>
+                                        <span>: 4030-01-011093-53-6</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Update modal content
+                    document.getElementById('kwitansiPrintContent').innerHTML = kwitansiHTML;
+                } else {
+                    showToast(data.message || 'Gagal memuat data kwitansi', 'error');
+                    toggleModal('cetakKwitansiModal');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching kwitansi details:', error);
+                showToast('Terjadi kesalahan saat memuat data kwitansi', 'error');
+                toggleModal('cetakKwitansiModal');
+            });
+        }
+        
+        // Function to convert number to words (Indonesian)
+        function numberToWords(num) {
+            const a = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'];
+            const bilangan = ['', 'ribu', 'juta', 'miliar', 'triliun'];
+            
+            if (num < 12) {
+                return a[num];
+            } else if (num < 20) {
+                return a[num - 10] + ' belas';
+            } else if (num < 100) {
+                return (Math.floor(num / 10) === 1 ? 'sepuluh' : a[Math.floor(num / 10)] + ' puluh') + ' ' + a[num % 10];
+            } else if (num < 200) {
+                return 'seratus ' + numberToWords(num - 100);
+            } else if (num < 1000) {
+                return a[Math.floor(num / 100)] + ' ratus ' + numberToWords(num % 100);
+            } else {
+                let temp = '';
+                let i = 0;
+                
+                while (num > 0) {
+                    if (num % 1000 !== 0) {
+                        if (num % 1000 < 12 && num >= 1000 && num % 1000 === 1) {
+                            temp = 'se' + bilangan[i] + ' ' + temp;
+                        } else if (num % 1000 < 100 && num >= 1000 && num % 1000 === 1) {
+                            temp = 'se' + bilangan[i] + ' ' + temp;
+                        } else {
+                            temp = numberToWords(num % 1000) + ' ' + bilangan[i] + ' ' + temp;
+                        }
+                    }
+                    num = Math.floor(num / 1000);
+                    i++;
+                }
+                
+                return temp.trim();
+            }
+        }
         
         // Submit Buat Kwitansi form - RENAMED FUNCTION
         function submitBuatKwitansiForm() {
