@@ -232,6 +232,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/kwitansi', fn() => view('admin/kwitansi'));
     Route::get('/catatan_rapat', fn() => view('admin/catatan_rapat'));
     Route::get('/pengumuman', fn() => view('admin/pengumuman'));
+    Route::get('/data_order', fn() => view('admin/data_order'));
     
     // Pemilik
     Route::get('/pemilik', fn() => view('pemilik/home'));
@@ -245,12 +246,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/data', fn() => view('finance/data_layanan'));
     Route::get('/pembayaran', fn() => view('finance/data_pembayaran'));
     Route::get('/data_in_out', fn() => view('finance/data_in_out'));
-    Route::get('/invoice', fn() => view('finance/invoice'));
-    Route::get('/kwitansi', fn() => view('finance/kwitansi'));
-    Route::get('/daftar_karyawan', fn() => view('finance/daftar_karyawan'));
-    Route::get('/pemasukan', fn() => view('finance/pemasukan'));
-    Route::get('/pengeluaran', fn() => view('finance/pengeluaran'));
-
+    
     // Manager Divisi
     Route::get('/manager_divisi', fn() => view('manager_divisi/home'));
     Route::get('/pengelola_tugas', fn() => view('manager_divisi/pengelola_tugas'));

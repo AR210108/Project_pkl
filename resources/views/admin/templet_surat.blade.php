@@ -1,16 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="id">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Template Surat Management</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
@@ -19,15 +16,22 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: "#000000",
-                        "background-light": "#FFFFFF",
-                        "background-dark": "#121212",
-                        "surface-light": "#F3F4F6",
-                        "surface-dark": "#1E1E1E",
-                        "text-light": "#111827",
-                        "text-dark": "#E5E7EB",
-                        "subtle-light": "#6B7280",
-                        "subtle-dark": "#9CA3AF",
+                        primary: "#3b82f6",
+                        "background-light": "#ffffff",
+                        "background-dark": "#f8fafc",
+                        "sidebar-light": "#f3f4f6",
+                        "sidebar-dark": "#1e293b",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e293b",
+                        "text-light": "#1e293b",
+                        "text-dark": "#f8fafc",
+                        "text-muted-light": "#64748b",
+                        "text-muted-dark": "#94a3b8",
+                        "border-light": "#e2e8f0",
+                        "border-dark": "#334155",
+                        "success": "#10b981",
+                        "warning": "#f59e0b",
+                        "danger": "#ef4444"
                     },
                     fontFamily: {
                         display: ["Poppins", "sans-serif"],
@@ -35,27 +39,24 @@
                     borderRadius: {
                         DEFAULT: "0.75rem",
                     },
+                    boxShadow: {
+                        card: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                        "card-hover": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+                    },
                 },
             },
         };
     </script>
     <style>
-        .material-icons-outlined {
-            font-family: 'Material Icons Outlined';
-            font-weight: normal;
-            font-style: normal;
-            font-size: 24px;
-            line-height: 1;
-            letter-spacing: normal;
-            text-transform: none;
-            display: inline-block;
-            white-space: nowrap;
-            word-wrap: normal;
-            direction: ltr;
-            -webkit-font-feature-settings: 'liga';
-            -webkit-font-smoothing: antialiased;
+        body {
+            font-family: 'Poppins', sans-serif;
         }
-
+        
+        .material-icons-outlined {
+            font-size: 24px;
+            vertical-align: middle;
+        }
+        
         .material-symbols-outlined {
             font-variation-settings:
                 'FILL' 0,
@@ -72,57 +73,563 @@
                 'opsz' 24
         }
         
+        /* Card hover effects */
+        .template-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        
+        .template-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Button styles */
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+        
         /* Modal styles */
         .modal {
-            transition: opacity 0.3s ease;
+            transition: opacity 0.25s ease;
         }
         
         .modal-backdrop {
             background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        /* Category Badge Styles */
+        .category-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .category-marketing {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #1e40af;
+        }
+        
+        .category-development {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #065f46;
+        }
+        
+        .category-hr {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #92400e;
+        }
+        
+        .category-finance {
+            background-color: rgba(139, 92, 246, 0.15);
+            color: #5b21b6;
+        }
+        
+        /* Custom styles untuk transisi */
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        /* Animasi hamburger */
+        .hamburger-line {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .hamburger-active .line1 {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .hamburger-active .line2 {
+            opacity: 0;
+        }
+        
+        .hamburger-active .line3 {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+        
+        /* Style untuk efek hover yang lebih menonjol */
+        .nav-item {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Gaya untuk indikator aktif/hover */
+        /* Default untuk mobile: di sebelah kanan */
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background-color: #3b82f6;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        /* Override untuk desktop: di sebelah kiri */
+        @media (min-width: 768px) {
+            .nav-item::before {
+                right: auto;
+                left: 0;
+                transform: translateX(-100%);
+            }
+        }
+        
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            transform: translateX(0);
+        }
+        
+        /* Memastikan sidebar tetap di posisinya saat scroll */
+        .sidebar-fixed {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 40;
+        }
+        
+        /* Menyesuaikan konten utama agar tidak tertutup sidebar */
+        .main-content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        @media (min-width: 768px) {
+            .main-content {
+                margin-left: 256px; /* Lebar sidebar */
+            }
+        }
+        
+        /* Scrollbar kustom untuk sidebar */
+        .sidebar-fixed::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar-fixed::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .sidebar-fixed::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        
+        .sidebar-fixed::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Pagination styles */
+        .page-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .page-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Desktop pagination styles */
+        .desktop-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+        
+        .desktop-page-btn {
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .desktop-page-btn.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .desktop-page-btn:not(.active) {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .desktop-page-btn:not(.active):hover {
+            background-color: #e2e8f0;
+        }
+        
+        .desktop-nav-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            color: #64748b;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .desktop-nav-btn:hover:not(:disabled) {
+            background-color: #e2e8f0;
+        }
+        
+        .desktop-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Panel Styles */
+        .panel {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .panel-header {
+            background: #f8fafc;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .panel-body {
+            padding: 1.5rem;
+        }
+        
+        /* Minimalist Popup Styles */
+        .minimal-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            max-width: 350px;
+            border-left: 4px solid #10b981;
+        }
+        
+        .minimal-popup.show {
+            transform: translateX(0);
+        }
+        
+        .minimal-popup.error {
+            border-left-color: #ef4444;
+        }
+        
+        .minimal-popup.warning {
+            border-left-color: #f59e0b;
+        }
+        
+        .minimal-popup-icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .minimal-popup.success .minimal-popup-icon {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        
+        .minimal-popup.error .minimal-popup-icon {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        
+        .minimal-popup.warning .minimal-popup-icon {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+        
+        .minimal-popup-content {
+            flex-grow: 1;
+        }
+        
+        .minimal-popup-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 2px;
+        }
+        
+        .minimal-popup-message {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .minimal-popup-close {
+            flex-shrink: 0;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .minimal-popup-close:hover {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        
+        /* Filter Dropdown Styles */
+        .filter-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px;
+            min-width: 200px;
+            z-index: 100;
+            display: none;
+        }
+        
+        .filter-dropdown.show {
+            display: block;
+        }
+        
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-option:hover {
+            color: #3b82f6;
+        }
+        
+        .filter-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .filter-option label {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .filter-actions button {
+            flex: 1;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        
+        .filter-apply {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .filter-apply:hover {
+            background-color: #2563eb;
+        }
+        
+        .filter-reset {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .filter-reset:hover {
+            background-color: #e2e8f0;
+        }
+        
+        /* Hidden class for filtering */
+        .hidden-by-filter {
+            display: none !important;
+        }
+        
+        /* Template preview modal */
+        .template-preview-container {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            height: 100%;
+            overflow-y: auto;
+        }
+        
+        .template-preview-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 20px;
+        }
+        
+        .template-preview-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 
-<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
-    <div class="flex h-screen">
-        <aside class="w-64 flex-shrink-0 bg-surface-light dark:bg-surface-dark flex flex-col p-6">
-            @include('admin/templet/sider')
-            
-        </aside>
-        <main class="flex-1 flex flex-col overflow-y-auto">
-            <div class="flex-grow p-8 md:p-12">
-                <h1 class="text-4xl font-bold text-text-light dark:text-text-dark mb-8">Template Surat</h1>
-                <div class="flex flex-wrap items-center gap-4 mb-8">
-                    <button id="buatSuratBtn"
-                        class="flex items-center gap-2 bg-gray-200 dark:bg-gray-700 text-text-light dark:text-text-dark font-semibold px-6 py-3 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                        <span class="material-symbols-outlined text-2xl">add</span>
-                        Buat Surat Kerjasama
-                    </button>
-                    <div class="relative flex-grow max-w-sm">
-                        <span
-                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-subtle-light dark:text-subtle-dark">search</span>
-                        <input
-                            class="w-full bg-gray-200 dark:bg-gray-700 border-none rounded-full py-3 pl-12 pr-4 placeholder-subtle-light dark:placeholder-subtle-dark focus:ring-2 focus:ring-primary"
-                            placeholder="Search..." type="text" />
+<body class="font-display bg-background-light text-text-light">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        @include('admin.templet.sider')
+
+        <!-- MAIN -->
+        <main class="flex-1 flex flex-col main-content">
+            <div class="flex-grow p-3 sm:p-8">
+
+                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Template Surat</h2>
+                
+                <!-- Search and Filter Section -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div class="relative w-full md:w-1/3">
+                        <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari judul atau kategori..." type="text" />
                     </div>
-                    <button
-                        class="bg-gray-200 dark:bg-gray-700 text-text-light dark:text-text-dark font-semibold px-8 py-3 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                        Filter
-                    </button>
+                    <div class="flex flex-wrap gap-3 w-full md:w-auto">
+                        <div class="relative">
+                            <button id="filterBtn" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
+                                <span class="material-icons-outlined text-sm">filter_list</span>
+                                Filter
+                            </button>
+                            <div id="filterDropdown" class="filter-dropdown">
+                                <div class="filter-option">
+                                    <input type="checkbox" id="filterAll" value="all" checked>
+                                    <label for="filterAll">Semua Kategori</label>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="filterMarketing" value="marketing">
+                                    <label for="filterMarketing">Digital Marketing</label>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="filterDevelopment" value="development">
+                                    <label for="filterDevelopment">Web Development</label>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="filterHR" value="hr">
+                                    <label for="filterHR">HR</label>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="filterFinance" value="finance">
+                                    <label for="filterFinance">Finance</label>
+                                </div>
+                                <div class="filter-actions">
+                                    <button id="applyFilter" class="filter-apply">Terapkan</button>
+                                    <button id="resetFilter" class="filter-reset">Reset</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="buatSuratBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
+                            <span class="material-icons-outlined">add</span>
+                            <span class="hidden sm:inline">Buat Surat</span>
+                            <span class="sm:hidden">Buat</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Template Grid -->
-                <div id="templateGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-8">
-                    <!-- Templates will be inserted here by JavaScript -->
-                </div>
-                
-                <!-- Pagination -->
-                <div id="pagination" class="flex justify-center items-center space-x-1 sm:space-x-2 mb-8">
-                    <!-- Pagination buttons will be inserted here by JavaScript -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <span class="material-icons-outlined text-primary">description</span>
+                            Daftar Template Surat
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">9</span> template</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="templateGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-8">
+                            <!-- Templates will be inserted here by JavaScript -->
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div id="paginationContainer" class="desktop-pagination">
+                            <button id="prevPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_left</span>
+                            </button>
+                            <div id="pageNumbers" class="flex gap-1">
+                                <!-- Page numbers will be generated by JavaScript -->
+                            </div>
+                            <button id="nextPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <footer class="bg-gray-200 dark:bg-gray-800 text-center py-4 mt-auto">
-                <p class="text-sm text-subtle-light dark:text-subtle-dark">Copyright ©2025 by digicity.id</p>
+            <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light">
+                Copyright ©2025 by digicity.id
             </footer>
         </main>
     </div>
@@ -239,9 +746,65 @@
                     </svg>
                 </button>
             </div>
-            <div class="flex-grow overflow-auto p-4 bg-gray-100 dark:bg-gray-900 flex justify-center">
-                <div class="bg-white dark:bg-gray-800 w-full aspect-[3/4] flex items-center justify-center">
-                    <span class="material-symbols-outlined text-6xl text-subtle-light dark:text-subtle-dark">description</span>
+            <div class="flex-grow overflow-auto p-4 bg-gray-100 dark:bg-gray-900">
+                <div class="template-preview-container">
+                    <div class="template-preview-header">
+                        <h4 class="text-lg font-bold text-gray-800">SURAT PERJANJIAN KERJASAMA</h4>
+                        <p class="text-sm text-gray-600">Nomor: SPK/001/VI/2023</p>
+                    </div>
+                    <div class="template-preview-content">
+                        <p class="mb-4">Pada hari ini, Senin tanggal 1 Juni 2023, telah dibuat kesepakatan bersama antara:</p>
+                        <div class="mb-4">
+                            <p class="font-bold">PIHAK PERTAMA:</p>
+                            <p>Nama: <span id="previewNama1">[Nama Perusahaan 1]</span></p>
+                            <p>Alamat: <span id="previewAlamat1">[Alamat Perusahaan 1]</span></p>
+                            <p>Penanggung Jawab: <span id="previewPenanggung1">[Nama Penanggung Jawab 1]</span></p>
+                            <p>Jabatan: <span id="previewJabatan1">[Jabatan 1]</span></p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="font-bold">PIHAK KEDUA:</p>
+                            <p>Nama: <span id="previewNama2">[Nama Perusahaan 2]</span></p>
+                            <p>Alamat: <span id="previewAlamat2">[Alamat Perusahaan 2]</span></p>
+                            <p>Penanggung Jawab: <span id="previewPenanggung2">[Nama Penanggung Jawab 2]</span></p>
+                            <p>Jabatan: <span id="previewJabatan2">[Jabatan 2]</span></p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="font-bold">JUDUL KERJASAMA:</p>
+                            <p id="previewJudul">[Judul Kerjasama]</p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="font-bold">LINGKUP KERJASAMA:</p>
+                            <p id="previewLingkup">[Lingkup Kerjasama]</p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="font-bold">MASA BERLAKU:</p>
+                            <p>Dari tanggal <span id="previewMulai">[Tanggal Mulai]</span> hingga <span id="previewSelesai">[Tanggal Selesai]</span></p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="font-bold">NILAI KONTRAK:</p>
+                            <p>Rp <span id="previewNilai">[Nilai Kontrak]</span></p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="font-bold">KETERANGAN TAMBAHAN:</p>
+                            <p id="previewKeterangan">[Keterangan Tambahan]</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-8 mt-8">
+                            <div>
+                                <p class="text-center mb-4">PIHAK PERTAMA</p>
+                                <div class="border-t border-gray-800 pt-4">
+                                    <p id="previewTtd1" class="text-center">[Nama Penanggung Jawab 1]</p>
+                                    <p id="previewTtdJabatan1" class="text-center">[Jabatan 1]</p>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-center mb-4">PIHAK KEDUA</p>
+                                <div class="border-t border-gray-800 pt-4">
+                                    <p id="previewTtd2" class="text-center">[Nama Penanggung Jawab 2]</p>
+                                    <p id="previewTtdJabatan2" class="text-center">[Jabatan 2]</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
@@ -261,80 +824,385 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center">
-        <span id="toastMessage" class="mr-2"></span>
-        <button id="closeToast" class="ml-2 text-white hover:text-gray-200">
-            <span class="material-symbols-outlined text-lg">close</span>
+    <!-- Minimalist Popup -->
+    <div id="minimalPopup" class="minimal-popup">
+        <div class="minimal-popup-icon">
+            <span class="material-icons-outlined">check</span>
+        </div>
+        <div class="minimal-popup-content">
+            <div class="minimal-popup-title">Berhasil</div>
+            <div class="minimal-popup-message">Operasi berhasil dilakukan</div>
+        </div>
+        <button class="minimal-popup-close">
+            <span class="material-icons-outlined text-sm">close</span>
         </button>
     </div>
 
     <script>
-        // Fungsi untuk dropdown menu Surat Kerjasama
-        document.addEventListener('DOMContentLoaded', function() {
-            // Cari elemen dropdown Surat Kerjasama
-            const suratKerjasamaMenu = document.querySelector('a[href="/surat_kerjasama"]');
-            const templateSuratMenu = document.querySelector('a[href="/template_surat"]');
-            const listTugosMenu = document.querySelector('a[href="/list_tugos"]');
+        // Inisialisasi variabel untuk pagination, filter, dan search
+        let currentPage = 1;
+        const itemsPerPage = 8;
+        let activeFilters = ['all'];
+        let searchTerm = '';
+        
+        // Template data
+        const templates = [
+            { id: 1, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 2, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 3, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 4, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 5, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 6, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 7, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 8, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 9, title: 'Surat Perjanjian Kerjasama', category: 'development', categoryName: 'Web Development' }
+        ];
+        
+        // Inisialisasi pagination, filter, dan search
+        initializePagination();
+        initializeFilter();
+        initializeSearch();
+        renderTemplates();
+
+        // === PAGINATION ===
+        function initializePagination() {
+            renderPagination();
+            updateVisibleItems();
+        }
+        
+        function renderPagination() {
+            const visibleTemplates = getFilteredTemplates();
+            const totalPages = Math.ceil(visibleTemplates.length / itemsPerPage);
+            const pageNumbersContainer = document.getElementById('pageNumbers');
+            const prevButton = document.getElementById('prevPage');
+            const nextButton = document.getElementById('nextPage');
             
-            // Jika elemen ada, tambahkan event listener untuk dropdown
-            if (suratKerjasamaMenu) {
-                // Buat elemen dropdown
-                const dropdown = document.createElement('div');
-                dropdown.className = 'pl-6 mt-1 space-y-1';
-                
-                // Pindahkan menu Template Surat dan List Tugos ke dalam dropdown
-                if (templateSuratMenu && listTugosMenu) {
-                    dropdown.appendChild(templateSuratMenu);
-                    dropdown.appendChild(listTugosMenu);
-                    
-                    // Sisipkan dropdown setelah menu Surat Kerjasama
-                    suratKerjasamaMenu.parentNode.insertBefore(dropdown, suratKerjasamaMenu.nextSibling);
-                    
-                    // Tambahkan ikon expand pada menu Surat Kerjasama
-                    const expandIcon = document.createElement('span');
-                    expandIcon.className = 'material-icons-outlined ml-auto';
-                    expandIcon.textContent = 'expand_more';
-                    suratKerjasamaMenu.appendChild(expandIcon);
-                    
-                    // Tambahkan event listener untuk toggle dropdown
-                    suratKerjasamaMenu.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        dropdown.classList.toggle('hidden');
-                        
-                        // Ubah ikon berdasarkan status dropdown
-                        if (dropdown.classList.contains('hidden')) {
-                            expandIcon.textContent = 'expand_more';
-                        } else {
-                            expandIcon.textContent = 'expand_less';
-                        }
-                    });
-                    
-                    // Tandai menu aktif
-                    if (window.location.pathname.includes('/template_surat')) {
-                        suratKerjasamaMenu.classList.add('bg-primary', 'bg-opacity-10', 'text-primary', 'font-medium');
-                        templateSuratMenu.classList.add('bg-primary', 'bg-opacity-10', 'text-primary', 'font-medium');
-                        dropdown.classList.remove('hidden');
-                        expandIcon.textContent = 'expand_less';
-                    }
-                    
-                    // Tambahkan badge angka pada menu Template Surat jika lebih dari 2
-                    // Hitung jumlah template surat (dalam contoh ini kita hardcode menjadi 9)
-                    const jumlahTemplateSurat = 9;
-                    
-                    if (jumlahTemplateSurat > 2) {
-                        // Buat elemen badge
-                        const badge = document.createElement('span');
-                        badge.className = 'bg-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center ml-2';
-                        badge.textContent = jumlahTemplateSurat;
-                        
-                        // Tambahkan badge ke menu Template Surat
-                        templateSuratMenu.appendChild(badge);
-                    }
-                }
+            // Clear existing page numbers
+            pageNumbersContainer.innerHTML = '';
+            
+            // Generate page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const pageNumber = document.createElement('button');
+                pageNumber.textContent = i;
+                pageNumber.className = `desktop-page-btn ${i === currentPage ? 'active' : ''}`;
+                pageNumber.addEventListener('click', () => goToPage(i));
+                pageNumbersContainer.appendChild(pageNumber);
             }
             
-            // Event listener untuk tombol Buat Surat Kerjasama
+            // Update navigation buttons
+            prevButton.disabled = currentPage === 1;
+            nextButton.disabled = currentPage === totalPages || totalPages === 0;
+            
+            // Add event listeners for navigation buttons
+            prevButton.onclick = () => {
+                if (currentPage > 1) goToPage(currentPage - 1);
+            };
+            
+            nextButton.onclick = () => {
+                if (currentPage < totalPages) goToPage(currentPage + 1);
+            };
+        }
+        
+        function goToPage(page) {
+            currentPage = page;
+            renderPagination();
+            updateVisibleItems();
+        }
+        
+        function getFilteredTemplates() {
+            return templates.filter(template => !template.hidden);
+        }
+        
+        function updateVisibleItems() {
+            const visibleTemplates = getFilteredTemplates();
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            
+            // Hide all templates first
+            templates.forEach(template => template.hidden = true);
+            
+            // Show only the templates for current page
+            visibleTemplates.forEach((template, index) => {
+                if (index >= startIndex && index < endIndex) {
+                    template.hidden = false;
+                }
+            });
+            
+            // Re-render templates
+            renderTemplates();
+            
+            // Update total count
+            document.getElementById('totalCount').textContent = visibleTemplates.length;
+        }
+        
+        // === FILTER ===
+        function initializeFilter() {
+            const filterBtn = document.getElementById('filterBtn');
+            const filterDropdown = document.getElementById('filterDropdown');
+            const applyFilterBtn = document.getElementById('applyFilter');
+            const resetFilterBtn = document.getElementById('resetFilter');
+            const filterAll = document.getElementById('filterAll');
+            
+            // Toggle filter dropdown
+            filterBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                filterDropdown.classList.toggle('show');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function() {
+                filterDropdown.classList.remove('show');
+            });
+            
+            // Prevent dropdown from closing when clicking inside
+            filterDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Handle "All" checkbox
+            filterAll.addEventListener('change', function() {
+                if (this.checked) {
+                    // Uncheck all other checkboxes
+                    document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
+                        cb.checked = false;
+                    });
+                }
+            });
+            
+            // Handle other checkboxes
+            document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Uncheck "All" checkbox
+                        filterAll.checked = false;
+                    }
+                });
+            });
+            
+            // Apply filter
+            applyFilterBtn.addEventListener('click', function() {
+                const filterAll = document.getElementById('filterAll');
+                const filterMarketing = document.getElementById('filterMarketing');
+                const filterDevelopment = document.getElementById('filterDevelopment');
+                const filterHR = document.getElementById('filterHR');
+                const filterFinance = document.getElementById('filterFinance');
+                
+                activeFilters = [];
+                if (filterAll.checked) {
+                    activeFilters.push('all');
+                } else {
+                    if (filterMarketing.checked) activeFilters.push('marketing');
+                    if (filterDevelopment.checked) activeFilters.push('development');
+                    if (filterHR.checked) activeFilters.push('hr');
+                    if (filterFinance.checked) activeFilters.push('finance');
+                }
+                
+                applyFilters();
+                filterDropdown.classList.remove('show');
+                const visibleCount = getFilteredTemplates().length;
+                showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} template`, 'success');
+            });
+            
+            // Reset filter
+            resetFilterBtn.addEventListener('click', function() {
+                document.getElementById('filterAll').checked = true;
+                document.getElementById('filterMarketing').checked = false;
+                document.getElementById('filterDevelopment').checked = false;
+                document.getElementById('filterHR').checked = false;
+                document.getElementById('filterFinance').checked = false;
+                activeFilters = ['all'];
+                applyFilters();
+                filterDropdown.classList.remove('show');
+                const visibleCount = getFilteredTemplates().length;
+                showMinimalPopup('Filter Direset', 'Menampilkan semua template', 'success');
+            });
+        }
+        
+        function applyFilters() {
+            // Reset to first page
+            currentPage = 1;
+            
+            // Apply filters to templates
+            templates.forEach(template => {
+                // Check if category matches filter
+                let categoryMatches = false;
+                if (activeFilters.includes('all')) {
+                    categoryMatches = true;
+                } else {
+                    categoryMatches = activeFilters.some(filter => template.category.includes(filter));
+                }
+                
+                // Check if search term matches
+                let searchMatches = true;
+                if (searchTerm) {
+                    const searchLower = searchTerm.toLowerCase();
+                    searchMatches = template.title.toLowerCase().includes(searchLower) || 
+                                   template.categoryName.toLowerCase().includes(searchLower);
+                }
+                
+                template.hidden = !(categoryMatches && searchMatches);
+            });
+            
+            // Update pagination and visible items
+            renderPagination();
+            updateVisibleItems();
+        }
+        
+        // === SEARCH ===
+        function initializeSearch() {
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+            
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    searchTerm = searchInput.value.trim();
+                    applyFilters();
+                }, 300); // Debounce search
+            });
+        }
+
+        // === RENDER TEMPLATES ===
+        function renderTemplates() {
+            const grid = document.getElementById('templateGrid');
+            grid.innerHTML = '';
+            
+            // Filter templates based on current page and filters
+            const visibleTemplates = templates.filter(template => !template.hidden);
+            
+            // Render templates
+            visibleTemplates.forEach(template => {
+                const templateElement = document.createElement('div');
+                templateElement.className = `template-card bg-background-light dark:bg-surface-dark rounded-lg p-3 sm:p-4 shadow-md`;
+                
+                // Determine category badge class
+                let categoryClass = '';
+                if (template.category === 'marketing') {
+                    categoryClass = 'category-marketing';
+                } else if (template.category === 'development') {
+                    categoryClass = 'category-development';
+                } else if (template.category === 'hr') {
+                    categoryClass = 'category-hr';
+                } else if (template.category === 'finance') {
+                    categoryClass = 'category-finance';
+                }
+                
+                templateElement.innerHTML = `
+                    <div class="bg-gray-200 dark:bg-gray-700 w-full aspect-[3/4] mb-3 sm:mb-4 cursor-pointer template-preview"
+                         onclick="openModal('${template.title}', '${template.categoryName}')">
+                        <div class="w-full h-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-6xl text-subtle-light dark:text-subtle-dark">description</span>
+                        </div>
+                    </div>
+                    <div class="text-center py-2">
+                        <h2 class="font-bold text-text-light dark:text-text-dark text-sm sm:text-base">${template.title}</h2>
+                        <p class="text-text-light dark:text-text-dark text-xs sm:text-sm">
+                            <span class="category-badge ${categoryClass}">${template.categoryName}</span>
+                        </p>
+                    </div>
+                `;
+                
+                grid.appendChild(templateElement);
+            });
+        }
+
+        // === MODAL FUNCTIONS ===
+        function openModal(title, subtitle) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalSubtitle').textContent = subtitle;
+            document.getElementById('templateModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('templateModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function downloadTemplate() {
+            // Simulate download
+            showMinimalPopup('Download Berhasil', 'Template berhasil diunduh', 'success');
+            closeModal();
+        }
+
+        function editTemplate() {
+            // Simulate edit
+            closeModal();
+            document.getElementById('buatSuratModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Modal functions for Buat Surat Kerjasama
+        function closeBuatSuratModal() {
+            document.getElementById('buatSuratModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            document.getElementById('buatSuratForm').reset();
+        }
+
+        function submitBuatSurat() {
+            const form = document.getElementById('buatSuratForm');
+            
+            // Simple form validation
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            // Get form data
+            const formData = {
+                namaPerusahaan1: document.getElementById('namaPerusahaan1').value,
+                namaPerusahaan2: document.getElementById('namaPerusahaan2').value,
+                alamatPerusahaan1: document.getElementById('alamatPerusahaan1').value,
+                alamatPerusahaan2: document.getElementById('alamatPerusahaan2').value,
+                penanggungJawab1: document.getElementById('penanggungJawab1').value,
+                penanggungJawab2: document.getElementById('penanggungJawab2').value,
+                jabatan1: document.getElementById('jabatan1').value,
+                jabatan2: document.getElementById('jabatan2').value,
+                judulKerjasama: document.getElementById('judulKerjasama').value,
+                lingkupKerjasama: document.getElementById('lingkupKerjasama').value,
+                tanggalMulai: document.getElementById('tanggalMulai').value,
+                tanggalSelesai: document.getElementById('tanggalSelesai').value,
+                nilaiKontrak: document.getElementById('nilaiKontrak').value,
+                keterangan: document.getElementById('keterangan').value
+            };
+            
+            // Update preview with form data
+            document.getElementById('previewNama1').textContent = formData.namaPerusahaan1;
+            document.getElementById('previewAlamat1').textContent = formData.alamatPerusahaan1;
+            document.getElementById('previewPenanggung1').textContent = formData.penanggungJawab1;
+            document.getElementById('previewJabatan1').textContent = formData.jabatan1;
+            
+            document.getElementById('previewNama2').textContent = formData.namaPerusahaan2;
+            document.getElementById('previewAlamat2').textContent = formData.alamatPerusahaan2;
+            document.getElementById('previewPenanggung2').textContent = formData.penanggungJawab2;
+            document.getElementById('previewJabatan2').textContent = formData.jabatan2;
+            
+            document.getElementById('previewJudul').textContent = formData.judulKerjasama;
+            document.getElementById('previewLingkup').textContent = formData.lingkupKerjasama;
+            document.getElementById('previewMulai').textContent = formData.tanggalMulai;
+            document.getElementById('previewSelesai').textContent = formData.tanggalSelesai;
+            document.getElementById('previewNilai').textContent = Number(formData.nilaiKontrak).toLocaleString('id-ID');
+            document.getElementById('previewKeterangan').textContent = formData.keterangan;
+            
+            document.getElementById('previewTtd1').textContent = formData.penanggungJawab1;
+            document.getElementById('previewTtdJabatan1').textContent = formData.jabatan1;
+            document.getElementById('previewTtd2').textContent = formData.penanggungJawab2;
+            document.getElementById('previewTtdJabatan2').textContent = formData.jabatan2;
+            
+            // Show success message
+            showMinimalPopup('Surat Dibuat', 'Surat kerjasama berhasil dibuat', 'success');
+            
+            // Close modal
+            closeBuatSuratModal();
+            
+            // Open preview modal
+            openModal('Surat Perjanjian Kerjasama', 'Preview');
+        }
+
+        // === EVENT LISTENERS ===
+        document.addEventListener('DOMContentLoaded', function() {
+            // Event listener for tombol Buat Surat Kerjasama
             const buatSuratBtn = document.getElementById('buatSuratBtn');
             if (buatSuratBtn) {
                 buatSuratBtn.addEventListener('click', function() {
@@ -343,303 +1211,6 @@
                 });
             }
             
-            // Template data
-            const templates = [
-                { title: 'Surat Perjanjian Kerjasama', subtitle: 'Digital Marketing' },
-                { title: 'Surat Perjanjian Kerjasama', subtitle: 'Digital Marketing' },
-                { title: 'Surat Perjanjian Kerjasama', subtitle: 'Digital Marketing' },
-                { title: 'Surat Perjanjian Kerjasama', subtitle: 'Digital Marketing' },
-                { title: 'Surat Perjanjian Kerjasama', subtitle: 'Digital Marketing' },
-                { title: 'Surat Perjanjian Kerjasama', subtitle: 'Digital Marketing' },
-                { title: 'Surat Perjanjian Kerjasama', subtitle: 'Digital Marketing' },
-                { title: 'Surat Perjanjian Kerjasama', subtitle: 'Digital Marketing' },
-                { title: 'Surat Perjanjian Kerjasama', subtitle: 'Web Development' }
-            ];
-
-            // Pagination variables
-            let currentPage = 1;
-            let itemsPerPage = 4; // Default for mobile (2x2 grid)
-            let totalPages = Math.ceil(templates.length / itemsPerPage);
-            let maxVisiblePages = 3; // Maximum number of page numbers to show at once
-
-            // Function to check if we're on mobile
-            function isMobile() {
-                return window.innerWidth < 768;
-            }
-
-            // Function to update items per page based on screen size
-            function updateItemsPerPage() {
-                if (isMobile()) {
-                    itemsPerPage = 4; // 2 per row, 2 rows
-                } else {
-                    itemsPerPage = 8; // 4 per row, 2 rows
-                }
-                totalPages = Math.ceil(templates.length / itemsPerPage);
-                
-                // Reset to first page if current page is out of bounds
-                if (currentPage > totalPages) {
-                    currentPage = totalPages;
-                }
-            }
-
-            // Function to render templates
-            function renderTemplates() {
-                const grid = document.getElementById('templateGrid');
-                grid.innerHTML = '';
-                
-                // Calculate start and end indices
-                const startIndex = (currentPage - 1) * itemsPerPage;
-                const endIndex = Math.min(startIndex + itemsPerPage, templates.length);
-                
-                // Update grid classes based on screen size
-                if (isMobile()) {
-                    grid.className = 'grid grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-8';
-                } else {
-                    grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-8';
-                }
-                
-                // Render templates for current page
-                for (let i = startIndex; i < endIndex; i++) {
-                    const template = templates[i];
-                    
-                    const templateElement = document.createElement('div');
-                    templateElement.className = `bg-background-light dark:bg-surface-dark rounded-lg p-3 sm:p-4 shadow-md`;
-                    
-                    templateElement.innerHTML = `
-                        <div class="bg-gray-200 dark:bg-gray-700 w-full aspect-[3/4] mb-3 sm:mb-4 cursor-pointer template-preview"
-                             onclick="openModal('${template.title}', '${template.subtitle}')">
-                            <div class="w-full h-full flex items-center justify-center">
-                                <span class="material-symbols-outlined text-6xl text-subtle-light dark:text-subtle-dark">description</span>
-                            </div>
-                        </div>
-                        <div class="text-center py-2">
-                            <h2 class="font-bold text-text-light dark:text-text-dark text-sm sm:text-base">${template.title}</h2>
-                            <p class="text-text-light dark:text-text-dark text-xs sm:text-sm">${template.subtitle}</p>
-                        </div>
-                    `;
-                    
-                    grid.appendChild(templateElement);
-                }
-            }
-
-            // Function to render pagination
-            function renderPagination() {
-                const pagination = document.getElementById('pagination');
-                pagination.innerHTML = '';
-                
-                // Only show pagination if there's more than one page
-                if (totalPages <= 1) return;
-                
-                // Previous button
-                const prevButton = document.createElement('button');
-                prevButton.className = `px-2 sm:px-3 py-1 rounded-lg ${currentPage === 1 ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`;
-                prevButton.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>';
-                prevButton.disabled = currentPage === 1;
-                prevButton.onclick = () => {
-                    if (currentPage > 1) {
-                        currentPage--;
-                        renderTemplates();
-                        renderPagination();
-                    }
-                };
-                pagination.appendChild(prevButton);
-                
-                // Calculate visible page range
-                let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-                let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-                
-                // Adjust if we're at the end
-                if (endPage - startPage + 1 < maxVisiblePages) {
-                    startPage = Math.max(1, endPage - maxVisiblePages + 1);
-                }
-                
-                // First page and ellipsis if needed
-                if (startPage > 1) {
-                    const firstButton = document.createElement('button');
-                    firstButton.className = `px-2 sm:px-3 py-1 rounded-lg ${1 === currentPage ? 'bg-primary text-white' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`;
-                    firstButton.textContent = '1';
-                    firstButton.onclick = () => {
-                        currentPage = 1;
-                        renderTemplates();
-                        renderPagination();
-                    };
-                    pagination.appendChild(firstButton);
-                    
-                    if (startPage > 2) {
-                        const ellipsis = document.createElement('button');
-                        ellipsis.className = 'px-2 sm:px-3 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600';
-                        ellipsis.textContent = '...';
-                        ellipsis.onclick = () => {
-                            // Go to the page before the current visible range
-                            currentPage = Math.max(1, startPage - maxVisiblePages);
-                            renderTemplates();
-                            renderPagination();
-                        };
-                        pagination.appendChild(ellipsis);
-                    }
-                }
-                
-                // Visible page numbers
-                for (let i = startPage; i <= endPage; i++) {
-                    const pageButton = document.createElement('button');
-                    pageButton.className = `px-2 sm:px-3 py-1 rounded-lg ${i === currentPage ? 'bg-primary text-white' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`;
-                    pageButton.textContent = i;
-                    pageButton.onclick = () => {
-                        currentPage = i;
-                        renderTemplates();
-                        renderPagination();
-                    };
-                    pagination.appendChild(pageButton);
-                }
-                
-                // Last page and ellipsis if needed
-                if (endPage < totalPages) {
-                    if (endPage < totalPages - 1) {
-                        const ellipsis = document.createElement('button');
-                        ellipsis.className = 'px-2 sm:px-3 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600';
-                        ellipsis.textContent = '...';
-                        ellipsis.onclick = () => {
-                            // Go to the page after the current visible range
-                            currentPage = Math.min(totalPages, endPage + maxVisiblePages);
-                            renderTemplates();
-                            renderPagination();
-                        };
-                        pagination.appendChild(ellipsis);
-                    }
-                    
-                    const lastButton = document.createElement('button');
-                    lastButton.className = `px-2 sm:px-3 py-1 rounded-lg ${totalPages === currentPage ? 'bg-primary text-white' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`;
-                    lastButton.textContent = totalPages;
-                    lastButton.onclick = () => {
-                        currentPage = totalPages;
-                        renderTemplates();
-                        renderPagination();
-                    };
-                    pagination.appendChild(lastButton);
-                }
-                
-                // Next button
-                const nextButton = document.createElement('button');
-                nextButton.className = `px-2 sm:px-3 py-1 rounded-lg ${currentPage === totalPages ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`;
-                nextButton.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>';
-                nextButton.disabled = currentPage === totalPages;
-                nextButton.onclick = () => {
-                    if (currentPage < totalPages) {
-                        currentPage++;
-                        renderTemplates();
-                        renderPagination();
-                    }
-                };
-                pagination.appendChild(nextButton);
-            }
-
-            // Initialize the page
-            function init() {
-                updateItemsPerPage();
-                renderTemplates();
-                renderPagination();
-            }
-
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                const oldItemsPerPage = itemsPerPage;
-                updateItemsPerPage();
-                
-                // If items per page changed, re-render
-                if (oldItemsPerPage !== itemsPerPage) {
-                    renderTemplates();
-                    renderPagination();
-                }
-            });
-
-            // Modal functions for template preview
-            function openModal(title, subtitle) {
-                document.getElementById('modalTitle').textContent = title;
-                document.getElementById('modalSubtitle').textContent = subtitle;
-                document.getElementById('templateModal').classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closeModal() {
-                document.getElementById('templateModal').classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
-
-            function downloadTemplate() {
-                // Simulate download
-                alert('Template akan diunduh');
-                closeModal();
-            }
-
-            function editTemplate() {
-                // Simulate edit
-                alert('Edit template');
-                closeModal();
-            }
-
-            // Modal functions for Buat Surat Kerjasama
-            function closeBuatSuratModal() {
-                document.getElementById('buatSuratModal').classList.add('hidden');
-                document.body.style.overflow = 'auto';
-                document.getElementById('buatSuratForm').reset();
-            }
-
-            function submitBuatSurat() {
-                const form = document.getElementById('buatSuratForm');
-                
-                // Simple form validation
-                if (!form.checkValidity()) {
-                    form.reportValidity();
-                    return;
-                }
-                
-                // Get form data
-                const formData = {
-                    namaPerusahaan1: document.getElementById('namaPerusahaan1').value,
-                    namaPerusahaan2: document.getElementById('namaPerusahaan2').value,
-                    alamatPerusahaan1: document.getElementById('alamatPerusahaan1').value,
-                    alamatPerusahaan2: document.getElementById('alamatPerusahaan2').value,
-                    penanggungJawab1: document.getElementById('penanggungJawab1').value,
-                    penanggungJawab2: document.getElementById('penanggungJawab2').value,
-                    jabatan1: document.getElementById('jabatan1').value,
-                    jabatan2: document.getElementById('jabatan2').value,
-                    judulKerjasama: document.getElementById('judulKerjasama').value,
-                    lingkupKerjasama: document.getElementById('lingkupKerjasama').value,
-                    tanggalMulai: document.getElementById('tanggalMulai').value,
-                    tanggalSelesai: document.getElementById('tanggalSelesai').value,
-                    nilaiKontrak: document.getElementById('nilaiKontrak').value,
-                    keterangan: document.getElementById('keterangan').value
-                };
-                
-                // In a real application, you would send this data to the server
-                console.log('Form data:', formData);
-                
-                // Show success message
-                showToast('Surat kerjasama berhasil dibuat!');
-                
-                // Close modal
-                closeBuatSuratModal();
-            }
-
-            // Toast notification function
-            function showToast(message) {
-                const toast = document.getElementById('toast');
-                const toastMessage = document.getElementById('toastMessage');
-                
-                toastMessage.textContent = message;
-                toast.classList.remove('translate-y-20', 'opacity-0');
-                
-                // Auto hide after 3 seconds
-                setTimeout(() => {
-                    toast.classList.add('translate-y-20', 'opacity-0');
-                }, 3000);
-            }
-
-            // Close toast notification
-            document.getElementById('closeToast').addEventListener('click', function() {
-                document.getElementById('toast').classList.add('translate-y-20', 'opacity-0');
-            });
-
             // Close modal when clicking outside
             document.getElementById('buatSuratModal').addEventListener('click', function(e) {
                 if (e.target === this) {
@@ -664,11 +1235,41 @@
                     }
                 }
             });
+        });
 
-            // Initialize the page
-            init();
+        // === MINIMALIST POPUP ===
+        function showMinimalPopup(title, message, type = 'success') {
+            const popup = document.getElementById('minimalPopup');
+            const popupTitle = popup.querySelector('.minimal-popup-title');
+            const popupMessage = popup.querySelector('.minimal-popup-message');
+            const popupIcon = popup.querySelector('.minimal-popup-icon span');
+            
+            // Set content
+            popupTitle.textContent = title;
+            popupMessage.textContent = message;
+            
+            // Set type
+            popup.className = 'minimal-popup show ' + type;
+            
+            // Set icon
+            if (type === 'success') {
+                popupIcon.textContent = 'check';
+            } else if (type === 'error') {
+                popupIcon.textContent = 'error';
+            } else if (type === 'warning') {
+                popupIcon.textContent = 'warning';
+            }
+            
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Close popup when clicking the close button
+        document.querySelector('.minimal-popup-close').addEventListener('click', function() {
+            document.getElementById('minimalPopup').classList.remove('show');
         });
     </script>
 </body>
-
 </html>
