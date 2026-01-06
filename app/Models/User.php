@@ -2,55 +2,81 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
-use App\Models\Karyawan; // <-- TAMBAHKAN BARIS INI
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role',
+        'divisi'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
 
-    /**
-     * Relasi ke Model Karyawan.
-     * Satu user bisa memiliki satu data karyawan.
-     */
-    public function karyawan()
+    // Cek Role
+    public function isOwner(): bool { 
+        return $this->role === 'owner'; 
+    }
+    
+    public function isGeneralManager(): bool { 
+        return $this->role === 'general_manager'; 
+    }
+    
+    public function isManagerDivisi(): bool { 
+        return $this->role === 'manager_divisi'; 
+    }
+    
+    public function isKaryawan(): bool { 
+        return $this->role === 'karyawan'; 
+    }
+
+    // Cek Divisi
+    public function isProgrammer(): bool { 
+        return $this->divisi === 'programmer'; 
+    }
+    
+    public function isDigitalMarketing(): bool { 
+        return $this->divisi === 'digital_marketing'; 
+    }
+    
+    public function isDesainer(): bool { 
+        return $this->divisi === 'desainer'; 
+    }
+
+    // Helper
+    public function getRoleName(): string
     {
-        return $this->hasOne(Karyawan::class, 'user_id');
+        return match($this->role) {
+            'owner' => 'Pemilik',
+            'general_manager' => 'General Manager',
+            'manager_divisi' => 'Manager Divisi',
+            'karyawan' => 'Karyawan',
+            default => '-'
+        };
+    }
+
+    public function getDivisiName(): string
+    {
+        return match($this->divisi) {
+            'programmer' => 'Programmer',
+            'digital_marketing' => 'Digital Marketing',
+            'desainer' => 'Desainer',
+            default => '-'
+        };
     }
 }

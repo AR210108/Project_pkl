@@ -50,9 +50,43 @@ class KaryawanController extends Controller
         ]);
     }
 
+    /**
+     * Menampilkan halaman absensi karyawan.
+     */
     public function absensiPage()
     {
         return view('karyawan.absen');
+    }
+
+    /**
+     * Menampilkan halaman daftar absensi karyawan.
+     */
+    public function listPage()
+    {
+        $userId = Auth::id();
+        
+        // Ambil semua data absensi karyawan yang sedang login
+        $absensis = Absensi::where('user_id', $userId)
+                          ->orderBy('tanggal', 'desc')
+                          ->paginate(15);
+
+        return view('karyawan.list', compact('absensis'));
+    }
+
+    /**
+     * Menampilkan halaman detail absensi karyawan.
+     */
+    public function detailPage($id)
+    {
+        // Ambil data absensi berdasarkan ID
+        $absensi = Absensi::findOrFail($id);
+        
+        // Pastikan karyawan hanya bisa melihat detail absensi miliknya sendiri
+        if ($absensi->user_id !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki akses ke data ini.');
+        }
+        
+        return view('karyawan.detail', compact('absensi'));
     }
 
     // =================================================================
@@ -100,6 +134,7 @@ class KaryawanController extends Controller
                           ->get()
                           ->map(function ($item) {
                               return [
+                                  'id' => $item->id,
                                   'date' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
                                   'checkIn' => $item->jam_masuk,
                                   'checkOut' => $item->jam_pulang,
@@ -110,6 +145,9 @@ class KaryawanController extends Controller
                                   'earlyCheckoutReason' => $item->early_checkout_reason,
                                   'approvalStatus' => $item->approval_status,
                                   'userName' => $item->name,
+                                  'reason' => $item->reason,
+                                  'location' => $item->location,
+                                  'purpose' => $item->purpose,
                               ];
                           })
                           ->all();
@@ -153,6 +191,50 @@ class KaryawanController extends Controller
             'attendance_status' => $attendanceStatus,
             'ketidakhadiran_count' => $ketidakhadiranCount,
             'tugas_count' => $tugasCount,
+        ]);
+    }
+
+    /**
+     * Mengambil status pengajuan (pending, approved, rejected).
+     */
+    public function getPengajuanStatus()
+    {
+        $userId = Auth::id();
+        
+        // Ambil semua pengajuan yang masih pending
+        $pendingSubmissions = Absensi::where('user_id', $userId)
+                                    ->where('approval_status', 'pending')
+                                    ->orderBy('tanggal', 'desc')
+                                    ->get()
+                                    ->map(function ($item) {
+                                        return [
+                                            'id' => $item->id,
+                                            'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
+                                            'status' => $item->status,
+                                            'approval_status' => $item->approval_status,
+                                            'reason' => $item->reason,
+                                        ];
+                                    });
+
+        // Ambil pengajuan yang sudah approved atau rejected (7 hari terakhir)
+        $recentSubmissions = Absensi::where('user_id', $userId)
+                                    ->whereIn('approval_status', ['approved', 'rejected'])
+                                    ->where('tanggal', '>=', now()->subDays(7)->toDateString())
+                                    ->orderBy('tanggal', 'desc')
+                                    ->get()
+                                    ->map(function ($item) {
+                                        return [
+                                            'id' => $item->id,
+                                            'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
+                                            'status' => $item->status,
+                                            'approval_status' => $item->approval_status,
+                                            'reason' => $item->reason,
+                                        ];
+                                    });
+
+        return response()->json([
+            'pending' => $pendingSubmissions,
+            'recent' => $recentSubmissions,
         ]);
     }
 

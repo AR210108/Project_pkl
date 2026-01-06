@@ -5,46 +5,57 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
-    /**
-     * Tampilkan halaman login.
-     * Middleware 'guest' akan menangani redirect jika user sudah login.
-     */
     public function show()
     {
-        // Tugas controller ini hanya satu: tampilkan view.
         return view('login.login');
     }
 
-    /**
-     * Proses autentikasi user.
-     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-
-            // Arahkan user ke halaman yang sesuai berdasarkan role
+            
             $user = Auth::user();
-
-            if ($user->role === 'admin') {
-                return redirect()->intended(route('admin.home'));
+            
+            // Debug log
+            \Log::info('Login successful', [
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'user_role' => $user->role,
+                'redirect_to' => match($user->role) {
+                    'admin', 'finance' => route("{$user->role}.beranda"),
+                    'karyawan', 'general_manager', 'manager_divisi', 'owner' => route("{$user->role}.home"),
+                    default => route('login')
+                }
+            ]);
+            
+            // Redirect berdasarkan role
+            if (in_array($user->role, ['admin', 'finance'])) {
+                return redirect()->route("{$user->role}.beranda");
+            } else {
+                return redirect()->route("{$user->role}.home");
             }
-
-            // Default untuk role 'karyawan' atau role lainnya
-            return redirect()->intended(route('karyawan.home'));
         }
 
-        throw ValidationException::withMessages([
-            'email' => ['Email atau password yang Anda masukkan salah.'],
+        return back()->withErrors([
+            'email' => 'Email atau password salah.',
         ]);
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect('/');
     }
 }
