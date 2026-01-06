@@ -15,6 +15,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\SuratKerjasamaController;
+use App\Http\Controllers\PelayananController;
 use App\Models\Invoice;
 
 /*
@@ -359,9 +360,8 @@ Route::get('/general_manajer', function () {
 Route::get('/data_karyawan', function () {
     return redirect()->route('pegawai.index');
 });
-Route::get('/layanan', function () {
-    return view('general_manajer/data_layanan');
-});
+Route::get('/layanan', [PelayananController::class, 'index']);
+
 Route::get('/kelola_order', function () {
     return view('general_manajer/kelola_order');
 });
@@ -371,3 +371,8 @@ Route::get('/kelola_tugas', function () {
 Route::get('/kelola_absen', function () {
     return view('general_manajer/kelola_absen');
 });
+
+// routes untuk pelayanan
+Route::post('/layanan', [PelayananController::class, 'store']);
+Route::put('/layanan/{id}', [PelayananController::class, 'update']);
+Route::delete('/layanan/{id}', [PelayananController::class, 'destroy']);

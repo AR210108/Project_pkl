@@ -53,7 +53,6 @@
             vertical-align: middle;
         }
         
-        /* Card hover effects */
         .stat-card {
             transition: all 0.3s ease;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
@@ -64,7 +63,6 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         
-        /* Table styles */
         .order-table {
             transition: all 0.2s ease;
         }
@@ -73,7 +71,6 @@
             background-color: rgba(59, 130, 246, 0.05);
         }
         
-        /* Button styles */
         .btn-primary {
             background-color: #3b82f6;
             color: white;
@@ -94,7 +91,6 @@
             background-color: #e2e8f0;
         }
         
-        /* Modal styles */
         .modal {
             transition: opacity 0.25s ease;
         }
@@ -104,7 +100,6 @@
             backdrop-filter: blur(4px);
         }
 
-        /* Status Badge Styles */
         .status-badge {
             display: inline-block;
             padding: 0.25rem 0.75rem;
@@ -133,12 +128,10 @@
             color: #92400e;
         }
         
-        /* Custom styles untuk transisi */
         .sidebar-transition {
             transition: transform 0.3s ease-in-out;
         }
         
-        /* Animasi hamburger */
         .hamburger-line {
             transition: all 0.3s ease-in-out;
         }
@@ -155,14 +148,11 @@
             transform: rotate(-45deg) translate(7px, -6px);
         }
         
-        /* Style untuk efek hover yang lebih menonjol */
         .nav-item {
             position: relative;
             overflow: hidden;
         }
         
-        /* Gaya untuk indikator aktif/hover */
-        /* Default untuk mobile: di sebelah kanan */
         .nav-item::before {
             content: '';
             position: absolute;
@@ -175,7 +165,6 @@
             transition: transform 0.3s ease;
         }
         
-        /* Override untuk desktop: di sebelah kiri */
         @media (min-width: 768px) {
             .nav-item::before {
                 right: auto;
@@ -189,7 +178,6 @@
             transform: translateX(0);
         }
         
-        /* Memastikan sidebar tetap di posisinya saat scroll */
         .sidebar-fixed {
             position: fixed;
             height: 100vh;
@@ -197,7 +185,6 @@
             z-index: 40;
         }
         
-        /* Menyesuaikan konten utama agar tidak tertutup sidebar */
         .main-content {
             margin-left: 0;
             transition: margin-left 0.3s ease-in-out;
@@ -205,11 +192,10 @@
         
         @media (min-width: 768px) {
             .main-content {
-                margin-left: 256px; /* Lebar sidebar */
+                margin-left: 256px;
             }
         }
         
-        /* Scrollbar kustom untuk sidebar */
         .sidebar-fixed::-webkit-scrollbar {
             width: 6px;
         }
@@ -227,7 +213,6 @@
             background: #555;
         }
         
-        /* Table mobile adjustments */
         @media (max-width: 639px) {
             .desktop-table {
                 display: none;
@@ -237,7 +222,6 @@
                 display: block;
             }
             
-            /* Hide desktop pagination on mobile */
             .desktop-pagination {
                 display: none !important;
             }
@@ -252,13 +236,11 @@
                 display: none;
             }
             
-            /* Hide mobile pagination on desktop */
             .mobile-pagination {
                 display: none !important;
             }
         }
         
-        /* Form input styles */
         .form-input {
             border: 1px solid #e2e8f0;
             transition: all 0.2s ease;
@@ -269,7 +251,6 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
         
-        /* Pagination styles */
         .page-btn {
             transition: all 0.2s ease;
         }
@@ -283,7 +264,6 @@
             cursor: not-allowed;
         }
         
-        /* Desktop pagination styles */
         .desktop-pagination {
             display: flex;
             justify-content: center;
@@ -341,7 +321,6 @@
             cursor: not-allowed;
         }
         
-        /* Panel Styles */
         .panel {
             background: white;
             border-radius: 0.75rem;
@@ -373,7 +352,6 @@
             padding: 1.5rem;
         }
         
-        /* SCROLLABLE TABLE - TANPA INDICATOR */
         .scrollable-table-container {
             width: 100%;
             overflow-x: auto;
@@ -383,7 +361,6 @@
             background: white;
         }
         
-        /* Force scrollbar to be visible */
         .scrollable-table-container {
             scrollbar-width: auto;
             -webkit-overflow-scrolling: touch;
@@ -409,10 +386,9 @@
             background: #94a3b8;
         }
         
-        /* Table with fixed width to ensure scrolling */
         .data-table {
             width: 100%;
-            min-width: 1200px; /* Fixed minimum width */
+            min-width: 1200px;
             border-collapse: collapse;
         }
         
@@ -441,12 +417,10 @@
             background: #f3f4f6;
         }
         
-        /* Shadow effect */
         .table-shadow {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         
-        /* Truncate text style */
         .truncate-text {
             max-width: 300px;
             white-space: nowrap;
@@ -464,14 +438,31 @@
         <main class="flex-1 flex flex-col bg-background-light">
             <div class="flex-1 p-3 sm:p-8">
 
+                <!-- Flash Message -->
+                @if(session('success'))
+                    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 flex items-center">
+                        <span class="mr-2">{{ session('success') }}</span>
+                        <button onclick="this.parentElement.style.display='none'" class="text-white hover:text-gray-200">
+                            <span class="material-icons-outlined">close</span>
+                        </button>
+                    </div>
+                @endif
+
                 <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Data Layanan</h2>
                 
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <div class="relative w-full md:w-1/3">
+                    <!-- PERUBAHAN: Search input dibungkus dalam form GET -->
+                    <form action="/layanan" method="GET" class="relative w-full md:w-1/3">
                         <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Search..." type="text" />
-                    </div>
+                        <input 
+                            name="search" 
+                            value="{{ $search ?? '' }}" 
+                            class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" 
+                            placeholder="Search..." 
+                            type="text" 
+                        />
+                    </form>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <button class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
                             Filter
@@ -492,7 +483,7 @@
                             Daftar Layanan
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="totalCount">4</span> layanan</span>
+                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light">{{ $pelayanan->total() }}</span> layanan</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -511,42 +502,94 @@
                                             <th style="min-width: 150px; text-align: center;">Aksi</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="desktopTableBody">
-                                        <!-- Data rows will be populated by JavaScript -->
+                                    <tbody>
+                                        @foreach($pelayanan as $item)
+                                            <tr>
+                                                <td style="min-width: 60px;">{{ $pelayanan->firstItem() + $loop->index }}</td>
+                                                <td style="min-width: 200px;">{{ $item->nama }}</td>
+                                                <td style="min-width: 120px;">Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
+                                                <td style="min-width: 100px;">{{ $item->durasi }}</td>
+                                                <td style="min-width: 300px;" class="truncate-text" title="{{ $item->deskripsi }}">{{ \Illuminate\Support\Str::limit($item->deskripsi, 50) }}</td>
+                                                <td style="min-width: 120px;"><span class="status-badge status-{{ strtolower($item->kategori) }}">{{ $item->kategori }}</span></td>
+                                                <td style="min-width: 150px; text-align: center;">
+                                                    <div class="flex justify-center gap-2">
+                                                        <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                            onclick="openDetailModal('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->harga }}', '{{ $item->durasi }}', '{{ $item->deskripsi }}', '{{ $item->kategori }}')"
+                                                            title="Lihat Detail">
+                                                            <span class="material-icons-outlined">visibility</span>
+                                                        </button>
+                                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                            onclick="openEditModal('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->harga }}', '{{ $item->durasi }}', '{{ $item->deskripsi }}', '{{ $item->kategori }}')"
+                                                            title="Edit">
+                                                            <span class="material-icons-outlined">edit</span>
+                                                        </button>
+                                                        <form action="/layanan/{{ $item->id }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus ini?');" class="inline">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" title="Hapus">
+                                                                <span class="material-icons-outlined">delete</span>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                         
                         <!-- Mobile Card View -->
-                        <div class="mobile-cards space-y-4" id="mobile-cards">
-                            <!-- Mobile cards will be populated by JavaScript -->
+                        <div class="mobile-cards space-y-4">
+                            @foreach($pelayanan as $item)
+                                <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h4 class="font-semibold text-base">{{ $item->nama }}</h4>
+                                            <p class="text-sm text-text-muted-light">Rp {{ number_format($item->harga, 0, ',', '.') }}</p>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                onclick="openEditModal('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->harga }}', '{{ $item->durasi }}', '{{ $item->deskripsi }}', '{{ $item->kategori }}')"
+                                                title="Edit">
+                                                <span class="material-icons-outlined">edit</span>
+                                            </button>
+                                            <form action="/layanan/{{ $item->id }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus ini?');" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" title="Hapus">
+                                                    <span class="material-icons-outlined">delete</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2 text-sm">
+                                        <div>
+                                            <p class="text-text-muted-light">Durasi</p>
+                                            <p class="font-medium">{{ $item->durasi }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-text-muted-light">Kategori</p>
+                                            <p><span class="status-badge status-{{ strtolower($item->kategori) }}">{{ $item->kategori }}</span></p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <p class="text-text-muted-light">Deskripsi</p>
+                                        <p class="font-medium">{{ \Illuminate\Support\Str::limit($item->deskripsi, 80) }}</p>
+                                        @if(strlen($item->deskripsi) > 80)
+                                            <button class="text-primary text-sm mt-1" 
+                                                onclick="openDetailModal('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->harga }}', '{{ $item->durasi }}', '{{ $item->deskripsi }}', '{{ $item->kategori }}')">
+                                                Lihat selengkapnya
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                         
-                        <!-- Desktop Pagination - SELALU DITAMPILKAN -->
-                        <div id="desktopPaginationContainer" class="desktop-pagination">
-                            <button id="desktopPrevPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="desktopPageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="desktopNextPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
-                        </div>
-                        
-                        <!-- Mobile Pagination -->
-                        <div class="mobile-pagination md:hidden flex justify-center items-center gap-2 mt-4">
-                            <button id="prevPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="pageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="nextPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
+                        <!-- Pagination -->
+                        <div class="flex justify-center mt-6">
+                            {{ $pelayanan->links() }}
                         </div>
                     </div>
                 </div>
@@ -567,29 +610,30 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="tambahForm">
+                <form action="/layanan" method="POST">
+                    @csrf
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
-                        <input type="text" id="tambahNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="text" name="nama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700">Rp</span>
-                            <input type="number" id="tambahHarga" class="w-full pl-10 pr-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <input type="number" name="harga" class="w-full pl-10 pr-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                         </div>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Durasi</label>
-                        <input type="text" id="tambahDurasi" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Contoh: 30 Hari" required>
+                        <input type="text" name="durasi" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Contoh: 30 Hari" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="tambahDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                        <textarea name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                        <select id="tambahKategori" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <select name="kategori" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                             <option value="">Pilih Kategori</option>
                             <option value="Teknologi">Teknologi</option>
                             <option value="Desain">Desain</option>
@@ -616,30 +660,31 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="editForm">
-                    <input type="hidden" id="editId">
+                <form id="editForm" action="" method="POST">
+                    @csrf
+                    @method('PUT')
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
-                        <input type="text" id="editNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="text" name="nama" id="editNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700">Rp</span>
-                            <input type="number" id="editHarga" class="w-full pl-10 pr-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <input type="number" name="harga" id="editHarga" class="w-full pl-10 pr-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                         </div>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Durasi</label>
-                        <input type="text" id="editDurasi" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="text" name="durasi" id="editDurasi" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="editDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                        <textarea name="deskripsi" id="editDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                        <select id="editKategori" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <select name="kategori" id="editKategori" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                             <option value="Teknologi">Teknologi</option>
                             <option value="Desain">Desain</option>
                             <option value="Marketing">Marketing</option>
@@ -697,105 +742,20 @@
         </div>
     </div>
 
-    <!-- Modal Hapus Layanan -->
-    <div id="deleteModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h3>
-                    <button class="close-modal text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <div class="mb-6">
-                    <p class="text-gray-700">Apakah Anda yakin ingin menghapus layanan <span id="deleteNama" class="font-semibold"></span>?</p>
-                    <p class="text-sm text-gray-500 mt-2">Tindakan ini tidak dapat dibatalkan.</p>
-                </div>
-                <input type="hidden" id="deleteId">
-                <div class="flex justify-end gap-2">
-                    <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                    <button id="confirmDelete" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Hapus</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center">
-        <span id="toastMessage" class="mr-2"></span>
-        <button id="closeToast" class="ml-2 text-white hover:text-gray-200">
-            <span class="material-icons-outlined">close</span>
-        </button>
-    </div>
-
     <script>
-        // Sample data for layanan
-        const layananData = [
-            { 
-                id: 1, 
-                nama: "Jasa Pembuatan Website", 
-                harga: 5000000, 
-                durasi: "30 Hari", 
-                deskripsi: "Website company profile dengan desain modern dan responsif. Paket ini mencakup desain UI/UX, pengembangan frontend dan backend, optimasi SEO dasar, dan pelatihan penggunaan sistem website.", 
-                kategori: "Teknologi" 
-            },
-            { 
-                id: 2, 
-                nama: "Desain Logo", 
-                harga: 1500000, 
-                durasi: "7 Hari", 
-                deskripsi: "Desain logo profesional dengan konsep sesuai brand Anda. Kami akan menyediakan 3 konsep desain awal, revisi hingga 3 kali, dan file akhir dalam berbagai format (PNG, JPG, SVG, AI).", 
-                kategori: "Desain" 
-            },
-            { 
-                id: 3, 
-                nama: "Manajemen Sosial Media", 
-                harga: 3000000, 
-                durasi: "30 Hari", 
-                deskripsi: "Kelola akun sosmed dengan konten berkualitas dan strategi yang efektif. Layanan ini mencakup pembuatan konten, penjadwalan posting, monitoring engagement, dan laporan bulanan.", 
-                kategori: "Marketing" 
-            },
-            { 
-                id: 4, 
-                nama: "Konsultasi SEO", 
-                harga: 2000000, 
-                durasi: "14 Hari", 
-                deskripsi: "Analisis dan strategi SEO untuk meningkatkan visibilitas website. Kami akan melakukan audit SEO, analisis kompetitor, riset kata kunci, dan memberikan rekomendasi implementasi.", 
-                kategori: "Marketing" 
-            }
-        ];
-
-        // Pagination variables
-        const itemsPerPage = 3; // Dikurangi jadi 3 agar pagination terlihat
-        let currentPage = 1;
-        const totalPages = Math.ceil(layananData.length / itemsPerPage);
-
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize pagination - SELALU DIJALANKAN
-            initializePagination();
-            
             // Modal elements
             const tambahModal = document.getElementById('tambahModal');
             const editModal = document.getElementById('editModal');
             const detailModal = document.getElementById('detailModal');
-            const deleteModal = document.getElementById('deleteModal');
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
             
             // Buttons
             const tambahLayananBtn = document.getElementById('tambahLayananBtn');
             const closeModals = document.querySelectorAll('.close-modal');
-            const confirmDeleteBtn = document.getElementById('confirmDelete');
-            const closeToastBtn = document.getElementById('closeToast');
-            
-            // Forms
-            const tambahForm = document.getElementById('tambahForm');
-            const editForm = document.getElementById('editForm');
             
             // Show tambah modal
             tambahLayananBtn.addEventListener('click', function() {
                 tambahModal.classList.remove('hidden');
-                tambahForm.reset();
             });
             
             // Close modals
@@ -804,7 +764,6 @@
                     tambahModal.classList.add('hidden');
                     editModal.classList.add('hidden');
                     detailModal.classList.add('hidden');
-                    deleteModal.classList.add('hidden');
                 });
             });
             
@@ -819,306 +778,14 @@
                 if (event.target === detailModal) {
                     detailModal.classList.add('hidden');
                 }
-                if (event.target === deleteModal) {
-                    deleteModal.classList.add('hidden');
-                }
             });
-            
-            // Handle tambah form submission
-            tambahForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                showToast('Layanan berhasil ditambahkan!');
-                tambahModal.classList.add('hidden');
-                tambahForm.reset();
-                
-                // Refresh data
-                renderDesktopTable(currentPage);
-                renderMobileCards(currentPage);
-            });
-            
-            // Handle edit form submission
-            editForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                showToast('Data layanan berhasil diperbarui!');
-                editModal.classList.add('hidden');
-                
-                // Refresh data
-                renderDesktopTable(currentPage);
-                renderMobileCards(currentPage);
-            });
-            
-            // Handle delete confirmation
-            confirmDeleteBtn.addEventListener('click', function() {
-                const id = document.getElementById('deleteId').value;
-                showToast('Layanan berhasil dihapus!');
-                deleteModal.classList.add('hidden');
-                
-                // Refresh data
-                renderDesktopTable(currentPage);
-                renderMobileCards(currentPage);
-            });
-            
-            // Close toast notification
-            closeToastBtn.addEventListener('click', function() {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            });
-            
-            // Function to show toast notification
-            function showToast(message) {
-                toastMessage.textContent = message;
-                toast.classList.remove('translate-y-20', 'opacity-0');
-                
-                // Auto hide after 3 seconds
-                setTimeout(() => {
-                    toast.classList.add('translate-y-20', 'opacity-0');
-                }, 3000);
-            }
         });
-
-        // Initialize pagination - SELALU DIJALANKAN
-        function initializePagination() {
-            // Update total count
-            document.getElementById('totalCount').textContent = layananData.length;
-            
-            // SELALU tampilkan pagination
-            initDesktopPagination();
-            initMobilePagination();
-            
-            // Render first page
-            renderDesktopTable(1);
-            renderMobileCards(1);
-        }
-
-        // Desktop pagination functionality
-        function initDesktopPagination() {
-            const pageNumbersContainer = document.getElementById('desktopPageNumbers');
-            const prevButton = document.getElementById('desktopPrevPage');
-            const nextButton = document.getElementById('desktopNextPage');
-            
-            // Clear existing page numbers
-            pageNumbersContainer.innerHTML = '';
-            
-            // Generate page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                const pageNumber = document.createElement('button');
-                pageNumber.textContent = i;
-                pageNumber.className = `desktop-page-btn ${
-                    i === currentPage ? 'active' : ''
-                }`;
-                pageNumber.addEventListener('click', () => goToDesktopPage(i));
-                pageNumbersContainer.appendChild(pageNumber);
-            }
-            
-            // Event listeners for navigation buttons
-            prevButton.addEventListener('click', () => {
-                if (currentPage > 1) goToDesktopPage(currentPage - 1);
-            });
-            
-            nextButton.addEventListener('click', () => {
-                if (currentPage < totalPages) goToDesktopPage(currentPage + 1);
-            });
-        }
-
-        // Mobile pagination functionality
-        function initMobilePagination() {
-            const pageNumbersContainer = document.getElementById('pageNumbers');
-            const prevButton = document.getElementById('prevPage');
-            const nextButton = document.getElementById('nextPage');
-            
-            // Clear existing page numbers
-            pageNumbersContainer.innerHTML = '';
-            
-            // Generate page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                const pageNumber = document.createElement('button');
-                pageNumber.textContent = i;
-                pageNumber.className = `page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                    i === currentPage ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
-                }`;
-                pageNumber.addEventListener('click', () => goToMobilePage(i));
-                pageNumbersContainer.appendChild(pageNumber);
-            }
-            
-            // Event listeners for navigation buttons
-            prevButton.addEventListener('click', () => {
-                if (currentPage > 1) goToMobilePage(currentPage - 1);
-            });
-            
-            nextButton.addEventListener('click', () => {
-                if (currentPage < totalPages) goToMobilePage(currentPage + 1);
-            });
-        }
-
-        // Go to specific desktop page
-        function goToDesktopPage(page) {
-            currentPage = page;
-            renderDesktopTable(page);
-            updateDesktopPaginationButtons();
-            
-            // Reset scroll position when changing pages
-            const scrollableTable = document.getElementById('scrollableTable');
-            if (scrollableTable) {
-                scrollableTable.scrollLeft = 0;
-            }
-        }
-
-        // Go to specific mobile page
-        function goToMobilePage(page) {
-            currentPage = page;
-            renderMobileCards(page);
-            updateMobilePaginationButtons();
-        }
-
-        // Render desktop table for specific page
-        function renderDesktopTable(page) {
-            const tbody = document.getElementById('desktopTableBody');
-            tbody.innerHTML = '';
-            
-            const startIndex = (page - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, layananData.length);
-            
-            for (let i = startIndex; i < endIndex; i++) {
-                const layanan = layananData[i];
-                const row = document.createElement('tr');
-                
-                // Truncate description for table view
-                const truncatedDesc = layanan.deskripsi.length > 50 
-                    ? layanan.deskripsi.substring(0, 50) + '...' 
-                    : layanan.deskripsi;
-                
-                row.innerHTML = `
-                    <td style="min-width: 60px;">${i + 1}</td>
-                    <td style="min-width: 200px;">${layanan.nama}</td>
-                    <td style="min-width: 120px;">Rp ${layanan.harga.toLocaleString('id-ID')}</td>
-                    <td style="min-width: 100px;">${layanan.durasi}</td>
-                    <td style="min-width: 300px;" class="truncate-text" title="${layanan.deskripsi}">${truncatedDesc}</td>
-                    <td style="min-width: 120px;"><span class="status-badge status-${layanan.kategori.toLowerCase()}">${layanan.kategori}</span></td>
-                    <td style="min-width: 150px; text-align: center;">
-                        <div class="flex justify-center gap-2">
-                            <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openDetailModal(${layanan.id}, '${layanan.nama}', ${layanan.harga}, '${layanan.durasi}', '${layanan.deskripsi}', '${layanan.kategori}')"
-                                title="Lihat Detail">
-                                <span class="material-icons-outlined">visibility</span>
-                            </button>
-                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openEditModal(${layanan.id}, '${layanan.nama}', ${layanan.harga}, '${layanan.durasi}', '${layanan.deskripsi}', '${layanan.kategori}')"
-                                title="Edit">
-                                <span class="material-icons-outlined">edit</span>
-                            </button>
-                            <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                onclick="openDeleteModal(${layanan.id}, '${layanan.nama}')"
-                                title="Hapus">
-                                <span class="material-icons-outlined">delete</span>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            }
-        }
-
-        // Render mobile cards for specific page
-        function renderMobileCards(page) {
-            const container = document.getElementById('mobile-cards');
-            container.innerHTML = '';
-            
-            const startIndex = (page - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, layananData.length);
-            
-            for (let i = startIndex; i < endIndex; i++) {
-                const layanan = layananData[i];
-                
-                // Truncate description for mobile card view
-                const truncatedDesc = layanan.deskripsi.length > 80 
-                    ? layanan.deskripsi.substring(0, 80) + '...' 
-                    : layanan.deskripsi;
-                
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-lg border border-border-light p-4 shadow-sm';
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <h4 class="font-semibold text-base">${layanan.nama}</h4>
-                            <p class="text-sm text-text-muted-light">Rp ${layanan.harga.toLocaleString('id-ID')}</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openEditModal(${layanan.id}, '${layanan.nama}', ${layanan.harga}, '${layanan.durasi}', '${layanan.deskripsi}', '${layanan.kategori}')"
-                                title="Edit">
-                                <span class="material-icons-outlined">edit</span>
-                            </button>
-                            <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                onclick="openDeleteModal(${layanan.id}, '${layanan.nama}')"
-                                title="Hapus">
-                                <span class="material-icons-outlined">delete</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                            <p class="text-text-muted-light">Durasi</p>
-                            <p class="font-medium">${layanan.durasi}</p>
-                        </div>
-                        <div>
-                            <p class="text-text-muted-light">Kategori</p>
-                            <p><span class="status-badge status-${layanan.kategori.toLowerCase()}">${layanan.kategori}</span></p>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <p class="text-text-muted-light">Deskripsi</p>
-                        <p class="font-medium">${truncatedDesc}</p>
-                        ${layanan.deskripsi.length > 80 ? `
-                        <button class="text-primary text-sm mt-1" 
-                            onclick="openDetailModal(${layanan.id}, '${layanan.nama}', ${layanan.harga}, '${layanan.durasi}', '${layanan.deskripsi}', '${layanan.kategori}')">
-                            Lihat selengkapnya
-                        </button>` : ''}
-                    </div>
-                `;
-                container.appendChild(card);
-            }
-        }
-
-        // Update desktop pagination buttons
-        function updateDesktopPaginationButtons() {
-            const prevButton = document.getElementById('desktopPrevPage');
-            const nextButton = document.getElementById('desktopNextPage');
-            const pageButtons = document.querySelectorAll('#desktopPageNumbers button');
-            
-            prevButton.disabled = currentPage === 1;
-            nextButton.disabled = currentPage === totalPages;
-            
-            pageButtons.forEach((btn, index) => {
-                if (index + 1 === currentPage) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        }
-
-        // Update mobile pagination buttons
-        function updateMobilePaginationButtons() {
-            const prevButton = document.getElementById('prevPage');
-            const nextButton = document.getElementById('nextPage');
-            const pageButtons = document.querySelectorAll('#pageNumbers button');
-            
-            prevButton.disabled = currentPage === 1;
-            nextButton.disabled = currentPage === totalPages;
-            
-            pageButtons.forEach((btn, index) => {
-                if (index + 1 === currentPage) {
-                    btn.className = 'page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm bg-primary text-white';
-                } else {
-                    btn.className = 'page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm bg-gray-200 text-gray-600';
-                }
-            });
-        }
 
         // Open detail modal with data
         function openDetailModal(id, nama, harga, durasi, deskripsi, kategori) {
             document.getElementById('detailId').textContent = '#' + id;
             document.getElementById('detailNama').textContent = nama;
-            document.getElementById('detailHarga').textContent = 'Rp ' + harga.toLocaleString('id-ID');
+            document.getElementById('detailHarga').textContent = 'Rp ' + Number(harga).toLocaleString('id-ID');
             document.getElementById('detailDurasi').textContent = durasi;
             document.getElementById('detailDeskripsi').textContent = deskripsi;
             
@@ -1131,22 +798,17 @@
 
         // Open edit modal with data
         function openEditModal(id, nama, harga, durasi, deskripsi, kategori) {
-            document.getElementById('editId').value = id;
             document.getElementById('editNama').value = nama;
             document.getElementById('editHarga').value = harga;
             document.getElementById('editDurasi').value = durasi;
             document.getElementById('editDeskripsi').value = deskripsi;
             document.getElementById('editKategori').value = kategori;
             
-            document.getElementById('editModal').classList.remove('hidden');
-        }
-
-        // Open delete modal with data
-        function openDeleteModal(id, nama) {
-            document.getElementById('deleteId').value = id;
-            document.getElementById('deleteNama').textContent = nama;
+            // Set action URL untuk form edit
+            const editForm = document.getElementById('editForm');
+            editForm.action = `/layanan/${id}`;
             
-            document.getElementById('deleteModal').classList.remove('hidden');
+            document.getElementById('editModal').classList.remove('hidden');
         }
     </script>
 </body>
