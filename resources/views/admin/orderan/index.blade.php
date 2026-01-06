@@ -512,7 +512,7 @@
                                 Daftar Orderan
                             </h3>
                             <div class="flex items-center gap-2">
-                                <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="totalCount">2</span> orderan</span>
+                                <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light">{{ $orderan->total() }}</span> orderan</span>
                             </div>
                         </div>
                         <div class="panel-body">
@@ -533,7 +533,51 @@
                                             </tr>
                                         </thead>
                                         <tbody id="desktopTableBody">
-                                            <!-- Data rows will be populated by JavaScript -->
+                                            @foreach($orderan as $index => $item)
+                                                <tr>
+                                                    <td style="min-width: 60px;">{{ ($orderan->currentPage() - 1) * $orderan->perPage() + $index + 1 }}</td>
+                                                    <td style="min-width: 200px;">{{ $item->nama }}</td>
+                                                    <td style="min-width: 300px;" class="truncate-text" title="{{ $item->deskripsi }}">
+                                                        {{ Str::limit($item->deskripsi, 50) }}
+                                                    </td>
+                                                    <td style="min-width: 120px;">{{ $item->harga }}</td>
+                                                    <td style="min-width: 120px;">{{ $item->deadline->format('Y-m-d') }}</td>
+                                                    <td style="min-width: 150px;">
+                                                        <div class="progress-bar">
+                                                            <div class="progress-fill {{ $item->progres < 50 ? 'bg-red-500' : ($item->progres < 80 ? 'bg-yellow-500' : 'bg-green-500') }}" style="width: {{ $item->progres }}%"></div>
+                                                        </div>
+                                                        <span class="text-xs text-gray-600 dark:text-gray-400 mt-1 block">{{ $item->progres }}%</span>
+                                                    </td>
+                                                    <td style="min-width: 120px;">
+                                                        <span class="status-badge 
+                                                            @if($item->status == 'In Progress') status-inprogress 
+                                                            @elseif($item->status == 'Active') status-active 
+                                                            @elseif($item->status == 'Completed') status-done 
+                                                            @else status-todo @endif">
+                                                            {{ $item->status }}
+                                                        </span>
+                                                    </td>
+                                                    <td style="min-width: 180px; text-align: center;">
+                                                        <div class="flex justify-center gap-2">
+                                                            <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                                onclick="openDetailModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
+                                                                title="Lihat Detail">
+                                                                <span class="material-icons-outlined">visibility</span>
+                                                            </button>
+                                                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                                onclick="openEditModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
+                                                                title="Edit">
+                                                                <span class="material-icons-outlined">edit</span>
+                                                            </button>
+                                                            <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
+                                                                onclick="openDeleteModal({{ $item->id }}, '{{ $item->nama }}')"
+                                                                title="Hapus">
+                                                                <span class="material-icons-outlined">delete</span>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
                                         </tbody>
                                     </table>
                                 </div>
@@ -541,31 +585,104 @@
                             
                             <!-- Mobile Card View -->
                             <div class="mobile-cards space-y-4" id="mobile-cards">
-                                <!-- Mobile cards will be populated by JavaScript -->
+                                @foreach($orderan as $item)
+                                    <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm">
+                                        <div class="flex justify-between items-start mb-3">
+                                            <div>
+                                                <h4 class="font-semibold text-base">{{ $item->nama }}</h4>
+                                                <p class="text-sm text-text-muted-light">Deadline: {{ $item->deadline->format('Y-m-d') }}</p>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                    onclick="openDetailModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
+                                                    title="Lihat Detail">
+                                                    <span class="material-icons-outlined">visibility</span>
+                                                </button>
+                                                <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                    onclick="openEditModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
+                                                    title="Edit">
+                                                    <span class="material-icons-outlined">edit</span>
+                                                </button>
+                                                <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
+                                                    onclick="openDeleteModal({{ $item->id }}, '{{ $item->nama }}')"
+                                                    title="Hapus">
+                                                    <span class="material-icons-outlined">delete</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2 text-sm">
+                                            <div>
+                                                <p class="text-text-muted-light">Harga</p>
+                                                <p class="font-medium">{{ $item->harga }}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-text-muted-light">Status</p>
+                                                <p>
+                                                    <span class="status-badge 
+                                                        @if($item->status == 'In Progress') status-inprogress 
+                                                        @elseif($item->status == 'Active') status-active 
+                                                        @elseif($item->status == 'Completed') status-done 
+                                                        @else status-todo @endif">
+                                                        {{ $item->status }}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div class="col-span-2">
+                                                <p class="text-text-muted-light">Progres</p>
+                                                <div class="progress-bar mt-1">
+                                                    <div class="progress-fill {{ $item->progres < 50 ? 'bg-red-500' : ($item->progres < 80 ? 'bg-yellow-500' : 'bg-green-500') }}" style="width: {{ $item->progres }}%"></div>
+                                                </div>
+                                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ $item->progres }}%</p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-text-muted-light">Deskripsi</p>
+                                            <p class="font-medium">{{ Str::limit($item->deskripsi, 80) }}</p>
+                                            @if(strlen($item->deskripsi) > 80)
+                                                <button class="text-primary text-sm mt-1" 
+                                                    onclick="openDetailModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')">
+                                                    Lihat selengkapnya
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                             
-                            <!-- Desktop Pagination - SELALU DITAMPILKAN -->
-                            <div id="desktopPaginationContainer" class="desktop-pagination">
-                                <button id="desktopPrevPage" class="desktop-nav-btn">
+                            <!-- Desktop Pagination -->
+                            <div class="desktop-pagination">
+                                <button class="desktop-nav-btn" @if($orderan->currentPage() == 1) disabled @endif onclick="window.location.href='{{ $orderan->previousPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_left</span>
                                 </button>
-                                <div id="desktopPageNumbers" class="flex gap-1">
-                                    <!-- Page numbers will be generated by JavaScript -->
+                                <div class="flex gap-1">
+                                    @for($i = 1; $i <= $orderan->lastPage(); $i++)
+                                        <button class="desktop-page-btn {{ $i == $orderan->currentPage() ? 'active' : '' }}" 
+                                            onclick="window.location.href='{{ $orderan->url($i) }}'">
+                                            {{ $i }}
+                                        </button>
+                                    @endfor
                                 </div>
-                                <button id="desktopNextPage" class="desktop-nav-btn">
+                                <button class="desktop-nav-btn" @if($orderan->currentPage() == $orderan->lastPage()) disabled @endif onclick="window.location.href='{{ $orderan->nextPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_right</span>
                                 </button>
                             </div>
                             
                             <!-- Mobile Pagination -->
                             <div class="mobile-pagination md:hidden flex justify-center items-center gap-2 mt-4">
-                                <button id="prevPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <button class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                    @if($orderan->currentPage() == 1) disabled @endif onclick="window.location.href='{{ $orderan->previousPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_left</span>
                                 </button>
-                                <div id="pageNumbers" class="flex gap-1">
-                                    <!-- Page numbers will be generated by JavaScript -->
+                                <div class="flex gap-1">
+                                    @for($i = 1; $i <= $orderan->lastPage(); $i++)
+                                        <button class="page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm {{ $i == $orderan->currentPage() ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600' }}" 
+                                            onclick="window.location.href='{{ $orderan->url($i) }}'">
+                                            {{ $i }}
+                                        </button>
+                                    @endfor
                                 </div>
-                                <button id="nextPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <button class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                    @if($orderan->currentPage() == $orderan->lastPage()) disabled @endif onclick="window.location.href='{{ $orderan->nextPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_right</span>
                                 </button>
                             </div>
@@ -589,35 +706,54 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="tambahForm">
+                <form id="tambahForm" action="{{ route('orderan.store') }}" method="POST">
+                    @csrf
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
-                        <input type="text" id="tambahNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="text" name="nama" id="tambahNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        @error('nama')
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="tambahDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                        <textarea name="deskripsi" id="tambahDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                        @error('deskripsi')
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                        <input type="text" id="tambahHarga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="text" name="harga" id="tambahHarga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        @error('harga')
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                        <input type="date" id="tambahDeadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="date" name="deadline" id="tambahDeadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        @error('deadline')
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
-                        <input type="number" id="tambahProgres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="number" name="progres" id="tambahProgres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        @error('progres')
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select id="tambahStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <select name="status" id="tambahStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                             <option value="In Progress">In Progress</option>
                             <option value="Active">Active</option>
                             <option value="Completed">Completed</option>
                             <option value="Cancelled">Cancelled</option>
                         </select>
+                        @error('status')
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="flex justify-end gap-2">
                         <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -638,31 +774,33 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="editForm">
-                    <input type="hidden" id="editId">
+                <form id="editForm" action="{{ route('orderan.update', '') }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="id" id="editId">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
-                        <input type="text" id="editNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="text" name="nama" id="editNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="editDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                        <textarea name="deskripsi" id="editDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                        <input type="text" id="editHarga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="text" name="harga" id="editHarga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                        <input type="date" id="editDeadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="date" name="deadline" id="editDeadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
-                        <input type="number" id="editProgres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="number" name="progres" id="editProgres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select id="editStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <select name="status" id="editStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                             <option value="In Progress">In Progress</option>
                             <option value="Active">Active</option>
                             <option value="Completed">Completed</option>
@@ -743,11 +881,15 @@
                     <p class="text-gray-700">Apakah Anda yakin ingin menghapus orderan <span id="deleteNama" class="font-semibold"></span>?</p>
                     <p class="text-sm text-gray-500 mt-2">Tindakan ini tidak dapat dibatalkan.</p>
                 </div>
-                <input type="hidden" id="deleteId">
-                <div class="flex justify-end gap-2">
-                    <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                    <button id="confirmDelete" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Hapus</button>
-                </div>
+                <form id="deleteForm" action="{{ route('orderan.destroy', '') }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <input type="hidden" name="id" id="deleteId">
+                    <div class="flex justify-end gap-2">
+                        <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Hapus</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -760,38 +902,27 @@
         </button>
     </div>
 
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div id="successToast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 flex items-center">
+            <span class="mr-2">{{ session('success') }}</span>
+            <button onclick="this.parentElement.style.display='none'" class="ml-2 text-white hover:text-gray-200">
+                <span class="material-icons-outlined">close</span>
+            </button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div id="errorToast" class="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 flex items-center">
+            <span class="mr-2">{{ session('error') }}</span>
+            <button onclick="this.parentElement.style.display='none'" class="ml-2 text-white hover:text-gray-200">
+                <span class="material-icons-outlined">close</span>
+            </button>
+        </div>
+    @endif
+
     <script>
-        // Sample data for orderan
-        const orderanData = [
-            { 
-                id: 1, 
-                nama: "Website Company Profile", 
-                deskripsi: "Redesign corporate branding dengan tampilan modern dan responsif. Meliputi pembuatan ulang UI/UX, optimasi performa, dan integrasi dengan sistem manajemen konten yang sudah ada. Proyek ini bertujuan untuk meningkatkan citra perusahaan di dunia digital dan meningkatkan konversi pengunjung menjadi pelanggan potensial.", 
-                harga: "Rp 5.000.000",
-                deadline: "2025-12-25", 
-                progres: 70,
-                status: "In Progress" 
-            },
-            { 
-                id: 2, 
-                nama: "Aplikasi Kasir Mobile", 
-                deskripsi: "Pengembangan sistem POS android dengan fitur lengkap untuk kebutuhan retail. Aplikasi ini akan memiliki kemampuan untuk mengelola inventaris, melacak penjualan, menghasilkan laporan, dan sinkronisasi data dengan sistem backend. Dengan antarmuka yang intuitif, aplikasi ini dirancang untuk memudahkan proses transaksi dan manajemen toko.", 
-                harga: "Rp 12.500.000",
-                deadline: "2026-01-10", 
-                progres: 45,
-                status: "Active" 
-            }
-        ];
-
-        // Pagination variables
-        const itemsPerPage = 3;
-        let currentPage = 1;
-        const totalPages = Math.ceil(orderanData.length / itemsPerPage);
-
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize pagination - SELALU DIJALANKAN
-            initializePagination();
-            
             // Modal elements
             const tambahModal = document.getElementById('tambahModal');
             const editModal = document.getElementById('editModal');
@@ -803,12 +934,12 @@
             // Buttons
             const tambahOrderanBtn = document.getElementById('tambahOrderanBtn');
             const closeModals = document.querySelectorAll('.close-modal');
-            const confirmDeleteBtn = document.getElementById('confirmDelete');
             const closeToastBtn = document.getElementById('closeToast');
             
             // Forms
             const tambahForm = document.getElementById('tambahForm');
             const editForm = document.getElementById('editForm');
+            const deleteForm = document.getElementById('deleteForm');
             
             // Show tambah modal
             tambahOrderanBtn.addEventListener('click', function() {
@@ -842,38 +973,103 @@
                 }
             });
             
-            // Handle tambah form submission
+            // Handle tambah form submission with AJAX
             tambahForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                showToast('Orderan berhasil ditambahkan!');
-                tambahModal.classList.add('hidden');
-                tambahForm.reset();
                 
-                // Refresh data
-                renderDesktopTable(currentPage);
-                renderMobileCards(currentPage);
+                const formData = new FormData(tambahForm);
+                
+                fetch(tambahForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message);
+                        tambahModal.classList.add('hidden');
+                        tambahForm.reset();
+                        // Reload page to show new data
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showToast('Terjadi kesalahan. Silakan coba lagi.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Terjadi kesalahan. Silakan coba lagi.');
+                });
             });
             
-            // Handle edit form submission
+            // Handle edit form submission with AJAX
             editForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                showToast('Orderan berhasil diperbarui!');
-                editModal.classList.add('hidden');
                 
-                // Refresh data
-                renderDesktopTable(currentPage);
-                renderMobileCards(currentPage);
+                const formData = new FormData(editForm);
+                const id = document.getElementById('editId').value;
+                
+                fetch(`/orderan/${id}`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message);
+                        editModal.classList.add('hidden');
+                        // Reload page to show updated data
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showToast('Terjadi kesalahan. Silakan coba lagi.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Terjadi kesalahan. Silakan coba lagi.');
+                });
             });
             
-            // Handle delete confirmation
-            confirmDeleteBtn.addEventListener('click', function() {
-                const id = document.getElementById('deleteId').value;
-                showToast('Orderan berhasil dihapus!');
-                deleteModal.classList.add('hidden');
+            // Handle delete form submission with AJAX
+            deleteForm.addEventListener('submit', function(e) {
+                e.preventDefault();
                 
-                // Refresh data
-                renderDesktopTable(currentPage);
-                renderMobileCards(currentPage);
+                const formData = new FormData(deleteForm);
+                const id = document.getElementById('deleteId').value;
+                
+                fetch(`/orderan/${id}`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message);
+                        deleteModal.classList.add('hidden');
+                        // Reload page to show updated data
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showToast('Terjadi kesalahan. Silakan coba lagi.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Terjadi kesalahan. Silakan coba lagi.');
+                });
             });
             
             // Close toast notification
@@ -892,306 +1088,6 @@
                 }, 3000);
             }
         });
-
-        // Initialize pagination - SELALU DIJALANKAN
-        function initializePagination() {
-            // Update total count
-            document.getElementById('totalCount').textContent = orderanData.length;
-            
-            // SELALU tampilkan pagination
-            initDesktopPagination();
-            initMobilePagination();
-            
-            // Render first page
-            renderDesktopTable(1);
-            renderMobileCards(1);
-        }
-
-        // Desktop pagination functionality
-        function initDesktopPagination() {
-            const pageNumbersContainer = document.getElementById('desktopPageNumbers');
-            const prevButton = document.getElementById('desktopPrevPage');
-            const nextButton = document.getElementById('desktopNextPage');
-            
-            // Clear existing page numbers
-            pageNumbersContainer.innerHTML = '';
-            
-            // Generate page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                const pageNumber = document.createElement('button');
-                pageNumber.textContent = i;
-                pageNumber.className = `desktop-page-btn ${
-                    i === currentPage ? 'active' : ''
-                }`;
-                pageNumber.addEventListener('click', () => goToDesktopPage(i));
-                pageNumbersContainer.appendChild(pageNumber);
-            }
-            
-            // Event listeners for navigation buttons
-            prevButton.addEventListener('click', () => {
-                if (currentPage > 1) goToDesktopPage(currentPage - 1);
-            });
-            
-            nextButton.addEventListener('click', () => {
-                if (currentPage < totalPages) goToDesktopPage(currentPage + 1);
-            });
-        }
-
-        // Mobile pagination functionality
-        function initMobilePagination() {
-            const pageNumbersContainer = document.getElementById('pageNumbers');
-            const prevButton = document.getElementById('prevPage');
-            const nextButton = document.getElementById('nextPage');
-            
-            // Clear existing page numbers
-            pageNumbersContainer.innerHTML = '';
-            
-            // Generate page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                const pageNumber = document.createElement('button');
-                pageNumber.textContent = i;
-                pageNumber.className = `page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                    i === currentPage ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
-                }`;
-                pageNumber.addEventListener('click', () => goToMobilePage(i));
-                pageNumbersContainer.appendChild(pageNumber);
-            }
-            
-            // Event listeners for navigation buttons
-            prevButton.addEventListener('click', () => {
-                if (currentPage > 1) goToMobilePage(currentPage - 1);
-            });
-            
-            nextButton.addEventListener('click', () => {
-                if (currentPage < totalPages) goToMobilePage(currentPage + 1);
-            });
-        }
-
-        // Go to specific desktop page
-        function goToDesktopPage(page) {
-            currentPage = page;
-            renderDesktopTable(page);
-            updateDesktopPaginationButtons();
-            
-            // Reset scroll position when changing pages
-            const scrollableTable = document.getElementById('scrollableTable');
-            if (scrollableTable) {
-                scrollableTable.scrollLeft = 0;
-            }
-        }
-
-        // Go to specific mobile page
-        function goToMobilePage(page) {
-            currentPage = page;
-            renderMobileCards(page);
-            updateMobilePaginationButtons();
-        }
-
-        // Render desktop table for specific page
-        function renderDesktopTable(page) {
-            const tbody = document.getElementById('desktopTableBody');
-            tbody.innerHTML = '';
-            
-            const startIndex = (page - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, orderanData.length);
-            
-            for (let i = startIndex; i < endIndex; i++) {
-                const orderan = orderanData[i];
-                const row = document.createElement('tr');
-                
-                // Determine status class
-                let statusClass = '';
-                if (orderan.status === 'In Progress') {
-                    statusClass = 'status-inprogress';
-                } else if (orderan.status === 'Active') {
-                    statusClass = 'status-active';
-                } else if (orderan.status === 'Completed') {
-                    statusClass = 'status-done';
-                } else if (orderan.status === 'Cancelled') {
-                    statusClass = 'status-todo';
-                }
-                
-                // Determine progress bar color
-                let progressColor = '';
-                if (orderan.progres < 50) {
-                    progressColor = 'bg-red-500';
-                } else if (orderan.progres < 80) {
-                    progressColor = 'bg-yellow-500';
-                } else {
-                    progressColor = 'bg-green-500';
-                }
-                
-                // Truncate description for table view
-                const truncatedDesc = orderan.deskripsi.length > 50 
-                    ? orderan.deskripsi.substring(0, 50) + '...' 
-                    : orderan.deskripsi;
-                
-                row.innerHTML = `
-                    <td style="min-width: 60px;">${i + 1}</td>
-                    <td style="min-width: 200px;">${orderan.nama}</td>
-                    <td style="min-width: 300px;" class="truncate-text" title="${orderan.deskripsi}">${truncatedDesc}</td>
-                    <td style="min-width: 120px;">${orderan.harga}</td>
-                    <td style="min-width: 120px;">${orderan.deadline}</td>
-                    <td style="min-width: 150px;">
-                        <div class="progress-bar">
-                            <div class="progress-fill ${progressColor}" style="width: ${orderan.progres}%"></div>
-                        </div>
-                        <span class="text-xs text-gray-600 dark:text-gray-400 mt-1 block">${orderan.progres}%</span>
-                    </td>
-                    <td style="min-width: 120px;"><span class="status-badge ${statusClass}">${orderan.status}</span></td>
-                    <td style="min-width: 180px; text-align: center;">
-                        <div class="flex justify-center gap-2">
-                            <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openDetailModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')"
-                                title="Lihat Detail">
-                                <span class="material-icons-outlined">visibility</span>
-                            </button>
-                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openEditModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')"
-                                title="Edit">
-                                <span class="material-icons-outlined">edit</span>
-                            </button>
-                            <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                onclick="openDeleteModal(${orderan.id}, '${orderan.nama}')"
-                                title="Hapus">
-                                <span class="material-icons-outlined">delete</span>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            }
-        }
-
-        // Render mobile cards for specific page
-        function renderMobileCards(page) {
-            const container = document.getElementById('mobile-cards');
-            container.innerHTML = '';
-            
-            const startIndex = (page - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, orderanData.length);
-            
-            for (let i = startIndex; i < endIndex; i++) {
-                const orderan = orderanData[i];
-                
-                // Determine status class
-                let statusClass = '';
-                if (orderan.status === 'In Progress') {
-                    statusClass = 'status-inprogress';
-                } else if (orderan.status === 'Active') {
-                    statusClass = 'status-active';
-                } else if (orderan.status === 'Completed') {
-                    statusClass = 'status-done';
-                } else if (orderan.status === 'Cancelled') {
-                    statusClass = 'status-todo';
-                }
-                
-                // Determine progress bar color
-                let progressColor = '';
-                if (orderan.progres < 50) {
-                    progressColor = 'bg-red-500';
-                } else if (orderan.progres < 80) {
-                    progressColor = 'bg-yellow-500';
-                } else {
-                    progressColor = 'bg-green-500';
-                }
-                
-                // Truncate description for mobile card view
-                const truncatedDesc = orderan.deskripsi.length > 80 
-                    ? orderan.deskripsi.substring(0, 80) + '...' 
-                    : orderan.deskripsi;
-                
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-lg border border-border-light p-4 shadow-sm';
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <h4 class="font-semibold text-base">${orderan.nama}</h4>
-                            <p class="text-sm text-text-muted-light">Deadline: ${orderan.deadline}</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openDetailModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')"
-                                title="Lihat Detail">
-                            </button>
-                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openEditModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')"
-                                title="Edit">
-                                <span class="material-icons-outlined">edit</span>
-                            </button>
-                            <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                onclick="openDeleteModal(${orderan.id}, '${orderan.nama}')"
-                                title="Hapus">
-                                <span class="material-icons-outlined">delete</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                            <p class="text-text-muted-light">Harga</p>
-                            <p class="font-medium">${orderan.harga}</p>
-                        </div>
-                        <div>
-                            <p class="text-text-muted-light">Status</p>
-                            <p><span class="status-badge ${statusClass}">${orderan.status}</span></p>
-                        </div>
-                        <div class="col-span-2">
-                            <p class="text-text-muted-light">Progres</p>
-                            <div class="progress-bar mt-1">
-                                <div class="progress-fill ${progressColor}" style="width: ${orderan.progres}%"></div>
-                            </div>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">${orderan.progres}%</p>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <p class="text-text-muted-light">Deskripsi</p>
-                        <p class="font-medium">${truncatedDesc}</p>
-                        ${orderan.deskripsi.length > 80 ? `
-                        <button class="text-primary text-sm mt-1" 
-                            onclick="openDetailModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')">
-                            Lihat selengkapnya
-                        </button>` : ''}
-                    </div>
-                `;
-                container.appendChild(card);
-            }
-        }
-
-        // Update desktop pagination buttons
-        function updateDesktopPaginationButtons() {
-            const prevButton = document.getElementById('desktopPrevPage');
-            const nextButton = document.getElementById('desktopNextPage');
-            const pageButtons = document.querySelectorAll('#desktopPageNumbers button');
-            
-            prevButton.disabled = currentPage === 1;
-            nextButton.disabled = currentPage === totalPages;
-            
-            pageButtons.forEach((btn, index) => {
-                if (index + 1 === currentPage) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        }
-
-        // Update mobile pagination buttons
-        function updateMobilePaginationButtons() {
-            const prevButton = document.getElementById('prevPage');
-            const nextButton = document.getElementById('nextPage');
-            const pageButtons = document.querySelectorAll('#pageNumbers button');
-            
-            prevButton.disabled = currentPage === 1;
-            nextButton.disabled = currentPage === totalPages;
-            
-            pageButtons.forEach((btn, index) => {
-                if (index + 1 === currentPage) {
-                    btn.className = 'page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm bg-primary text-white';
-                } else {
-                    btn.className = 'page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm bg-gray-200 text-gray-600';
-                }
-            });
-        }
 
         // Open detail modal with data
         function openDetailModal(id, nama, deskripsi, harga, deadline, progres, status) {
@@ -1242,6 +1138,9 @@
             document.getElementById('editProgres').value = progres;
             document.getElementById('editStatus').value = status;
             
+            // Update form action with the correct ID
+            document.getElementById('editForm').action = `/orderan/${id}`;
+            
             document.getElementById('editModal').classList.remove('hidden');
         }
 
@@ -1250,8 +1149,14 @@
             document.getElementById('deleteId').value = id;
             document.getElementById('deleteNama').textContent = nama;
             
+            // Update form action with the correct ID
+            document.getElementById('deleteForm').action = `/orderan/${id}`;
+            
             document.getElementById('deleteModal').classList.remove('hidden');
         }
     </script>
+    
+    <!-- Add CSRF token meta tag -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </body>
 </html>
