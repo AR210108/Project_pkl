@@ -243,6 +243,57 @@ Route::get('/absensi', function () {
 // Pintasan lainnya
 Route::get('/list', fn() => redirect()->route('karyawan.list'));
 Route::get('/detail', fn() => redirect()->route('karyawan.detail'));
+
+// Halaman-halaman lain yang tidak memerlukan controller
+Route::middleware('auth')->group(function () {
+    // Admin
+    Route::get('/data_karyawan_admin', fn() => view('admin/data_karyawan'));
+    Route::get('/data_layanan_admin', fn() => view('admin/data_layanan'));
+    Route::get('/data_user', fn() => redirect()->route('admin.user'));
+    Route::get('/data_absen', fn() => view('admin/absensi'));
+    Route::get('/template_surat', fn() => view('admin/templet_surat'));
+    Route::get('/list_surat', fn() => view('admin/list_surat'));
+    Route::get('/invoice', fn() => view('admin/invoice'));
+    Route::get('/kwitansi', fn() => view('admin/kwitansi'));
+    Route::get('/catatan_rapat', fn() => view('admin/catatan_rapat'));
+    Route::get('/pengumuman', fn() => view('admin/pengumuman'));
+    Route::get('/data_order', fn() => view('admin/data_order'));
+    
+    // Pemilik
+    Route::get('/pemilik', fn() => view('pemilik/home'));
+    Route::get('/rekap_absen', fn() => view('pemilik/rekap_absen'));
+    Route::get('/laporan', fn() => view('pemilik/laporan'));
+    Route::get('/monitoring', fn() => view('pemilik/monitoring_progres'));
+    Route::get('/surat', fn() => view('pemilik/surat_kerjasama'));
+    
+    // Finance
+    Route::get('/finance', fn() => view('finance/beranda'));
+    Route::get('/data', fn() => view('finance/data_layanan'));
+    Route::get('/pembayaran', fn() => view('finance/data_pembayaran'));
+    Route::get('/data_in_out', fn() => view('finance/data_in_out'));
+    
+    // Manager Divisi
+    Route::get('/manager_divisi', fn() => view('manager_divisi/home'));
+    Route::get('/pengelola_tugas', fn() => view('manager_divisi/pengelola_tugas'));
+    
+    // General Manager
+    Route::get('/general_manajer', fn() => view('general_manajer/home'));
+    Route::get('/data_karyawan', fn() => view('general_manajer/data_karyawan'));
+    Route::get('/layanan', fn() => view('general_manajer/data_layanan'));
+    Route::get('/kelola_tugas', fn() => view('general_manajer/kelola_tugas'));
+    Route::get('/kelola_absen', fn() => view('general_manajer/kelola_absen'));
+    Route::get('/kelola_order', fn() => view('general_manajer/kelola_order'));
+  
+});
+/*
+|--------------------------------------------------------------------------
+| Banyak Route View Langsung (admin, pemilik, finance, dsb)
+|--------------------------------------------------------------------------
+*/
+
+Route::view('/admin', 'admin/home');
+Route::view('/data_karyawan_admin', 'admin/data_karyawan');
+Route::view('/data_layanan_admin', 'admin/data_layanan');
 Route::get('/data_user', fn() => redirect()->route('admin.user'));
 
 /*

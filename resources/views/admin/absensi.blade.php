@@ -1,51 +1,357 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Kelola Absensi</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        primary: '#000000',
-                        secondary: '#333333',
-                        success: '#666666',
-                        warning: '#999999',
-                        danger: '#000000',
-                        info: '#333333',
+                        primary: "#3b82f6",
+                        success: "#10b981",
+                        warning: "#f59e0b",
+                        danger: "#ef4444"
                     },
+                    fontFamily: {
+                        display: ["Poppins", "sans-serif"],
+                    }
                 },
             },
         };
     </script>
     <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .material-icons-outlined {
+            font-size: 24px;
+            vertical-align: middle;
+        }
+        
+        /* Fix untuk layout sidebar */
+        .main-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 256px;
+            flex-shrink: 0;
+            position: fixed;
+            height: 100vh;
+            z-index: 40;
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: 256px;
+            width: calc(100% - 256px);
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+        
+        /* Responsive untuk mobile */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .main-wrapper {
+                flex-direction: column;
+            }
+        }
+        
         .card {
             transition: all 0.3s ease;
         }
+
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
-        .btn {
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-hadir {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #065f46;
+        }
+        
+        .status-terlambat {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #92400e;
+        }
+        
+        .status-izin {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #1e40af;
+        }
+        
+        .status-cuti {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #991b1b;
+        }
+        
+        .icon-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.5rem;
+        }
+        
+        .tab-nav {
+            display: flex;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            color: #64748b;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
             transition: all 0.2s ease;
         }
-        .btn:hover {
-            transform: scale(1.05);
+
+        .tab-button:hover {
+            color: #3b82f6;
         }
+
+        .tab-button.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .panel-header {
+            background: #f8fafc;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .panel-body {
+            padding: 1.5rem;
+        }
+        
+        .scrollable-table-container {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background: white;
+        }
+        
+        .data-table {
+            width: 100%;
+            min-width: 1200px;
+            border-collapse: collapse;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .data-table tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        
+        .data-table tbody tr:hover {
+            background: #f3f4f6;
+        }
+        
+        .desktop-pagination {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+        
+        @media (min-width: 768px) {
+            .desktop-pagination {
+                display: flex;
+            }
+        }
+        
+        .desktop-page-btn {
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .desktop-page-btn.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .desktop-page-btn:not(.active) {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .desktop-page-btn:not(.active):hover {
+            background-color: #e2e8f0;
+        }
+        
+        .desktop-nav-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            color: #64748b;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .desktop-nav-btn:hover:not(:disabled) {
+            background-color: #e2e8f0;
+        }
+        
+        .desktop-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .mobile-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        @media (min-width: 768px) {
+            .mobile-pagination {
+                display: none;
+            }
+        }
+        
+        .mobile-page-btn {
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .mobile-page-btn.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .mobile-page-btn:not(.active) {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .mobile-page-btn:not(.active):hover {
+            background-color: #e2e8f0;
+        }
+        
+        .mobile-nav-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            color: #64748b;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .mobile-nav-btn:hover:not(:disabled) {
+            background-color: #e2e8f0;
+        }
+        
+        .mobile-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
         .modal {
             backdrop-filter: blur(5px);
         }
+        
         .notification {
             animation: slideIn 0.3s ease-out;
         }
+        
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -56,363 +362,317 @@
                 opacity: 1;
             }
         }
-        /* Custom responsive styles */
-        @media (max-width: 768px) {
-            .table-container {
-                overflow-x: auto;
-            }
-            .stats-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-        @media (max-width: 640px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        /* Black and white theme overrides */
-        .bg-blue-100, .bg-red-100, .bg-yellow-100, .bg-green-100, .bg-purple-100, .bg-indigo-100 {
-            background-color: #f0f0f0 !important;
-        }
-        .dark .bg-blue-900, .dark .bg-red-900, .dark .bg-yellow-900, .dark .bg-green-900, .dark .bg-purple-900, .dark .bg-indigo-900 {
-            background-color: #333333 !important;
-        }
-        .text-blue-600, .text-red-600, .text-yellow-600, .text-green-600, .text-purple-600, .text-indigo-600 {
-            color: #333333 !important;
-        }
-        .dark .text-blue-300, .dark .text-red-300, .dark .text-yellow-300, .dark .text-green-300, .dark .text-purple-300, .dark .text-indigo-300 {
-            color: #cccccc !important;
-        }
-        .bg-blue-500, .bg-red-500, .bg-yellow-500, .bg-green-500, .bg-purple-500, .bg-indigo-500 {
-            background-color: #333333 !important;
-        }
-        .text-blue-500, .text-red-500, .text-yellow-500, .text-green-500, .text-purple-500, .text-indigo-500 {
-            color: #333333 !important;
-        }
-        .text-blue-700, .text-red-700, .text-yellow-700, .text-green-700, .text-purple-700, .text-indigo-700 {
-            color: #000000 !important;
-        }
-        .bg-green-100, .dark .bg-green-900 {
-            background-color: #f0f0f0 !important;
-        }
-        .text-green-800, .dark .text-green-200 {
-            color: #333333 !important;
-        }
-        .bg-yellow-100, .dark .bg-yellow-900 {
-            background-color: #f0f0f0 !important;
-        }
-        .text-yellow-800, .dark .text-yellow-200 {
-            color: #333333 !important;
-        }
-        .bg-red-100, .dark .bg-red-900 {
-            background-color: #f0f0f0 !important;
-        }
-        .text-red-800, .dark .text-red-200 {
-            color: #333333 !important;
-        }
-        .bg-purple-100, .dark .bg-purple-900 {
-            background-color: #f0f0f0 !important;
-        }
-        .text-purple-800, .dark .text-purple-200 {
-            color: #333333 !important;
-        }
-        .bg-indigo-100, .dark .bg-indigo-900 {
-            background-color: #f0f0f0 !important;
-        }
-        .text-indigo-800, .dark .text-indigo-200 {
-            color: #333333 !important;
-        }
-        /* Icon styling */
-        .icon-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 0.5rem;
-        }
-        .icon-lg {
-            width: 3rem;
-            height: 3rem;
-        }
-        .icon-sm {
-            width: 2rem;
-            height: 2rem;
-        }
-        .icon-action {
-            padding: 0.25rem;
-            border-radius: 0.25rem;
-            transition: all 0.2s ease;
-        }
-        .icon-action:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-        .dark .icon-action:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
     </style>
 </head>
 
-<body class="font-plus-jakarta bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-    <div class="flex flex-col md:flex-row h-screen">
+<body class="font-display bg-gray-50 text-gray-800">
+    <div class="main-wrapper">
         <!-- Sidebar -->
-        @include('admin/templet/sider')
+        <div class="sidebar">
+            @include('admin/templet/sider')
+        </div>
         
-        <main class="flex-1 overflow-y-auto">
+        <!-- Main Content -->
+        <main class="main-content">
             <div class="p-4 md:p-6 lg:p-8">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
                     <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-0">Kelola Absensi</h2>
                 </div>
                 
                 <!-- Statistics Cards -->
-                <div class="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
-                    <!-- Baris 1 -->
-                    <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+                    <!-- Total Kehadiran Card -->
+                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
-                            <div class="icon-container bg-gray-100 dark:bg-gray-700 mr-3 md:mr-4">
-                                <i class="fas fa-users text-gray-600 dark:text-gray-300 text-lg md:text-xl"></i>
+                            <div class="icon-container bg-green-100 mr-3 md:mr-4">
+                                <span class="material-icons-outlined text-green-600 text-lg md:text-xl">check_circle</span>
                             </div>
                             <div>
-                                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Total Kehadiran</p>
-                                <p class="text-xl md:text-2xl font-bold">{{ $stats['total_tepat_waktu'] + $stats['total_terlambat'] }}</p>
+                                <p class="text-xs md:text-sm text-gray-500">Total Kehadiran</p>
+                                <p class="text-xl md:text-2xl font-bold text-green-600">{{ $stats['total_tepat_waktu'] + $stats['total_terlambat'] }}</p>
                             </div>
                         </div>
                     </div>
-                    <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
+                    
+                    <!-- Tidak Hadir Card -->
+                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
-                            <div class="icon-container bg-gray-100 dark:bg-gray-700 mr-3 md:mr-4">
-                                <i class="fas fa-user-times text-gray-600 dark:text-gray-300 text-lg md:text-xl"></i>
+                            <div class="icon-container bg-red-100 mr-3 md:mr-4">
+                                <span class="material-icons-outlined text-red-600 text-lg md:text-xl">cancel</span>
                             </div>
                             <div>
-                                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Tidak Hadir</p>
-                                <p class="text-xl md:text-2xl font-bold">{{ $stats['total_tidak_masuk'] }}</p>
+                                <p class="text-xs md:text-sm text-gray-500">Tidak Hadir</p>
+                                <p class="text-xl md:text-2xl font-bold text-red-600">{{ $stats['total_tidak_masuk'] }}</p>
                             </div>
                         </div>
                     </div>
-                    <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
+                    
+                    <!-- Izin Card -->
+                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
-                            <div class="icon-container bg-gray-100 dark:bg-gray-700 mr-3 md:mr-4">
-                                <i class="fas fa-calendar-times text-gray-600 dark:text-gray-300 text-lg md:text-xl"></i>
+                            <div class="icon-container bg-blue-100 mr-3 md:mr-4">
+                                <span class="material-icons-outlined text-blue-600 text-lg md:text-xl">error</span>
                             </div>
                             <div>
-                                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Izin</p>
-                                <p class="text-xl md:text-2xl font-bold">{{ $stats['total_izin'] }}</p>
+                                <p class="text-xs md:text-sm text-gray-500">Izin</p>
+                                <p class="text-xl md:text-2xl font-bold text-blue-600">{{ $stats['total_izin'] }}</p>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Baris 2 -->
-                    <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
+                    
+                    <!-- Cuti Card -->
+                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
-                            <div class="icon-container bg-gray-100 dark:bg-gray-700 mr-3 md:mr-4">
-                                <i class="fas fa-umbrella-beach text-gray-600 dark:text-gray-300 text-lg md:text-xl"></i>
+                            <div class="icon-container bg-yellow-100 mr-3 md:mr-4">
+                                <span class="material-icons-outlined text-yellow-600 text-lg md:text-xl">event_busy</span>
                             </div>
                             <div>
-                                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Cuti</p>
-                                <p class="text-xl md:text-2xl font-bold">{{ $stats['total_cuti'] }}</p>
+                                <p class="text-xs md:text-sm text-gray-500">Cuti</p>
+                                <p class="text-xl md:text-2xl font-bold text-yellow-600">{{ $stats['total_cuti'] }}</p>
                             </div>
                         </div>
                     </div>
-                    <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
+                    
+                    <!-- Dinas Luar Card -->
+                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
-                            <div class="icon-container bg-gray-100 dark:bg-gray-700 mr-3 md:mr-4">
-                                <i class="fas fa-briefcase text-gray-600 dark:text-gray-300 text-lg md:text-xl"></i>
+                            <div class="icon-container bg-purple-100 mr-3 md:mr-4">
+                                <span class="material-icons-outlined text-purple-600 text-lg md:text-xl">directions_car</span>
                             </div>
                             <div>
-                                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Dinas Luar</p>
-                                <p class="text-xl md:text-2xl font-bold">{{ $stats['total_dinas_luar'] ?? 0 }}</p>
+                                <p class="text-xs md:text-sm text-gray-500">Dinas Luar</p>
+                                <p class="text-xl md:text-2xl font-bold text-purple-600">{{ $stats['total_dinas_luar'] ?? 0 }}</p>
                             </div>
                         </div>
                     </div>
-                    <div class="card bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
+                    
+                    <!-- Sakit Card -->
+                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
-                            <div class="icon-container bg-gray-100 dark:bg-gray-700 mr-3 md:mr-4">
-                                <i class="fas fa-thermometer text-gray-600 dark:text-gray-300 text-lg md:text-xl"></i>
+                            <div class="icon-container bg-orange-100 mr-3 md:mr-4">
+                                <span class="material-icons-outlined text-orange-600 text-lg md:text-xl">healing</span>
                             </div>
                             <div>
-                                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Sakit</p>
-                                <p class="text-xl md:text-2xl font-bold">{{ $stats['total_sakit'] ?? 0 }}</p>
+                                <p class="text-xs md:text-sm text-gray-500">Sakit</p>
+                                <p class="text-xl md:text-2xl font-bold text-orange-600">{{ $stats['total_sakit'] ?? 0 }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Attendance Table -->
-                <div class="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md mb-6 md:mb-8">
-                    <h3 class="text-lg md:text-xl font-semibold mb-4">Absensi</h3>
-                    <div class="table-container overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 uppercase">
-                                <tr>
-                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">No</th>
-                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Nama</th>
-                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Tanggal</th>
-                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Jam Masuk</th>
-                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Jam Keluar</th>
-                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php
-                                $index = 0;
-                                @endphp
-                                @forelse ($attendances as $attendance)
-                                    @if(!in_array($attendance->status, ['Sakit', 'Cuti', 'Izin', 'Tidak Masuk', 'Dinas Luar']))
-                                        @php
-                                        $index++;
-                                        @endphp
-                                        <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ $index }}</td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4 font-medium">{{ $attendance->user->name }}</td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ \Carbon\Carbon::parse($attendance->tanggal)->format('d/m/Y') }}</td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ $attendance->jam_masuk ? \Carbon\Carbon::parse($attendance->jam_masuk)->format('H:i') : '-' }}</td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ $attendance->jam_pulang ? \Carbon\Carbon::parse($attendance->jam_pulang)->format('H:i') : '-' }}</td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4">
-                                                <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium
-                                                    @if($attendance->status == 'Tepat Waktu') bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
-                                                    @elseif($attendance->status == 'Terlambat') bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
-                                                    @else bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
-                                                    @endif">
-                                                    {{ $attendance->status }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    @endif
-                                @empty
-                                <tr>
-                                    <td colspan="6" class="px-4 md:px-6 py-2 md:py-4 text-center">Tidak ada data absensi.</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                <!-- Tab Navigation -->
+                <div class="tab-nav">
+                    <button id="absensiTab" class="tab-button active" onclick="switchTab('absensi')">
+                        <span class="material-icons-outlined align-middle mr-2">fact_check</span>
+                        Data Absensi
+                    </button>
+                    <button id="ketidakhadiranTab" class="tab-button" onclick="switchTab('ketidakhadiran')">
+                        <span class="material-icons-outlined align-middle mr-2">assignment_late</span>
+                        Daftar Ketidakhadiran
+                    </button>
+                </div>
+                
+                <!-- Data Absensi Panel -->
+                <div id="absensiPanel" class="panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <span class="material-icons-outlined text-primary">fact_check</span>
+                            Data Absensi
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-500">Total: <span class="font-semibold text-gray-800">{{ count($attendances) }}</span> data</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="scrollable-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="min-width: 60px;">No</th>
+                                        <th style="min-width: 200px;">Nama</th>
+                                        <th style="min-width: 120px;">Tanggal</th>
+                                        <th style="min-width: 120px;">Jam Masuk</th>
+                                        <th style="min-width: 120px;">Jam Keluar</th>
+                                        <th style="min-width: 120px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php
+                                    $index = 0;
+                                    @endphp
+                                    @forelse ($attendances as $attendance)
+                                        @if(!in_array($attendance->status, ['Sakit', 'Cuti', 'Izin', 'Tidak Masuk', 'Dinas Luar']))
+                                            @php
+                                            $index++;
+                                            @endphp
+                                            <tr>
+                                                <td style="min-width: 60px;">{{ $index }}</td>
+                                                <td style="min-width: 200px;">{{ $attendance->user->name }}</td>
+                                                <td style="min-width: 120px;">{{ \Carbon\Carbon::parse($attendance->tanggal)->format('d/m/Y') }}</td>
+                                                <td style="min-width: 120px;">{{ $attendance->jam_masuk ? \Carbon\Carbon::parse($attendance->jam_masuk)->format('H:i') : '-' }}</td>
+                                                <td style="min-width: 120px;">{{ $attendance->jam_pulang ? \Carbon\Carbon::parse($attendance->jam_pulang)->format('H:i') : '-' }}</td>
+                                                <td style="min-width: 120px;">
+                                                    <span class="status-badge 
+                                                        @if($attendance->status == 'Tepat Waktu') status-hadir
+                                                        @elseif($attendance->status == 'Terlambat') status-terlambat
+                                                        @else status-hadir
+                                                        @endif">
+                                                        {{ $attendance->status }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center">Tidak ada data absensi.</td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Leave/Absence Table -->
-                <div class="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
-                    <h3 class="text-lg md:text-xl font-semibold mb-4">Daftar Ketidakhadiran</h3>
-                    <div class="table-container overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 uppercase">
-                                <tr>
-                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">No</th>
-                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Nama</th>
-                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Tanggal Mulai</th>
-                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Tanggal Akhir</th>
-                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Alasan</th>
-                                    <th class="px-4 md:px-6 py-2 md:py-3 text-left">Status</th>
-                                    <th class="px-4 md:px-6 py-2 md:py-3 text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php
-                                $index = 0;
-                                @endphp
-                                <!-- Data dari tabel ketidakhadiran (tanpa status Tidak Masuk) -->
-                                @forelse ($ketidakhadiran as $item)
-                                    @if($item->status !== 'Tidak Masuk')
-                                        @php
-                                        $index++;
-                                        @endphp
-                                        <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ $index }}</td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4 font-medium">{{ $item->user->name }}</td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ $item->tanggal_akhir ? \Carbon\Carbon::parse($item->tanggal_akhir)->format('d/m/Y') : \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4">
-                                                @if($item->status === 'Cuti')
-                                                    {{ $item->jenis_cuti }} - {{ $item->alasan_cuti }}
-                                                @else
-                                                    {{ $item->status }} - {{ $item->reason }}
-                                                @endif
-                                            </td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4">
-                                                <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium
-                                                    @if($item->approval_status == 'approved') bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
-                                                    @elseif($item->approval_status == 'rejected') bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
-                                                    @else bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
-                                                    @endif">
-                                                    {{ strtoupper($item->approval_status) }}
-                                                </span>
-                                            </td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4">
-                                                <div class="flex justify-center space-x-2">
-                                                    <button class="icon-action edit-cuti-btn text-gray-600 dark:text-gray-400" data-id="{{ $item->id }}" title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    @if($item->approval_status == 'pending')
-                                                    <button class="icon-action verify-btn text-gray-600 dark:text-gray-400" data-id="{{ $item->id }}" data-type="{{ $item->status }}" title="Verifikasi">
-                                                        <i class="fas fa-check-double"></i>
-                                                    </button>
+                <!-- Ketidakhadiran Panel (Initially Hidden) -->
+                <div id="ketidakhadiranPanel" class="panel hidden">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <span class="material-icons-outlined text-primary">assignment_late</span>
+                            Daftar Ketidakhadiran
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-500">Total: <span class="font-semibold text-gray-800">{{ count($ketidakhadiran) + count($attendances->whereIn('status', ['Sakit', 'Cuti', 'Izin', 'Dinas Luar'])) }}</span> data</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="scrollable-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="min-width: 60px;">No</th>
+                                        <th style="min-width: 200px;">Nama</th>
+                                        <th style="min-width: 120px;">Tanggal Mulai</th>
+                                        <th style="min-width: 120px;">Tanggal Akhir</th>
+                                        <th style="min-width: 200px;">Alasan</th>
+                                        <th style="min-width: 120px;">Status</th>
+                                        <th style="min-width: 120px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php
+                                    $index = 0;
+                                    @endphp
+                                    <!-- Data dari tabel ketidakhadiran (tanpa status Tidak Masuk) -->
+                                    @forelse ($ketidakhadiran as $item)
+                                        @if($item->status !== 'Tidak Masuk')
+                                            @php
+                                            $index++;
+                                            @endphp
+                                            <tr>
+                                                <td style="min-width: 60px;">{{ $index }}</td>
+                                                <td style="min-width: 200px;">{{ $item->user->name }}</td>
+                                                <td style="min-width: 120px;">{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
+                                                <td style="min-width: 120px;">{{ $item->tanggal_akhir ? \Carbon\Carbon::parse($item->tanggal_akhir)->format('d/m/Y') : \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
+                                                <td style="min-width: 200px;">
+                                                    @if($item->status === 'Cuti')
+                                                        {{ $item->jenis_cuti }} - {{ $item->alasan_cuti }}
+                                                    @else
+                                                        {{ $item->status }} - {{ $item->reason }}
                                                     @endif
-                                                    <button class="icon-action delete-cuti-btn text-gray-600 dark:text-gray-400" data-id="{{ $item->id }}" title="Hapus">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                                </td>
+                                                <td style="min-width: 120px;">
+                                                    <span class="status-badge 
+                                                        @if($item->approval_status == 'approved') status-hadir
+                                                        @elseif($item->approval_status == 'rejected') status-terlambat
+                                                        @else status-izin
+                                                        @endif">
+                                                        {{ strtoupper($item->approval_status) }}
+                                                    </span>
+                                                </td>
+                                                <td style="min-width: 120px;">
+                                                    <div class="flex justify-center space-x-2">
+                                                        <button class="edit-cuti-btn text-gray-600 hover:text-gray-800" data-id="{{ $item->id }}" title="Edit">
+                                                            <span class="material-icons-outlined text-sm">edit</span>
+                                                        </button>
+                                                        @if($item->approval_status == 'pending')
+                                                        <button class="verify-btn text-gray-600 hover:text-gray-800" data-id="{{ $item->id }}" data-type="{{ $item->status }}" title="Verifikasi">
+                                                            <span class="material-icons-outlined text-sm">check_circle</span>
+                                                        </button>
+                                                        @endif
+                                                        <button class="delete-cuti-btn text-gray-600 hover:text-gray-800" data-id="{{ $item->id }}" title="Hapus">
+                                                            <span class="material-icons-outlined text-sm">delete</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @empty
+                                    @endphp
+                                    @endforelse
+                                    
+                                    <!-- Data dari tabel absensi dengan status Sakit, Cuti, Izin, atau Dinas Luar -->
+                                    @forelse ($attendances as $attendance)
+                                        @if(in_array($attendance->status, ['Sakit', 'Cuti', 'Izin', 'Dinas Luar']))
+                                            @php
+                                            $index++;
+                                            @endphp
+                                            <tr>
+                                                <td style="min-width: 60px;">{{ $index }}</td>
+                                                <td style="min-width: 200px;">{{ $attendance->user->name }}</td>
+                                                <td style="min-width: 120px;">{{ \Carbon\Carbon::parse($attendance->tanggal)->format('d/m/Y') }}</td>
+                                                <td style="min-width: 120px;">{{ \Carbon\Carbon::parse($attendance->tanggal)->format('d/m/Y') }}</td>
+                                                <td style="min-width: 200px;">{{ $attendance->status }}</td>
+                                                <td style="min-width: 120px;">
+                                                    <span class="status-badge 
+                                                        @if($attendance->status == 'Sakit') status-izin
+                                                        @elseif($attendance->status == 'Cuti') status-cuti
+                                                        @elseif($attendance->status == 'Izin') status-izin
+                                                        @else status-izin
+                                                        @endif">
+                                                        {{ $attendance->status }}
+                                                    </span>
+                                                </td>
+                                                <td style="min-width: 120px;">
+                                                    <div class="flex justify-center space-x-2">
+                                                        <button class="edit-absensi-btn text-gray-600 hover:text-gray-800" data-id="{{ $attendance->id }}" title="Edit">
+                                                            <span class="material-icons-outlined text-sm">edit</span>
+                                                        </button>
+                                                        <button class="delete-absensi-btn text-gray-600 hover:text-gray-800" data-id="{{ $attendance->id }}" title="Hapus">
+                                                            <span class="material-icons-outlined text-sm">delete</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @empty
+                                    @endphp
+                                    @endforelse
+                                    
+                                    @if($index == 0)
+                                    <tr>
+                                        <td colspan="7" class="text-center">Tidak ada data ketidakhadiran.</td>
+                                    </tr>
                                     @endif
-                                @empty
-                                @endphp
-                                @endforelse
-                                
-                                <!-- Data dari tabel absensi dengan status Sakit, Cuti, Izin, atau Dinas Luar -->
-                                @forelse ($attendances as $attendance)
-                                    @if(in_array($attendance->status, ['Sakit', 'Cuti', 'Izin', 'Dinas Luar']))
-                                        @php
-                                        $index++;
-                                        @endphp
-                                        <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ $index }}</td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4 font-medium">{{ $attendance->user->name }}</td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ \Carbon\Carbon::parse($attendance->tanggal)->format('d/m/Y') }}</td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ \Carbon\Carbon::parse($attendance->tanggal)->format('d/m/Y') }}</td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4">{{ $attendance->status }}</td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4">
-                                                <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                                                    {{ $attendance->status }}
-                                                </span>
-                                            </td>
-                                            <td class="px-4 md:px-6 py-2 md:py-4">
-                                                <div class="flex justify-center space-x-2">
-                                                    <button class="icon-action edit-absensi-btn text-gray-600 dark:text-gray-400" data-id="{{ $attendance->id }}" title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button class="icon-action delete-absensi-btn text-gray-600 dark:text-gray-400" data-id="{{ $attendance->id }}" title="Hapus">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endif
-                                @empty
-                               
-                                @endforelse
-                                
-                                @if($index == 0)
-                                <tr>
-                                    <td colspan="7" class="px-4 md:px-6 py-2 md:py-4 text-center">Tidak ada data ketidakhadiran.</td>
-                                </tr>
-                                @endif
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-            <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 md:px-8 py-4 text-center">
-                <p class="text-sm text-gray-500 dark:text-gray-400">Copyright ©2025 by digicity.id</p>
+            <footer class="bg-white border-t border-gray-200 px-4 md:px-8 py-4 text-center">
+                <p class="text-sm text-gray-500">Copyright ©2025 by digicity.id</p>
             </footer>
         </main>
     </div>
 
     <!-- Edit Cuti Modal -->
     <div id="editCutiModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xl font-bold">Edit Cuti/Izin</h3>
-                    <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                        <i class="fas fa-times text-xl"></i>
+                    <button class="close-modal text-gray-500 hover:text-gray-700">
+                        <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
             </div>
@@ -421,7 +681,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">Nama Karyawan</label>
-                        <select id="editCutiNamaKaryawan" name="user_id" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                        <select id="editCutiNamaKaryawan" name="user_id" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                             <option value="">Pilih karyawan</option>
                             @foreach ($users as $user)
                                 <option value="{{ $user->id }}">{{ $user->name }}</option>
@@ -430,7 +690,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Jenis Cuti/Izin</label>
-                        <select id="editCutiJenisCuti" name="jenis_cuti" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                        <select id="editCutiJenisCuti" name="jenis_cuti" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                             <option value="">Pilih jenis cuti</option>
                             <option value="Cuti Tahunan">Cuti Tahunan</option>
                             <option value="Cuti Sakit">Cuti Sakit</option>
@@ -441,19 +701,19 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Tanggal Mulai</label>
-                        <input type="date" id="editCutiTanggalMulai" name="tanggal" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                        <input type="date" id="editCutiTanggalMulai" name="tanggal" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Tanggal Akhir</label>
-                        <input type="date" id="editCutiTanggalAkhir" name="tanggal_akhir" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                        <input type="date" id="editCutiTanggalAkhir" name="tanggal_akhir" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium mb-2">Alasan</label>
-                        <textarea id="editCutiAlasan" name="alasan_cuti" rows="3" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary" placeholder="Masukkan alasan cuti"></textarea>
+                        <textarea id="editCutiAlasan" name="alasan_cuti" rows="3" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary" placeholder="Masukkan alasan cuti"></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Status Persetujuan</label>
-                        <select id="editCutiStatus" name="approval_status" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                        <select id="editCutiStatus" name="approval_status" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                             <option value="pending">Pending</option>
                             <option value="approved">Disetujui</option>
                             <option value="rejected">Ditolak</option>
@@ -461,13 +721,13 @@
                     </div>
                     <div id="editRejectionReasonWrapper" class="hidden">
                         <label class="block text-sm font-medium mb-2">Alasan Penolakan</label>
-                        <textarea id="editRejectionReason" name="rejection_reason" rows="3" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary"></textarea>
+                        <textarea id="editRejectionReason" name="rejection_reason" rows="3" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary"></textarea>
                     </div>
                 </div>
                 <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" class="cancel-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-gray-800 dark:bg-gray-600 text-white rounded-lg">
-                        <i class="fas fa-save mr-2"></i>Simpan
+                    <button type="button" class="cancel-btn px-4 py-2 bg-gray-200 rounded-lg">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg">
+                        <span class="material-icons-outlined text-sm align-middle mr-2">save</span>Simpan
                     </button>
                 </div>
             </form>
@@ -476,12 +736,12 @@
 
     <!-- Verify Modal -->
     <div id="verifyModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xl font-bold">Verifikasi Pengajuan</h3>
-                    <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                        <i class="fas fa-times text-xl"></i>
+                    <button class="close-modal text-gray-500 hover:text-gray-700">
+                        <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
             </div>
@@ -491,7 +751,7 @@
                 
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Status Persetujuan</label>
-                    <select id="verifyStatus" name="approval_status" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                    <select id="verifyStatus" name="approval_status" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                         <option value="approved">Disetujui</option>
                         <option value="rejected">Ditolak</option>
                     </select>
@@ -499,13 +759,13 @@
                 
                 <div class="mb-6" id="rejectionReasonContainer" style="display: none;">
                     <label class="block text-sm font-medium mb-2">Alasan Penolakan</label>
-                    <textarea id="rejectionReason" name="rejection_reason" rows="3" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary" placeholder="Masukkan alasan penolakan"></textarea>
+                    <textarea id="rejectionReason" name="rejection_reason" rows="3" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary" placeholder="Masukkan alasan penolakan"></textarea>
                 </div>
 
                 <div class="flex justify-end space-x-3">
-                    <button type="button" class="cancel-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-gray-800 dark:bg-gray-600 text-white rounded-lg">
-                        <i class="fas fa-check mr-2"></i>Verifikasi
+                    <button type="button" class="cancel-btn px-4 py-2 bg-gray-200 rounded-lg">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg">
+                        <span class="material-icons-outlined text-sm align-middle mr-2">check_circle</span>Verifikasi
                     </button>
                 </div>
             </form>
@@ -514,23 +774,23 @@
 
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xl font-bold">Konfirmasi Hapus</h3>
-                    <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                        <i class="fas fa-times text-xl"></i>
+                    <button class="close-modal text-gray-500 hover:text-gray-700">
+                        <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
             </div>
             <div class="p-6">
                 <div class="flex items-center mb-4">
-                    <div class="icon-container icon-lg bg-gray-100 dark:bg-gray-700 mr-4">
-                        <i class="fas fa-exclamation-triangle text-gray-600 dark:text-gray-300 text-2xl"></i>
+                    <div class="icon-container bg-gray-100 mr-4" style="width: 3rem; height: 3rem;">
+                        <span class="material-icons-outlined text-gray-600 text-2xl">warning</span>
                     </div>
                     <div>
                         <p class="font-semibold">Apakah Anda yakin?</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Tindakan ini tidak dapat dibatalkan.</p>
+                        <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
                     </div>
                 </div>
 
@@ -538,9 +798,9 @@
                 <input type="hidden" id="deleteType">
 
                 <div class="flex justify-end space-x-3">
-                    <button class="cancel-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">Batal</button>
-                    <button id="confirmDeleteBtn" class="px-4 py-2 bg-gray-800 dark:bg-gray-600 text-white rounded-lg">
-                        <i class="fas fa-trash mr-2"></i>Hapus
+                    <button class="cancel-btn px-4 py-2 bg-gray-200 rounded-lg">Batal</button>
+                    <button id="confirmDeleteBtn" class="px-4 py-2 bg-danger text-white rounded-lg">
+                        <span class="material-icons-outlined text-sm align-middle mr-2">delete</span>Hapus
                     </button>
                 </div>
             </div>
@@ -561,25 +821,25 @@
                 let icon, bgColor;
                 switch(type) {
                     case 'success':
-                        icon = 'fa-check-circle';
-                        bgColor = 'bg-gray-700';
+                        icon = 'check_circle';
+                        bgColor = 'bg-green-500';
                         break;
                     case 'error':
-                        icon = 'fa-exclamation-circle';
-                        bgColor = 'bg-gray-900';
+                        icon = 'error';
+                        bgColor = 'bg-red-500';
                         break;
                     case 'warning':
-                        icon = 'fa-exclamation-triangle';
-                        bgColor = 'bg-gray-600';
+                        icon = 'warning';
+                        bgColor = 'bg-yellow-500';
                         break;
                     default:
-                        icon = 'fa-info-circle';
-                        bgColor = 'bg-gray-700';
+                        icon = 'info';
+                        bgColor = 'bg-blue-500';
                 }
                 
                 notification.className = `notification ${bgColor} text-white p-4 rounded-lg shadow-lg mb-3 flex items-center`;
                 notification.innerHTML = `
-                    <i class="fas ${icon} mr-3"></i>
+                    <span class="material-icons-outlined mr-3">${icon}</span>
                     <span>${message}</span>
                 `;
                 
@@ -902,6 +1162,30 @@
                     }
                 });
             });
+            
+            // Function to switch between tabs
+            window.switchTab = function(tabName) {
+                // Get tab buttons and panels
+                const absensiTab = document.getElementById('absensiTab');
+                const ketidakhadiranTab = document.getElementById('ketidakhadiranTab');
+                const absensiPanel = document.getElementById('absensiPanel');
+                const ketidakhadiranPanel = document.getElementById('ketidakhadiranPanel');
+
+                // Hide all panels and remove active class from all tabs
+                absensiPanel.classList.add('hidden');
+                ketidakhadiranPanel.classList.add('hidden');
+                absensiTab.classList.remove('active');
+                ketidakhadiranTab.classList.remove('active');
+
+                // Show selected panel and add active class to clicked tab
+                if (tabName === 'absensi') {
+                    absensiPanel.classList.remove('hidden');
+                    absensiTab.classList.add('active');
+                } else if (tabName === 'ketidakhadiran') {
+                    ketidakhadiranPanel.classList.remove('hidden');
+                    ketidakhadiranTab.classList.add('active');
+                }
+            }
         });
     </script>
 </body>

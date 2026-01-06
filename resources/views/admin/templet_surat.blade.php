@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surat Kerjasama</title>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Template Surat Management</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
@@ -537,18 +536,6 @@
             border-radius: 8px;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
         }
-        
-        /* Icon button styles */
-        .icon-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem;
-        }
-        
-        .icon-btn i {
-            font-size: 18px;
-        }
     </style>
 </head>
 
@@ -561,13 +548,13 @@
         <main class="flex-1 flex flex-col main-content">
             <div class="flex-grow p-3 sm:p-8">
 
-                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Daftar Surat Kerjasama</h2>
+                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Template Surat</h2>
                 
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
                         <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari judul atau nomor surat..." type="text" />
+                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari judul atau kategori..." type="text" />
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <div class="relative">
@@ -602,11 +589,11 @@
                                 </div>
                             </div>
                         </div>
-                        <a href="{{ route('admin.surat_kerjasama.create') }}" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
+                        <button id="buatSuratBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
                             <span class="material-icons-outlined">add</span>
-                            <span class="hidden sm:inline">Buat Surat Baru</span>
+                            <span class="hidden sm:inline">Buat Surat</span>
                             <span class="sm:hidden">Buat</span>
-                        </a>
+                        </button>
                     </div>
                 </div>
                 
@@ -615,75 +602,29 @@
                     <div class="panel-header">
                         <h3 class="panel-title">
                             <span class="material-icons-outlined text-primary">description</span>
-                            Daftar Surat Kerjasama
+                            Daftar Template Surat
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">{{ count($surat) }}</span> surat</span>
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">9</span> template</span>
                         </div>
                     </div>
                     <div class="panel-body">
-                        <div id="suratGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-8">
-                            @foreach ($surat as $item)
-                                <div class="template-card bg-background-light dark:bg-surface-dark rounded-lg p-3 sm:p-4 shadow-md">
-                                    <div class="bg-gray-200 dark:bg-gray-700 w-full aspect-[3/4] mb-3 sm:mb-4 cursor-pointer template-preview"
-                                         onclick="openModal('{{ $item->judul }}', '{{ $item->nomor_surat }}')">
-                                        @if ($item->preview_image)
-                                            <img src="{{ asset('storage/' . $item->preview_image) }}" class="w-full h-full object-cover" alt="{{ $item->judul }}">
-                                        @else
-                                            <div class="w-full h-full flex items-center justify-center">
-                                                <span class="material-symbols-outlined text-6xl text-subtle-light dark:text-subtle-dark">description</span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <div class="text-center py-2">
-                                        <h2 class="font-bold text-text-light dark:text-text-dark text-sm sm:text-base truncate">{{ $item->judul }}</h2>
-                                        <p class="text-text-muted-light dark:text-text-muted-dark text-xs sm:text-sm">
-                                            <span class="category-badge category-marketing">Nomor: {{ $item->nomor_surat }}</span>
-                                        </p>
-                                        <p class="text-text-muted-light dark:text-text-muted-dark text-xs sm:text-sm mt-1">
-                                            {{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}
-                                        </p>
-                                    </div>
-                                    <div class="flex gap-2 mt-3">
-                                        <a href="{{ route('admin.surat_kerjasama.show', $item->id) }}" class="flex-1 btn-primary text-white py-2 text-sm font-medium text-center rounded-lg icon-btn" title="Detail">
-                                            <i class='bx bx-show'></i>
-                                        </a>
-                                        <a href="{{ route('admin.surat_kerjasama.edit', $item->id) }}" class="flex-1 btn-secondary text-gray-700 py-2 text-sm font-medium text-center rounded-lg icon-btn" title="Edit">
-                                            <i class='bx bx-edit'></i>
-                                        </a>
-                                        <form action="{{ route('admin.surat_kerjasama.destroy', $item->id) }}" method="POST" class="flex-1">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                onclick="return confirm('Apakah Anda yakin ingin menghapus surat ini?')"
-                                                class="w-full bg-red-50 text-red-600 py-2 text-sm font-medium rounded-lg hover:bg-red-100 icon-btn" title="Hapus">
-                                                <i class='bx bx-trash'></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            @endforeach
+                        <div id="templateGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-8">
+                            <!-- Templates will be inserted here by JavaScript -->
                         </div>
                         
-                        <!-- Empty State -->
-                        @if ($surat->isEmpty())
-                            <div class="bg-white border border-gray-200 p-12 text-center">
-                                <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">description</span>
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada surat kerjasama</h3>
-                                <p class="text-gray-500 mb-6">Mulai dengan membuat surat kerjasama pertama Anda.</p>
-                                <a href="{{ route('admin.surat_kerjasama.create') }}" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 mx-auto w-fit">
-                                    <span class="material-icons-outlined">add</span>
-                                    <span>Buat Surat Baru</span>
-                                </a>
-                            </div>
-                        @endif
-                        
                         <!-- Pagination -->
-                        @if (method_exists($surat, 'links'))
-                            <div class="desktop-pagination">
-                                {{ $surat->links() }}
+                        <div id="paginationContainer" class="desktop-pagination">
+                            <button id="prevPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_left</span>
+                            </button>
+                            <div id="pageNumbers" class="flex gap-1">
+                                <!-- Page numbers will be generated by JavaScript -->
                             </div>
-                        @endif
+                            <button id="nextPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_right</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -693,8 +634,106 @@
         </main>
     </div>
 
-    <!-- Modal untuk Preview Surat -->
-    <div id="suratModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <!-- Modal untuk Buat Surat Kerjasama -->
+    <div id="buatSuratModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Buat Surat Kerjasama</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Isi form di bawah untuk membuat surat kerjasama baru</p>
+                </div>
+                <button onclick="closeBuatSuratModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="flex-grow overflow-auto p-4">
+                <form id="buatSuratForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Perusahaan 1</label>
+                            <input type="text" id="namaPerusahaan1" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Perusahaan 2</label>
+                            <input type="text" id="namaPerusahaan2" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Alamat Perusahaan 1</label>
+                            <textarea id="alamatPerusahaan1" rows="2" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Alamat Perusahaan 2</label>
+                            <textarea id="alamatPerusahaan2" rows="2" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Penanggung Jawab 1</label>
+                            <input type="text" id="penanggungJawab1" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Penanggung Jawab 2</label>
+                            <input type="text" id="penanggungJawab2" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jabatan Penanggung Jawab 1</label>
+                            <input type="text" id="jabatan1" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jabatan Penanggung Jawab 2</label>
+                            <input type="text" id="jabatan2" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Judul Kerjasama</label>
+                        <input type="text" id="judulKerjasama" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lingkup Kerjasama</label>
+                        <textarea id="lingkupKerjasama" rows="3" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tanggal Mulai</label>
+                            <input type="date" id="tanggalMulai" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tanggal Selesai</label>
+                            <input type="date" id="tanggalSelesai" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nilai Kontrak</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">Rp</span>
+                            <input type="number" id="nilaiKontrak" class="w-full pl-10 pr-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Keterangan Tambahan</label>
+                        <textarea id="keterangan" rows="3" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+                <button onclick="closeBuatSuratModal()" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    Batal
+                </button>
+                <button onclick="submitBuatSurat()" class="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-opacity-90 transition-colors">
+                    Buat Surat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Template Preview -->
+    <div id="templateModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                 <div>
@@ -711,7 +750,7 @@
                 <div class="template-preview-container">
                     <div class="template-preview-header">
                         <h4 class="text-lg font-bold text-gray-800">SURAT PERJANJIAN KERJASAMA</h4>
-                        <p class="text-sm text-gray-600">Nomor: <span id="modalNomor"></span></p>
+                        <p class="text-sm text-gray-600">Nomor: SPK/001/VI/2023</p>
                     </div>
                     <div class="template-preview-content">
                         <p class="mb-4">Pada hari ini, Senin tanggal 1 Juni 2023, telah dibuat kesepakatan bersama antara:</p>
@@ -769,12 +808,16 @@
                 </div>
             </div>
             <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
-                <button onclick="downloadSurat()" class="flex items-center bg-primary text-white font-medium py-2 px-4 rounded-lg hover:bg-opacity-90 transition-colors">
-                    <i class='bx bx-download mr-2'></i>
+                <button onclick="downloadTemplate()" class="flex items-center bg-primary text-white font-medium py-2 px-4 rounded-lg hover:bg-opacity-90 transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
                     Download
                 </button>
-                <button onclick="editSurat()" class="flex items-center bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                    <i class='bx bx-edit mr-2'></i>
+                <button onclick="editTemplate()" class="flex items-center bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
                     Edit
                 </button>
             </div>
@@ -795,15 +838,6 @@
         </button>
     </div>
 
-    <!-- Success Message -->
-    @if (session('success'))
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                showMinimalPopup('Berhasil', '{{ session('success') }}', 'success');
-            });
-        </script>
-    @endif
-
     <script>
         // Inisialisasi variabel untuk pagination, filter, dan search
         let currentPage = 1;
@@ -811,10 +845,97 @@
         let activeFilters = ['all'];
         let searchTerm = '';
         
-        // Inisialisasi filter dan search
+        // Template data
+        const templates = [
+            { id: 1, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 2, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 3, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 4, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 5, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 6, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 7, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 8, title: 'Surat Perjanjian Kerjasama', category: 'marketing', categoryName: 'Digital Marketing' },
+            { id: 9, title: 'Surat Perjanjian Kerjasama', category: 'development', categoryName: 'Web Development' }
+        ];
+        
+        // Inisialisasi pagination, filter, dan search
+        initializePagination();
         initializeFilter();
         initializeSearch();
+        renderTemplates();
 
+        // === PAGINATION ===
+        function initializePagination() {
+            renderPagination();
+            updateVisibleItems();
+        }
+        
+        function renderPagination() {
+            const visibleTemplates = getFilteredTemplates();
+            const totalPages = Math.ceil(visibleTemplates.length / itemsPerPage);
+            const pageNumbersContainer = document.getElementById('pageNumbers');
+            const prevButton = document.getElementById('prevPage');
+            const nextButton = document.getElementById('nextPage');
+            
+            // Clear existing page numbers
+            pageNumbersContainer.innerHTML = '';
+            
+            // Generate page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const pageNumber = document.createElement('button');
+                pageNumber.textContent = i;
+                pageNumber.className = `desktop-page-btn ${i === currentPage ? 'active' : ''}`;
+                pageNumber.addEventListener('click', () => goToPage(i));
+                pageNumbersContainer.appendChild(pageNumber);
+            }
+            
+            // Update navigation buttons
+            prevButton.disabled = currentPage === 1;
+            nextButton.disabled = currentPage === totalPages || totalPages === 0;
+            
+            // Add event listeners for navigation buttons
+            prevButton.onclick = () => {
+                if (currentPage > 1) goToPage(currentPage - 1);
+            };
+            
+            nextButton.onclick = () => {
+                if (currentPage < totalPages) goToPage(currentPage + 1);
+            };
+        }
+        
+        function goToPage(page) {
+            currentPage = page;
+            renderPagination();
+            updateVisibleItems();
+        }
+        
+        function getFilteredTemplates() {
+            return templates.filter(template => !template.hidden);
+        }
+        
+        function updateVisibleItems() {
+            const visibleTemplates = getFilteredTemplates();
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            
+            // Hide all templates first
+            templates.forEach(template => template.hidden = true);
+            
+            // Show only the templates for current page
+            visibleTemplates.forEach((template, index) => {
+                if (index >= startIndex && index < endIndex) {
+                    template.hidden = false;
+                }
+            });
+            
+            // Re-render templates
+            renderTemplates();
+            
+            // Update total count
+            document.getElementById('totalCount').textContent = visibleTemplates.length;
+        }
+        
         // === FILTER ===
         function initializeFilter() {
             const filterBtn = document.getElementById('filterBtn');
@@ -879,7 +1000,8 @@
                 
                 applyFilters();
                 filterDropdown.classList.remove('show');
-                showMinimalPopup('Filter Diterapkan', 'Filter berhasil diterapkan', 'success');
+                const visibleCount = getFilteredTemplates().length;
+                showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} template`, 'success');
             });
             
             // Reset filter
@@ -892,18 +1014,39 @@
                 activeFilters = ['all'];
                 applyFilters();
                 filterDropdown.classList.remove('show');
-                showMinimalPopup('Filter Direset', 'Filter telah direset', 'success');
+                const visibleCount = getFilteredTemplates().length;
+                showMinimalPopup('Filter Direset', 'Menampilkan semua template', 'success');
             });
         }
         
         function applyFilters() {
-            // Apply filters to surat cards
-            const suratCards = document.querySelectorAll('#suratGrid > div');
+            // Reset to first page
+            currentPage = 1;
             
-            suratCards.forEach(card => {
-                // Show all cards for now since we don't have category data
-                card.classList.remove('hidden-by-filter');
+            // Apply filters to templates
+            templates.forEach(template => {
+                // Check if category matches filter
+                let categoryMatches = false;
+                if (activeFilters.includes('all')) {
+                    categoryMatches = true;
+                } else {
+                    categoryMatches = activeFilters.some(filter => template.category.includes(filter));
+                }
+                
+                // Check if search term matches
+                let searchMatches = true;
+                if (searchTerm) {
+                    const searchLower = searchTerm.toLowerCase();
+                    searchMatches = template.title.toLowerCase().includes(searchLower) || 
+                                   template.categoryName.toLowerCase().includes(searchLower);
+                }
+                
+                template.hidden = !(categoryMatches && searchMatches);
             });
+            
+            // Update pagination and visible items
+            renderPagination();
+            updateVisibleItems();
         }
         
         // === SEARCH ===
@@ -914,62 +1057,168 @@
             searchInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
-                    searchTerm = searchInput.value.trim().toLowerCase();
-                    applySearch();
+                    searchTerm = searchInput.value.trim();
+                    applyFilters();
                 }, 300); // Debounce search
             });
         }
-        
-        function applySearch() {
-            const suratCards = document.querySelectorAll('#suratGrid > div');
+
+        // === RENDER TEMPLATES ===
+        function renderTemplates() {
+            const grid = document.getElementById('templateGrid');
+            grid.innerHTML = '';
             
-            suratCards.forEach(card => {
-                const title = card.querySelector('h2').textContent.toLowerCase();
-                const nomor = card.querySelector('.category-badge').textContent.toLowerCase();
+            // Filter templates based on current page and filters
+            const visibleTemplates = templates.filter(template => !template.hidden);
+            
+            // Render templates
+            visibleTemplates.forEach(template => {
+                const templateElement = document.createElement('div');
+                templateElement.className = `template-card bg-background-light dark:bg-surface-dark rounded-lg p-3 sm:p-4 shadow-md`;
                 
-                if (searchTerm === '' || title.includes(searchTerm) || nomor.includes(searchTerm)) {
-                    card.classList.remove('hidden-by-filter');
-                } else {
-                    card.classList.add('hidden-by-filter');
+                // Determine category badge class
+                let categoryClass = '';
+                if (template.category === 'marketing') {
+                    categoryClass = 'category-marketing';
+                } else if (template.category === 'development') {
+                    categoryClass = 'category-development';
+                } else if (template.category === 'hr') {
+                    categoryClass = 'category-hr';
+                } else if (template.category === 'finance') {
+                    categoryClass = 'category-finance';
                 }
+                
+                templateElement.innerHTML = `
+                    <div class="bg-gray-200 dark:bg-gray-700 w-full aspect-[3/4] mb-3 sm:mb-4 cursor-pointer template-preview"
+                         onclick="openModal('${template.title}', '${template.categoryName}')">
+                        <div class="w-full h-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-6xl text-subtle-light dark:text-subtle-dark">description</span>
+                        </div>
+                    </div>
+                    <div class="text-center py-2">
+                        <h2 class="font-bold text-text-light dark:text-text-dark text-sm sm:text-base">${template.title}</h2>
+                        <p class="text-text-light dark:text-text-dark text-xs sm:text-sm">
+                            <span class="category-badge ${categoryClass}">${template.categoryName}</span>
+                        </p>
+                    </div>
+                `;
+                
+                grid.appendChild(templateElement);
             });
-            
-            // Update visible count
-            const visibleCount = document.querySelectorAll('#suratGrid > div:not(.hidden-by-filter)').length;
-            document.getElementById('totalCount').textContent = visibleCount;
         }
 
         // === MODAL FUNCTIONS ===
-        function openModal(title, nomor) {
+        function openModal(title, subtitle) {
             document.getElementById('modalTitle').textContent = title;
-            document.getElementById('modalSubtitle').textContent = 'Nomor: ' + nomor;
-            document.getElementById('modalNomor').textContent = nomor;
-            document.getElementById('suratModal').classList.remove('hidden');
+            document.getElementById('modalSubtitle').textContent = subtitle;
+            document.getElementById('templateModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
-            document.getElementById('suratModal').classList.add('hidden');
+            document.getElementById('templateModal').classList.add('hidden');
             document.body.style.overflow = 'auto';
         }
 
-        function downloadSurat() {
+        function downloadTemplate() {
             // Simulate download
-            showMinimalPopup('Download Berhasil', 'Surat berhasil diunduh', 'success');
+            showMinimalPopup('Download Berhasil', 'Template berhasil diunduh', 'success');
             closeModal();
         }
 
-        function editSurat() {
+        function editTemplate() {
             // Simulate edit
             closeModal();
-            // Redirect to edit page or open edit modal
-            showMinimalPopup('Edit Mode', 'Mengalihkan ke halaman edit', 'success');
+            document.getElementById('buatSuratModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Modal functions for Buat Surat Kerjasama
+        function closeBuatSuratModal() {
+            document.getElementById('buatSuratModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            document.getElementById('buatSuratForm').reset();
+        }
+
+        function submitBuatSurat() {
+            const form = document.getElementById('buatSuratForm');
+            
+            // Simple form validation
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            // Get form data
+            const formData = {
+                namaPerusahaan1: document.getElementById('namaPerusahaan1').value,
+                namaPerusahaan2: document.getElementById('namaPerusahaan2').value,
+                alamatPerusahaan1: document.getElementById('alamatPerusahaan1').value,
+                alamatPerusahaan2: document.getElementById('alamatPerusahaan2').value,
+                penanggungJawab1: document.getElementById('penanggungJawab1').value,
+                penanggungJawab2: document.getElementById('penanggungJawab2').value,
+                jabatan1: document.getElementById('jabatan1').value,
+                jabatan2: document.getElementById('jabatan2').value,
+                judulKerjasama: document.getElementById('judulKerjasama').value,
+                lingkupKerjasama: document.getElementById('lingkupKerjasama').value,
+                tanggalMulai: document.getElementById('tanggalMulai').value,
+                tanggalSelesai: document.getElementById('tanggalSelesai').value,
+                nilaiKontrak: document.getElementById('nilaiKontrak').value,
+                keterangan: document.getElementById('keterangan').value
+            };
+            
+            // Update preview with form data
+            document.getElementById('previewNama1').textContent = formData.namaPerusahaan1;
+            document.getElementById('previewAlamat1').textContent = formData.alamatPerusahaan1;
+            document.getElementById('previewPenanggung1').textContent = formData.penanggungJawab1;
+            document.getElementById('previewJabatan1').textContent = formData.jabatan1;
+            
+            document.getElementById('previewNama2').textContent = formData.namaPerusahaan2;
+            document.getElementById('previewAlamat2').textContent = formData.alamatPerusahaan2;
+            document.getElementById('previewPenanggung2').textContent = formData.penanggungJawab2;
+            document.getElementById('previewJabatan2').textContent = formData.jabatan2;
+            
+            document.getElementById('previewJudul').textContent = formData.judulKerjasama;
+            document.getElementById('previewLingkup').textContent = formData.lingkupKerjasama;
+            document.getElementById('previewMulai').textContent = formData.tanggalMulai;
+            document.getElementById('previewSelesai').textContent = formData.tanggalSelesai;
+            document.getElementById('previewNilai').textContent = Number(formData.nilaiKontrak).toLocaleString('id-ID');
+            document.getElementById('previewKeterangan').textContent = formData.keterangan;
+            
+            document.getElementById('previewTtd1').textContent = formData.penanggungJawab1;
+            document.getElementById('previewTtdJabatan1').textContent = formData.jabatan1;
+            document.getElementById('previewTtd2').textContent = formData.penanggungJawab2;
+            document.getElementById('previewTtdJabatan2').textContent = formData.jabatan2;
+            
+            // Show success message
+            showMinimalPopup('Surat Dibuat', 'Surat kerjasama berhasil dibuat', 'success');
+            
+            // Close modal
+            closeBuatSuratModal();
+            
+            // Open preview modal
+            openModal('Surat Perjanjian Kerjasama', 'Preview');
         }
 
         // === EVENT LISTENERS ===
         document.addEventListener('DOMContentLoaded', function() {
+            // Event listener for tombol Buat Surat Kerjasama
+            const buatSuratBtn = document.getElementById('buatSuratBtn');
+            if (buatSuratBtn) {
+                buatSuratBtn.addEventListener('click', function() {
+                    document.getElementById('buatSuratModal').classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+            
             // Close modal when clicking outside
-            document.getElementById('suratModal').addEventListener('click', function(e) {
+            document.getElementById('buatSuratModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeBuatSuratModal();
+                }
+            });
+
+            document.getElementById('templateModal').addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeModal();
                 }
@@ -978,7 +1227,10 @@
             // Close modal with Escape key
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
-                    if (!document.getElementById('suratModal').classList.contains('hidden')) {
+                    if (!document.getElementById('buatSuratModal').classList.contains('hidden')) {
+                        closeBuatSuratModal();
+                    }
+                    if (!document.getElementById('templateModal').classList.contains('hidden')) {
                         closeModal();
                     }
                 }
