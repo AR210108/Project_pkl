@@ -9,15 +9,18 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminKaryawanController;
+use App\Http\Controllers\CatatanRapatController;
 use App\Http\Controllers\KwitansiController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PengumumanController;
+use App\Http\Controllers\SuratKerjasamaController;
+use App\Models\Invoice;
 
 /*
 |--------------------------------------------------------------------------
 | Guest Routes (Pengunjung Belum Login)
 |--------------------------------------------------------------------------
 */
-
 
 // Redirect default ke halaman home
 Route::get('/', function () {
@@ -67,7 +70,7 @@ Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
 
     // API untuk Kwitansi
     Route::apiResource('kwitansi', KwitansiController::class);
-    
+
     // API untuk Invoice
     Route::apiResource('invoices', InvoiceController::class);
 });
@@ -98,7 +101,7 @@ Route::middleware(['auth', 'role:karyawan'])
         Route::post('/submit-izin', [KaryawanController::class, 'submitIzinApi'])->name('izin');
         // Endpoint untuk submit pengajuan dinas luar
         Route::post('/submit-dinas', [KaryawanController::class, 'submitDinasApi'])->name('dinas');
-        
+
         // Endpoint untuk mendapatkan status pengajuan (pending, approved, rejected)
         Route::get('/pengajuan-status', [KaryawanController::class, 'getPengajuanStatus'])->name('pengajuan.status');
     });
@@ -138,11 +141,11 @@ Route::middleware(['auth', 'role:admin'])
 
         // HAPUS USER
         Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
-    
+
         // Data Karyawan
-       Route::get('/data_karyawan', [AdminKaryawanController::class, 'index'])->name('data_karyawan');
-        
-        // Routes untuk AdminKaryawanController - PERBAIKAN
+        Route::get('/data_karyawan', [AdminKaryawanController::class, 'index'])->name('data_karyawan');
+
+        // Routes untuk AdminKaryawanController
         Route::controller(AdminKaryawanController::class)->group(function () {
             Route::get('/karyawan', 'index')->name('karyawan.index');
             Route::post('/karyawan/store', 'store')->name('karyawan.store');
@@ -150,9 +153,7 @@ Route::middleware(['auth', 'role:admin'])
             Route::delete('/karyawan/delete/{id}', 'destroy')->name('karyawan.delete');
         });
 
-        // Halaman untuk mengelola data absensi.
-        // Rute ini memanggil method 'index' di AbsensiController yang bertugas
-        // menyiapkan data (statistik, absensi, dll) sebelum menampilkan view.
+        // Halaman untuk mengelola data absensi
         Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
 
         // Halaman untuk mengelola data keuangan (menggunakan view langsung)
@@ -165,7 +166,18 @@ Route::middleware(['auth', 'role:admin'])
             Route::put('/{id}', [LayananController::class, 'update'])->name('update');
             Route::delete('/{id}', [LayananController::class, 'destroy'])->name('delete');
         });
-        
+
+        // Grup rute untuk CRUD Surat Kerjasama
+        Route::prefix('surat_kerjasama')->name('surat_kerjasama.')->group(function () {
+            Route::get('/', [SuratKerjasamaController::class, 'index'])->name('index');
+            Route::get('/create', [SuratKerjasamaController::class, 'create'])->name('create');
+            Route::post('/', [SuratKerjasamaController::class, 'store'])->name('store');
+            Route::get('/surat_kerjasama/{id}', [SuratKerjasamaController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [SuratKerjasamaController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [SuratKerjasamaController::class, 'update'])->name('update');
+            Route::delete('/{id}', [SuratKerjasamaController::class, 'destroy'])->name('destroy');
+        });
+
         // Grup rute untuk CRUD Invoice
         Route::prefix('invoice')->name('invoice.')->group(function () {
             Route::get('/', [InvoiceController::class, 'index'])->name('index');
@@ -176,7 +188,9 @@ Route::middleware(['auth', 'role:admin'])
             Route::put('/{id}', [InvoiceController::class, 'update'])->name('update');
             Route::delete('/{id}', [InvoiceController::class, 'destroy'])->name('destroy');
         });
-          Route::prefix('kwitansi')->name('kwitansi.')->group(function () {
+
+        // ✅ PERBAIKAN: Grup rute untuk Kwitansi (dipindahkan ke dalam grup admin)
+        Route::prefix('kwitansi')->name('kwitansi.')->group(function () {
             Route::get('/', fn() => view('admin.kwitansi'))->name('index');
             Route::get('/{id}/cetak', [KwitansiController::class, 'cetak'])->name('cetak');
         });
@@ -184,20 +198,26 @@ Route::middleware(['auth', 'role:admin'])
 
 /*
 |--------------------------------------------------------------------------
-| Routes untuk Role Lain
+| Routes untuk Pengumuman
 |--------------------------------------------------------------------------
 */
+Route::resource('pengumuman', PengumumanController::class);
 
-Route::middleware('auth')->group(function () {
-    // Halaman untuk role 'owner'
-    Route::get('/owner', fn() => view('owner.index'))->name('owner.home');
-    // Halaman untuk role 'pm' (project manager)
-    Route::get('/pm', fn() => view('pm.index'))->name('pm.home');
+/*
+|--------------------------------------------------------------------------
+| Routes untuk Catatan Rapat
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::get('/catatan_rapat', [CatatanRapatController::class, 'index'])->name('catatan_rapat.index');
+    Route::post('/catatan_rapat', [CatatanRapatController::class, 'store'])->name('catatan_rapat.store');
+    Route::put('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'update'])->name('catatan_rapat.update');
+    Route::delete('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'destroy'])->name('catatan_rapat.destroy');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Aliases / Pintasan
+| Pintasan Routes
 |--------------------------------------------------------------------------
 */
 
@@ -271,63 +291,22 @@ Route::view('/data_karyawan_admin', 'admin/data_karyawan');
 Route::view('/data_layanan_admin', 'admin/data_layanan');
 Route::get('/data_user', fn() => redirect()->route('admin.user'));
 
-Route::view('/data_absen', 'admin/absensi');
-Route::view('/template_surat', 'admin/templet_surat');
-Route::view('/list_surat', 'admin/list_surat');
-Route::view('/invoice', 'admin/invoice');
-Route::view('/kwitansi', 'admin/kwitansi');
-Route::view('/catatan_rapat', 'admin/catatan_rapat');
-Route::view('/pengumuman', 'admin/pengumuman');
-
-Route::view('/pemilik', 'pemilik/home');
-Route::view('/rekap_absen', 'pemilik/rekap_absen');
-Route::view('/laporan', 'pemilik/laporan');
-Route::view('/monitoring', 'pemilik/monitoring_progres');
-Route::view('/surat', 'pemilik/surat_kerjasama');
-
-Route::view('/finance', 'finance/beranda');
-Route::view('/data', 'finance/data_layanan');
-Route::view('/pembayaran', 'finance/data_pembayaran');
-
-Route::view('/manager_divisi', 'manager_divisi/home');
-Route::view('/pengelola_tugas', 'manager_divisi/pengelola_tugas');
-
-Route::view('/general_manajer', 'general_manajer/home');
-Route::view('/data_karyawan', 'general_manajer/data_karyawan');
-Route::view('/layanan', 'general_manajer/data_layanan');
-Route::view('/kelola_tugas', 'general_manajer/kelola_tugas');
-Route::view('/kelola_absen', 'general_manajer/kelola_absen');
-
+/*
+|--------------------------------------------------------------------------
+| Routes untuk Invoice (Public/Resource)
+|--------------------------------------------------------------------------
+*/
 Route::resource('invoices', InvoiceController::class);
 Route::get('/invoices/{invoice}/print', function (Invoice $invoice) {
     return view('invoices.print', compact('invoice'));
 })->name('invoices.print');
 
-
-Route::get('/data_absen', function () {
-    return view('admin/absensi');
-});
-Route::get('/template_surat', function () {
-    return view('admin/templet_surat');
-});
-Route::get('/list_surat', function () {
-    return view('admin/list_surat');
-});
-Route::get('/invoice', function () {
-    return view('admin/invoice');
-});
-Route::get('/kwitansi', function () {
-    return view('admin/kwitansi');
-});
-Route::get('/catatan_rapat', function () {
-    return view('admin/catatan_rapat');
-});
-Route::get('/pengumuman', function () {
-    return view('admin/pengumuman');
-});
-
-
-Route::get('/pemilik', function () {
+/*
+|--------------------------------------------------------------------------
+| Routes untuk Role Pemilik
+|--------------------------------------------------------------------------
+*/
+Route::get('/pemilik', function () { 
     return view('pemilik/home');
 });
 Route::get('/rekap_absen', function () {
@@ -336,15 +315,12 @@ Route::get('/rekap_absen', function () {
 Route::get('/laporan', function () {
     return view('pemilik/laporan');
 });
-Route::get('/monitoring', function () {
-    return view('pemilik/monitoring_progres');
-});
-Route::get('/surat', function () {
-    return view('pemilik/surat_kerjasama');
-});
 
-
-// finance
+/*
+|--------------------------------------------------------------------------
+| Routes untuk Finance
+|--------------------------------------------------------------------------
+*/
 Route::get('/finance', function () {
     return view('finance/beranda');
 });
@@ -355,8 +331,11 @@ Route::get('/pembayaran', function () {
     return view('finance/data_pembayaran');
 });
 
-
-
+/*
+|--------------------------------------------------------------------------
+| Routes untuk Manager Divisi
+|--------------------------------------------------------------------------
+*/
 Route::get('/manager_divisi', function () {
     return view('manager_divisi/home');
 });
@@ -364,7 +343,11 @@ Route::get('/pengelola_tugas', function () {
     return view('manager_divisi/pengelola_tugas');
 });
 
-
+/*
+|--------------------------------------------------------------------------
+| Routes untuk General Manager
+|--------------------------------------------------------------------------
+*/
 Route::get('/general_manajer', function () {
     return view('general_manajer/home');
 });
@@ -374,21 +357,12 @@ Route::get('/data_karyawan', function () {
 Route::get('/layanan', function () {
     return view('general_manajer/data_layanan');
 });
+Route::get('/kelola_order', function () {
+    return view('general_manajer/kelola_order');
+});
 Route::get('/kelola_tugas', function () {
     return view('general_manajer/kelola_tugas');
 });
 Route::get('/kelola_absen', function () {
     return view('general_manajer/kelola_absen');
 });
-
-
-Route::resource('pengumuman', PengumumanController::class);
-// === ROUTE UNTUK CATATAN RAPAT ANDA ===
-// Semua route di dalam group ini memerlukan user sudah login
-Route::middleware(['auth'])->group(function () {
-    Route::get('/catatan_rapat', [CatatanRapatController::class, 'index'])->name('catatan_rapat.index');
-    Route::post('/catatan_rapat', [CatatanRapatController::class, 'store'])->name('catatan_rapat.store');
-    Route::put('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'update'])->name('catatan_rapat.update');
-    Route::delete('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'destroy'])->name('catatan_rapat.destroy');
-});
-

@@ -135,13 +135,41 @@
                     <span class="material-icons">home</span>
                     <span>Beranda</span>
                 </a>
-                <a class="nav-item flex items-center space-x-3 text-gray-700 font-medium hover:bg-gray-100 p-3 rounded-lg transition-colors" href="/data">
+               <a class="nav-item flex items-center space-x-3 text-gray-700 font-medium hover:bg-gray-100 p-3 rounded-lg transition-colors"
+   href="">
+    <span class="material-icons">trending_up</span>
+    <span>Pemasukan</span>
+</a>
+
+<a class="nav-item flex items-center space-x-3 text-gray-700 font-medium hover:bg-gray-100 p-3 rounded-lg transition-colors"
+   href="">
+    <span class="material-icons">trending_down</span>
+    <span>Pengeluaran</span>
+</a>
+
+<a class="nav-item flex items-center space-x-3 text-gray-700 font-medium hover:bg-gray-100 p-3 rounded-lg transition-colors"
+   href="">
+    <span class="material-icons">request_quote</span>
+    <span>Invoice</span>
+</a>
+
+<a class="nav-item flex items-center space-x-3 text-gray-700 font-medium hover:bg-gray-100 p-3 rounded-lg transition-colors"
+   href="">
+    <span class="material-icons">receipt_long</span>
+    <span>Kwitansi</span>
+</a>
+
+                <a class="nav-item flex items-center space-x-3 text-gray-700 font-medium hover:bg-gray-100 p-3 rounded-lg transition-colors" href="">
                     <span class="material-icons">list_alt</span>
                     <span>Data Layanan</span>
                 </a>
-                <a class="nav-item flex items-center space-x-3 text-gray-700 font-medium hover:bg-gray-100 p-3 rounded-lg transition-colors" href="/pembayaran">
+                <a class="nav-item flex items-center space-x-3 text-gray-700 font-medium hover:bg-gray-100 p-3 rounded-lg transition-colors" href="">
                     <span class="material-icons">payment</span>
                     <span>Data Pembayaran</span>
+                </a>
+                <a class="nav-item flex items-center space-x-3 text-gray-700 font-medium hover:bg-gray-100 p-3 rounded-lg transition-colors" href="">
+                    <span class="material-icons">payment</span>
+                    <span>Data Karyawan</span>
                 </a>
             </nav>
         </div>

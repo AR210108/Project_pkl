@@ -219,10 +219,6 @@
                     <span class="material-icons sidebar-icon">miscellaneous_services</span>
                     <span class="sidebar-text">Data Layanan</span>
                 </a>
-                 <a class="nav-item flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/data_order" data-page="data_order">
-                <span class="material-icons">receipt_long</span>
-                <span>Data Order</span>
-            </a>
 
                 <!-- Menu Absensi -->
                 <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/admin/absensi" data-page="absensi">

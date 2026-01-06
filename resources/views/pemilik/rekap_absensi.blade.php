@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Kelola Absensi - Dashboard</title>
+    <title>Rekap Absensi - Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
@@ -53,7 +53,7 @@
             vertical-align: middle;
         }
         
-        /* Card hover effects - updated to match reference */
+        /* Card hover effects */
         .card {
             transition: all 0.3s ease;
         }
@@ -120,6 +120,16 @@
         .status-cuti {
             background-color: rgba(239, 68, 68, 0.15);
             color: #991b1b;
+        }
+        
+        .status-sakit {
+            background-color: rgba(251, 146, 60, 0.15);
+            color: #9a3412;
+        }
+        
+        .status-dinas {
+            background-color: rgba(139, 92, 246, 0.15);
+            color: #5b21b6;
         }
         
         /* Custom styles untuk transisi */
@@ -523,9 +533,9 @@
         <main class="flex-1 flex flex-col bg-background-light">
             <div class="flex-1 p-3 sm:p-8">
 
-                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Kelola Absensi</h2>
+                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Rekap Absensi</h2>
                 
-                <!-- Stats Cards - Modified to match reference style -->
+                <!-- Stats Cards -->
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
                     <!-- Total Kehadiran Card -->
                     <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
@@ -535,7 +545,10 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Total Kehadiran</p>
-                                <p class="text-xl md:text-2xl font-bold text-green-600">1</p>
+                                <p class="text-xl md:text-2xl font-bold text-green-600">
+                                {{ $statistik['hadir'] }} 
+                            </p>
+
                             </div>
                         </div>
                     </div>
@@ -548,7 +561,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Tidak Hadir</p>
-                                <p class="text-xl md:text-2xl font-bold text-red-600">11</p>
+                                <p class="text-xl md:text-2xl font-bold text-red-600">{{ $statistik['tidakMasuk'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -561,7 +574,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Izin</p>
-                                <p class="text-xl md:text-2xl font-bold text-blue-600">0</p>
+                                <p class="text-xl md:text-2xl font-bold text-blue-600">{{ $statistik['izin'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -574,7 +587,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Cuti</p>
-                                <p class="text-xl md:text-2xl font-bold text-yellow-600">0</p>
+                                <p class="text-xl md:text-2xl font-bold text-yellow-600">{{ $statistik['cuti'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -587,7 +600,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Dinas Luar</p>
-                                <p class="text-xl md:text-2xl font-bold text-purple-600">0</p>
+                                <p class="text-xl md:text-2xl font-bold text-purple-600">{{ $statistik['dinas'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -600,7 +613,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Sakit</p>
-                                <p class="text-xl md:text-2xl font-bold text-orange-600">0</p>
+                                <p class="text-xl md:text-2xl font-bold text-orange-600">{{ $statistik['sakit'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -626,7 +639,7 @@
                             Data Absensi
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="absensiCount">3</span> data</span>
+                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="absensiCount">{{ $dataKehadiran->count() }}</span> data</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -685,7 +698,7 @@
                             Daftar Ketidakhadiran
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="ketidakhadiranCount">2</span> data</span>
+                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="ketidakhadiranCount">{{ $dataKetidakhadiran->count() }}</span> data</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -743,26 +756,17 @@
     </div>
 
     <script>
-        // Sample data for absensi
-        const absensiData = [
-            { id: 1, nama: "Budi Santoso", tanggal: "2024-10-15", jamMasuk: "08:00", jamKeluar: "17:00", status: "Hadir" },
-            { id: 2, nama: "Citra Lestari", tanggal: "2024-10-15", jamMasuk: "08:30", jamKeluar: "17:30", status: "Hadir" },
-            { id: 3, nama: "Eko Prabowo", tanggal: "2024-10-15", jamMasuk: "09:15", jamKeluar: "17:00", status: "Terlambat" }
-        ];
-
-        // Sample data for ketidakhadiran
-        const ketidakhadiranData = [
-            { id: 1, nama: "Dewi Anggraini", tanggalMulai: "2024-10-10", tanggalAkhir: "2024-10-12", alasan: "Sakit", status: "Izin" },
-            { id: 2, nama: "Ani Yudhoyono", tanggalMulai: "2024-10-05", tanggalAkhir: "2024-10-15", alasan: "Liburan keluarga", status: "Cuti" }
-        ];
+        // Data dari controller
+        const absensiData = @json($dataKehadiran);
+        const ketidakhadiranData = @json($dataKetidakhadiran);
 
         // Pagination variables for absensi
-        const absensiItemsPerPage = 2; // Dikurangi agar pagination terlihat
+        const absensiItemsPerPage = 10; // Diperbesar untuk menampilkan lebih banyak data
         let absensiCurrentPage = 1;
         const absensiTotalPages = Math.ceil(absensiData.length / absensiItemsPerPage);
 
         // Pagination variables for ketidakhadiran
-        const ketidakhadiranItemsPerPage = 2; // Dikurangi agar pagination terlihat
+        const ketidakhadiranItemsPerPage = 10; // Diperbesar untuk menampilkan lebih banyak data
         let ketidakhadiranCurrentPage = 1;
         const ketidakhadiranTotalPages = Math.ceil(ketidakhadiranData.length / ketidakhadiranItemsPerPage);
 
@@ -988,9 +992,16 @@
                 const absensi = absensiData[i];
                 const row = document.createElement('tr');
                 
+                // Format tanggal
+                const tanggal = new Date(absensi.tanggal).toLocaleDateString('id-ID');
+                
+                // Format jam
+                const jamMasuk = absensi.jam_masuk ? absensi.jam_masuk.substring(0, 5) : '-';
+                const jamKeluar = absensi.jam_pulang ? absensi.jam_pulang.substring(0, 5) : '-';
+                
                 // Determine status class
                 let statusClass = '';
-                if (absensi.status === 'Hadir') {
+                if (absensi.status === 'Tepat Waktu') {
                     statusClass = 'status-hadir';
                 } else if (absensi.status === 'Terlambat') {
                     statusClass = 'status-terlambat';
@@ -998,10 +1009,10 @@
                 
                 row.innerHTML = `
                     <td style="min-width: 60px;">${i + 1}</td>
-                    <td style="min-width: 200px;">${absensi.nama}</td>
-                    <td style="min-width: 120px;">${absensi.tanggal}</td>
-                    <td style="min-width: 120px;">${absensi.jamMasuk}</td>
-                    <td style="min-width: 120px;">${absensi.jamKeluar}</td>
+                    <td style="min-width: 200px;">${absensi.user ? absensi.user.name : absensi.name}</td>
+                    <td style="min-width: 120px;">${tanggal}</td>
+                    <td style="min-width: 120px;">${jamMasuk}</td>
+                    <td style="min-width: 120px;">${jamKeluar}</td>
                     <td style="min-width: 120px;"><span class="status-badge ${statusClass}">${absensi.status}</span></td>
                 `;
                 tbody.appendChild(row);
@@ -1020,21 +1031,49 @@
                 const ketidakhadiran = ketidakhadiranData[i];
                 const row = document.createElement('tr');
                 
+                // Format tanggal
+                const tanggalMulai = new Date(ketidakhadiran.tanggal).toLocaleDateString('id-ID');
+                const tanggalAkhir = ketidakhadiran.tanggal_akhir 
+                    ? new Date(ketidakhadiran.tanggal_akhir).toLocaleDateString('id-ID') 
+                    : tanggalMulai;
+                
+                // Determine alasan
+                let alasan = '-';
+                if (ketidakhadiran.status === 'Cuti') {
+                    alasan = ketidakhadiran.alasan_cuti || ketidakhadiran.jenis_cuti || 'Cuti';
+                } else if (ketidakhadiran.status === 'Sakit') {
+                    alasan = 'Sakit';
+                } else if (ketidakhadiran.status === 'Izin') {
+                    alasan = ketidakhadiran.reason || 'Izin';
+                } else if (ketidakhadiran.status === 'Tidak Masuk') {
+                    alasan = 'Tanpa Keterangan';
+                }
+                
                 // Determine status class
                 let statusClass = '';
                 if (ketidakhadiran.status === 'Izin') {
                     statusClass = 'status-izin';
                 } else if (ketidakhadiran.status === 'Cuti') {
                     statusClass = 'status-cuti';
+                } else if (ketidakhadiran.status === 'Sakit') {
+                    statusClass = 'status-sakit';
+                } else if (ketidakhadiran.status === 'Tidak Masuk') {
+                    statusClass = 'status-tidak-masuk';
+                }
+                
+                // Tambahkan badge untuk status persetujuan jika pending
+                let statusBadge = `<span class="status-badge ${statusClass}">${ketidakhadiran.status}</span>`;
+                if (ketidakhadiran.approval_status === 'pending') {
+                    statusBadge += ` <span class="status-badge" style="background-color: rgba(245, 158, 11, 0.15); color: #92400e;">Menunggu Persetujuan</span>`;
                 }
                 
                 row.innerHTML = `
                     <td style="min-width: 60px;">${i + 1}</td>
-                    <td style="min-width: 200px;">${ketidakhadiran.nama}</td>
-                    <td style="min-width: 120px;">${ketidakhadiran.tanggalMulai}</td>
-                    <td style="min-width: 120px;">${ketidakhadiran.tanggalAkhir}</td>
-                    <td style="min-width: 200px;">${ketidakhadiran.alasan}</td>
-                    <td style="min-width: 120px;"><span class="status-badge ${statusClass}">${ketidakhadiran.status}</span></td>
+                    <td style="min-width: 200px;">${ketidakhadiran.user ? ketidakhadiran.user.name : ketidakhadiran.name}</td>
+                    <td style="min-width: 120px;">${tanggalMulai}</td>
+                    <td style="min-width: 120px;">${tanggalAkhir}</td>
+                    <td style="min-width: 200px;">${alasan}</td>
+                    <td style="min-width: 120px;">${statusBadge}</td>
                 `;
                 tbody.appendChild(row);
             }

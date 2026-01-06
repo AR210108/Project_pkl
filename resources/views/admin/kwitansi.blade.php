@@ -1123,6 +1123,20 @@
             if (editFeeMaintenance) editFeeMaintenance.addEventListener('input', calculateEditTotal);
         });
         
+        // Function to format number to Rupiah
+        function formatToRupiah(number) {
+            if (isNaN(number)) return 'Rp 0';
+            return 'Rp ' + parseFloat(number).toLocaleString('id-ID');
+        }
+        
+        // Function to parse Rupiah string back to number
+        function parseRupiah(rupiahString) {
+            if (typeof rupiahString !== 'string') return 0;
+            // Remove "Rp " and all non-digit characters except decimal point
+            const cleanString = rupiahString.replace(/Rp\s/g, '').replace(/[^\d.-]/g, '');
+            return parseFloat(cleanString) || 0;
+        }
+        
         // Load invoice options from database
         function loadInvoiceOptions() {
             const select = document.getElementById('pilihInvoice');
@@ -1631,7 +1645,7 @@
             const total = subTotal + feeMaintenance;
             
             // Set both the display and the actual value
-            document.getElementById('total').value = total.toLocaleString('id-ID');
+            document.getElementById('total').value = formatToRupiah(total);
             document.getElementById('totalValue').value = total;
         }
         
@@ -1642,7 +1656,7 @@
             const total = subTotal + feeMaintenance;
             
             // Set both the display and the actual value
-            document.getElementById('editTotal').value = total.toLocaleString('id-ID');
+            document.getElementById('editTotal').value = formatToRupiah(total);
             document.getElementById('editTotalValue').value = total;
         }
         
