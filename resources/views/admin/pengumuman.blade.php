@@ -154,7 +154,7 @@
                                 </tr>
                             </thead>
                             <tbody id="pengumumanTableBody" class="divide-y divide-border-light dark:divide-border-dark">
-                                @foreach($pengumuman as $index => $item)
+                                @forelse($pengumuman ?? [] as $index => $item)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                                     <td class="px-6 py-4">{{ $index + 1 }}.</td>
                                     <td class="px-6 py-4">{{ $item->judul_informasi }}</td>

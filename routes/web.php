@@ -204,6 +204,7 @@ Route::middleware(['auth', 'role:admin'])
 */
 Route::resource('pengumuman', PengumumanController::class);
 
+
 // Resource routes untuk Pegawai (mendefinisikan pegawai.index, pegawai.store, dll.)
 Route::resource('pegawai', PegawaiController::class);
 

@@ -106,6 +106,7 @@
 </head>
 
 <body class="font-display bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark">
+
     <div class="flex h-screen">
 
                 <!-- Sidebar -->
@@ -167,7 +168,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tableBody">
-                                    @forelse($catatanRapat as $index => $item)
+                                    @forelse($catatanRapat ?? [] as $index => $item)
                                     <tr class="border-b border-border-light dark:border-border-dark hover:bg-highlight-light dark:hover:bg-highlight-dark transition-colors" data-id="{{ $item->id }}">
                                         <td class="px-6 py-4">{{ $catatanRapat->firstItem() + $index }}</td>
                                         <td class="px-6 py-4 font-medium">{{ $item->id }}</td>
@@ -222,7 +223,8 @@
                             </table>
                         </div>
                         
-                        @if($catatanRapat->hasPages())
+                        @if(isset($catatanRapat) && method_exists($catatanRapat, 'hasPages') && $catatanRapat->hasPages())
+
                         <div class="px-6 py-4 border-t border-border-light dark:border-border-dark">
                             {{ $catatanRapat->links() }}
                         </div>
