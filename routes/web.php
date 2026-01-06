@@ -255,9 +255,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/template_surat', fn() => view('admin/templet_surat'));
     Route::get('/list_surat', fn() => view('admin/list_surat'));
     Route::get('/invoice', fn() => view('admin/invoice'));
-    Route::get('/kwitansi', fn() => view('admin/kwitansi'));
-    Route::get('/catatan_rapat', fn() => view('admin/catatan_rapat'));
-    Route::get('/pengumuman', fn() => view('admin/pengumuman'));
+    Route::get('/kwitansi', fn() => view('admin/kwitansi')); 
     Route::get('/data_order', fn() => view('admin/data_order'));
     
     // Pemilik

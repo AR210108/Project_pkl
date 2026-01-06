@@ -11,9 +11,10 @@ return new class extends Migration
         // Ubah 'karyawan' menjadi 'karyawans' di sini
         Schema::create('karyawan', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('nama', 100);
             $table->string('jabatan', 100);
-            $table->string('gaji', 50);
+            $table->string('divisi', 50);
             $table->text('alamat');
             $table->string('kontak', 20);
             $table->string('foto')->nullable();
@@ -24,6 +25,6 @@ return new class extends Migration
     public function down(): void
     {
         // Dan juga ubah 'karyawan' menjadi 'karyawans' di sini
-        Schema::dropIfExists('karyawans');
+        Schema::dropIfExists('karyawan');
     }
 };

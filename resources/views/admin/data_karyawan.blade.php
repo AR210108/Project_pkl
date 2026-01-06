@@ -693,7 +693,7 @@
                                             <th style="min-width: 60px;">No</th>
                                             <th style="min-width: 200px;">Nama</th>
                                             <th style="min-width: 150px;">Jabatan</th>
-                                            <th style="min-width: 150px;">Gaji</th>
+                                            <th style="min-width: 150px;">Divisi</th>
                                             <th style="min-width: 250px;">Alamat</th>
                                             <th style="min-width: 150px;">Kontak</th>
                                             <th style="min-width: 100px;">Foto</th>
@@ -708,7 +708,7 @@
                                                     data-id="{{ $item->id }}" 
                                                     data-nama="{{ $item->nama }}" 
                                                     data-jabatan="{{ $item->jabatan }}" 
-                                                    data-gaji="{{ $item->gaji }}" 
+                                                    data-divisi="{{ $item->divisi }}" 
                                                     data-alamat="{{ $item->alamat }}" 
                                                     data-kontak="{{ $item->kontak }}" 
                                                     data-foto="{{ $item->foto ?? '' }}">
@@ -722,7 +722,7 @@
                                                             {{ $item->jabatan }}
                                                         </span>
                                                     </td>
-                                                    <td style="min-width: 150px;">Rp. {{ number_format($item->gaji, 0, ',', '.') }}</td>
+                                                    <td style="min-width: 150px;">{{ $item->divisi }}</td>
                                                     <td style="min-width: 250px;">{{ $item->alamat }}</td>
                                                     <td style="min-width: 150px;">{{ $item->kontak }}</td>
                                                     <td style="min-width: 100px;">
@@ -737,7 +737,7 @@
                                                     <td style="min-width: 100px; text-align: center;">
                                                         <div class="flex justify-center gap-2">
                                                             <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                                    data-karyawan='{"id": "{{ $item->id }}", "nama": "{{ $item->nama }}", "jabatan": "{{ $item->jabatan }}", "gaji": "{{ $item->gaji }}", "alamat": "{{ $item->alamat }}", "kontak": "{{ $item->kontak }}", "foto": "{{ $item->foto ?? '' }}" }'>
+                                                                    data-karyawan='{"id": "{{ $item->id }}", "nama": "{{ $item->nama }}", "jabatan": "{{ $item->jabatan }}", "divisi": "{{ $item->divisi }}", "alamat": "{{ $item->alamat }}", "kontak": "{{ $item->kontak }}", "foto": "{{ $item->foto ?? '' }}" }'>
                                                                 <span class="material-icons-outlined">edit</span>
                                                             </button>
                                                             <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
@@ -769,7 +769,7 @@
                                          data-id="{{ $item->id }}" 
                                          data-nama="{{ $item->nama }}" 
                                          data-jabatan="{{ $item->jabatan }}" 
-                                         data-gaji="{{ $item->gaji }}" 
+                                         data-divisi="{{ $item->divisi }}" 
                                          data-alamat="{{ $item->alamat }}" 
                                          data-kontak="{{ $item->kontak }}" 
                                          data-foto="{{ $item->foto ?? '' }}">
@@ -789,7 +789,7 @@
                                             </div>
                                             <div class="flex gap-2">
                                                 <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                        data-karyawan='{"id": "{{ $item->id }}", "nama": "{{ $item->nama }}", "jabatan": "{{ $item->jabatan }}", "gaji": "{{ $item->gaji }}", "alamat": "{{ $item->alamat }}", "kontak": "{{ $item->kontak }}", "foto": "{{ $item->foto ?? '' }}" }'>
+                                                        data-karyawan='{"id": "{{ $item->id }}", "nama": "{{ $item->nama }}", "jabatan": "{{ $item->jabatan }}", "divisi": "{{ $item->divisi }}", "alamat": "{{ $item->alamat }}", "kontak": "{{ $item->kontak }}", "foto": "{{ $item->foto ?? '' }}" }'>
                                                     <span class="material-icons-outlined">edit</span>
                                                 </button>
                                                 <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
@@ -815,8 +815,8 @@
                                                 </p>
                                             </div>
                                             <div>
-                                                <p class="text-text-muted-light">Gaji</p>
-                                                <p class="font-medium">Rp. {{ number_format($item->gaji, 0, ',', '.') }}</p>
+                                                <p class="text-text-muted-light">Divisi</p>
+                                                <p class="font-medium">{{ $item->divisi }}</p>
                                             </div>
                                             <div>
                                                 <p class="text-text-muted-light">Alamat</p>
@@ -884,10 +884,10 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Gaji</label>
-                            <input type="number" name="gaji" id="gajiInput"
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
+                            <input type="text" name="divisi" id="divisiInput"
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="Masukkan gaji" required>
+                                placeholder="Masukkan divisi" required>
                         </div>
 
                         <div>
@@ -967,10 +967,10 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Gaji</label>
-                            <input type="number" id="editGaji" name="gaji"
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
+                            <input type="text" id="editDivisi" name="divisi"
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="Masukkan gaji" required>
+                                placeholder="Masukkan divisi" required>
                         </div>
 
                         <div>
@@ -1414,7 +1414,7 @@
         document.getElementById('editId').value = data.id;
         document.getElementById('editNama').value = data.nama;
         document.getElementById('editJabatan').value = data.jabatan;
-        document.getElementById('editGaji').value = data.gaji;
+        document.getElementById('editDivisi').value = data.divisi;
         document.getElementById('editKontak').value = data.kontak;
         document.getElementById('editAlamat').value = data.alamat;
 

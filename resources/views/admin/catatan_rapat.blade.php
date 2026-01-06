@@ -1062,15 +1062,15 @@
             const existingCards = mobileCards.querySelectorAll('.catatan-rapat-card');
             existingCards.forEach(card => card.remove());
             
-            // Fetch data from API
-            fetch('/api/catatan_rapat', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                }
-            })
+fetch('/catatan_rapat', {
+    method: 'GET',
+    headers: {
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute('content')
+    }
+})
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`Server error: ${response.status} ${response.statusText}`);
