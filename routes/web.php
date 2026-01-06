@@ -13,6 +13,7 @@ use App\Http\Controllers\CatatanRapatController;
 use App\Http\Controllers\KwitansiController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PengumumanController;
+use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\SuratKerjasamaController;
 use App\Models\Invoice;
 
@@ -203,6 +204,9 @@ Route::middleware(['auth', 'role:admin'])
 */
 Route::resource('pengumuman', PengumumanController::class);
 
+// Resource routes untuk Pegawai (mendefinisikan pegawai.index, pegawai.store, dll.)
+Route::resource('pegawai', PegawaiController::class);
+
 /*
 |--------------------------------------------------------------------------
 | Routes untuk Catatan Rapat
@@ -352,7 +356,7 @@ Route::get('/general_manajer', function () {
     return view('general_manajer/home');
 });
 Route::get('/data_karyawan', function () {
-    return view('general_manajer/data_karyawan');
+    return redirect()->route('pegawai.index');
 });
 Route::get('/layanan', function () {
     return view('general_manajer/data_layanan');
