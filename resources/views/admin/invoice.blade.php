@@ -3,26 +3,45 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kelola Invoice - Dashboard</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: "#1d4ed8", // Using a sample blue for primary, as none is specified
+                        primary: "#3b82f6",
                         "background-light": "#ffffff",
-                        "background-dark": "#111827",
+                        "background-dark": "#f8fafc",
+                        "sidebar-light": "#f3f4f6",
+                        "sidebar-dark": "#1e293b",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e293b",
+                        "text-light": "#1e293b",
+                        "text-dark": "#f8fafc",
+                        "text-muted-light": "#64748b",
+                        "text-muted-dark": "#94a3b8",
+                        "border-light": "#e2e8f0",
+                        "border-dark": "#334155",
+                        "success": "#10b981",
+                        "warning": "#f59e0b",
+                        "danger": "#ef4444"
                     },
                     fontFamily: {
-                        display: ["Inter", "sans-serif"],
+                        display: ["Poppins", "sans-serif"],
                     },
                     borderRadius: {
-                        DEFAULT: "0.5rem",
+                        DEFAULT: "0.75rem",
+                    },
+                    boxShadow: {
+                        card: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                        "card-hover": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
                     },
                 },
             },
@@ -691,77 +710,136 @@
             transform: rotate(-2deg);
         }
     </style>
-    <!-- Add CSRF token meta tag -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
-<body class="font-display bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100">
-    <div class="flex h-screen">
-       @include('admin/templet/sider')
+<body class="font-display bg-background-light text-text-light">
+    <div class="flex min-h-screen">
+        @include('admin/templet/sider')
 
-        <!-- Main Content -->
-        <main class="flex-1 flex flex-col overflow-hidden">
-            <div class="p-8 flex-1 overflow-y-auto">
-                <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Kelola Invoice</h2>
-                <div class="flex justify-between items-center mb-6">
-                    <button id="buatInvoiceBtn"
-                        class="flex items-center bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                        <span class="material-icons mr-2">add</span>
-                        Buat Invoice
-                    </button>
-                    <div class="flex items-center space-x-4">
+        <!-- MAIN -->
+        <main class="flex-1 flex flex-col main-content">
+            <div class="flex-grow p-3 sm:p-8">
+
+                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Kelola Invoice</h2>
+                
+                <!-- Search and Filter Section -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div class="relative w-full md:w-1/3">
+                        <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama perusahaan, nomor order, atau klien..." type="text" />
+                    </div>
+                    <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <div class="relative">
-                            <span
-                                class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">search</span>
-                            <input id="searchInput"
-                                class="w-72 bg-gray-200 dark:bg-gray-700 border-none rounded-lg pl-12 pr-4 py-3 focus:ring-2 focus:ring-primary"
-                                placeholder="Search..." type="text" />
+                            <button id="filterBtn" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
+                                <span class="material-icons-outlined text-sm">filter_list</span>
+                                Filter
+                            </button>
+                            <div id="filterDropdown" class="filter-dropdown">
+                                <div class="filter-option">
+                                    <input type="checkbox" id="filterAll" value="all" checked>
+                                    <label for="filterAll">Semua Status</label>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="filterPaid" value="paid">
+                                    <label for="filterPaid">Paid</label>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="filterUnpaid" value="unpaid">
+                                    <label for="filterUnpaid">Unpaid</label>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="filterPending" value="pending">
+                                    <label for="filterPending">Pending</label>
+                                </div>
+                                <div class="filter-actions">
+                                    <button id="applyFilter" class="filter-apply">Terapkan</button>
+                                    <button id="resetFilter" class="filter-reset">Reset</button>
+                                </div>
+                            </div>
                         </div>
-                        <button
-                            class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                            Filter
+                        <button id="buatInvoiceBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
+                            <span class="material-icons-outlined">add</span>
+                            <span class="hidden sm:inline">Buat Invoice</span>
+                            <span class="sm:hidden">Buat</span>
                         </button>
                     </div>
                 </div>
-                <!-- Changed overflow-hidden to overflow-x-auto to handle wide table -->
-                <div class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-gray-200 dark:bg-gray-700">
-                            <tr>
-                                <th class="p-4 w-16 text-sm font-semibold text-gray-600 dark:text-gray-400">NO</th>
-                                <th class="p-4 text-sm font-semibold text-gray-600 dark:text-gray-400">NAMA PERUSAHAAN</th>
-                                <th class="p-4 text-sm font-semibold text-gray-600 dark:text-gray-400">TANGGAL</th>
-                                <th class="p-4 text-sm font-semibold text-gray-600 dark:text-gray-400">NOMOR ORDER</th>
-                                <th class="p-4 text-sm font-semibold text-gray-600 dark:text-gray-400">NAMA KLIEN</th>
-                                <th class="p-4 text-sm font-semibold text-gray-600 dark:text-gray-400">ALAMAT</th>
-                                <th class="p-4 text-sm font-semibold text-gray-600 dark:text-gray-400">DESKRIPSI</th>
-                                <th class="p-4 text-sm font-semibold text-gray-600 dark:text-gray-400">HARGA</th>
-                                <th class="p-4 text-sm font-semibold text-gray-600 dark:text-gray-400">QTY</th>
-                                <th class="p-4 text-sm font-semibold text-gray-600 dark:text-gray-400">TOTAL</th>
-                                <th class="p-4 text-sm font-semibold text-gray-600 dark:text-gray-400">PAJAK (%)</th>
-                                <th class="p-4 text-sm font-semibold text-gray-600 dark:text-gray-400">METODE BAYAR</th>
-                                <th class="p-4 text-sm font-semibold text-gray-600 dark:text-gray-400">AKSI</th>
-                            </tr>
-                        </thead>
-                        <tbody id="invoiceTableBody">
-                            <!-- Data will be populated here -->
-                            <tr id="loadingRow">
-                                <td colspan="13" class="p-4 text-center">
-                                    <div class="flex justify-center items-center">
-                                        <div class="spinner"></div>
-                                        <span class="ml-2">Memuat data...</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr id="noDataRow" class="hidden">
-                                <td colspan="13" class="p-4 text-center">Tidak ada data invoice</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                
+                <!-- Data Table Panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <span class="material-icons-outlined text-primary">receipt</span>
+                            Daftar Invoice
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">0</span> invoice</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <!-- SCROLLABLE TABLE -->
+                        <div class="desktop-table">
+                            <div class="scrollable-table-container scroll-indicator table-shadow" id="scrollableTable">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="min-width: 60px;">No</th>
+                                            <th style="min-width: 120px;">Tanggal</th>
+                                            <th style="min-width: 180px;">Nama Perusahaan</th>
+                                            <th style="min-width: 150px;">Nomor Order</th>
+                                            <th style="min-width: 150px;">Nama Klien</th>
+                                            <th style="min-width: 200px;">Alamat</th>
+                                            <th style="min-width: 200px;">Deskripsi</th>
+                                            <th style="min-width: 120px;">Harga</th>
+                                            <th style="min-width: 120px;">Qty</th>
+                                            <th style="min-width: 120px;">Total</th>
+                                            <th style="min-width: 120px;">Pajak (%)</th>
+                                            <th style="min-width: 150px;">Metode Pembayaran</th>
+                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="desktopTableBody">
+                                        <!-- Data will be populated here -->
+                                        <tr id="loadingRow">
+                                            <td colspan="13" class="px-6 py-4 text-center">
+                                                <div class="flex justify-center items-center">
+                                                    <div class="spinner"></div>
+                                                    <span class="ml-2">Memuat data...</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr id="noDataRow" class="hidden">
+                                            <td colspan="13" class="px-6 py-4 text-center text-sm text-gray-500">
+                                                Tidak ada data invoice
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile Card View -->
+                        <div class="mobile-cards space-y-4" id="mobile-cards">
+                            <!-- Mobile cards will be populated here -->
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div id="paginationContainer" class="desktop-pagination">
+                            <button id="prevPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_left</span>
+                            </button>
+                            <div id="pageNumbers" class="flex gap-1">
+                                <!-- Page numbers will be generated by JavaScript -->
+                            </div>
+                            <button id="nextPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <footer class="bg-gray-200 dark:bg-gray-800 text-center py-4">
-                <p class="text-sm text-gray-600 dark:text-gray-400">Copyright ©2025 by digicity.id</p>
+            <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light">
+                Copyright ©2025 by digicity.id
             </footer>
         </main>
     </div>
@@ -777,6 +855,7 @@
                     </button>
                 </div>
                 <form id="buatInvoiceForm" class="space-y-4">
+                    @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Perusahaan</label>
@@ -829,6 +908,10 @@
                             <option value="Cash">Cash</option>
                         </select>
                     </div>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" id="cancelBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Buat Invoice</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -845,6 +928,7 @@
                     </button>
                 </div>
                 <form id="editInvoiceForm" class="space-y-4">
+                    @csrf
                     <input type="hidden" id="editInvoiceId" name="id">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -896,6 +980,10 @@
                             <option value="Credit Card">Credit Card</option>
                             <option value="Cash">Cash</option>
                         </select>
+                    </div>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" id="cancelEditBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Invoice</button>
                     </div>
                 </form>
             </div>
@@ -979,17 +1067,45 @@
         let allInvoices = []; // Store all invoices data
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date as default for the date input
+            const today = new Date().toISOString().split('T')[0];
+            const tanggalInput = document.getElementById('tanggal');
+            if (tanggalInput) {
+                tanggalInput.value = today;
+            }
+
             // Load invoice data when page loads
             loadInvoices();
             
             // Event listener for search input
-            document.getElementById('searchInput').addEventListener('input', function() {
-                clearTimeout(this.searchTimeout);
-                this.searchTimeout = setTimeout(() => {
-                    searchTerm = this.value.trim();
-                    currentPage = 1; // Reset to first page on search
-                    applyFilters();
-                }, 300); // Debounce search
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(this.searchTimeout);
+                    this.searchTimeout = setTimeout(() => {
+                        searchTerm = this.value.trim();
+                        currentPage = 1; // Reset to first page on search
+                        applyFilters();
+                    }, 300); // Debounce search
+                });
+            }
+            
+            // Event listener for filter button
+            const filterBtn = document.getElementById('filterBtn');
+            if (filterBtn) {
+                filterBtn.addEventListener('click', function() {
+                    document.getElementById('filterDropdown').classList.toggle('show');
+                });
+            }
+            
+            // Close filter dropdown when clicking outside
+            document.addEventListener('click', function() {
+                document.getElementById('filterDropdown').classList.remove('show');
+            });
+            
+            // Prevent dropdown from closing when clicking inside
+            document.getElementById('filterDropdown').addEventListener('click', function(e) {
+                e.stopPropagation();
             });
             
             // Event listener untuk tombol Buat Invoice
@@ -1154,23 +1270,22 @@
                         row.setAttribute('data-status', invoice.status || 'pending');
                         
                         // Format date
-                        const date = new Date(invoice.tanggal);
-                        const formattedDate = date.toLocaleDateString('id-ID');
+                        let formattedDate = '';
+                        if (invoice.tanggal) {
+                            const date = new Date(invoice.tanggal);
+                            formattedDate = date.toLocaleDateString('id-ID', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            });
+                        }
                         
                         // Format currency
-                        const formattedHarga = new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0
-                        }).format(invoice.harga);
+                        const formattedHarga = new Intl.NumberFormat('id-ID').format(invoice.harga);
                         
-                        // Format total
+                        // Calculate total
                         const total = invoice.harga * invoice.qty + ((invoice.harga * invoice.qty) * invoice.pajak / 100);
-                        const formattedTotal = new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0
-                        }).format(total);
+                        const formattedTotal = new Intl.NumberFormat('id-ID').format(total);
                         
                         // Determine payment status
                         let paymentStatus = invoice.status || 'pending';
@@ -1182,21 +1297,21 @@
                         }
                         
                         row.innerHTML = `
-                            <td class="p-4">${index + 1}.</td>
-                            <td class="p-4">${invoice.nama_perusahaan}</td>
-                            <td class="p-4">${formattedDate}</td>
-                            <td class="p-4">${invoice.nomor_order}</td>
-                            <td class="p-4">${invoice.nama_klien}</td>
-                            <td class="p-4">${invoice.alamat}</td>
-                            <td class="p-4">${invoice.deskripsi}</td>
-                            <td class="p-4">${formattedHarga}</td>
-                            <td class="p-4">${invoice.qty}</td>
-                            <td class="p-4">${formattedTotal}</td>
-                            <td class="p-4">${invoice.pajak}</td>
-                            <td class="p-4">${invoice.metode_pembayaran}</td>
-                            <td class="p-4">
-                                <div class="flex items-center justify-center space-x-2">
-                                    <button class="edit-invoice-btn tooltip p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                            <td style="min-width: 60px;">${index + 1}.</td>
+                            <td style="min-width: 120px;">${formattedDate}</td>
+                            <td style="min-width: 180px;">${invoice.nama_perusahaan}</td>
+                            <td style="min-width: 150px;">${invoice.nomor_order}</td>
+                            <td style="min-width: 150px;">${invoice.nama_klien}</td>
+                            <td style="min-width: 200px;">${invoice.alamat}</td>
+                            <td style="min-width: 200px;">${invoice.deskripsi}</td>
+                            <td style="min-width: 120px;">Rp ${formattedHarga}</td>
+                            <td style="min-width: 120px;">${invoice.qty}</td>
+                            <td style="min-width: 120px;">Rp ${formattedTotal}</td>
+                            <td style="min-width: 120px;">${invoice.pajak}</td>
+                            <td style="min-width: 150px;">${invoice.metode_pembayaran}</td>
+                            <td style="min-width: 100px; text-align: center;">
+                                <div class="flex justify-center gap-2">
+                                    <button class="edit-invoice-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
                                         data-id="${invoice.id}"
                                         data-nama-perusahaan="${invoice.nama_perusahaan}"
                                         data-tanggal="${invoice.tanggal}"
@@ -1207,9 +1322,12 @@
                                         data-harga="${invoice.harga}"
                                         data-qty="${invoice.qty}"
                                         data-pajak="${invoice.pajak}"
-                                        data-metode-pembayaran="${invoice.metode_pembayaran}"
-                                        data-tooltip="Edit">
-                                        <span class="material-icons text-blue-600 dark:text-blue-400">edit</span>
+                                        data-metode-pembayaran="${invoice.metode_pembayaran}">
+                                        <span class="material-icons-outlined">edit</span>
+                                    </button>
+                                    <button class="print-invoice-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
+                                        data-id="${invoice.id}">
+                                        <span class="material-icons-outlined">print</span>
                                     </button>
                                     <button class="delete-invoice-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
                                         data-id="${invoice.id}"
@@ -1255,6 +1373,10 @@
                                         data-metode-pembayaran="${invoice.metode_pembayaran}">
                                         <span class="material-icons-outlined">edit</span>
                                     </button>
+                                    <button class="print-invoice-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
+                                        data-id="${invoice.id}">
+                                        <span class="material-icons-outlined">print</span>
+                                    </button>
                                     <button class="delete-invoice-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
                                         data-id="${invoice.id}"
                                         data-nama-perusahaan="${invoice.nama_perusahaan}"
@@ -1278,7 +1400,7 @@
                                 </div>
                                 <div>
                                     <p class="text-text-muted-light">Total</p>
-                                    <p class="font-medium">${formattedTotal}</p>
+                                    <p class="font-medium">Rp ${formattedTotal}</p>
                                 </div>
                                 <div>
                                     <p class="text-text-muted-light">Status</p>
@@ -1321,8 +1443,16 @@
                             const pajak = this.getAttribute('data-pajak');
                             
                             document.getElementById('editInvoiceId').value = id;
+                            
+                            // Format date for input field (YYYY-MM-DD)
+                            let tanggalValue = tanggal;
+                            if (tanggalValue) {
+                                const date = new Date(tanggalValue);
+                                tanggalValue = date.toISOString().split('T')[0];
+                            }
+                            document.getElementById('editTanggal').value = tanggalValue;
+                            
                             document.getElementById('editNamaPerusahaan').value = namaPerusahaan;
-                            document.getElementById('editTanggal').value = tanggal;
                             document.getElementById('editNomorOrder').value = nomorOrder;
                             document.getElementById('editNamaKlien').value = namaKlien;
                             document.getElementById('editAlamat').value = alamat;
@@ -1560,12 +1690,12 @@
                     document.getElementById('printInvoiceModal').classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
                 } else {
-                    showToast('Gagal memuat data invoice');
+                    showMinimalPopup('Error', 'Gagal memuat data invoice', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error fetching invoice:', error);
-                showToast('Gagal memuat data invoice: ' + error.message);
+                showMinimalPopup('Error', 'Gagal memuat data invoice: ' + error.message, 'error');
             });
         }
         
@@ -1585,27 +1715,16 @@
             submitBtn.disabled = true;
             
             // Get form data
-            const formData = {
-                nomor_order: document.getElementById('nomorOrder').value,
-                nama_perusahaan: document.getElementById('namaPerusahaan').value,
-                nama_klien: document.getElementById('namaKlien').value,
-                alamat: document.getElementById('alamat').value,
-                deskripsi: document.getElementById('deskripsi').value,
-                harga: document.getElementById('harga').value,
-                qty: document.getElementById('qty').value,
-                pajak: document.getElementById('pajak').value,
-                tanggal: document.getElementById('tanggal').value
-            };
+            const formData = new FormData(form);
             
             // Send data to API
             fetch('/api/invoices', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: formData
             })
             .then(response => {
                 if (!response.ok) {
@@ -1651,27 +1770,16 @@
             
             // Get form data
             const id = document.getElementById('editInvoiceId').value;
-            const formData = {
-                nomor_order: document.getElementById('editNomorOrder').value,
-                nama_perusahaan: document.getElementById('editNamaPerusahaan').value,
-                nama_klien: document.getElementById('editNamaKlien').value,
-                alamat: document.getElementById('editAlamat').value,
-                deskripsi: document.getElementById('editDeskripsi').value,
-                harga: document.getElementById('editHarga').value,
-                qty: document.getElementById('editQty').value,
-                pajak: document.getElementById('editPajak').value,
-                tanggal: document.getElementById('editTanggal').value
-            };
+            const formData = new FormData(form);
             
             // Send data to API
             fetch(`/api/invoices/${id}`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: formData
             })
             .then(response => {
                 if (!response.ok) {
@@ -1755,6 +1863,13 @@
             document.getElementById('buatInvoiceModal').classList.add('hidden');
             document.body.style.overflow = 'auto';
             document.getElementById('buatInvoiceForm').reset();
+            
+            // Set today's date again
+            const today = new Date().toISOString().split('T')[0];
+            const tanggalInput = document.getElementById('tanggal');
+            if (tanggalInput) {
+                tanggalInput.value = today;
+            }
         }
         
         // Modal functions for Edit Invoice
@@ -1806,27 +1921,9 @@
         
         // Initialize filter
         function initializeFilter() {
-            const filterBtn = document.getElementById('filterBtn');
-            const filterDropdown = document.getElementById('filterDropdown');
+            const filterAll = document.getElementById('filterAll');
             const applyFilterBtn = document.getElementById('applyFilter');
             const resetFilterBtn = document.getElementById('resetFilter');
-            const filterAll = document.getElementById('filterAll');
-            
-            // Toggle filter dropdown
-            filterBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                filterDropdown.classList.toggle('show');
-            });
-            
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function() {
-                filterDropdown.classList.remove('show');
-            });
-            
-            // Prevent dropdown from closing when clicking inside
-            filterDropdown.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
             
             // Handle "All" checkbox
             filterAll.addEventListener('change', function() {
@@ -1866,7 +1963,7 @@
                 
                 currentPage = 1; // Reset to first page when filter is applied
                 applyFilters();
-                filterDropdown.classList.remove('show');
+                document.getElementById('filterDropdown').classList.remove('show');
                 const visibleCount = getFilteredRows().length;
                 showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} invoice`, 'success');
             });
@@ -1880,7 +1977,7 @@
                 activeFilters = ['all'];
                 currentPage = 1; // Reset to first page when filter is reset
                 applyFilters();
-                filterDropdown.classList.remove('show');
+                document.getElementById('filterDropdown').classList.remove('show');
                 const visibleCount = getFilteredRows().length;
                 showMinimalPopup('Filter Direset', 'Menampilkan semua invoice', 'success');
             });
