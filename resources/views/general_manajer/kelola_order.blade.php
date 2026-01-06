@@ -490,10 +490,10 @@
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                         <div class="relative w-full md:w-1/3">
                             <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                            <input class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Search..." type="text" />
+                            <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Search..." type="text" />
                         </div>
                         <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                            <button class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
+                            <button id="filterBtn" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
                                 Filter
                             </button>
                             <button id="tambahOrderanBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
@@ -512,7 +512,7 @@
                                 Daftar Orderan
                             </h3>
                             <div class="flex items-center gap-2">
-                                <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="totalCount">2</span> orderan</span>
+                                <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light">{{ $orderan->total() }}</span> orderan</span>
                             </div>
                         </div>
                         <div class="panel-body">
@@ -533,7 +533,51 @@
                                             </tr>
                                         </thead>
                                         <tbody id="desktopTableBody">
-                                            <!-- Data rows will be populated by JavaScript -->
+                                            @foreach($orderan as $index => $item)
+                                                <tr>
+                                                    <td style="min-width: 60px;">{{ ($orderan->currentPage() - 1) * $orderan->perPage() + $index + 1 }}</td>
+                                                    <td style="min-width: 200px;">{{ $item->nama }}</td>
+                                                    <td style="min-width: 300px;" class="truncate-text" title="{{ $item->deskripsi }}">
+                                                        {{ Str::limit($item->deskripsi, 50) }}
+                                                    </td>
+                                                    <td style="min-width: 120px;">{{ $item->harga }}</td>
+                                                    <td style="min-width: 120px;">{{ $item->deadline->format('Y-m-d') }}</td>
+                                                    <td style="min-width: 150px;">
+                                                        <div class="progress-bar">
+                                                            <div class="progress-fill {{ $item->progres < 50 ? 'bg-red-500' : ($item->progres < 80 ? 'bg-yellow-500' : 'bg-green-500') }}" style="width: {{ $item->progres }}%"></div>
+                                                        </div>
+                                                        <span class="text-xs text-gray-600 dark:text-gray-400 mt-1 block">{{ $item->progres }}%</span>
+                                                    </td>
+                                                    <td style="min-width: 120px;">
+                                                        <span class="status-badge 
+                                                            @if($item->status == 'In Progress') status-inprogress 
+                                                            @elseif($item->status == 'Active') status-active 
+                                                            @elseif($item->status == 'Completed') status-done 
+                                                            @else status-todo @endif">
+                                                            {{ $item->status }}
+                                                        </span>
+                                                    </td>
+                                                    <td style="min-width: 180px; text-align: center;">
+                                                        <div class="flex justify-center gap-2">
+                                                            <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                                onclick="openDetailModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
+                                                                title="Lihat Detail">
+                                                                <span class="material-icons-outlined">visibility</span>
+                                                            </button>
+                                                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                                onclick="openEditModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
+                                                                title="Edit">
+                                                                <span class="material-icons-outlined">edit</span>
+                                                            </button>
+                                                            <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
+                                                                onclick="openDeleteModal({{ $item->id }}, '{{ $item->nama }}')"
+                                                                title="Hapus">
+                                                                <span class="material-icons-outlined">delete</span>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
                                         </tbody>
                                     </table>
                                 </div>
@@ -541,31 +585,104 @@
                             
                             <!-- Mobile Card View -->
                             <div class="mobile-cards space-y-4" id="mobile-cards">
-                                <!-- Mobile cards will be populated by JavaScript -->
+                                @foreach($orderan as $item)
+                                    <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm">
+                                        <div class="flex justify-between items-start mb-3">
+                                            <div>
+                                                <h4 class="font-semibold text-base">{{ $item->nama }}</h4>
+                                                <p class="text-sm text-text-muted-light">Deadline: {{ $item->deadline->format('Y-m-d') }}</p>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                    onclick="openDetailModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
+                                                    title="Lihat Detail">
+                                                    <span class="material-icons-outlined">visibility</span>
+                                                </button>
+                                                <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                    onclick="openEditModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
+                                                    title="Edit">
+                                                    <span class="material-icons-outlined">edit</span>
+                                                </button>
+                                                <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
+                                                    onclick="openDeleteModal({{ $item->id }}, '{{ $item->nama }}')"
+                                                    title="Hapus">
+                                                    <span class="material-icons-outlined">delete</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2 text-sm">
+                                            <div>
+                                                <p class="text-text-muted-light">Harga</p>
+                                                <p class="font-medium">{{ $item->harga }}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-text-muted-light">Status</p>
+                                                <p>
+                                                    <span class="status-badge 
+                                                        @if($item->status == 'In Progress') status-inprogress 
+                                                        @elseif($item->status == 'Active') status-active 
+                                                        @elseif($item->status == 'Completed') status-done 
+                                                        @else status-todo @endif">
+                                                        {{ $item->status }}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div class="col-span-2">
+                                                <p class="text-text-muted-light">Progres</p>
+                                                <div class="progress-bar mt-1">
+                                                    <div class="progress-fill {{ $item->progres < 50 ? 'bg-red-500' : ($item->progres < 80 ? 'bg-yellow-500' : 'bg-green-500') }}" style="width: {{ $item->progres }}%"></div>
+                                                </div>
+                                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ $item->progres }}%</p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-text-muted-light">Deskripsi</p>
+                                            <p class="font-medium">{{ Str::limit($item->deskripsi, 80) }}</p>
+                                            @if(strlen($item->deskripsi) > 80)
+                                                <button class="text-primary text-sm mt-1" 
+                                                    onclick="openDetailModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')">
+                                                    Lihat selengkapnya
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                             
-                            <!-- Desktop Pagination - SELALU DITAMPILKAN -->
-                            <div id="desktopPaginationContainer" class="desktop-pagination">
-                                <button id="desktopPrevPage" class="desktop-nav-btn">
+                            <!-- Desktop Pagination -->
+                            <div class="desktop-pagination">
+                                <button class="desktop-nav-btn" @if($orderan->currentPage() == 1) disabled @endif onclick="window.location.href='{{ $orderan->previousPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_left</span>
                                 </button>
-                                <div id="desktopPageNumbers" class="flex gap-1">
-                                    <!-- Page numbers will be generated by JavaScript -->
+                                <div class="flex gap-1">
+                                    @for($i = 1; $i <= $orderan->lastPage(); $i++)
+                                        <button class="desktop-page-btn {{ $i == $orderan->currentPage() ? 'active' : '' }}" 
+                                            onclick="window.location.href='{{ $orderan->url($i) }}'">
+                                            {{ $i }}
+                                        </button>
+                                    @endfor
                                 </div>
-                                <button id="desktopNextPage" class="desktop-nav-btn">
+                                <button class="desktop-nav-btn" @if($orderan->currentPage() == $orderan->lastPage()) disabled @endif onclick="window.location.href='{{ $orderan->nextPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_right</span>
                                 </button>
                             </div>
                             
                             <!-- Mobile Pagination -->
                             <div class="mobile-pagination md:hidden flex justify-center items-center gap-2 mt-4">
-                                <button id="prevPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <button class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                    @if($orderan->currentPage() == 1) disabled @endif onclick="window.location.href='{{ $orderan->previousPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_left</span>
                                 </button>
-                                <div id="pageNumbers" class="flex gap-1">
-                                    <!-- Page numbers will be generated by JavaScript -->
+                                <div class="flex gap-1">
+                                    @for($i = 1; $i <= $orderan->lastPage(); $i++)
+                                        <button class="page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm {{ $i == $orderan->currentPage() ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600' }}" 
+                                            onclick="window.location.href='{{ $orderan->url($i) }}'">
+                                            {{ $i }}
+                                        </button>
+                                    @endfor
                                 </div>
-                                <button id="nextPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <button class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                    @if($orderan->currentPage() == $orderan->lastPage()) disabled @endif onclick="window.location.href='{{ $orderan->nextPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_right</span>
                                 </button>
                             </div>
@@ -589,35 +706,54 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="tambahForm">
+                <form id="tambahForm" action="{{ route('general_manajer.orderan.store') }}" method="POST">
+                    @csrf
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
-                        <input type="text" id="tambahNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="text" name="nama" id="tambahNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        @error('nama')
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="tambahDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                        <textarea name="deskripsi" id="tambahDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                        @error('deskripsi')
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                        <input type="text" id="tambahHarga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="text" name="harga" id="tambahHarga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        @error('harga')
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                        <input type="date" id="tambahDeadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="date" name="deadline" id="tambahDeadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        @error('deadline')
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
-                        <input type="number" id="tambahProgres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="number" name="progres" id="tambahProgres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        @error('progres')
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select id="tambahStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <select name="status" id="tambahStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                             <option value="In Progress">In Progress</option>
                             <option value="Active">Active</option>
                             <option value="Completed">Completed</option>
                             <option value="Cancelled">Cancelled</option>
                         </select>
+                        @error('status')
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="flex justify-end gap-2">
                         <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -638,31 +774,33 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="editForm">
-                    <input type="hidden" id="editId">
+                <form id="editForm" action="{{ route('general_manajer.orderan.update', '') }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="id" id="editId">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
-                        <input type="text" id="editNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="text" name="nama" id="editNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="editDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                        <textarea name="deskripsi" id="editDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                        <input type="text" id="editHarga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="text" name="harga" id="editHarga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                        <input type="date" id="editDeadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="date" name="deadline" id="editDeadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
-                        <input type="number" id="editProgres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="number" name="progres" id="editProgres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select id="editStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <select name="status" id="editStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                             <option value="In Progress">In Progress</option>
                             <option value="Active">Active</option>
                             <option value="Completed">Completed</option>
@@ -743,11 +881,15 @@
                     <p class="text-gray-700">Apakah Anda yakin ingin menghapus orderan <span id="deleteNama" class="font-semibold"></span>?</p>
                     <p class="text-sm text-gray-500 mt-2">Tindakan ini tidak dapat dibatalkan.</p>
                 </div>
-                <input type="hidden" id="deleteId">
-                <div class="flex justify-end gap-2">
-                    <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                    <button id="confirmDelete" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Hapus</button>
-                </div>
+                <form id="deleteForm" action="{{ route('general_manajer.orderan.destroy', '') }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <input type="hidden" name="id" id="deleteId">
+                    <div class="flex justify-end gap-2">
+                        <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Hapus</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -760,498 +902,335 @@
         </button>
     </div>
 
-    <script>
-        // Sample data for orderan
-        const orderanData = [
-            { 
-                id: 1, 
-                nama: "Website Company Profile", 
-                deskripsi: "Redesign corporate branding dengan tampilan modern dan responsif. Meliputi pembuatan ulang UI/UX, optimasi performa, dan integrasi dengan sistem manajemen konten yang sudah ada. Proyek ini bertujuan untuk meningkatkan citra perusahaan di dunia digital dan meningkatkan konversi pengunjung menjadi pelanggan potensial.", 
-                harga: "Rp 5.000.000",
-                deadline: "2025-12-25", 
-                progres: 70,
-                status: "In Progress" 
-            },
-            { 
-                id: 2, 
-                nama: "Aplikasi Kasir Mobile", 
-                deskripsi: "Pengembangan sistem POS android dengan fitur lengkap untuk kebutuhan retail. Aplikasi ini akan memiliki kemampuan untuk mengelola inventaris, melacak penjualan, menghasilkan laporan, dan sinkronisasi data dengan sistem backend. Dengan antarmuka yang intuitif, aplikasi ini dirancang untuk memudahkan proses transaksi dan manajemen toko.", 
-                harga: "Rp 12.500.000",
-                deadline: "2026-01-10", 
-                progres: 45,
-                status: "Active" 
-            }
-        ];
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div id="successToast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 flex items-center">
+            <span class="mr-2">{{ session('success') }}</span>
+            <button onclick="this.parentElement.style.display='none'" class="ml-2 text-white hover:text-gray-200">
+                <span class="material-icons-outlined">close</span>
+            </button>
+        </div>
+    @endif
 
-        // Pagination variables
-        const itemsPerPage = 3;
-        let currentPage = 1;
-        const totalPages = Math.ceil(orderanData.length / itemsPerPage);
+    @if(session('error'))
+        <div id="errorToast" class="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 flex items-center">
+            <span class="mr-2">{{ session('error') }}</span>
+            <button onclick="this.parentElement.style.display='none'" class="ml-2 text-white hover:text-gray-200">
+                <span class="material-icons-outlined">close</span>
+            </button>
+        </div>
+    @endif
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize pagination - SELALU DIJALANKAN
-            initializePagination();
-            
-            // Modal elements
-            const tambahModal = document.getElementById('tambahModal');
-            const editModal = document.getElementById('editModal');
-            const detailModal = document.getElementById('detailModal');
-            const deleteModal = document.getElementById('deleteModal');
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            // Buttons
-            const tambahOrderanBtn = document.getElementById('tambahOrderanBtn');
-            const closeModals = document.querySelectorAll('.close-modal');
-            const confirmDeleteBtn = document.getElementById('confirmDelete');
-            const closeToastBtn = document.getElementById('closeToast');
-            
-            // Forms
-            const tambahForm = document.getElementById('tambahForm');
-            const editForm = document.getElementById('editForm');
-            
-            // Show tambah modal
-            tambahOrderanBtn.addEventListener('click', function() {
-                tambahModal.classList.remove('hidden');
-                tambahForm.reset();
-            });
-            
-            // Close modals
-            closeModals.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    tambahModal.classList.add('hidden');
-                    editModal.classList.add('hidden');
-                    detailModal.classList.add('hidden');
-                    deleteModal.classList.add('hidden');
-                });
-            });
-            
-            // Close modal when clicking outside
-            window.addEventListener('click', function(event) {
-                if (event.target === tambahModal) {
-                    tambahModal.classList.add('hidden');
-                }
-                if (event.target === editModal) {
-                    editModal.classList.add('hidden');
-                }
-                if (event.target === detailModal) {
-                    detailModal.classList.add('hidden');
-                }
-                if (event.target === deleteModal) {
-                    deleteModal.classList.add('hidden');
-                }
-            });
-            
-            // Handle tambah form submission
-            tambahForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                showToast('Orderan berhasil ditambahkan!');
+   <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal elements
+        const tambahModal = document.getElementById('tambahModal');
+        const editModal = document.getElementById('editModal');
+        const detailModal = document.getElementById('detailModal');
+        const deleteModal = document.getElementById('deleteModal');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        
+        // Buttons
+        const tambahOrderanBtn = document.getElementById('tambahOrderanBtn');
+        const closeModals = document.querySelectorAll('.close-modal');
+        const closeToastBtn = document.getElementById('closeToast');
+        
+        // Forms
+        const tambahForm = document.getElementById('tambahForm');
+        const editForm = document.getElementById('editForm');
+        const deleteForm = document.getElementById('deleteForm');
+        
+        // Show tambah modal
+        tambahOrderanBtn.addEventListener('click', function() {
+            tambahModal.classList.remove('hidden');
+            tambahForm.reset();
+        });
+        
+        // Close modals
+        closeModals.forEach(btn => {
+            btn.addEventListener('click', function() {
                 tambahModal.classList.add('hidden');
-                tambahForm.reset();
-                
-                // Refresh data
-                renderDesktopTable(currentPage);
-                renderMobileCards(currentPage);
-            });
-            
-            // Handle edit form submission
-            editForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                showToast('Orderan berhasil diperbarui!');
                 editModal.classList.add('hidden');
-                
-                // Refresh data
-                renderDesktopTable(currentPage);
-                renderMobileCards(currentPage);
-            });
-            
-            // Handle delete confirmation
-            confirmDeleteBtn.addEventListener('click', function() {
-                const id = document.getElementById('deleteId').value;
-                showToast('Orderan berhasil dihapus!');
+                detailModal.classList.add('hidden');
                 deleteModal.classList.add('hidden');
-                
-                // Refresh data
-                renderDesktopTable(currentPage);
-                renderMobileCards(currentPage);
             });
-            
-            // Close toast notification
-            closeToastBtn.addEventListener('click', function() {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            });
-            
-            // Function to show toast notification
-            function showToast(message) {
-                toastMessage.textContent = message;
-                toast.classList.remove('translate-y-20', 'opacity-0');
-                
-                // Auto hide after 3 seconds
-                setTimeout(() => {
-                    toast.classList.add('translate-y-20', 'opacity-0');
-                }, 3000);
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === tambahModal) {
+                tambahModal.classList.add('hidden');
+            }
+            if (event.target === editModal) {
+                editModal.classList.add('hidden');
+            }
+            if (event.target === detailModal) {
+                detailModal.classList.add('hidden');
+            }
+            if (event.target === deleteModal) {
+                deleteModal.classList.add('hidden');
             }
         });
-
-        // Initialize pagination - SELALU DIJALANKAN
-        function initializePagination() {
-            // Update total count
-            document.getElementById('totalCount').textContent = orderanData.length;
+        
+        // Handle tambah form submission with AJAX
+        tambahForm.addEventListener('submit', function(e) {
+            e.preventDefault();
             
-            // SELALU tampilkan pagination
-            initDesktopPagination();
-            initMobilePagination();
+            const formData = new FormData(tambahForm);
             
-            // Render first page
-            renderDesktopTable(1);
-            renderMobileCards(1);
-        }
-
-        // Desktop pagination functionality
-        function initDesktopPagination() {
-            const pageNumbersContainer = document.getElementById('desktopPageNumbers');
-            const prevButton = document.getElementById('desktopPrevPage');
-            const nextButton = document.getElementById('desktopNextPage');
-            
-            // Clear existing page numbers
-            pageNumbersContainer.innerHTML = '';
-            
-            // Generate page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                const pageNumber = document.createElement('button');
-                pageNumber.textContent = i;
-                pageNumber.className = `desktop-page-btn ${
-                    i === currentPage ? 'active' : ''
-                }`;
-                pageNumber.addEventListener('click', () => goToDesktopPage(i));
-                pageNumbersContainer.appendChild(pageNumber);
-            }
-            
-            // Event listeners for navigation buttons
-            prevButton.addEventListener('click', () => {
-                if (currentPage > 1) goToDesktopPage(currentPage - 1);
-            });
-            
-            nextButton.addEventListener('click', () => {
-                if (currentPage < totalPages) goToDesktopPage(currentPage + 1);
-            });
-        }
-
-        // Mobile pagination functionality
-        function initMobilePagination() {
-            const pageNumbersContainer = document.getElementById('pageNumbers');
-            const prevButton = document.getElementById('prevPage');
-            const nextButton = document.getElementById('nextPage');
-            
-            // Clear existing page numbers
-            pageNumbersContainer.innerHTML = '';
-            
-            // Generate page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                const pageNumber = document.createElement('button');
-                pageNumber.textContent = i;
-                pageNumber.className = `page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                    i === currentPage ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
-                }`;
-                pageNumber.addEventListener('click', () => goToMobilePage(i));
-                pageNumbersContainer.appendChild(pageNumber);
-            }
-            
-            // Event listeners for navigation buttons
-            prevButton.addEventListener('click', () => {
-                if (currentPage > 1) goToMobilePage(currentPage - 1);
-            });
-            
-            nextButton.addEventListener('click', () => {
-                if (currentPage < totalPages) goToMobilePage(currentPage + 1);
-            });
-        }
-
-        // Go to specific desktop page
-        function goToDesktopPage(page) {
-            currentPage = page;
-            renderDesktopTable(page);
-            updateDesktopPaginationButtons();
-            
-            // Reset scroll position when changing pages
-            const scrollableTable = document.getElementById('scrollableTable');
-            if (scrollableTable) {
-                scrollableTable.scrollLeft = 0;
-            }
-        }
-
-        // Go to specific mobile page
-        function goToMobilePage(page) {
-            currentPage = page;
-            renderMobileCards(page);
-            updateMobilePaginationButtons();
-        }
-
-        // Render desktop table for specific page
-        function renderDesktopTable(page) {
-            const tbody = document.getElementById('desktopTableBody');
-            tbody.innerHTML = '';
-            
-            const startIndex = (page - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, orderanData.length);
-            
-            for (let i = startIndex; i < endIndex; i++) {
-                const orderan = orderanData[i];
-                const row = document.createElement('tr');
-                
-                // Determine status class
-                let statusClass = '';
-                if (orderan.status === 'In Progress') {
-                    statusClass = 'status-inprogress';
-                } else if (orderan.status === 'Active') {
-                    statusClass = 'status-active';
-                } else if (orderan.status === 'Completed') {
-                    statusClass = 'status-done';
-                } else if (orderan.status === 'Cancelled') {
-                    statusClass = 'status-todo';
+            fetch(tambahForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
-                
-                // Determine progress bar color
-                let progressColor = '';
-                if (orderan.progres < 50) {
-                    progressColor = 'bg-red-500';
-                } else if (orderan.progres < 80) {
-                    progressColor = 'bg-yellow-500';
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        const error = new Error('Server responded with an error status');
+                        error.response = response;
+                        error.data = errorData;
+                        throw error;
+                    }).catch(() => {
+                        const error = new Error('Server responded with an error status');
+                        error.response = response;
+                        throw error;
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    tambahModal.classList.add('hidden');
+                    tambahForm.reset();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
                 } else {
-                    progressColor = 'bg-green-500';
+                    showToast(data.message || 'Terjadi kesalahan yang tidak diketahui.', 'error');
                 }
-                
-                // Truncate description for table view
-                const truncatedDesc = orderan.deskripsi.length > 50 
-                    ? orderan.deskripsi.substring(0, 50) + '...' 
-                    : orderan.deskripsi;
-                
-                row.innerHTML = `
-                    <td style="min-width: 60px;">${i + 1}</td>
-                    <td style="min-width: 200px;">${orderan.nama}</td>
-                    <td style="min-width: 300px;" class="truncate-text" title="${orderan.deskripsi}">${truncatedDesc}</td>
-                    <td style="min-width: 120px;">${orderan.harga}</td>
-                    <td style="min-width: 120px;">${orderan.deadline}</td>
-                    <td style="min-width: 150px;">
-                        <div class="progress-bar">
-                            <div class="progress-fill ${progressColor}" style="width: ${orderan.progres}%"></div>
-                        </div>
-                        <span class="text-xs text-gray-600 dark:text-gray-400 mt-1 block">${orderan.progres}%</span>
-                    </td>
-                    <td style="min-width: 120px;"><span class="status-badge ${statusClass}">${orderan.status}</span></td>
-                    <td style="min-width: 180px; text-align: center;">
-                        <div class="flex justify-center gap-2">
-                            <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openDetailModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')"
-                                title="Lihat Detail">
-                                <span class="material-icons-outlined">visibility</span>
-                            </button>
-                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openEditModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')"
-                                title="Edit">
-                                <span class="material-icons-outlined">edit</span>
-                            </button>
-                            <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                onclick="openDeleteModal(${orderan.id}, '${orderan.nama}')"
-                                title="Hapus">
-                                <span class="material-icons-outlined">delete</span>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            }
-        }
-
-        // Render mobile cards for specific page
-        function renderMobileCards(page) {
-            const container = document.getElementById('mobile-cards');
-            container.innerHTML = '';
-            
-            const startIndex = (page - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, orderanData.length);
-            
-            for (let i = startIndex; i < endIndex; i++) {
-                const orderan = orderanData[i];
-                
-                // Determine status class
-                let statusClass = '';
-                if (orderan.status === 'In Progress') {
-                    statusClass = 'status-inprogress';
-                } else if (orderan.status === 'Active') {
-                    statusClass = 'status-active';
-                } else if (orderan.status === 'Completed') {
-                    statusClass = 'status-done';
-                } else if (orderan.status === 'Cancelled') {
-                    statusClass = 'status-todo';
-                }
-                
-                // Determine progress bar color
-                let progressColor = '';
-                if (orderan.progres < 50) {
-                    progressColor = 'bg-red-500';
-                } else if (orderan.progres < 80) {
-                    progressColor = 'bg-yellow-500';
-                } else {
-                    progressColor = 'bg-green-500';
-                }
-                
-                // Truncate description for mobile card view
-                const truncatedDesc = orderan.deskripsi.length > 80 
-                    ? orderan.deskripsi.substring(0, 80) + '...' 
-                    : orderan.deskripsi;
-                
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-lg border border-border-light p-4 shadow-sm';
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <h4 class="font-semibold text-base">${orderan.nama}</h4>
-                            <p class="text-sm text-text-muted-light">Deadline: ${orderan.deadline}</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openDetailModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')"
-                                title="Lihat Detail">
-                            </button>
-                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openEditModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')"
-                                title="Edit">
-                                <span class="material-icons-outlined">edit</span>
-                            </button>
-                            <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                onclick="openDeleteModal(${orderan.id}, '${orderan.nama}')"
-                                title="Hapus">
-                                <span class="material-icons-outlined">delete</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                            <p class="text-text-muted-light">Harga</p>
-                            <p class="font-medium">${orderan.harga}</p>
-                        </div>
-                        <div>
-                            <p class="text-text-muted-light">Status</p>
-                            <p><span class="status-badge ${statusClass}">${orderan.status}</span></p>
-                        </div>
-                        <div class="col-span-2">
-                            <p class="text-text-muted-light">Progres</p>
-                            <div class="progress-bar mt-1">
-                                <div class="progress-fill ${progressColor}" style="width: ${orderan.progres}%"></div>
-                            </div>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">${orderan.progres}%</p>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <p class="text-text-muted-light">Deskripsi</p>
-                        <p class="font-medium">${truncatedDesc}</p>
-                        ${orderan.deskripsi.length > 80 ? `
-                        <button class="text-primary text-sm mt-1" 
-                            onclick="openDetailModal(${orderan.id}, '${orderan.nama}', '${orderan.deskripsi}', '${orderan.harga}', '${orderan.deadline}', ${orderan.progres}, '${orderan.status}')">
-                            Lihat selengkapnya
-                        </button>` : ''}
-                    </div>
-                `;
-                container.appendChild(card);
-            }
-        }
-
-        // Update desktop pagination buttons
-        function updateDesktopPaginationButtons() {
-            const prevButton = document.getElementById('desktopPrevPage');
-            const nextButton = document.getElementById('desktopNextPage');
-            const pageButtons = document.querySelectorAll('#desktopPageNumbers button');
-            
-            prevButton.disabled = currentPage === 1;
-            nextButton.disabled = currentPage === totalPages;
-            
-            pageButtons.forEach((btn, index) => {
-                if (index + 1 === currentPage) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                handleFetchError(error);
             });
-        }
-
-        // Update mobile pagination buttons
-        function updateMobilePaginationButtons() {
-            const prevButton = document.getElementById('prevPage');
-            const nextButton = document.getElementById('nextPage');
-            const pageButtons = document.querySelectorAll('#pageNumbers button');
+        });
+        
+        // Handle edit form submission with AJAX
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
             
-            prevButton.disabled = currentPage === 1;
-            nextButton.disabled = currentPage === totalPages;
+            const formData = new FormData(editForm);
+            const id = document.getElementById('editId').value;
             
-            pageButtons.forEach((btn, index) => {
-                if (index + 1 === currentPage) {
-                    btn.className = 'page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm bg-primary text-white';
-                } else {
-                    btn.className = 'page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm bg-gray-200 text-gray-600';
+            fetch(`/general_manajer/orderan/${id}`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        const error = new Error('Server responded with an error status');
+                        error.response = response;
+                        error.data = errorData;
+                        throw error;
+                    }).catch(() => {
+                        const error = new Error('Server responded with an error status');
+                        error.response = response;
+                        throw error;
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    editModal.classList.add('hidden');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showToast(data.message || 'Terjadi kesalahan yang tidak diketahui.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                handleFetchError(error);
             });
-        }
-
-        // Open detail modal with data
-        function openDetailModal(id, nama, deskripsi, harga, deadline, progres, status) {
-            document.getElementById('detailId').textContent = '#' + id;
-            document.getElementById('detailNama').textContent = nama;
-            document.getElementById('detailDeskripsi').textContent = deskripsi;
-            document.getElementById('detailHarga').textContent = harga;
-            document.getElementById('detailDeadline').textContent = deadline;
-            document.getElementById('detailProgres').textContent = progres + '%';
+        });
+        
+        // Handle delete form submission with AJAX
+        deleteForm.addEventListener('submit', function(e) {
+            e.preventDefault();
             
-            // Set status badge
-            const statusElement = document.getElementById('detailStatus');
-            let statusClass = '';
-            if (status === 'In Progress') {
-                statusClass = 'status-inprogress';
-            } else if (status === 'Active') {
-                statusClass = 'status-active';
-            } else if (status === 'Completed') {
-                statusClass = 'status-done';
-            } else if (status === 'Cancelled') {
-                statusClass = 'status-todo';
-            }
-            statusElement.innerHTML = `<span class="status-badge ${statusClass}">${status}</span>`;
+            const formData = new FormData(deleteForm);
+            const id = document.getElementById('deleteId').value;
             
-            // Set progress bar
-            const progressBar = document.getElementById('detailProgressBar');
-            let progressColor = '';
-            if (progres < 50) {
-                progressColor = 'bg-red-500';
-            } else if (progres < 80) {
-                progressColor = 'bg-yellow-500';
+            fetch(`/general_manajer/orderan/${id}`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        const error = new Error('Server responded with an error status');
+                        error.response = response;
+                        error.data = errorData;
+                        throw error;
+                    }).catch(() => {
+                        const error = new Error('Server responded with an error status');
+                        error.response = response;
+                        throw error;
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    deleteModal.classList.add('hidden');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showToast(data.message || 'Terjadi kesalahan yang tidak diketahui.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                handleFetchError(error);
+            });
+        });
+        
+        // Close toast notification
+        closeToastBtn.addEventListener('click', function() {
+            toast.classList.add('translate-y-20', 'opacity-0');
+        });
+        
+        // Function to show toast notification
+        function showToast(message, type = 'success') {
+            toastMessage.textContent = message;
+            
+            // Change background color based on type
+            toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 flex items-center`;
+            if (type === 'error') {
+                toast.classList.add('bg-red-500', 'text-white');
             } else {
-                progressColor = 'bg-green-500';
+                toast.classList.add('bg-green-500', 'text-white');
             }
-            progressBar.className = `progress-fill ${progressColor}`;
-            progressBar.style.width = progres + '%';
             
-            document.getElementById('detailModal').classList.remove('hidden');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            // Auto hide after 5 seconds for error messages
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, type === 'error' ? 5000 : 3000);
         }
+        
+        // Function to handle fetch errors
+        function handleFetchError(error) {
+            if (error.response) {
+                if (error.response.status === 422) {
+                    let errorMessages = '';
+                    if (error.data && error.data.errors) {
+                        const errors = error.data.errors;
+                        for (const field in errors) {
+                            errorMessages += errors[field].join(', ') + ' ';
+                        }
+                        showToast('Validasi gagal: ' + errorMessages.trim(), 'error');
+                    } else {
+                        showToast('Data yang dimasukkan tidak valid.', 'error');
+                    }
+                } else if (error.response.status === 401) {
+                    showToast('Anda belum login. Sesi mungkin telah habis.', 'error');
+                } else if (error.response.status === 403) {
+                    showToast('Anda tidak memiliki izin untuk melakukan aksi ini.', 'error');
+                } else if (error.response.status === 404) {
+                    showToast('Data tidak ditemukan atau endpoint tidak valid.', 'error');
+                } else if (error.response.status >= 500) {
+                    showToast('Terjadi kesalahan pada server. Periksa konsol browser untuk detail.', 'error');
+                } else {
+                    showToast(`Terjadi kesalahan (Status: ${error.response.status}).`, 'error');
+                }
+            } else if (error.request) {
+                showToast('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.', 'error');
+            } else {
+                showToast('Terjadi kesalahan. Silakan coba lagi.', 'error');
+            }
+        }
+    });
 
-        // Open edit modal with data
-        function openEditModal(id, nama, deskripsi, harga, deadline, progres, status) {
-            document.getElementById('editId').value = id;
-            document.getElementById('editNama').value = nama;
-            document.getElementById('editDeskripsi').value = deskripsi;
-            document.getElementById('editHarga').value = harga;
-            document.getElementById('editDeadline').value = deadline;
-            document.getElementById('editProgres').value = progres;
-            document.getElementById('editStatus').value = status;
-            
-            document.getElementById('editModal').classList.remove('hidden');
+    // Open detail modal with data
+    function openDetailModal(id, nama, deskripsi, harga, deadline, progres, status) {
+        document.getElementById('detailId').textContent = '#' + id;
+        document.getElementById('detailNama').textContent = nama;
+        document.getElementById('detailDeskripsi').textContent = deskripsi;
+        document.getElementById('detailHarga').textContent = harga;
+        document.getElementById('detailDeadline').textContent = deadline;
+        document.getElementById('detailProgres').textContent = progres + '%';
+        
+        // Set status badge
+        const statusElement = document.getElementById('detailStatus');
+        let statusClass = '';
+        if (status === 'In Progress') {
+            statusClass = 'status-inprogress';
+        } else if (status === 'Active') {
+            statusClass = 'status-active';
+        } else if (status === 'Completed') {
+            statusClass = 'status-done';
+        } else if (status === 'Cancelled') {
+            statusClass = 'status-todo';
         }
+        statusElement.innerHTML = `<span class="status-badge ${statusClass}">${status}</span>`;
+        
+        // Set progress bar
+        const progressBar = document.getElementById('detailProgressBar');
+        let progressColor = '';
+        if (progres < 50) {
+            progressColor = 'bg-red-500';
+        } else if (progres < 80) {
+            progressColor = 'bg-yellow-500';
+        } else {
+            progressColor = 'bg-green-500';
+        }
+        progressBar.className = `progress-fill ${progressColor}`;
+        progressBar.style.width = progres + '%';
+        
+        document.getElementById('detailModal').classList.remove('hidden');
+    }
 
-        // Open delete modal with data
-        function openDeleteModal(id, nama) {
-            document.getElementById('deleteId').value = id;
-            document.getElementById('deleteNama').textContent = nama;
-            
-            document.getElementById('deleteModal').classList.remove('hidden');
-        }
-    </script>
+    // Open edit modal with data
+    function openEditModal(id, nama, deskripsi, harga, deadline, progres, status) {
+        document.getElementById('editId').value = id;
+        document.getElementById('editNama').value = nama;
+        document.getElementById('editDeskripsi').value = deskripsi;
+        document.getElementById('editHarga').value = harga;
+        document.getElementById('editDeadline').value = deadline;
+        document.getElementById('editProgres').value = progres;
+        document.getElementById('editStatus').value = status;
+        
+        document.getElementById('editModal').classList.remove('hidden');
+    }
+
+    // Open delete modal with data
+    function openDeleteModal(id, nama) {
+        document.getElementById('deleteId').value = id;
+        document.getElementById('deleteNama').textContent = nama;
+        
+        document.getElementById('deleteModal').classList.remove('hidden');
+    }
+</script>
+    
+    <!-- Add CSRF token meta tag -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </body>
 </html>
