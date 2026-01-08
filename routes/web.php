@@ -15,6 +15,7 @@
     use App\Http\Controllers\PengumumanController;
     use App\Http\Controllers\SuratKerjasamaController;
     use App\Models\Invoice;
+    use App\Http\Controllers\TugasController;
 
     /*
     |--------------------------------------------------------------------------
@@ -352,10 +353,18 @@ Route::get('/pembayaran', function () {
     Route::get('/manager_divisi', function () {
         return view('manager_divisi/home');
     });
-    Route::get('/pengelola_tugas', function () {
+    Route::get('/pengelola_tugas', action: function () {
         return view('manager_divisi/pengelola_tugas');
     });
-
+    Route::get('/data_order', function () {
+        return view('manager_divisi/data_order');
+    });
+    Route::get('/daftar_karyawan', function () {
+        return view('manager_divisi/daftar_karyawan');
+    });
+    Route::get('/kelola_absensi', function () {
+        return view('manager_divisi/kelola_absensi');
+    });
 
 Route::get('/general_manajer', function () {
     return view('general_manajer/home');
@@ -387,3 +396,6 @@ Route::middleware(['auth'])->group(function () {
 // Rekap
 Route::get('/kelola_absen', [AbsensiController::class, 'kelolaAbsen'])->name('kelola.absen');
 Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');
+
+//Buat Tugas
+// Tambahkan route untuk tugas
