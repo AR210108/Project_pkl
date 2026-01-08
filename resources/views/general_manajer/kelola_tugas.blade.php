@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Kelola Tugas - Dashboard</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
@@ -465,7 +466,7 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
                         <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Search..." type="text" />
+                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Search..." type="text" />
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <button class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
@@ -487,7 +488,7 @@
                             Daftar Tugas
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="totalCount">4</span> tugas</span>
+                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="totalCount">0</span> tugas</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -566,19 +567,19 @@
                 <form id="tambahForm">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Judul Tugas</label>
-                        <input type="text" id="tambahJudul" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="text" id="tambahJudul" name="judul" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="tambahDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                        <textarea id="tambahDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                        <input type="date" id="tambahDeadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="date" id="tambahDeadline" name="deadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Karyawan</label>
-                        <select id="tambahKaryawan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <select id="tambahKaryawan" name="karyawan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                             <option value="">Pilih Karyawan</option>
                             <option value="Budi Santoso">Budi Santoso</option>
                             <option value="Ani Yudhoyono">Ani Yudhoyono</option>
@@ -588,7 +589,7 @@
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Projek Manajer</label>
-                        <select id="tambahManajer" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <select id="tambahManajer" name="manajer" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                             <option value="">Pilih Projek Manajer</option>
                             <option value="Citra Lestari">Citra Lestari</option>
                             <option value="Budi Santoso">Budi Santoso</option>
@@ -597,7 +598,7 @@
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select id="tambahStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <select id="tambahStatus" name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                             <option value="To Do">To Do</option>
                             <option value="In Progress">In Progress</option>
                             <option value="Done">Done</option>
@@ -623,22 +624,22 @@
                     </button>
                 </div>
                 <form id="editForm">
-                    <input type="hidden" id="editId">
+                    <input type="hidden" id="editId" name="id">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Judul Tugas</label>
-                        <input type="text" id="editJudul" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="text" id="editJudul" name="judul" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="editDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                        <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                        <input type="date" id="editDeadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <input type="date" id="editDeadline" name="deadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Karyawan</label>
-                        <select id="editKaryawan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <select id="editKaryawan" name="karyawan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                             <option value="Budi Santoso">Budi Santoso</option>
                             <option value="Ani Yudhoyono">Ani Yudhoyono</option>
                             <option value="Eko Prabowo">Eko Prabowo</option>
@@ -647,7 +648,7 @@
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Projek Manajer</label>
-                        <select id="editManajer" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <select id="editManajer" name="manajer" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                             <option value="Citra Lestari">Citra Lestari</option>
                             <option value="Budi Santoso">Budi Santoso</option>
                             <option value="Eko Prabowo">Eko Prabowo</option>
@@ -655,7 +656,7 @@
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select id="editStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <select id="editStatus" name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                             <option value="To Do">To Do</option>
                             <option value="In Progress">In Progress</option>
                             <option value="Done">Done</option>
@@ -676,6 +677,9 @@
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold text-gray-800">Detail Tugas</h3>
+                    <button class="close-modal text-gray-800 hover:text-gray-500">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
                 </div>
                 <div class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -748,468 +752,348 @@
     </div>
 
     <script>
-        // Sample data for tugas
-        const tugasData = [
-            { 
-                id: 1, 
-                judul: "Mendesain Ulang Halaman Utama", 
-                deskripsi: "Revisi UI/UX untuk meningkatkan pengalaman pengguna. Proyek ini mencakup analisis kebutuhan pengguna, pembuatan wireframe, desain visual, dan implementasi responsif. Fokus utama adalah meningkatkan konversi dan memudahkan navigasi bagi pengguna baru.", 
-                deadline: "2024-10-25", 
-                karyawan: "Budi Santoso", 
-                manajer: "Citra Lestari", 
-                status: "In Progress" 
-            },
-            { 
-                id: 2, 
-                judul: "Implementasi Fitur Pembayaran", 
-                deskripsi: "Mengintegrasikan gateway pembayaran ke sistem. Meliputi integrasi dengan berbagai metode pembayaran seperti kartu kredit, e-wallet, dan transfer bank. Sistem harus memenuhi standar keamanan PCI DSS dan memiliki fitur pencatatan transaksi yang lengkap.", 
-                deadline: "2024-11-05", 
-                karyawan: "Ani Yudhoyono", 
-                manajer: "Citra Lestari", 
-                status: "To Do" 
-            },
-            { 
-                id: 3, 
-                judul: "Testing Aplikasi Mobile", 
-                deskripsi: "Melakukan pengujian menyeluruh pada aplikasi mobile. Termasuk testing fungsionalitas, kompatibilitas di berbagai perangkat, performa, dan keamanan. Membuat laporan bug dan rekomendasi perbaikan untuk tim pengembang.", 
-                deadline: "2024-10-30", 
-                karyawan: "Eko Prabowo", 
-                manajer: "Citra Lestari", 
-                status: "To Do" 
-            },
-            { 
-                id: 4, 
-                judul: "Deployment ke Server Produksi", 
-                deskripsi: "Menyiapkan dan melakukan deployment ke server produksi. Proses ini mencakup konfigurasi server, setup CI/CD pipeline, monitoring, dan backup strategy. Juga termasuk dokumentasi untuk tim operasional.", 
-                deadline: "2024-11-15", 
-                karyawan: "Dewi Anggraini", 
-                manajer: "Citra Lestari", 
-                status: "Done" 
-            }
-        ];
-
-        // Pagination variables
-        const itemsPerPage = 3; // Dikurangi jadi 3 agar pagination terlihat
-        let currentPage = 1;
-        const totalPages = Math.ceil(tugasData.length / itemsPerPage);
-
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize pagination - SELALU DIJALANKAN
-            initializePagination();
-            
-            // Modal elements
+            // --- VARIABEL GLOBAL ---
+            let currentPage = 1;
+            let totalPages = 1;
+            let searchQuery = '';
+
+            // --- ELEMEN DOM ---
             const tambahModal = document.getElementById('tambahModal');
             const editModal = document.getElementById('editModal');
             const detailModal = document.getElementById('detailModal');
             const deleteModal = document.getElementById('deleteModal');
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
+            const totalCount = document.getElementById('totalCount');
+            const searchInput = document.getElementById('searchInput');
             
-            // Buttons
-            const buatTugasBtn = document.getElementById('buatTugasBtn');
-            const closeModals = document.querySelectorAll('.close-modal');
-            const confirmDeleteBtn = document.getElementById('confirmDelete');
-            const closeToastBtn = document.getElementById('closeToast');
-            
-            // Forms
-            const tambahForm = document.getElementById('tambahForm');
-            const editForm = document.getElementById('editForm');
-            
-            // Show tambah modal
-            buatTugasBtn.addEventListener('click', function() {
-                tambahModal.classList.remove('hidden');
-                tambahForm.reset();
-            });
-            
-            // Close modals
-            closeModals.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    tambahModal.classList.add('hidden');
-                    editModal.classList.add('hidden');
-                    detailModal.classList.add('hidden');
-                    deleteModal.classList.add('hidden');
+            // --- INISIALISASI ---
+            fetchTugas(); // Ambil data saat halaman dimuat
+            setupEventListeners();
+
+            // --- FUNGSI UTAMA ---
+            function fetchTugas(page = 1) {
+                currentPage = page;
+                let url = `/kelola_tugas/data?page=${page}`;
+                
+                if (searchQuery) {
+                    url += `&search=${encodeURIComponent(searchQuery)}`;
+                }
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        renderDesktopTable(data.data);
+                        renderMobileCards(data.data);
+                        renderPagination(data.links);
+                        totalCount.textContent = data.total;
+                        totalPages = data.last_page;
+                    })
+                    .catch(error => console.error('Error fetching data:', error));
+            }
+
+            function renderDesktopTable(tugasList) {
+                const tbody = document.getElementById('desktopTableBody');
+                tbody.innerHTML = '';
+                
+                if (tugasList.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data tugas</td>`;
+                    tbody.appendChild(row);
+                    return;
+                }
+                
+                tugasList.forEach((tugas, index) => {
+                    const row = document.createElement('tr');
+                    let statusClass = getStatusClass(tugas.status);
+                    const startIndex = (currentPage - 1) * 3; // 3 adalah items per page
+                    const truncatedDesc = tugas.deskripsi.length > 50 
+                        ? tugas.deskripsi.substring(0, 50) + '...' 
+                        : tugas.deskripsi;
+                    
+                    row.innerHTML = `
+                        <td style="min-width: 60px;">${startIndex + index + 1}</td>
+                        <td style="min-width: 200px;">${tugas.judul}</td>
+                        <td style="min-width: 300px;" class="truncate-text" title="${tugas.deskripsi}">${truncatedDesc}</td>
+                        <td style="min-width: 120px;">${tugas.deadline}</td>
+                        <td style="min-width: 150px;">${tugas.karyawan}</td>
+                        <td style="min-width: 150px;">${tugas.manajer}</td>
+                        <td style="min-width: 120px;"><span class="status-badge ${statusClass}">${tugas.status}</span></td>
+                        <td style="min-width: 180px; text-align: center;">
+                            <div class="flex justify-center gap-2">
+                                <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" onclick="openDetailModal(${tugas.id})" title="Lihat Detail"><span class="material-icons-outlined">visibility</span></button>
+                                <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" onclick="openEditModal(${tugas.id})" title="Edit"><span class="material-icons-outlined">edit</span></button>
+                                <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" onclick="openDeleteModal(${tugas.id}, '${tugas.judul}')" title="Hapus"><span class="material-icons-outlined">delete</span></button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
                 });
-            });
-            
-            // Close modal when clicking outside
-            window.addEventListener('click', function(event) {
-                if (event.target === tambahModal) {
-                    tambahModal.classList.add('hidden');
-                }
-                if (event.target === editModal) {
-                    editModal.classList.add('hidden');
-                }
-                if (event.target === detailModal) {
-                    detailModal.classList.add('hidden');
-                }
-                if (event.target === deleteModal) {
-                    deleteModal.classList.add('hidden');
-                }
-            });
-            
-            // Handle tambah form submission
-            tambahForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                showToast('Tugas berhasil ditambahkan!');
-                tambahModal.classList.add('hidden');
-                tambahForm.reset();
+            }
+
+            function renderMobileCards(tugasList) {
+                const container = document.getElementById('mobile-cards');
+                container.innerHTML = '';
                 
-                // Refresh data
-                renderDesktopTable(currentPage);
-                renderMobileCards(currentPage);
-            });
-            
-            // Handle edit form submission
-            editForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                showToast('Tugas berhasil diperbarui!');
-                editModal.classList.add('hidden');
+                if (tugasList.length === 0) {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-lg border border-border-light p-4 shadow-sm text-center text-gray-500';
+                    card.textContent = 'Tidak ada data tugas';
+                    container.appendChild(card);
+                    return;
+                }
                 
-                // Refresh data
-                renderDesktopTable(currentPage);
-                renderMobileCards(currentPage);
-            });
+                tugasList.forEach(tugas => {
+                    let statusClass = getStatusClass(tugas.status);
+                    const truncatedDesc = tugas.deskripsi.length > 80 
+                        ? tugas.deskripsi.substring(0, 80) + '...' 
+                        : tugas.deskripsi;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-lg border border-border-light p-4 shadow-sm';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h4 class="font-semibold text-base">${tugas.judul}</h4>
+                                <p class="text-sm text-text-muted-light">Deadline: ${tugas.deadline}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="p-1 rounded-full hover:bg-primary/20 text-gray-700" onclick="openDetailModal(${tugas.id})" title="Lihat Detail"><span class="material-icons-outlined">visibility</span></button>
+                                <button class="p-1 rounded-full hover:bg-primary/20 text-gray-700" onclick="openEditModal(${tugas.id})" title="Edit"><span class="material-icons-outlined">edit</span></button>
+                                <button class="p-1 rounded-full hover:bg-red-500/20 text-gray-700" onclick="openDeleteModal(${tugas.id}, '${tugas.judul}')" title="Hapus"><span class="material-icons-outlined">delete</span></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div><p class="text-text-muted-light">Karyawan</p><p class="font-medium">${tugas.karyawan}</p></div>
+                            <div><p class="text-text-muted-light">Projek Manajer</p><p class="font-medium">${tugas.manajer}</p></div>
+                            <div><p class="text-text-muted-light">Status</p><p><span class="status-badge ${statusClass}">${tugas.status}</span></p></div>
+                        </div>
+                        <div class="mt-3">
+                            <p class="text-text-muted-light">Deskripsi</p>
+                            <p class="font-medium">${truncatedDesc}</p>
+                            ${tugas.deskripsi.length > 80 ? `<button class="text-primary text-sm mt-1" onclick="openDetailModal(${tugas.id})">Lihat selengkapnya</button>` : ''}
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
             
-            // Handle delete confirmation
-            confirmDeleteBtn.addEventListener('click', function() {
-                const id = document.getElementById('deleteId').value;
-                showToast('Tugas berhasil dihapus!');
-                deleteModal.classList.add('hidden');
+            function renderPagination(links) {
+                // Desktop Pagination
+                const desktopPageNumbers = document.getElementById('desktopPageNumbers');
+                desktopPageNumbers.innerHTML = '';
+                links.slice(1, -1).forEach(link => {
+                    const btn = document.createElement('button');
+                    btn.innerHTML = link.label;
+                    btn.className = `desktop-page-btn ${link.active ? 'active' : ''}`;
+                    btn.disabled = !link.url;
+                    btn.onclick = () => fetchTugas(new URL(link.url).searchParams.get('page'));
+                    desktopPageNumbers.appendChild(btn);
+                });
+                document.getElementById('desktopPrevPage').onclick = () => links[0].url ? fetchTugas(new URL(links[0].url).searchParams.get('page')) : null;
+                document.getElementById('desktopNextPage').onclick = () => links[links.length-1].url ? fetchTugas(new URL(links[links.length-1].url).searchParams.get('page')) : null;
                 
-                // Refresh data
-                renderDesktopTable(currentPage);
-                renderMobileCards(currentPage);
-            });
-            
-            // Close toast notification
-            closeToastBtn.addEventListener('click', function() {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            });
-            
-            // Function to show toast notification
+                // Mobile Pagination (sama dengan desktop)
+                const mobilePageNumbers = document.getElementById('pageNumbers');
+                mobilePageNumbers.innerHTML = '';
+                links.slice(1, -1).forEach(link => {
+                    const btn = document.createElement('button');
+                    btn.innerHTML = link.label;
+                    btn.className = `page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm ${link.active ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'}`;
+                    btn.disabled = !link.url;
+                    btn.onclick = () => fetchTugas(new URL(link.url).searchParams.get('page'));
+                    mobilePageNumbers.appendChild(btn);
+                });
+                document.getElementById('prevPage').onclick = () => links[0].url ? fetchTugas(new URL(links[0].url).searchParams.get('page')) : null;
+                document.getElementById('nextPage').onclick = () => links[links.length-1].url ? fetchTugas(new URL(links[links.length-1].url).searchParams.get('page')) : null;
+            }
+
+            // --- EVENT LISTENERS ---
+            function setupEventListeners() {
+                // Modal
+                document.querySelectorAll('.close-modal').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        tambahModal.classList.add('hidden');
+                        editModal.classList.add('hidden');
+                        detailModal.classList.add('hidden');
+                        deleteModal.classList.add('hidden');
+                    });
+                });
+
+                // Form Tambah
+                document.getElementById('tambahForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    fetch('/kelola_tugas', {
+                        method: 'POST',
+                        headers: { 
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        showToast(data.message);
+                        tambahModal.classList.add('hidden');
+                        this.reset();
+                        fetchTugas(currentPage);
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        if (err.response && err.response.status === 422) {
+                            err.response.json().then(errors => {
+                                let errorMessage = 'Error: ';
+                                for (const field in errors.errors) {
+                                    errorMessage += errors.errors[field].join(', ') + ' ';
+                                }
+                                showToast(errorMessage);
+                            });
+                        } else {
+                            showToast('Terjadi kesalahan saat menambah tugas');
+                        }
+                    });
+                });
+
+                // Form Edit
+                document.getElementById('editForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const id = document.getElementById('editId').value;
+                    const formData = new FormData(this);
+                    formData.append('_method', 'PUT'); // Method spoofing untuk PUT
+
+                    fetch(`/kelola_tugas/${id}`, {
+                        method: 'POST', // Kirim sebagai POST karena FormData tidak mendukung PUT
+                        headers: { 
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        showToast(data.message);
+                        editModal.classList.add('hidden');
+                        fetchTugas(currentPage);
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        if (err.response && err.response.status === 422) {
+                            err.response.json().then(errors => {
+                                let errorMessage = 'Error: ';
+                                for (const field in errors.errors) {
+                                    errorMessage += errors.errors[field].join(', ') + ' ';
+                                }
+                                showToast(errorMessage);
+                            });
+                        } else {
+                            showToast('Terjadi kesalahan saat memperbarui tugas');
+                        }
+                    });
+                });
+
+                // Tombol Hapus
+                document.getElementById('confirmDelete').addEventListener('click', function() {
+                    const id = document.getElementById('deleteId').value;
+                    fetch(`/kelola_tugas/${id}`, {
+                        method: 'DELETE',
+                        headers: { 
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        showToast(data.message);
+                        deleteModal.classList.add('hidden');
+                        fetchTugas(currentPage);
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        showToast('Terjadi kesalahan saat menghapus tugas');
+                    });
+                });
+
+                // Toast
+                document.getElementById('closeToast').addEventListener('click', () => {
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                });
+
+                // Search
+                searchInput.addEventListener('input', function() {
+                    searchQuery = this.value;
+                    fetchTugas(1); // Reset ke halaman pertama saat searching
+                });
+            }
+
+            // --- FUNGSI MODAL ---
+            window.openDetailModal = function(id) {
+                fetch(`/kelola_tugas/${id}`)
+                    .then(res => res.json())
+                    .then(tugas => {
+                        document.getElementById('detailId').textContent = '#' + tugas.id;
+                        document.getElementById('detailJudul').textContent = tugas.judul;
+                        document.getElementById('detailDeskripsi').textContent = tugas.deskripsi;
+                        document.getElementById('detailDeadline').textContent = tugas.deadline;
+                        document.getElementById('detailKaryawan').textContent = tugas.karyawan;
+                        document.getElementById('detailManajer').textContent = tugas.manajer;
+                        document.getElementById('detailStatus').innerHTML = `<span class="status-badge ${getStatusClass(tugas.status)}">${tugas.status}</span>`;
+                        detailModal.classList.remove('hidden');
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        showToast('Terjadi kesalahan saat mengambil detail tugas');
+                    });
+            };
+
+            window.openEditModal = function(id) {
+                fetch(`/kelola_tugas/${id}`)
+                    .then(res => res.json())
+                    .then(tugas => {
+                        document.getElementById('editId').value = tugas.id;
+                        document.getElementById('editJudul').value = tugas.judul;
+                        document.getElementById('editDeskripsi').value = tugas.deskripsi;
+                        document.getElementById('editDeadline').value = tugas.deadline;
+                        document.getElementById('editKaryawan').value = tugas.karyawan;
+                        document.getElementById('editManajer').value = tugas.manajer;
+                        document.getElementById('editStatus').value = tugas.status;
+                        editModal.classList.remove('hidden');
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        showToast('Terjadi kesalahan saat mengambil data tugas untuk diedit');
+                    });
+            };
+
+            window.openDeleteModal = function(id, judul) {
+                document.getElementById('deleteId').value = id;
+                document.getElementById('deleteJudul').textContent = judul;
+                deleteModal.classList.remove('hidden');
+            };
+
+            // --- UTILITAS ---
+            function getStatusClass(status) {
+                if (status === 'To Do') return 'status-todo';
+                if (status === 'In Progress') return 'status-progress';
+                if (status === 'Done') return 'status-done';
+                return '';
+            }
+
             function showToast(message) {
                 toastMessage.textContent = message;
                 toast.classList.remove('translate-y-20', 'opacity-0');
-                
-                // Auto hide after 3 seconds
                 setTimeout(() => {
                     toast.classList.add('translate-y-20', 'opacity-0');
                 }, 3000);
             }
+
+            // Tombol buat tugas
+            document.getElementById('buatTugasBtn').addEventListener('click', () => {
+                tambahModal.classList.remove('hidden');
+                document.getElementById('tambahForm').reset();
+            });
         });
-
-        // Initialize pagination - SELALU DIJALANKAN
-        function initializePagination() {
-            // Update total count
-            document.getElementById('totalCount').textContent = tugasData.length;
-            
-            // SELALU tampilkan pagination
-            initDesktopPagination();
-            initMobilePagination();
-            
-            // Render first page
-            renderDesktopTable(1);
-            renderMobileCards(1);
-        }
-
-        // Desktop pagination functionality
-        function initDesktopPagination() {
-            const pageNumbersContainer = document.getElementById('desktopPageNumbers');
-            const prevButton = document.getElementById('desktopPrevPage');
-            const nextButton = document.getElementById('desktopNextPage');
-            
-            // Clear existing page numbers
-            pageNumbersContainer.innerHTML = '';
-            
-            // Generate page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                const pageNumber = document.createElement('button');
-                pageNumber.textContent = i;
-                pageNumber.className = `desktop-page-btn ${
-                    i === currentPage ? 'active' : ''
-                }`;
-                pageNumber.addEventListener('click', () => goToDesktopPage(i));
-                pageNumbersContainer.appendChild(pageNumber);
-            }
-            
-            // Event listeners for navigation buttons
-            prevButton.addEventListener('click', () => {
-                if (currentPage > 1) goToDesktopPage(currentPage - 1);
-            });
-            
-            nextButton.addEventListener('click', () => {
-                if (currentPage < totalPages) goToDesktopPage(currentPage + 1);
-            });
-        }
-
-        // Mobile pagination functionality
-        function initMobilePagination() {
-            const pageNumbersContainer = document.getElementById('pageNumbers');
-            const prevButton = document.getElementById('prevPage');
-            const nextButton = document.getElementById('nextPage');
-            
-            // Clear existing page numbers
-            pageNumbersContainer.innerHTML = '';
-            
-            // Generate page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                const pageNumber = document.createElement('button');
-                pageNumber.textContent = i;
-                pageNumber.className = `page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                    i === currentPage ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
-                }`;
-                pageNumber.addEventListener('click', () => goToMobilePage(i));
-                pageNumbersContainer.appendChild(pageNumber);
-            }
-            
-            // Event listeners for navigation buttons
-            prevButton.addEventListener('click', () => {
-                if (currentPage > 1) goToMobilePage(currentPage - 1);
-            });
-            
-            nextButton.addEventListener('click', () => {
-                if (currentPage < totalPages) goToMobilePage(currentPage + 1);
-            });
-        }
-
-        // Go to specific desktop page
-        function goToDesktopPage(page) {
-            currentPage = page;
-            renderDesktopTable(page);
-            updateDesktopPaginationButtons();
-            
-            // Reset scroll position when changing pages
-            const scrollableTable = document.getElementById('scrollableTable');
-            if (scrollableTable) {
-                scrollableTable.scrollLeft = 0;
-            }
-        }
-
-        // Go to specific mobile page
-        function goToMobilePage(page) {
-            currentPage = page;
-            renderMobileCards(page);
-            updateMobilePaginationButtons();
-        }
-
-        // Render desktop table for specific page
-        function renderDesktopTable(page) {
-            const tbody = document.getElementById('desktopTableBody');
-            tbody.innerHTML = '';
-            
-            const startIndex = (page - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, tugasData.length);
-            
-            for (let i = startIndex; i < endIndex; i++) {
-                const tugas = tugasData[i];
-                const row = document.createElement('tr');
-                
-                // Determine status class
-                let statusClass = '';
-                if (tugas.status === 'To Do') {
-                    statusClass = 'status-todo';
-                } else if (tugas.status === 'In Progress') {
-                    statusClass = 'status-progress';
-                } else if (tugas.status === 'Done') {
-                    statusClass = 'status-done';
-                }
-                
-                // Truncate description for table view
-                const truncatedDesc = tugas.deskripsi.length > 50 
-                    ? tugas.deskripsi.substring(0, 50) + '...' 
-                    : tugas.deskripsi;
-                
-                row.innerHTML = `
-                    <td style="min-width: 60px;">${i + 1}</td>
-                    <td style="min-width: 200px;">${tugas.judul}</td>
-                    <td style="min-width: 300px;" class="truncate-text" title="${tugas.deskripsi}">${truncatedDesc}</td>
-                    <td style="min-width: 120px;">${tugas.deadline}</td>
-                    <td style="min-width: 150px;">${tugas.karyawan}</td>
-                    <td style="min-width: 150px;">${tugas.manajer}</td>
-                    <td style="min-width: 120px;"><span class="status-badge ${statusClass}">${tugas.status}</span></td>
-                    <td style="min-width: 180px; text-align: center;">
-                        <div class="flex justify-center gap-2">
-                            <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openDetailModal(${tugas.id}, '${tugas.judul}', '${tugas.deskripsi}', '${tugas.deadline}', '${tugas.karyawan}', '${tugas.manajer}', '${tugas.status}')"
-                                title="Lihat Detail">
-                                <span class="material-icons-outlined">visibility</span>
-                            </button>
-                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openEditModal(${tugas.id}, '${tugas.judul}', '${tugas.deskripsi}', '${tugas.deadline}', '${tugas.karyawan}', '${tugas.manajer}', '${tugas.status}')"
-                                title="Edit">
-                                <span class="material-icons-outlined">edit</span>
-                            </button>
-                            <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                onclick="openDeleteModal(${tugas.id}, '${tugas.judul}')"
-                                title="Hapus">
-                                <span class="material-icons-outlined">delete</span>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            }
-        }
-
-        // Render mobile cards for specific page
-        function renderMobileCards(page) {
-            const container = document.getElementById('mobile-cards');
-            container.innerHTML = '';
-            
-            const startIndex = (page - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, tugasData.length);
-            
-            for (let i = startIndex; i < endIndex; i++) {
-                const tugas = tugasData[i];
-                
-                // Determine status class
-                let statusClass = '';
-                if (tugas.status === 'To Do') {
-                    statusClass = 'status-todo';
-                } else if (tugas.status === 'In Progress') {
-                    statusClass = 'status-progress';
-                } else if (tugas.status === 'Done') {
-                    statusClass = 'status-done';
-                }
-                
-                // Truncate description for mobile card view
-                const truncatedDesc = tugas.deskripsi.length > 80 
-                    ? tugas.deskripsi.substring(0, 80) + '...' 
-                    : tugas.deskripsi;
-                
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-lg border border-border-light p-4 shadow-sm';
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <h4 class="font-semibold text-base">${tugas.judul}</h4>
-                            <p class="text-sm text-text-muted-light">Deadline: ${tugas.deadline}</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openDetailModal(${tugas.id}, '${tugas.judul}', '${tugas.deskripsi}', '${tugas.deadline}', '${tugas.karyawan}', '${tugas.manajer}', '${tugas.status}')"
-                                title="Lihat Detail">
-                            </button>
-                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                onclick="openEditModal(${tugas.id}, '${tugas.judul}', '${tugas.deskripsi}', '${tugas.deadline}', '${tugas.karyawan}', '${tugas.manajer}', '${tugas.status}')"
-                                title="Edit">
-                                <span class="material-icons-outlined">edit</span>
-                            </button>
-                            <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                onclick="openDeleteModal(${tugas.id}, '${tugas.judul}')"
-                                title="Hapus">
-                                <span class="material-icons-outlined">delete</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                            <p class="text-text-muted-light">Karyawan</p>
-                            <p class="font-medium">${tugas.karyawan}</p>
-                        </div>
-                        <div>
-                            <p class="text-text-muted-light">Projek Manajer</p>
-                            <p class="font-medium">${tugas.manajer}</p>
-                        </div>
-                        <div>
-                            <p class="text-text-muted-light">Status</p>
-                            <p><span class="status-badge ${statusClass}">${tugas.status}</span></p>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <p class="text-text-muted-light">Deskripsi</p>
-                        <p class="font-medium">${truncatedDesc}</p>
-                        ${tugas.deskripsi.length > 80 ? `
-                        <button class="text-primary text-sm mt-1" 
-                            onclick="openDetailModal(${tugas.id}, '${tugas.judul}', '${tugas.deskripsi}', '${tugas.deadline}', '${tugas.karyawan}', '${tugas.manajer}', '${tugas.status}')">
-                            Lihat selengkapnya
-                        </button>` : ''}
-                    </div>
-                `;
-                container.appendChild(card);
-            }
-        }
-
-        // Update desktop pagination buttons
-        function updateDesktopPaginationButtons() {
-            const prevButton = document.getElementById('desktopPrevPage');
-            const nextButton = document.getElementById('desktopNextPage');
-            const pageButtons = document.querySelectorAll('#desktopPageNumbers button');
-            
-            prevButton.disabled = currentPage === 1;
-            nextButton.disabled = currentPage === totalPages;
-            
-            pageButtons.forEach((btn, index) => {
-                if (index + 1 === currentPage) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        }
-
-        // Update mobile pagination buttons
-        function updateMobilePaginationButtons() {
-            const prevButton = document.getElementById('prevPage');
-            const nextButton = document.getElementById('nextPage');
-            const pageButtons = document.querySelectorAll('#pageNumbers button');
-            
-            prevButton.disabled = currentPage === 1;
-            nextButton.disabled = currentPage === totalPages;
-            
-            pageButtons.forEach((btn, index) => {
-                if (index + 1 === currentPage) {
-                    btn.className = 'page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm bg-primary text-white';
-                } else {
-                    btn.className = 'page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm bg-gray-200 text-gray-600';
-                }
-            });
-        }
-
-        // Open detail modal with data
-        function openDetailModal(id, judul, deskripsi, deadline, karyawan, manajer, status) {
-            document.getElementById('detailId').textContent = '#' + id;
-            document.getElementById('detailJudul').textContent = judul;
-            document.getElementById('detailDeskripsi').textContent = deskripsi;
-            document.getElementById('detailDeadline').textContent = deadline;
-            document.getElementById('detailKaryawan').textContent = karyawan;
-            document.getElementById('detailManajer').textContent = manajer;
-            
-            // Set status badge
-            const statusElement = document.getElementById('detailStatus');
-            let statusClass = '';
-            if (status === 'To Do') {
-                statusClass = 'status-todo';
-            } else if (status === 'In Progress') {
-                statusClass = 'status-progress';
-            } else if (status === 'Done') {
-                statusClass = 'status-done';
-            }
-            statusElement.innerHTML = `<span class="status-badge ${statusClass}">${status}</span>`;
-            
-            document.getElementById('detailModal').classList.remove('hidden');
-        }
-
-        // Open edit modal with data
-        function openEditModal(id, judul, deskripsi, deadline, karyawan, manajer, status) {
-            document.getElementById('editId').value = id;
-            document.getElementById('editJudul').value = judul;
-            document.getElementById('editDeskripsi').value = deskripsi;
-            document.getElementById('editDeadline').value = deadline;
-            document.getElementById('editKaryawan').value = karyawan;
-            document.getElementById('editManajer').value = manajer;
-            document.getElementById('editStatus').value = status;
-            
-            document.getElementById('editModal').classList.remove('hidden');
-        }
-
-        // Open delete modal with data
-        function openDeleteModal(id, judul) {
-            document.getElementById('deleteId').value = id;
-            document.getElementById('deleteJudul').textContent = judul;
-            
-            document.getElementById('deleteModal').classList.remove('hidden');
-        }
     </script>
 </body>
 </html>
