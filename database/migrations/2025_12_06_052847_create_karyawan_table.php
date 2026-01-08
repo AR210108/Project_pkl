@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         // Ubah 'karyawan' menjadi 'karyawans' di sini
-        Schema::create('karyawans', function (Blueprint $table) {
+        Schema::create('karyawan', function (Blueprint $table) {
             $table->id();
             $table->string('nama', 100);
             $table->string('jabatan', 100);

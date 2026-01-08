@@ -477,7 +477,7 @@
 <body class="font-display bg-background-light text-text-light">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-       @include('general_manajer/templet/header')
+       @include('admin/templet/sider')
         
         <!-- Main Content Container -->
         <div class="main-content flex-1 flex flex-col overflow-y-auto bg-background-light">
@@ -490,10 +490,10 @@
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                         <div class="relative w-full md:w-1/3">
                             <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                            <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Search..." type="text" />
+                            <input class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Search..." type="text" />
                         </div>
                         <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                            <button id="filterBtn" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
+                            <button class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
                                 Filter
                             </button>
                             <button id="tambahOrderanBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
@@ -706,7 +706,7 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="tambahForm" action="{{ route('general_manajer.orderan.store') }}" method="POST">
+                <form id="tambahForm" action="{{ route('orderan.store') }}" method="POST">
                     @csrf
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
@@ -774,7 +774,7 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="editForm" action="{{ route('general_manajer.orderan.update', '') }}" method="POST">
+                <form id="editForm" action="{{ route('orderan.update', '') }}" method="POST">
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="id" id="editId">
@@ -881,7 +881,7 @@
                     <p class="text-gray-700">Apakah Anda yakin ingin menghapus orderan <span id="deleteNama" class="font-semibold"></span>?</p>
                     <p class="text-sm text-gray-500 mt-2">Tindakan ini tidak dapat dibatalkan.</p>
                 </div>
-                <form id="deleteForm" action="{{ route('general_manajer.orderan.destroy', '') }}" method="POST">
+                <form id="deleteForm" action="{{ route('orderan.destroy', '') }}" method="POST">
                     @csrf
                     @method('DELETE')
                     <input type="hidden" name="id" id="deleteId">
@@ -921,314 +921,240 @@
         </div>
     @endif
 
-   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Modal elements
-        const tambahModal = document.getElementById('tambahModal');
-        const editModal = document.getElementById('editModal');
-        const detailModal = document.getElementById('detailModal');
-        const deleteModal = document.getElementById('deleteModal');
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toastMessage');
-        
-        // Buttons
-        const tambahOrderanBtn = document.getElementById('tambahOrderanBtn');
-        const closeModals = document.querySelectorAll('.close-modal');
-        const closeToastBtn = document.getElementById('closeToast');
-        
-        // Forms
-        const tambahForm = document.getElementById('tambahForm');
-        const editForm = document.getElementById('editForm');
-        const deleteForm = document.getElementById('deleteForm');
-        
-        // Show tambah modal
-        tambahOrderanBtn.addEventListener('click', function() {
-            tambahModal.classList.remove('hidden');
-            tambahForm.reset();
-        });
-        
-        // Close modals
-        closeModals.forEach(btn => {
-            btn.addEventListener('click', function() {
-                tambahModal.classList.add('hidden');
-                editModal.classList.add('hidden');
-                detailModal.classList.add('hidden');
-                deleteModal.classList.add('hidden');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Modal elements
+            const tambahModal = document.getElementById('tambahModal');
+            const editModal = document.getElementById('editModal');
+            const detailModal = document.getElementById('detailModal');
+            const deleteModal = document.getElementById('deleteModal');
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            // Buttons
+            const tambahOrderanBtn = document.getElementById('tambahOrderanBtn');
+            const closeModals = document.querySelectorAll('.close-modal');
+            const closeToastBtn = document.getElementById('closeToast');
+            
+            // Forms
+            const tambahForm = document.getElementById('tambahForm');
+            const editForm = document.getElementById('editForm');
+            const deleteForm = document.getElementById('deleteForm');
+            
+            // Show tambah modal
+            tambahOrderanBtn.addEventListener('click', function() {
+                tambahModal.classList.remove('hidden');
+                tambahForm.reset();
             });
-        });
-        
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            if (event.target === tambahModal) {
-                tambahModal.classList.add('hidden');
-            }
-            if (event.target === editModal) {
-                editModal.classList.add('hidden');
-            }
-            if (event.target === detailModal) {
-                detailModal.classList.add('hidden');
-            }
-            if (event.target === deleteModal) {
-                deleteModal.classList.add('hidden');
-            }
-        });
-        
-        // Handle tambah form submission with AJAX
-        tambahForm.addEventListener('submit', function(e) {
-            e.preventDefault();
             
-            const formData = new FormData(tambahForm);
-            
-            fetch(tambahForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errorData => {
-                        const error = new Error('Server responded with an error status');
-                        error.response = response;
-                        error.data = errorData;
-                        throw error;
-                    }).catch(() => {
-                        const error = new Error('Server responded with an error status');
-                        error.response = response;
-                        throw error;
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    showToast(data.message, 'success');
+            // Close modals
+            closeModals.forEach(btn => {
+                btn.addEventListener('click', function() {
                     tambahModal.classList.add('hidden');
-                    tambahForm.reset();
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    showToast(data.message || 'Terjadi kesalahan yang tidak diketahui.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Fetch Error:', error);
-                handleFetchError(error);
-            });
-        });
-        
-        // Handle edit form submission with AJAX
-        editForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(editForm);
-            const id = document.getElementById('editId').value;
-            
-            fetch(`/general_manajer/orderan/${id}`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errorData => {
-                        const error = new Error('Server responded with an error status');
-                        error.response = response;
-                        error.data = errorData;
-                        throw error;
-                    }).catch(() => {
-                        const error = new Error('Server responded with an error status');
-                        error.response = response;
-                        throw error;
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    showToast(data.message, 'success');
                     editModal.classList.add('hidden');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    showToast(data.message || 'Terjadi kesalahan yang tidak diketahui.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Fetch Error:', error);
-                handleFetchError(error);
-            });
-        });
-        
-        // Handle delete form submission with AJAX
-        deleteForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(deleteForm);
-            const id = document.getElementById('deleteId').value;
-            
-            fetch(`/general_manajer/orderan/${id}`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errorData => {
-                        const error = new Error('Server responded with an error status');
-                        error.response = response;
-                        error.data = errorData;
-                        throw error;
-                    }).catch(() => {
-                        const error = new Error('Server responded with an error status');
-                        error.response = response;
-                        throw error;
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    showToast(data.message, 'success');
+                    detailModal.classList.add('hidden');
                     deleteModal.classList.add('hidden');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    showToast(data.message || 'Terjadi kesalahan yang tidak diketahui.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Fetch Error:', error);
-                handleFetchError(error);
+                });
             });
-        });
-        
-        // Close toast notification
-        closeToastBtn.addEventListener('click', function() {
-            toast.classList.add('translate-y-20', 'opacity-0');
-        });
-        
-        // Function to show toast notification
-        function showToast(message, type = 'success') {
-            toastMessage.textContent = message;
             
-            // Change background color based on type
-            toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 flex items-center`;
-            if (type === 'error') {
-                toast.classList.add('bg-red-500', 'text-white');
-            } else {
-                toast.classList.add('bg-green-500', 'text-white');
-            }
-            
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            
-            // Auto hide after 5 seconds for error messages
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, type === 'error' ? 5000 : 3000);
-        }
-        
-        // Function to handle fetch errors
-        function handleFetchError(error) {
-            if (error.response) {
-                if (error.response.status === 422) {
-                    let errorMessages = '';
-                    if (error.data && error.data.errors) {
-                        const errors = error.data.errors;
-                        for (const field in errors) {
-                            errorMessages += errors[field].join(', ') + ' ';
-                        }
-                        showToast('Validasi gagal: ' + errorMessages.trim(), 'error');
-                    } else {
-                        showToast('Data yang dimasukkan tidak valid.', 'error');
-                    }
-                } else if (error.response.status === 401) {
-                    showToast('Anda belum login. Sesi mungkin telah habis.', 'error');
-                } else if (error.response.status === 403) {
-                    showToast('Anda tidak memiliki izin untuk melakukan aksi ini.', 'error');
-                } else if (error.response.status === 404) {
-                    showToast('Data tidak ditemukan atau endpoint tidak valid.', 'error');
-                } else if (error.response.status >= 500) {
-                    showToast('Terjadi kesalahan pada server. Periksa konsol browser untuk detail.', 'error');
-                } else {
-                    showToast(`Terjadi kesalahan (Status: ${error.response.status}).`, 'error');
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === tambahModal) {
+                    tambahModal.classList.add('hidden');
                 }
-            } else if (error.request) {
-                showToast('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.', 'error');
-            } else {
-                showToast('Terjadi kesalahan. Silakan coba lagi.', 'error');
+                if (event.target === editModal) {
+                    editModal.classList.add('hidden');
+                }
+                if (event.target === detailModal) {
+                    detailModal.classList.add('hidden');
+                }
+                if (event.target === deleteModal) {
+                    deleteModal.classList.add('hidden');
+                }
+            });
+            
+            // Handle tambah form submission with AJAX
+            tambahForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(tambahForm);
+                
+                fetch(tambahForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message);
+                        tambahModal.classList.add('hidden');
+                        tambahForm.reset();
+                        // Reload page to show new data
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showToast('Terjadi kesalahan. Silakan coba lagi.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Terjadi kesalahan. Silakan coba lagi.');
+                });
+            });
+            
+            // Handle edit form submission with AJAX
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(editForm);
+                const id = document.getElementById('editId').value;
+                
+                fetch(`/orderan/${id}`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message);
+                        editModal.classList.add('hidden');
+                        // Reload page to show updated data
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showToast('Terjadi kesalahan. Silakan coba lagi.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Terjadi kesalahan. Silakan coba lagi.');
+                });
+            });
+            
+            // Handle delete form submission with AJAX
+            deleteForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(deleteForm);
+                const id = document.getElementById('deleteId').value;
+                
+                fetch(`/orderan/${id}`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message);
+                        deleteModal.classList.add('hidden');
+                        // Reload page to show updated data
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showToast('Terjadi kesalahan. Silakan coba lagi.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Terjadi kesalahan. Silakan coba lagi.');
+                });
+            });
+            
+            // Close toast notification
+            closeToastBtn.addEventListener('click', function() {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            });
+            
+            // Function to show toast notification
+            function showToast(message) {
+                toastMessage.textContent = message;
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                
+                // Auto hide after 3 seconds
+                setTimeout(() => {
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
             }
-        }
-    });
+        });
 
-    // Open detail modal with data
-    function openDetailModal(id, nama, deskripsi, harga, deadline, progres, status) {
-        document.getElementById('detailId').textContent = '#' + id;
-        document.getElementById('detailNama').textContent = nama;
-        document.getElementById('detailDeskripsi').textContent = deskripsi;
-        document.getElementById('detailHarga').textContent = harga;
-        document.getElementById('detailDeadline').textContent = deadline;
-        document.getElementById('detailProgres').textContent = progres + '%';
-        
-        // Set status badge
-        const statusElement = document.getElementById('detailStatus');
-        let statusClass = '';
-        if (status === 'In Progress') {
-            statusClass = 'status-inprogress';
-        } else if (status === 'Active') {
-            statusClass = 'status-active';
-        } else if (status === 'Completed') {
-            statusClass = 'status-done';
-        } else if (status === 'Cancelled') {
-            statusClass = 'status-todo';
+        // Open detail modal with data
+        function openDetailModal(id, nama, deskripsi, harga, deadline, progres, status) {
+            document.getElementById('detailId').textContent = '#' + id;
+            document.getElementById('detailNama').textContent = nama;
+            document.getElementById('detailDeskripsi').textContent = deskripsi;
+            document.getElementById('detailHarga').textContent = harga;
+            document.getElementById('detailDeadline').textContent = deadline;
+            document.getElementById('detailProgres').textContent = progres + '%';
+            
+            // Set status badge
+            const statusElement = document.getElementById('detailStatus');
+            let statusClass = '';
+            if (status === 'In Progress') {
+                statusClass = 'status-inprogress';
+            } else if (status === 'Active') {
+                statusClass = 'status-active';
+            } else if (status === 'Completed') {
+                statusClass = 'status-done';
+            } else if (status === 'Cancelled') {
+                statusClass = 'status-todo';
+            }
+            statusElement.innerHTML = `<span class="status-badge ${statusClass}">${status}</span>`;
+            
+            // Set progress bar
+            const progressBar = document.getElementById('detailProgressBar');
+            let progressColor = '';
+            if (progres < 50) {
+                progressColor = 'bg-red-500';
+            } else if (progres < 80) {
+                progressColor = 'bg-yellow-500';
+            } else {
+                progressColor = 'bg-green-500';
+            }
+            progressBar.className = `progress-fill ${progressColor}`;
+            progressBar.style.width = progres + '%';
+            
+            document.getElementById('detailModal').classList.remove('hidden');
         }
-        statusElement.innerHTML = `<span class="status-badge ${statusClass}">${status}</span>`;
-        
-        // Set progress bar
-        const progressBar = document.getElementById('detailProgressBar');
-        let progressColor = '';
-        if (progres < 50) {
-            progressColor = 'bg-red-500';
-        } else if (progres < 80) {
-            progressColor = 'bg-yellow-500';
-        } else {
-            progressColor = 'bg-green-500';
+
+        // Open edit modal with data
+        function openEditModal(id, nama, deskripsi, harga, deadline, progres, status) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editNama').value = nama;
+            document.getElementById('editDeskripsi').value = deskripsi;
+            document.getElementById('editHarga').value = harga;
+            document.getElementById('editDeadline').value = deadline;
+            document.getElementById('editProgres').value = progres;
+            document.getElementById('editStatus').value = status;
+            
+            // Update form action with the correct ID
+            document.getElementById('editForm').action = `/orderan/${id}`;
+            
+            document.getElementById('editModal').classList.remove('hidden');
         }
-        progressBar.className = `progress-fill ${progressColor}`;
-        progressBar.style.width = progres + '%';
-        
-        document.getElementById('detailModal').classList.remove('hidden');
-    }
 
-    // Open edit modal with data
-    function openEditModal(id, nama, deskripsi, harga, deadline, progres, status) {
-        document.getElementById('editId').value = id;
-        document.getElementById('editNama').value = nama;
-        document.getElementById('editDeskripsi').value = deskripsi;
-        document.getElementById('editHarga').value = harga;
-        document.getElementById('editDeadline').value = deadline;
-        document.getElementById('editProgres').value = progres;
-        document.getElementById('editStatus').value = status;
-        
-        document.getElementById('editModal').classList.remove('hidden');
-    }
-
-    // Open delete modal with data
-    function openDeleteModal(id, nama) {
-        document.getElementById('deleteId').value = id;
-        document.getElementById('deleteNama').textContent = nama;
-        
-        document.getElementById('deleteModal').classList.remove('hidden');
-    }
-</script>
+        // Open delete modal with data
+        function openDeleteModal(id, nama) {
+            document.getElementById('deleteId').value = id;
+            document.getElementById('deleteNama').textContent = nama;
+            
+            // Update form action with the correct ID
+            document.getElementById('deleteForm').action = `/orderan/${id}`;
+            
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+    </script>
     
     <!-- Add CSRF token meta tag -->
     <meta name="csrf-token" content="{{ csrf_token() }}">

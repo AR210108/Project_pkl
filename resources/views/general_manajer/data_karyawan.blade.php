@@ -733,7 +733,7 @@
             document.querySelectorAll('.edit-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id = this.getAttribute('data-id');
-                    fetch(`{{ url('/data_karyawan') }}/${id}/edit`)
+                    fetch(`{{ url('/pegawai') }}/${id}/edit`)
                         .then(res => res.json())
                         .then(data => {
                             document.getElementById('edit_id').value = data.id;
@@ -745,7 +745,7 @@
                             document.getElementById('edit_divisi').value = data.divisi;
                             document.getElementById('edit_status').value = data.status;
                             document.getElementById('edit_email').value = data.email;
-                            editForm.action = `{{ url('/data_karyawan') }}/${id}`;
+                            editForm.action = `{{ url('/pegawai') }}/${id}`;
                             openEditModal();
                         }).catch(err => alert('Gagal mengambil data.'));
                 });

@@ -5,249 +5,753 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kwitansi Management</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
         tailwind.config = {
-            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        primary: "#000000",
+                        primary: "#3b82f6",
                         "background-light": "#ffffff",
-                        "background-dark": "#000000",
+                        "background-dark": "#f8fafc",
+                        "sidebar-light": "#f3f4f6",
+                        "sidebar-dark": "#1e293b",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e293b",
+                        "text-light": "#1e293b",
+                        "text-dark": "#f8fafc",
+                        "text-muted-light": "#64748b",
+                        "text-muted-dark": "#94a3b8",
+                        "border-light": "#e2e8f0",
+                        "border-dark": "#334155",
+                        "success": "#10b981",
+                        "warning": "#f59e0b",
+                        "danger": "#ef4444"
                     },
                     fontFamily: {
-                        display: ["Inter", "sans-serif"],
+                        display: ["Poppins", "sans-serif"],
                     },
                     borderRadius: {
-                        DEFAULT: "0.5rem",
+                        DEFAULT: "0.75rem",
+                    },
+                    boxShadow: {
+                        card: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                        "card-hover": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
                     },
                 },
             },
         };
     </script>
     <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24
+        body {
+            font-family: 'Poppins', sans-serif;
         }
+        
         .material-icons-outlined {
-            font-family: 'Material Icons';
-            font-weight: normal;
-            font-style: normal;
             font-size: 24px;
-            line-height: 1;
-            letter-spacing: normal;
-            text-transform: none;
-            display: inline-block;
-            white-space: nowrap;
-            word-wrap: normal;
-            direction: ltr;
-            -webkit-font-feature-settings: 'liga';
-            -webkit-font-smoothing: antialiased;
+            vertical-align: middle;
         }
-        .active .material-symbols-outlined {
-            font-variation-settings: 'FILL' 1
+        
+        /* Card hover effects */
+        .stat-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
-        .active .material-icons-outlined {
-            font-weight: bold;
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        .modal {
-            transition: opacity 0.3s ease;
+        
+        /* Table styles */
+        .order-table {
+            transition: all 0.2s ease;
         }
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.5);
+        
+        .order-table tr:hover {
+            background-color: rgba(59, 130, 246, 0.05);
         }
-        .tooltip {
-            position: relative;
-        }
-        .tooltip::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.8);
+        
+        /* Button styles */
+        .btn-primary {
+            background-color: #3b82f6;
             color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+            transition: all 0.2s ease;
         }
-        .tooltip:hover::after {
-            opacity: 1;
+        
+        .btn-primary:hover {
+            background-color: #2563eb;
         }
-        /* Pagination styling */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 1rem;
-        }
-        .pagination a {
-            padding: 0.5rem 0.75rem;
-            margin: 0 0.25rem;
-            border-radius: 0.375rem;
+        
+        .btn-secondary {
             background-color: #f1f5f9;
-            color: #000000;
-            text-decoration: none;
-            transition: all 0.2s;
-            border: 1px solid #e2e8f0;
+            color: #64748b;
+            transition: all 0.2s ease;
         }
-        .pagination a:hover {
+        
+        .btn-secondary:hover {
             background-color: #e2e8f0;
         }
-        .pagination .active {
-            background-color: #000000;
+        
+        /* Modal styles */
+        .modal {
+            transition: opacity 0.25s ease;
+        }
+        
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        /* Status Badge Styles */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-paid {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #065f46;
+        }
+        
+        .status-unpaid {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #991b1b;
+        }
+        
+        .status-pending {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #92400e;
+        }
+        
+        /* Custom styles untuk transisi */
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        /* Animasi hamburger */
+        .hamburger-line {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .hamburger-active .line1 {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .hamburger-active .line2 {
+            opacity: 0;
+        }
+        
+        .hamburger-active .line3 {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+        
+        /* Gaya untuk indikator aktif/hover */
+        /* Default untuk mobile: di sebelah kanan */
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background-color: #3b82f6;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        /* Override untuk desktop: di sebelah kiri */
+        @media (min-width: 768px) {
+            .nav-item::before {
+                right: auto;
+                left: 0;
+                transform: translateX(-100%);
+            }
+        }
+        
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            transform: translateX(0);
+        }
+        
+        /* Memastikan sidebar tetap di posisinya saat scroll */
+        .sidebar-fixed {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 40;
+        }
+        
+        /* Menyesuaikan konten utama agar tidak tertutup sidebar */
+        .main-content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        @media (min-width: 768px) {
+            .main-content {
+                margin-left: 256px; /* Lebar sidebar */
+            }
+        }
+        
+        /* Scrollbar kustom untuk sidebar */
+        .sidebar-fixed::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar-fixed::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .sidebar-fixed::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        
+        .sidebar-fixed::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Table mobile adjustments */
+        @media (max-width: 639px) {
+            .desktop-table {
+                display: none;
+            }
+            
+            .mobile-cards {
+                display: block;
+            }
+            
+            /* Hide desktop pagination on mobile */
+            .desktop-pagination {
+                display: none !important;
+            }
+        }
+        
+        @media (min-width: 640px) {
+            .desktop-table {
+                display: block;
+            }
+            
+            .mobile-cards {
+                display: none;
+            }
+            
+            /* Hide mobile pagination on desktop */
+            .mobile-pagination {
+                display: none !important;
+            }
+        }
+        
+        /* Form input styles */
+        .form-input {
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        
+        .form-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Pagination styles */
+        .page-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .page-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Desktop pagination styles */
+        .desktop-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+        
+        .desktop-page-btn {
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .desktop-page-btn.active {
+            background-color: #3b82f6;
             color: white;
         }
-        .pagination .disabled {
-            opacity: 0.5;
-            pointer-events: none;
+        
+        .desktop-page-btn:not(.active) {
+            background-color: #f1f5f9;
+            color: #64748b;
         }
+        
+        .desktop-page-btn:not(.active):hover {
+            background-color: #e2e8f0;
+        }
+        
+        .desktop-nav-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            color: #64748b;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .desktop-nav-btn:hover:not(:disabled) {
+            background-color: #e2e8f0;
+        }
+        
+        .desktop-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Panel Styles */
+        .panel {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .panel-header {
+            background: #f8fafc;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .panel-body {
+            padding: 1.5rem;
+        }
+        
+        /* SCROLLABLE TABLE */
+        .scrollable-table-container {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background: white;
+        }
+        
+        /* Force scrollbar to be visible */
+        .scrollable-table-container {
+            scrollbar-width: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .scrollable-table-container::-webkit-scrollbar {
+            height: 12px;
+            width: 12px;
+        }
+        
+        .scrollable-table-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 6px;
+        }
+        
+        .scrollable-table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 6px;
+            border: 2px solid #f1f5f9;
+        }
+        
+        .scrollable-table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Table with fixed width to ensure scrolling */
+        .data-table {
+            width: 100%;
+            min-width: 1400px; /* Fixed minimum width */
+            border-collapse: collapse;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .data-table tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        
+        .data-table tbody tr:hover {
+            background: #f3f4f6;
+        }
+        
+        /* Shadow effect */
+        .table-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Minimalist Popup Styles */
+        .minimal-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            max-width: 350px;
+            border-left: 4px solid #10b981;
+        }
+        
+        .minimal-popup.show {
+            transform: translateX(0);
+        }
+        
+        .minimal-popup.error {
+            border-left-color: #ef4444;
+        }
+        
+        .minimal-popup.warning {
+            border-left-color: #f59e0b;
+        }
+        
+        .minimal-popup-icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .minimal-popup.success .minimal-popup-icon {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        
+        .minimal-popup.error .minimal-popup-icon {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        
+        .minimal-popup.warning .minimal-popup-icon {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+        
+        .minimal-popup-content {
+            flex-grow: 1;
+        }
+        
+        .minimal-popup-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 2px;
+        }
+        
+        .minimal-popup-message {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .minimal-popup-close {
+            flex-shrink: 0;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .minimal-popup-close:hover {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        
+        /* Filter Dropdown Styles */
+        .filter-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px;
+            min-width: 200px;
+            z-index: 100;
+            display: none;
+        }
+        
+        .filter-dropdown.show {
+            display: block;
+        }
+        
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-option:hover {
+            color: #3b82f6;
+        }
+        
+        .filter-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .filter-option label {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .filter-actions button {
+            flex: 1;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        
+        .filter-apply {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .filter-apply:hover {
+            background-color: #2563eb;
+        }
+        
+        .filter-reset {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .filter-reset:hover {
+            background-color: #e2e8f0;
+        }
+        
+        /* Hidden class for filtering */
+        .hidden-by-filter {
+            display: none !important;
+        }
+        
         /* Loading spinner */
         .spinner {
-            border: 2px solid rgba(0, 0, 0, 0.3);
+            border: 4px solid rgba(0, 0, 0, 0.1);
             border-radius: 50%;
-            border-top: 2px solid black;
-            width: 16px;
-            height: 16px;
+            border-top: 4px solid #3498db;
+            width: 30px;
+            height: 30px;
             animation: spin 1s linear infinite;
-            display: inline-block;
         }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Black and white theme overrides */
-        body {
-            color: #000000;
-        }
-        .dark body {
-            color: #ffffff;
-        }
-        .dark .bg-white {
-            background-color: #1a1a1a !important;
-        }
-        .dark .text-slate-900 {
-            color: #ffffff !important;
-        }
-        .dark .text-slate-800 {
-            color: #e0e0e0 !important;
-        }
-        .dark .text-slate-700 {
-            color: #cccccc !important;
-        }
-        .dark .text-slate-600 {
-            color: #b3b3b3 !important;
-        }
-        .dark .text-slate-500 {
-            color: #999999 !important;
-        }
-        .dark .text-slate-400 {
-            color: #808080 !important;
-        }
-        .dark .border-slate-200 {
-            border-color: #333333 !important;
-        }
-        .dark .border-slate-300 {
-            border-color: #404040 !important;
-        }
-        .dark .bg-slate-100 {
-            background-color: #1a1a1a !important;
-        }
-        .dark .bg-slate-200 {
-            background-color: #262626 !important;
-        }
-        .dark .bg-slate-700 {
-            background-color: #404040 !important;
-        }
-        .dark .bg-slate-800 {
-            background-color: #1a1a1a !important;
-        }
-        .dark .hover\:bg-slate-100:hover {
-            background-color: #333333 !important;
-        }
-        .dark .hover\:bg-slate-300:hover {
-            background-color: #333333 !important;
-        }
-        .dark .hover\:bg-slate-600:hover {
-            background-color: #333333 !important;
-        }
-        .dark .hover\:bg-slate-700:hover {
-            background-color: #333333 !important;
-        }
-        .dark input, .dark select, .dark textarea {
-            background-color: #262626 !important;
-            color: #ffffff !important;
-            border-color: #404040 !important;
-        }
-        .dark .focus\:ring-primary:focus {
-            --tw-ring-color: #666666 !important;
-        }
     </style>
 </head>
 
-<body class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200">
-    <div class="flex h-screen">
+<body class="font-display bg-background-light text-text-light">
+    <div class="flex min-h-screen">
         @include('admin/templet/sider')
-        <main class="flex-1 flex flex-col">
-            <div class="flex-grow p-8">
-                <div class="mb-4">
-                    <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-50">Kwitansi</h1>
-                </div>
+
+        <!-- MAIN -->
+        <main class="flex-1 flex flex-col main-content">
+            <div class="flex-grow p-3 sm:p-8">
+
+                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Kelola Kwitansi</h2>
                 
-                <div class="flex justify-between items-center mb-6">
-                    <button id="buatKwitansiBtn" onclick="toggleModal('buatKwitansiModal')" class="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-800 transition-colors">
-                        <span class="material-symbols-outlined">add</span>
-                        <span>Buat Kwitansi</span>
-                    </button>
-                    <div class="flex items-center gap-4">
+                <!-- Search and Filter Section -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div class="relative w-full md:w-1/3">
+                        <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama perusahaan, nomor order, atau klien..." type="text" />
+                    </div>
+                    <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <div class="relative">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                            <input id="searchInput" class="w-72 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-primary" placeholder="Search..." type="text" />
+                            <button id="filterBtn" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
+                                <span class="material-icons-outlined text-sm">filter_list</span>
+                                Filter
+                            </button>
+                            <div id="filterDropdown" class="filter-dropdown">
+                                <div class="filter-option">
+                                    <input type="checkbox" id="filterAll" value="all" checked>
+                                    <label for="filterAll">Semua Status</label>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="filterPaid" value="paid">
+                                    <label for="filterPaid">Paid</label>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="filterUnpaid" value="unpaid">
+                                    <label for="filterUnpaid">Unpaid</label>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="filterPending" value="pending">
+                                    <label for="filterPending">Pending</label>
+                                </div>
+                                <div class="filter-actions">
+                                    <button id="applyFilter" class="filter-apply">Terapkan</button>
+                                    <button id="resetFilter" class="filter-reset">Reset</button>
+                                </div>
+                            </div>
                         </div>
-                        <button id="filterBtn" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">Filter</button>
+                        <button id="buatKwitansiBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
+                            <span class="material-icons-outlined">add</span>
+                            <span class="hidden sm:inline">Buat Kwitansi</span>
+                            <span class="sm:hidden">Buat</span>
+                        </button>
                     </div>
                 </div>
                 
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md overflow-hidden border border-slate-200 dark:border-slate-700">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                                <tr>
-                                    <th class="p-4">No</th>
-                                    <th class="p-4">Tanggal</th>
-                                    <th class="p-4">Nama Perusahaan</th>
-                                    <th class="p-4">Nomor Order</th>
-                                    <th class="p-4">Nama Klien</th>
-                                    <th class="p-4">Deskripsi</th>
-                                    <th class="p-4">Harga</th>
-                                    <th class="p-4">Sub Total</th>
-                                    <th class="p-4">Fee Maintenance</th>
-                                    <th class="p-4">Total</th>
-                                    <th class="p-4">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 dark:divide-slate-700" id="kwitansiTableBody">
-                                <!-- Data will be loaded from database via JavaScript -->
-                            </tbody>
-                        </table>
+                <!-- Data Table Panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <span class="material-icons-outlined text-primary">receipt</span>
+                            Daftar Kwitansi
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">0</span> kwitansi</span>
+                        </div>
                     </div>
-                    
-                    <!-- Pagination -->
-                    <div class="p-4 border-t border-slate-200 dark:border-slate-700">
-                        <div class="pagination" id="pagination">
-                            <!-- Pagination links will be generated by JavaScript -->
+                    <div class="panel-body">
+                        <!-- SCROLLABLE TABLE -->
+                        <div class="desktop-table">
+                            <div class="scrollable-table-container scroll-indicator table-shadow" id="scrollableTable">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="min-width: 60px;">No</th>
+                                            <th style="min-width: 120px;">Tanggal</th>
+                                            <th style="min-width: 180px;">Nama Perusahaan</th>
+                                            <th style="min-width: 150px;">Nomor Order</th>
+                                            <th style="min-width: 150px;">Nama Klien</th>
+                                            <th style="min-width: 200px;">Deskripsi</th>
+                                            <th style="min-width: 120px;">Harga</th>
+                                            <th style="min-width: 120px;">Sub Total</th>
+                                            <th style="min-width: 150px;">Fee Maintenance</th>
+                                            <th style="min-width: 120px;">Total</th>
+                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="desktopTableBody">
+                                        <!-- Data will be populated here -->
+                                        <tr id="loadingRow">
+                                            <td colspan="11" class="px-6 py-4 text-center">
+                                                <div class="flex justify-center items-center">
+                                                    <div class="spinner"></div>
+                                                    <span class="ml-2">Memuat data...</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr id="noDataRow" class="hidden">
+                                            <td colspan="11" class="px-6 py-4 text-center text-sm text-gray-500">
+                                                Tidak ada data kwitansi
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile Card View -->
+                        <div class="mobile-cards space-y-4" id="mobile-cards">
+                            <!-- Mobile cards will be populated here -->
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div id="paginationContainer" class="desktop-pagination">
+                            <button id="prevPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_left</span>
+                            </button>
+                            <div id="pageNumbers" class="flex gap-1">
+                                <!-- Page numbers will be generated by JavaScript -->
+                            </div>
+                            <button id="nextPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_right</span>
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-            <footer class="text-center p-4 bg-slate-200 dark:bg-slate-900 text-sm text-slate-600 dark:text-slate-400">
+            <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light">
                 Copyright ©2025 by digicity.id
             </footer>
         </main>
@@ -255,194 +759,188 @@
 
     <!-- Modal Buat Kwitansi -->
     <div id="buatKwitansiModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-slate-800 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
-            <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-                <div>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-slate-50">Buat Kwitansi Baru</h3>
-                    <p class="text-slate-600 dark:text-slate-400">Pilih invoice dan isi form untuk membuat kwitansi</p>
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Buat Kwitansi Baru</h3>
+                    <button id="closeModalBtn" class="text-gray-800 hover:text-gray-500">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
                 </div>
-                <button onclick="toggleModal('buatKwitansiModal')" class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-            <div class="flex-grow overflow-auto p-4">
                 <form id="buatKwitansiForm" class="space-y-4">
                     @csrf
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Pilih Invoice</label>
-                        <select id="pilihInvoice" name="invoice_id" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Invoice</label>
+                        <select id="pilihInvoice" name="invoice_id" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                             <option value="">-- Pilih Invoice --</option>
                             <!-- Invoice options will be loaded via JavaScript -->
                         </select>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tanggal</label>
-                            <input type="date" id="tanggal" name="tanggal" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                            <input type="date" id="tanggal" name="tanggal" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nama Perusahaan</label>
-                            <input type="text" id="namaPerusahaan" name="nama_perusahaan" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Perusahaan</label>
+                            <input type="text" id="namaPerusahaan" name="nama_perusahaan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nomor Order</label>
-                        <input type="text" id="nomorOrder" name="nomor_order" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Order</label>
+                        <input type="text" id="nomorOrder" name="nomor_order" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nama Klien</label>
-                        <input type="text" id="namaKlien" name="nama_klien" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Klien</label>
+                        <input type="text" id="namaKlien" name="nama_klien" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <!-- Added Deskripsi Field -->
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Deskripsi</label>
-                        <textarea id="deskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                        <textarea id="deskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Harga (Rp)</label>
-                            <input type="number" id="harga" name="harga" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
+                            <input type="number" id="harga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Sub Total (Rp)</label>
-                            <input type="number" id="subTotal" name="sub_total" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sub Total (Rp)</label>
+                            <input type="number" id="subTotal" name="sub_total" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fee Maintenance (Rp)</label>
-                            <input type="number" id="feeMaintenance" name="fee_maintenance" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fee Maintenance (Rp)</label>
+                            <input type="number" id="feeMaintenance" name="fee_maintenance" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Total (Rp)</label>
-                        <input type="text" id="total" name="total_display" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50" readonly>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp)</label>
+                        <input type="text" id="total" name="total_display" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700" readonly>
                         <!-- Hidden input for the actual numeric total value -->
                         <input type="hidden" id="totalValue" name="total" value="0">
                     </div>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" id="cancelBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Buat Kwitansi</button>
+                    </div>
                 </form>
-            </div>
-            <div class="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-end space-x-3">
-                <button onclick="toggleModal('buatKwitansiModal')" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
-                    Batal
-                </button>
-                <button id="submitBuatKwitansiBtn" class="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-gray-800 transition-colors flex items-center">
-                    <span id="submitBuatKwitansiText">Buat Kwitansi</span>
-                    <span id="submitBuatKwitansiSpinner" class="spinner ml-2 hidden"></span>
-                </button>
             </div>
         </div>
     </div>
 
     <!-- Modal Edit Kwitansi -->
     <div id="editKwitansiModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-slate-800 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
-            <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-                <div>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-slate-50">Edit Kwitansi</h3>
-                    <p class="text-slate-600 dark:text-slate-400">Ubah informasi kwitansi di bawah</p>
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Edit Kwitansi</h3>
+                    <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
                 </div>
-                <button onclick="toggleModal('editKwitansiModal')" class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-            <div class="flex-grow overflow-auto p-4">
                 <form id="editKwitansiForm" class="space-y-4">
                     @csrf
                     <input type="hidden" id="editKwitansiId" name="id">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tanggal</label>
-                            <input type="date" id="editTanggal" name="tanggal" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                            <input type="date" id="editTanggal" name="tanggal" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nama Perusahaan</label>
-                            <input type="text" id="editNamaPerusahaan" name="nama_perusahaan" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Perusahaan</label>
+                            <input type="text" id="editNamaPerusahaan" name="nama_perusahaan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nomor Order</label>
-                        <input type="text" id="editNomorOrder" name="nomor_order" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Order</label>
+                        <input type="text" id="editNomorOrder" name="nomor_order" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nama Klien</label>
-                        <input type="text" id="editNamaKlien" name="nama_klien" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Klien</label>
+                        <input type="text" id="editNamaKlien" name="nama_klien" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <!-- Added Deskripsi Field -->
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Deskripsi</label>
-                        <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                        <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Harga (Rp)</label>
-                            <input type="number" id="editHarga" name="harga" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
+                            <input type="number" id="editHarga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Sub Total (Rp)</label>
-                            <input type="number" id="editSubTotal" name="sub_total" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sub Total (Rp)</label>
+                            <input type="number" id="editSubTotal" name="sub_total" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fee Maintenance (Rp)</label>
-                            <input type="number" id="editFeeMaintenance" name="fee_maintenance" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fee Maintenance (Rp)</label>
+                            <input type="number" id="editFeeMaintenance" name="fee_maintenance" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Total (Rp)</label>
-                        <input type="text" id="editTotal" name="total_display" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-50" readonly>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp)</label>
+                        <input type="text" id="editTotal" name="total_display" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700" readonly>
                         <!-- Hidden input for the actual numeric total value -->
                         <input type="hidden" id="editTotalValue" name="total" value="0">
                     </div>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" id="cancelEditBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Kwitansi</button>
+                    </div>
                 </form>
-            </div>
-            <div class="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-end space-x-3">
-                <button onclick="toggleModal('editKwitansiModal')" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
-                    Batal
-                </button>
-                <button id="submitEditKwitansiBtn" class="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-gray-800 transition-colors flex items-center">
-                    <span id="submitEditKwitansiText">Update Kwitansi</span>
-                    <span id="submitEditKwitansiSpinner" class="spinner ml-2 hidden"></span>
-                </button>
             </div>
         </div>
     </div>
 
     <!-- Modal Hapus Kwitansi -->
     <div id="deleteKwitansiModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-slate-800 rounded-lg max-w-md w-full mx-4 border border-slate-200 dark:border-slate-700">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-slate-50">Konfirmasi Hapus</h3>
-                    <button onclick="toggleModal('deleteKwitansiModal')" class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
-                        <span class="material-symbols-outlined">close</span>
+                    <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h3>
+                    <button id="closeDeleteModalBtn" class="text-gray-800 hover:text-gray-500">
+                        <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <div class="mb-6">
-                    <p class="text-slate-900 dark:text-slate-50">Apakah Anda yakin ingin menghapus kwitansi untuk <span id="deleteKwitansiNama" class="font-semibold"></span> dengan nomor order <span id="deleteKwitansiNomor" class="font-semibold"></span>?</p>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Tindakan ini tidak dapat dibatalkan.</p>
-                </div>
-                <input type="hidden" id="deleteKwitansiId">
-                <div class="flex justify-end gap-2">
-                    <button type="button" onclick="toggleModal('deleteKwitansiModal')" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600">Batal</button>
-                    <button id="confirmDeleteKwitansiBtn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center">
-                        <span id="confirmDeleteText">Hapus</span>
-                        <span id="confirmDeleteSpinner" class="spinner ml-2 hidden"></span>
-                    </button>
-                </div>
+                <form id="deleteKwitansiForm" class="space-y-4">
+                    <div class="mb-6">
+                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus kwitansi untuk <span id="deleteKwitansiNama" class="font-semibold"></span> dengan nomor order <span id="deleteKwitansiNomor" class="font-semibold"></span>?</p>
+                        <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
+                        <input type="hidden" id="deleteKwitansiId" name="id">
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button type="button" id="cancelDeleteBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center">
-        <span id="toastMessage" class="mr-2"></span>
-        <button id="closeToast" class="ml-2 text-white hover:text-gray-200">
-            <span class="material-symbols-outlined text-lg">close</span>
+    <!-- Minimalist Popup -->
+    <div id="minimalPopup" class="minimal-popup">
+        <div class="minimal-popup-icon">
+            <span class="material-icons-outlined">check</span>
+        </div>
+        <div class="minimal-popup-content">
+            <div class="minimal-popup-title">Berhasil</div>
+            <div class="minimal-popup-message">Operasi berhasil dilakukan</div>
+        </div>
+        <button class="minimal-popup-close">
+            <span class="material-icons-outlined text-sm">close</span>
         </button>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log("DOM Content Loaded. Memulai inisialisasi...");
+        // Declare all global variables at the top level
+        let currentPage = 1;
+        const itemsPerPage = 5;
+        let activeFilters = ['all'];
+        let searchTerm = '';
+        let allKwitansi = []; // Store all kwitansi data
 
+        document.addEventListener('DOMContentLoaded', function() {
             // Set today's date as default for the date input
             const today = new Date().toISOString().split('T')[0];
             const tanggalInput = document.getElementById('tanggal');
@@ -451,54 +949,120 @@
             }
 
             // Load invoice options when page loads
-            console.log("Memuat opsi invoice...");
             loadInvoiceOptions();
             
             // Load kwitansi data on page load
-            console.log("Memuat data kwitansi...");
             loadKwitansiData();
             
             // Event listener for search input
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
-                    loadKwitansiData(1, this.value);
+                    clearTimeout(this.searchTimeout);
+                    this.searchTimeout = setTimeout(() => {
+                        searchTerm = this.value.trim();
+                        currentPage = 1; // Reset to first page on search
+                        applyFilters();
+                    }, 300); // Debounce search
                 });
-            } else {
-                console.error("Elemen #searchInput tidak ditemukan.");
             }
             
             // Event listener for filter button
             const filterBtn = document.getElementById('filterBtn');
             if (filterBtn) {
                 filterBtn.addEventListener('click', function() {
-                    showToast('Filter functionality will be implemented soon');
-                });
-            }
-
-            // Event listener for submit Buat Kwitansi form - FIXED NAMING CONFLICT
-            const submitBuatKwitansiBtn = document.getElementById('submitBuatKwitansiBtn');
-            if (submitBuatKwitansiBtn) {
-                submitBuatKwitansiBtn.addEventListener('click', function() {
-                    submitBuatKwitansiForm();
+                    document.getElementById('filterDropdown').classList.toggle('show');
                 });
             }
             
-            // Event listener for submit Edit Kwitansi form - FIXED NAMING CONFLICT
-            const submitEditKwitansiBtn = document.getElementById('submitEditKwitansiBtn');
-            if (submitEditKwitansiBtn) {
-                submitEditKwitansiBtn.addEventListener('click', function() {
-                    submitEditKwitansiForm();
+            // Close filter dropdown when clicking outside
+            document.addEventListener('click', function() {
+                document.getElementById('filterDropdown').classList.remove('show');
+            });
+            
+            // Prevent dropdown from closing when clicking inside
+            document.getElementById('filterDropdown').addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Event listener for Buat Kwitansi button
+            const buatKwitansiBtn = document.getElementById('buatKwitansiBtn');
+            if (buatKwitansiBtn) {
+                buatKwitansiBtn.addEventListener('click', function() {
+                    document.getElementById('buatKwitansiModal').classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
                 });
             }
             
-            // Event listener for confirm delete button - FIXED NAMING CONFLICT
-            const confirmDeleteKwitansiBtn = document.getElementById('confirmDeleteKwitansiBtn');
-            if (confirmDeleteKwitansiBtn) {
-                confirmDeleteKwitansiBtn.addEventListener('click', function() {
-                    confirmDeleteKwitansi();
-                });
-            }
+            // Close modal when clicking outside
+            document.getElementById('buatKwitansiModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeBuatKwitansiModal();
+                }
+            });
+            
+            document.getElementById('editKwitansiModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeEditKwitansiModal();
+                }
+            });
+            
+            document.getElementById('deleteKwitansiModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeDeleteKwitansiModal();
+                }
+            });
+            
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (!document.getElementById('buatKwitansiModal').classList.contains('hidden')) {
+                        closeBuatKwitansiModal();
+                    }
+                    if (!document.getElementById('editKwitansiModal').classList.contains('hidden')) {
+                        closeEditKwitansiModal();
+                    }
+                    if (!document.getElementById('deleteKwitansiModal').classList.contains('hidden')) {
+                        closeDeleteKwitansiModal();
+                    }
+                }
+            });
+            
+            // Close popup when clicking the close button
+            document.querySelector('.minimal-popup-close').addEventListener('click', function() {
+                document.getElementById('minimalPopup').classList.remove('show');
+            });
+            
+            // Modal close buttons
+            document.getElementById('closeModalBtn').addEventListener('click', closeBuatKwitansiModal);
+            document.getElementById('cancelBtn').addEventListener('click', closeBuatKwitansiModal);
+            document.getElementById('closeEditModalBtn').addEventListener('click', closeEditKwitansiModal);
+            document.getElementById('cancelEditBtn').addEventListener('click', closeEditKwitansiModal);
+            document.getElementById('closeDeleteModalBtn').addEventListener('click', closeDeleteKwitansiModal);
+            document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteKwitansiModal);
+            
+            // Form submissions
+            document.getElementById('buatKwitansiForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitBuatKwitansi();
+            });
+            
+            document.getElementById('editKwitansiForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitEditKwitansi();
+            });
+            
+            document.getElementById('deleteKwitansiForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const id = document.getElementById('deleteKwitansiId').value;
+                deleteKwitansi(id);
+            });
+            
+            // Initialize filter
+            initializeFilter();
+            
+            // Initialize scroll detection for table
+            initializeScrollDetection();
             
             // Event listener for invoice selection
             const pilihInvoice = document.getElementById('pilihInvoice');
@@ -535,12 +1099,12 @@
                                 // Calculate total
                                 calculateTotal();
                             } else {
-                                showToast(data.message || 'Gagal mengambil data invoice', 'error');
+                                showMinimalPopup('Error', data.message || 'Gagal mengambil data invoice', 'error');
                             }
                         })
                         .catch(error => {
                             console.error('Error fetching invoice details:', error);
-                            showToast('Terjadi kesalahan saat mengambil data invoice', 'error');
+                            showMinimalPopup('Error', 'Terjadi kesalahan saat mengambil data invoice', 'error');
                         });
                     }
                 });
@@ -557,26 +1121,21 @@
             const editFeeMaintenance = document.getElementById('editFeeMaintenance');
             if (editSubTotal) editSubTotal.addEventListener('input', calculateEditTotal);
             if (editFeeMaintenance) editFeeMaintenance.addEventListener('input', calculateEditTotal);
-            
-            // Close modal with Escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    ['buatKwitansiModal', 'editKwitansiModal', 'deleteKwitansiModal'].forEach(id => {
-                        if (!document.getElementById(id).classList.contains('hidden')) {
-                            toggleModal(id);
-                        }
-                    });
-                }
-            });
-            
-            // Close toast notification
-            const closeToast = document.getElementById('closeToast');
-            if (closeToast) {
-                closeToast.addEventListener('click', hideToast);
-            }
-            
-            console.log("Inisialisasi selesai.");
         });
+        
+        // Function to format number to Rupiah
+        function formatToRupiah(number) {
+            if (isNaN(number)) return 'Rp 0';
+            return 'Rp ' + parseFloat(number).toLocaleString('id-ID');
+        }
+        
+        // Function to parse Rupiah string back to number
+        function parseRupiah(rupiahString) {
+            if (typeof rupiahString !== 'string') return 0;
+            // Remove "Rp " and all non-digit characters except decimal point
+            const cleanString = rupiahString.replace(/Rp\s/g, '').replace(/[^\d.-]/g, '');
+            return parseFloat(cleanString) || 0;
+        }
         
         // Load invoice options from database
         function loadInvoiceOptions() {
@@ -618,25 +1177,30 @@
             })
             .catch(error => {
                 console.error('Error loading invoice options:', error);
-                showToast('Terjadi kesalahan saat memuat data invoice', 'error');
+                showMinimalPopup('Error', 'Terjadi kesalahan saat memuat data invoice', 'error');
             });
         }
         
         // Load kwitansi data from database
-        function loadKwitansiData(page = 1, search = '') {
-            const tableBody = document.getElementById('kwitansiTableBody');
-            const pagination = document.getElementById('pagination');
+        function loadKwitansiData() {
+            const loadingRow = document.getElementById('loadingRow');
+            const noDataRow = document.getElementById('noDataRow');
+            const tableBody = document.getElementById('desktopTableBody');
+            const mobileCards = document.getElementById('mobile-cards');
             
-            if (!tableBody) {
-                console.error("Elemen #kwitansiTableBody tidak ditemukan.");
-                return;
-            }
+            // Show loading
+            loadingRow.classList.remove('hidden');
+            noDataRow.classList.add('hidden');
             
-            // Show loading state
-            tableBody.innerHTML = '<tr><td colspan="11" class="p-4 text-center">Loading data...</td></tr>';
+            // Remove existing kwitansi rows and cards
+            const existingRows = tableBody.querySelectorAll('.kwitansi-row');
+            existingRows.forEach(row => row.remove());
+            
+            const existingCards = mobileCards.querySelectorAll('.kwitansi-card');
+            existingCards.forEach(card => card.remove());
             
             // Fetch data from API
-            fetch(`/api/kwitansi?page=${page}&search=${encodeURIComponent(search)}`, {
+            fetch('/api/kwitansi', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -651,24 +1215,27 @@
                 return response.json();
             })
             .then(data => {
-                // Clear table
-                tableBody.innerHTML = '';
+                loadingRow.classList.add('hidden');
                 
-                // Check if there's data
                 if (data.data && data.data.length > 0) {
-                    // Populate table with data
+                    // Store all kwitansi data
+                    allKwitansi = data.data;
+                    
+                    // Populate table with kwitansi data
                     data.data.forEach((kwitansi, index) => {
+                        // Create desktop table row
                         const row = document.createElement('tr');
-                        row.className = 'hover:bg-slate-50 dark:hover:bg-slate-700';
-                        
-                        // Calculate row number based on current page
-                        const rowNumber = (data.current_page - 1) * data.per_page + index + 1;
-                        
-                        // Format price with thousand separator
-                        const formattedHarga = new Intl.NumberFormat('id-ID').format(kwitansi.harga);
-                        const formattedSubTotal = new Intl.NumberFormat('id-ID').format(kwitansi.sub_total);
-                        const formattedFeeMaintenance = new Intl.NumberFormat('id-ID').format(kwitansi.fee_maintenance);
-                        const formattedTotal = new Intl.NumberFormat('id-ID').format(kwitansi.total);
+                        row.className = 'kwitansi-row';
+                        row.setAttribute('data-id', kwitansi.id);
+                        row.setAttribute('data-tanggal', kwitansi.tanggal);
+                        row.setAttribute('data-nama-perusahaan', kwitansi.nama_perusahaan);
+                        row.setAttribute('data-nomor-order', kwitansi.nomor_order);
+                        row.setAttribute('data-nama-klien', kwitansi.nama_klien);
+                        row.setAttribute('data-deskripsi', kwitansi.deskripsi || '');
+                        row.setAttribute('data-harga', kwitansi.harga);
+                        row.setAttribute('data-sub-total', kwitansi.sub_total);
+                        row.setAttribute('data-fee-maintenance', kwitansi.fee_maintenance);
+                        row.setAttribute('data-total', kwitansi.total);
                         
                         // Format date
                         let formattedDate = '';
@@ -681,6 +1248,12 @@
                             });
                         }
                         
+                        // Format price with thousand separator
+                        const formattedHarga = new Intl.NumberFormat('id-ID').format(kwitansi.harga);
+                        const formattedSubTotal = new Intl.NumberFormat('id-ID').format(kwitansi.sub_total);
+                        const formattedFeeMaintenance = new Intl.NumberFormat('id-ID').format(kwitansi.fee_maintenance);
+                        const formattedTotal = new Intl.NumberFormat('id-ID').format(kwitansi.total);
+                        
                         // Truncate description if too long
                         let deskripsiDisplay = kwitansi.deskripsi || '';
                         if (deskripsiDisplay.length > 50) {
@@ -688,81 +1261,150 @@
                         }
                         
                         row.innerHTML = `
-                            <td class="p-4">${rowNumber}.</td>
-                            <td class="p-4">${formattedDate}</td>
-                            <td class="p-4">${kwitansi.nama_perusahaan}</td>
-                            <td class="p-4">${kwitansi.nomor_order}</td>
-                            <td class="p-4">${kwitansi.nama_klien}</td>
-                            <td class="p-4" title="${kwitansi.deskripsi || ''}">${deskripsiDisplay}</td>
-                            <td class="p-4">Rp ${formattedHarga}</td>
-                            <td class="p-4">Rp ${formattedSubTotal}</td>
-                            <td class="p-4">Rp ${formattedFeeMaintenance}</td>
-                            <td class="p-4">Rp ${formattedTotal}</td>
-                            <td class="p-4">
+                            <td style="min-width: 60px;">${index + 1}.</td>
+                            <td style="min-width: 120px;">${formattedDate}</td>
+                            <td style="min-width: 180px;">${kwitansi.nama_perusahaan}</td>
+                            <td style="min-width: 150px;">${kwitansi.nomor_order}</td>
+                            <td style="min-width: 150px;">${kwitansi.nama_klien}</td>
+                            <td style="min-width: 200px;" title="${kwitansi.deskripsi || ''}">${deskripsiDisplay}</td>
+                            <td style="min-width: 120px;">Rp ${formattedHarga}</td>
+                            <td style="min-width: 120px;">Rp ${formattedSubTotal}</td>
+                            <td style="min-width: 150px;">Rp ${formattedFeeMaintenance}</td>
+                            <td style="min-width: 120px;">Rp ${formattedTotal}</td>
+                            <td style="min-width: 100px; text-align: center;">
                                 <div class="flex justify-center gap-2">
-                                    <button class="edit-kwitansi-btn tooltip p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" 
-                                        data-id="${kwitansi.id}" 
+                                    <button class="edit-kwitansi-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
+                                        data-id="${kwitansi.id}"
                                         data-tanggal="${kwitansi.tanggal}"
                                         data-nama-perusahaan="${kwitansi.nama_perusahaan}"
-                                        data-nomor-order="${kwitansi.nomor_order}" 
+                                        data-nomor-order="${kwitansi.nomor_order}"
                                         data-nama-klien="${kwitansi.nama_klien}"
                                         data-deskripsi="${kwitansi.deskripsi || ''}"
                                         data-harga="${kwitansi.harga}"
                                         data-sub-total="${kwitansi.sub_total}"
                                         data-fee-maintenance="${kwitansi.fee_maintenance}"
-                                        data-total="${kwitansi.total}"
-                                        data-tooltip="Edit">
-                                        <span class="material-symbols-outlined text-gray-700 dark:text-gray-300">edit</span>
+                                        data-total="${kwitansi.total}">
+                                        <span class="material-icons-outlined">edit</span>
                                     </button>
-                                    <button class="cetak-kwitansi-btn tooltip p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" 
-                                        data-id="${kwitansi.id}" 
-                                        data-tooltip="Cetak">
-                                        <span class="material-symbols-outlined text-gray-700 dark:text-gray-300">print</span>
+                                    <button class="cetak-kwitansi-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
+                                        data-id="${kwitansi.id}">
+                                        <span class="material-icons-outlined">print</span>
                                     </button>
-                                    <button class="delete-kwitansi-btn tooltip p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" 
-                                        data-id="${kwitansi.id}" 
+                                    <button class="delete-kwitansi-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
+                                        data-id="${kwitansi.id}"
                                         data-nama-perusahaan="${kwitansi.nama_perusahaan}"
-                                        data-nomor-order="${kwitansi.nomor_order}" 
-                                        data-tooltip="Hapus">
-                                        <span class="material-symbols-outlined text-red-500">delete</span>
+                                        data-nomor-order="${kwitansi.nomor_order}">
+                                        <span class="material-icons-outlined">delete</span>
                                     </button>
                                 </div>
                             </td>
                         `;
                         
                         tableBody.appendChild(row);
+                        
+                        // Create mobile card
+                        const card = document.createElement('div');
+                        card.className = 'kwitansi-card bg-white rounded-lg border border-border-light p-4 shadow-sm';
+                        card.setAttribute('data-id', kwitansi.id);
+                        card.setAttribute('data-tanggal', kwitansi.tanggal);
+                        card.setAttribute('data-nama-perusahaan', kwitansi.nama_perusahaan);
+                        card.setAttribute('data-nomor-order', kwitansi.nomor_order);
+                        card.setAttribute('data-nama-klien', kwitansi.nama_klien);
+                        card.setAttribute('data-deskripsi', kwitansi.deskripsi || '');
+                        
+                        card.innerHTML = `
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h4 class="font-semibold text-base">${kwitansi.nama_perusahaan}</h4>
+                                    <p class="text-sm text-text-muted-light">${kwitansi.nomor_order}</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="edit-kwitansi-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
+                                        data-id="${kwitansi.id}"
+                                        data-tanggal="${kwitansi.tanggal}"
+                                        data-nama-perusahaan="${kwitansi.nama_perusahaan}"
+                                        data-nomor-order="${kwitansi.nomor_order}"
+                                        data-nama-klien="${kwitansi.nama_klien}"
+                                        data-deskripsi="${kwitansi.deskripsi || ''}"
+                                        data-harga="${kwitansi.harga}"
+                                        data-sub-total="${kwitansi.sub_total}"
+                                        data-fee-maintenance="${kwitansi.fee_maintenance}"
+                                        data-total="${kwitansi.total}">
+                                        <span class="material-icons-outlined">edit</span>
+                                    </button>
+                                    <button class="cetak-kwitansi-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
+                                        data-id="${kwitansi.id}">
+                                        <span class="material-icons-outlined">print</span>
+                                    </button>
+                                    <button class="delete-kwitansi-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
+                                        data-id="${kwitansi.id}"
+                                        data-nama-perusahaan="${kwitansi.nama_perusahaan}"
+                                        data-nomor-order="${kwitansi.nomor_order}">
+                                        <span class="material-icons-outlined">delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    <p class="text-text-muted-light">No</p>
+                                    <p class="font-medium">${index + 1}</p>
+                                </div>
+                                <div>
+                                    <p class="text-text-muted-light">Tanggal</p>
+                                    <p class="font-medium">${formattedDate}</p>
+                                </div>
+                                <div>
+                                    <p class="text-text-muted-light">Nama Klien</p>
+                                    <p class="font-medium">${kwitansi.nama_klien}</p>
+                                </div>
+                                <div>
+                                    <p class="text-text-muted-light">Total</p>
+                                    <p class="font-medium">Rp ${formattedTotal}</p>
+                                </div>
+                            </div>
+                        `;
+                        
+                        mobileCards.appendChild(card);
                     });
-                    
-                    // Generate pagination
-                    generatePagination(data);
                     
                     // Add event listeners to edit buttons
                     document.querySelectorAll('.edit-kwitansi-btn').forEach(btn => {
                         btn.addEventListener('click', function() {
-                            document.getElementById('editKwitansiId').value = this.getAttribute('data-id');
+                            const id = this.getAttribute('data-id');
+                            const tanggal = this.getAttribute('data-tanggal');
+                            const namaPerusahaan = this.getAttribute('data-nama-perusahaan');
+                            const nomorOrder = this.getAttribute('data-nomor-order');
+                            const namaKlien = this.getAttribute('data-nama-klien');
+                            const deskripsi = this.getAttribute('data-deskripsi');
+                            const harga = this.getAttribute('data-harga');
+                            const subTotal = this.getAttribute('data-sub-total');
+                            const feeMaintenance = this.getAttribute('data-fee-maintenance');
+                            const total = this.getAttribute('data-total');
+                            
+                            document.getElementById('editKwitansiId').value = id;
                             
                             // Format date for input field (YYYY-MM-DD)
-                            let tanggalValue = this.getAttribute('data-tanggal');
+                            let tanggalValue = tanggal;
                             if (tanggalValue) {
                                 const date = new Date(tanggalValue);
                                 tanggalValue = date.toISOString().split('T')[0];
                             }
                             document.getElementById('editTanggal').value = tanggalValue;
                             
-                            document.getElementById('editNamaPerusahaan').value = this.getAttribute('data-nama-perusahaan');
-                            document.getElementById('editNomorOrder').value = this.getAttribute('data-nomor-order');
-                            document.getElementById('editNamaKlien').value = this.getAttribute('data-nama-klien');
-                            document.getElementById('editDeskripsi').value = this.getAttribute('data-deskripsi');
-                            document.getElementById('editHarga').value = this.getAttribute('data-harga');
-                            document.getElementById('editSubTotal').value = this.getAttribute('data-sub-total');
-                            document.getElementById('editFeeMaintenance').value = this.getAttribute('data-fee-maintenance');
+                            document.getElementById('editNamaPerusahaan').value = namaPerusahaan;
+                            document.getElementById('editNomorOrder').value = nomorOrder;
+                            document.getElementById('editNamaKlien').value = namaKlien;
+                            document.getElementById('editDeskripsi').value = deskripsi;
+                            document.getElementById('editHarga').value = harga;
+                            document.getElementById('editSubTotal').value = subTotal;
+                            document.getElementById('editFeeMaintenance').value = feeMaintenance;
                             
                             // Set both the display and the actual value for total
-                            const totalValue = this.getAttribute('data-total');
-                            document.getElementById('editTotal').value = parseFloat(totalValue).toLocaleString('id-ID');
-                            document.getElementById('editTotalValue').value = totalValue;
+                            document.getElementById('editTotal').value = parseFloat(total).toLocaleString('id-ID');
+                            document.getElementById('editTotalValue').value = total;
                             
-                            toggleModal('editKwitansiModal');
+                            document.getElementById('editKwitansiModal').classList.remove('hidden');
+                            document.body.style.overflow = 'hidden';
                         });
                     });
                     
@@ -777,159 +1419,55 @@
                     // Add event listeners to delete buttons
                     document.querySelectorAll('.delete-kwitansi-btn').forEach(btn => {
                         btn.addEventListener('click', function() {
-                            document.getElementById('deleteKwitansiId').value = this.getAttribute('data-id');
-                            document.getElementById('deleteKwitansiNama').textContent = this.getAttribute('data-nama-perusahaan');
-                            document.getElementById('deleteKwitansiNomor').textContent = this.getAttribute('data-nomor-order');
-                            toggleModal('deleteKwitansiModal');
+                            const id = this.getAttribute('data-id');
+                            const namaPerusahaan = this.getAttribute('data-nama-perusahaan');
+                            const nomorOrder = this.getAttribute('data-nomor-order');
+                            
+                            document.getElementById('deleteKwitansiId').value = id;
+                            document.getElementById('deleteKwitansiNama').textContent = namaPerusahaan;
+                            document.getElementById('deleteKwitansiNomor').textContent = nomorOrder;
+                            
+                            document.getElementById('deleteKwitansiModal').classList.remove('hidden');
+                            document.body.style.overflow = 'hidden';
                         });
                     });
+                    
+                    // Apply filters and initialize pagination
+                    applyFilters();
                 } else {
-                    // No data message
-                    tableBody.innerHTML = '<tr><td colspan="11" class="p-4 text-center">Tidak ada data kwitansi</td></tr>';
-                    if (pagination) pagination.innerHTML = '';
+                    // Show no data message
+                    noDataRow.classList.remove('hidden');
+                    
+                    // Update total count
+                    document.getElementById('totalCount').textContent = '0';
                 }
             })
             .catch(error => {
+                loadingRow.classList.add('hidden');
                 console.error('Error loading kwitansi data:', error);
-                tableBody.innerHTML = '<tr><td colspan="11" class="p-4 text-center text-red-500">Error loading data. Please try again.</td></tr>';
+                showMinimalPopup('Error', 'Gagal memuat data kwitansi: ' + error.message, 'error');
             });
         }
         
-        // Generate pagination links
-        function generatePagination(data) {
-            const pagination = document.getElementById('pagination');
-            if (!pagination) return;
-            
-            pagination.innerHTML = '';
-            
-            if (data.last_page > 1) {
-                // Previous button
-                const prevBtn = document.createElement('a');
-                prevBtn.href = '#';
-                prevBtn.innerHTML = '&laquo; Previous';
-                prevBtn.className = data.prev_page_url ? '' : 'disabled';
-                if (data.prev_page_url) {
-                    prevBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        loadKwitansiData(data.current_page - 1, document.getElementById('searchInput').value);
-                    });
-                }
-                pagination.appendChild(prevBtn);
-                
-                // Page numbers
-                for (let i = 1; i <= data.last_page; i++) {
-                    const pageBtn = document.createElement('a');
-                    pageBtn.href = '#';
-                    pageBtn.textContent = i;
-                    pageBtn.className = i === data.current_page ? 'active' : '';
-                    pageBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        loadKwitansiData(i, document.getElementById('searchInput').value);
-                    });
-                    pagination.appendChild(pageBtn);
-                }
-                
-                // Next button
-                const nextBtn = document.createElement('a');
-                nextBtn.href = '#';
-                nextBtn.innerHTML = 'Next &raquo;';
-                nextBtn.className = data.next_page_url ? '' : 'disabled';
-                if (data.next_page_url) {
-                    nextBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        loadKwitansiData(data.current_page + 1, document.getElementById('searchInput').value);
-                    });
-                }
-                pagination.appendChild(nextBtn);
-            }
-        }
-        
-        // Modal toggle function
-        function toggleModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (!modal) return;
-            
-            const isHidden = modal.classList.contains('hidden');
-            
-            if (isHidden) {
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            } else {
-                modal.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-                
-                // Reset form if it's a create modal
-                if (modalId === 'buatKwitansiModal') {
-                    const form = document.getElementById('buatKwitansiForm');
-                    if (form) form.reset();
-                    const totalInput = document.getElementById('total');
-                    if (totalInput) totalInput.value = '';
-                    const totalValueInput = document.getElementById('totalValue');
-                    if (totalValueInput) totalValueInput.value = '0';
-                    
-                    // Set today's date again
-                    const today = new Date().toISOString().split('T')[0];
-                    const tanggalInput = document.getElementById('tanggal');
-                    if (tanggalInput) {
-                        tanggalInput.value = today;
-                    }
-                }
-            }
-        }
-        
-        // Function to calculate total in create form
-        function calculateTotal() {
-            const subTotal = parseFloat(document.getElementById('subTotal').value) || 0;
-            const feeMaintenance = parseFloat(document.getElementById('feeMaintenance').value) || 0;
-            const total = subTotal + feeMaintenance;
-            
-            // Set both the display and the actual value
-            document.getElementById('total').value = total.toLocaleString('id-ID');
-            document.getElementById('totalValue').value = total;
-        }
-        
-        // Function to calculate total in edit form
-        function calculateEditTotal() {
-            const subTotal = parseFloat(document.getElementById('editSubTotal').value) || 0;
-            const feeMaintenance = parseFloat(document.getElementById('editFeeMaintenance').value) || 0;
-            const total = subTotal + feeMaintenance;
-            
-            // Set both the display and the actual value
-            document.getElementById('editTotal').value = total.toLocaleString('id-ID');
-            document.getElementById('editTotalValue').value = total;
-        }
-        
         // Function to print kwitansi
-      // Function to print kwitansi
-function cetakKwitansi(id) {
-    window.open(`/admin/kwitansi/${id}/cetak`, '_blank');
-}
+        function cetakKwitansi(id) {
+            window.open(`/admin/kwitansi/${id}/cetak`, '_blank');
+        }
         
-        // Submit Buat Kwitansi form - RENAMED FUNCTION
-        function submitBuatKwitansiForm() {
+        // Function to create a new kwitansi
+        function submitBuatKwitansi() {
             const form = document.getElementById('buatKwitansiForm');
             
-            if (!form) {
-                console.error("Form buat kwitansi tidak ditemukan.");
-                return;
-            }
-            
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-            
             // Show loading state
-            const submitText = document.getElementById('submitBuatKwitansiText');
-            const submitSpinner = document.getElementById('submitBuatKwitansiSpinner');
-            const submitBtn = document.getElementById('submitBuatKwitansiBtn');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Menyimpan...';
+            submitBtn.disabled = true;
             
-            if (submitText) submitText.textContent = 'Menyimpan...';
-            if (submitSpinner) submitSpinner.classList.remove('hidden');
-            if (submitBtn) submitBtn.disabled = true;
-            
+            // Get form data
             const formData = new FormData(form);
             
+            // Send data to API
             fetch('/api/kwitansi', {
                 method: 'POST',
                 headers: {
@@ -952,51 +1490,39 @@ function cetakKwitansi(id) {
             })
             .then(data => {
                 if (data.success) {
-                    showToast('Kwitansi berhasil dibuat!');
-                    toggleModal('buatKwitansiModal');
+                    showMinimalPopup('Berhasil', 'Kwitansi berhasil dibuat!', 'success');
+                    closeBuatKwitansiModal();
                     loadKwitansiData();
                 } else {
-                    showToast(data.message || 'Gagal membuat kwitansi', 'error');
+                    showMinimalPopup('Error', 'Gagal membuat kwitansi: ' + (data.message || 'Unknown error'), 'error');
                 }
             })
             .catch(error => {
                 console.error('Error creating kwitansi:', error);
-                showToast('Terjadi kesalahan pada server: ' + error.message, 'error');
+                showMinimalPopup('Error', 'Gagal membuat kwitansi: ' + error.message, 'error');
             })
             .finally(() => {
-                // Reset loading state
-                if (submitText) submitText.textContent = 'Buat Kwitansi';
-                if (submitSpinner) submitSpinner.classList.add('hidden');
-                if (submitBtn) submitBtn.disabled = false;
+                // Reset button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             });
         }
         
-        // Submit Edit Kwitansi form - RENAMED FUNCTION
-        function submitEditKwitansiForm() {
+        // Function to update an existing kwitansi
+        function submitEditKwitansi() {
             const form = document.getElementById('editKwitansiForm');
             
-            if (!form) {
-                console.error("Form edit kwitansi tidak ditemukan.");
-                return;
-            }
-            
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-            
             // Show loading state
-            const submitText = document.getElementById('submitEditKwitansiText');
-            const submitSpinner = document.getElementById('submitEditKwitansiSpinner');
-            const submitBtn = document.getElementById('submitEditKwitansiBtn');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Memperbarui...';
+            submitBtn.disabled = true;
             
-            if (submitText) submitText.textContent = 'Menyimpan...';
-            if (submitSpinner) submitSpinner.classList.remove('hidden');
-            if (submitBtn) submitBtn.disabled = true;
-            
-            const formData = new FormData(form);
+            // Get form data
             const id = document.getElementById('editKwitansiId').value;
+            const formData = new FormData(form);
             
+            // Send data to API
             fetch(`/api/kwitansi/${id}`, {
                 method: 'PUT',
                 headers: {
@@ -1019,46 +1545,37 @@ function cetakKwitansi(id) {
             })
             .then(data => {
                 if (data.success) {
-                    showToast('Kwitansi berhasil diperbarui!');
-                    toggleModal('editKwitansiModal');
+                    showMinimalPopup('Berhasil', 'Kwitansi berhasil diperbarui!', 'success');
+                    closeEditKwitansiModal();
                     loadKwitansiData();
                 } else {
-                    showToast(data.message || 'Gagal memperbarui kwitansi', 'error');
+                    showMinimalPopup('Error', 'Gagal memperbarui kwitansi: ' + (data.message || 'Unknown error'), 'error');
                 }
             })
             .catch(error => {
                 console.error('Error updating kwitansi:', error);
-                showToast('Terjadi kesalahan pada server: ' + error.message, 'error');
+                showMinimalPopup('Error', 'Gagal memperbarui kwitansi: ' + error.message, 'error');
             })
             .finally(() => {
-                // Reset loading state
-                if (submitText) submitText.textContent = 'Update Kwitansi';
-                if (submitSpinner) submitSpinner.classList.add('hidden');
-                if (submitBtn) submitBtn.disabled = false;
+                // Reset button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             });
         }
         
-        // Confirm delete kwitansi
-        function confirmDeleteKwitansi() {
-            const id = document.getElementById('deleteKwitansiId').value;
-            
-            if (!id) {
-                console.error("ID kwitansi tidak ditemukan.");
-                return;
-            }
-            
+        // Function to delete a kwitansi
+        function deleteKwitansi(id) {
             // Show loading state
-            const confirmText = document.getElementById('confirmDeleteText');
-            const confirmSpinner = document.getElementById('confirmDeleteSpinner');
-            const confirmBtn = document.getElementById('confirmDeleteKwitansiBtn');
+            const submitBtn = document.querySelector('#deleteKwitansiForm button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Menghapus...';
+            submitBtn.disabled = true;
             
-            if (confirmText) confirmText.textContent = 'Menghapus...';
-            if (confirmSpinner) confirmSpinner.classList.remove('hidden');
-            if (confirmBtn) confirmBtn.disabled = true;
-            
+            // Send delete request to API
             fetch(`/api/kwitansi/${id}`, {
                 method: 'DELETE',
                 headers: {
+                    'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 }
@@ -1073,51 +1590,321 @@ function cetakKwitansi(id) {
             })
             .then(data => {
                 if (data.success) {
-                    showToast('Kwitansi berhasil dihapus!');
-                    toggleModal('deleteKwitansiModal');
+                    showMinimalPopup('Berhasil', 'Kwitansi berhasil dihapus!', 'success');
+                    closeDeleteKwitansiModal();
                     loadKwitansiData();
                 } else {
-                    showToast(data.message || 'Gagal menghapus kwitansi', 'error');
+                    showMinimalPopup('Error', 'Gagal menghapus kwitansi: ' + (data.message || 'Unknown error'), 'error');
                 }
             })
             .catch(error => {
                 console.error('Error deleting kwitansi:', error);
-                showToast('Terjadi kesalahan pada server: ' + error.message, 'error');
+                showMinimalPopup('Error', 'Gagal menghapus kwitansi: ' + error.message, 'error');
             })
             .finally(() => {
-                // Reset loading state
-                if (confirmText) confirmText.textContent = 'Hapus';
-                if (confirmSpinner) confirmSpinner.classList.add('hidden');
-                if (confirmBtn) confirmBtn.disabled = false;
+                // Reset button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             });
         }
         
-        // Toast notification functions
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
+        // Modal functions for Buat Kwitansi
+        function closeBuatKwitansiModal() {
+            document.getElementById('buatKwitansiModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            document.getElementById('buatKwitansiForm').reset();
             
-            if (!toast || !toastMessage) return;
+            // Reset total field
+            document.getElementById('total').value = '';
+            document.getElementById('totalValue').value = '0';
             
-            // Set background color based on type
-            if (type === 'error') {
-                toast.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center';
-            } else {
-                toast.className = 'fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center';
+            // Set today's date again
+            const today = new Date().toISOString().split('T')[0];
+            const tanggalInput = document.getElementById('tanggal');
+            if (tanggalInput) {
+                tanggalInput.value = today;
+            }
+        }
+        
+        // Modal functions for Edit Kwitansi
+        function closeEditKwitansiModal() {
+            document.getElementById('editKwitansiModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Modal functions for Delete Kwitansi
+        function closeDeleteKwitansiModal() {
+            document.getElementById('deleteKwitansiModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Function to calculate total in create form
+        function calculateTotal() {
+            const subTotal = parseFloat(document.getElementById('subTotal').value) || 0;
+            const feeMaintenance = parseFloat(document.getElementById('feeMaintenance').value) || 0;
+            const total = subTotal + feeMaintenance;
+            
+            // Set both the display and the actual value
+            document.getElementById('total').value = formatToRupiah(total);
+            document.getElementById('totalValue').value = total;
+        }
+        
+        // Function to calculate total in edit form
+        function calculateEditTotal() {
+            const subTotal = parseFloat(document.getElementById('editSubTotal').value) || 0;
+            const feeMaintenance = parseFloat(document.getElementById('editFeeMaintenance').value) || 0;
+            const total = subTotal + feeMaintenance;
+            
+            // Set both the display and the actual value
+            document.getElementById('editTotal').value = formatToRupiah(total);
+            document.getElementById('editTotalValue').value = total;
+        }
+        
+        // Minimalist Popup function
+        function showMinimalPopup(title, message, type = 'success') {
+            const popup = document.getElementById('minimalPopup');
+            const popupTitle = popup.querySelector('.minimal-popup-title');
+            const popupMessage = popup.querySelector('.minimal-popup-message');
+            const popupIcon = popup.querySelector('.minimal-popup-icon span');
+            
+            // Set content
+            popupTitle.textContent = title;
+            popupMessage.textContent = message;
+            
+            // Set type
+            popup.className = 'minimal-popup show ' + type;
+            
+            // Set icon
+            if (type === 'success') {
+                popupIcon.textContent = 'check';
+            } else if (type === 'error') {
+                popupIcon.textContent = 'error';
+            } else if (type === 'warning') {
+                popupIcon.textContent = 'warning';
             }
             
-            toastMessage.textContent = message;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            
+            // Auto hide after 3 seconds
             setTimeout(() => {
-                hideToast();
+                popup.classList.remove('show');
             }, 3000);
         }
         
-        function hideToast() {
-            const toast = document.getElementById('toast');
-            if (toast) {
-                toast.classList.add('translate-y-20', 'opacity-0');
+        // Initialize filter
+        function initializeFilter() {
+            const filterAll = document.getElementById('filterAll');
+            const applyFilterBtn = document.getElementById('applyFilter');
+            const resetFilterBtn = document.getElementById('resetFilter');
+            
+            // Handle "All" checkbox
+            filterAll.addEventListener('change', function() {
+                if (this.checked) {
+                    // Uncheck all other checkboxes
+                    document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
+                        cb.checked = false;
+                    });
+                }
+            });
+            
+            // Handle other checkboxes
+            document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Uncheck "All" checkbox
+                        filterAll.checked = false;
+                    }
+                });
+            });
+            
+            // Apply filter
+            applyFilterBtn.addEventListener('click', function() {
+                const filterAll = document.getElementById('filterAll');
+                const filterPaid = document.getElementById('filterPaid');
+                const filterUnpaid = document.getElementById('filterUnpaid');
+                const filterPending = document.getElementById('filterPending');
+                
+                activeFilters = [];
+                if (filterAll.checked) {
+                    activeFilters.push('all');
+                } else {
+                    if (filterPaid.checked) activeFilters.push('paid');
+                    if (filterUnpaid.checked) activeFilters.push('unpaid');
+                    if (filterPending.checked) activeFilters.push('pending');
+                }
+                
+                currentPage = 1; // Reset to first page when filter is applied
+                applyFilters();
+                document.getElementById('filterDropdown').classList.remove('show');
+                const visibleCount = getFilteredRows().length;
+                showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} kwitansi`, 'success');
+            });
+            
+            // Reset filter
+            resetFilterBtn.addEventListener('click', function() {
+                document.getElementById('filterAll').checked = true;
+                document.getElementById('filterPaid').checked = false;
+                document.getElementById('filterUnpaid').checked = false;
+                document.getElementById('filterPending').checked = false;
+                activeFilters = ['all'];
+                currentPage = 1; // Reset to first page when filter is reset
+                applyFilters();
+                document.getElementById('filterDropdown').classList.remove('show');
+                const visibleCount = getFilteredRows().length;
+                showMinimalPopup('Filter Direset', 'Menampilkan semua kwitansi', 'success');
+            });
+        }
+        
+        // Initialize pagination
+        function initializePagination() {
+            renderPagination();
+            updateVisibleItems();
+        }
+        
+        function renderPagination() {
+            const visibleRows = getFilteredRows();
+            const totalPages = Math.ceil(visibleRows.length / itemsPerPage);
+            const pageNumbersContainer = document.getElementById('pageNumbers');
+            const prevButton = document.getElementById('prevPage');
+            const nextButton = document.getElementById('nextPage');
+            
+            // Clear existing page numbers
+            pageNumbersContainer.innerHTML = '';
+            
+            // Generate page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const pageNumber = document.createElement('button');
+                pageNumber.textContent = i;
+                pageNumber.className = `desktop-page-btn ${i === currentPage ? 'active' : ''}`;
+                pageNumber.addEventListener('click', () => goToPage(i));
+                pageNumbersContainer.appendChild(pageNumber);
+            }
+            
+            // Update navigation buttons
+            prevButton.disabled = currentPage === 1;
+            nextButton.disabled = currentPage === totalPages || totalPages === 0;
+            
+            // Add event listeners for navigation buttons
+            prevButton.onclick = () => {
+                if (currentPage > 1) goToPage(currentPage - 1);
+            };
+            
+            nextButton.onclick = () => {
+                if (currentPage < totalPages) goToPage(currentPage + 1);
+            };
+        }
+        
+        function goToPage(page) {
+            currentPage = page;
+            renderPagination();
+            updateVisibleItems();
+            
+            // Reset scroll position when changing pages
+            const scrollableTable = document.getElementById('scrollableTable');
+            if (scrollableTable) {
+                scrollableTable.scrollLeft = 0;
+            }
+        }
+        
+        function getFilteredRows() {
+            return Array.from(document.querySelectorAll('.kwitansi-row')).filter(row => !row.classList.contains('hidden-by-filter'));
+        }
+        
+        function getFilteredCards() {
+            return Array.from(document.querySelectorAll('.kwitansi-card')).filter(card => !card.classList.contains('hidden-by-filter'));
+        }
+        
+        function updateVisibleItems() {
+            const visibleRows = getFilteredRows();
+            const visibleCards = getFilteredCards();
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            
+            // Hide all rows and cards first
+            document.querySelectorAll('.kwitansi-row').forEach(row => row.style.display = 'none');
+            document.querySelectorAll('.kwitansi-card').forEach(card => card.style.display = 'none');
+            
+            // Show only the rows for current page
+            visibleRows.forEach((row, index) => {
+                if (index >= startIndex && index < endIndex) {
+                    row.style.display = '';
+                }
+            });
+            
+            // Show only the cards for current page
+            visibleCards.forEach((card, index) => {
+                if (index >= startIndex && index < endIndex) {
+                    card.style.display = '';
+                }
+            });
+        }
+        
+        function applyFilters() {
+            // Apply filters to rows
+            document.querySelectorAll('.kwitansi-row').forEach(row => {
+                const namaPerusahaan = row.getAttribute('data-nama-perusahaan').toLowerCase();
+                const nomorOrder = row.getAttribute('data-nomor-order').toLowerCase();
+                const namaKlien = row.getAttribute('data-nama-klien').toLowerCase();
+                const deskripsi = row.getAttribute('data-deskripsi').toLowerCase();
+                
+                // Check if search term matches
+                let searchMatches = true;
+                if (searchTerm) {
+                    const searchLower = searchTerm.toLowerCase();
+                    searchMatches = namaPerusahaan.includes(searchLower) || 
+                                   nomorOrder.includes(searchLower) ||
+                                   namaKlien.includes(searchLower) ||
+                                   deskripsi.includes(searchLower);
+                }
+                
+                if (searchMatches) {
+                    row.classList.remove('hidden-by-filter');
+                } else {
+                    row.classList.add('hidden-by-filter');
+                }
+            });
+            
+            // Apply same filters to cards
+            document.querySelectorAll('.kwitansi-card').forEach(card => {
+                const namaPerusahaan = card.getAttribute('data-nama-perusahaan').toLowerCase();
+                const nomorOrder = card.getAttribute('data-nomor-order').toLowerCase();
+                const namaKlien = card.getAttribute('data-nama-klien').toLowerCase();
+                const deskripsi = card.getAttribute('data-deskripsi').toLowerCase();
+                
+                // Check if search term matches
+                let searchMatches = true;
+                if (searchTerm) {
+                    const searchLower = searchTerm.toLowerCase();
+                    searchMatches = namaPerusahaan.includes(searchLower) || 
+                                   nomorOrder.includes(searchLower) ||
+                                   namaKlien.includes(searchLower) ||
+                                   deskripsi.includes(searchLower);
+                }
+                
+                if (searchMatches) {
+                    card.classList.remove('hidden-by-filter');
+                } else {
+                    card.classList.add('hidden-by-filter');
+                }
+            });
+            
+            // Update pagination and visible items
+            renderPagination();
+            updateVisibleItems();
+            
+            // Update total count
+            document.getElementById('totalCount').textContent = getFilteredRows().length;
+        }
+        
+        // Initialize scroll detection for table
+        function initializeScrollDetection() {
+            const scrollableTable = document.getElementById('scrollableTable');
+            
+            if (scrollableTable) {
+                // Add scroll event listener
+                scrollableTable.addEventListener('scroll', function() {
+                    const scrollLeft = scrollableTable.scrollLeft;
+                    const maxScroll = scrollableTable.scrollWidth - scrollableTable.clientWidth;
+                });
             }
         }
     </script>
