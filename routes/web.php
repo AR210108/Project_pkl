@@ -17,6 +17,7 @@ use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\SuratKerjasamaController;
 use App\Http\Controllers\PelayananController;
+use App\Http\Controllers\TugasController;
 use App\Models\Invoice;
 use App\Http\Controllers\GeneralManajer\OrderController;
 
@@ -389,9 +390,16 @@ Route::get('/data_karyawan', function () {
 });
 Route::get('/layanan', [PelayananController::class, 'index']);
 
+<<<<<<< HEAD
+Route::get('/kelola_order', function () {
+    return view('general_manajer/kelola_order');
+});
+Route::get('/kelola_tugas', [TugasController::class, 'index'])->name('tugas.page');
+=======
 Route::get('/kelola_tugas', function () {
     return view('general_manajer/kelola_tugas');
 });
+>>>>>>> ff503eaaf58984ddc015c2e472d81a3ef1296bc2
 Route::get('/kelola_absen', function () {
     return view('general_manajer/kelola_absen');
 });
@@ -400,3 +408,11 @@ Route::get('/kelola_absen', function () {
 Route::post('/layanan', [PelayananController::class, 'store']);
 Route::put('/layanan/{id}', [PelayananController::class, 'update']);
 Route::delete('/layanan/{id}', [PelayananController::class, 'destroy']);
+
+Route::prefix('kelola_tugas')->name('tugas.')->group(function () {
+    Route::get('/data', [TugasController::class, 'getData'])->name('data');
+    Route::post('/', [TugasController::class, 'store'])->name('store');
+    Route::get('/{id}', [TugasController::class, 'show'])->name('show');
+    Route::put('/{id}', [TugasController::class, 'update'])->name('update');
+    Route::delete('/{id}', [TugasController::class, 'destroy'])->name('destroy');
+});
