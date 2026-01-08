@@ -18,6 +18,8 @@ use App\Http\Controllers\SuratKerjasamaController;
 use App\Http\Controllers\PelayananController;
 use App\Http\Controllers\TugasController;
 use App\Models\Invoice;
+use App\Http\Controllers\OrderanController;
+use App\Http\Controllers\GeneralManajer\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -260,6 +262,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/catatan_rapat', fn() => view('admin/catatan_rapat'));
     Route::get('/pengumuman', fn() => view('admin/pengumuman'));
     Route::get('/data_order', fn() => view('admin/data_order'));
+    // Orderan Routes
+Route::resource('orderan', OrderanController::class)->names([
+    'index' => 'orderan.index',
+    'store' => 'orderan.store',
+    'show' => 'orderan.show',
+    'update' => 'orderan.update',
+    'destroy' => 'orderan.destroy'
+]);
     
     // Pemilik
     Route::get('/pemilik', fn() => view('pemilik/home'));
@@ -284,7 +294,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/layanan', fn() => view('general_manajer/data_layanan'));
     Route::get('/kelola_tugas', fn() => view('general_manajer/kelola_tugas'));
     Route::get('/kelola_absen', fn() => view('general_manajer/kelola_absen'));
-    Route::get('/kelola_order', fn() => view('general_manajer/kelola_order'));
+    // Route untuk General Manajer - Orderan
+Route::prefix('general_manajer')->name('general_manajer.')->group(function () {
+    Route::get('/orderan', [OrderController::class, 'index'])->name('orderan.index');
+    Route::post('/orderan', [OrderController::class, 'store'])->name('orderan.store');
+    Route::put('/orderan/{id}', [OrderController::class, 'update'])->name('orderan.update');
+    Route::delete('/orderan/{id}', [OrderController::class, 'destroy'])->name('orderan.destroy');
+});
   
 });
 /*
@@ -363,10 +379,16 @@ Route::get('/data_karyawan', function () {
 });
 Route::get('/layanan', [PelayananController::class, 'index']);
 
+<<<<<<< HEAD
 Route::get('/kelola_order', function () {
     return view('general_manajer/kelola_order');
 });
 Route::get('/kelola_tugas', [TugasController::class, 'index'])->name('tugas.page');
+=======
+Route::get('/kelola_tugas', function () {
+    return view('general_manajer/kelola_tugas');
+});
+>>>>>>> ff503eaaf58984ddc015c2e472d81a3ef1296bc2
 Route::get('/kelola_absen', function () {
     return view('general_manajer/kelola_absen');
 });
