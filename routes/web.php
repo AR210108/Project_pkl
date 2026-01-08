@@ -217,10 +217,23 @@ Route::resource('pegawai', PegawaiController::class);
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
-    Route::get('/catatan_rapat', [CatatanRapatController::class, 'index'])->name('catatan_rapat.index');
-    Route::post('/catatan_rapat', [CatatanRapatController::class, 'store'])->name('catatan_rapat.store');
-    Route::put('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'update'])->name('catatan_rapat.update');
-    Route::delete('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'destroy'])->name('catatan_rapat.destroy');
+
+    // view
+    Route::get('/catatan_rapat', [CatatanRapatController::class, 'index'])
+        ->name('catatan_rapat');
+
+    // data (JSON)
+    Route::get('/catatan_rapat/data', [CatatanRapatController::class, 'data'])
+        ->name('catatan_rapat.data');
+
+    Route::post('/catatan_rapat', [CatatanRapatController::class, 'store'])
+        ->name('catatan_rapat.store');
+
+    Route::put('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'update'])
+        ->name('catatan_rapat.update');
+
+    Route::delete('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'destroy'])
+        ->name('catatan_rapat.destroy');
 });
 
 /*
