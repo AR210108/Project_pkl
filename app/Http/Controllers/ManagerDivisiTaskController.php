@@ -7,26 +7,30 @@ use App\Models\Task;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
-class GeneralManagerTaskController extends Controller
+class ManagerDivisiTaskController extends Controller
 {
     public function index()
     {
         $user = Auth::user();
         
-        // Get semua karyawan
-        $karyawan = User::where('role', 'karyawan')->get();
+        // Get karyawan in same division
+        $karyawan = User::where('divisi', $user->divisi)
+                       ->where('role', 'karyawan')
+                       ->get();
         
-        // Get semua manager divisi
-        $managers = User::where('role', 'manager_divisi')->get();
-        
-        // List of all divisions
+        // List of all divisions (hardcoded)
         $divisi = [
             'Programmer',
             'Desainer',
             'Digital Marketing'
         ];
         
-        return view('general_manajer.kelola_tugas', compact(
+        // Get other managers excluding current user
+        $managers = User::where('role', 'manager_divisi')
+                       ->where('id', '!=', $user->id)
+                       ->get();
+        
+        return view('manager_divisi.kelola_tugas', compact(
             'karyawan', 
             'divisi', 
             'managers'
@@ -110,20 +114,38 @@ class GeneralManagerTaskController extends Controller
         $task = Task::findOrFail($id);
         $user = Auth::user();
         
-        // General Manager bisa update semua tugas
-        $task->status = $request->status;
+        // Check authorization - user can update if:
+        // 1. They created the task
+        // 2. They are assigned to the task
+        // 3. Task is assigned to their division
+        // 4. They are the target manager
+        $canUpdate = $task->created_by == $user->id ||
+                    $task->assigned_to == $user->id ||
+                    $task->target_divisi == $user->divisi ||
+                    $task->target_manager_id == $user->id;
+        
+        if (!$canUpdate) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk mengupdate tugas ini'
+            ], 403);
+        }
+        
+        $updateData = [
+            'status' => $request->status,
+        ];
         
         // Add catatan_update if provided
         if ($request->filled('catatan_update')) {
-            $task->catatan_update = $request->catatan_update;
+            $updateData['catatan_update'] = $request->catatan_update;
         }
         
         // Set completed_at if status is 'selesai'
         if ($request->status === 'selesai') {
-            $task->completed_at = now();
+            $updateData['completed_at'] = now();
         }
         
-        $task->save();
+        $task->update($updateData);
         
         return response()->json([
             'success' => true,
@@ -146,6 +168,14 @@ class GeneralManagerTaskController extends Controller
                 'success' => false,
                 'message' => 'Tugas ini bukan tugas broadcast ke divisi'
             ], 422);
+        }
+        
+        // Check if user is authorized to assign (must be manager of the division)
+        if ($task->target_divisi !== $user->divisi || $user->role !== 'manager_divisi') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki izin untuk menugaskan tugas ini'
+            ], 403);
         }
         
         // Check if karyawan is in the same division
@@ -176,20 +206,42 @@ class GeneralManagerTaskController extends Controller
         $type = $request->get('type', 'my-tasks');
         
         if ($type === 'my-tasks') {
-            // Tasks created by this general manager
+            // Tasks created by this manager
             $tasks = Task::where('created_by', $user->id)
                         ->with(['assignedUser', 'creator', 'targetManager'])
                         ->orderBy('created_at', 'desc')
                         ->get();
+        } elseif ($type === 'team-tasks') {
+            // Tasks assigned to this manager or their division
+            $tasks = Task::where(function($query) use ($user) {
+                            // Tasks where user is the target manager
+                            $query->where('target_manager_id', $user->id);
+                        })
+                        ->orWhere(function($query) use ($user) {
+                            // Tasks broadcast to user's division
+                            $query->where('target_divisi', $user->divisi)
+                                  ->where('target_type', 'divisi');
+                        })
+                        ->orWhere(function($query) use ($user) {
+                            // Tasks assigned directly to user
+                            $query->where('assigned_to', $user->id);
+                        })
+                        ->with(['assignedUser', 'creator', 'targetManager'])
+                        ->orderBy('created_at', 'desc')
+                        ->get();
         } else {
-            // All tasks (general manager bisa lihat semua)
-            $tasks = Task::with(['assignedUser', 'creator', 'targetManager'])
+            // All tasks for user's division
+            $tasks = Task::where('target_divisi', $user->divisi)
+                        ->orWhereHas('assignedUser', function($query) use ($user) {
+                            $query->where('divisi', $user->divisi);
+                        })
+                        ->with(['assignedUser', 'creator', 'targetManager'])
                         ->orderBy('created_at', 'desc')
                         ->get();
         }
         
         // Transform data for frontend
-        $tasks->transform(function($task) {
+        $tasks->transform(function($task) use ($user) {
             // Determine assignee text based on target_type
             if ($task->target_type === 'karyawan' && $task->assignedUser) {
                 $task->assignee_text = $task->assignedUser->name;
@@ -218,12 +270,20 @@ class GeneralManagerTaskController extends Controller
     {
         $user = Auth::user();
         
-        // Statistics for all tasks (general manager bisa lihat semua)
-        $total = Task::count();
-        $completed = Task::where('status', 'selesai')->count();
-        $inProgress = Task::where('status', 'proses')->count();
-        $pending = Task::where('status', 'pending')->count();
-        $cancelled = Task::where('status', 'dibatalkan')->count();
+        // Statistics for tasks created by this manager
+        $total = Task::where('created_by', $user->id)->count();
+        $completed = Task::where('created_by', $user->id)
+                        ->where('status', 'selesai')
+                        ->count();
+        $inProgress = Task::where('created_by', $user->id)
+                        ->where('status', 'proses')
+                        ->count();
+        $pending = Task::where('created_by', $user->id)
+                        ->where('status', 'pending')
+                        ->count();
+        $cancelled = Task::where('created_by', $user->id)
+                        ->where('status', 'dibatalkan')
+                        ->count();
         
         return response()->json([
             'total' => $total,
@@ -239,6 +299,22 @@ class GeneralManagerTaskController extends Controller
     {
         $task = Task::with(['assignedUser', 'creator', 'targetManager', 'assignedByManager'])
                    ->findOrFail($id);
+        
+        $user = Auth::user();
+        
+        // Check authorization
+        $canView = $task->created_by == $user->id ||
+                  $task->assigned_to == $user->id ||
+                  $task->target_divisi == $user->divisi ||
+                  $task->target_manager_id == $user->id ||
+                  $user->role === 'admin';
+        
+        if (!$canView) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk melihat tugas ini'
+            ], 403);
+        }
         
         return response()->json([
             'success' => true,

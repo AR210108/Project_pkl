@@ -6,11 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        // Ubah 'karyawan' menjadi 'karyawans' di sini
-        Schema::create('karyawans', function (Blueprint $table) {
+        Schema::create('karyawan', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id')->nullable(); // Tambahkan user_id di sini
             $table->string('nama', 100);
             $table->string('jabatan', 100);
             $table->string('gaji', 50);
@@ -18,12 +21,20 @@ return new class extends Migration
             $table->string('kontak', 20);
             $table->string('foto')->nullable();
             $table->timestamps();
+
+            // Foreign key constraint
+            $table->foreign('user_id')
+                  ->references('id')
+                  ->on('users')
+                  ->onDelete('cascade');
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        // Dan juga ubah 'karyawan' menjadi 'karyawans' di sini
-        Schema::dropIfExists('karyawans');
+        Schema::dropIfExists('karyawan');
     }
 };

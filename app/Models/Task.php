@@ -2,60 +2,74 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
 class Task extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'title',
-        'description',
-        'full_description',
-        'status',
-        'priority',
-        'category',
+        'judul',
+        'deskripsi',
+        'prioritas',
         'deadline',
-        'file_path',
-        'file_notes',
-        'completed_at',
-        'user_id',
-        'assigned_by',
-        'assigner_name',
+        'assigned_to',
+        'created_by',
+        'status',
+        'target_type',
+        'target_divisi',
+        'target_manager_id',
+        'kategori',
+        'catatan',
+        'catatan_update',
+        'is_broadcast',
+        'assigned_by_manager',
+        'assigned_at',
+        'completed_at'
     ];
 
     protected $casts = [
         'deadline' => 'datetime',
-        'completed_at' => 'datetime',
+        'assigned_at' => 'datetime',
+        'completed_at' => 'datetime'
     ];
 
-    // Relasi
-    public function user()
+    // Relationships
+    public function assignedUser()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    public function assigner()
+    public function creator()
     {
-        return $this->belongsTo(User::class, 'assigned_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
-    // Scope untuk filter umum
-    public function scopePending($query)
+    public function targetManager()
     {
-        return $query->where('status', 'pending');
+        return $this->belongsTo(User::class, 'target_manager_id');
     }
 
-    public function scopeForUser($query, $userId)
+    public function targetDivisiModel()
     {
-        return $query->where('user_id', $userId);
+        return $this->belongsTo(Divisi::class, 'target_divisi');
     }
 
-    // Accessor: format deadline Indonesia
-    public function getFormattedDeadlineAttribute()
+    public function assignedByManager()
     {
-        return Carbon::parse($this->deadline)->translatedFormat('d F Y H:i');
+        return $this->belongsTo(User::class, 'assigned_by_manager');
+    }
+
+    // Scopes
+    public function scopeForDivisi($query, $divisi)
+    {
+        return $query->where('target_divisi', $divisi)
+                    ->orWhereHas('assignedUser', function($q) use ($divisi) {
+                        $q->where('divisi', $divisi);
+                    });
+    }
+
+    public function scopeForManager($query, $managerId)
+    {
+        return $query->where('target_manager_id', $managerId)
+                    ->orWhere('created_by', $managerId);
     }
 }

@@ -10,20 +10,30 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->text('description');
-            $table->text('full_description')->nullable();
-            $table->string('status')->default('pending'); // pending, completed, in_progress
-            $table->datetime('deadline');
-            $table->string('assigner')->nullable();
-            $table->string('priority')->default('medium'); // low, medium, high
-            $table->string('category')->nullable(); // development, design, marketing, etc.
-            $table->string('file_path')->nullable();
-            $table->text('file_notes')->nullable();
-            $table->datetime('completed_at')->nullable();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('assigned_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->string('judul');
+            $table->text('deskripsi');
+            $table->enum('prioritas', ['tinggi', 'normal', 'rendah'])->default('normal');
+            $table->dateTime('deadline');
+            $table->unsignedBigInteger('assigned_to')->nullable();
+            $table->unsignedBigInteger('created_by');
+            $table->enum('status', ['pending', 'proses', 'selesai', 'dibatalkan'])->default('pending');
+            $table->enum('target_type', ['karyawan', 'divisi', 'manager'])->default('karyawan');
+            $table->string('target_divisi')->nullable(); // Ubah dari foreign key ke string
+            $table->unsignedBigInteger('target_manager_id')->nullable();
+            $table->string('kategori')->nullable();
+            $table->text('catatan')->nullable();
+            $table->text('catatan_update')->nullable();
+            $table->boolean('is_broadcast')->default(false);
+            $table->unsignedBigInteger('assigned_by_manager')->nullable();
+            $table->timestamp('assigned_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
             $table->timestamps();
+
+            // Foreign keys
+            $table->foreign('assigned_to')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('target_manager_id')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('assigned_by_manager')->references('id')->on('users')->onDelete('set null');
         });
     }
 

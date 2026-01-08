@@ -16,7 +16,7 @@ use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\SuratKerjasamaController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\GeneralManagerTaskController;
-use App\Models\Invoice;
+use App\Http\Controllers\ManagerDivisiTaskController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,12 +57,6 @@ Route::post('/login-process', [LoginController::class, 'login'])->name('login.pr
 |--------------------------------------------------------------------------
 */
 
-/*
-|--------------------------------------------------------------------------
-| Authenticated Routes (Sudah Login)
-|--------------------------------------------------------------------------
-*/
-
 Route::middleware('auth')->group(function () {
     // Route logout dengan POST
     Route::post('/logout', function () {
@@ -72,18 +66,18 @@ Route::middleware('auth')->group(function () {
         return redirect('/');
     })->name('logout');
     
-    // Tambahkan juga route GET untuk logout (untuk testing/backup)
+    // Route GET untuk logout (backup/fallback)
     Route::get('/logout-get', function () {
         Auth::logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
         return redirect('/');
-    })->name('logout.get')->middleware('auth');
+    })->name('logout.get');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Role-Based Routes - ADMIN (KONSISTEN: semua underscore)
+| Role-Based Routes - ADMIN
 |--------------------------------------------------------------------------
 */
 
@@ -93,12 +87,22 @@ Route::middleware(['auth', 'role:admin'])
     ->group(function () {
         // Halaman beranda admin
         Route::get('/beranda', [AdminController::class, 'beranda'])->name('beranda');
+        
+        // Route untuk sidebar: /admin/home → redirect ke /admin/beranda
+        Route::get('/home', function () {
+            return redirect()->route('admin.beranda');
+        });
 
         // USER MANAGEMENT
         Route::get('/user', [UserController::class, 'index'])->name('user');
         Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
         Route::post('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
         Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
+        
+        // Route untuk sidebar: /admin/data_user → redirect ke /admin/user
+        Route::get('/data_user', function () {
+            return redirect()->route('admin.user');
+        });
 
         // KARYAWAN MANAGEMENT
         Route::get('/data-karyawan', [AdminKaryawanController::class, 'index'])->name('data_karyawan');
@@ -116,6 +120,11 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/keuangan', function() {
             return view('admin.keuangan');
         })->name('keuangan.index');
+        
+        // Route untuk sidebar: /admin/data_order (hanya placeholder)
+        Route::get('/data_order', function() {
+            return view('admin.data_order');
+        })->name('data_order');
         
         // TASK MANAGEMENT
         Route::prefix('tasks')->name('tasks.')->group(function () {
@@ -146,6 +155,16 @@ Route::middleware(['auth', 'role:admin'])
             Route::put('/{id}', [SuratKerjasamaController::class, 'update'])->name('update');
             Route::delete('/{id}', [SuratKerjasamaController::class, 'destroy'])->name('destroy');
         });
+        
+        // Route untuk sidebar: /admin/surat_kerjasama → redirect ke index
+        Route::get('/surat_kerjasama', function () {
+            return redirect()->route('admin.surat_kerjasama.index');
+        });
+        
+        // Route untuk sidebar: /template_surat (hanya placeholder)
+        Route::get('/template_surat', function() {
+            return view('admin.template_surat');
+        })->name('template_surat');
 
         // INVOICE MANAGEMENT
         Route::prefix('invoice')->name('invoice.')->group(function () {
@@ -160,9 +179,7 @@ Route::middleware(['auth', 'role:admin'])
 
         // KWITANSI MANAGEMENT
         Route::prefix('kwitansi')->name('kwitansi.')->group(function () {
-            Route::get('/', function() {
-                return view('admin.kwitansi');
-            })->name('index');
+            Route::get('/', [KwitansiController::class, 'index'])->name('index');
             Route::get('/{id}/cetak', [KwitansiController::class, 'cetak'])->name('cetak');
         });
 
@@ -170,6 +187,29 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/settings', function () {
             return view('admin.settings');
         })->name('settings');
+        
+        // Route untuk sidebar: /admin/catatan_rapat → redirect ke global route
+        Route::get('/catatan_rapat', function () {
+            return redirect()->route('catatan_rapat.index');
+        });
+        
+        // Route untuk sidebar: /admin/pengumuman → redirect ke global route
+        Route::get('/pengumuman', function () {
+            return redirect()->route('pengumuman.index');
+        });
+        
+        // API untuk dashboard data
+        Route::get('/api/dashboard-data', function() {
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'total_users' => \App\Models\User::count(),
+                    'total_karyawan' => \App\Models\User::where('role', 'karyawan')->count(),
+                    'total_tasks' => \App\Models\Task::count(),
+                    'completed_tasks' => \App\Models\Task::where('status', 'selesai')->count(),
+                ]
+            ]);
+        });
     });
 
 /*
@@ -187,20 +227,49 @@ Route::middleware(['auth', 'role:karyawan'])
         Route::get('/tugas', [TaskController::class, 'karyawanIndex'])->name('tugas');
         Route::get('/detail/{id}', [KaryawanController::class, 'detailPage'])->name('detail');
         
+        // Route untuk list karyawan
+        Route::get('/list', function () {
+            return view('karyawan.list');
+        })->name('list');
+        
         Route::prefix('tugas')->name('tugas.')->group(function () {
             Route::get('/{id}', [TaskController::class, 'karyawanShow'])->name('show');
         });
+        
+        // API untuk dashboard data karyawan
+        Route::get('/dashboard-data', function() {
+            $user = auth()->user();
+            
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'total_tugas' => \App\Models\Task::where('assigned_to', $user->id)->count(),
+                    'tugas_selesai' => \App\Models\Task::where('assigned_to', $user->id)
+                                                ->where('status', 'selesai')
+                                                ->count(),
+                    'tugas_proses' => \App\Models\Task::where('assigned_to', $user->id)
+                                                ->where('status', 'proses')
+                                                ->count(),
+                    'absensi_hari_ini' => 'Belum absen',
+                    'user' => [
+                        'name' => $user->name,
+                        'role' => $user->role,
+                        'divisi' => $user->divisi
+                    ]
+                ]
+            ]);
+        })->name('dashboard.data');
     });
 
 /*
 |--------------------------------------------------------------------------
-| Role-Based Routes - GENERAL MANAGER (KONSISTEN: prefix dash, name underscore)
+| Role-Based Routes - GENERAL MANAGER (PERBAIKAN: semua route dengan prefix 'general-manajer')
 |--------------------------------------------------------------------------
 */
 
 Route::middleware(['auth', 'role:general_manager'])
-    ->prefix('general-manager') // URL: /general-manager (DASH)
-    ->name('general_manager.')  // Route name: general_manager. (UNDERSCORE)
+    ->prefix('general-manajer')  // Prefix: 'general-manajer'
+    ->name('general_manajer.')
     ->group(function () {
         Route::get('/home', function () {
             return view('general_manajer.home');
@@ -218,7 +287,39 @@ Route::middleware(['auth', 'role:general_manager'])
             return view('general_manajer.kelola_order');
         })->name('kelola_order');
         
-        Route::get('/kelola-tugas', [GeneralManagerTaskController::class, 'index'])->name('kelola_tugas');
+        // TUGAS MANAGEMENT UNTUK GENERAL MANAGER
+        Route::get('/kelola-tugas', [GeneralManagerTaskController::class, 'index'])
+            ->name('kelola_tugas');
+        
+        // ROUTE GROUP UNTUK TASKS (SEMUA DI DALAM GROUP INI)
+        Route::prefix('tasks')->name('tasks.')->group(function () {
+            Route::post('/', [GeneralManagerTaskController::class, 'store'])
+                ->name('store');
+                
+            Route::get('/{id}', [GeneralManagerTaskController::class, 'show'])
+                ->name('show');
+                
+            Route::put('/{id}', [GeneralManagerTaskController::class, 'update'])
+                ->name('update');
+                
+            Route::put('/{id}/status', [GeneralManagerTaskController::class, 'updateStatus'])
+                ->name('update.status');
+                
+            Route::post('/{id}/assign', [GeneralManagerTaskController::class, 'assignToKaryawan'])
+                ->name('assign');
+        });
+        
+        // API Routes untuk General Manager
+        Route::prefix('api')->name('api.')->group(function () {
+            Route::get('/tasks', [GeneralManagerTaskController::class, 'getTasksApi'])
+                ->name('tasks');
+                
+            Route::get('/tasks/statistics', [GeneralManagerTaskController::class, 'getStatistics'])
+                ->name('tasks.statistics');
+                
+            Route::get('/karyawan-by-divisi/{divisi}', [GeneralManagerTaskController::class, 'getKaryawanByDivisi'])
+                ->name('karyawan.by_divisi');
+        });
         
         Route::get('/kelola-absen', function () {
             return view('general_manajer.kelola_absen');
@@ -277,20 +378,54 @@ Route::middleware(['auth', 'role:finance'])
 
 /*
 |--------------------------------------------------------------------------
-| Role-Based Routes - MANAGER DIVISI (KONSISTEN: prefix dash, name underscore)
+| Role-Based Routes - MANAGER DIVISI (PERBAIKAN: nama folder 'manajer_divisi' bukan 'manager_divisi')
 |--------------------------------------------------------------------------
 */
 
 Route::middleware(['auth', 'role:manager_divisi'])
-    ->prefix('manager-divisi') // URL: /manager-divisi (DASH)
-    ->name('manager_divisi.')  // Route name: manager_divisi. (UNDERSCORE)
+    ->prefix('manajer-divisi')  // PERUBAHAN: dari 'manager-divisi' ke 'manajer-divisi'
+    ->name('manager_divisi.')
     ->group(function () {
         Route::get('/home', function () {
-            return view('manager_divisi.home');
+            return view('manajer_divisi.home');  // PERUBAHAN: dari 'manager_divisi.home' ke 'manajer_divisi.home'
         })->name('home');
         
+        // Tugas untuk Manager Divisi
+        Route::get('/kelola-tugas', [ManagerDivisiTaskController::class, 'index'])
+            ->name('kelola_tugas');
+        
+        // ROUTE GROUP UNTUK TASKS (SEMUA DI DALAM GROUP INI)
+        Route::prefix('tasks')->name('tasks.')->group(function () {
+            Route::post('/', [ManagerDivisiTaskController::class, 'store'])
+                ->name('store');
+                
+            Route::get('/{id}', [ManagerDivisiTaskController::class, 'show'])
+                ->name('show');
+                
+            Route::put('/{id}', [ManagerDivisiTaskController::class, 'update'])
+                ->name('update');
+                
+            Route::put('/{id}/status', [ManagerDivisiTaskController::class, 'updateStatus'])
+                ->name('update.status');
+                
+            Route::post('/{id}/assign', [ManagerDivisiTaskController::class, 'assignToKaryawan'])
+                ->name('assign');
+        });
+        
+        // API Routes untuk Manager Divisi
+        Route::prefix('api')->name('api.')->group(function () {
+            Route::get('/tasks', [ManagerDivisiTaskController::class, 'getTasksApi'])
+                ->name('tasks');
+                
+            Route::get('/tasks/statistics', [ManagerDivisiTaskController::class, 'getStatistics'])
+                ->name('tasks.statistics');
+                
+            Route::get('/karyawan-by-divisi/{divisi}', [ManagerDivisiTaskController::class, 'getKaryawanByDivisi'])
+                ->name('karyawan.by_divisi');
+        });
+        
         Route::get('/pengelola-tugas', function () {
-            return view('manager_divisi.pengelola_tugas');
+            return view('manajer_divisi.pengelola_tugas');  // PERUBAHAN: dari 'manager_divisi' ke 'manajer_divisi'
         })->name('pengelola_tugas');
         
         Route::get('/tim-saya', function () {
@@ -298,15 +433,15 @@ Route::middleware(['auth', 'role:manager_divisi'])
             $tim = \App\Models\User::where('divisi', $user->divisi)
                                    ->where('role', 'karyawan')
                                    ->get();
-            return view('manager_divisi.tim_saya', compact('tim'));
+            return view('manajer_divisi.tim_saya', compact('tim'));  // PERUBAHAN: dari 'manager_divisi' ke 'manajer_divisi'
         })->name('tim_saya');
         
         Route::get('/absensi-tim', function () {
-            return view('manager_divisi.absensi_tim');
+            return view('manajer_divisi.absensi_tim');  // PERUBAHAN: dari 'manager_divisi' ke 'manajer_divisi'
         })->name('absensi_tim');
         
         Route::get('/laporan-kinerja', function () {
-            return view('manager_divisi.laporan_kinerja');
+            return view('manajer_divisi.laporan_kinerja');  // PERUBAHAN: dari 'manager_divisi' ke 'manajer_divisi'
         })->name('laporan_kinerja');
     });
 
@@ -315,6 +450,7 @@ Route::middleware(['auth', 'role:manager_divisi'])
 | Routes untuk Pengumuman & Catatan Rapat (Global untuk yang sudah login)
 |--------------------------------------------------------------------------
 */
+
 Route::middleware(['auth'])->resource('pengumuman', PengumumanController::class);
 
 Route::middleware(['auth'])->group(function () {
@@ -324,7 +460,7 @@ Route::middleware(['auth'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Pintasan Routes (Shortcut) - UPDATE DENGAN ROUTE NAME YANG BENAR
+| Pintasan Routes (Shortcut)
 |--------------------------------------------------------------------------
 */
 
@@ -346,7 +482,7 @@ Route::get('/tugas', function () {
             'karyawan' => redirect()->route('karyawan.tugas'),
             'admin' => redirect()->route('admin.tasks.index'),
             'general_manager' => redirect()->route('general_manager.kelola_tugas'),
-            'manager_divisi' => redirect()->route('manager_divisi.pengelola_tugas'),
+            'manager_divisi' => redirect()->route('manager_divisi.kelola_tugas'),
             default => redirect('/login')
         };
     }
@@ -369,6 +505,39 @@ Route::get('/absensi', function () {
 
 /*
 |--------------------------------------------------------------------------
+| API Routes (di web.php untuk kemudahan)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->prefix('api')->group(function () {
+    // API untuk karyawan dashboard data
+    Route::get('/karyawan/dashboard-data', function() {
+        $user = auth()->user();
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'total_tugas' => \App\Models\Task::where('assigned_to', $user->id)->count(),
+                'tugas_selesai' => \App\Models\Task::where('assigned_to', $user->id)
+                                            ->where('status', 'selesai')
+                                            ->count(),
+                'tugas_proses' => \App\Models\Task::where('assigned_to', $user->id)
+                                            ->where('status', 'proses')
+                                            ->count(),
+                'absensi_hari_ini' => 'Belum absen',
+                'persentase_selesai' => 0,
+                'user' => [
+                    'name' => $user->name,
+                    'role' => $user->role,
+                    'divisi' => $user->divisi
+                ]
+            ]
+        ]);
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
 | Debug Routes untuk Testing
 |--------------------------------------------------------------------------
 */
@@ -378,30 +547,28 @@ if (config('app.debug')) {
         if (!$user) return 'Not authenticated';
         
         $routes = [
+            // General Manager routes - PERBAIKAN
+            'general_manager.kelola_tugas' => route('general_manager.kelola_tugas'),
+            'general_manager.tasks.store' => route('general_manager.tasks.store'),
+            'general_manager.tasks.show' => route('general_manager.tasks.show', ['id' => 1]),
+            'general_manager.tasks.update' => route('general_manager.tasks.update', ['id' => 1]),
+            'general_manager.tasks.update.status' => route('general_manager.tasks.update.status', ['id' => 1]),
+            'general_manager.tasks.assign' => route('general_manager.tasks.assign', ['id' => 1]),
+            'general_manager.api.tasks' => route('general_manager.api.tasks'),
+            'general_manager.api.tasks.statistics' => route('general_manager.api.tasks.statistics'),
+            'general_manager.api.karyawan.by_divisi' => route('general_manager.api.karyawan.by_divisi', ['divisi' => 'Programmer']),
+            
+            // Manager Divisi routes - PERBAIKAN
+            'manager_divisi.home' => route('manager_divisi.home'),
+            'manager_divisi.kelola_tugas' => route('manager_divisi.kelola_tugas'),
+            'manager_divisi.tasks.store' => route('manager_divisi.tasks.store'),
+            'manager_divisi.tasks.show' => route('manager_divisi.tasks.show', ['id' => 1]),
+            
             // Admin routes
             'admin.beranda' => route('admin.beranda'),
-            'admin.user' => route('admin.user'),
-            'admin.data_karyawan' => route('admin.data_karyawan'),
-            'admin.absensi.index' => route('admin.absensi.index'),
-            
-            // General Manager routes
-            'general_manager.home' => route('general_manager.home'),
-            'general_manager.data_karyawan' => route('general_manager.data_karyawan'),
-            'general_manager.kelola_tugas' => route('general_manager.kelola_tugas'),
-            
-            // Manager Divisi routes
-            'manager_divisi.home' => route('manager_divisi.home'),
-            'manager_divisi.pengelola_tugas' => route('manager_divisi.pengelola_tugas'),
             
             // Karyawan routes
             'karyawan.home' => route('karyawan.home'),
-            'karyawan.tugas' => route('karyawan.tugas'),
-            
-            // Finance routes
-            'finance.beranda' => route('finance.beranda'),
-            
-            // Owner routes
-            'owner.home' => route('owner.home'),
         ];
         
         return response()->json([
@@ -412,14 +579,15 @@ if (config('app.debug')) {
                 'divisi' => $user->divisi
             ],
             'routes' => $routes,
-            'accessible_routes' => array_filter($routes, function($url) {
-                try {
-                    // Coba akses route untuk cek apakah bisa diakses
-                    return true;
-                } catch (\Exception $e) {
-                    return false;
-                }
-            }, ARRAY_FILTER_USE_KEY)
+            'test_urls' => [
+                // General Manager
+                '/general-manajer/api/tasks' => url('/general-manajer/api/tasks'),
+                '/general-manajer/api/tasks/statistics' => url('/general-manajer/api/tasks/statistics'),
+                '/general-manajer/tasks' => url('/general-manajer/tasks'),
+                // Manager Divisi
+                '/manajer-divisi/api/tasks' => url('/manajer-divisi/api/tasks'),
+                '/manajer-divisi/tasks' => url('/manajer-divisi/tasks'),
+            ]
         ]);
     })->middleware('auth');
     
@@ -441,6 +609,16 @@ if (config('app.debug')) {
                 'exists' => false
             ], 404);
         }
+    })->middleware('auth');
+    
+    // Test URL langsung
+    Route::get('/test-url/{url}', function($url) {
+        $fullUrl = "/general-manajer/{$url}";
+        return response()->json([
+            'url' => $fullUrl,
+            'full_url' => url($fullUrl),
+            'exists' => Route::has($url) ? 'Unknown (needs specific route name)' : 'No'
+        ]);
     })->middleware('auth');
 }
 
