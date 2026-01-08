@@ -235,6 +235,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::delete('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'destroy'])
         ->name('catatan_rapat.destroy');
+
+        Route::get('/catatan_rapat/data', [CatatanRapatController::class, 'data'])
+    ->name('catatan_rapat.data');
+
 });
 
 /*
@@ -390,16 +394,10 @@ Route::get('/data_karyawan', function () {
 });
 Route::get('/layanan', [PelayananController::class, 'index']);
 
-<<<<<<< HEAD
 Route::get('/kelola_order', function () {
     return view('general_manajer/kelola_order');
 });
 Route::get('/kelola_tugas', [TugasController::class, 'index'])->name('tugas.page');
-=======
-Route::get('/kelola_tugas', function () {
-    return view('general_manajer/kelola_tugas');
-});
->>>>>>> ff503eaaf58984ddc015c2e472d81a3ef1296bc2
 Route::get('/kelola_absen', function () {
     return view('general_manajer/kelola_absen');
 });

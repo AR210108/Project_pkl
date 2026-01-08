@@ -15,6 +15,15 @@ class CatatanRapatController extends Controller
     return view('admin.catatan_rapat', compact('catatanRapat'));
     }
 
+
+public function data(): JsonResponse
+{
+    $catatanRapat = CatatanRapat::orderBy('tanggal', 'desc')->paginate(10);
+
+    return response()->json($catatanRapat);
+}
+
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
