@@ -260,7 +260,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/kwitansi', fn() => view('admin/kwitansi'));
     Route::get('/catatan_rapat', fn() => view('admin/catatan_rapat'));
     Route::get('/pengumuman', fn() => view('admin/pengumuman'));
-    Route::get('/data_order', fn() => view('admin/data_order'));
     // Orderan Routes
 Route::resource('orderan', OrderanController::class)->names([
     'index' => 'orderan.index',
@@ -281,7 +280,8 @@ Route::resource('orderan', OrderanController::class)->names([
     Route::get('/finance', fn() => view('finance/beranda'));
     Route::get('/data', fn() => view('finance/data_layanan'));
     Route::get('/pembayaran', fn() => view('finance/data_pembayaran'));
-    Route::get('/data_in_out', fn() => view('finance/data_in_out'));
+    Route::get('/kwetansi', fn() => view('finance/kwitansi'));
+    
     
     // Manager Divisi
     Route::get('/manager_divisi', fn() => view('manager_divisi/home'));
@@ -351,6 +351,24 @@ Route::get('/data', function () {
 });
 Route::get('/pembayaran', function () {
     return view('finance/data_pembayaran');
+});
+Route::get('/pemasukan', function () {
+    return view('finance/pemasukan');
+});
+Route::get('/pengeluaran', function () {
+    return view('finance/pengeluaran');
+});
+Route::get('/finance/invoice', function () {
+    return view('finance/invoice');
+});
+Route::get('/pembayaran', function () {
+    return view('finance/data_pembayaran');
+});
+Route::get('/karyawann', function () {
+    return view('finance/daftar_karyawan');
+});
+Route::get('/rekap_absensi', function () {
+    return view('pemilik/rekap_absensi');
 });
 
 /*

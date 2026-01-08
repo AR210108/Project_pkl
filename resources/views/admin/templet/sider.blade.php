@@ -259,7 +259,7 @@
             </a>
 
             <a class="nav-item flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/data_order" data-page="data_order">
+                href="/orderan" data-page="orderan">
                 <span class="material-icons">receipt_long</span>
                 <span>Kelola Order</span>
             </a>
