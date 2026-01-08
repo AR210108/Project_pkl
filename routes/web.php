@@ -10,6 +10,7 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminKaryawanController;
 use App\Http\Controllers\CatatanRapatController;
+use App\Http\Controllers\DataProjectController;
 use App\Http\Controllers\KwitansiController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PengumumanController;
@@ -17,7 +18,6 @@ use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\SuratKerjasamaController;
 use App\Http\Controllers\PelayananController;
 use App\Models\Invoice;
-use App\Http\Controllers\OrderanController;
 use App\Http\Controllers\GeneralManajer\OrderController;
 
 /*
@@ -260,12 +260,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/kwitansi', fn() => view('admin/kwitansi')); 
     Route::get('/data_order', fn() => view('admin/data_order'));
     // Orderan Routes
-Route::resource('orderan', OrderanController::class)->names([
-    'index' => 'orderan.index',
-    'store' => 'orderan.store',
-    'show' => 'orderan.show',
-    'update' => 'orderan.update',
-    'destroy' => 'orderan.destroy'
+Route::resource('project', DataProjectController::class)->names([
+    'index' => 'project.index',
+    'store' => 'project.store',
+    'show' => 'project.show',
+    'update' => 'project.update',
+    'destroy' => 'project.destroy'
 ]);
     
     // Pemilik
