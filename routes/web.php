@@ -403,11 +403,23 @@ Route::get('/pengelola_tugas', function () {
     return view('manager_divisi/pengelola_tugas');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Routes untuk General Manager
-|--------------------------------------------------------------------------
-*/
+
+    Route::get('/manager_divisi', function () {
+        return view('manager_divisi/home');
+    });
+    Route::get('/pengelola_tugas', action: function () {
+        return view('manager_divisi/pengelola_tugas');
+    });
+    Route::get('/data_order', function () {
+        return view('manager_divisi/data_order');
+    });
+    Route::get('/daftar_karyawan', function () {
+        return view('manager_divisi/daftar_karyawan');
+    });
+    Route::get('/kelola_absensi', function () {
+        return view('manager_divisi/kelola_absensi');
+    });
+
 Route::get('/general_manajer', function () {
     return view('general_manajer/home');
 });
@@ -429,10 +441,19 @@ Route::post('/layanan', [PelayananController::class, 'store']);
 Route::put('/layanan/{id}', [PelayananController::class, 'update']);
 Route::delete('/layanan/{id}', [PelayananController::class, 'destroy']);
 
-Route::prefix('kelola_tugas')->name('tugas.')->group(function () {
-    Route::get('/data', [TugasController::class, 'getData'])->name('data');
-    Route::post('/', [TugasController::class, 'store'])->name('store');
-    Route::get('/{id}', [TugasController::class, 'show'])->name('show');
-    Route::put('/{id}', [TugasController::class, 'update'])->name('update');
-    Route::delete('/{id}', [TugasController::class, 'destroy'])->name('destroy');
+Route::resource('pengumuman', PengumumanController::class);
+// === ROUTE UNTUK CATATAN RAPAT ANDA ===
+// Semua route di dalam group ini memerlukan user sudah login
+Route::middleware(['auth'])->group(function () {
+    Route::get('/catatan_rapat', [CatatanRapatController::class, 'index'])->name('catatan_rapat.index');
+    Route::post('/catatan_rapat', [CatatanRapatController::class, 'store'])->name('catatan_rapat.store');
+    Route::put('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'update'])->name('catatan_rapat.update');
+    Route::delete('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'destroy'])->name('catatan_rapat.destroy');
 });
+
+// Rekap
+Route::get('/kelola_absen', [AbsensiController::class, 'kelolaAbsen'])->name('kelola.absen');
+Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');
+
+//Buat Tugas
+// Tambahkan route untuk tugas

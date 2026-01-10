@@ -1,15 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Task List Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Orderan</title>
+    
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+
+    <!-- Fonts & Icons -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    />
+    <link
+        href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
+        rel="stylesheet"
+    />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -35,6 +46,7 @@
                     },
                     fontFamily: {
                         display: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
                     },
                     borderRadius: {
                         DEFAULT: "0.75rem",
@@ -47,17 +59,10 @@
             },
         };
     </script>
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings:
-                'FILL' 1,
-                'wght' 400,
-                'GRAD' 0,
-                'opsz' 24
-        }
 
+    <style>
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: "Inter", sans-serif;
         }
         
         .material-icons-outlined {
@@ -205,7 +210,6 @@
         .main-content {
             margin-left: 0;
             transition: margin-left 0.3s ease-in-out;
-            overflow-x: hidden; /* Mencegah horizontal scroll pada main content */
         }
         
         @media (min-width: 768px) {
@@ -376,11 +380,9 @@
         
         .panel-body {
             padding: 1.5rem;
-            /* Mencegah overflow horizontal pada panel body */
-            overflow-x: hidden;
         }
         
-        /* SCROLLABLE TABLE - Hanya table yang bisa di-scroll */
+        /* SCROLLABLE TABLE */
         .scrollable-table-container {
             width: 100%;
             overflow-x: auto;
@@ -388,11 +390,8 @@
             border: 1px solid #e2e8f0;
             border-radius: 0.5rem;
             background: white;
-            /* Mencegah shadow keluar dari container */
-            position: relative;
         }
         
-        /* Custom scrollbar untuk table */
         .scrollable-table-container {
             scrollbar-width: auto;
             -webkit-overflow-scrolling: touch;
@@ -420,7 +419,7 @@
         
         .data-table {
             width: 100%;
-            min-width: 1200px; /* Lebar minimum table */
+            min-width: 1200px;
             border-collapse: collapse;
         }
         
@@ -439,9 +438,6 @@
             font-size: 0.875rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            position: sticky;
-            top: 0;
-            z-index: 10;
         }
         
         .data-table tbody tr:nth-child(even) {
@@ -627,38 +623,24 @@
         .hidden-by-filter {
             display: none !important;
         }
-        
-        /* Mencegah horizontal scroll pada body dan html */
-        html, body {
-            overflow-x: hidden;
-            max-width: 100%;
-        }
-        
-        /* Container untuk memastikan tidak ada overflow */
-        .container-wrapper {
-            max-width: 100%;
-            overflow-x: hidden;
-        }
     </style>
-    <!-- Add CSRF token meta tag -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="font-display bg-background-light text-text-light">
-    <div class="flex min-h-screen container-wrapper">
+    <div class="flex min-h-screen">
         <!-- Menggunakan template header -->
         @include('manager_divisi/templet/sider')
         <div class="flex-1 flex flex-col main-content">
             <div class="flex-1 p-3 sm:p-8">
                 <header class="mb-4 sm:mb-8">
-                    <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">Daftar Tugas</h1>
+                    <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">Data Orderan</h1>
                 </header>
                 
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
                         <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari judul tugas atau karyawan..." type="text" />
+                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama orderan atau deskripsi..." type="text" />
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <div class="relative">
@@ -689,10 +671,10 @@
                                 </div>
                             </div>
                         </div>
-                        <button id="tambahTugasBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
+                        <button id="tambahOrderanBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
                             <span class="material-icons-outlined">add</span>
-                            <span class="hidden sm:inline">Buat Tugas Baru</span>
-                            <span class="sm:hidden">Buat</span>
+                            <span class="hidden sm:inline">Tambah Orderan</span>
+                            <span class="sm:hidden">Tambah</span>
                         </button>
                     </div>
                 </div>
@@ -701,63 +683,64 @@
                 <div class="panel">
                     <div class="panel-header">
                         <h3 class="panel-title">
-                            <span class="material-icons-outlined text-primary">assignment</span>
-                            Daftar Tugas
+                            <span class="material-icons-outlined text-primary">shopping_cart</span>
+                            Data Orderan
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">4</span> tugas</span>
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">2</span> orderan</span>
                         </div>
                     </div>
                     <div class="panel-body">
-                        <!-- SCROLLABLE TABLE - Hanya table yang bisa di-scroll -->
+                        <!-- SCROLLABLE TABLE -->
                         <div class="desktop-table">
                             <div class="scrollable-table-container scroll-indicator table-shadow" id="scrollableTable">
                                 <table class="data-table">
                                     <thead>
                                         <tr>
                                             <th style="min-width: 60px;">No</th>
-                                            <th style="min-width: 200px;">Judul Tugas</th>
-                                            <th style="min-width: 150px;">Layanan</th>
-                                            <th style="min-width: 150px;">Karyawan</th>
-                                            <th style="min-width: 150px;">Deadline</th>
+                                            <th style="min-width: 200px;">Nama Orderan</th>
                                             <th style="min-width: 250px;">Deskripsi</th>
-                                            <th style="min-width: 120px;">Status</th>
-                                            <th style="min-width: 100px;">File</th>
+                                            <th style="min-width: 150px;">Harga</th>
+                                            <th style="min-width: 150px;">Deadline</th>
+                                            <th style="min-width: 150px;">Progres</th>
+                                            <th style="min-width: 150px;">Status</th>
                                             <th style="min-width: 100px; text-align: center;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="desktopTableBody">
-                                        <tr class="tugas-row" 
+                                        <tr class="orderan-row" 
                                             data-id="1" 
-                                            data-judul="Desain UI/UX" 
-                                            data-layanan="Web Development" 
-                                            data-karyawan="Ahmad Rizki" 
-                                            data-deadline="2023-12-15" 
-                                            data-status="pending">
+                                            data-nama="Website Company Profile" 
+                                            data-deskripsi="Pembuatan web profil perusahaan..." 
+                                            data-harga="5000000" 
+                                            data-deadline="12 Okt 2025"
+                                            data-progres="75"
+                                            data-status="selesai">
                                             <td style="min-width: 60px;">1</td>
-                                            <td style="min-width: 200px;">Desain UI/UX</td>
-                                            <td style="min-width: 150px;">Web Development</td>
-                                            <td style="min-width: 150px;">Ahmad Rizki</td>
-                                            <td style="min-width: 150px;">15 Des 2023</td>
-                                            <td style="min-width: 250px;">Membuat desain UI/UX untuk aplikasi mobile dengan konsep modern dan minimalis</td>
-                                            <td style="min-width: 120px;">
-                                                <span class="status-badge status-pending">Pending</span>
+                                            <td style="min-width: 200px;">Website Company Profile</td>
+                                            <td style="min-width: 250px;">Pembuatan web profil perusahaan...</td>
+                                            <td style="min-width: 150px;">Rp 5.000.000</td>
+                                            <td style="min-width: 150px;">12 Okt 2025</td>
+                                            <td style="min-width: 150px;">
+                                                <div class="w-full bg-gray-400 rounded-full h-2 dark:bg-gray-600">
+                                                    <div class="bg-primary h-2 rounded-full" style="width: 75%"></div>
+                                                </div>
                                             </td>
-                                            <td style="min-width: 100px;">
-                                                <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                                    <span class="material-icons-outlined text-sm">download</span>
-                                                    File
-                                                </a>
+                                            <td style="min-width: 150px;">
+                                                <span class="status-badge status-selesai">
+                                                    Selesai
+                                                </span>
                                             </td>
                                             <td style="min-width: 100px; text-align: center;">
                                                 <div class="flex justify-center gap-2">
                                                     <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
                                                             data-id="1"
-                                                            data-judul="Desain UI/UX"
-                                                            data-layanan="Web Development"
-                                                            data-karyawan="Ahmad Rizki"
-                                                            data-deadline="2023-12-15"
-                                                            data-status="pending">
+                                                            data-nama="Website Company Profile"
+                                                            data-deskripsi="Pembuatan web profil perusahaan..."
+                                                            data-harga="5000000"
+                                                            data-deadline="12 Okt 2025"
+                                                            data-progres="75"
+                                                            data-status="selesai">
                                                         <span class="material-icons-outlined">edit</span>
                                                     </button>
                                                     <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
@@ -767,121 +750,43 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                        <tr class="tugas-row" 
+                                        <tr class="orderan-row" 
                                             data-id="2" 
-                                            data-judul="API Integration" 
-                                            data-layanan="Mobile Development" 
-                                            data-karyawan="Siti Nurhaliza" 
-                                            data-deadline="2023-12-20" 
+                                            data-nama="Aplikasi Kasir Android" 
+                                            data-deskripsi="Aplikasi POS untuk retail..." 
+                                            data-harga="12000000" 
+                                            data-deadline="20 Nov 2025"
+                                            data-progres="30"
                                             data-status="proses">
                                             <td style="min-width: 60px;">2</td>
-                                            <td style="min-width: 200px;">API Integration</td>
-                                            <td style="min-width: 150px;">Mobile Development</td>
-                                            <td style="min-width: 150px;">Siti Nurhaliza</td>
-                                            <td style="min-width: 150px;">20 Des 2023</td>
-                                            <td style="min-width: 250px;">Mengintegrasikan API payment gateway ke aplikasi mobile</td>
-                                            <td style="min-width: 120px;">
-                                                <span class="status-badge status-proses">Proses</span>
+                                            <td style="min-width: 200px;">Aplikasi Kasir Android</td>
+                                            <td style="min-width: 250px;">Aplikasi POS untuk retail...</td>
+                                            <td style="min-width: 150px;">Rp 12.000.000</td>
+                                            <td style="min-width: 150px;">20 Nov 2025</td>
+                                            <td style="min-width: 150px;">
+                                                <div class="w-full bg-gray-400 rounded-full h-2 dark:bg-gray-600">
+                                                    <div class="bg-primary h-2 rounded-full" style="width: 30%"></div>
+                                                </div>
                                             </td>
-                                            <td style="min-width: 100px;">
-                                                <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                                    <span class="material-icons-outlined text-sm">download</span>
-                                                    File
-                                                </a>
+                                            <td style="min-width: 150px;">
+                                                <span class="status-badge status-proses">
+                                                    Proses
+                                                </span>
                                             </td>
                                             <td style="min-width: 100px; text-align: center;">
                                                 <div class="flex justify-center gap-2">
                                                     <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
                                                             data-id="2"
-                                                            data-judul="API Integration"
-                                                            data-layanan="Mobile Development"
-                                                            data-karyawan="Siti Nurhaliza"
-                                                            data-deadline="2023-12-20"
+                                                            data-nama="Aplikasi Kasir Android"
+                                                            data-deskripsi="Aplikasi POS untuk retail..."
+                                                            data-harga="12000000"
+                                                            data-deadline="20 Nov 2025"
+                                                            data-progres="30"
                                                             data-status="proses">
                                                         <span class="material-icons-outlined">edit</span>
                                                     </button>
                                                     <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
                                                             data-id="2">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr class="tugas-row" 
-                                            data-id="3" 
-                                            data-judul="Database Optimization" 
-                                            data-layanan="Backend Development" 
-                                            data-karyawan="Budi Santoso" 
-                                            data-deadline="2023-12-10" 
-                                            data-status="selesai">
-                                            <td style="min-width: 60px;">3</td>
-                                            <td style="min-width: 200px;">Database Optimization</td>
-                                            <td style="min-width: 150px;">Backend Development</td>
-                                            <td style="min-width: 150px;">Budi Santoso</td>
-                                            <td style="min-width: 150px;">10 Des 2023</td>
-                                            <td style="min-width: 250px;">Optimasi query database untuk meningkatkan performa aplikasi</td>
-                                            <td style="min-width: 120px;">
-                                                <span class="status-badge status-selesai">Selesai</span>
-                                            </td>
-                                            <td style="min-width: 100px;">
-                                                <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                                    <span class="material-icons-outlined text-sm">download</span>
-                                                    File
-                                                </a>
-                                            </td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                            data-id="3"
-                                                            data-judul="Database Optimization"
-                                                            data-layanan="Backend Development"
-                                                            data-karyawan="Budi Santoso"
-                                                            data-deadline="2023-12-10"
-                                                            data-status="selesai">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                            data-id="3">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr class="tugas-row" 
-                                            data-id="4" 
-                                            data-judul="Content Writing" 
-                                            data-layanan="Digital Marketing" 
-                                            data-karyawan="Dewi Lestari" 
-                                            data-deadline="2023-12-18" 
-                                            data-status="pending">
-                                            <td style="min-width: 60px;">4</td>
-                                            <td style="min-width: 200px;">Content Writing</td>
-                                            <td style="min-width: 150px;">Digital Marketing</td>
-                                            <td style="min-width: 150px;">Dewi Lestari</td>
-                                            <td style="min-width: 150px;">18 Des 2023</td>
-                                            <td style="min-width: 250px;">Menulis konten blog dan artikel untuk website perusahaan</td>
-                                            <td style="min-width: 120px;">
-                                                <span class="status-badge status-pending">Pending</span>
-                                            </td>
-                                            <td style="min-width: 100px;">
-                                                <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                                    <span class="material-icons-outlined text-sm">download</span>
-                                                    File
-                                                </a>
-                                            </td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                            data-id="4"
-                                                            data-judul="Content Writing"
-                                                            data-layanan="Digital Marketing"
-                                                            data-karyawan="Dewi Lestari"
-                                                            data-deadline="2023-12-18"
-                                                            data-status="pending">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                            data-id="4">
                                                         <span class="material-icons-outlined">delete</span>
                                                     </button>
                                                 </div>
@@ -894,31 +799,33 @@
                         
                         <!-- Mobile Card View -->
                         <div class="mobile-cards space-y-4" id="mobile-cards">
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm tugas-card" 
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm orderan-card" 
                                  data-id="1" 
-                                 data-judul="Desain UI/UX" 
-                                 data-layanan="Web Development" 
-                                 data-karyawan="Ahmad Rizki" 
-                                 data-deadline="2023-12-15" 
-                                 data-status="pending">
+                                 data-nama="Website Company Profile" 
+                                 data-deskripsi="Pembuatan web profil perusahaan..." 
+                                 data-harga="5000000" 
+                                 data-deadline="12 Okt 2025"
+                                 data-progres="75"
+                                 data-status="selesai">
                                 <div class="flex justify-between items-start mb-3">
                                     <div class="flex items-center gap-3">
                                         <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">assignment</span>
+                                            <span class="material-icons-outlined text-primary">shopping_cart</span>
                                         </div>
                                         <div>
-                                            <h4 class="font-semibold text-base">Desain UI/UX</h4>
-                                            <p class="text-sm text-text-muted-light">Ahmad Rizki</p>
+                                            <h4 class="font-semibold text-base">Website Company Profile</h4>
+                                            <p class="text-sm text-text-muted-light">Rp 5.000.000</p>
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
                                         <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
                                                 data-id="1"
-                                                data-judul="Desain UI/UX"
-                                                data-layanan="Web Development"
-                                                data-karyawan="Ahmad Rizki"
-                                                data-deadline="2023-12-15"
-                                                data-status="pending">
+                                                data-nama="Website Company Profile"
+                                                data-deskripsi="Pembuatan web profil perusahaan..."
+                                                data-harga="5000000"
+                                                data-deadline="12 Okt 2025"
+                                                data-progres="75"
+                                                data-status="selesai">
                                             <span class="material-icons-outlined">edit</span>
                                         </button>
                                         <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
@@ -935,55 +842,54 @@
                                     <div>
                                         <p class="text-text-muted-light">Status</p>
                                         <p>
-                                            <span class="status-badge status-pending">Pending</span>
+                                            <span class="status-badge status-selesai">
+                                                Selesai
+                                            </span>
                                         </p>
                                     </div>
                                     <div>
-                                        <p class="text-text-muted-light">Layanan</p>
-                                        <p class="font-medium">Web Development</p>
+                                        <p class="text-text-muted-light">Deadline</p>
+                                        <p class="font-medium">12 Okt 2025</p>
                                     </div>
                                     <div>
-                                        <p class="text-text-muted-light">Deadline</p>
-                                        <p class="font-medium">15 Des 2023</p>
+                                        <p class="text-text-muted-light">Progres</p>
+                                        <div class="w-full bg-gray-400 rounded-full h-2 dark:bg-gray-600 mt-2">
+                                            <div class="bg-primary h-2 rounded-full" style="width: 75%"></div>
+                                        </div>
                                     </div>
                                     <div class="col-span-2">
                                         <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Membuat desain UI/UX untuk aplikasi mobile dengan konsep modern dan minimalis</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">File</p>
-                                        <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                            <span class="material-icons-outlined text-sm">download</span>
-                                            Unduh File
-                                        </a>
+                                        <p class="font-medium">Pembuatan web profil perusahaan...</p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm tugas-card" 
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm orderan-card" 
                                  data-id="2" 
-                                 data-judul="API Integration" 
-                                 data-layanan="Mobile Development" 
-                                 data-karyawan="Siti Nurhaliza" 
-                                 data-deadline="2023-12-20" 
+                                 data-nama="Aplikasi Kasir Android" 
+                                 data-deskripsi="Aplikasi POS untuk retail..." 
+                                 data-harga="12000000" 
+                                 data-deadline="20 Nov 2025"
+                                 data-progres="30"
                                  data-status="proses">
                                 <div class="flex justify-between items-start mb-3">
                                     <div class="flex items-center gap-3">
                                         <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">assignment</span>
+                                            <span class="material-icons-outlined text-primary">shopping_cart</span>
                                         </div>
                                         <div>
-                                            <h4 class="font-semibold text-base">API Integration</h4>
-                                            <p class="text-sm text-text-muted-light">Siti Nurhaliza</p>
+                                            <h4 class="font-semibold text-base">Aplikasi Kasir Android</h4>
+                                            <p class="text-sm text-text-muted-light">Rp 12.000.000</p>
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
                                         <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
                                                 data-id="2"
-                                                data-judul="API Integration"
-                                                data-layanan="Mobile Development"
-                                                data-karyawan="Siti Nurhaliza"
-                                                data-deadline="2023-12-20"
+                                                data-nama="Aplikasi Kasir Android"
+                                                data-deskripsi="Aplikasi POS untuk retail..."
+                                                data-harga="12000000"
+                                                data-deadline="20 Nov 2025"
+                                                data-progres="30"
                                                 data-status="proses">
                                             <span class="material-icons-outlined">edit</span>
                                         </button>
@@ -1001,159 +907,24 @@
                                     <div>
                                         <p class="text-text-muted-light">Status</p>
                                         <p>
-                                            <span class="status-badge status-proses">Proses</span>
+                                            <span class="status-badge status-proses">
+                                                Proses
+                                            </span>
                                         </p>
                                     </div>
                                     <div>
-                                        <p class="text-text-muted-light">Layanan</p>
-                                        <p class="font-medium">Mobile Development</p>
+                                        <p class="text-text-muted-light">Deadline</p>
+                                        <p class="font-medium">20 Nov 2025</p>
                                     </div>
                                     <div>
-                                        <p class="text-text-muted-light">Deadline</p>
-                                        <p class="font-medium">20 Des 2023</p>
+                                        <p class="text-text-muted-light">Progres</p>
+                                        <div class="w-full bg-gray-400 rounded-full h-2 dark:bg-gray-600 mt-2">
+                                            <div class="bg-primary h-2 rounded-full" style="width: 30%"></div>
+                                        </div>
                                     </div>
                                     <div class="col-span-2">
                                         <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Mengintegrasikan API payment gateway ke aplikasi mobile</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">File</p>
-                                        <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                            <span class="material-icons-outlined text-sm">download</span>
-                                            Unduh File
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm tugas-card" 
-                                 data-id="3" 
-                                 data-judul="Database Optimization" 
-                                 data-layanan="Backend Development" 
-                                 data-karyawan="Budi Santoso" 
-                                 data-deadline="2023-12-10" 
-                                 data-status="selesai">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">assignment</span>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-base">Database Optimization</h4>
-                                            <p class="text-sm text-text-muted-light">Budi Santoso</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                data-id="3"
-                                                data-judul="Database Optimization"
-                                                data-layanan="Backend Development"
-                                                data-karyawan="Budi Santoso"
-                                                data-deadline="2023-12-10"
-                                                data-status="selesai">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                data-id="3">
-                                            <span class="material-icons-outlined">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <p class="text-text-muted-light">No</p>
-                                        <p class="font-medium">3</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Status</p>
-                                        <p>
-                                            <span class="status-badge status-selesai">Selesai</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Layanan</p>
-                                        <p class="font-medium">Backend Development</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Deadline</p>
-                                        <p class="font-medium">10 Des 2023</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Optimasi query database untuk meningkatkan performa aplikasi</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">File</p>
-                                        <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                            <span class="material-icons-outlined text-sm">download</span>
-                                            Unduh File
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm tugas-card" 
-                                 data-id="4" 
-                                 data-judul="Content Writing" 
-                                 data-layanan="Digital Marketing" 
-                                 data-karyawan="Dewi Lestari" 
-                                 data-deadline="2023-12-18" 
-                                 data-status="pending">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">assignment</span>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-base">Content Writing</h4>
-                                            <p class="text-sm text-text-muted-light">Dewi Lestari</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                data-id="4"
-                                                data-judul="Content Writing"
-                                                data-layanan="Digital Marketing"
-                                                data-karyawan="Dewi Lestari"
-                                                data-deadline="2023-12-18"
-                                                data-status="pending">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                data-id="4">
-                                            <span class="material-icons-outlined">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <p class="text-text-muted-light">No</p>
-                                        <p class="font-medium">4</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Status</p>
-                                        <p>
-                                            <span class="status-badge status-pending">Pending</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Layanan</p>
-                                        <p class="font-medium">Digital Marketing</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Deadline</p>
-                                        <p class="font-medium">18 Des 2023</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Menulis konten blog dan artikel untuk website perusahaan</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">File</p>
-                                        <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                            <span class="material-icons-outlined text-sm">download</span>
-                                            Unduh File
-                                        </a>
+                                        <p class="font-medium">Aplikasi POS untuk retail...</p>
                                     </div>
                                 </div>
                             </div>
@@ -1180,46 +951,29 @@
         </div>
     </div>
 
-    <!-- Modal Tambah Tugas -->
-    <div id="tambahTugasModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <!-- Modal Tambah Orderan -->
+    <div id="tambahOrderanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Buat Tugas Baru</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Tambah Orderan Baru</h3>
                     <button id="closeModalBtn" class="text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form action="#" method="POST" id="tambahTugasForm" class="space-y-4">
-                    @csrf
+                <form action="#" method="POST" id="tambahOrderanForm" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Judul Tugas</label>
-                            <input type="text" name="judul_tugas" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan judul tugas" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
+                            <input type="text" name="nama_orderan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama orderan" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Layanan</label>
-                            <select name="layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih layanan</option>
-                                <option value="Web Development">Web Development</option>
-                                <option value="Mobile Development">Mobile Development</option>
-                                <option value="Backend Development">Backend Development</option>
-                                <option value="Digital Marketing">Digital Marketing</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Karyawan</label>
-                            <select name="karyawan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih karyawan</option>
-                                <option value="Ahmad Rizki">Ahmad Rizki</option>
-                                <option value="Siti Nurhaliza">Siti Nurhaliza</option>
-                                <option value="Budi Santoso">Budi Santoso</option>
-                                <option value="Dewi Lestari">Dewi Lestari</option>
-                            </select>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
+                            <input type="text" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan harga" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                            <input type="date" name="deadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <input type="text" name="deadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deadline" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -1230,14 +984,14 @@
                                 <option value="selesai">Selesai</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">File</label>
-                            <input type="file" name="file" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                        </div>
                     </div>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi tugas" required></textarea>
+                        <textarea name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi orderan" required></textarea>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
+                        <input type="number" name="progres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan progres (0-100)" required>
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" id="batalTambahBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -1248,48 +1002,30 @@
         </div>
     </div>
 
-    <!-- Modal Edit Tugas -->
-    <div id="editTugasModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <!-- Modal Edit Orderan -->
+    <div id="editOrderanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Tugas</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Edit Orderan</h3>
                     <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form method="POST" action="#" id="editTugasForm" class="space-y-4">
-                    @csrf
-                    @method('PUT')
+                <form method="POST" action="#" id="editOrderanForm" class="space-y-4">
                     <input type="hidden" id="editId" name="id">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Judul Tugas</label>
-                            <input type="text" id="editJudulTugas" name="judul_tugas" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan judul tugas" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
+                            <input type="text" id="editNamaOrderan" name="nama_orderan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama orderan" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Layanan</label>
-                            <select id="editLayanan" name="layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih layanan</option>
-                                <option value="Web Development">Web Development</option>
-                                <option value="Mobile Development">Mobile Development</option>
-                                <option value="Backend Development">Backend Development</option>
-                                <option value="Digital Marketing">Digital Marketing</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Karyawan</label>
-                            <select id="editKaryawan" name="karyawan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih karyawan</option>
-                                <option value="Ahmad Rizki">Ahmad Rizki</option>
-                                <option value="Siti Nurhaliza">Siti Nurhaliza</option>
-                                <option value="Budi Santoso">Budi Santoso</option>
-                                <option value="Dewi Lestari">Dewi Lestari</option>
-                            </select>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
+                            <input type="text" id="editHarga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan harga" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                            <input type="date" id="editDeadline" name="deadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <input type="text" id="editDeadline" name="deadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deadline" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -1300,14 +1036,14 @@
                                 <option value="selesai">Selesai</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">File</label>
-                            <input type="file" name="file" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                        </div>
                     </div>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi tugas" required></textarea>
+                        <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi orderan" required></textarea>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
+                        <input type="number" id="editProgres" name="progres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan progres (0-100)" required>
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" id="batalEditBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -1329,10 +1065,8 @@
                     </button>
                 </div>
                 <form id="deleteForm" method="POST" action="#">
-                    @csrf
-                    @method('DELETE')
                     <div class="mb-6">
-                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus tugas ini?</p>
+                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus orderan ini?</p>
                         <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
                         <input type="hidden" id="deleteId" name="id">
                     </div>
@@ -1366,9 +1100,9 @@
         let activeFilters = ['all'];
         let searchTerm = '';
         
-        // Dapatkan semua elemen tugas
-        const tugasRows = document.querySelectorAll('.tugas-row');
-        const tugasCards = document.querySelectorAll('.tugas-card');
+        // Dapatkan semua elemen orderan
+        const orderanRows = document.querySelectorAll('.orderan-row');
+        const orderanCards = document.querySelectorAll('.orderan-card');
         
         // Inisialisasi pagination, filter, dan search
         initializePagination();
@@ -1428,11 +1162,11 @@
         }
         
         function getFilteredRows() {
-            return Array.from(tugasRows).filter(row => !row.classList.contains('hidden-by-filter'));
+            return Array.from(orderanRows).filter(row => !row.classList.contains('hidden-by-filter'));
         }
         
         function getFilteredCards() {
-            return Array.from(tugasCards).filter(card => !card.classList.contains('hidden-by-filter'));
+            return Array.from(orderanCards).filter(card => !card.classList.contains('hidden-by-filter'));
         }
         
         function updateVisibleItems() {
@@ -1443,8 +1177,8 @@
             const endIndex = startIndex + itemsPerPage;
             
             // Hide all rows and cards first
-            tugasRows.forEach(row => row.style.display = 'none');
-            tugasCards.forEach(card => card.style.display = 'none');
+            orderanRows.forEach(row => row.style.display = 'none');
+            orderanCards.forEach(card => card.style.display = 'none');
             
             // Show only the rows for current page
             visibleRows.forEach((row, index) => {
@@ -1527,7 +1261,7 @@
                 applyFilters();
                 filterDropdown.classList.remove('show');
                 const visibleCount = getFilteredRows().length;
-                showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} tugas`, 'success');
+                showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} orderan`, 'success');
             });
             
             // Reset filter
@@ -1540,7 +1274,7 @@
                 applyFilters();
                 filterDropdown.classList.remove('show');
                 const visibleCount = getFilteredRows().length;
-                showMinimalPopup('Filter Direset', 'Menampilkan semua tugas', 'success');
+                showMinimalPopup('Filter Direset', 'Menampilkan semua orderan', 'success');
             });
         }
         
@@ -1549,10 +1283,10 @@
             currentPage = 1;
             
             // Apply filters to rows
-            tugasRows.forEach(row => {
+            orderanRows.forEach(row => {
                 const status = row.getAttribute('data-status').toLowerCase();
-                const judul = row.getAttribute('data-judul').toLowerCase();
-                const karyawan = row.getAttribute('data-karyawan').toLowerCase();
+                const nama = row.getAttribute('data-nama').toLowerCase();
+                const deskripsi = row.getAttribute('data-deskripsi').toLowerCase();
                 
                 // Check if status matches filter
                 let statusMatches = false;
@@ -1566,8 +1300,8 @@
                 let searchMatches = true;
                 if (searchTerm) {
                     const searchLower = searchTerm.toLowerCase();
-                    searchMatches = judul.includes(searchLower) || 
-                                   karyawan.includes(searchLower) ||
+                    searchMatches = nama.includes(searchLower) || 
+                                   deskripsi.includes(searchLower) ||
                                    status.includes(searchLower);
                 }
                 
@@ -1579,10 +1313,10 @@
             });
             
             // Apply same filters to cards
-            tugasCards.forEach(card => {
+            orderanCards.forEach(card => {
                 const status = card.getAttribute('data-status').toLowerCase();
-                const judul = card.getAttribute('data-judul').toLowerCase();
-                const karyawan = card.getAttribute('data-karyawan').toLowerCase();
+                const nama = card.getAttribute('data-nama').toLowerCase();
+                const deskripsi = card.getAttribute('data-deskripsi').toLowerCase();
                 
                 // Check if status matches filter
                 let statusMatches = false;
@@ -1596,8 +1330,8 @@
                 let searchMatches = true;
                 if (searchTerm) {
                     const searchLower = searchTerm.toLowerCase();
-                    searchMatches = judul.includes(searchLower) || 
-                                   karyawan.includes(searchLower) ||
+                    searchMatches = nama.includes(searchLower) || 
+                                   deskripsi.includes(searchLower) ||
                                    status.includes(searchLower);
                 }
                 
@@ -1675,12 +1409,12 @@
         });
 
         // Modal elements
-        const tambahTugasModal = document.getElementById('tambahTugasModal');
-        const editTugasModal = document.getElementById('editTugasModal');
+        const tambahOrderanModal = document.getElementById('tambahOrderanModal');
+        const editOrderanModal = document.getElementById('editOrderanModal');
         const deleteModal = document.getElementById('deleteModal');
 
         // Buttons
-        const tambahTugasBtn = document.getElementById('tambahTugasBtn');
+        const tambahOrderanBtn = document.getElementById('tambahOrderanBtn');
         const batalTambahBtn = document.getElementById('batalTambahBtn');
         const batalEditBtn = document.getElementById('batalEditBtn');
         const batalDeleteBtn = document.getElementById('batalDeleteBtn');
@@ -1689,34 +1423,34 @@
         const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
 
         // Forms
-        const tambahTugasForm = document.getElementById('tambahTugasForm');
-        const editTugasForm = document.getElementById('editTugasForm');
+        const tambahOrderanForm = document.getElementById('tambahOrderanForm');
+        const editOrderanForm = document.getElementById('editOrderanForm');
 
         // Open tambah modal
-        tambahTugasBtn.addEventListener('click', () => {
-            tambahTugasModal.classList.remove('hidden');
+        tambahOrderanBtn.addEventListener('click', () => {
+            tambahOrderanModal.classList.remove('hidden');
         });
 
         // Close tambah modal
         batalTambahBtn.addEventListener('click', () => {
-            tambahTugasModal.classList.add('hidden');
-            tambahTugasForm.reset();
+            tambahOrderanModal.classList.add('hidden');
+            tambahOrderanForm.reset();
         });
 
         closeModalBtn.addEventListener('click', () => {
-            tambahTugasModal.classList.add('hidden');
-            tambahTugasForm.reset();
+            tambahOrderanModal.classList.add('hidden');
+            tambahOrderanForm.reset();
         });
 
         // Close edit modal
         batalEditBtn.addEventListener('click', () => {
-            editTugasModal.classList.add('hidden');
-            editTugasForm.reset();
+            editOrderanModal.classList.add('hidden');
+            editOrderanForm.reset();
         });
 
         closeEditModalBtn.addEventListener('click', () => {
-            editTugasModal.classList.add('hidden');
-            editTugasForm.reset();
+            editOrderanModal.classList.add('hidden');
+            editOrderanForm.reset();
         });
 
         // Close delete modal
@@ -1735,16 +1469,17 @@
             button.addEventListener('click', () => {
                 // SET VALUE
                 document.getElementById('editId').value = button.dataset.id;
-                document.getElementById('editJudulTugas').value = button.dataset.judul;
-                document.getElementById('editLayanan').value = button.dataset.layanan;
-                document.getElementById('editKaryawan').value = button.dataset.karyawan;
+                document.getElementById('editNamaOrderan').value = button.dataset.nama;
+                document.getElementById('editDeskripsi').value = button.dataset.deskripsi;
+                document.getElementById('editHarga').value = button.dataset.harga;
                 document.getElementById('editDeadline').value = button.dataset.deadline;
+                document.getElementById('editProgres').value = button.dataset.progres;
                 document.getElementById('editStatus').value = button.dataset.status;
 
                 // SET ACTION URL DINAMIS
-                editTugasForm.action = `/tugas/${button.dataset.id}`;
+                editOrderanForm.action = `/orderan/${button.dataset.id}`;
 
-                editTugasModal.classList.remove('hidden');
+                editOrderanModal.classList.remove('hidden');
             });
         });
 
@@ -1756,7 +1491,7 @@
                 const id = button.dataset.id;
 
                 // Set action form delete
-                document.getElementById('deleteForm').action = `/tugas/${id}`;
+                document.getElementById('deleteForm').action = `/orderan/${id}`;
                 document.getElementById('deleteId').value = id;
 
                 // Tampilkan modal
@@ -1766,14 +1501,9 @@
 
         // ============================
         // SUBMIT FORM EDIT
-        // (untuk Laravel biarkan form submit saja)
         // ============================
-        editTugasForm.addEventListener('submit', (e) => {
-            // Jangan prevent kalau mau kirim ke backend
-            // e.preventDefault();
-            // editTugasForm.submit();  // opsional
-
-            editTugasModal.classList.add('hidden');
+        editOrderanForm.addEventListener('submit', (e) => {
+            editOrderanModal.classList.add('hidden');
         });
 
         // ============================
@@ -1786,10 +1516,9 @@
         // ============================
         // SUBMIT FORM TAMBAH
         // ============================
-        tambahTugasForm.addEventListener('submit', (e) => {
-            tambahTugasModal.classList.add('hidden');
+        tambahOrderanForm.addEventListener('submit', (e) => {
+            tambahOrderanModal.classList.add('hidden');
         });
     </script>
 </body>
-
 </html>
