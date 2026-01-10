@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="id">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Data Layanan</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
         tailwind.config = {
+            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
@@ -31,7 +33,7 @@
                         "danger": "#ef4444"
                     },
                     fontFamily: {
-                        display: ["Poppins", "sans-serif"],
+                        display: ["Inter", "sans-serif"],
                     },
                     borderRadius: {
                         DEFAULT: "0.75rem",
@@ -45,8 +47,16 @@
         };
     </script>
     <style>
+        .material-symbols-outlined {
+            font-variation-settings:
+                'FILL' 1,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24
+        }
+
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
         
         .material-icons-outlined {
@@ -54,36 +64,24 @@
             vertical-align: middle;
         }
         
-        .preview-image {
-            max-width: 100%;
-            max-height: 200px;
-            object-fit: contain;
-        }
-        
         /* Card hover effects */
-        .service-card {
+        .stat-card {
             transition: all 0.3s ease;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
         
-        .service-card:hover {
+        .stat-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         
-        /* Progress bar styling */
-        .progress-bar {
-            height: 8px;
-            background-color: #e2e8f0;
-            border-radius: 9999px;
-            overflow: hidden;
+        /* Table styles */
+        .order-table {
+            transition: all 0.2s ease;
         }
         
-        .progress-fill {
-            height: 100%;
-            background-color: #3b82f6;
-            border-radius: 9999px;
-            transition: width 0.3s ease;
+        .order-table tr:hover {
+            background-color: rgba(59, 130, 246, 0.05);
         }
         
         /* Button styles */
@@ -108,9 +106,135 @@
         }
         
         /* Modal styles */
+        .modal {
+            transition: opacity 0.25s ease;
+        }
+        
         .modal-backdrop {
             background-color: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
+        }
+
+        /* Custom styles untuk transisi */
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        /* Animasi hamburger */
+        .hamburger-line {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .hamburger-active .line1 {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .hamburger-active .line2 {
+            opacity: 0;
+        }
+        
+        .hamburger-active .line3 {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+        
+        /* Gaya untuk indikator aktif/hover */
+        .nav-item {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background-color: #3b82f6;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        @media (min-width: 768px) {
+            .nav-item::before {
+                right: auto;
+                left: 0;
+                transform: translateX(-100%);
+            }
+        }
+        
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            transform: translateX(0);
+        }
+        
+        /* Memastikan sidebar tetap di posisinya saat scroll */
+        .sidebar-fixed {
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 40;
+        }
+        
+        /* Menyesuaikan konten utama agar tidak tertutup sidebar */
+        .main-content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        @media (min-width: 768px) {
+            .main-content {
+                margin-left: 256px; /* Lebar sidebar */
+            }
+        }
+        
+        /* Scrollbar kustom untuk sidebar */
+        .sidebar-fixed::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar-fixed::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .sidebar-fixed::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        
+        .sidebar-fixed::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Table mobile adjustments */
+        @media (max-width: 639px) {
+            .desktop-table {
+                display: none;
+            }
+            
+            .mobile-cards {
+                display: block;
+            }
+            
+            /* Hide desktop pagination on mobile */
+            .desktop-pagination {
+                display: none !important;
+            }
+        }
+        
+        @media (min-width: 640px) {
+            .desktop-table {
+                display: block;
+            }
+            
+            .mobile-cards {
+                display: none;
+            }
+            
+            /* Hide mobile pagination on desktop */
+            .mobile-pagination {
+                display: none !important;
+            }
         }
         
         /* Form input styles */
@@ -124,87 +248,7 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
         
-        /* Custom scrollbar for dark mode */
-        .dark ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        .dark ::-webkit-scrollbar-track {
-            background: #1f2937;
-        }
-        
-        .dark ::-webkit-scrollbar-thumb {
-            background: #4b5563;
-            border-radius: 4px;
-        }
-        
-        .dark ::-webkit-scrollbar-thumb:hover {
-            background: #6b7280;
-        }
-        
-        /* Mobile card adjustments */
-        @media (max-width: 639px) {
-            .service-card {
-                padding: 0.75rem !important;
-            }
-            
-            .service-card .bg-gray-100 {
-                height: 120px !important;
-            }
-            
-            .service-card h3 {
-                font-size: 1rem !important;
-                margin-bottom: 0.5rem !important;
-            }
-            
-            .service-card .space-y-2 {
-                gap: 0.25rem !important;
-            }
-            
-            .service-card .space-y-2 > div {
-                font-size: 0.75rem !important;
-            }
-            
-            .service-card .material-icons-outlined {
-                font-size: 1rem !important;
-            }
-            
-            .service-card .progress-bar {
-                height: 6px !important;
-            }
-            
-            .service-card .text-xs {
-                font-size: 0.625rem !important;
-            }
-            
-            .service-card .flex.justify-between {
-                margin-bottom: 0.5rem !important;
-            }
-            
-            .service-card button {
-                padding: 0.25rem 0.5rem !important;
-                font-size: 0.75rem !important;
-            }
-        }
-        
         /* Pagination styles */
-        .pagination-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #cbd5e1;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        
-        .pagination-dot.active {
-            background-color: #3b82f6;
-            width: 24px;
-            border-radius: 4px;
-        }
-        
-        /* Mobile pagination styles */
         .page-btn {
             transition: all 0.2s ease;
         }
@@ -276,1373 +320,1186 @@
             cursor: not-allowed;
         }
         
-        /* Custom styles untuk transisi */
-        .sidebar-transition {
-            transition: transform 0.3s ease-in-out;
-        }
-        
-        /* Animasi hamburger */
-        .hamburger-line {
-            transition: all 0.3s ease-in-out;
-        }
-        
-        .hamburger-active .line1 {
-            transform: rotate(45deg) translate(5px, 5px);
-        }
-        
-        .hamburger-active .line2 {
-            opacity: 0;
-        }
-        
-        .hamburger-active .line3 {
-            transform: rotate(-45deg) translate(7px, -6px);
-        }
-        
-        /* Style untuk efek hover yang lebih menonjol */
-        .nav-item {
-            position: relative;
+        /* Panel Styles */
+        .panel {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
             overflow: hidden;
+            border: 1px solid #e2e8f0;
         }
         
-        /* Gaya untuk indikator aktif/hover */
-        /* Default untuk mobile: di sebelah kanan */
-        .nav-item::before {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 0;
-            height: 100%;
-            width: 3px;
-            background-color: #000;
-            transform: translateX(100%);
+        .panel-header {
+            background: #f8fafc;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .panel-body {
+            padding: 1.5rem;
+        }
+        
+        /* SCROLLABLE TABLE */
+        .scrollable-table-container {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background: white;
+        }
+        
+        .scrollable-table-container {
+            scrollbar-width: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .scrollable-table-container::-webkit-scrollbar {
+            height: 12px;
+            width: 12px;
+        }
+        
+        .scrollable-table-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 6px;
+        }
+        
+        .scrollable-table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 6px;
+            border: 2px solid #f1f5f9;
+        }
+        
+        .scrollable-table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        .data-table {
+            width: 100%;
+            min-width: 1200px;
+            border-collapse: collapse;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .data-table tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        
+        .data-table tbody tr:hover {
+            background: #f3f4f6;
+        }
+        
+        .table-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Minimalist Popup Styles */
+        .minimal-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            transform: translateX(400px);
             transition: transform 0.3s ease;
+            max-width: 350px;
+            border-left: 4px solid #10b981;
         }
         
-        /* Override untuk desktop: di sebelah kiri */
-        @media (min-width: 768px) {
-            .nav-item::before {
-                right: auto;
-                left: 0;
-                transform: translateX(-100%);
-            }
-        }
-        
-        .nav-item:hover::before,
-        .nav-item.active::before {
+        .minimal-popup.show {
             transform: translateX(0);
         }
         
-        /* Memastikan sidebar tetap di posisinya saat scroll */
-        .sidebar-fixed {
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 40;
+        .minimal-popup.error {
+            border-left-color: #ef4444;
         }
         
-        /* Scrollbar kustom untuk sidebar */
-        .sidebar-fixed::-webkit-scrollbar {
-            width: 6px;
+        .minimal-popup.warning {
+            border-left-color: #f59e0b;
         }
         
-        .sidebar-fixed::-webkit-scrollbar-track {
-            background: #f1f1f1;
+        .minimal-popup-icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
         }
         
-        .sidebar-fixed::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
+        .minimal-popup.success .minimal-popup-icon {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
         }
         
-        .sidebar-fixed::-webkit-scrollbar-thumb:hover {
-            background: #555;
+        .minimal-popup.error .minimal-popup-icon {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        
+        .minimal-popup.warning .minimal-popup-icon {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+        
+        .minimal-popup-content {
+            flex-grow: 1;
+        }
+        
+        .minimal-popup-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 2px;
+        }
+        
+        .minimal-popup-message {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .minimal-popup-close {
+            flex-shrink: 0;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .minimal-popup-close:hover {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        
+        /* Hidden class for filtering */
+        .hidden-by-filter {
+            display: none !important;
         }
     </style>
+    <!-- Add CSRF token meta tag -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="font-display bg-background-light text-text-light">
-    <!-- Tombol Hamburger untuk Mobile (sekarang di kanan) -->
-    <button id="hamburger" class="md:hidden fixed top-4 right-4 z-50 p-2 rounded-md bg-white shadow-md">
-        <div class="w-6 h-6 flex flex-col justify-center space-y-1">
-            <div class="hamburger-line line1 w-6 h-0.5 bg-gray-800"></div>
-            <div class="hamburger-line line2 w-6 h-0.5 bg-gray-800"></div>
-            <div class="hamburger-line line3 w-6 h-0.5 bg-gray-800"></div>
-        </div>
-    </button>
-
-    <!-- Overlay untuk Mobile -->
-    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
-
-    <!-- Sidebar -->
-  <body class="font-display bg-background-light text-text-light">
     <div class="flex min-h-screen">
-        <!-- Container untuk sidebar yang akan dimuat -->
+        <!-- Menggunakan template header -->
         @include('finance.templet.sider')
-
-    <!-- Konten Utama -->
-    <div id="main-content" class="main-content min-h-screen md:ml-64">
-        <main class="flex-1 p-4 md:p-8">
-            <h2 class="text-3xl font-bold mb-6">Data Layanan</h2>
-            
-            <!-- Search and Filter Section -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                <div class="relative w-full md:w-1/3">
-                    <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                    <input class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Search" type="text" />
-                </div>
-                <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                    <button class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
-                        Filter
-                    </button>
-                    <button onclick="openAddModal()" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
-                        <span class="material-icons-outlined">add</span>
-                        <span class="hidden sm:inline">Tambah Data Layanan</span>
-                        <span class="sm:hidden">Tambah</span>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Cards Container -->
-            <div class="relative">
-                <!-- Desktop Cards Grid -->
-                <div class="hidden md:block">
-                    <div id="desktopPagesContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-4">
-                        <!-- Desktop Card 1 -->
-                        <div class="service-card desktop-card bg-card-light rounded-DEFAULT p-5 flex flex-col gap-4 border border-border-light">
-                            <div class="bg-gray-100 h-40 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-4xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-base">edit</span>
-                                    <span class="hidden sm:inline">Edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-lg">Website Sekolah</h3>
-                            <div class="space-y-2 text-sm text-text-muted-light">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">school</span>
-                                    <span>Educational</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">groups</span>
-                                    <span>Sekolah ABC</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">payments</span>
-                                    <span>Rp 10.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 75%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">75%</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Desktop Card 2 -->
-                        <div class="service-card desktop-card bg-card-light rounded-DEFAULT p-5 flex flex-col gap-4 border border-border-light">
-                            <div class="bg-gray-100 h-40 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-4xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-base">edit</span>
-                                    <span class="hidden sm:inline">Edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-lg">Aplikasi Mobile</h3>
-                            <div class="space-y-2 text-sm text-text-muted-light">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">phone_android</span>
-                                    <span>Mobile App</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">groups</span>
-                                    <span>PT. Teknologi</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">payments</span>
-                                    <span>Rp 15.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 45%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">45%</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Desktop Card 3 -->
-                        <div class="service-card desktop-card bg-card-light rounded-DEFAULT p-5 flex flex-col gap-4 border border-border-light">
-                            <div class="bg-gray-100 h-40 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-4xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-base">edit</span>
-                                    <span class="hidden sm:inline">Edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-lg">Desain UI/UX</h3>
-                            <div class="space-y-2 text-sm text-text-muted-light">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">palette</span>
-                                    <span>Design</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">groups</span>
-                                    <span>CV. Kreatif</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">payments</span>
-                                    <span>Rp 7.500.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 90%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">90%</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Desktop Card 4 -->
-                        <div class="service-card desktop-card bg-card-light rounded-DEFAULT p-5 flex flex-col gap-4 border border-border-light">
-                            <div class="bg-gray-100 h-40 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-4xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-base">edit</span>
-                                    <span class="hidden sm:inline">Edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-lg">SEO Optimization</h3>
-                            <div class="space-y-2 text-sm text-text-muted-light">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">search</span>
-                                    <span>Digital Marketing</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">groups</span>
-                                    <span>Toko Online</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">payments</span>
-                                    <span>Rp 5.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 30%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">30%</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Desktop Card 5 -->
-                        <div class="service-card desktop-card bg-card-light rounded-DEFAULT p-5 flex flex-col gap-4 border border-border-light">
-                            <div class="bg-gray-100 h-40 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-4xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-base">edit</span>
-                                    <span class="hidden sm:inline">Edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-lg">Sistem ERP</h3>
-                            <div class="space-y-2 text-sm text-text-muted-light">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">business</span>
-                                    <span>Enterprise</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">groups</span>
-                                    <span>PT. Manufaktur</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">payments</span>
-                                    <span>Rp 25.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 60%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">60%</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Desktop Card 6 -->
-                        <div class="service-card desktop-card bg-card-light rounded-DEFAULT p-5 flex flex-col gap-4 border border-border-light">
-                            <div class="bg-gray-100 h-40 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-4xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-base">edit</span>
-                                    <span class="hidden sm:inline">Edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-lg">E-Commerce</h3>
-                            <div class="space-y-2 text-sm text-text-muted-light">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">shopping_cart</span>
-                                    <span>Online Store</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">groups</span>
-                                    <span>UD. Fashion</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">payments</span>
-                                    <span>Rp 12.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 15%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">15%</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Desktop Card 7 -->
-                        <div class="service-card desktop-card bg-card-light rounded-DEFAULT p-5 flex flex-col gap-4 border border-border-light">
-                            <div class="bg-gray-100 h-40 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-4xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-base">edit</span>
-                                    <span class="hidden sm:inline">Edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-lg">Aplikasi Kasir</h3>
-                            <div class="space-y-2 text-sm text-text-muted-light">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">point_of_sale</span>
-                                    <span>POS System</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">groups</span>
-                                    <span>Resto Nusantara</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">payments</span>
-                                    <span>Rp 8.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 55%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">55%</span>
-                            </div>
-                        </div>
-
-                        <div class="service-card desktop-card bg-card-light rounded-DEFAULT p-5 flex flex-col gap-4 border border-border-light">
-                            <div class="bg-gray-100 h-40 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-4xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-base">edit</span>
-                                    <span class="hidden sm:inline">Edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-lg">E-Commerce</h3>
-                            <div class="space-y-2 text-sm text-text-muted-light">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">shopping_cart</span>
-                                    <span>Online Store</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">groups</span>
-                                    <span>UD. Fashion</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">payments</span>
-                                    <span>Rp 12.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 15%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">15%</span>
-                            </div>
-                        </div>
-
-                        <div class="service-card desktop-card bg-card-light rounded-DEFAULT p-5 flex flex-col gap-4 border border-border-light">
-                            <div class="bg-gray-100 h-40 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-4xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-base">edit</span>
-                                    <span class="hidden sm:inline">Edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-lg">E-Commerce</h3>
-                            <div class="space-y-2 text-sm text-text-muted-light">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">shopping_cart</span>
-                                    <span>Online Store</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">groups</span>
-                                    <span>UD. Fashion</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">payments</span>
-                                    <span>Rp 12.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 15%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">15%</span>
-                            </div>
-                        </div>
-
-                        <div class="service-card desktop-card bg-card-light rounded-DEFAULT p-5 flex flex-col gap-4 border border-border-light">
-                            <div class="bg-gray-100 h-40 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-4xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-base">edit</span>
-                                    <span class="hidden sm:inline">Edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-lg">E-Commerce</h3>
-                            <div class="space-y-2 text-sm text-text-muted-light">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">shopping_cart</span>
-                                    <span>Online Store</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">groups</span>
-                                    <span>UD. Fashion</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">payments</span>
-                                    <span>Rp 12.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 15%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">15%</span>
-                            </div>
-                        </div>
-
-                        <div class="service-card desktop-card bg-card-light rounded-DEFAULT p-5 flex flex-col gap-4 border border-border-light">
-                            <div class="bg-gray-100 h-40 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-4xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-base">edit</span>
-                                    <span class="hidden sm:inline">Edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-lg">E-Commerce</h3>
-                            <div class="space-y-2 text-sm text-text-muted-light">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">shopping_cart</span>
-                                    <span>Online Store</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">groups</span>
-                                    <span>UD. Fashion</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">payments</span>
-                                    <span>Rp 12.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 15%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">15%</span>
-                            </div>
-                        </div>
-
-                        <div class="service-card desktop-card bg-card-light rounded-DEFAULT p-5 flex flex-col gap-4 border border-border-light">
-                            <div class="bg-gray-100 h-40 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-4xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-base">edit</span>
-                                    <span class="hidden sm:inline">Edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-sm bg-white border border-border-light px-3 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-lg">E-Commerce</h3>
-                            <div class="space-y-2 text-sm text-text-muted-light">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">shopping_cart</span>
-                                    <span>Online Store</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">groups</span>
-                                    <span>UD. Fashion</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="material-icons-outlined text-base">payments</span>
-                                    <span>Rp 12.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 15%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">15%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-
-                    <!-- Desktop Pagination Container -->
-                    <div id="desktopPaginationContainer" class="desktop-pagination hidden">
-                        <button id="desktopPrevPage" class="desktop-nav-btn">
-                            <span class="material-icons-outlined text-sm">chevron_left</span>
-                        </button>
-                        <div id="desktopPageNumbers" class="flex gap-1">
-                            <!-- Page numbers will be generated by JavaScript -->
-                        </div>
-                        <button id="desktopNextPage" class="desktop-nav-btn">
-                            <span class="material-icons-outlined text-sm">chevron_right</span>
-                        </button>
+        <div class="flex-1 flex flex-col main-content">
+            <div class="flex-1 p-3 sm:p-8">
+                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Data Layanan</h2>
+                
+                <!-- Search Section -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div class="relative w-full md:w-1/3">
+                        <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama layanan atau deskripsi..." type="text" />
                     </div>
                 </div>
                 
-                <!-- Mobile Cards Grid -->
-                <div class="md:hidden">
-                    <div id="mobilePagesContainer" class="grid grid-cols-2 gap-3 mb-4">
-                        <!-- Mobile Card 1 -->
-                        <div class="service-card mobile-card bg-card-light rounded-DEFAULT p-2 flex flex-col gap-2 border border-border-light" data-page="1">
-                            <div class="bg-gray-100 h-24 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-2xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-xs bg-white border border-border-light px-2 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-sm">edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-xs bg-white border border-border-light px-2 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-sm">Website Sekolah</h3>
-                            <div class="space-y-1 text-xs text-text-muted-light">
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">school</span>
-                                    <span>Educational</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">groups</span>
-                                    <span>Sekolah ABC</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">payments</span>
-                                    <span>Rp 10.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 75%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">75%</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Mobile Card 2 -->
-                        <div class="service-card mobile-card bg-card-light rounded-DEFAULT p-2 flex flex-col gap-2 border border-border-light" data-page="1">
-                            <div class="bg-gray-100 h-24 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-2xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-xs bg-white border border-border-light px-2 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-sm">edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-xs bg-white border border-border-light px-2 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-sm">Aplikasi Mobile</h3>
-                            <div class="space-y-1 text-xs text-text-muted-light">
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">phone_android</span>
-                                    <span>Mobile App</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">groups</span>
-                                    <span>PT. Teknologi</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">payments</span>
-                                    <span>Rp 15.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 45%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">45%</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Mobile Card 3 -->
-                        <div class="service-card mobile-card bg-card-light rounded-DEFAULT p-2 flex flex-col gap-2 border border-border-light" data-page="1">
-                            <div class="bg-gray-100 h-24 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-2xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-xs bg-white border border-border-light px-2 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-sm">edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-xs bg-white border border-border-light px-2 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-sm">Desain UI/UX</h3>
-                            <div class="space-y-1 text-xs text-text-muted-light">
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">palette</span>
-                                    <span>Design</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">groups</span>
-                                    <span>CV. Kreatif</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">payments</span>
-                                    <span>Rp 7.500.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 90%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">90%</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Mobile Card 4 -->
-                        <div class="service-card mobile-card bg-card-light rounded-DEFAULT p-2 flex flex-col gap-2 border border-border-light" data-page="1">
-                            <div class="bg-gray-100 h-24 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-2xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-xs bg-white border border-border-light px-2 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-sm">edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-xs bg-white border border-border-light px-2 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-sm">SEO Optimization</h3>
-                            <div class="space-y-1 text-xs text-text-muted-light">
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">search</span>
-                                    <span>Digital Marketing</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">groups</span>
-                                    <span>Toko Online</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">payments</span>
-                                    <span>Rp 5.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 30%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">30%</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Mobile Card 5 -->
-                        <div class="service-card mobile-card bg-card-light rounded-DEFAULT p-2 flex flex-col gap-2 border border-border-light hidden" data-page="2">
-                            <div class="bg-gray-100 h-24 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-2xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-xs bg-white border border-border-light px-2 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-sm">edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-xs bg-white border border-border-light px-2 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-sm">Sistem ERP</h3>
-                            <div class="space-y-1 text-xs text-text-muted-light">
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">business</span>
-                                    <span>Enterprise</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">groups</span>
-                                    <span>PT. Manufaktur</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">payments</span>
-                                    <span>Rp 25.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 60%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">60%</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Mobile Card 6 -->
-                        <div class="service-card mobile-card bg-card-light rounded-DEFAULT p-2 flex flex-col gap-2 border border-border-light hidden" data-page="2">
-                            <div class="bg-gray-100 h-24 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-2xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-xs bg-white border border-border-light px-2 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-sm">edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-xs bg-white border border-border-light px-2 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-sm">E-Commerce</h3>
-                            <div class="space-y-1 text-xs text-text-muted-light">
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">shopping_cart</span>
-                                    <span>Online Store</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">groups</span>
-                                    <span>UD. Fashion</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">payments</span>
-                                    <span>Rp 12.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 15%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">15%</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Mobile Card 7 -->
-                        <div class="service-card mobile-card bg-card-light rounded-DEFAULT p-2 flex flex-col gap-2 border border-border-light hidden" data-page="2">
-                            <div class="bg-gray-100 h-24 rounded-lg flex items-center justify-center text-text-muted-light">
-                                <span class="material-icons-outlined text-2xl">image</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <button onclick="openEditModal()" class="flex items-center gap-1 text-xs bg-white border border-border-light px-2 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">
-                                    <span class="material-icons-outlined text-sm">edit</span>
-                                </button>
-                                <button onclick="openStatusModal()" class="text-xs bg-white border border-border-light px-2 py-1 rounded-md text-text-light hover:bg-gray-50 transition-colors">Status</button>
-                            </div>
-                            <h3 class="font-semibold text-sm">Aplikasi Kasir</h3>
-                            <div class="space-y-1 text-xs text-text-muted-light">
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">point_of_sale</span>
-                                    <span>POS System</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">groups</span>
-                                    <span>Resto Nusantara</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-icons-outlined text-sm">payments</span>
-                                    <span>Rp 8.000.000</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-bar mb-1">
-                                    <div class="progress-fill" style="width: 55%"></div>
-                                </div>
-                                <span class="text-xs text-text-muted-light">55%</span>
-                            </div>
+                <!-- Data Table Panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <span class="material-icons-outlined text-primary">miscellaneous_services</span>
+                            Data Layanan
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">12</span> layanan</span>
                         </div>
                     </div>
-                    
-                    <!-- Mobile Pagination -->
-                    <div class="flex justify-center items-center gap-2 mt-4">
-                        <button id="prevPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                            <span class="material-icons-outlined text-sm">chevron_left</span>
-                        </button>
-                        <div id="pageNumbers" class="flex gap-1">
-                            <!-- Page numbers will be generated by JavaScript -->
+                    <div class="panel-body">
+                        <!-- SCROLLABLE TABLE -->
+                        <div class="desktop-table">
+                            <div class="scrollable-table-container scroll-indicator table-shadow" id="scrollableTable">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="min-width: 60px;">No</th>
+                                            <th style="min-width: 200px;">Nama Layanan</th>
+                                            <th style="min-width: 250px;">Deskripsi</th>
+                                            <th style="min-width: 150px;">Harga</th>
+                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="desktopTableBody">
+                                        <!-- Data dari card pertama -->
+                                        <tr class="layanan-row" data-id="1" data-nama="Website Sekolah" data-deskripsi="Pembuatan website untuk sekolah dengan fitur lengkap" data-harga="10000000">
+                                            <td style="min-width: 60px;">1</td>
+                                            <td style="min-width: 200px;">Website Sekolah</td>
+                                            <td style="min-width: 250px;">Pembuatan website untuk sekolah dengan fitur lengkap</td>
+                                            <td style="min-width: 150px;">Rp. 10.000.000</td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="1" data-nama="Website Sekolah" data-deskripsi="Pembuatan website untuk sekolah dengan fitur lengkap" data-harga="10000000">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="1">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <!-- Data dari card kedua -->
+                                        <tr class="layanan-row" data-id="2" data-nama="Aplikasi Mobile" data-deskripsi="Pengembangan aplikasi mobile untuk iOS dan Android" data-harga="15000000">
+                                            <td style="min-width: 60px;">2</td>
+                                            <td style="min-width: 200px;">Aplikasi Mobile</td>
+                                            <td style="min-width: 250px;">Pengembangan aplikasi mobile untuk iOS dan Android</td>
+                                            <td style="min-width: 150px;">Rp. 15.000.000</td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="2" data-nama="Aplikasi Mobile" data-deskripsi="Pengembangan aplikasi mobile untuk iOS dan Android" data-harga="15000000">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="2">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <!-- Data dari card ketiga -->
+                                        <tr class="layanan-row" data-id="3" data-nama="Desain UI/UX" data-deskripsi="Jasa desain UI/UX untuk aplikasi dan website" data-harga="7500000">
+                                            <td style="min-width: 60px;">3</td>
+                                            <td style="min-width: 200px;">Desain UI/UX</td>
+                                            <td style="min-width: 250px;">Jasa desain UI/UX untuk aplikasi dan website</td>
+                                            <td style="min-width: 150px;">Rp. 7.500.000</td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="3" data-nama="Desain UI/UX" data-deskripsi="Jasa desain UI/UX untuk aplikasi dan website" data-harga="7500000">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="3">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <!-- Data dari card keempat -->
+                                        <tr class="layanan-row" data-id="4" data-nama="SEO Optimization" data-deskripsi="Optimasi SEO untuk meningkatkan peringkat website" data-harga="5000000">
+                                            <td style="min-width: 60px;">4</td>
+                                            <td style="min-width: 200px;">SEO Optimization</td>
+                                            <td style="min-width: 250px;">Optimasi SEO untuk meningkatkan peringkat website</td>
+                                            <td style="min-width: 150px;">Rp. 5.000.000</td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="4" data-nama="SEO Optimization" data-deskripsi="Optimasi SEO untuk meningkatkan peringkat website" data-harga="5000000">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="4">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <!-- Data dari card kelima -->
+                                        <tr class="layanan-row" data-id="5" data-nama="Sistem ERP" data-deskripsi="Implementasi sistem ERP untuk manufaktur" data-harga="25000000">
+                                            <td style="min-width: 60px;">5</td>
+                                            <td style="min-width: 200px;">Sistem ERP</td>
+                                            <td style="min-width: 250px;">Implementasi sistem ERP untuk manufaktur</td>
+                                            <td style="min-width: 150px;">Rp. 25.000.000</td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="5" data-nama="Sistem ERP" data-deskripsi="Implementasi sistem ERP untuk manufaktur" data-harga="25000000">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="5">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <!-- Data dari card keenam -->
+                                        <tr class="layanan-row" data-id="6" data-nama="E-Commerce" data-deskripsi="Pembuatan toko online dengan fitur pembayaran lengkap" data-harga="12000000">
+                                            <td style="min-width: 60px;">6</td>
+                                            <td style="min-width: 200px;">E-Commerce</td>
+                                            <td style="min-width: 250px;">Pembuatan toko online dengan fitur pembayaran lengkap</td>
+                                            <td style="min-width: 150px;">Rp. 12.000.000</td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="6" data-nama="E-Commerce" data-deskripsi="Pembuatan toko online dengan fitur pembayaran lengkap" data-harga="12000000">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="6">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <!-- Data dari card ketujuh -->
+                                        <tr class="layanan-row" data-id="7" data-nama="Aplikasi Kasir" data-deskripsi="Sistem kasir modern untuk restoran dan retail" data-harga="8000000">
+                                            <td style="min-width: 60px;">7</td>
+                                            <td style="min-width: 200px;">Aplikasi Kasir</td>
+                                            <td style="min-width: 250px;">Sistem kasir modern untuk restoran dan retail</td>
+                                            <td style="min-width: 150px;">Rp. 8.000.000</td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="7" data-nama="Aplikasi Kasir" data-deskripsi="Sistem kasir modern untuk restoran dan retail" data-harga="8000000">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="7">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <!-- Data tambahan -->
+                                        <tr class="layanan-row" data-id="8" data-nama="Company Profile" data-deskripsi="Website profil perusahaan profesional" data-harga="9000000">
+                                            <td style="min-width: 60px;">8</td>
+                                            <td style="min-width: 200px;">Company Profile</td>
+                                            <td style="min-width: 250px;">Website profil perusahaan profesional</td>
+                                            <td style="min-width: 150px;">Rp. 9.000.000</td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="8" data-nama="Company Profile" data-deskripsi="Website profil perusahaan profesional" data-harga="9000000">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="8">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="layanan-row" data-id="9" data-nama="Digital Marketing" data-deskripsi="Strategi pemasaran digital untuk bisnis" data-harga="6000000">
+                                            <td style="min-width: 60px;">9</td>
+                                            <td style="min-width: 200px;">Digital Marketing</td>
+                                            <td style="min-width: 250px;">Strategi pemasaran digital untuk bisnis</td>
+                                            <td style="min-width: 150px;">Rp. 6.000.000</td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="9" data-nama="Digital Marketing" data-deskripsi="Strategi pemasaran digital untuk bisnis" data-harga="6000000">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="9">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="layanan-row" data-id="10" data-nama="Mobile Banking" data-deskripsi="Aplikasi mobile banking dengan fitur keamanan tinggi" data-harga="30000000">
+                                            <td style="min-width: 60px;">10</td>
+                                            <td style="min-width: 200px;">Mobile Banking</td>
+                                            <td style="min-width: 250px;">Aplikasi mobile banking dengan fitur keamanan tinggi</td>
+                                            <td style="min-width: 150px;">Rp. 30.000.000</td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="10" data-nama="Mobile Banking" data-deskripsi="Aplikasi mobile banking dengan fitur keamanan tinggi" data-harga="30000000">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="10">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="layanan-row" data-id="11" data-nama="Aplikasi Chat" data-deskripsi="Aplikasi chatting real-time untuk internal perusahaan" data-harga="11000000">
+                                            <td style="min-width: 60px;">11</td>
+                                            <td style="min-width: 200px;">Aplikasi Chat</td>
+                                            <td style="min-width: 250px;">Aplikasi chatting real-time untuk internal perusahaan</td>
+                                            <td style="min-width: 150px;">Rp. 11.000.000</td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="11" data-nama="Aplikasi Chat" data-deskripsi="Aplikasi chatting real-time untuk internal perusahaan" data-harga="11000000">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="11">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="layanan-row" data-id="12" data-nama="Sistem Inventory" data-deskripsi="Sistem manajemen inventory untuk gudang" data-harga="13500000">
+                                            <td style="min-width: 60px;">12</td>
+                                            <td style="min-width: 200px;">Sistem Inventory</td>
+                                            <td style="min-width: 250px;">Sistem manajemen inventory untuk gudang</td>
+                                            <td style="min-width: 150px;">Rp. 13.500.000</td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="12" data-nama="Sistem Inventory" data-deskripsi="Sistem manajemen inventory untuk gudang" data-harga="13500000">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="12">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                        <button id="nextPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                            <span class="material-icons-outlined text-sm">chevron_right</span>
-                        </button>
+                        
+                        <!-- Mobile Card View -->
+                        <div class="mobile-cards space-y-4" id="mobile-cards">
+                            <!-- Card 1 -->
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" data-id="1" data-nama="Website Sekolah" data-deskripsi="Pembuatan website untuk sekolah dengan fitur lengkap" data-harga="10000000">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <span class="material-icons-outlined text-primary">school</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-base">Website Sekolah</h4>
+                                            <p class="text-sm text-text-muted-light">Rp. 10.000.000</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="1" data-nama="Website Sekolah" data-deskripsi="Pembuatan website untuk sekolah dengan fitur lengkap" data-harga="10000000">
+                                            <span class="material-icons-outlined">edit</span>
+                                        </button>
+                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="1">
+                                            <span class="material-icons-outlined">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>
+                                        <p class="text-text-muted-light">No</p>
+                                        <p class="font-medium">1</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Harga</p>
+                                        <p class="font-medium">Rp. 10.000.000</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-text-muted-light">Deskripsi</p>
+                                        <p class="font-medium">Pembuatan website untuk sekolah dengan fitur lengkap</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Card 2 -->
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" data-id="2" data-nama="Aplikasi Mobile" data-deskripsi="Pengembangan aplikasi mobile untuk iOS dan Android" data-harga="15000000">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <span class="material-icons-outlined text-primary">phone_android</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-base">Aplikasi Mobile</h4>
+                                            <p class="text-sm text-text-muted-light">Rp. 15.000.000</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="2" data-nama="Aplikasi Mobile" data-deskripsi="Pengembangan aplikasi mobile untuk iOS dan Android" data-harga="15000000">
+                                            <span class="material-icons-outlined">edit</span>
+                                        </button>
+                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="2">
+                                            <span class="material-icons-outlined">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>
+                                        <p class="text-text-muted-light">No</p>
+                                        <p class="font-medium">2</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Harga</p>
+                                        <p class="font-medium">Rp. 15.000.000</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-text-muted-light">Deskripsi</p>
+                                        <p class="font-medium">Pengembangan aplikasi mobile untuk iOS dan Android</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Card 3 -->
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" data-id="3" data-nama="Desain UI/UX" data-deskripsi="Jasa desain UI/UX untuk aplikasi dan website" data-harga="7500000">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <span class="material-icons-outlined text-primary">palette</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-base">Desain UI/UX</h4>
+                                            <p class="text-sm text-text-muted-light">Rp. 7.500.000</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="3" data-nama="Desain UI/UX" data-deskripsi="Jasa desain UI/UX untuk aplikasi dan website" data-harga="7500000">
+                                            <span class="material-icons-outlined">edit</span>
+                                        </button>
+                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="3">
+                                            <span class="material-icons-outlined">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>
+                                        <p class="text-text-muted-light">No</p>
+                                        <p class="font-medium">3</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Harga</p>
+                                        <p class="font-medium">Rp. 7.500.000</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-text-muted-light">Deskripsi</p>
+                                        <p class="font-medium">Jasa desain UI/UX untuk aplikasi dan website</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Card 4 -->
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" data-id="4" data-nama="SEO Optimization" data-deskripsi="Optimasi SEO untuk meningkatkan peringkat website" data-harga="5000000">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <span class="material-icons-outlined text-primary">search</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-base">SEO Optimization</h4>
+                                            <p class="text-sm text-text-muted-light">Rp. 5.000.000</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="4" data-nama="SEO Optimization" data-deskripsi="Optimasi SEO untuk meningkatkan peringkat website" data-harga="5000000">
+                                            <span class="material-icons-outlined">edit</span>
+                                        </button>
+                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="4">
+                                            <span class="material-icons-outlined">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>
+                                        <p class="text-text-muted-light">No</p>
+                                        <p class="font-medium">4</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Harga</p>
+                                        <p class="font-medium">Rp. 5.000.000</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-text-muted-light">Deskripsi</p>
+                                        <p class="font-medium">Optimasi SEO untuk meningkatkan peringkat website</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Card 5 -->
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" data-id="5" data-nama="Sistem ERP" data-deskripsi="Implementasi sistem ERP untuk manufaktur" data-harga="25000000">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <span class="material-icons-outlined text-primary">business</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-base">Sistem ERP</h4>
+                                            <p class="text-sm text-text-muted-light">Rp. 25.000.000</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="5" data-nama="Sistem ERP" data-deskripsi="Implementasi sistem ERP untuk manufaktur" data-harga="25000000">
+                                            <span class="material-icons-outlined">edit</span>
+                                        </button>
+                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="5">
+                                            <span class="material-icons-outlined">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>
+                                        <p class="text-text-muted-light">No</p>
+                                        <p class="font-medium">5</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Harga</p>
+                                        <p class="font-medium">Rp. 25.000.000</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-text-muted-light">Deskripsi</p>
+                                        <p class="font-medium">Implementasi sistem ERP untuk manufaktur</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Card 6 -->
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" data-id="6" data-nama="E-Commerce" data-deskripsi="Pembuatan toko online dengan fitur pembayaran lengkap" data-harga="12000000">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <span class="material-icons-outlined text-primary">shopping_cart</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-base">E-Commerce</h4>
+                                            <p class="text-sm text-text-muted-light">Rp. 12.000.000</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="6" data-nama="E-Commerce" data-deskripsi="Pembuatan toko online dengan fitur pembayaran lengkap" data-harga="12000000">
+                                            <span class="material-icons-outlined">edit</span>
+                                        </button>
+                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="6">
+                                            <span class="material-icons-outlined">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>
+                                        <p class="text-text-muted-light">No</p>
+                                        <p class="font-medium">6</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Harga</p>
+                                        <p class="font-medium">Rp. 12.000.000</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-text-muted-light">Deskripsi</p>
+                                        <p class="font-medium">Pembuatan toko online dengan fitur pembayaran lengkap</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Card 7 -->
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" data-id="7" data-nama="Aplikasi Kasir" data-deskripsi="Sistem kasir modern untuk restoran dan retail" data-harga="8000000">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <span class="material-icons-outlined text-primary">point_of_sale</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-base">Aplikasi Kasir</h4>
+                                            <p class="text-sm text-text-muted-light">Rp. 8.000.000</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="7" data-nama="Aplikasi Kasir" data-deskripsi="Sistem kasir modern untuk restoran dan retail" data-harga="8000000">
+                                            <span class="material-icons-outlined">edit</span>
+                                        </button>
+                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="7">
+                                            <span class="material-icons-outlined">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>
+                                        <p class="text-text-muted-light">No</p>
+                                        <p class="font-medium">7</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Harga</p>
+                                        <p class="font-medium">Rp. 8.000.000</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-text-muted-light">Deskripsi</p>
+                                        <p class="font-medium">Sistem kasir modern untuk restoran dan retail</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div id="paginationContainer" class="desktop-pagination">
+                            <button id="prevPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_left</span>
+                            </button>
+                            <div id="pageNumbers" class="flex gap-1">
+                                <!-- Page numbers will be generated by JavaScript -->
+                            </div>
+                            <button id="nextPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_right</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </main>
-        <footer class="bg-gray-100 text-center p-4 text-sm text-text-muted-light border-t border-border-light">
-            Copyright ©2025 by digicity.id
-        </footer>
-    </div>
-
-    <!-- Modal Tambah Data Layanan -->
-    <div id="addModal" class="fixed inset-0 modal-backdrop flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-text-light">Tambah Data Layanan</h3>
-                <button onclick="closeAddModal()" class="text-text-muted-light hover:text-text-light">
-                    <span class="material-icons-outlined">close</span>
-                </button>
-            </div>
-            <form>
-                <div class="mb-4">
-                    <label class="block text-text-light mb-2">Foto Layanan</label>
-                    <div class="flex items-center justify-center w-full">
-                        <label for="addPhoto" class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border-light rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                            <div class="flex flex-col items-center justify-center pt-5 pb-6" id="addPhotoPreview">
-                                <span class="material-icons-outlined text-4xl text-text-muted-light mb-2">cloud_upload</span>
-                                <p class="mb-2 text-sm text-text-muted-light"><span class="font-semibold">Klik untuk upload</span> atau drag and drop</p>
-                                <p class="text-xs text-text-muted-light">PNG, JPG, GIF (MAX. 5MB)</p>
-                            </div>
-                            <input id="addPhoto" type="file" class="hidden" onchange="previewAddPhoto(event)" />
-                        </label>
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-text-light mb-2">Nama Layanan</label>
-                    <input type="text" class="w-full px-3 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary form-input bg-white text-text-light">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-text-light mb-2">Kategori</label>
-                    <select class="w-full px-3 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary form-input bg-white text-text-light">
-                        <option value="">Pilih Kategori</option>
-                        <option value="website">Website</option>
-                        <option value="aplikasi">Aplikasi</option>
-                        <option value="design">Design</option>
-                        <option value="marketing">Digital Marketing</option>
-                        <option value="enterprise">Enterprise</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-text-light mb-2">Klien</label>
-                    <input type="text" class="w-full px-3 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary form-input bg-white text-text-light">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-text-light mb-2">Harga</label>
-                    <input type="text" class="w-full px-3 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary form-input bg-white text-text-light">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-text-light mb-2">Progress</label>
-                    <input type="range" min="0" max="100" value="0" class="w-full">
-                </div>
-                <div class="flex flex-col sm:flex-row justify-end gap-3">
-                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 btn-secondary rounded-lg order-2 sm:order-1">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg order-1 sm:order-2">
-                        Simpan
-                    </button>
-                </div>
-            </form>
+            <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light">
+                Copyright ©2025 by digicity.id
+            </footer>
         </div>
     </div>
 
-    <!-- Modal Edit Data Layanan -->
-    <div id="editModal" class="fixed inset-0 modal-backdrop flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-text-light">Edit Data Layanan</h3>
-                <button onclick="closeEditModal()" class="text-text-muted-light hover:text-text-light">
-                    <span class="material-icons-outlined">close</span>
-                </button>
-            </div>
-            <form>
-                <div class="mb-4">
-                    <label class="block text-text-light mb-2">Foto Layanan</label>
-                    <div class="flex items-center justify-center w-full">
-                        <label for="editPhoto" class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border-light rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                            <div class="flex flex-col items-center justify-center pt-5 pb-6" id="editPhotoPreview">
-                                <span class="material-icons-outlined text-4xl text-text-muted-light mb-2">cloud_upload</span>
-                                <p class="mb-2 text-sm text-text-muted-light"><span class="font-semibold">Klik untuk upload</span> atau drag and drop</p>
-                                <p class="text-xs text-text-muted-light">PNG, JPG, GIF (MAX. 5MB)</p>
-                            </div>
-                            <input id="editPhoto" type="file" class="hidden" onchange="previewEditPhoto(event)" />
-                        </label>
+    <!-- Modal Edit Layanan -->
+    <div id="editLayananModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Edit Layanan</h3>
+                    <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
+                </div>
+                <form id="editLayananForm" class="space-y-4">
+                    <input type="hidden" id="editId" name="id">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
+                            <input type="text" id="editNamaLayanan" name="nama_layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama layanan" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
+                            <input type="text" id="editHarga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan harga" required>
+                        </div>
                     </div>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-text-light mb-2">Nama Layanan</label>
-                    <input type="text" value="Website Sekolah" class="w-full px-3 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary form-input bg-white text-text-light">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-text-light mb-2">Kategori</label>
-                    <select class="w-full px-3 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary form-input bg-white text-text-light">
-                        <option value="">Pilih Kategori</option>
-                        <option value="website" selected>Website</option>
-                        <option value="aplikasi">Aplikasi</option>
-                        <option value="design">Design</option>
-                        <option value="marketing">Digital Marketing</option>
-                        <option value="enterprise">Enterprise</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-text-light mb-2">Klien</label>
-                    <input type="text" value="Sekolah ABC" class="w-full px-3 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary form-input bg-white text-text-light">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-text-light mb-2">Harga</label>
-                    <input type="text" value="Rp 10.000.000" class="w-full px-3 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary form-input bg-white text-text-light">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-text-light mb-2">Progress</label>
-                    <input type="range" min="0" max="100" value="75" class="w-full">
-                </div>
-                <div class="flex flex-col sm:flex-row justify-end gap-3">
-                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 btn-secondary rounded-lg order-2 sm:order-1">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg order-1 sm:order-2">
-                        Simpan Perubahan
-                    </button>
-                </div>
-            </form>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                        <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi layanan" required></textarea>
+                    </div>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" id="batalEditBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Data</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Modal Status -->
-    <div id="statusModal" class="fixed inset-0 modal-backdrop flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-text-light">Ubah Status</h3>
-                <button onclick="closeStatusModal()" class="text-text-muted-light hover:text-text-light">
-                    <span class="material-icons-outlined">close</span>
-                </button>
+    <!-- Modal Delete Konfirmasi -->
+    <div id="deleteModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h3>
+                    <button id="closeDeleteModalBtn" class="text-gray-800 hover:text-gray-500">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
+                </div>
+                <form id="deleteForm" class="space-y-4">
+                    <div class="mb-6">
+                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus layanan ini?</p>
+                        <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
+                        <input type="hidden" id="deleteId" name="id">
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button type="button" id="batalDeleteBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
+                    </div>
+                </form>
             </div>
-            <form>
-                <div class="mb-4">
-                    <label class="block text-text-light mb-2">Status Layanan</label>
-                    <select class="w-full px-3 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary form-input bg-white text-text-light">
-                        <option value="">Pilih Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="progress">In Progress</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-text-light mb-2">Keterangan</label>
-                    <textarea class="w-full px-3 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary form-input bg-white text-text-light" rows="3"></textarea>
-                </div>
-                <div class="flex flex-col sm:flex-row justify-end gap-3">
-                    <button type="button" onclick="closeStatusModal()" class="px-4 py-2 btn-secondary rounded-lg order-2 sm:order-1">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg order-1 sm:order-2">
-                        Simpan Status
-                    </button>
-                </div>
-            </form>
         </div>
+    </div>
+
+    <!-- Minimalist Popup -->
+    <div id="minimalPopup" class="minimal-popup">
+        <div class="minimal-popup-icon">
+            <span class="material-icons-outlined">check</span>
+        </div>
+        <div class="minimal-popup-content">
+            <div class="minimal-popup-title">Berhasil</div>
+            <div class="minimal-popup-message">Operasi berhasil dilakukan</div>
+        </div>
+        <button class="minimal-popup-close">
+            <span class="material-icons-outlined text-sm">close</span>
+        </button>
     </div>
 
     <script>
-        // Fungsi untuk inisialisasi sidebar
-        function initSidebar() {
-            // Ambil elemen yang diperlukan
-            const hamburger = document.getElementById('hamburger');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            const mainContent = document.getElementById('main-content');
+        // Inisialisasi variabel untuk pagination dan search
+        let currentPage = 1;
+        const itemsPerPage = 5;
+        let searchTerm = '';
+        
+        // Dapatkan semua elemen layanan
+        const layananRows = document.querySelectorAll('.layanan-row');
+        const layananCards = document.querySelectorAll('.layanan-card');
+        
+        // Inisialisasi pagination dan search
+        initializePagination();
+        initializeSearch();
+        initializeScrollDetection();
 
-            // Fungsi untuk membuka sidebar
-            function openSidebar() {
-                sidebar.classList.remove('translate-x-full');
-                overlay.classList.remove('hidden');
-                hamburger.classList.add('hamburger-active');
-                document.body.style.overflow = 'hidden'; // Mencegah scroll saat sidebar terbuka
-            }
-
-            // Fungsi untuk menutup sidebar
-            function closeSidebar() {
-                sidebar.classList.add('translate-x-full');
-                overlay.classList.add('hidden');
-                hamburger.classList.remove('hamburger-active');
-                document.body.style.overflow = ''; // Kembalikan scroll
-            }
-
-            // Event listener untuk hamburger
-            hamburger.addEventListener('click', () => {
-                // Periksa apakah sidebar sedang tersembunyi (untuk mobile)
-                if (sidebar.classList.contains('translate-x-full')) {
-                    openSidebar();
-                } else {
-                    closeSidebar();
-                }
-            });
-
-            // Event listener untuk overlay
-            overlay.addEventListener('click', closeSidebar);
-
-            // Event listener untuk escape key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && !sidebar.classList.contains('translate-x-full')) {
-                    closeSidebar();
-                }
-            });
-
-            // Event listener untuk resize window
-            window.addEventListener('resize', () => {
-                if (window.innerWidth >= 768) {
-                    closeSidebar(); // Tutup sidebar jika layar menjadi besar
-                }
-            });
-
-            // Event listener untuk menutup sidebar saat link diklik di mobile
-            document.querySelectorAll('nav a').forEach(link => {
-                link.addEventListener('click', () => {
-                    if (window.innerWidth < 768) {
-                        closeSidebar();
-                    }
-                });
-            });
+        // === PAGINATION ===
+        function initializePagination() {
+            renderPagination();
+            updateVisibleItems();
         }
-
-        // Modal functions
-        function openAddModal() {
-            const modal = document.getElementById('addModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeAddModal() {
-            const modal = document.getElementById('addModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                document.body.style.overflow = '';
-                // Reset form
-                const photoInput = document.getElementById('addPhoto');
-                const photoPreview = document.getElementById('addPhotoPreview');
-                if (photoInput && photoPreview) {
-                    photoInput.value = '';
-                    photoPreview.innerHTML = `
-                        <span class="material-icons-outlined text-4xl text-text-muted-light mb-2">cloud_upload</span>
-                        <p class="mb-2 text-sm text-text-muted-light"><span class="font-semibold">Klik untuk upload</span> atau drag and drop</p>
-                        <p class="text-xs text-text-muted-light">PNG, JPG, GIF (MAX. 5MB)</p>
-                    `;
-                }
-            }
-        }
-
-        function openEditModal() {
-            const modal = document.getElementById('editModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeEditModal() {
-            const modal = document.getElementById('editModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                document.body.style.overflow = '';
-                // Reset form khusus untuk bagian foto
-                const photoInput = document.getElementById('editPhoto');
-                const photoPreview = document.getElementById('editPhotoPreview');
-                if (photoInput && photoPreview) {
-                    photoInput.value = '';
-                    photoPreview.innerHTML = `
-                        <span class="material-icons-outlined text-4xl text-text-muted-light mb-2">cloud_upload</span>
-                        <p class="mb-2 text-sm text-text-muted-light"><span class="font-semibold">Klik untuk upload</span> atau drag and drop</p>
-                        <p class="text-xs text-text-muted-light">PNG, JPG, GIF (MAX. 5MB)</p>
-                    `;
-                }
-            }
-        }
-
-        function openStatusModal() {
-            const modal = document.getElementById('statusModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeStatusModal() {
-            const modal = document.getElementById('statusModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                document.body.style.overflow = '';
-            }
-        }
-
-        // Preview photo functions
-        function previewAddPhoto(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('addPhotoPreview');
-                    if (preview) {
-                        preview.innerHTML = `
-                            <img src="${e.target.result}" alt="Preview" class="preview-image rounded-lg mb-2">
-                            <p class="text-xs text-text-muted-light">Klik untuk mengganti foto</p>
-                        `;
-                    }
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function previewEditPhoto(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('editPhotoPreview');
-                    if (preview) {
-                        preview.innerHTML = `
-                            <img src="${e.target.result}" alt="Preview" class="preview-image rounded-lg mb-2">
-                            <p class="text-xs text-text-muted-light">Klik untuk mengganti foto</p>
-                        `;
-                    }
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Desktop pagination functionality
-        function initDesktopPagination() {
-            const cardsPerPage = 9; // 9 cards per page for desktop
-            const desktopCards = document.querySelectorAll('.desktop-card');
-            const totalCards = desktopCards.length;
-            const paginationContainer = document.getElementById('desktopPaginationContainer');
-            
-            // Only show pagination if there are more than 3 cards
-            if (totalCards <= cardsPerPage) {
-                // Show all cards and hide pagination
-                desktopCards.forEach(card => {
-                    card.classList.remove('hidden');
-                });
-                if (paginationContainer) {
-                    paginationContainer.classList.add('hidden');
-                }
-                return;
-            }
-            
-            // Show pagination container
-            if (paginationContainer) {
-                paginationContainer.classList.remove('hidden');
-            }
-            
-            const totalPages = Math.ceil(totalCards / cardsPerPage);
-            let currentPage = 1;
-            
-            const pageNumbersContainer = document.getElementById('desktopPageNumbers');
-            const prevButton = document.getElementById('desktopPrevPage');
-            const nextButton = document.getElementById('desktopNextPage');
-            
-            // Clear existing page numbers
-            if (pageNumbersContainer) {
-                pageNumbersContainer.innerHTML = '';
-                
-                // Generate page numbers
-                for (let i = 1; i <= totalPages; i++) {
-                    const pageNumber = document.createElement('button');
-                    pageNumber.textContent = i;
-                    pageNumber.className = `desktop-page-btn ${
-                        i === currentPage ? 'active' : ''
-                    }`;
-                    pageNumber.addEventListener('click', () => goToPage(i));
-                    pageNumbersContainer.appendChild(pageNumber);
-                }
-            }
-            
-            // Update button states
-            function updateButtonStates() {
-                if (prevButton) prevButton.disabled = currentPage === 1;
-                if (nextButton) nextButton.disabled = currentPage === totalPages;
-                
-                // Update page number buttons
-                if (pageNumbersContainer) {
-                    const pageButtons = pageNumbersContainer.querySelectorAll('button');
-                    pageButtons.forEach((btn, index) => {
-                        if (index + 1 === currentPage) {
-                            btn.classList.add('active');
-                        } else {
-                            btn.classList.remove('active');
-                        }
-                    });
-                }
-            }
-            
-            // Go to specific page
-            function goToPage(page) {
-                if (page < 1 || page > totalPages) return;
-                
-                currentPage = page;
-                
-                // Hide all cards
-                desktopCards.forEach(card => {
-                    card.classList.add('hidden');
-                });
-                
-                // Show cards for current page
-                const startIndex = (page - 1) * cardsPerPage;
-                const endIndex = Math.min(startIndex + cardsPerPage, totalCards);
-                
-                for (let i = startIndex; i < endIndex; i++) {
-                    desktopCards[i].classList.remove('hidden');
-                }
-                
-                updateButtonStates();
-            }
-            
-            // Event listeners for navigation buttons
-            if (prevButton) {
-                prevButton.addEventListener('click', () => {
-                    if (currentPage > 1) goToPage(currentPage - 1);
-                });
-            }
-            
-            if (nextButton) {
-                nextButton.addEventListener('click', () => {
-                    if (currentPage < totalPages) goToPage(currentPage + 1);
-                });
-            }
-            
-            // Initialize first page
-            goToPage(1);
-        }
-
-        // Mobile pagination functionality
-        function initMobilePagination() {
-            const cardsPerPage = 4; // 2x2 grid
-            const mobileCards = document.querySelectorAll('.mobile-card');
-            const totalPages = Math.ceil(mobileCards.length / cardsPerPage);
-            let currentPage = 1;
-            
+        
+        function renderPagination() {
+            const visibleRows = getFilteredRows();
+            const totalPages = Math.ceil(visibleRows.length / itemsPerPage);
             const pageNumbersContainer = document.getElementById('pageNumbers');
             const prevButton = document.getElementById('prevPage');
             const nextButton = document.getElementById('nextPage');
+            
+            // Clear existing page numbers
+            pageNumbersContainer.innerHTML = '';
             
             // Generate page numbers
             for (let i = 1; i <= totalPages; i++) {
                 const pageNumber = document.createElement('button');
                 pageNumber.textContent = i;
-                pageNumber.className = `page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                    i === currentPage ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
-                }`;
+                pageNumber.className = `desktop-page-btn ${i === currentPage ? 'active' : ''}`;
                 pageNumber.addEventListener('click', () => goToPage(i));
                 pageNumbersContainer.appendChild(pageNumber);
             }
             
-            // Update button states
-            function updateButtonStates() {
-                prevButton.disabled = currentPage === 1;
-                nextButton.disabled = currentPage === totalPages;
-                
-                // Update page number buttons
-                const pageButtons = pageNumbersContainer.querySelectorAll('button');
-                pageButtons.forEach((btn, index) => {
-                    if (index + 1 === currentPage) {
-                        btn.className = 'page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm bg-primary text-white';
-                    } else {
-                        btn.className = 'page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm bg-gray-200 text-gray-600';
-                    }
-                });
-            }
+            // Update navigation buttons
+            prevButton.disabled = currentPage === 1;
+            nextButton.disabled = currentPage === totalPages || totalPages === 0;
             
-            // Go to specific page
-            function goToPage(page) {
-                if (page < 1 || page > totalPages) return;
+            // Add event listeners for navigation buttons
+            prevButton.onclick = () => {
+                if (currentPage > 1) goToPage(currentPage - 1);
+            };
+            
+            nextButton.onclick = () => {
+                if (currentPage < totalPages) goToPage(currentPage + 1);
+            };
+        }
+        
+        function goToPage(page) {
+            currentPage = page;
+            renderPagination();
+            updateVisibleItems();
+            
+            // Reset scroll position when changing pages
+            const scrollableTable = document.getElementById('scrollableTable');
+            if (scrollableTable) {
+                scrollableTable.scrollLeft = 0;
+            }
+        }
+        
+        function getFilteredRows() {
+            return Array.from(layananRows).filter(row => !row.classList.contains('hidden-by-filter'));
+        }
+        
+        function getFilteredCards() {
+            return Array.from(layananCards).filter(card => !card.classList.contains('hidden-by-filter'));
+        }
+        
+        function updateVisibleItems() {
+            const visibleRows = getFilteredRows();
+            const visibleCards = getFilteredCards();
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            
+            // Hide all rows and cards first
+            layananRows.forEach(row => row.style.display = 'none');
+            layananCards.forEach(card => card.style.display = 'none');
+            
+            // Show only the rows for current page
+            visibleRows.forEach((row, index) => {
+                if (index >= startIndex && index < endIndex) {
+                    row.style.display = '';
+                }
+            });
+            
+            // Show only the cards for current page
+            visibleCards.forEach((card, index) => {
+                if (index >= startIndex && index < endIndex) {
+                    card.style.display = '';
+                }
+            });
+            
+            // Update total count
+            document.getElementById('totalCount').textContent = visibleRows.length;
+        }
+        
+        // === SEARCH ===
+        function initializeSearch() {
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+            
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    searchTerm = searchInput.value.trim();
+                    applySearch();
+                }, 300); // Debounce search
+            });
+        }
+        
+        function applySearch() {
+            // Reset to first page
+            currentPage = 1;
+            
+            // Apply search to rows
+            layananRows.forEach(row => {
+                const nama = row.getAttribute('data-nama').toLowerCase();
+                const deskripsi = row.getAttribute('data-deskripsi').toLowerCase();
                 
-                currentPage = page;
-                
-                // Hide all cards
-                mobileCards.forEach(card => {
-                    card.classList.add('hidden');
-                });
-                
-                // Show cards for current page
-                const startIndex = (page - 1) * cardsPerPage;
-                const endIndex = Math.min(startIndex + cardsPerPage, mobileCards.length);
-                
-                for (let i = startIndex; i < endIndex; i++) {
-                    mobileCards[i].classList.remove('hidden');
+                // Check if search term matches
+                let searchMatches = true;
+                if (searchTerm) {
+                    const searchLower = searchTerm.toLowerCase();
+                    searchMatches = nama.includes(searchLower) || 
+                                   deskripsi.includes(searchLower);
                 }
                 
-                updateButtonStates();
-            }
-            
-            // Event listeners for navigation buttons
-            prevButton.addEventListener('click', () => {
-                if (currentPage > 1) goToPage(currentPage - 1);
+                if (searchMatches) {
+                    row.classList.remove('hidden-by-filter');
+                } else {
+                    row.classList.add('hidden-by-filter');
+                }
             });
             
-            nextButton.addEventListener('click', () => {
-                if (currentPage < totalPages) goToPage(currentPage + 1);
+            // Apply same search to cards
+            layananCards.forEach(card => {
+                const nama = card.getAttribute('data-nama').toLowerCase();
+                const deskripsi = card.getAttribute('data-deskripsi').toLowerCase();
+                
+                // Check if search term matches
+                let searchMatches = true;
+                if (searchTerm) {
+                    const searchLower = searchTerm.toLowerCase();
+                    searchMatches = nama.includes(searchLower) || 
+                                   deskripsi.includes(searchLower);
+                }
+                
+                if (searchMatches) {
+                    card.classList.remove('hidden-by-filter');
+                } else {
+                    card.classList.add('hidden-by-filter');
+                }
             });
             
-            // Initialize first page
-            goToPage(1);
+            // Update pagination and visible items
+            renderPagination();
+            updateVisibleItems();
         }
 
-        // Initialize all event listeners when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize sidebar
-            initSidebar();
+        // Initialize scroll detection for table
+        function initializeScrollDetection() {
+            const scrollableTable = document.getElementById('scrollableTable');
             
-            // Initialize desktop pagination
-            initDesktopPagination();
+            if (scrollableTable) {
+                // Add scroll event listener
+                scrollableTable.addEventListener('scroll', function() {
+                    const scrollLeft = scrollableTable.scrollLeft;
+                    const maxScroll = scrollableTable.scrollWidth - scrollableTable.clientWidth;
+                });
+            }
+        }
+
+        // Minimalist Popup
+        function showMinimalPopup(title, message, type = 'success') {
+            const popup = document.getElementById('minimalPopup');
+            const popupTitle = popup.querySelector('.minimal-popup-title');
+            const popupMessage = popup.querySelector('.minimal-popup-message');
+            const popupIcon = popup.querySelector('.minimal-popup-icon span');
             
-            // Initialize mobile pagination
-            initMobilePagination();
+            // Set content
+            popupTitle.textContent = title;
+            popupMessage.textContent = message;
             
-            // Close modal when clicking outside
-            window.onclick = function(event) {
-                const addModal = document.getElementById('addModal');
-                const editModal = document.getElementById('editModal');
-                const statusModal = document.getElementById('statusModal');
-                
-                if (event.target == addModal) {
-                    closeAddModal();
-                }
-                if (event.target == editModal) {
-                    closeEditModal();
-                }
-                if (event.target == statusModal) {
-                    closeStatusModal();
-                }
+            // Set type
+            popup.className = 'minimal-popup show ' + type;
+            
+            // Set icon
+            if (type === 'success') {
+                popupIcon.textContent = 'check';
+            } else if (type === 'error') {
+                popupIcon.textContent = 'error';
+            } else if (type === 'warning') {
+                popupIcon.textContent = 'warning';
             }
             
-            // Handle escape key to close modals
-            document.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape') {
-                    closeAddModal();
-                    closeEditModal();
-                    closeStatusModal();
-                }
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Close popup when clicking the close button
+        document.querySelector('.minimal-popup-close').addEventListener('click', function() {
+            document.getElementById('minimalPopup').classList.remove('show');
+        });
+
+        // Modal elements
+        const editLayananModal = document.getElementById('editLayananModal');
+        const deleteModal = document.getElementById('deleteModal');
+
+        // Buttons
+        const batalEditBtn = document.getElementById('batalEditBtn');
+        const batalDeleteBtn = document.getElementById('batalDeleteBtn');
+        const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+        const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
+
+        // Forms
+        const editLayananForm = document.getElementById('editLayananForm');
+
+        // Close edit modal
+        batalEditBtn.addEventListener('click', () => {
+            editLayananModal.classList.add('hidden');
+            editLayananForm.reset();
+        });
+
+        closeEditModalBtn.addEventListener('click', () => {
+            editLayananModal.classList.add('hidden');
+            editLayananForm.reset();
+        });
+
+        // Close delete modal
+        batalDeleteBtn.addEventListener('click', () => {
+            deleteModal.classList.add('hidden');
+        });
+
+        closeDeleteModalBtn.addEventListener('click', () => {
+            deleteModal.classList.add('hidden');
+        });
+
+        // ============================
+        // HANDLE EDIT BUTTON
+        // ============================
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // SET VALUE
+                document.getElementById('editId').value = button.dataset.id;
+                document.getElementById('editNamaLayanan').value = button.dataset.nama;
+                document.getElementById('editDeskripsi').value = button.dataset.deskripsi;
+                document.getElementById('editHarga').value = button.dataset.harga;
+
+                editLayananModal.classList.remove('hidden');
             });
+        });
+
+        // ============================
+        // HANDLE DELETE BUTTON
+        // ============================
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const id = button.dataset.id;
+
+                // Set action form delete
+                document.getElementById('deleteForm').action = `/admin/layanan/${id}`;
+                document.getElementById('deleteId').value = id;
+
+                // Tampilkan modal
+                deleteModal.classList.remove('hidden');
+            });
+        });
+
+        // ============================
+        // SUBMIT FORM EDIT
+        // ============================
+        editLayananForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Simulasi pengiriman data
+            const id = document.getElementById('editId').value;
+            const nama = document.getElementById('editNamaLayanan').value;
+            const deskripsi = document.getElementById('editDeskripsi').value;
+            const harga = document.getElementById('editHarga').value;
+            
+            // Update data di tabel
+            const row = document.querySelector(`.layanan-row[data-id="${id}"]`);
+            if (row) {
+                row.setAttribute('data-nama', nama);
+                row.setAttribute('data-deskripsi', deskripsi);
+                row.setAttribute('data-harga', harga);
+                
+                // Update tampilan
+                row.cells[1].textContent = nama;
+                row.cells[2].textContent = deskripsi;
+                row.cells[3].textContent = `Rp. ${parseInt(harga).toLocaleString('id-ID')}`;
+                
+                // Update tombol edit
+                const editBtn = row.querySelector('.edit-btn');
+                editBtn.setAttribute('data-nama', nama);
+                editBtn.setAttribute('data-deskripsi', deskripsi);
+                editBtn.setAttribute('data-harga', harga);
+            }
+            
+            // Update data di card mobile
+            const card = document.querySelector(`.layanan-card[data-id="${id}"]`);
+            if (card) {
+                card.setAttribute('data-nama', nama);
+                card.setAttribute('data-deskripsi', deskripsi);
+                card.setAttribute('data-harga', harga);
+                
+                // Update tampilan
+                card.querySelector('h4').textContent = nama;
+                card.querySelector('.text-text-muted-light').textContent = `Rp. ${parseInt(harga).toLocaleString('id-ID')}`;
+                card.querySelector('.grid .col-span-2 p:last-child').textContent = deskripsi;
+                
+                // Update tombol edit
+                const editBtn = card.querySelector('.edit-btn');
+                editBtn.setAttribute('data-nama', nama);
+                editBtn.setAttribute('data-deskripsi', deskripsi);
+                editBtn.setAttribute('data-harga', harga);
+            }
+            
+            editLayananModal.classList.add('hidden');
+            editLayananForm.reset();
+            showMinimalPopup('Berhasil', 'Data layanan berhasil diperbarui', 'success');
+        });
+
+        // ============================
+        // SUBMIT FORM DELETE
+        // ============================
+        document.getElementById('deleteForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('deleteId').value;
+            
+            // Hapus baris dari tabel
+            const row = document.querySelector(`.layanan-row[data-id="${id}"]`);
+            if (row) {
+                row.remove();
+            }
+            
+            // Hapus card mobile
+            const card = document.querySelector(`.layanan-card[data-id="${id}"]`);
+            if (card) {
+                card.remove();
+            }
+            
+            deleteModal.classList.add('hidden');
+            showMinimalPopup('Berhasil', 'Data layanan berhasil dihapus', 'success');
+            
+            // Update pagination
+            renderPagination();
+            updateVisibleItems();
+        });
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target == editLayananModal) {
+                editLayananModal.classList.add('hidden');
+                editLayananForm.reset();
+            }
+            if (event.target == deleteModal) {
+                deleteModal.classList.add('hidden');
+            }
+        }
+        
+        // Handle escape key to close modals
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                editLayananModal.classList.add('hidden');
+                deleteModal.classList.add('hidden');
+            }
         });
     </script>
 </body>
-
 </html>

@@ -162,7 +162,7 @@
                 <span>Data Layanan</span>
             </a>
             <!-- TAMBAHAN: Menu Kelola Order -->
-            <a class="nav-item flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/kelola_order" data-page="kelola_order">
+            <a class="nav-item flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/general_manajer/orderan" data-page="general_manajer/orderan">
                 <span class="material-icons">receipt_long</span>
                 <span>Kelola Order</span>
             </a>

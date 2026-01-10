@@ -26,7 +26,8 @@ use App\Http\Controllers\GeneralManajer\OrderController;
 | Guest Routes (Pengunjung Belum Login)
 |--------------------------------------------------------------------------
 */
-
+Route::get('/users/data', [UserController::class, 'data'])
+    ->middleware('auth');
 // Redirect default ke halaman home
 Route::get('/', function () {
     return view('home');
@@ -147,6 +148,8 @@ Route::middleware(['auth', 'role:admin'])
         // HAPUS USER
         Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
 
+
+
         // Data Karyawan
         Route::get('/data_karyawan', [AdminKaryawanController::class, 'index'])->name('data_karyawan');
 
@@ -207,7 +210,7 @@ Route::middleware(['auth', 'role:admin'])
 |--------------------------------------------------------------------------
 */
 Route::resource('pengumuman', PengumumanController::class);
-
+Route::get('/pengumuman/data', [PengumumanController::class, 'data']);
 
 // Resource routes untuk Pegawai (mendefinisikan pegawai.index, pegawai.store, dll.)
 Route::resource('pegawai', PegawaiController::class);
@@ -297,7 +300,8 @@ Route::resource('project', DataProjectController::class)->names([
     Route::get('/finance', fn() => view('finance/beranda'));
     Route::get('/data', fn() => view('finance/data_layanan'));
     Route::get('/pembayaran', fn() => view('finance/data_pembayaran'));
-    Route::get('/data_in_out', fn() => view('finance/data_in_out'));
+    Route::get('/kwetansi', fn() => view('finance/kwitansi'));
+    
     
     // Manager Divisi
     Route::get('/manager_divisi', fn() => view('manager_divisi/home'));
@@ -367,6 +371,24 @@ Route::get('/data', function () {
 });
 Route::get('/pembayaran', function () {
     return view('finance/data_pembayaran');
+});
+Route::get('/pemasukan', function () {
+    return view('finance/pemasukan');
+});
+Route::get('/pengeluaran', function () {
+    return view('finance/pengeluaran');
+});
+Route::get('/finance/invoice', function () {
+    return view('finance/invoice');
+});
+Route::get('/pembayaran', function () {
+    return view('finance/data_pembayaran');
+});
+Route::get('/karyawann', function () {
+    return view('finance/daftar_karyawan');
+});
+Route::get('/rekap_absensi', function () {
+    return view('pemilik/rekap_absensi');
 });
 
 /*
