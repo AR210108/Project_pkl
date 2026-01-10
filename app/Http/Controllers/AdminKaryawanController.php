@@ -45,7 +45,7 @@ class AdminKaryawanController extends Controller
             $validated = $request->validate([
                 'nama' => 'required|string|max:255',
                 'jabatan' => 'required|string|max:255',
-                'gaji' => 'required|numeric|min:0', // Gaji seharusnya angka
+                'divisi' => 'required|string|max:255', 
                 'alamat' => 'required|string',
                 'kontak' => 'required|string|max:255',
                 'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
@@ -63,7 +63,7 @@ class AdminKaryawanController extends Controller
                 'user_id' => auth()->id(), // Ambil ID user yang sedang login
                 'nama' => $validated['nama'],
                 'jabatan' => $validated['jabatan'],
-                'gaji' => $validated['gaji'],
+                'divisi' => $validated['divisi'],
                 'alamat' => $validated['alamat'],
                 'kontak' => $validated['kontak'],
                 'foto' => $fotoName,
@@ -87,7 +87,7 @@ class AdminKaryawanController extends Controller
             $validated = $request->validate([
                 'nama' => 'required|string|max:255',
                 'jabatan' => 'required|string|max:255',
-                'gaji' => 'required|numeric|min:0',
+                'divisi' => 'required|string|max:255',
                 'alamat' => 'required|string',
                 'kontak' => 'required|string|max:255',
                 'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Foto tidak wajib diubah
@@ -96,7 +96,7 @@ class AdminKaryawanController extends Controller
             // Update data karyawan
             $karyawan->nama = $validated['nama'];
             $karyawan->jabatan = $validated['jabatan'];
-            $karyawan->gaji = $validated['gaji'];
+            $karyawan->divisi = $validated['divisi'];
             $karyawan->alamat = $validated['alamat'];
             $karyawan->kontak = $validated['kontak'];
 

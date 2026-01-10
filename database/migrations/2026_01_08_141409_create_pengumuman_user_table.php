@@ -11,7 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::rename('orderan', 'orderans');
+Schema::create('pengumuman_user', function (Blueprint $table) {
+    $table->id();
+
+    $table->foreignId('pengumuman_id')
+        ->constrained('pengumuman')
+        ->cascadeOnDelete();
+
+    $table->foreignId('user_id')
+        ->constrained('users')
+        ->cascadeOnDelete();
+});
+
+
     }
 
     /**
@@ -19,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::rename('orderans', 'orderan');
+        Schema::dropIfExists('pengumuman_user');
     }
 };

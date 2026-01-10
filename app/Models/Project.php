@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Orderan extends Model
+class Project extends Model
 {
     use HasFactory;
     
     // Tambahkan baris ini
-    protected $table = 'orderan'; // Beri tahu model untuk menggunakan tabel 'orderan'
+    protected $table = 'project'; // Beri tahu model untuk menggunakan tabel 'orderan'
     
     protected $fillable = [
         'nama',
