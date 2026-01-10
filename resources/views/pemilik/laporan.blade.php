@@ -103,7 +103,7 @@
                 <div class="bg-white dark:bg-card-dark p-4 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">Total Keuangan</p>
+                            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">Total Keuntungan</p>
                             <p class="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-500 mt-1">500.000</p>
                         </div>
                         <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-full">
