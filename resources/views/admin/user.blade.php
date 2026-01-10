@@ -950,7 +950,6 @@
             
             // Inisialisasi pagination, filter, dan search
             initializePagination();
-            initializeFilter();
             initializeSearch();
             initializeScrollDetection();
             
