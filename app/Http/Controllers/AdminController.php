@@ -1,7 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Karyawan;
+use App\Models\User;
+use App\Models\Layanan;
+use App\Models\CatatanRapat;
+use App\Models\Pengumuman;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -17,9 +21,24 @@ class AdminController extends Controller
             'keuangan' => route('admin.keuangan.index'),
             'absensi' => route('admin.absensi.index'),
         ];
+        $jumlahKaryawan = Karyawan::count();
+        $jumlahUser = User::count();
+        $jumlahLayanan = Layanan::count();
+        $catatanRapat = CatatanRapat::with(['peserta', 'penugasan'])
+            ->orderBy('tanggal', 'desc')
+            ->take(5)
+            ->get();
+        $pengumumanTerbaru = Pengumuman::orderBy('created_at', 'desc')
+    ->limit(5)
+    ->get();
+        return view('admin.home', compact('urls',
+            'jumlahKaryawan',
+            'jumlahUser',
+            'jumlahLayanan',
+            'catatanRapat',
+            'pengumumanTerbaru'
 
-        // Kirim variabel $urls ke view
-        return view('admin.home', compact('urls'));
+        ));
     }
     
     public function dataKaryawan()

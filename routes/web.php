@@ -327,8 +327,6 @@ Route::prefix('general_manajer')->name('general_manajer.')->group(function () {
 | Banyak Route View Langsung (admin, pemilik, finance, dsb)
 |--------------------------------------------------------------------------
 */
-
-Route::view('/admin', 'admin/home');
 Route::view('/data_karyawan_admin', 'admin/data_karyawan');
 Route::view('/data_layanan_admin', 'admin/data_layanan');
 Route::get('/data_user', fn() => redirect()->route('admin.user'));
