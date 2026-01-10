@@ -258,18 +258,6 @@
                 <span class="sidebar-text">Data Layanan</span>
             </a>
 
-            <a class="nav-item flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/orderan" data-page="orderan">
-                <span class="material-icons">receipt_long</span>
-                <span>Kelola Order</span>
-            </a>
-
-            <!-- Menu Absensi -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/admin/absensi" data-page="absensi">
-                <span class="material-icons sidebar-icon">schedule</span>
-                <span class="sidebar-text">Absensi</span>
-            </a>
 
             <!-- Menu Surat Kerjasama (Dropdown) -->
             <div class="relative">
@@ -294,32 +282,6 @@
                         href="/admin/surat_kerjasama" data-page="list_surat">
                         <span class="material-icons sidebar-icon">list_alt</span>
                         <span class="sidebar-text">List Surat</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Menu Invoice & Kwitansi -->
-            <div class="relative">
-                <button
-                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors w-full text-left"
-                    onclick="toggleDropdown('invoice-kwitansi-dropdown')" data-page="invoice_kwitansi">
-                    <span class="material-icons sidebar-icon">receipt</span>
-                    <span class="sidebar-text">Invoice & Kwitansi</span>
-                    <span class="material-icons sidebar-icon ml-auto transition-transform duration-200"
-                        id="invoice-kwitansi-icon">expand_more</span>
-                </button>
-
-                <div id="invoice-kwitansi-dropdown" class="pl-6 mt-1 space-y-1 hidden">
-                    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        href="/invoice" data-page="invoice">
-                        <span class="material-icons sidebar-icon">description</span>
-                        <span class="sidebar-text">Invoice</span>
-                    </a>
-
-                    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        href="/kwitansi" data-page="kwitansi">
-                        <span class="material-icons sidebar-icon">payments</span>
-                        <span class="sidebar-text">Kwitansi</span>
                     </a>
                 </div>
             </div>

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('orderan', function (Blueprint $table) {
+        Schema::table('project', function (Blueprint $table) {
             // Tambahkan kolom created_id setelah kolom id
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('cascade');
         });
@@ -22,7 +22,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('orderan', function (Blueprint $table) {
+        Schema::table('project', function (Blueprint $table) {
             $table->dropForeign(['created_by']);
             $table->dropColumn('created_by');
         });

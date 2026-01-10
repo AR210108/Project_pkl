@@ -16,7 +16,7 @@ class Karyawan extends Model
         'user_id',
         'nama',
         'jabatan',
-        'gaji',
+        'divisi',
         'alamat',
         'kontak',
         'foto'

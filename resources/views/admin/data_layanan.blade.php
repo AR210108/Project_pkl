@@ -414,7 +414,7 @@
         
         .data-table {
             width: 100%;
-            min-width: 1200px;
+            min-width: 100px;
             border-collapse: collapse;
         }
         
@@ -694,12 +694,11 @@
                                 <table class="data-table">
                                     <thead>
                                         <tr>
-                                            <th style="min-width: 60px;">No</th>
-                                            <th style="min-width: 200px;">Nama Layanan</th>
-                                            <th style="min-width: 250px;">Deskripsi</th>
-                                            <th style="min-width: 150px;">Harga</th>
-                                            <th style="min-width: 150px;">Status</th>
-                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
+                                            <th style="min-width: 50px;">No</th>
+                                            <th style="min-width: 80px;">Nama Layanan</th>
+                                            <th style="min-width: 80px;">Deskripsi</th>
+                                            <th style="min-width: 70px;">Harga</th>
+                                            <th style="min-width: 10px; ">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="desktopTableBody">
@@ -716,22 +715,13 @@
                                                     <td style="min-width: 200px;">{{ $layanan->nama_layanan }}</td>
                                                     <td style="min-width: 250px;">{{ $layanan->deskripsi }}</td>
                                                     <td style="min-width: 150px;">Rp. {{ number_format($layanan->harga, 0, ',', '.') }}</td>
-                                                    <td style="min-width: 150px;">
-                                                        <span class="status-badge 
-                                                            @if(strtolower($layanan->status) == 'pending') status-pending
-                                                            @elseif(strtolower($layanan->status) == 'proses') status-proses
-                                                            @else status-selesai @endif">
-                                                            {{ $layanan->status }}
-                                                        </span>
-                                                    </td>
                                                     <td style="min-width: 100px; text-align: center;">
                                                         <div class="flex justify-center gap-2">
                                                             <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
                                                                     data-id="{{ $layanan->id }}"
                                                                     data-nama="{{ $layanan->nama_layanan }}"
                                                                     data-deskripsi="{{ $layanan->deskripsi }}"
-                                                                    data-harga="{{ $layanan->harga }}"
-                                                                    data-status="{{ $layanan->status }}">
+                                                                    data-harga="{{ $layanan->harga }}">
                                                                 <span class="material-icons-outlined">edit</span>
                                                             </button>
                                                             <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 

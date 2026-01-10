@@ -1,32 +1,33 @@
 <?php
 
-    use App\Http\Controllers\GeneralManajer\OrderController;
-    use App\Http\Controllers\OrderanController;
-    use App\Http\Controllers\PegawaiController;
-    use App\Http\Controllers\PelayananController;
-    use Illuminate\Support\Facades\Route;
-    use Illuminate\Support\Facades\Auth;
-    use App\Http\Controllers\Auth\LoginController;
-    use App\Http\Controllers\KaryawanController;
-    use App\Http\Controllers\LayananController;
-    use App\Http\Controllers\AdminController;
-    use App\Http\Controllers\AbsensiController;
-    use App\Http\Controllers\UserController;
-    use App\Http\Controllers\AdminKaryawanController;
-    use App\Http\Controllers\CatatanRapatController;
-    use App\Http\Controllers\KwitansiController;
-    use App\Http\Controllers\InvoiceController;
-    use App\Http\Controllers\PengumumanController;
-    use App\Http\Controllers\SuratKerjasamaController;
-    use App\Models\Invoice;
-    use App\Http\Controllers\TugasController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\LayananController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminKaryawanController;
+use App\Http\Controllers\CatatanRapatController;
+use App\Http\Controllers\DataProjectController;
+use App\Http\Controllers\KwitansiController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PengumumanController;
+use App\Http\Controllers\PegawaiController;
+use App\Http\Controllers\SuratKerjasamaController;
+use App\Http\Controllers\PelayananController;
+use App\Http\Controllers\TugasController;
+use App\Models\Invoice;
+use App\Http\Controllers\GeneralManajer\OrderController;
 
 /*
 |--------------------------------------------------------------------------
 | Guest Routes (Pengunjung Belum Login)
 |--------------------------------------------------------------------------
 */
-
+Route::get('/users/data', [UserController::class, 'data'])
+    ->middleware('auth');
 // Redirect default ke halaman home
 Route::get('/', function () {
     return view('home');
@@ -147,6 +148,8 @@ Route::middleware(['auth', 'role:admin'])
         // HAPUS USER
         Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
 
+
+
         // Data Karyawan
         Route::get('/data_karyawan', [AdminKaryawanController::class, 'index'])->name('data_karyawan');
 
@@ -207,7 +210,7 @@ Route::middleware(['auth', 'role:admin'])
 |--------------------------------------------------------------------------
 */
 Route::resource('pengumuman', PengumumanController::class);
-
+Route::get('/pengumuman/data', [PengumumanController::class, 'data']);
 
 // Resource routes untuk Pegawai (mendefinisikan pegawai.index, pegawai.store, dll.)
 Route::resource('pegawai', PegawaiController::class);
@@ -218,10 +221,27 @@ Route::resource('pegawai', PegawaiController::class);
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
-    Route::get('/catatan_rapat', [CatatanRapatController::class, 'index'])->name('catatan_rapat.index');
-    Route::post('/catatan_rapat', [CatatanRapatController::class, 'store'])->name('catatan_rapat.store');
-    Route::put('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'update'])->name('catatan_rapat.update');
-    Route::delete('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'destroy'])->name('catatan_rapat.destroy');
+
+    // view
+    Route::get('/catatan_rapat', [CatatanRapatController::class, 'index'])
+        ->name('catatan_rapat');
+
+    // data (JSON)
+    Route::get('/catatan_rapat/data', [CatatanRapatController::class, 'data'])
+        ->name('catatan_rapat.data');
+
+    Route::post('/catatan_rapat', [CatatanRapatController::class, 'store'])
+        ->name('catatan_rapat.store');
+
+    Route::put('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'update'])
+        ->name('catatan_rapat.update');
+
+    Route::delete('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'destroy'])
+        ->name('catatan_rapat.destroy');
+
+        Route::get('/catatan_rapat/data', [CatatanRapatController::class, 'data'])
+    ->name('catatan_rapat.data');
+
 });
 
 /*
@@ -258,16 +278,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/template_surat', fn() => view('admin/templet_surat'));
     Route::get('/list_surat', fn() => view('admin/list_surat'));
     Route::get('/invoice', fn() => view('admin/invoice'));
-    Route::get('/kwitansi', fn() => view('admin/kwitansi'));
-    Route::get('/catatan_rapat', fn() => view('admin/catatan_rapat'));
-    Route::get('/pengumuman', fn() => view('admin/pengumuman'));
+    Route::get('/kwitansi', fn() => view('admin/kwitansi')); 
+    Route::get('/data_order', fn() => view('admin/data_order'));
     // Orderan Routes
-Route::resource('orderan', OrderanController::class)->names([
-    'index' => 'orderan.index',
-    'store' => 'orderan.store',
-    'show' => 'orderan.show',
-    'update' => 'orderan.update',
-    'destroy' => 'orderan.destroy'
+Route::resource('project', DataProjectController::class)->names([
+    'index' => 'project.index',
+    'store' => 'project.store',
+    'show' => 'project.show',
+    'update' => 'project.update',
+    'destroy' => 'project.destroy'
 ]);
     
     // Pemilik
