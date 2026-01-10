@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Task List Dashboard</title>
+    <title>Daftar Karyawan</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
@@ -125,19 +124,19 @@
             font-weight: 600;
         }
         
-        .status-pending {
+        .status-aktif {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #065f46;
+        }
+        
+        .status-cuti {
             background-color: rgba(245, 158, 11, 0.15);
             color: #92400e;
         }
         
-        .status-proses {
-            background-color: rgba(59, 130, 246, 0.15);
-            color: #1e40af;
-        }
-        
-        .status-selesai {
-            background-color: rgba(16, 185, 129, 0.15);
-            color: #065f46;
+        .status-tidak-aktif {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #991b1b;
         }
         
         /* Custom styles untuk transisi */
@@ -205,7 +204,6 @@
         .main-content {
             margin-left: 0;
             transition: margin-left 0.3s ease-in-out;
-            overflow-x: hidden; /* Mencegah horizontal scroll pada main content */
         }
         
         @media (min-width: 768px) {
@@ -376,11 +374,9 @@
         
         .panel-body {
             padding: 1.5rem;
-            /* Mencegah overflow horizontal pada panel body */
-            overflow-x: hidden;
         }
         
-        /* SCROLLABLE TABLE - Hanya table yang bisa di-scroll */
+        /* SCROLLABLE TABLE */
         .scrollable-table-container {
             width: 100%;
             overflow-x: auto;
@@ -388,11 +384,8 @@
             border: 1px solid #e2e8f0;
             border-radius: 0.5rem;
             background: white;
-            /* Mencegah shadow keluar dari container */
-            position: relative;
         }
         
-        /* Custom scrollbar untuk table */
         .scrollable-table-container {
             scrollbar-width: auto;
             -webkit-overflow-scrolling: touch;
@@ -420,7 +413,7 @@
         
         .data-table {
             width: 100%;
-            min-width: 1200px; /* Lebar minimum table */
+            min-width: 1200px;
             border-collapse: collapse;
         }
         
@@ -439,9 +432,6 @@
             font-size: 0.875rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            position: sticky;
-            top: 0;
-            z-index: 10;
         }
         
         .data-table tbody tr:nth-child(even) {
@@ -627,38 +617,26 @@
         .hidden-by-filter {
             display: none !important;
         }
-        
-        /* Mencegah horizontal scroll pada body dan html */
-        html, body {
-            overflow-x: hidden;
-            max-width: 100%;
-        }
-        
-        /* Container untuk memastikan tidak ada overflow */
-        .container-wrapper {
-            max-width: 100%;
-            overflow-x: hidden;
-        }
     </style>
     <!-- Add CSRF token meta tag -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="font-display bg-background-light text-text-light">
-    <div class="flex min-h-screen container-wrapper">
+    <div class="flex min-h-screen">
         <!-- Menggunakan template header -->
         @include('manager_divisi/templet/sider')
         <div class="flex-1 flex flex-col main-content">
             <div class="flex-1 p-3 sm:p-8">
                 <header class="mb-4 sm:mb-8">
-                    <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">Daftar Tugas</h1>
+                    <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">Daftar Karyawan</h1>
                 </header>
                 
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
                         <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari judul tugas atau karyawan..." type="text" />
+                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama karyawan atau jabatan..." type="text" />
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <div class="relative">
@@ -672,16 +650,16 @@
                                     <label for="filterAll">Semua Status</label>
                                 </div>
                                 <div class="filter-option">
-                                    <input type="checkbox" id="filterPending" value="pending">
-                                    <label for="filterPending">Pending</label>
+                                    <input type="checkbox" id="filterAktif" value="aktif">
+                                    <label for="filterAktif">Aktif</label>
                                 </div>
                                 <div class="filter-option">
-                                    <input type="checkbox" id="filterProses" value="proses">
-                                    <label for="filterProses">Proses</label>
+                                    <input type="checkbox" id="filterCuti" value="cuti">
+                                    <label for="filterCuti">Cuti</label>
                                 </div>
                                 <div class="filter-option">
-                                    <input type="checkbox" id="filterSelesai" value="selesai">
-                                    <label for="filterSelesai">Selesai</label>
+                                    <input type="checkbox" id="filterTidakAktif" value="tidak aktif">
+                                    <label for="filterTidakAktif">Tidak Aktif</label>
                                 </div>
                                 <div class="filter-actions">
                                     <button id="applyFilter" class="filter-apply">Terapkan</button>
@@ -689,10 +667,10 @@
                                 </div>
                             </div>
                         </div>
-                        <button id="tambahTugasBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
+                        <button id="tambahKaryawanBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
                             <span class="material-icons-outlined">add</span>
-                            <span class="hidden sm:inline">Buat Tugas Baru</span>
-                            <span class="sm:hidden">Buat</span>
+                            <span class="hidden sm:inline">Tambah Karyawan</span>
+                            <span class="sm:hidden">Tambah</span>
                         </button>
                     </div>
                 </div>
@@ -701,63 +679,64 @@
                 <div class="panel">
                     <div class="panel-header">
                         <h3 class="panel-title">
-                            <span class="material-icons-outlined text-primary">assignment</span>
-                            Daftar Tugas
+                            <span class="material-icons-outlined text-primary">people</span>
+                            Data Karyawan
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">4</span> tugas</span>
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">4</span> karyawan</span>
                         </div>
                     </div>
                     <div class="panel-body">
-                        <!-- SCROLLABLE TABLE - Hanya table yang bisa di-scroll -->
+                        <!-- SCROLLABLE TABLE -->
                         <div class="desktop-table">
                             <div class="scrollable-table-container scroll-indicator table-shadow" id="scrollableTable">
                                 <table class="data-table">
                                     <thead>
                                         <tr>
                                             <th style="min-width: 60px;">No</th>
-                                            <th style="min-width: 200px;">Judul Tugas</th>
-                                            <th style="min-width: 150px;">Layanan</th>
-                                            <th style="min-width: 150px;">Karyawan</th>
-                                            <th style="min-width: 150px;">Deadline</th>
-                                            <th style="min-width: 250px;">Deskripsi</th>
-                                            <th style="min-width: 120px;">Status</th>
-                                            <th style="min-width: 100px;">File</th>
+                                            <th style="min-width: 200px;">Nama</th>
+                                            <th style="min-width: 150px;">Jabatan</th>
+                                            <th style="min-width: 150px;">Divisi</th>
+                                            <th style="min-width: 200px;">Alamat</th>
+                                            <th style="min-width: 150px;">Kontak</th>
+                                            <th style="min-width: 100px;">Status</th>
+                                            <th style="min-width: 100px;">Foto</th>
                                             <th style="min-width: 100px; text-align: center;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="desktopTableBody">
-                                        <tr class="tugas-row" 
+                                        <tr class="karyawan-row" 
                                             data-id="1" 
-                                            data-judul="Desain UI/UX" 
-                                            data-layanan="Web Development" 
-                                            data-karyawan="Ahmad Rizki" 
-                                            data-deadline="2023-12-15" 
-                                            data-status="pending">
+                                            data-nama="Ahmad Fauzi" 
+                                            data-jabatan="Senior Developer" 
+                                            data-divisi="IT" 
+                                            data-alamat="Jl. Merdeka No. 123, Jakarta" 
+                                            data-kontak="08123456789" 
+                                            data-status="aktif">
                                             <td style="min-width: 60px;">1</td>
-                                            <td style="min-width: 200px;">Desain UI/UX</td>
-                                            <td style="min-width: 150px;">Web Development</td>
-                                            <td style="min-width: 150px;">Ahmad Rizki</td>
-                                            <td style="min-width: 150px;">15 Des 2023</td>
-                                            <td style="min-width: 250px;">Membuat desain UI/UX untuk aplikasi mobile dengan konsep modern dan minimalis</td>
-                                            <td style="min-width: 120px;">
-                                                <span class="status-badge status-pending">Pending</span>
+                                            <td style="min-width: 200px;">Ahmad Fauzi</td>
+                                            <td style="min-width: 150px;">Senior Developer</td>
+                                            <td style="min-width: 150px;">IT</td>
+                                            <td style="min-width: 200px;">Jl. Merdeka No. 123, Jakarta</td>
+                                            <td style="min-width: 150px;">08123456789</td>
+                                            <td style="min-width: 100px;">
+                                                <span class="status-badge status-aktif">Aktif</span>
                                             </td>
                                             <td style="min-width: 100px;">
-                                                <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                                    <span class="material-icons-outlined text-sm">download</span>
-                                                    File
-                                                </a>
+                                                <div class="w-10 h-10 rounded-full overflow-hidden">
+                                                    <img src="https://picsum.photos/seed/employee1/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
+                                                </div>
                                             </td>
                                             <td style="min-width: 100px; text-align: center;">
                                                 <div class="flex justify-center gap-2">
                                                     <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
                                                             data-id="1"
-                                                            data-judul="Desain UI/UX"
-                                                            data-layanan="Web Development"
-                                                            data-karyawan="Ahmad Rizki"
-                                                            data-deadline="2023-12-15"
-                                                            data-status="pending">
+                                                            data-nama="Ahmad Fauzi"
+                                                            data-jabatan="Senior Developer"
+                                                            data-divisi="IT"
+                                                            data-alamat="Jl. Merdeka No. 123, Jakarta"
+                                                            data-kontak="08123456789"
+                                                            data-status="aktif">
                                                         <span class="material-icons-outlined">edit</span>
                                                     </button>
                                                     <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
@@ -767,37 +746,38 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                        <tr class="tugas-row" 
+                                        <tr class="karyawan-row" 
                                             data-id="2" 
-                                            data-judul="API Integration" 
-                                            data-layanan="Mobile Development" 
-                                            data-karyawan="Siti Nurhaliza" 
-                                            data-deadline="2023-12-20" 
-                                            data-status="proses">
+                                            data-nama="Siti Nurhaliza" 
+                                            data-jabatan="HR Manager" 
+                                            data-divisi="HR" 
+                                            data-alamat="Jl. Sudirman No. 456, Bandung" 
+                                            data-kontak="08234567890" 
+                                            data-status="cuti">
                                             <td style="min-width: 60px;">2</td>
-                                            <td style="min-width: 200px;">API Integration</td>
-                                            <td style="min-width: 150px;">Mobile Development</td>
-                                            <td style="min-width: 150px;">Siti Nurhaliza</td>
-                                            <td style="min-width: 150px;">20 Des 2023</td>
-                                            <td style="min-width: 250px;">Mengintegrasikan API payment gateway ke aplikasi mobile</td>
-                                            <td style="min-width: 120px;">
-                                                <span class="status-badge status-proses">Proses</span>
+                                            <td style="min-width: 200px;">Siti Nurhaliza</td>
+                                            <td style="min-width: 150px;">HR Manager</td>
+                                            <td style="min-width: 150px;">HR</td>
+                                            <td style="min-width: 200px;">Jl. Sudirman No. 456, Bandung</td>
+                                            <td style="min-width: 150px;">08234567890</td>
+                                            <td style="min-width: 100px;">
+                                                <span class="status-badge status-cuti">Cuti</span>
                                             </td>
                                             <td style="min-width: 100px;">
-                                                <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                                    <span class="material-icons-outlined text-sm">download</span>
-                                                    File
-                                                </a>
+                                                <div class="w-10 h-10 rounded-full overflow-hidden">
+                                                    <img src="https://picsum.photos/seed/employee2/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
+                                                </div>
                                             </td>
                                             <td style="min-width: 100px; text-align: center;">
                                                 <div class="flex justify-center gap-2">
                                                     <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
                                                             data-id="2"
-                                                            data-judul="API Integration"
-                                                            data-layanan="Mobile Development"
-                                                            data-karyawan="Siti Nurhaliza"
-                                                            data-deadline="2023-12-20"
-                                                            data-status="proses">
+                                                            data-nama="Siti Nurhaliza"
+                                                            data-jabatan="HR Manager"
+                                                            data-divisi="HR"
+                                                            data-alamat="Jl. Sudirman No. 456, Bandung"
+                                                            data-kontak="08234567890"
+                                                            data-status="cuti">
                                                         <span class="material-icons-outlined">edit</span>
                                                     </button>
                                                     <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
@@ -807,37 +787,38 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                        <tr class="tugas-row" 
+                                        <tr class="karyawan-row" 
                                             data-id="3" 
-                                            data-judul="Database Optimization" 
-                                            data-layanan="Backend Development" 
-                                            data-karyawan="Budi Santoso" 
-                                            data-deadline="2023-12-10" 
-                                            data-status="selesai">
+                                            data-nama="Budi Santoso" 
+                                            data-jabatan="Marketing Manager" 
+                                            data-divisi="Marketing" 
+                                            data-alamat="Jl. Gatot Subroto No. 789, Surabaya" 
+                                            data-kontak="08345678901" 
+                                            data-status="aktif">
                                             <td style="min-width: 60px;">3</td>
-                                            <td style="min-width: 200px;">Database Optimization</td>
-                                            <td style="min-width: 150px;">Backend Development</td>
-                                            <td style="min-width: 150px;">Budi Santoso</td>
-                                            <td style="min-width: 150px;">10 Des 2023</td>
-                                            <td style="min-width: 250px;">Optimasi query database untuk meningkatkan performa aplikasi</td>
-                                            <td style="min-width: 120px;">
-                                                <span class="status-badge status-selesai">Selesai</span>
+                                            <td style="min-width: 200px;">Budi Santoso</td>
+                                            <td style="min-width: 150px;">Marketing Manager</td>
+                                            <td style="min-width: 150px;">Marketing</td>
+                                            <td style="min-width: 200px;">Jl. Gatot Subroto No. 789, Surabaya</td>
+                                            <td style="min-width: 150px;">08345678901</td>
+                                            <td style="min-width: 100px;">
+                                                <span class="status-badge status-aktif">Aktif</span>
                                             </td>
                                             <td style="min-width: 100px;">
-                                                <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                                    <span class="material-icons-outlined text-sm">download</span>
-                                                    File
-                                                </a>
+                                                <div class="w-10 h-10 rounded-full overflow-hidden">
+                                                    <img src="https://picsum.photos/seed/employee3/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
+                                                </div>
                                             </td>
                                             <td style="min-width: 100px; text-align: center;">
                                                 <div class="flex justify-center gap-2">
                                                     <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
                                                             data-id="3"
-                                                            data-judul="Database Optimization"
-                                                            data-layanan="Backend Development"
-                                                            data-karyawan="Budi Santoso"
-                                                            data-deadline="2023-12-10"
-                                                            data-status="selesai">
+                                                            data-nama="Budi Santoso"
+                                                            data-jabatan="Marketing Manager"
+                                                            data-divisi="Marketing"
+                                                            data-alamat="Jl. Gatot Subroto No. 789, Surabaya"
+                                                            data-kontak="08345678901"
+                                                            data-status="aktif">
                                                         <span class="material-icons-outlined">edit</span>
                                                     </button>
                                                     <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
@@ -847,37 +828,38 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                        <tr class="tugas-row" 
+                                        <tr class="karyawan-row" 
                                             data-id="4" 
-                                            data-judul="Content Writing" 
-                                            data-layanan="Digital Marketing" 
-                                            data-karyawan="Dewi Lestari" 
-                                            data-deadline="2023-12-18" 
-                                            data-status="pending">
+                                            data-nama="Dewi Lestari" 
+                                            data-jabatan="Finance Manager" 
+                                            data-divisi="Finance" 
+                                            data-alamat="Jl. Thamrin No. 321, Medan" 
+                                            data-kontak="08456789012" 
+                                            data-status="tidak aktif">
                                             <td style="min-width: 60px;">4</td>
-                                            <td style="min-width: 200px;">Content Writing</td>
-                                            <td style="min-width: 150px;">Digital Marketing</td>
-                                            <td style="min-width: 150px;">Dewi Lestari</td>
-                                            <td style="min-width: 150px;">18 Des 2023</td>
-                                            <td style="min-width: 250px;">Menulis konten blog dan artikel untuk website perusahaan</td>
-                                            <td style="min-width: 120px;">
-                                                <span class="status-badge status-pending">Pending</span>
+                                            <td style="min-width: 200px;">Dewi Lestari</td>
+                                            <td style="min-width: 150px;">Finance Manager</td>
+                                            <td style="min-width: 150px;">Finance</td>
+                                            <td style="min-width: 200px;">Jl. Thamrin No. 321, Medan</td>
+                                            <td style="min-width: 150px;">08456789012</td>
+                                            <td style="min-width: 100px;">
+                                                <span class="status-badge status-tidak-aktif">Tidak Aktif</span>
                                             </td>
                                             <td style="min-width: 100px;">
-                                                <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                                    <span class="material-icons-outlined text-sm">download</span>
-                                                    File
-                                                </a>
+                                                <div class="w-10 h-10 rounded-full overflow-hidden">
+                                                    <img src="https://picsum.photos/seed/employee4/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
+                                                </div>
                                             </td>
                                             <td style="min-width: 100px; text-align: center;">
                                                 <div class="flex justify-center gap-2">
                                                     <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
                                                             data-id="4"
-                                                            data-judul="Content Writing"
-                                                            data-layanan="Digital Marketing"
-                                                            data-karyawan="Dewi Lestari"
-                                                            data-deadline="2023-12-18"
-                                                            data-status="pending">
+                                                            data-nama="Dewi Lestari"
+                                                            data-jabatan="Finance Manager"
+                                                            data-divisi="Finance"
+                                                            data-alamat="Jl. Thamrin No. 321, Medan"
+                                                            data-kontak="08456789012"
+                                                            data-status="tidak aktif">
                                                         <span class="material-icons-outlined">edit</span>
                                                     </button>
                                                     <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
@@ -894,31 +876,33 @@
                         
                         <!-- Mobile Card View -->
                         <div class="mobile-cards space-y-4" id="mobile-cards">
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm tugas-card" 
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card" 
                                  data-id="1" 
-                                 data-judul="Desain UI/UX" 
-                                 data-layanan="Web Development" 
-                                 data-karyawan="Ahmad Rizki" 
-                                 data-deadline="2023-12-15" 
-                                 data-status="pending">
+                                 data-nama="Ahmad Fauzi" 
+                                 data-jabatan="Senior Developer" 
+                                 data-divisi="IT" 
+                                 data-alamat="Jl. Merdeka No. 123, Jakarta" 
+                                 data-kontak="08123456789" 
+                                 data-status="aktif">
                                 <div class="flex justify-between items-start mb-3">
                                     <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">assignment</span>
+                                        <div class="h-12 w-12 rounded-full overflow-hidden">
+                                            <img src="https://picsum.photos/seed/employee1/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
                                         </div>
                                         <div>
-                                            <h4 class="font-semibold text-base">Desain UI/UX</h4>
-                                            <p class="text-sm text-text-muted-light">Ahmad Rizki</p>
+                                            <h4 class="font-semibold text-base">Ahmad Fauzi</h4>
+                                            <p class="text-sm text-text-muted-light">Senior Developer - IT</p>
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
                                         <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
                                                 data-id="1"
-                                                data-judul="Desain UI/UX"
-                                                data-layanan="Web Development"
-                                                data-karyawan="Ahmad Rizki"
-                                                data-deadline="2023-12-15"
-                                                data-status="pending">
+                                                data-nama="Ahmad Fauzi"
+                                                data-jabatan="Senior Developer"
+                                                data-divisi="IT"
+                                                data-alamat="Jl. Merdeka No. 123, Jakarta"
+                                                data-kontak="08123456789"
+                                                data-status="aktif">
                                             <span class="material-icons-outlined">edit</span>
                                         </button>
                                         <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
@@ -935,56 +919,47 @@
                                     <div>
                                         <p class="text-text-muted-light">Status</p>
                                         <p>
-                                            <span class="status-badge status-pending">Pending</span>
+                                            <span class="status-badge status-aktif">Aktif</span>
                                         </p>
                                     </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Layanan</p>
-                                        <p class="font-medium">Web Development</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Deadline</p>
-                                        <p class="font-medium">15 Des 2023</p>
+                                    <div class="col-span-2">
+                                        <p class="text-text-muted-light">Alamat</p>
+                                        <p class="font-medium">Jl. Merdeka No. 123, Jakarta</p>
                                     </div>
                                     <div class="col-span-2">
-                                        <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Membuat desain UI/UX untuk aplikasi mobile dengan konsep modern dan minimalis</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">File</p>
-                                        <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                            <span class="material-icons-outlined text-sm">download</span>
-                                            Unduh File
-                                        </a>
+                                        <p class="text-text-muted-light">Kontak</p>
+                                        <p class="font-medium">08123456789</p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm tugas-card" 
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card" 
                                  data-id="2" 
-                                 data-judul="API Integration" 
-                                 data-layanan="Mobile Development" 
-                                 data-karyawan="Siti Nurhaliza" 
-                                 data-deadline="2023-12-20" 
-                                 data-status="proses">
+                                 data-nama="Siti Nurhaliza" 
+                                 data-jabatan="HR Manager" 
+                                 data-divisi="HR" 
+                                 data-alamat="Jl. Sudirman No. 456, Bandung" 
+                                 data-kontak="08234567890" 
+                                 data-status="cuti">
                                 <div class="flex justify-between items-start mb-3">
                                     <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">assignment</span>
+                                        <div class="h-12 w-12 rounded-full overflow-hidden">
+                                            <img src="https://picsum.photos/seed/employee2/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
                                         </div>
                                         <div>
-                                            <h4 class="font-semibold text-base">API Integration</h4>
-                                            <p class="text-sm text-text-muted-light">Siti Nurhaliza</p>
+                                            <h4 class="font-semibold text-base">Siti Nurhaliza</h4>
+                                            <p class="text-sm text-text-muted-light">HR Manager - HR</p>
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
                                         <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
                                                 data-id="2"
-                                                data-judul="API Integration"
-                                                data-layanan="Mobile Development"
-                                                data-karyawan="Siti Nurhaliza"
-                                                data-deadline="2023-12-20"
-                                                data-status="proses">
+                                                data-nama="Siti Nurhaliza"
+                                                data-jabatan="HR Manager"
+                                                data-divisi="HR"
+                                                data-alamat="Jl. Sudirman No. 456, Bandung"
+                                                data-kontak="08234567890"
+                                                data-status="cuti">
                                             <span class="material-icons-outlined">edit</span>
                                         </button>
                                         <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
@@ -1001,56 +976,47 @@
                                     <div>
                                         <p class="text-text-muted-light">Status</p>
                                         <p>
-                                            <span class="status-badge status-proses">Proses</span>
+                                            <span class="status-badge status-cuti">Cuti</span>
                                         </p>
                                     </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Layanan</p>
-                                        <p class="font-medium">Mobile Development</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Deadline</p>
-                                        <p class="font-medium">20 Des 2023</p>
+                                    <div class="col-span-2">
+                                        <p class="text-text-muted-light">Alamat</p>
+                                        <p class="font-medium">Jl. Sudirman No. 456, Bandung</p>
                                     </div>
                                     <div class="col-span-2">
-                                        <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Mengintegrasikan API payment gateway ke aplikasi mobile</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">File</p>
-                                        <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                            <span class="material-icons-outlined text-sm">download</span>
-                                            Unduh File
-                                        </a>
+                                        <p class="text-text-muted-light">Kontak</p>
+                                        <p class="font-medium">08234567890</p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm tugas-card" 
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card" 
                                  data-id="3" 
-                                 data-judul="Database Optimization" 
-                                 data-layanan="Backend Development" 
-                                 data-karyawan="Budi Santoso" 
-                                 data-deadline="2023-12-10" 
-                                 data-status="selesai">
+                                 data-nama="Budi Santoso" 
+                                 data-jabatan="Marketing Manager" 
+                                 data-divisi="Marketing" 
+                                 data-alamat="Jl. Gatot Subroto No. 789, Surabaya" 
+                                 data-kontak="08345678901" 
+                                 data-status="aktif">
                                 <div class="flex justify-between items-start mb-3">
                                     <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">assignment</span>
+                                        <div class="h-12 w-12 rounded-full overflow-hidden">
+                                            <img src="https://picsum.photos/seed/employee3/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
                                         </div>
                                         <div>
-                                            <h4 class="font-semibold text-base">Database Optimization</h4>
-                                            <p class="text-sm text-text-muted-light">Budi Santoso</p>
+                                            <h4 class="font-semibold text-base">Budi Santoso</h4>
+                                            <p class="text-sm text-text-muted-light">Marketing Manager - Marketing</p>
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
                                         <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
                                                 data-id="3"
-                                                data-judul="Database Optimization"
-                                                data-layanan="Backend Development"
-                                                data-karyawan="Budi Santoso"
-                                                data-deadline="2023-12-10"
-                                                data-status="selesai">
+                                                data-nama="Budi Santoso"
+                                                data-jabatan="Marketing Manager"
+                                                data-divisi="Marketing"
+                                                data-alamat="Jl. Gatot Subroto No. 789, Surabaya"
+                                                data-kontak="08345678901"
+                                                data-status="aktif">
                                             <span class="material-icons-outlined">edit</span>
                                         </button>
                                         <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
@@ -1067,56 +1033,47 @@
                                     <div>
                                         <p class="text-text-muted-light">Status</p>
                                         <p>
-                                            <span class="status-badge status-selesai">Selesai</span>
+                                            <span class="status-badge status-aktif">Aktif</span>
                                         </p>
                                     </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Layanan</p>
-                                        <p class="font-medium">Backend Development</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Deadline</p>
-                                        <p class="font-medium">10 Des 2023</p>
+                                    <div class="col-span-2">
+                                        <p class="text-text-muted-light">Alamat</p>
+                                        <p class="font-medium">Jl. Gatot Subroto No. 789, Surabaya</p>
                                     </div>
                                     <div class="col-span-2">
-                                        <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Optimasi query database untuk meningkatkan performa aplikasi</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">File</p>
-                                        <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                            <span class="material-icons-outlined text-sm">download</span>
-                                            Unduh File
-                                        </a>
+                                        <p class="text-text-muted-light">Kontak</p>
+                                        <p class="font-medium">08345678901</p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm tugas-card" 
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card" 
                                  data-id="4" 
-                                 data-judul="Content Writing" 
-                                 data-layanan="Digital Marketing" 
-                                 data-karyawan="Dewi Lestari" 
-                                 data-deadline="2023-12-18" 
-                                 data-status="pending">
+                                 data-nama="Dewi Lestari" 
+                                 data-jabatan="Finance Manager" 
+                                 data-divisi="Finance" 
+                                 data-alamat="Jl. Thamrin No. 321, Medan" 
+                                 data-kontak="08456789012" 
+                                 data-status="tidak aktif">
                                 <div class="flex justify-between items-start mb-3">
                                     <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">assignment</span>
+                                        <div class="h-12 w-12 rounded-full overflow-hidden">
+                                            <img src="https://picsum.photos/seed/employee4/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
                                         </div>
                                         <div>
-                                            <h4 class="font-semibold text-base">Content Writing</h4>
-                                            <p class="text-sm text-text-muted-light">Dewi Lestari</p>
+                                            <h4 class="font-semibold text-base">Dewi Lestari</h4>
+                                            <p class="text-sm text-text-muted-light">Finance Manager - Finance</p>
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
                                         <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
                                                 data-id="4"
-                                                data-judul="Content Writing"
-                                                data-layanan="Digital Marketing"
-                                                data-karyawan="Dewi Lestari"
-                                                data-deadline="2023-12-18"
-                                                data-status="pending">
+                                                data-nama="Dewi Lestari"
+                                                data-jabatan="Finance Manager"
+                                                data-divisi="Finance"
+                                                data-alamat="Jl. Thamrin No. 321, Medan"
+                                                data-kontak="08456789012"
+                                                data-status="tidak aktif">
                                             <span class="material-icons-outlined">edit</span>
                                         </button>
                                         <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
@@ -1133,27 +1090,16 @@
                                     <div>
                                         <p class="text-text-muted-light">Status</p>
                                         <p>
-                                            <span class="status-badge status-pending">Pending</span>
+                                            <span class="status-badge status-tidak-aktif">Tidak Aktif</span>
                                         </p>
                                     </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Layanan</p>
-                                        <p class="font-medium">Digital Marketing</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Deadline</p>
-                                        <p class="font-medium">18 Des 2023</p>
+                                    <div class="col-span-2">
+                                        <p class="text-text-muted-light">Alamat</p>
+                                        <p class="font-medium">Jl. Thamrin No. 321, Medan</p>
                                     </div>
                                     <div class="col-span-2">
-                                        <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Menulis konten blog dan artikel untuk website perusahaan</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">File</p>
-                                        <a href="#" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                                            <span class="material-icons-outlined text-sm">download</span>
-                                            Unduh File
-                                        </a>
+                                        <p class="text-text-muted-light">Kontak</p>
+                                        <p class="font-medium">08456789012</p>
                                     </div>
                                 </div>
                             </div>
@@ -1180,64 +1126,58 @@
         </div>
     </div>
 
-    <!-- Modal Tambah Tugas -->
-    <div id="tambahTugasModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <!-- Modal Tambah Karyawan -->
+    <div id="tambahKaryawanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Buat Tugas Baru</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Tambah Karyawan Baru</h3>
                     <button id="closeModalBtn" class="text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form action="#" method="POST" id="tambahTugasForm" class="space-y-4">
+                <form action="#" method="POST" id="tambahKaryawanForm" class="space-y-4">
                     @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Judul Tugas</label>
-                            <input type="text" name="judul_tugas" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan judul tugas" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Karyawan</label>
+                            <input type="text" name="nama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama karyawan" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Layanan</label>
-                            <select name="layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih layanan</option>
-                                <option value="Web Development">Web Development</option>
-                                <option value="Mobile Development">Mobile Development</option>
-                                <option value="Backend Development">Backend Development</option>
-                                <option value="Digital Marketing">Digital Marketing</option>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
+                            <input type="text" name="jabatan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan jabatan" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
+                            <select name="divisi" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">Pilih divisi</option>
+                                <option value="IT">IT</option>
+                                <option value="HR">HR</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Finance">Finance</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Karyawan</label>
-                            <select name="karyawan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih karyawan</option>
-                                <option value="Ahmad Rizki">Ahmad Rizki</option>
-                                <option value="Siti Nurhaliza">Siti Nurhaliza</option>
-                                <option value="Budi Santoso">Budi Santoso</option>
-                                <option value="Dewi Lestari">Dewi Lestari</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                            <input type="date" name="deadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kontak</label>
+                            <input type="text" name="kontak" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nomor kontak" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                             <select name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih status</option>
-                                <option value="pending">Pending</option>
-                                <option value="proses">Proses</option>
-                                <option value="selesai">Selesai</option>
+                                <option value="aktif">Aktif</option>
+                                <option value="cuti">Cuti</option>
+                                <option value="tidak aktif">Tidak Aktif</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">File</label>
-                            <input type="file" name="file" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
+                            <input type="file" name="foto" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                         </div>
                     </div>
                     <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi tugas" required></textarea>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+                        <textarea name="alamat" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan alamat karyawan" required></textarea>
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" id="batalTambahBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -1248,66 +1188,60 @@
         </div>
     </div>
 
-    <!-- Modal Edit Tugas -->
-    <div id="editTugasModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <!-- Modal Edit Karyawan -->
+    <div id="editKaryawanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Tugas</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Edit Karyawan</h3>
                     <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form method="POST" action="#" id="editTugasForm" class="space-y-4">
+                <form method="POST" action="#" id="editKaryawanForm" class="space-y-4">
                     @csrf
                     @method('PUT')
                     <input type="hidden" id="editId" name="id">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Judul Tugas</label>
-                            <input type="text" id="editJudulTugas" name="judul_tugas" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan judul tugas" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Karyawan</label>
+                            <input type="text" id="editNama" name="nama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama karyawan" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Layanan</label>
-                            <select id="editLayanan" name="layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih layanan</option>
-                                <option value="Web Development">Web Development</option>
-                                <option value="Mobile Development">Mobile Development</option>
-                                <option value="Backend Development">Backend Development</option>
-                                <option value="Digital Marketing">Digital Marketing</option>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
+                            <input type="text" id="editJabatan" name="jabatan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan jabatan" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
+                            <select id="editDivisi" name="divisi" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">Pilih divisi</option>
+                                <option value="IT">IT</option>
+                                <option value="HR">HR</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Finance">Finance</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Karyawan</label>
-                            <select id="editKaryawan" name="karyawan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih karyawan</option>
-                                <option value="Ahmad Rizki">Ahmad Rizki</option>
-                                <option value="Siti Nurhaliza">Siti Nurhaliza</option>
-                                <option value="Budi Santoso">Budi Santoso</option>
-                                <option value="Dewi Lestari">Dewi Lestari</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                            <input type="date" id="editDeadline" name="deadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kontak</label>
+                            <input type="text" id="editKontak" name="kontak" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nomor kontak" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                             <select id="editStatus" name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih status</option>
-                                <option value="pending">Pending</option>
-                                <option value="proses">Proses</option>
-                                <option value="selesai">Selesai</option>
+                                <option value="aktif">Aktif</option>
+                                <option value="cuti">Cuti</option>
+                                <option value="tidak aktif">Tidak Aktif</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">File</label>
-                            <input type="file" name="file" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
+                            <input type="file" name="foto" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                         </div>
                     </div>
                     <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi tugas" required></textarea>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+                        <textarea id="editAlamat" name="alamat" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan alamat karyawan" required></textarea>
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" id="batalEditBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -1332,7 +1266,7 @@
                     @csrf
                     @method('DELETE')
                     <div class="mb-6">
-                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus tugas ini?</p>
+                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus karyawan ini?</p>
                         <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
                         <input type="hidden" id="deleteId" name="id">
                     </div>
@@ -1366,9 +1300,9 @@
         let activeFilters = ['all'];
         let searchTerm = '';
         
-        // Dapatkan semua elemen tugas
-        const tugasRows = document.querySelectorAll('.tugas-row');
-        const tugasCards = document.querySelectorAll('.tugas-card');
+        // Dapatkan semua elemen karyawan
+        const karyawanRows = document.querySelectorAll('.karyawan-row');
+        const karyawanCards = document.querySelectorAll('.karyawan-card');
         
         // Inisialisasi pagination, filter, dan search
         initializePagination();
@@ -1428,11 +1362,11 @@
         }
         
         function getFilteredRows() {
-            return Array.from(tugasRows).filter(row => !row.classList.contains('hidden-by-filter'));
+            return Array.from(karyawanRows).filter(row => !row.classList.contains('hidden-by-filter'));
         }
         
         function getFilteredCards() {
-            return Array.from(tugasCards).filter(card => !card.classList.contains('hidden-by-filter'));
+            return Array.from(karyawanCards).filter(card => !card.classList.contains('hidden-by-filter'));
         }
         
         function updateVisibleItems() {
@@ -1443,8 +1377,8 @@
             const endIndex = startIndex + itemsPerPage;
             
             // Hide all rows and cards first
-            tugasRows.forEach(row => row.style.display = 'none');
-            tugasCards.forEach(card => card.style.display = 'none');
+            karyawanRows.forEach(row => row.style.display = 'none');
+            karyawanCards.forEach(card => card.style.display = 'none');
             
             // Show only the rows for current page
             visibleRows.forEach((row, index) => {
@@ -1511,36 +1445,36 @@
             // Apply filter
             applyFilterBtn.addEventListener('click', function() {
                 const filterAll = document.getElementById('filterAll');
-                const filterPending = document.getElementById('filterPending');
-                const filterProses = document.getElementById('filterProses');
-                const filterSelesai = document.getElementById('filterSelesai');
+                const filterAktif = document.getElementById('filterAktif');
+                const filterCuti = document.getElementById('filterCuti');
+                const filterTidakAktif = document.getElementById('filterTidakAktif');
                 
                 activeFilters = [];
                 if (filterAll.checked) {
                     activeFilters.push('all');
                 } else {
-                    if (filterPending.checked) activeFilters.push('pending');
-                    if (filterProses.checked) activeFilters.push('proses');
-                    if (filterSelesai.checked) activeFilters.push('selesai');
+                    if (filterAktif.checked) activeFilters.push('aktif');
+                    if (filterCuti.checked) activeFilters.push('cuti');
+                    if (filterTidakAktif.checked) activeFilters.push('tidak aktif');
                 }
                 
                 applyFilters();
                 filterDropdown.classList.remove('show');
                 const visibleCount = getFilteredRows().length;
-                showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} tugas`, 'success');
+                showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} karyawan`, 'success');
             });
             
             // Reset filter
             resetFilterBtn.addEventListener('click', function() {
                 document.getElementById('filterAll').checked = true;
-                document.getElementById('filterPending').checked = false;
-                document.getElementById('filterProses').checked = false;
-                document.getElementById('filterSelesai').checked = false;
+                document.getElementById('filterAktif').checked = false;
+                document.getElementById('filterCuti').checked = false;
+                document.getElementById('filterTidakAktif').checked = false;
                 activeFilters = ['all'];
                 applyFilters();
                 filterDropdown.classList.remove('show');
                 const visibleCount = getFilteredRows().length;
-                showMinimalPopup('Filter Direset', 'Menampilkan semua tugas', 'success');
+                showMinimalPopup('Filter Direset', 'Menampilkan semua karyawan', 'success');
             });
         }
         
@@ -1549,10 +1483,11 @@
             currentPage = 1;
             
             // Apply filters to rows
-            tugasRows.forEach(row => {
+            karyawanRows.forEach(row => {
                 const status = row.getAttribute('data-status').toLowerCase();
-                const judul = row.getAttribute('data-judul').toLowerCase();
-                const karyawan = row.getAttribute('data-karyawan').toLowerCase();
+                const nama = row.getAttribute('data-nama').toLowerCase();
+                const jabatan = row.getAttribute('data-jabatan').toLowerCase();
+                const divisi = row.getAttribute('data-divisi').toLowerCase();
                 
                 // Check if status matches filter
                 let statusMatches = false;
@@ -1566,8 +1501,9 @@
                 let searchMatches = true;
                 if (searchTerm) {
                     const searchLower = searchTerm.toLowerCase();
-                    searchMatches = judul.includes(searchLower) || 
-                                   karyawan.includes(searchLower) ||
+                    searchMatches = nama.includes(searchLower) || 
+                                   jabatan.includes(searchLower) ||
+                                   divisi.includes(searchLower) ||
                                    status.includes(searchLower);
                 }
                 
@@ -1579,10 +1515,11 @@
             });
             
             // Apply same filters to cards
-            tugasCards.forEach(card => {
+            karyawanCards.forEach(card => {
                 const status = card.getAttribute('data-status').toLowerCase();
-                const judul = card.getAttribute('data-judul').toLowerCase();
-                const karyawan = card.getAttribute('data-karyawan').toLowerCase();
+                const nama = card.getAttribute('data-nama').toLowerCase();
+                const jabatan = card.getAttribute('data-jabatan').toLowerCase();
+                const divisi = card.getAttribute('data-divisi').toLowerCase();
                 
                 // Check if status matches filter
                 let statusMatches = false;
@@ -1596,8 +1533,9 @@
                 let searchMatches = true;
                 if (searchTerm) {
                     const searchLower = searchTerm.toLowerCase();
-                    searchMatches = judul.includes(searchLower) || 
-                                   karyawan.includes(searchLower) ||
+                    searchMatches = nama.includes(searchLower) || 
+                                   jabatan.includes(searchLower) ||
+                                   divisi.includes(searchLower) ||
                                    status.includes(searchLower);
                 }
                 
@@ -1675,12 +1613,12 @@
         });
 
         // Modal elements
-        const tambahTugasModal = document.getElementById('tambahTugasModal');
-        const editTugasModal = document.getElementById('editTugasModal');
+        const tambahKaryawanModal = document.getElementById('tambahKaryawanModal');
+        const editKaryawanModal = document.getElementById('editKaryawanModal');
         const deleteModal = document.getElementById('deleteModal');
 
         // Buttons
-        const tambahTugasBtn = document.getElementById('tambahTugasBtn');
+        const tambahKaryawanBtn = document.getElementById('tambahKaryawanBtn');
         const batalTambahBtn = document.getElementById('batalTambahBtn');
         const batalEditBtn = document.getElementById('batalEditBtn');
         const batalDeleteBtn = document.getElementById('batalDeleteBtn');
@@ -1689,34 +1627,34 @@
         const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
 
         // Forms
-        const tambahTugasForm = document.getElementById('tambahTugasForm');
-        const editTugasForm = document.getElementById('editTugasForm');
+        const tambahKaryawanForm = document.getElementById('tambahKaryawanForm');
+        const editKaryawanForm = document.getElementById('editKaryawanForm');
 
         // Open tambah modal
-        tambahTugasBtn.addEventListener('click', () => {
-            tambahTugasModal.classList.remove('hidden');
+        tambahKaryawanBtn.addEventListener('click', () => {
+            tambahKaryawanModal.classList.remove('hidden');
         });
 
         // Close tambah modal
         batalTambahBtn.addEventListener('click', () => {
-            tambahTugasModal.classList.add('hidden');
-            tambahTugasForm.reset();
+            tambahKaryawanModal.classList.add('hidden');
+            tambahKaryawanForm.reset();
         });
 
         closeModalBtn.addEventListener('click', () => {
-            tambahTugasModal.classList.add('hidden');
-            tambahTugasForm.reset();
+            tambahKaryawanModal.classList.add('hidden');
+            tambahKaryawanForm.reset();
         });
 
         // Close edit modal
         batalEditBtn.addEventListener('click', () => {
-            editTugasModal.classList.add('hidden');
-            editTugasForm.reset();
+            editKaryawanModal.classList.add('hidden');
+            editKaryawanForm.reset();
         });
 
         closeEditModalBtn.addEventListener('click', () => {
-            editTugasModal.classList.add('hidden');
-            editTugasForm.reset();
+            editKaryawanModal.classList.add('hidden');
+            editKaryawanForm.reset();
         });
 
         // Close delete modal
@@ -1735,16 +1673,17 @@
             button.addEventListener('click', () => {
                 // SET VALUE
                 document.getElementById('editId').value = button.dataset.id;
-                document.getElementById('editJudulTugas').value = button.dataset.judul;
-                document.getElementById('editLayanan').value = button.dataset.layanan;
-                document.getElementById('editKaryawan').value = button.dataset.karyawan;
-                document.getElementById('editDeadline').value = button.dataset.deadline;
+                document.getElementById('editNama').value = button.dataset.nama;
+                document.getElementById('editJabatan').value = button.dataset.jabatan;
+                document.getElementById('editDivisi').value = button.dataset.divisi;
+                document.getElementById('editAlamat').value = button.dataset.alamat;
+                document.getElementById('editKontak').value = button.dataset.kontak;
                 document.getElementById('editStatus').value = button.dataset.status;
 
                 // SET ACTION URL DINAMIS
-                editTugasForm.action = `/tugas/${button.dataset.id}`;
+                editKaryawanForm.action = `/manager_divisi/karyawan/${button.dataset.id}`;
 
-                editTugasModal.classList.remove('hidden');
+                editKaryawanModal.classList.remove('hidden');
             });
         });
 
@@ -1756,7 +1695,7 @@
                 const id = button.dataset.id;
 
                 // Set action form delete
-                document.getElementById('deleteForm').action = `/tugas/${id}`;
+                document.getElementById('deleteForm').action = `/manager_divisi/karyawan/${id}`;
                 document.getElementById('deleteId').value = id;
 
                 // Tampilkan modal
@@ -1768,12 +1707,12 @@
         // SUBMIT FORM EDIT
         // (untuk Laravel biarkan form submit saja)
         // ============================
-        editTugasForm.addEventListener('submit', (e) => {
+        editKaryawanForm.addEventListener('submit', (e) => {
             // Jangan prevent kalau mau kirim ke backend
             // e.preventDefault();
-            // editTugasForm.submit();  // opsional
+            // editKaryawanForm.submit();  // opsional
 
-            editTugasModal.classList.add('hidden');
+            editKaryawanModal.classList.add('hidden');
         });
 
         // ============================
@@ -1786,8 +1725,8 @@
         // ============================
         // SUBMIT FORM TAMBAH
         // ============================
-        tambahTugasForm.addEventListener('submit', (e) => {
-            tambahTugasModal.classList.add('hidden');
+        tambahKaryawanForm.addEventListener('submit', (e) => {
+            tambahKaryawanModal.classList.add('hidden');
         });
     </script>
 </body>
