@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -210,6 +209,30 @@
             padding: 2rem;
         }
 
+        .calendar-animate {
+    transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.calendar-slide-left {
+    transform: translateX(-20px);
+    opacity: 0;
+}
+
+.calendar-slide-right {
+    transform: translateX(20px);
+    opacity: 0;
+}
+
+.event-animate {
+    transition: all 0.3s ease;
+}
+
+.event-hidden {
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+
         /* Mobile responsive */
         @media (max-width: 768px) {
             .app-container {
@@ -391,6 +414,7 @@
             .stat-card .card-content {
                 flex: 1;
             }
+
         }
     </style>
 </head>
@@ -413,7 +437,8 @@
                         </div>
                         <div class="card-content">
                             <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah Karyawan</p>
-                            <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">{{$jumlahKaryawan}}</p>
+                            <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">
+                                {{ $jumlahKaryawan }}</p>
                         </div>
                     </div>
                     <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card">
@@ -422,7 +447,8 @@
                         </div>
                         <div class="card-content">
                             <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah User</p>
-                            <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">{{$jumlahUser}}</p>
+                            <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">
+                                {{ $jumlahUser }}</p>
                         </div>
                     </div>
                     <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card">
@@ -431,7 +457,8 @@
                         </div>
                         <div class="card-content">
                             <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah Layanan</p>
-                            <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">{{$jumlahLayanan}}</p>
+                            <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">
+                                {{ $jumlahLayanan }}</p>
                         </div>
                     </div>
                     <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card">
@@ -444,47 +471,37 @@
                         </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="panel">
-                        <div class="panel-header">
-                            <h3 class="panel-title">
-                                <span class="material-symbols-rounded text-primary">calendar_month</span>
-                                September 2025
-                            </h3>
-                        </div>
-                        <div class="panel-body">
-                            <div class="w-full mb-6">
-                                <div class="flex justify-between mb-4">
-                                    <div class="flex flex-col items-center space-y-2 calendar-date">
-                                        <span class="text-xs text-gray-500 font-medium calendar-date-text">Jan</span>
-                                        <span class="text-sm font-bold text-gray-800 calendar-date-number">12</span>
-                                    </div>
-                                    <div class="flex flex-col items-center space-y-2 calendar-date">
-                                        <span class="text-xs text-gray-500 font-medium calendar-date-text">Jan</span>
-                                        <span class="text-sm font-bold text-gray-800 calendar-date-number">13</span>
-                                    </div>
-                                    <div
-                                        class="flex flex-col items-center space-y-2 p-2 -mx-2 bg-primary rounded-xl shadow-lg transform scale-110 calendar-date">
-                                        <span class="text-xs text-white/80 font-medium calendar-date-text">Jan</span>
-                                        <span class="text-sm font-bold text-white calendar-date-number">14</span>
-                                    </div>
-                                    <div class="flex flex-col items-center space-y-2 calendar-date">
-                                        <span class="text-xs text-gray-500 font-medium calendar-date-text">Jan</span>
-                                        <span class="text-sm font-bold text-gray-800 calendar-date-number">15</span>
-                                    </div>
-                                    <div class="flex flex-col items-center space-y-2 calendar-date">
-                                        <span class="text-xs text-gray-500 font-medium calendar-date-text">Jan</span>
-                                        <span class="text-sm font-bold text-gray-800 calendar-date-number">16</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div
-                                class="w-full h-12 md:h-16 border-2 border-gray-200 border-dashed rounded-xl flex items-center justify-center text-gray-500 text-xs md:text-sm">
-                                No events today
-                            </div>
-                        </div>
-                    </div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="panel">
+        <div class="panel-header">
+            <div class="flex gap-2">
+    <button onclick="prevDate()">‹</button>
+    <button onclick="nextDate()">›</button>
+</div>
+
+<h3 class="panel-title" id="calendarTitle">
+    <span class="material-symbols-rounded text-primary">calendar_month</span>
+    <!-- diisi JS -->
+</h3>
+        </div>
+
+        <div class="panel-body">
+            <div class="w-full mb-6">
+                <div id="calendarDates"
+                     class="flex justify-between mb-4 calendar-animate">
                 </div>
+            </div>
+
+            <div id="calendarEvent"
+                 class="event-animate w-full h-12 md:h-16 border-2 border-gray-200 border-dashed
+                        rounded-xl flex items-center justify-center text-gray-500 text-xs md:text-sm">
+                Pilih tanggal
+            </div>
+        </div>
+    </div>
+</div>
+
 
                 <!-- Tab Navigation for Meeting Notes and Announcements -->
                 <div class="tab-nav">
@@ -507,16 +524,6 @@
                             <span class="material-symbols-rounded text-primary">description</span>
                             Catatan Meeting
                         </h3>
-                        <div class="flex space-x-2">
-                            <button
-                                class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-                                <span class="material-symbols-rounded text-lg">history</span>
-                            </button>
-                            <button
-                                class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-                                <span class="material-symbols-rounded text-lg">arrow_outward</span>
-                            </button>
-                        </div>
                     </div>
                     <div class="panel-body">
                         <div class="overflow-x-auto">
@@ -532,49 +539,48 @@
                                         <th class="text-center">Penugasan</th>
                                     </tr>
                                 </thead>
-<tbody>
-@if($catatanRapat->count() > 0)
-    @foreach($catatanRapat as $rapat)
-        <tr>
-            <td class="font-medium">{{ $loop->iteration }}</td>
+                                <tbody>
+                                    @if ($catatanRapat->count() > 0)
+                                        @foreach ($catatanRapat as $rapat)
+                                            <tr>
+                                                <td class="font-medium">{{ $loop->iteration }}</td>
 
-            <td>
-                {{ \Carbon\Carbon::parse($rapat->tanggal)->translatedFormat('d F Y') }}
-            </td>
+                                                <td>
+                                                    {{ \Carbon\Carbon::parse($rapat->tanggal)->translatedFormat('d F Y') }}
+                                                </td>
 
-<td class="text-center">
-    @foreach($rapat->peserta as $user)
-        <span class="block">{{ $user->name }}</span>
-    @endforeach
-</td>
+                                                <td class="text-center">
+                                                    @foreach ($rapat->peserta as $user)
+                                                        <span class="block">{{ $user->name }}</span>
+                                                    @endforeach
+                                                </td>
 
-            <td class="text-center">{{ $rapat->topik }}</td>
+                                                <td class="text-center">{{ $rapat->topik }}</td>
 
-            <td class="text-center">
-                {{ Str::limit($rapat->hasil_diskusi, 30) }}
-            </td>
+                                                <td class="text-center">
+                                                    {{ Str::limit($rapat->hasil_diskusi, 30) }}
+                                                </td>
 
-            <td class="text-center">
-                {{ Str::limit($rapat->keputusan, 30) }}
-            </td>
+                                                <td class="text-center">
+                                                    {{ Str::limit($rapat->keputusan, 30) }}
+                                                </td>
 
-<td class="text-center">
-    @foreach($rapat->penugasan as $user)
-        <span class="block">{{ $user->name }}</span>
-    @endforeach
-</td>
+                                                <td class="text-center">
+                                                    @foreach ($rapat->penugasan as $user)
+                                                        <span class="block">{{ $user->name }}</span>
+                                                    @endforeach
+                                                </td>
 
-        </tr>
-    @endforeach
-@else
-    <tr>
-        <td colspan="7" class="text-center py-6 text-gray-500">
-            Belum ada catatan meeting
-        </td>
-    </tr>
-@endif
-</tbody>
-
+                                            </tr>
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="7" class="text-center py-6 text-gray-500">
+                                                Belum ada catatan meeting
+                                            </td>
+                                        </tr>
+                                    @endif
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -587,10 +593,6 @@
                             <span class="material-symbols-rounded text-primary">campaign</span>
                             Pengumuman Terbaru
                         </h3>
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm text-gray-500">Total: <span
-                                    class="font-semibold text-gray-800">0</span> data</span>
-                        </div>
                     </div>
                     <div class="panel-body">
                         <div class="overflow-x-auto min-h-[100px]">
@@ -604,55 +606,54 @@
                                         <th class="text-center">Lampiran</th>
                                     </tr>
                                 </thead>
-<tbody>
-@if($pengumumanTerbaru->count() > 0)
-    @foreach($pengumumanTerbaru as $item)
-        <tr>
-            <td class="font-medium">
-                {{ $loop->iteration }}
-            </td>
-            <td class="font-medium">
-                {{ $item->judul }}
-            </td>
+                                <tbody>
+                                    @if ($pengumumanTerbaru->count() > 0)
+                                        @foreach ($pengumumanTerbaru as $item)
+                                            <tr>
+                                                <td class="font-medium">
+                                                    {{ $loop->iteration }}
+                                                </td>
+                                                <td class="font-medium">
+                                                    {{ $item->judul }}
+                                                </td>
 
-            
-            <td>
-                {{ \Illuminate\Support\Str::limit($item->isi_pesan, 50) }}
-            </td>
-<td>
-    @if($item->kepada === 'specific')
-        @foreach($item->users as $user)
-            <span class="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
-                {{ $user->name }}
-            </span>
-        @endforeach
-    @else
-        {{ ucfirst($item->kepada) }}
-    @endif
-</td>
 
-            <td class="text-center">
-                @if($item->lampiran)
-                    <a href="{{ asset('storage/'.$item->lampiran) }}"
-                       class="text-blue-600 hover:underline"
-                       target="_blank">
-                        Lihat
-                    </a>
-                @else
-                    -
-                @endif
-            </td>
-        </tr>
-    @endforeach
-@else
-    <tr>
-        <td colspan="5" class="text-center py-8 text-gray-500">
-            Tidak ada pengumuman terbaru
-        </td>
-    </tr>
-@endif
-</tbody>
+                                                <td>
+                                                    {{ \Illuminate\Support\Str::limit($item->isi_pesan, 50) }}
+                                                </td>
+                                                <td>
+                                                    @if ($item->kepada === 'specific')
+                                                        @foreach ($item->users as $user)
+                                                            <span
+                                                                class="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                                                                {{ $user->name }}
+                                                            </span>
+                                                        @endforeach
+                                                    @else
+                                                        {{ ucfirst($item->kepada) }}
+                                                    @endif
+                                                </td>
 
+                                                <td class="text-center">
+                                                    @if ($item->lampiran)
+                                                        <a href="{{ asset('storage/' . $item->lampiran) }}"
+                                                            class="text-blue-600 hover:underline" target="_blank">
+                                                            Lihat
+                                                        </a>
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="5" class="text-center py-8 text-gray-500">
+                                                Tidak ada pengumuman terbaru
+                                            </td>
+                                        </tr>
+                                    @endif
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -664,6 +665,8 @@
         </main>
     </div>
     <script>
+        let offset = 0;
+
         // Simple dark mode toggle logic for demonstration (optional)
         // Check system preference on load
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -693,6 +696,113 @@
                 announcementTab.classList.add('active');
             }
         }
+
+        const events = @json($events);
+        const today = "{{ $today->format('Y-m-d') }}";
+        const calendarContainer = document.getElementById('calendarDates');
+        const eventBox = document.getElementById('calendarEvent');
+
+        const baseDate = new Date(); // hari ini
+        const daysToShow = 5;
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+function renderCalendar(direction = 'right') {
+    updateCalendarTitle(); // ⬅️ tambahkan ini
+    // trigger animasi keluar
+    calendarContainer.classList.add(
+        direction === 'right' ? 'calendar-slide-right' : 'calendar-slide-left'
+    );
+
+    setTimeout(() => {
+        calendarContainer.innerHTML = '';
+
+        for (let i = -2; i <= 2; i++) {
+            const d = new Date(baseDate);
+            d.setDate(baseDate.getDate() + offset + i);
+
+            const dateStr = formatDate(d);
+            const isToday = dateStr === today;
+
+            const div = document.createElement('div');
+            div.className = `
+                flex flex-col items-center space-y-2 calendar-date cursor-pointer
+                ${isToday ? 'bg-primary text-white p-2 rounded-xl scale-110 shadow-lg' : ''}
+            `;
+
+            div.innerHTML = `
+                <span class="text-xs ${isToday ? 'text-white/80' : 'text-gray-500'}">
+                    ${d.toLocaleString('id-ID', { month: 'short' })}
+                </span>
+                <span class="text-sm font-bold">${d.getDate()}</span>
+            `;
+
+            if (events[dateStr]) {
+                div.innerHTML += `<span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>`;
+            }
+
+            div.onclick = () => showEvents(dateStr);
+            calendarContainer.appendChild(div);
+        }
+
+        // slide masuk
+        calendarContainer.classList.remove(
+            'calendar-slide-left',
+            'calendar-slide-right'
+        );
+    }, 200);
+}
+
+
+function showEvents(date) {
+    eventBox.classList.add('event-hidden');
+
+    setTimeout(() => {
+        if (events[date]) {
+            eventBox.innerHTML = events[date]
+                .map(e => `• ${e.keputusan}`)
+                .join('<br>');
+            eventBox.classList.remove('text-gray-500');
+        } else {
+            eventBox.innerHTML = 'Tidak ada keputusan pada tanggal ini';
+            eventBox.classList.add('text-gray-500');
+        }
+
+        eventBox.classList.remove('event-hidden');
+    }, 200);
+}
+
+function nextDate() {
+    offset++;
+    renderCalendar('right');
+}
+
+function prevDate() {
+    offset--;
+    renderCalendar('left');
+}
+
+const calendarTitle = document.getElementById('calendarTitle');
+
+function updateCalendarTitle() {
+    const d = new Date(baseDate);
+    d.setDate(baseDate.getDate() + offset);
+
+    const monthYear = d.toLocaleDateString('id-ID', {
+        month: 'long',
+        year: 'numeric'
+    });
+
+    calendarTitle.innerHTML = `
+        <span class="material-symbols-rounded text-primary">calendar_month</span>
+        ${monthYear}
+    `;
+}
+
+        renderCalendar();
+        showEvents(today);
     </script>
 
 </body>
