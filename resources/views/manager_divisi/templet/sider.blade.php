@@ -3,11 +3,11 @@
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Brand</h1>
     </div>
     <nav class="flex-1 px-4 py-6 space-y-2">
-        <a class="flex items-center px-4 py-2.5 rounded-lg transition-all duration-300 {{ request()->is('/manager_divisi/home') ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" href="/manager-divisi/home">
+        <a class="flex items-center px-4 py-2.5 rounded-lg transition-all duration-300 {{ request()->is('/manager_divisi/home') ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" href="/manager_divisi/home">
             <span class="material-symbols-outlined mr-3">home</span>
             <span class="font-semibold">Beranda</span>
         </a>
-        <a class="flex items-center px-4 py-2.5 rounded-lg transition-all duration-300 {{ request()->is('/manager_divisi/pengelola_tugas') ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" href="/manager-divisi/pengelola-tugas">
+        <a class="flex items-center px-4 py-2.5 rounded-lg transition-all duration-300 {{ request()->is('/manager_divisi/pengelola_tugas') ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" href="/manager_divisi/pengelola_tugas">
             <span class="material-symbols-outlined mr-3">assignment</span>
             <span class="font-medium">Kelola Tugas</span>
         </a>

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class GeneralManagerTaskController extends Controller
 {
@@ -38,11 +39,9 @@ class GeneralManagerTaskController extends Controller
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'prioritas' => 'required|in:tinggi,normal,rendah',
             'deadline' => 'required|date',
             'status' => 'sometimes|in:pending,proses,selesai,dibatalkan',
             'target_type' => 'required|in:karyawan,divisi,manager',
-            'kategori' => 'nullable|string|max:100',
             'catatan' => 'nullable|string',
         ]);
         
@@ -100,6 +99,51 @@ class GeneralManagerTaskController extends Controller
         ]);
     }
     
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'judul' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
+            'deadline' => 'required|date',
+            'status' => 'required|in:pending,proses,selesai,dibatalkan',
+            'target_type' => 'required|in:karyawan,divisi,manager',
+            'catatan' => 'nullable|string',
+        ]);
+        
+        $task = Task::findOrFail($id);
+        $user = Auth::user();
+        
+        // Check if user is authorized to edit
+        if ($task->created_by != $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki izin untuk mengedit tugas ini'
+            ], 403);
+        }
+        
+        // Handle different target types
+        if ($request->target_type === 'karyawan' && $request->filled('assigned_to')) {
+            $validated['assigned_to'] = $request->assigned_to;
+        } elseif ($request->target_type === 'divisi' && $request->filled('target_divisi')) {
+            $validated['target_divisi'] = $request->target_divisi;
+            $validated['is_broadcast'] = true;
+        } elseif ($request->target_type === 'manager' && $request->filled('target_manager_id')) {
+            $validated['target_manager_id'] = $request->target_manager_id;
+        }
+        
+        // Set completed_at if status is 'selesai'
+        if ($request->status === 'selesai') {
+            $validated['completed_at'] = now();
+        }
+        
+        $task->update($validated);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Tugas berhasil diperbarui'
+        ]);
+    }
+    
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
@@ -128,6 +172,28 @@ class GeneralManagerTaskController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Status tugas berhasil diupdate'
+        ]);
+    }
+    
+    public function destroy($id)
+    
+    {
+        $task = Task::findOrFail($id);
+        $user = Auth::user();
+        
+        // Check if user is authorized to delete
+        if ($task->created_by != $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki izin untuk menghapus tugas ini'
+            ], 403);
+        }
+        
+        $task->delete();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Tugas berhasil dihapus'
         ]);
     }
     
