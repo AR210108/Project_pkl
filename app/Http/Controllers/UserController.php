@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash; // <-- TAMBAHAN penting
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class UserController extends Controller
 {
@@ -12,6 +13,14 @@ class UserController extends Controller
     {
         $users = User::all();
         return view('admin.user', compact('users'));
+    }
+
+    public function data(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => User::select('id', 'name')->orderBy('name')->get()
+        ]);
     }
 
     public function store(Request $r)

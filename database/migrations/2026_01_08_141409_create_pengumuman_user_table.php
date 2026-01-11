@@ -11,14 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pengumuman', function (Blueprint $table) {
-            $table->id();
-            $table->string('judul');
-            $table->text('isi_pesan');
-            $table->string('kepada');
-            $table->string('lampiran')->nullable();
-            $table->timestamps();
-        });
+Schema::create('pengumuman_user', function (Blueprint $table) {
+    $table->id();
+
+    $table->foreignId('pengumuman_id')
+        ->constrained('pengumuman')
+        ->cascadeOnDelete();
+
+    $table->foreignId('user_id')
+        ->constrained('users')
+        ->cascadeOnDelete();
+});
+
+
     }
 
     /**
@@ -26,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pengumuman');
+        Schema::dropIfExists('pengumuman_user');
     }
 };

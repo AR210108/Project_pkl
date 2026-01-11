@@ -678,26 +678,6 @@
                         <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama atau email..." type="text" />
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                        <div class="relative">
-                            <button id="filterBtn" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
-                                <span class="material-icons-outlined text-sm">filter_list</span>
-                                Filter
-                            </button>
-                            <div id="filterDropdown" class="filter-dropdown">
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterAdmin" value="admin" checked>
-                                    <label for="filterAdmin">Admin</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterKaryawan" value="karyawan" checked>
-                                    <label for="filterKaryawan">Karyawan</label>
-                                </div>
-                                <div class="filter-actions">
-                                    <button id="applyFilter" class="filter-apply">Terapkan</button>
-                                    <button id="resetFilter" class="filter-reset">Reset</button>
-                                </div>
-                            </div>
-                        </div>
                         <button id="tambahUserBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
                             <span class="material-icons-outlined">add</span>
                             <span class="hidden sm:inline">Tambah User</span>
@@ -854,7 +834,6 @@
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
                         <select name="role" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                            <option value="admin">Admin</option>
                             <option value="karyawan">Karyawan</option>
                         </select>
                     </div>
@@ -971,7 +950,6 @@
             
             // Inisialisasi pagination, filter, dan search
             initializePagination();
-            initializeFilter();
             initializeSearch();
             initializeScrollDetection();
             

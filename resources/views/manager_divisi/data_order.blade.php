@@ -1,15 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Data Layanan</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Orderan</title>
+    
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+
+    <!-- Fonts & Icons -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    />
+    <link
+        href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
+        rel="stylesheet"
+    />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -35,6 +46,7 @@
                     },
                     fontFamily: {
                         display: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
                     },
                     borderRadius: {
                         DEFAULT: "0.75rem",
@@ -47,17 +59,10 @@
             },
         };
     </script>
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings:
-                'FILL' 1,
-                'wght' 400,
-                'GRAD' 0,
-                'opsz' 24
-        }
 
+    <style>
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: "Inter", sans-serif;
         }
         
         .material-icons-outlined {
@@ -414,7 +419,7 @@
         
         .data-table {
             width: 100%;
-            min-width: 100px;
+            min-width: 1200px;
             border-collapse: collapse;
         }
         
@@ -619,25 +624,23 @@
             display: none !important;
         }
     </style>
-    <!-- Add CSRF token meta tag -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="font-display bg-background-light text-text-light">
     <div class="flex min-h-screen">
         <!-- Menggunakan template header -->
-        @include('admin/templet/sider')
+        @include('manager_divisi/templet/sider')
         <div class="flex-1 flex flex-col main-content">
             <div class="flex-1 p-3 sm:p-8">
                 <header class="mb-4 sm:mb-8">
-                    <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">Data Layanan</h1>
+                    <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">Data Orderan</h1>
                 </header>
                 
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
                         <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama layanan atau deskripsi..." type="text" />
+                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama orderan atau deskripsi..." type="text" />
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <div class="relative">
@@ -668,9 +671,9 @@
                                 </div>
                             </div>
                         </div>
-                        <button id="tambahLayananBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
+                        <button id="tambahOrderanBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
                             <span class="material-icons-outlined">add</span>
-                            <span class="hidden sm:inline">Tambah Layanan</span>
+                            <span class="hidden sm:inline">Tambah Orderan</span>
                             <span class="sm:hidden">Tambah</span>
                         </button>
                     </div>
@@ -680,11 +683,11 @@
                 <div class="panel">
                     <div class="panel-header">
                         <h3 class="panel-title">
-                            <span class="material-icons-outlined text-primary">miscellaneous_services</span>
-                            Data Layanan
+                            <span class="material-icons-outlined text-primary">shopping_cart</span>
+                            Data Orderan
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">{{ count($layanans) }}</span> layanan</span>
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">2</span> orderan</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -694,51 +697,101 @@
                                 <table class="data-table">
                                     <thead>
                                         <tr>
-                                            <th style="min-width: 50px;">No</th>
-                                            <th style="min-width: 80px;">Nama Layanan</th>
-                                            <th style="min-width: 80px;">Deskripsi</th>
-                                            <th style="min-width: 70px;">Harga</th>
-                                            <th style="min-width: 10px; ">Aksi</th>
+                                            <th style="min-width: 60px;">No</th>
+                                            <th style="min-width: 200px;">Nama Orderan</th>
+                                            <th style="min-width: 250px;">Deskripsi</th>
+                                            <th style="min-width: 150px;">Harga</th>
+                                            <th style="min-width: 150px;">Deadline</th>
+                                            <th style="min-width: 150px;">Progres</th>
+                                            <th style="min-width: 150px;">Status</th>
+                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="desktopTableBody">
-                                        @if(isset($layanans) && count($layanans) > 0)
-                                            @php $no = 1; @endphp
-                                            @foreach($layanans as $layanan)
-                                                <tr class="layanan-row" 
-                                                    data-id="{{ $layanan->id }}" 
-                                                    data-nama="{{ $layanan->nama_layanan }}" 
-                                                    data-deskripsi="{{ $layanan->deskripsi }}" 
-                                                    data-harga="{{ $layanan->harga }}" 
-                                                    data-status="{{ $layanan->status }}">
-                                                    <td style="min-width: 60px;">{{ $no++ }}</td>
-                                                    <td style="min-width: 200px;">{{ $layanan->nama_layanan }}</td>
-                                                    <td style="min-width: 250px;">{{ $layanan->deskripsi }}</td>
-                                                    <td style="min-width: 150px;">Rp. {{ number_format($layanan->harga, 0, ',', '.') }}</td>
-                                                    <td style="min-width: 100px; text-align: center;">
-                                                        <div class="flex justify-center gap-2">
-                                                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                                    data-id="{{ $layanan->id }}"
-                                                                    data-nama="{{ $layanan->nama_layanan }}"
-                                                                    data-deskripsi="{{ $layanan->deskripsi }}"
-                                                                    data-harga="{{ $layanan->harga }}">
-                                                                <span class="material-icons-outlined">edit</span>
-                                                            </button>
-                                                            <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                                    data-id="{{ $layanan->id }}">
-                                                                <span class="material-icons-outlined">delete</span>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        @else
-                                            <tr>
-                                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                                                    Tidak ada data layanan
-                                                </td>
-                                            </tr>
-                                        @endif
+                                        <tr class="orderan-row" 
+                                            data-id="1" 
+                                            data-nama="Website Company Profile" 
+                                            data-deskripsi="Pembuatan web profil perusahaan..." 
+                                            data-harga="5000000" 
+                                            data-deadline="12 Okt 2025"
+                                            data-progres="75"
+                                            data-status="selesai">
+                                            <td style="min-width: 60px;">1</td>
+                                            <td style="min-width: 200px;">Website Company Profile</td>
+                                            <td style="min-width: 250px;">Pembuatan web profil perusahaan...</td>
+                                            <td style="min-width: 150px;">Rp 5.000.000</td>
+                                            <td style="min-width: 150px;">12 Okt 2025</td>
+                                            <td style="min-width: 150px;">
+                                                <div class="w-full bg-gray-400 rounded-full h-2 dark:bg-gray-600">
+                                                    <div class="bg-primary h-2 rounded-full" style="width: 75%"></div>
+                                                </div>
+                                            </td>
+                                            <td style="min-width: 150px;">
+                                                <span class="status-badge status-selesai">
+                                                    Selesai
+                                                </span>
+                                            </td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
+                                                            data-id="1"
+                                                            data-nama="Website Company Profile"
+                                                            data-deskripsi="Pembuatan web profil perusahaan..."
+                                                            data-harga="5000000"
+                                                            data-deadline="12 Okt 2025"
+                                                            data-progres="75"
+                                                            data-status="selesai">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
+                                                            data-id="1">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="orderan-row" 
+                                            data-id="2" 
+                                            data-nama="Aplikasi Kasir Android" 
+                                            data-deskripsi="Aplikasi POS untuk retail..." 
+                                            data-harga="12000000" 
+                                            data-deadline="20 Nov 2025"
+                                            data-progres="30"
+                                            data-status="proses">
+                                            <td style="min-width: 60px;">2</td>
+                                            <td style="min-width: 200px;">Aplikasi Kasir Android</td>
+                                            <td style="min-width: 250px;">Aplikasi POS untuk retail...</td>
+                                            <td style="min-width: 150px;">Rp 12.000.000</td>
+                                            <td style="min-width: 150px;">20 Nov 2025</td>
+                                            <td style="min-width: 150px;">
+                                                <div class="w-full bg-gray-400 rounded-full h-2 dark:bg-gray-600">
+                                                    <div class="bg-primary h-2 rounded-full" style="width: 30%"></div>
+                                                </div>
+                                            </td>
+                                            <td style="min-width: 150px;">
+                                                <span class="status-badge status-proses">
+                                                    Proses
+                                                </span>
+                                            </td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
+                                                            data-id="2"
+                                                            data-nama="Aplikasi Kasir Android"
+                                                            data-deskripsi="Aplikasi POS untuk retail..."
+                                                            data-harga="12000000"
+                                                            data-deadline="20 Nov 2025"
+                                                            data-progres="30"
+                                                            data-status="proses">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
+                                                            data-id="2">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -746,69 +799,135 @@
                         
                         <!-- Mobile Card View -->
                         <div class="mobile-cards space-y-4" id="mobile-cards">
-                            @if(isset($layanans) && count($layanans) > 0)
-                                @php $no = 1; @endphp
-                                @foreach($layanans as $layanan)
-                                    <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" 
-                                         data-id="{{ $layanan->id }}" 
-                                         data-nama="{{ $layanan->nama_layanan }}" 
-                                         data-deskripsi="{{ $layanan->deskripsi }}" 
-                                         data-harga="{{ $layanan->harga }}" 
-                                         data-status="{{ $layanan->status }}">
-                                        <div class="flex justify-between items-start mb-3">
-                                            <div class="flex items-center gap-3">
-                                                <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                                    <span class="material-icons-outlined text-primary">miscellaneous_services</span>
-                                                </div>
-                                                <div>
-                                                    <h4 class="font-semibold text-base">{{ $layanan->nama_layanan }}</h4>
-                                                    <p class="text-sm text-text-muted-light">Rp. {{ number_format($layanan->harga, 0, ',', '.') }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="flex gap-2">
-                                                <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                        data-id="{{ $layanan->id }}"
-                                                        data-nama="{{ $layanan->nama_layanan }}"
-                                                        data-deskripsi="{{ $layanan->deskripsi }}"
-                                                        data-harga="{{ $layanan->harga }}"
-                                                        data-status="{{ $layanan->status }}">
-                                                    <span class="material-icons-outlined">edit</span>
-                                                </button>
-                                                <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                        data-id="{{ $layanan->id }}">
-                                                    <span class="material-icons-outlined">delete</span>
-                                                </button>
-                                            </div>
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm orderan-card" 
+                                 data-id="1" 
+                                 data-nama="Website Company Profile" 
+                                 data-deskripsi="Pembuatan web profil perusahaan..." 
+                                 data-harga="5000000" 
+                                 data-deadline="12 Okt 2025"
+                                 data-progres="75"
+                                 data-status="selesai">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <span class="material-icons-outlined text-primary">shopping_cart</span>
                                         </div>
-                                        <div class="grid grid-cols-2 gap-2 text-sm">
-                                            <div>
-                                                <p class="text-text-muted-light">No</p>
-                                                <p class="font-medium">{{ $no++ }}</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-text-muted-light">Status</p>
-                                                <p>
-                                                    <span class="status-badge 
-                                                            @if(strtolower($layanan->status) == 'pending') status-pending
-                                                            @elseif(strtolower($layanan->status) == 'proses') status-proses
-                                                            @else status-selesai @endif">
-                                                            {{ $layanan->status }}
-                                                    </span>
-                                                </p>
-                                            </div>
-                                            <div class="col-span-2">
-                                                <p class="text-text-muted-light">Deskripsi</p>
-                                                <p class="font-medium">{{ $layanan->deskripsi }}</p>
-                                            </div>
+                                        <div>
+                                            <h4 class="font-semibold text-base">Website Company Profile</h4>
+                                            <p class="text-sm text-text-muted-light">Rp 5.000.000</p>
                                         </div>
                                     </div>
-                                @endforeach
-                            @else
-                                <div class="bg-white rounded-lg border border-border-light p-8 text-center">
-                                    <span class="material-icons-outlined text-4xl text-gray-300 mb-2">miscellaneous_services</span>
-                                    <p class="text-gray-500">Tidak ada data layanan</p>
+                                    <div class="flex gap-2">
+                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
+                                                data-id="1"
+                                                data-nama="Website Company Profile"
+                                                data-deskripsi="Pembuatan web profil perusahaan..."
+                                                data-harga="5000000"
+                                                data-deadline="12 Okt 2025"
+                                                data-progres="75"
+                                                data-status="selesai">
+                                            <span class="material-icons-outlined">edit</span>
+                                        </button>
+                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
+                                                data-id="1">
+                                            <span class="material-icons-outlined">delete</span>
+                                        </button>
+                                    </div>
                                 </div>
-                            @endif
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>
+                                        <p class="text-text-muted-light">No</p>
+                                        <p class="font-medium">1</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Status</p>
+                                        <p>
+                                            <span class="status-badge status-selesai">
+                                                Selesai
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Deadline</p>
+                                        <p class="font-medium">12 Okt 2025</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Progres</p>
+                                        <div class="w-full bg-gray-400 rounded-full h-2 dark:bg-gray-600 mt-2">
+                                            <div class="bg-primary h-2 rounded-full" style="width: 75%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-text-muted-light">Deskripsi</p>
+                                        <p class="font-medium">Pembuatan web profil perusahaan...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm orderan-card" 
+                                 data-id="2" 
+                                 data-nama="Aplikasi Kasir Android" 
+                                 data-deskripsi="Aplikasi POS untuk retail..." 
+                                 data-harga="12000000" 
+                                 data-deadline="20 Nov 2025"
+                                 data-progres="30"
+                                 data-status="proses">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <span class="material-icons-outlined text-primary">shopping_cart</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-base">Aplikasi Kasir Android</h4>
+                                            <p class="text-sm text-text-muted-light">Rp 12.000.000</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
+                                                data-id="2"
+                                                data-nama="Aplikasi Kasir Android"
+                                                data-deskripsi="Aplikasi POS untuk retail..."
+                                                data-harga="12000000"
+                                                data-deadline="20 Nov 2025"
+                                                data-progres="30"
+                                                data-status="proses">
+                                            <span class="material-icons-outlined">edit</span>
+                                        </button>
+                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
+                                                data-id="2">
+                                            <span class="material-icons-outlined">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>
+                                        <p class="text-text-muted-light">No</p>
+                                        <p class="font-medium">2</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Status</p>
+                                        <p>
+                                            <span class="status-badge status-proses">
+                                                Proses
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Deadline</p>
+                                        <p class="font-medium">20 Nov 2025</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Progres</p>
+                                        <div class="w-full bg-gray-400 rounded-full h-2 dark:bg-gray-600 mt-2">
+                                            <div class="bg-primary h-2 rounded-full" style="width: 30%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-text-muted-light">Deskripsi</p>
+                                        <p class="font-medium">Aplikasi POS untuk retail...</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- Pagination -->
@@ -817,9 +936,9 @@
                                 <span class="material-icons-outlined text-sm">chevron_left</span>
                             </button>
                             <div id="pageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
+                                <button class="desktop-page-btn active">1</button>
                             </div>
-                            <button id="nextPage" class="desktop-nav-btn">
+                            <button id="nextPage" class="desktop-nav-btn" disabled>
                                 <span class="material-icons-outlined text-sm">chevron_right</span>
                             </button>
                         </div>
@@ -832,26 +951,29 @@
         </div>
     </div>
 
-    <!-- Modal Tambah Layanan -->
-    <div id="tambahLayananModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <!-- Modal Tambah Orderan -->
+    <div id="tambahOrderanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Tambah Layanan Baru</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Tambah Orderan Baru</h3>
                     <button id="closeModalBtn" class="text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form action="{{ route('admin.layanan.store') }}" method="POST" id="tambahLayananForm" class="space-y-4">
-                    @csrf
+                <form action="#" method="POST" id="tambahOrderanForm" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
-                            <input type="text" name="nama_layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama layanan" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
+                            <input type="text" name="nama_orderan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama orderan" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
                             <input type="text" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan harga" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
+                            <input type="text" name="deadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deadline" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -865,7 +987,11 @@
                     </div>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi layanan" required></textarea>
+                        <textarea name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi orderan" required></textarea>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
+                        <input type="number" name="progres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan progres (0-100)" required>
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" id="batalTambahBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -876,28 +1002,30 @@
         </div>
     </div>
 
-    <!-- Modal Edit Layanan -->
-    <div id="editLayananModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <!-- Modal Edit Orderan -->
+    <div id="editOrderanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Layanan</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Edit Orderan</h3>
                     <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form method="POST" action="{{ route('admin.layanan.update', '') }}" id="editLayananForm" class="space-y-4">
-                    @csrf
-                    @method('PUT')
+                <form method="POST" action="#" id="editOrderanForm" class="space-y-4">
                     <input type="hidden" id="editId" name="id">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
-                            <input type="text" id="editNamaLayanan" name="nama_layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama layanan" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
+                            <input type="text" id="editNamaOrderan" name="nama_orderan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama orderan" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
                             <input type="text" id="editHarga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan harga" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
+                            <input type="text" id="editDeadline" name="deadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deadline" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -911,7 +1039,11 @@
                     </div>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi layanan" required></textarea>
+                        <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi orderan" required></textarea>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
+                        <input type="number" id="editProgres" name="progres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan progres (0-100)" required>
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" id="batalEditBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -932,11 +1064,9 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="deleteForm" method="POST" action="{{ route('admin.layanan.delete', '') }}">
-                    @csrf
-                    @method('DELETE')
+                <form id="deleteForm" method="POST" action="#">
                     <div class="mb-6">
-                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus layanan ini?</p>
+                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus orderan ini?</p>
                         <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
                         <input type="hidden" id="deleteId" name="id">
                     </div>
@@ -970,9 +1100,9 @@
         let activeFilters = ['all'];
         let searchTerm = '';
         
-        // Dapatkan semua elemen layanan
-        const layananRows = document.querySelectorAll('.layanan-row');
-        const layananCards = document.querySelectorAll('.layanan-card');
+        // Dapatkan semua elemen orderan
+        const orderanRows = document.querySelectorAll('.orderan-row');
+        const orderanCards = document.querySelectorAll('.orderan-card');
         
         // Inisialisasi pagination, filter, dan search
         initializePagination();
@@ -1032,11 +1162,11 @@
         }
         
         function getFilteredRows() {
-            return Array.from(layananRows).filter(row => !row.classList.contains('hidden-by-filter'));
+            return Array.from(orderanRows).filter(row => !row.classList.contains('hidden-by-filter'));
         }
         
         function getFilteredCards() {
-            return Array.from(layananCards).filter(card => !card.classList.contains('hidden-by-filter'));
+            return Array.from(orderanCards).filter(card => !card.classList.contains('hidden-by-filter'));
         }
         
         function updateVisibleItems() {
@@ -1047,8 +1177,8 @@
             const endIndex = startIndex + itemsPerPage;
             
             // Hide all rows and cards first
-            layananRows.forEach(row => row.style.display = 'none');
-            layananCards.forEach(card => card.style.display = 'none');
+            orderanRows.forEach(row => row.style.display = 'none');
+            orderanCards.forEach(card => card.style.display = 'none');
             
             // Show only the rows for current page
             visibleRows.forEach((row, index) => {
@@ -1131,7 +1261,7 @@
                 applyFilters();
                 filterDropdown.classList.remove('show');
                 const visibleCount = getFilteredRows().length;
-                showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} layanan`, 'success');
+                showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} orderan`, 'success');
             });
             
             // Reset filter
@@ -1144,7 +1274,7 @@
                 applyFilters();
                 filterDropdown.classList.remove('show');
                 const visibleCount = getFilteredRows().length;
-                showMinimalPopup('Filter Direset', 'Menampilkan semua layanan', 'success');
+                showMinimalPopup('Filter Direset', 'Menampilkan semua orderan', 'success');
             });
         }
         
@@ -1153,7 +1283,7 @@
             currentPage = 1;
             
             // Apply filters to rows
-            layananRows.forEach(row => {
+            orderanRows.forEach(row => {
                 const status = row.getAttribute('data-status').toLowerCase();
                 const nama = row.getAttribute('data-nama').toLowerCase();
                 const deskripsi = row.getAttribute('data-deskripsi').toLowerCase();
@@ -1183,7 +1313,7 @@
             });
             
             // Apply same filters to cards
-            layananCards.forEach(card => {
+            orderanCards.forEach(card => {
                 const status = card.getAttribute('data-status').toLowerCase();
                 const nama = card.getAttribute('data-nama').toLowerCase();
                 const deskripsi = card.getAttribute('data-deskripsi').toLowerCase();
@@ -1279,12 +1409,12 @@
         });
 
         // Modal elements
-        const tambahLayananModal = document.getElementById('tambahLayananModal');
-        const editLayananModal = document.getElementById('editLayananModal');
+        const tambahOrderanModal = document.getElementById('tambahOrderanModal');
+        const editOrderanModal = document.getElementById('editOrderanModal');
         const deleteModal = document.getElementById('deleteModal');
 
         // Buttons
-        const tambahLayananBtn = document.getElementById('tambahLayananBtn');
+        const tambahOrderanBtn = document.getElementById('tambahOrderanBtn');
         const batalTambahBtn = document.getElementById('batalTambahBtn');
         const batalEditBtn = document.getElementById('batalEditBtn');
         const batalDeleteBtn = document.getElementById('batalDeleteBtn');
@@ -1293,34 +1423,34 @@
         const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
 
         // Forms
-        const tambahLayananForm = document.getElementById('tambahLayananForm');
-        const editLayananForm = document.getElementById('editLayananForm');
+        const tambahOrderanForm = document.getElementById('tambahOrderanForm');
+        const editOrderanForm = document.getElementById('editOrderanForm');
 
         // Open tambah modal
-        tambahLayananBtn.addEventListener('click', () => {
-            tambahLayananModal.classList.remove('hidden');
+        tambahOrderanBtn.addEventListener('click', () => {
+            tambahOrderanModal.classList.remove('hidden');
         });
 
         // Close tambah modal
         batalTambahBtn.addEventListener('click', () => {
-            tambahLayananModal.classList.add('hidden');
-            tambahLayananForm.reset();
+            tambahOrderanModal.classList.add('hidden');
+            tambahOrderanForm.reset();
         });
 
         closeModalBtn.addEventListener('click', () => {
-            tambahLayananModal.classList.add('hidden');
-            tambahLayananForm.reset();
+            tambahOrderanModal.classList.add('hidden');
+            tambahOrderanForm.reset();
         });
 
         // Close edit modal
         batalEditBtn.addEventListener('click', () => {
-            editLayananModal.classList.add('hidden');
-            editLayananForm.reset();
+            editOrderanModal.classList.add('hidden');
+            editOrderanForm.reset();
         });
 
         closeEditModalBtn.addEventListener('click', () => {
-            editLayananModal.classList.add('hidden');
-            editLayananForm.reset();
+            editOrderanModal.classList.add('hidden');
+            editOrderanForm.reset();
         });
 
         // Close delete modal
@@ -1339,15 +1469,17 @@
             button.addEventListener('click', () => {
                 // SET VALUE
                 document.getElementById('editId').value = button.dataset.id;
-                document.getElementById('editNamaLayanan').value = button.dataset.nama;
+                document.getElementById('editNamaOrderan').value = button.dataset.nama;
                 document.getElementById('editDeskripsi').value = button.dataset.deskripsi;
                 document.getElementById('editHarga').value = button.dataset.harga;
+                document.getElementById('editDeadline').value = button.dataset.deadline;
+                document.getElementById('editProgres').value = button.dataset.progres;
                 document.getElementById('editStatus').value = button.dataset.status;
 
                 // SET ACTION URL DINAMIS
-                editLayananForm.action = `/admin/layanan/${button.dataset.id}`;
+                editOrderanForm.action = `/orderan/${button.dataset.id}`;
 
-                editLayananModal.classList.remove('hidden');
+                editOrderanModal.classList.remove('hidden');
             });
         });
 
@@ -1359,7 +1491,7 @@
                 const id = button.dataset.id;
 
                 // Set action form delete
-                document.getElementById('deleteForm').action = `/admin/layanan/${id}`;
+                document.getElementById('deleteForm').action = `/orderan/${id}`;
                 document.getElementById('deleteId').value = id;
 
                 // Tampilkan modal
@@ -1369,14 +1501,9 @@
 
         // ============================
         // SUBMIT FORM EDIT
-        // (untuk Laravel biarkan form submit saja)
         // ============================
-        editLayananForm.addEventListener('submit', (e) => {
-            // Jangan prevent kalau mau kirim ke backend
-            // e.preventDefault();
-            // editLayananForm.submit();  // opsional
-
-            editLayananModal.classList.add('hidden');
+        editOrderanForm.addEventListener('submit', (e) => {
+            editOrderanModal.classList.add('hidden');
         });
 
         // ============================
@@ -1389,10 +1516,9 @@
         // ============================
         // SUBMIT FORM TAMBAH
         // ============================
-        tambahLayananForm.addEventListener('submit', (e) => {
-            tambahLayananModal.classList.add('hidden');
+        tambahOrderanForm.addEventListener('submit', (e) => {
+            tambahOrderanModal.classList.add('hidden');
         });
     </script>
 </body>
-
 </html>

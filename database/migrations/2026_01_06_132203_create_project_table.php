@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orderan', function (Blueprint $table) {
+        Schema::create('project', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
             $table->text('deskripsi');
             $table->string('harga');
             $table->date('deadline');
-            $table->integer('progres')->default(0);
+            $table->integer('progres')->nullable();
             $table->enum('status', ['In Progress', 'Active', 'Completed', 'Cancelled'])->default('In Progress');
             $table->timestamps();
         });
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orderan');
+        Schema::dropIfExists('project');
     }
 };

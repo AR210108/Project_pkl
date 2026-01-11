@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class CatatanRapat extends Model
 {
@@ -13,11 +14,9 @@ class CatatanRapat extends Model
     protected $fillable = [
         'user_id',
         'tanggal',
-        'peserta',
         'topik',
         'hasil_diskusi',
         'keputusan',
-        'penugasan',
     ];
 
     protected $casts = [
@@ -29,7 +28,25 @@ class CatatanRapat extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getFormattedTanggalAttribute()
+    // ✅ PESERTA RAPAT
+    public function peserta(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'catatan_rapat_peserta'
+        );
+    }
+
+    // ✅ PENUGASAN
+    public function penugasan(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'catatan_rapat_penugasan'
+        );
+    }
+
+    public function getFormattedTanggalAttribute(): string
     {
         return $this->tanggal->format('d/m/Y');
     }

@@ -79,4 +79,10 @@ class User extends Authenticatable
             default => '-'
         };
     }
+
+    public function pengumuman()
+{
+    return $this->belongsToMany(Pengumuman::class);
+}
+
 }

@@ -258,6 +258,7 @@
                 <span class="sidebar-text">Data Layanan</span>
             </a>
 
+<<<<<<< HEAD
         
 
             <!-- Menu Absensi -->
@@ -266,6 +267,8 @@
                 <span class="material-icons sidebar-icon">schedule</span>
                 <span class="sidebar-text">Absensi</span>
             </a>
+=======
+>>>>>>> cec98305dcf5834bf7f5e73a9605a0a6f95af918
 
             <!-- Menu Surat Kerjasama (Dropdown) -->
             <div class="relative">
@@ -294,6 +297,7 @@
                 </div>
             </div>
 
+<<<<<<< HEAD
             <!-- Menu Invoice & Kwitansi -->
             <div class="relative">
                 <button
@@ -320,6 +324,8 @@
                 </div>
             </div>
 
+=======
+>>>>>>> cec98305dcf5834bf7f5e73a9605a0a6f95af918
             <!-- Catatan Rapat -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 href="/admin/catatan_rapat" data-page="catatan_rapat">

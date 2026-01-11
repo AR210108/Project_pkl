@@ -10,6 +10,7 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminKaryawanController;
 use App\Http\Controllers\CatatanRapatController;
+use App\Http\Controllers\DataProjectController;
 use App\Http\Controllers\KwitansiController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PengumumanController;
@@ -39,7 +40,6 @@ if (!function_exists('redirectToRolePage')) {
 | Guest Routes (Pengunjung Belum Login)
 |--------------------------------------------------------------------------
 */
-
 Route::get('/', function () {
     if (Auth::check()) {
         $user = Auth::user();
