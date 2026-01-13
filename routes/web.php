@@ -29,9 +29,8 @@ use App\Http\Controllers\GeneralManajer\OrderController;
 Route::get('/users/data', [UserController::class, 'data'])
     ->middleware('auth');
 // Redirect default ke halaman home
-Route::get('/', function () {
-    return view('home');
-})->name('home');
+Route::get('/', [LayananController::class, 'landingPage'])->name('home');
+
 
 // Rute untuk menampilkan halaman login
 Route::get('/login', [LoginController::class, 'show'])->name('login');
