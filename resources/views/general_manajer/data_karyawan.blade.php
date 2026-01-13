@@ -400,15 +400,10 @@
                             <select name="divisi" class="px-3 py-2 bg-white border border-border-light text-text-muted-light rounded-lg form-input">
                                 <option value="">Semua Divisi</option>
                                 @foreach(
-                                    \App\Models\Pegawai::select('divisi')->distinct()->orderBy('divisi')->pluck('divisi')
+                                    \App\Models\Karyawan::select('divisi')->distinct()->orderBy('divisi')->pluck('divisi')
                                     as $d)
                                 <option value="{{ $d }}" {{ request('divisi') == $d ? 'selected' : '' }}>{{ $d }}</option>
                                 @endforeach
-                            </select>
-                            <select name="status" class="px-3 py-2 bg-white border border-border-light text-text-muted-light rounded-lg form-input">
-                                <option value="">Semua Status</option>
-                                <option value="Magang" {{ request('status') == 'Magang' ? 'selected' : '' }}>Magang</option>
-                                <option value="Karyawan Tetap" {{ request('status') == 'Karyawan Tetap' ? 'selected' : '' }}>Karyawan Tetap</option>
                             </select>
                             <button type="submit" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors">
                                 Filter
@@ -430,7 +425,7 @@
                             Daftar Karyawan
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light">{{ $pegawai->total() }}</span> karyawan</span>
+                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light">{{ $karyawan->total() }}</span> karyawan</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -443,32 +438,22 @@
                                             <th style="min-width: 60px;">No</th>
                                             <th style="min-width: 200px;">Nama Lengkap</th>
                                             <th style="min-width: 350px;">Alamat Lengkap</th>
-                                            <th style="min-width: 120px;">Jenis Kelamin</th>
-                                            <th style="min-width: 150px;">Nomor Telepon</th>
+                                            <th style="min-width: 150px;">Nomor Kontak</th>
                                             <th style="min-width: 180px;">Jabatan</th>
                                             <th style="min-width: 150px;">Divisi</th>
-                                            <th style="min-width: 140px;">Status Karyawan</th>
-                                            <th style="min-width: 250px;">Email Address</th>
                                             <th style="min-width: 100px; text-align: center;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <!-- PERUBAHAN: Loop data dari database -->
                                     <tbody>
-                                        @forelse ($pegawai as $index => $item)
+                                        @forelse ($karyawan as $index => $item)
                                         <tr>
-                                            <td style="min-width: 60px;">{{ ($pegawai->currentPage()-1) * $pegawai->perPage() + $index + 1 }}</td>
+                                            <td style="min-width: 60px;">{{ ($karyawan->currentPage()-1) * $karyawan->perPage() + $index + 1 }}</td>
                                             <td style="min-width: 200px;">{{ $item->nama }}</td>
                                             <td style="min-width: 350px;">{{ $item->alamat }}</td>
-                                            <td style="min-width: 120px;">{{ $item->jenis_kelamin }}</td>
-                                            <td style="min-width: 150px;">{{ $item->telp }}</td>
+                                            <td style="min-width: 150px;">{{ $item->kontak }}</td>
                                             <td style="min-width: 180px;">{{ $item->jabatan }}</td>
                                             <td style="min-width: 150px;">{{ $item->divisi }}</td>
-                                            <td style="min-width: 140px;">
-                                                <span class="status-badge {{ $item->status == 'Karyawan Tetap' ? 'status-permanent' : 'status-intern' }}">
-                                                    {{ $item->status }}
-                                                </span>
-                                            </td>
-                                            <td style="min-width: 250px;">{{ $item->email }}</td>
                                             <td style="min-width: 100px; text-align: center;">
                                                 <div class="flex justify-center gap-2">
                                                     <button data-id="{{ $item->id }}" class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Edit">
@@ -486,7 +471,7 @@
                                         </tr>
                                         @empty
                                         <tr>
-                                            <td colspan="10" class="text-center py-4 text-gray-500">Belum ada data karyawan.</td>
+                                            <td colspan="7" class="text-center py-4 text-gray-500">Belum ada data karyawan.</td>
                                         </tr>
                                         @endforelse
                                     </tbody>
@@ -497,7 +482,7 @@
                         <!-- Mobile Card View -->
                         <div class="mobile-cards space-y-4">
                             <!-- PERUBAHAN: Loop data dari database -->
-                            @forelse ($pegawai as $item)
+                            @forelse ($karyawan as $item)
                             <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm">
                                 <div class="flex justify-between items-start mb-3">
                                     <div>
@@ -519,24 +504,12 @@
                                 </div>
                                 <div class="grid grid-cols-2 gap-2 text-sm">
                                     <div>
-                                        <p class="text-text-muted-light">Jenis Kelamin</p>
-                                        <p class="font-medium">{{ $item->jenis_kelamin }}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">No. Telp</p>
-                                        <p class="font-medium">{{ $item->telp }}</p>
-                                    </div>
-                                    <div>
                                         <p class="text-text-muted-light">Divisi</p>
                                         <p class="font-medium">{{ $item->divisi }}</p>
                                     </div>
                                     <div>
-                                        <p class="text-text-muted-light">Status</p>
-                                        <p><span class="status-badge {{ $item->status == 'Karyawan Tetap' ? 'status-permanent' : 'status-intern' }}">{{ $item->status }}</span></p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Email</p>
-                                        <p class="font-medium">{{ $item->email }}</p>
+                                        <p class="text-text-muted-light">No. Kontak</p>
+                                        <p class="font-medium">{{ $item->kontak }}</p>
                                     </div>
                                 </div>
                                 <div class="mt-3">
@@ -550,7 +523,7 @@
                         </div>
                         <!-- Pagination Links -->
                         <div class="mt-4 desktop-pagination">
-                            {{ $pegawai->links() }}
+                            {{ $karyawan->links() }}
                         </div>
                     </div>
                 </div>
@@ -583,36 +556,17 @@
                         <textarea name="alamat" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Kelamin</label>
-                        <select name="jenis_kelamin" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="">Pilih Jenis Kelamin</option>
-                            <option value="Laki-laki">Laki-laki</option>
-                            <option value="Perempuan">Perempuan</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">No. Telp</label>
-                        <input type="tel" name="telp" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Kontak</label>
+                        <input type="tel" name="kontak" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
                         <input type="text" name="jabatan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
                         <input type="text" name="divisi" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="">Pilih Status</option>
-                            <option value="Magang">Magang</option>
-                            <option value="Karyawan Tetap">Karyawan Tetap</option>
-                        </select>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" name="email" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="flex justify-end gap-2">
                         <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -646,36 +600,16 @@
                         <textarea name="alamat" id="edit_alamat" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Kelamin</label>
-                        <select name="jenis_kelamin" id="edit_jenis_kelamin" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="">Pilih Jenis Kelamin</option>
-                            <option value="Laki-laki">Laki-laki</option>
-                            <option value="Perempuan">Perempuan</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">No. Telp</label>
-                        <input type="tel" name="telp" id="edit_telp" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Kontak</label>
+                        <input type="tel" name="kontak" id="edit_kontak" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
                         <input type="text" name="jabatan" id="edit_jabatan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
                         <input type="text" name="divisi" id="edit_divisi" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select name="status" id="edit_status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="">Pilih Status</option>
-                            <option value="Magang">Magang</option>
-                            <option value="Karyawan Tetap">Karyawan Tetap</option>
-                        </select>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" name="email" id="edit_email" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="flex justify-end gap-2">
                         <button type="button" id="cancelEdit" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -739,12 +673,9 @@
                             document.getElementById('edit_id').value = data.id;
                             document.getElementById('edit_nama').value = data.nama;
                             document.getElementById('edit_alamat').value = data.alamat;
-                            document.getElementById('edit_jenis_kelamin').value = data.jenis_kelamin;
-                            document.getElementById('edit_telp').value = data.telp;
+                            document.getElementById('edit_kontak').value = data.kontak;
                             document.getElementById('edit_jabatan').value = data.jabatan;
                             document.getElementById('edit_divisi').value = data.divisi;
-                            document.getElementById('edit_status').value = data.status;
-                            document.getElementById('edit_email').value = data.email;
                             editForm.action = `{{ url('/pegawai') }}/${id}`;
                             openEditModal();
                         }).catch(err => alert('Gagal mengambil data.'));

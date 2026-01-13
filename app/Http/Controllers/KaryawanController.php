@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Absensi;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\Pegawai;
+use App\Models\Karyawan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -14,6 +16,88 @@ use Carbon\CarbonPeriod;
 
 class KaryawanController extends Controller
 {
+    /**
+     * Menampilkan data karyawan untuk general manager (dengan filter & pagination).
+     */
+    public function indexPegawai(Request $request)
+    {
+        $query = Karyawan::query();
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('jabatan', 'like', "%{$search}%")
+                    ->orWhere('alamat', 'like', "%{$search}%");
+            });
+        }
+
+        if ($divisi = $request->query('divisi')) {
+            $query->where('divisi', $divisi);
+        }
+
+        $karyawan = $query->orderBy('nama')->paginate(15)->withQueryString();
+
+        return view('general_manajer.data_karyawan', compact('karyawan'));
+    }
+
+    /**
+     * Store karyawan baru (untuk form tambah karyawan).
+     */
+    public function storePegawai(Request $request)
+    {
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'jabatan' => 'required|string|max:255',
+            'divisi' => 'required|string|max:255',
+            'alamat' => 'required|string',
+            'kontak' => 'required|string|max:255',
+        ]);
+
+        Karyawan::create($validated);
+
+        return redirect()->route('pegawai.index')->with('success', 'Karyawan berhasil ditambahkan.');
+    }
+
+    /**
+     * Edit karyawan (return JSON untuk modal).
+     */
+    public function editPegawai($id)
+    {
+        $karyawan = Karyawan::findOrFail($id);
+        return response()->json($karyawan);
+    }
+
+    /**
+     * Update karyawan.
+     */
+    public function updatePegawai(Request $request, $id)
+    {
+        $karyawan = Karyawan::findOrFail($id);
+
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'jabatan' => 'required|string|max:255',
+            'divisi' => 'required|string|max:255',
+            'alamat' => 'required|string',
+            'kontak' => 'required|string|max:255',
+        ]);
+
+        $karyawan->update($validated);
+
+        return redirect()->route('pegawai.index')->with('success', 'Karyawan berhasil diperbarui.');
+    }
+
+    /**
+     * Delete karyawan.
+     */
+    public function destroyPegawai($id)
+    {
+        $karyawan = Karyawan::findOrFail($id);
+        $karyawan->delete();
+
+        return redirect()->route('pegawai.index')->with('success', 'Karyawan berhasil dihapus.');
+    }
+
     /**
      * Menampilkan halaman beranda karyawan.
      */
