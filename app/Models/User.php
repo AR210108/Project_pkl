@@ -2,61 +2,141 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
-use App\Models\Karyawan; // <-- TAMBAHKAN BARIS INI
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role',
+        'divisi',
+        // ... kolom lainnya
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
 
     /**
-     * Relasi ke Model Karyawan.
-     * Satu user bisa memiliki satu data karyawan.
+     * Cek apakah user adalah admin
      */
-    public function karyawan()
+    public function isAdmin(): bool
     {
-        return $this->hasOne(Karyawan::class, 'user_id');
+        return in_array($this->role, ['admin','finance']);
     }
 
-    public function pengumuman()
-{
-    return $this->belongsToMany(Pengumuman::class);
-}
+    /**
+     * Cek apakah user adalah karyawan
+     */
+    public function isKaryawan(): bool
+    {
+        return $this->role === 'karyawan';
+    }
 
+    /**
+     * Cek apakah user adalah general manager
+     */
+    public function isGeneralManager(): bool
+    {
+        return $this->role === 'general_manager';
+    }
+
+    /**
+     * Cek apakah user adalah manager divisi
+     */
+    public function isManagerDivisi(): bool
+    {
+        return $this->role === 'manager_divisi';
+    }
+
+    /**
+     * Cek apakah user adalah owner
+     */
+    public function isOwner(): bool
+    {
+        return $this->role === 'owner';
+    }
+
+    /**
+     * Relasi dengan pengumuman
+     */
+    public function pengumuman()
+    {
+        return $this->belongsToMany(Pengumuman::class, 'pengumuman_user');
+    }
+
+    /**
+     * Relasi sebagai creator pengumuman
+     */
+    public function createdPengumuman()
+    {
+        return $this->hasMany(Pengumuman::class, 'user_id');
+    }
+
+    /**
+     * Relasi dengan catatan rapat sebagai peserta
+     */
+    public function catatanRapatPeserta()
+    {
+        return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_peserta');
+    }
+
+    /**
+     * Relasi dengan catatan rapat sebagai penugasan
+     */
+    public function catatanRapatPenugasan()
+    {
+        return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_penugasan');
+    }
+
+    /**
+     * Scope untuk user dengan role tertentu
+     */
+    public function scopeByRole($query, $role)
+    {
+        return $query->where('role', $role);
+    }
+
+    /**
+     * Scope untuk user dalam divisi tertentu
+     */
+    public function scopeByDivisi($query, $divisi)
+    {
+        return $query->where('divisi', $divisi);
+    }
+
+    /**
+     * Accessor untuk nama lengkap dengan role
+     */
+    public function getFullNameWithRoleAttribute(): string
+    {
+        return "{$this->name} ({$this->role})";
+    }
+
+    /**
+     * Accessor untuk inisial nama
+     */
+    public function getInitialsAttribute(): string
+    {
+        $words = explode(' ', $this->name);
+        $initials = '';
+        
+        foreach ($words as $word) {
+            $initials .= strtoupper(substr($word, 0, 1));
+        }
+        
+        return $initials;
+    }
 }

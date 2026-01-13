@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -47,12 +48,12 @@
         body {
             font-family: 'Poppins', sans-serif;
         }
-        
+
         .material-icons-outlined {
             font-size: 24px;
             vertical-align: middle;
         }
-        
+
         /* Card hover effects - updated to match reference */
         .card {
             transition: all 0.3s ease;
@@ -62,37 +63,37 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
-        
+
         /* Table styles */
         .order-table {
             transition: all 0.2s ease;
         }
-        
+
         .order-table tr:hover {
             background-color: rgba(59, 130, 246, 0.05);
         }
-        
+
         /* Button styles */
         .btn-primary {
             background-color: #3b82f6;
             color: white;
             transition: all 0.2s ease;
         }
-        
+
         .btn-primary:hover {
             background-color: #2563eb;
         }
-        
+
         .btn-secondary {
             background-color: #f1f5f9;
             color: #64748b;
             transition: all 0.2s ease;
         }
-        
+
         .btn-secondary:hover {
             background-color: #e2e8f0;
         }
-        
+
         /* Status Badge Styles */
         .status-badge {
             display: inline-block;
@@ -101,65 +102,65 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
-        
+
         .status-hadir {
             background-color: rgba(16, 185, 129, 0.15);
             color: #065f46;
         }
-        
+
         .status-terlambat {
             background-color: rgba(245, 158, 11, 0.15);
             color: #92400e;
         }
-        
+
         .status-izin {
             background-color: rgba(59, 130, 246, 0.15);
             color: #1e40af;
         }
-        
+
         .status-cuti {
             background-color: rgba(239, 68, 68, 0.15);
             color: #991b1b;
         }
-        
+
         .status-sakit {
             background-color: rgba(251, 146, 60, 0.15);
             color: #9a3412;
         }
-        
+
         .status-tidak-masuk {
             background-color: rgba(239, 68, 68, 0.15);
             color: #991b1b;
         }
-        
+
         /* Custom styles untuk transisi */
         .sidebar-transition {
             transition: transform 0.3s ease-in-out;
         }
-        
+
         /* Animasi hamburger */
         .hamburger-line {
             transition: all 0.3s ease-in-out;
         }
-        
+
         .hamburger-active .line1 {
             transform: rotate(45deg) translate(5px, 5px);
         }
-        
+
         .hamburger-active .line2 {
             opacity: 0;
         }
-        
+
         .hamburger-active .line3 {
             transform: rotate(-45deg) translate(7px, -6px);
         }
-        
+
         /* Style untuk efek hover yang lebih menonjol */
         .nav-item {
             position: relative;
             overflow: hidden;
         }
-        
+
         /* Gaya untuk indikator aktif/hover */
         /* Default untuk mobile: di sebelah kanan */
         .nav-item::before {
@@ -173,7 +174,7 @@
             transform: translateX(100%);
             transition: transform 0.3s ease;
         }
-        
+
         /* Override untuk desktop: di sebelah kiri */
         @media (min-width: 768px) {
             .nav-item::before {
@@ -182,12 +183,12 @@
                 transform: translateX(-100%);
             }
         }
-        
+
         .nav-item:hover::before,
         .nav-item.active::before {
             transform: translateX(0);
         }
-        
+
         /* Memastikan sidebar tetap di posisinya saat scroll */
         .sidebar-fixed {
             position: fixed;
@@ -195,78 +196,80 @@
             overflow-y: auto;
             z-index: 40;
         }
-        
+
         /* Menyesuaikan konten utama agar tidak tertutup sidebar */
         .main-content {
             margin-left: 0;
             transition: margin-left 0.3s ease-in-out;
         }
-        
+
         @media (min-width: 768px) {
             .main-content {
-                margin-left: 256px; /* Lebar sidebar */
+                margin-left: 256px;
+                /* Lebar sidebar */
             }
         }
-        
+
         /* Scrollbar kustom untuk sidebar */
         .sidebar-fixed::-webkit-scrollbar {
             width: 6px;
         }
-        
+
         .sidebar-fixed::-webkit-scrollbar-track {
             background: #f1f1f1;
         }
-        
+
         .sidebar-fixed::-webkit-scrollbar-thumb {
             background: #888;
             border-radius: 3px;
         }
-        
+
         .sidebar-fixed::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
-        
+
         /* Form input styles */
         .form-input {
             border: 1px solid #e2e8f0;
             transition: all 0.2s ease;
         }
-        
+
         .form-input:focus {
             border-color: #3b82f6;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
-        
+
         /* Pagination styles */
         .page-btn {
             transition: all 0.2s ease;
         }
-        
+
         .page-btn:hover:not(:disabled) {
             transform: scale(1.1);
         }
-        
+
         .page-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
+
         /* Desktop pagination styles */
         .desktop-pagination {
-            display: none; /* Hidden by default */
+            display: none;
+            /* Hidden by default */
             justify-content: center;
             align-items: center;
             gap: 8px;
             margin-top: 24px;
         }
-        
+
         /* Show desktop pagination on medium screens and up */
         @media (min-width: 768px) {
             .desktop-pagination {
                 display: flex;
             }
         }
-        
+
         .desktop-page-btn {
             min-width: 32px;
             height: 32px;
@@ -279,21 +282,21 @@
             transition: all 0.2s ease;
             cursor: pointer;
         }
-        
+
         .desktop-page-btn.active {
             background-color: #3b82f6;
             color: white;
         }
-        
+
         .desktop-page-btn:not(.active) {
             background-color: #f1f5f9;
             color: #64748b;
         }
-        
+
         .desktop-page-btn:not(.active):hover {
             background-color: #e2e8f0;
         }
-        
+
         .desktop-nav-btn {
             display: flex;
             justify-content: center;
@@ -306,16 +309,16 @@
             transition: all 0.2s ease;
             cursor: pointer;
         }
-        
+
         .desktop-nav-btn:hover:not(:disabled) {
             background-color: #e2e8f0;
         }
-        
+
         .desktop-nav-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
+
         /* Panel Styles */
         .panel {
             background: white;
@@ -324,7 +327,7 @@
             overflow: hidden;
             border: 1px solid #e2e8f0;
         }
-        
+
         .panel-header {
             background: #f8fafc;
             padding: 1rem 1.5rem;
@@ -333,7 +336,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .panel-title {
             font-size: 1.125rem;
             font-weight: 600;
@@ -343,11 +346,11 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .panel-body {
             padding: 1.5rem;
         }
-        
+
         /* SCROLLABLE TABLE - TANPA INDICATOR */
         .scrollable-table-container {
             width: 100%;
@@ -357,40 +360,41 @@
             border-radius: 0.5rem;
             background: white;
         }
-        
+
         /* Force scrollbar to be visible */
         .scrollable-table-container {
             scrollbar-width: auto;
             -webkit-overflow-scrolling: touch;
         }
-        
+
         .scrollable-table-container::-webkit-scrollbar {
             height: 12px;
             width: 12px;
         }
-        
+
         .scrollable-table-container::-webkit-scrollbar-track {
             background: #f1f5f9;
             border-radius: 6px;
         }
-        
+
         .scrollable-table-container::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 6px;
             border: 2px solid #f1f5f9;
         }
-        
+
         .scrollable-table-container::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
-        
+
         /* Table with fixed width to ensure scrolling */
         .data-table {
             width: 100%;
-            min-width: 1200px; /* Fixed minimum width */
+            min-width: 1200px;
+            /* Fixed minimum width */
             border-collapse: collapse;
         }
-        
+
         .data-table th,
         .data-table td {
             padding: 12px 16px;
@@ -398,7 +402,7 @@
             border-bottom: 1px solid #e2e8f0;
             white-space: nowrap;
         }
-        
+
         .data-table th {
             background: #f8fafc;
             font-weight: 600;
@@ -407,15 +411,15 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
-        
+
         .data-table tbody tr:nth-child(even) {
             background: #f9fafb;
         }
-        
+
         .data-table tbody tr:hover {
             background: #f3f4f6;
         }
-        
+
         /* Shadow effect */
         .table-shadow {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -447,7 +451,7 @@
             color: #3b82f6;
             border-bottom-color: #3b82f6;
         }
-        
+
         /* Icon styling - added to match reference */
         .icon-container {
             display: flex;
@@ -457,23 +461,24 @@
             height: 2.5rem;
             border-radius: 0.5rem;
         }
-        
+
         /* Mobile pagination styles */
         .mobile-pagination {
-            display: flex; /* Visible by default */
+            display: flex;
+            /* Visible by default */
             justify-content: center;
             align-items: center;
             gap: 8px;
             margin-top: 16px;
         }
-        
+
         /* Hide mobile pagination on medium screens and up */
         @media (min-width: 768px) {
             .mobile-pagination {
                 display: none;
             }
         }
-        
+
         .mobile-page-btn {
             min-width: 32px;
             height: 32px;
@@ -486,21 +491,21 @@
             transition: all 0.2s ease;
             cursor: pointer;
         }
-        
+
         .mobile-page-btn.active {
             background-color: #3b82f6;
             color: white;
         }
-        
+
         .mobile-page-btn:not(.active) {
             background-color: #f1f5f9;
             color: #64748b;
         }
-        
+
         .mobile-page-btn:not(.active):hover {
             background-color: #e2e8f0;
         }
-        
+
         .mobile-nav-btn {
             display: flex;
             justify-content: center;
@@ -513,11 +518,11 @@
             transition: all 0.2s ease;
             cursor: pointer;
         }
-        
+
         .mobile-nav-btn:hover:not(:disabled) {
             background-color: #e2e8f0;
         }
-        
+
         .mobile-nav-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -527,29 +532,31 @@
 
 <body class="font-display bg-background-light text-text-light">
     @include('general_manajer/templet/header')
-    
+
     <!-- Main Content Container -->
     <div class="main-content">
         <main class="flex-1 flex flex-col bg-background-light">
             <div class="flex-1 p-3 sm:p-8">
 
                 <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Kelola Absensi</h2>
-                
+
                 <!-- Stats Cards - Menggunakan data dari controller -->
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
                     <!-- Total Kehadiran Card -->
                     <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
                             <div class="icon-container bg-green-100 mr-3 md:mr-4">
-                                <span class="material-icons-outlined text-green-600 text-lg md:text-xl">check_circle</span>
+                                <span
+                                    class="material-icons-outlined text-green-600 text-lg md:text-xl">check_circle</span>
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Total Kehadiran</p>
-                                <p class="text-xl md:text-2xl font-bold text-green-600">{{ $stats['total_tepat_waktu'] }}</p>
+                                <p class="text-xl md:text-2xl font-bold text-green-600">
+                                    {{ $stats['total_tepat_waktu'] }}</p>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Tidak Hadir Card -->
                     <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
@@ -558,11 +565,12 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Tidak Hadir</p>
-                                <p class="text-xl md:text-2xl font-bold text-red-600">{{ $stats['total_tidak_masuk'] }}</p>
+                                <p class="text-xl md:text-2xl font-bold text-red-600">{{ $stats['total_tidak_masuk'] }}
+                                </p>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Izin Card -->
                     <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
@@ -575,12 +583,13 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Cuti Card -->
                     <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
                             <div class="icon-container bg-yellow-100 mr-3 md:mr-4">
-                                <span class="material-icons-outlined text-yellow-600 text-lg md:text-xl">event_busy</span>
+                                <span
+                                    class="material-icons-outlined text-yellow-600 text-lg md:text-xl">event_busy</span>
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Cuti</p>
@@ -588,20 +597,22 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Dinas Luar Card -->
                     <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
                             <div class="icon-container bg-purple-100 mr-3 md:mr-4">
-                                <span class="material-icons-outlined text-purple-600 text-lg md:text-xl">directions_car</span>
+                                <span
+                                    class="material-icons-outlined text-purple-600 text-lg md:text-xl">directions_car</span>
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Dinas Luar</p>
-                                <p class="text-xl md:text-2xl font-bold text-purple-600">{{ $stats['total_dinas_luar'] }}</p>
+                                <p class="text-xl md:text-2xl font-bold text-purple-600">
+                                    {{ $stats['total_dinas_luar'] }}</p>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Sakit Card -->
                     <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
@@ -615,7 +626,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Tab Navigation -->
                 <div class="tab-nav">
                     <button id="absensiTab" class="tab-button active" onclick="switchTab('absensi')">
@@ -627,7 +638,7 @@
                         Daftar Ketidakhadiran
                     </button>
                 </div>
-                
+
                 <!-- Data Absensi Panel -->
                 <div id="absensiPanel" class="panel">
                     <div class="panel-header">
@@ -636,7 +647,8 @@
                             Data Absensi
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="absensiCount">0</span> data</span>
+                            <span class="text-sm text-text-muted-light">Total: <span
+                                    class="font-semibold text-text-light" id="absensiCount">0</span> data</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -658,7 +670,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        
+
                         <!-- Desktop Pagination -->
                         <div id="absensiPaginationContainer" class="desktop-pagination">
                             <button id="absensiPrevPage" class="desktop-nav-btn">
@@ -671,7 +683,7 @@
                                 <span class="material-icons-outlined text-sm">chevron_right</span>
                             </button>
                         </div>
-                        
+
                         <!-- Mobile Pagination -->
                         <div class="mobile-pagination">
                             <button id="absensiPrevPageMobile" class="mobile-nav-btn">
@@ -686,7 +698,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Ketidakhadiran Panel (Initially Hidden) -->
                 <div id="ketidakhadiranPanel" class="panel hidden">
                     <div class="panel-header">
@@ -695,7 +707,8 @@
                             Daftar Ketidakhadiran
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="ketidakhadiranCount">0</span> data</span>
+                            <span class="text-sm text-text-muted-light">Total: <span
+                                    class="font-semibold text-text-light" id="ketidakhadiranCount">0</span> data</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -717,7 +730,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        
+
                         <!-- Desktop Pagination -->
                         <div id="ketidakhadiranPaginationContainer" class="desktop-pagination">
                             <button id="ketidakhadiranPrevPage" class="desktop-nav-btn">
@@ -730,7 +743,7 @@
                                 <span class="material-icons-outlined text-sm">chevron_right</span>
                             </button>
                         </div>
-                        
+
                         <!-- Mobile Pagination -->
                         <div class="mobile-pagination">
                             <button id="ketidakhadiranPrevPageMobile" class="mobile-nav-btn">
@@ -767,7 +780,7 @@
         let ketidakhadiranCurrentPage = 1;
         let ketidakhadiranTotalPages = 1;
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Ambil data dari API saat halaman dimuat
             fetchAbsensiData();
             fetchKetidakhadiranData();
@@ -782,10 +795,10 @@
                         absensiData = data.data;
                         document.getElementById('absensiCount').textContent = absensiData.length;
                         absensiTotalPages = Math.ceil(absensiData.length / absensiItemsPerPage);
-                        
+
                         // Initialize pagination
                         initializeAbsensiPagination();
-                        
+
                         // Render first page
                         renderAbsensiTable(1);
                     }
@@ -804,10 +817,10 @@
                         ketidakhadiranData = data.data;
                         document.getElementById('ketidakhadiranCount').textContent = ketidakhadiranData.length;
                         ketidakhadiranTotalPages = Math.ceil(ketidakhadiranData.length / ketidakhadiranItemsPerPage);
-                        
+
                         // Initialize pagination
                         initializeKetidakhadiranPagination();
-                        
+
                         // Render first page
                         renderKetidakhadiranTable(1);
                     }
@@ -860,26 +873,25 @@
             const pageNumbersContainer = document.getElementById('absensiPageNumbers');
             const prevButton = document.getElementById('absensiPrevPage');
             const nextButton = document.getElementById('absensiNextPage');
-            
+
             // Clear existing page numbers
             pageNumbersContainer.innerHTML = '';
-            
+
             // Generate page numbers
             for (let i = 1; i <= absensiTotalPages; i++) {
                 const pageNumber = document.createElement('button');
                 pageNumber.textContent = i;
-                pageNumber.className = `desktop-page-btn ${
-                    i === absensiCurrentPage ? 'active' : ''
-                }`;
+                pageNumber.className = `desktop-page-btn ${i === absensiCurrentPage ? 'active' : ''
+                    }`;
                 pageNumber.addEventListener('click', () => goToAbsensiDesktopPage(i));
                 pageNumbersContainer.appendChild(pageNumber);
             }
-            
+
             // Event listeners for navigation buttons
             prevButton.addEventListener('click', () => {
                 if (absensiCurrentPage > 1) goToAbsensiDesktopPage(absensiCurrentPage - 1);
             });
-            
+
             nextButton.addEventListener('click', () => {
                 if (absensiCurrentPage < absensiTotalPages) goToAbsensiDesktopPage(absensiCurrentPage + 1);
             });
@@ -890,26 +902,25 @@
             const pageNumbersContainer = document.getElementById('absensiPageNumbersMobile');
             const prevButton = document.getElementById('absensiPrevPageMobile');
             const nextButton = document.getElementById('absensiNextPageMobile');
-            
+
             // Clear existing page numbers
             pageNumbersContainer.innerHTML = '';
-            
+
             // Generate page numbers
             for (let i = 1; i <= absensiTotalPages; i++) {
                 const pageNumber = document.createElement('button');
                 pageNumber.textContent = i;
-                pageNumber.className = `mobile-page-btn ${
-                    i === absensiCurrentPage ? 'active' : ''
-                }`;
+                pageNumber.className = `mobile-page-btn ${i === absensiCurrentPage ? 'active' : ''
+                    }`;
                 pageNumber.addEventListener('click', () => goToAbsensiMobilePage(i));
                 pageNumbersContainer.appendChild(pageNumber);
             }
-            
+
             // Event listeners for navigation buttons
             prevButton.addEventListener('click', () => {
                 if (absensiCurrentPage > 1) goToAbsensiMobilePage(absensiCurrentPage - 1);
             });
-            
+
             nextButton.addEventListener('click', () => {
                 if (absensiCurrentPage < absensiTotalPages) goToAbsensiMobilePage(absensiCurrentPage + 1);
             });
@@ -920,26 +931,25 @@
             const pageNumbersContainer = document.getElementById('ketidakhadiranPageNumbers');
             const prevButton = document.getElementById('ketidakhadiranPrevPage');
             const nextButton = document.getElementById('ketidakhadiranNextPage');
-            
+
             // Clear existing page numbers
             pageNumbersContainer.innerHTML = '';
-            
+
             // Generate page numbers
             for (let i = 1; i <= ketidakhadiranTotalPages; i++) {
                 const pageNumber = document.createElement('button');
                 pageNumber.textContent = i;
-                pageNumber.className = `desktop-page-btn ${
-                    i === ketidakhadiranCurrentPage ? 'active' : ''
-                }`;
+                pageNumber.className = `desktop-page-btn ${i === ketidakhadiranCurrentPage ? 'active' : ''
+                    }`;
                 pageNumber.addEventListener('click', () => goToKetidakhadiranDesktopPage(i));
                 pageNumbersContainer.appendChild(pageNumber);
             }
-            
+
             // Event listeners for navigation buttons
             prevButton.addEventListener('click', () => {
                 if (ketidakhadiranCurrentPage > 1) goToKetidakhadiranDesktopPage(ketidakhadiranCurrentPage - 1);
             });
-            
+
             nextButton.addEventListener('click', () => {
                 if (ketidakhadiranCurrentPage < ketidakhadiranTotalPages) goToKetidakhadiranDesktopPage(ketidakhadiranCurrentPage + 1);
             });
@@ -950,26 +960,25 @@
             const pageNumbersContainer = document.getElementById('ketidakhadiranPageNumbersMobile');
             const prevButton = document.getElementById('ketidakhadiranPrevPageMobile');
             const nextButton = document.getElementById('ketidakhadiranNextPageMobile');
-            
+
             // Clear existing page numbers
             pageNumbersContainer.innerHTML = '';
-            
+
             // Generate page numbers
             for (let i = 1; i <= ketidakhadiranTotalPages; i++) {
                 const pageNumber = document.createElement('button');
                 pageNumber.textContent = i;
-                pageNumber.className = `mobile-page-btn ${
-                    i === ketidakhadiranCurrentPage ? 'active' : ''
-                }`;
+                pageNumber.className = `mobile-page-btn ${i === ketidakhadiranCurrentPage ? 'active' : ''
+                    }`;
                 pageNumber.addEventListener('click', () => goToKetidakhadiranMobilePage(i));
                 pageNumbersContainer.appendChild(pageNumber);
             }
-            
+
             // Event listeners for navigation buttons
             prevButton.addEventListener('click', () => {
                 if (ketidakhadiranCurrentPage > 1) goToKetidakhadiranMobilePage(ketidakhadiranCurrentPage - 1);
             });
-            
+
             nextButton.addEventListener('click', () => {
                 if (ketidakhadiranCurrentPage < ketidakhadiranTotalPages) goToKetidakhadiranMobilePage(ketidakhadiranCurrentPage + 1);
             });
@@ -1011,21 +1020,21 @@
         function renderAbsensiTable(page) {
             const tbody = document.getElementById('absensiTableBody');
             tbody.innerHTML = '';
-            
+
             const startIndex = (page - 1) * absensiItemsPerPage;
             const endIndex = Math.min(startIndex + absensiItemsPerPage, absensiData.length);
-            
+
             for (let i = startIndex; i < endIndex; i++) {
                 const absensi = absensiData[i];
                 const row = document.createElement('tr');
-                
+
                 // Format tanggal
                 const tanggal = new Date(absensi.tanggal).toLocaleDateString('id-ID');
-                
+
                 // Format jam
                 const jamMasuk = absensi.jam_masuk ? absensi.jam_masuk.substring(0, 5) : '-';
                 const jamKeluar = absensi.jam_pulang ? absensi.jam_pulang.substring(0, 5) : '-';
-                
+
                 // Determine status class
                 let statusClass = '';
                 if (absensi.status === 'Tepat Waktu') {
@@ -1033,7 +1042,7 @@
                 } else if (absensi.status === 'Terlambat') {
                     statusClass = 'status-terlambat';
                 }
-                
+
                 row.innerHTML = `
                     <td style="min-width: 60px;">${i + 1}</td>
                     <td style="min-width: 200px;">${absensi.user ? absensi.user.name : absensi.name}</td>
@@ -1050,20 +1059,20 @@
         function renderKetidakhadiranTable(page) {
             const tbody = document.getElementById('ketidakhadiranTableBody');
             tbody.innerHTML = '';
-            
+
             const startIndex = (page - 1) * ketidakhadiranItemsPerPage;
             const endIndex = Math.min(startIndex + ketidakhadiranItemsPerPage, ketidakhadiranData.length);
-            
+
             for (let i = startIndex; i < endIndex; i++) {
                 const ketidakhadiran = ketidakhadiranData[i];
                 const row = document.createElement('tr');
-                
+
                 // Format tanggal
                 const tanggalMulai = new Date(ketidakhadiran.tanggal).toLocaleDateString('id-ID');
-                const tanggalAkhir = ketidakhadiran.tanggal_akhir 
-                    ? new Date(ketidakhadiran.tanggal_akhir).toLocaleDateString('id-ID') 
+                const tanggalAkhir = ketidakhadiran.tanggal_akhir
+                    ? new Date(ketidakhadiran.tanggal_akhir).toLocaleDateString('id-ID')
                     : tanggalMulai;
-                
+
                 // Determine alasan
                 let alasan = '-';
                 if (ketidakhadiran.status === 'Cuti') {
@@ -1075,7 +1084,7 @@
                 } else if (ketidakhadiran.status === 'Tidak Masuk') {
                     alasan = 'Tanpa Keterangan';
                 }
-                
+
                 // Determine status class
                 let statusClass = '';
                 if (ketidakhadiran.status === 'Izin') {
@@ -1087,13 +1096,13 @@
                 } else if (ketidakhadiran.status === 'Tidak Masuk') {
                     statusClass = 'status-tidak-masuk';
                 }
-                
+
                 // Tambahkan badge untuk status persetujuan jika pending
                 let statusBadge = `<span class="status-badge ${statusClass}">${ketidakhadiran.status}</span>`;
                 if (ketidakhadiran.approval_status === 'pending') {
                     statusBadge += ` <span class="status-badge" style="background-color: rgba(245, 158, 11, 0.15); color: #92400e;">Menunggu Persetujuan</span>`;
                 }
-                
+
                 row.innerHTML = `
                     <td style="min-width: 60px;">${i + 1}</td>
                     <td style="min-width: 200px;">${ketidakhadiran.user ? ketidakhadiran.user.name : ketidakhadiran.name}</td>
@@ -1111,10 +1120,10 @@
             const prevButton = document.getElementById('absensiPrevPage');
             const nextButton = document.getElementById('absensiNextPage');
             const pageButtons = document.querySelectorAll('#absensiPageNumbers button');
-            
+
             prevButton.disabled = absensiCurrentPage === 1;
             nextButton.disabled = absensiCurrentPage === absensiTotalPages;
-            
+
             pageButtons.forEach((btn, index) => {
                 if (index + 1 === absensiCurrentPage) {
                     btn.classList.add('active');
@@ -1129,10 +1138,10 @@
             const prevButton = document.getElementById('absensiPrevPageMobile');
             const nextButton = document.getElementById('absensiNextPageMobile');
             const pageButtons = document.querySelectorAll('#absensiPageNumbersMobile button');
-            
+
             prevButton.disabled = absensiCurrentPage === 1;
             nextButton.disabled = absensiCurrentPage === absensiTotalPages;
-            
+
             pageButtons.forEach((btn, index) => {
                 if (index + 1 === absensiCurrentPage) {
                     btn.classList.add('active');
@@ -1147,10 +1156,10 @@
             const prevButton = document.getElementById('ketidakhadiranPrevPage');
             const nextButton = document.getElementById('ketidakhadiranNextPage');
             const pageButtons = document.querySelectorAll('#ketidakhadiranPageNumbers button');
-            
+
             prevButton.disabled = ketidakhadiranCurrentPage === 1;
             nextButton.disabled = ketidakhadiranCurrentPage === ketidakhadiranTotalPages;
-            
+
             pageButtons.forEach((btn, index) => {
                 if (index + 1 === ketidakhadiranCurrentPage) {
                     btn.classList.add('active');
@@ -1165,10 +1174,10 @@
             const prevButton = document.getElementById('ketidakhadiranPrevPageMobile');
             const nextButton = document.getElementById('ketidakhadiranNextPageMobile');
             const pageButtons = document.querySelectorAll('#ketidakhadiranPageNumbersMobile button');
-            
+
             prevButton.disabled = ketidakhadiranCurrentPage === 1;
             nextButton.disabled = ketidakhadiranCurrentPage === ketidakhadiranTotalPages;
-            
+
             pageButtons.forEach((btn, index) => {
                 if (index + 1 === ketidakhadiranCurrentPage) {
                     btn.classList.add('active');
@@ -1179,4 +1188,5 @@
         }
     </script>
 </body>
+
 </html>

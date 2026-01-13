@@ -5,7 +5,7 @@
         
         <!-- Desktop Navigation -->
         <nav class="hidden md:flex items-center gap-4 sm:gap-8 font-medium">
-            <a class="nav-link relative px-1 py-2 transition-colors duration-300 {{ request()->is('karyawan') ? 'text-primary font-semibold' : 'text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white' }}" href="/karyawan">
+            <a class="nav-link relative px-1 py-2 transition-colors duration-300 {{ request()->is('/karyawan/home') ? 'text-primary font-semibold' : 'text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white' }}" href="/karyawan/home">
                 Beranda
                 <span class="nav-indicator absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 {{ request()->is('karyawan') ? 'w-full' : 'w-0' }}"></span>
             </a>
@@ -13,7 +13,7 @@
                 Absensi
                 <span class="nav-indicator absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 {{ request()->is('absensi') ? 'w-full' : 'w-0' }}"></span>
             </a>
-            <a class="nav-link relative px-1 py-2 transition-colors duration-300 {{ request()->is('list') ? 'text-primary font-semibold' : 'text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white' }}" href="/list">
+            <a class="nav-link relative px-1 py-2 transition-colors duration-300 {{ request()->is('/karyawan/list') ? 'text-primary font-semibold' : 'text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white' }}" href="/karyawan/list">
                 Manage Tugas
                 <span class="nav-indicator absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 {{ request()->is('list') ? 'w-full' : 'w-0' }}"></span>
             </a>
@@ -63,7 +63,7 @@
             </button>
         </div>
     </div>
-    
+
     <!-- Mobile Navigation -->
     <nav id="mobile-menu" class="md:hidden hidden mt-4 pb-4 border-b border-border-color relative z-50">
         <div class="flex flex-col space-y-3">

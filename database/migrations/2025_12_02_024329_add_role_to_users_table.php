@@ -6,24 +6,31 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-public function up()
-{
-    Schema::table('users', function (Blueprint $table) {
-        $table->string('role')->default('karyawan');
-    });
-}
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            // Tambahkan 'admin' ke enum roles
+            $table->enum('role', [
+                'owner',
+                'admin', // TAMBAH INI
+                'general_manager', 
+                'manager_divisi',
+                'finance',
+                'karyawan'
+            ])->default('karyawan');
+            
+            $table->enum('divisi', [
+                'programmer',
+                'digital_marketing', 
+                'desainer'
+            ])->nullable();
+        });
+    }
 
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            $table->dropColumn(['role', 'divisi']);
         });
     }
 };
