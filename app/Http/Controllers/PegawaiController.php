@@ -15,11 +15,11 @@ class PegawaiController extends Controller
         $query = Pegawai::query();
 
         if ($search = $request->query('search')) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('telp', 'like', "%{$search}%")
-                  ->orWhere('jabatan', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('telp', 'like', "%{$search}%")
+                    ->orWhere('jabatan', 'like', "%{$search}%");
             });
         }
 
