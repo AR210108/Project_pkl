@@ -385,9 +385,6 @@ Route::get('/pembayaran', function () {
 Route::get('/karyawann', function () {
     return view('finance/daftar_karyawan');
 });
-Route::get('/rekap_absensi', function () {
-    return view('pemilik/rekap_absensi');
-});
 
 /*
 |--------------------------------------------------------------------------
