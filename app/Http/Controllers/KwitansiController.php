@@ -26,9 +26,9 @@ class KwitansiController extends Controller
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('nama_klien', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('nomor_order', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('nama_perusahaan', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('deskripsi', 'LIKE', "%{$searchTerm}%");
+                    ->orWhere('nomor_order', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('nama_perusahaan', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('deskripsi', 'LIKE', "%{$searchTerm}%");
             });
         }
 
@@ -80,7 +80,7 @@ class KwitansiController extends Controller
             'sub_total' => 'nullable|numeric|min:0',
             'fee_maintenance' => 'nullable|numeric|min:0',
             'total' => 'nullable|numeric|min:0',
-           
+
         ]);
 
         try {
@@ -132,7 +132,7 @@ class KwitansiController extends Controller
             'sub_total' => 'nullable|numeric|min:0',
             'fee_maintenance' => 'nullable|numeric|min:0',
             'total' => 'nullable|numeric|min:0',
-           
+
         ]);
 
         try {
@@ -188,14 +188,14 @@ class KwitansiController extends Controller
             ], 500);
         }
     }
-   public function cetak($id)
-{
-    $kwitansi = Kwitansi::findOrFail($id);
-    
-    // Format tanggal
-    $tanggal = \Carbon\Carbon::parse($kwitansi->tanggal)->locale('id')->isoFormat('DD/MM/YY');
-    $tanggalLengkap = \Carbon\Carbon::parse($kwitansi->tanggal)->locale('id')->isoFormat('DD MMMM YYYY');
-    
-    return view('admin.kwitansi_cetak', compact('kwitansi', 'tanggal', 'tanggalLengkap'));
-}
+    public function cetak($id)
+    {
+        $kwitansi = Kwitansi::findOrFail($id);
+
+        // Format tanggal
+        $tanggal = \Carbon\Carbon::parse($kwitansi->tanggal)->locale('id')->isoFormat('DD/MM/YY');
+        $tanggalLengkap = \Carbon\Carbon::parse($kwitansi->tanggal)->locale('id')->isoFormat('DD MMMM YYYY');
+
+        return view('admin.kwitansi_cetak', compact('kwitansi', 'tanggal', 'tanggalLengkap'));
+    }
 }

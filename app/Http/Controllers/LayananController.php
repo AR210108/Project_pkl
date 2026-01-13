@@ -15,9 +15,27 @@ class LayananController extends Controller
         return view('admin/data_layanan', compact('layanans'));
     }
 
+    public function indexLayanan(Request $request)
+    {
+        $query = Layanan::query();
+        
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('deskripsi', 'like', "%{$search}%");
+            });
+        }
+        
+        $pelayanan = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+        $search = $request->query('search');
+        
+        return view('general_manajer.data_layanan', compact('pelayanan', 'search'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
+<<<<<<< HEAD
             'nama_layanan' => 'required',
             'harga'        => 'nullable|integer',
             'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -34,13 +52,30 @@ class LayananController extends Controller
         }
 
         Layanan::create($data);
+=======
+            'nama'       => 'required',
+            'harga'      => 'required|integer',
+            'durasi'     => 'required',
+            'deskripsi'  => 'required',
+            'kategori'   => 'required',
+        ]);
+
+        Layanan::create([
+            'nama' => $request->nama,
+            'harga' => $request->harga,
+            'durasi' => $request->durasi,
+            'deskripsi' => $request->deskripsi,
+            'kategori' => $request->kategori,
+        ]);
+>>>>>>> 68cf5befa3cc9c8ca3ea0b9ebe493269eb530baf
 
         return back()->with('success', 'Layanan berhasil ditambahkan!');
     }
 
-    public function update(Request $request, $id)
+    public function edit($id)
     {
         $layanan = Layanan::findOrFail($id);
+<<<<<<< HEAD
         
         $request->validate([
             'nama_layanan' => 'required',
@@ -64,6 +99,29 @@ class LayananController extends Controller
         }
         
         $layanan->update($data);
+=======
+        return response()->json($layanan);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'nama'       => 'required',
+            'harga'      => 'required|integer',
+            'durasi'     => 'required',
+            'deskripsi'  => 'required',
+            'kategori'   => 'required',
+        ]);
+
+        $layanan = Layanan::findOrFail($id);
+        $layanan->update([
+            'nama' => $request->nama,
+            'harga' => $request->harga,
+            'durasi' => $request->durasi,
+            'deskripsi' => $request->deskripsi,
+            'kategori' => $request->kategori,
+        ]);
+>>>>>>> 68cf5befa3cc9c8ca3ea0b9ebe493269eb530baf
 
         return back()->with('success', 'Layanan berhasil diperbarui!');
     }

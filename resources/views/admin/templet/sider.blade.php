@@ -232,14 +232,14 @@
         <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             <!-- Menu Beranda -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/admin" data-page="admin">
+                href="/admin/home" data-page="admin">
                 <span class="material-icons sidebar-icon">home</span>
                 <span class="sidebar-text">Beranda</span>
             </a>
 
             <!-- Menu Data User -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/data_user" data-page="data_user">
+                href="/admin/data_user" data-page="data_user">
                 <span class="material-icons sidebar-icon">person</span>
                 <span class="sidebar-text">Data User</span>
             </a>
@@ -258,6 +258,9 @@
                 <span class="sidebar-text">Data Layanan</span>
             </a>
 
+        
+
+          
 
             <!-- Menu Surat Kerjasama (Dropdown) -->
             <div class="relative">
@@ -286,32 +289,32 @@
                 </div>
             </div>
 
+
+
+             
             <!-- Catatan Rapat -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/catatan_rapat" data-page="catatan_rapat">
+                href="/admin/catatan_rapat" data-page="catatan_rapat">
                 <span class="material-icons sidebar-icon">note</span>
                 <span class="sidebar-text">Catatan Rapat</span>
             </a>
 
             <!-- Pengumuman -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/pengumuman" data-page="pengumuman">
+                href="/admin/pengumuman" data-page="pengumuman">
                 <span class="material-icons sidebar-icon">campaign</span>
                 <span class="sidebar-text">Pengumuman</span>
             </a>
         </nav>
+<form action="{{ route('logout') }}" method="POST">
+    @csrf
+    <button type="submit"
+        class="nav-item w-full flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+        <span class="material-icons sidebar-icon">logout</span>
+        <span class="sidebar-text">Log Out</span>
+    </button>
+</form>
 
-        <div class="sidebar-footer border-t border-gray-200 flex-shrink-0">
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                <span class="material-icons sidebar-icon">logout</span>
-                <span class="sidebar-text">Log Out</span>
-            </a>
-
-            <form id="logout-form" action="/logout" method="POST" class="hidden">
-                <input type="hidden" name="_token" value="csrf_token_here">
-            </form>
-        </div>
     </aside>
 
 

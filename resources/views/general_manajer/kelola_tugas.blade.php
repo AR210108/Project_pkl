@@ -3,8 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Kelola Tugas - Dashboard</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Kelola Tugas</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
@@ -14,464 +13,211 @@
                 extend: {
                     colors: {
                         primary: "#3b82f6",
-                        "background-light": "#ffffff",
-                        "background-dark": "#f8fafc",
-                        "sidebar-light": "#f3f4f6",
-                        "sidebar-dark": "#1e293b",
-                        "card-light": "#ffffff",
-                        "card-dark": "#1e293b",
-                        "text-light": "#1e293b",
-                        "text-dark": "#f8fafc",
-                        "text-muted-light": "#64748b",
-                        "text-muted-dark": "#94a3b8",
-                        "border-light": "#e2e8f0",
-                        "border-dark": "#334155",
-                        "success": "#10b981",
-                        "warning": "#f59e0b",
-                        "danger": "#ef4444"
+                        programmer: "#3b82f6",
+                        desainer: "#8b5cf6",
+                        marketing: "#10b981",
                     },
                     fontFamily: {
                         display: ["Poppins", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "0.75rem",
-                    },
-                    boxShadow: {
-                        card: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-                        "card-hover": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
                     },
                 },
             },
         };
     </script>
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        .material-icons-outlined {
-            font-size: 24px;
-            vertical-align: middle;
-        }
-        
-        /* Card hover effects */
-        .stat-card {
-            transition: all 0.3s ease;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        
-        /* Table styles */
-        .order-table {
-            transition: all 0.2s ease;
-        }
-        
-        .order-table tr:hover {
-            background-color: rgba(59, 130, 246, 0.05);
-        }
-        
-        /* Button styles */
-        .btn-primary {
-            background-color: #3b82f6;
-            color: white;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-primary:hover {
-            background-color: #2563eb;
-        }
-        
-        .btn-secondary {
-            background-color: #f1f5f9;
-            color: #64748b;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #e2e8f0;
-        }
-        
-        /* Modal styles */
-        .modal {
-            transition: opacity 0.25s ease;
-        }
-        
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-        }
-
-        /* Status Badge Styles */
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .status-todo {
-            background-color: rgba(59, 130, 246, 0.15);
-            color: #1e40af;
-        }
-        
-        .status-progress {
-            background-color: rgba(245, 158, 11, 0.15);
-            color: #92400e;
-        }
-        
-        .status-done {
-            background-color: rgba(16, 185, 129, 0.15);
-            color: #065f46;
-        }
-        
-        /* Custom styles untuk transisi */
-        .sidebar-transition {
-            transition: transform 0.3s ease-in-out;
-        }
-        
-        /* Animasi hamburger */
-        .hamburger-line {
-            transition: all 0.3s ease-in-out;
-        }
-        
-        .hamburger-active .line1 {
-            transform: rotate(45deg) translate(5px, 5px);
-        }
-        
-        .hamburger-active .line2 {
-            opacity: 0;
-        }
-        
-        .hamburger-active .line3 {
-            transform: rotate(-45deg) translate(7px, -6px);
-        }
-        
-        /* Style untuk efek hover yang lebih menonjol */
-        .nav-item {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        /* Gaya untuk indikator aktif/hover */
-        /* Default untuk mobile: di sebelah kanan */
-        .nav-item::before {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 0;
-            height: 100%;
-            width: 3px;
-            background-color: #3b82f6;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-        }
-        
-        /* Override untuk desktop: di sebelah kiri */
-        @media (min-width: 768px) {
-            .nav-item::before {
-                right: auto;
-                left: 0;
-                transform: translateX(-100%);
-            }
-        }
-        
-        .nav-item:hover::before,
-        .nav-item.active::before {
-            transform: translateX(0);
-        }
-        
-        /* Memastikan sidebar tetap di posisinya saat scroll */
-        .sidebar-fixed {
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 40;
-        }
-        
-        /* Menyesuaikan konten utama agar tidak tertutup sidebar */
-        .main-content {
-            margin-left: 0;
-            transition: margin-left 0.3s ease-in-out;
-        }
-        
-        @media (min-width: 768px) {
-            .main-content {
-                margin-left: 256px; /* Lebar sidebar */
-            }
-        }
-        
-        /* Scrollbar kustom untuk sidebar */
-        .sidebar-fixed::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .sidebar-fixed::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        
-        .sidebar-fixed::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
-        }
-        
-        .sidebar-fixed::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
-        /* Table mobile adjustments */
-        @media (max-width: 639px) {
-            .desktop-table {
-                display: none;
-            }
-            
-            .mobile-cards {
-                display: block;
-            }
-            
-            /* Hide desktop pagination on mobile */
-            .desktop-pagination {
-                display: none !important;
-            }
-        }
-        
-        @media (min-width: 640px) {
-            .desktop-table {
-                display: block;
-            }
-            
-            .mobile-cards {
-                display: none;
-            }
-            
-            /* Hide mobile pagination on desktop */
-            .mobile-pagination {
-                display: none !important;
-            }
-        }
-        
-        /* Form input styles */
-        .form-input {
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s ease;
-        }
-        
-        .form-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        /* Pagination styles */
-        .page-btn {
-            transition: all 0.2s ease;
-        }
-        
-        .page-btn:hover:not(:disabled) {
-            transform: scale(1.1);
-        }
-        
-        .page-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        /* Desktop pagination styles */
-        .desktop-pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin-top: 24px;
-        }
-        
-        .desktop-page-btn {
-            min-width: 32px;
-            height: 32px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        
-        .desktop-page-btn.active {
-            background-color: #3b82f6;
-            color: white;
-        }
-        
-        .desktop-page-btn:not(.active) {
-            background-color: #f1f5f9;
-            color: #64748b;
-        }
-        
-        .desktop-page-btn:not(.active):hover {
-            background-color: #e2e8f0;
-        }
-        
-        .desktop-nav-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #f1f5f9;
-            color: #64748b;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        
-        .desktop-nav-btn:hover:not(:disabled) {
-            background-color: #e2e8f0;
-        }
-        
-        .desktop-nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        /* Panel Styles */
-        .panel {
-            background: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .panel-header {
-            background: #f8fafc;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .panel-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .panel-body {
-            padding: 1.5rem;
-        }
-        
-        /* SCROLLABLE TABLE - TANPA TEKS SCROLL */
-        .scrollable-table-container {
-            width: 100%;
-            overflow-x: auto;
-            overflow-y: hidden;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            background: white;
-        }
-        
-        /* Force scrollbar to be visible */
-        .scrollable-table-container {
-            scrollbar-width: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .scrollable-table-container::-webkit-scrollbar {
-            height: 12px;
-            width: 12px;
-        }
-        
-        .scrollable-table-container::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 6px;
-        }
-        
-        .scrollable-table-container::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 6px;
-            border: 2px solid #f1f5f9;
-        }
-        
-        .scrollable-table-container::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        
-        /* Table with fixed width to ensure scrolling */
-        .data-table {
-            width: 100%;
-            min-width: 1400px; /* Fixed minimum width */
-            border-collapse: collapse;
-        }
-        
-        .data-table th,
-        .data-table td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-            white-space: nowrap;
-        }
-        
-        .data-table th {
-            background: #f8fafc;
-            font-weight: 600;
-            color: #374151;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .data-table tbody tr:nth-child(even) {
-            background: #f9fafb;
-        }
-        
-        .data-table tbody tr:hover {
-            background: #f3f4f6;
-        }
-        
-        /* Shadow effect */
-        .table-shadow {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        
-        /* Truncate text style */
-        .truncate-text {
-            max-width: 300px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        body { font-family: 'Poppins', sans-serif; }
+        .material-icons-outlined { font-size: 24px; vertical-align: middle; }
+        .stat-card { transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .btn-primary { background-color: #3b82f6; color: white; transition: all 0.2s ease; }
+        .btn-primary:hover { background-color: #2563eb; }
+        .btn-secondary { background-color: #f1f5f9; color: #64748b; transition: all 0.2s ease; }
+        .btn-secondary:hover { background-color: #e2e8f0; }
+        .modal { transition: opacity 0.25s ease; }
+        .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .status-pending { background-color: rgba(59, 130, 246, 0.15); color: #1e40af; }
+        .status-proses { background-color: rgba(245, 158, 11, 0.15); color: #92400e; }
+        .status-selesai { background-color: rgba(16, 185, 129, 0.15); color: #065f46; }
+        .status-dibatalkan { background-color: rgba(239, 68, 68, 0.15); color: #991b1b; }
+        .badge-programmer { background-color: rgba(59, 130, 246, 0.15); color: #1e40af; }
+        .badge-desainer { background-color: rgba(139, 92, 246, 0.15); color: #5b21b6; }
+        .badge-marketing { background-color: rgba(16, 185, 129, 0.15); color: #065f46; }
+        .type-divisi { background-color: rgba(139, 92, 246, 0.15); color: #5b21b6; }
+        .type-manager { background-color: rgba(245, 158, 11, 0.15); color: #92400e; }
+        .nav-item::before { content: ''; position: absolute; right: 0; top: 0; height: 100%; width: 3px; background-color: #3b82f6; transform: translateX(100%); transition: transform 0.3s ease; }
+        @media (min-width: 768px) { .nav-item::before { right: auto; left: 0; transform: translateX(-100%); } .main-content { margin-left: 256px; } }
+        .nav-item:hover::before, .nav-item.active::before { transform: translateX(0); }
+        .form-input { border: 1px solid #e2e8f0; transition: all 0.2s ease; }
+        .form-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .page-btn { transition: all 0.2s ease; }
+        .page-btn:hover:not(:disabled) { transform: scale(1.1); }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .desktop-pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px; }
+        .desktop-page-btn { min-width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; border-radius: 50%; font-size: 14px; font-weight: 500; transition: all 0.2s ease; cursor: pointer; }
+        .desktop-page-btn.active { background-color: #3b82f6; color: white; }
+        .desktop-page-btn:not(.active) { background-color: #f1f5f9; color: #64748b; }
+        .desktop-page-btn:not(.active):hover { background-color: #e2e8f0; }
+        .desktop-nav-btn { display: flex; justify-content: center; align-items: center; width: 32px; height: 32px; border-radius: 50%; background-color: #f1f5f9; color: #64748b; transition: all 0.2s ease; cursor: pointer; }
+        .desktop-nav-btn:hover:not(:disabled) { background-color: #e2e8f0; }
+        .desktop-nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .panel { background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); overflow: hidden; border: 1px solid #e2e8f0; }
+        .panel-header { background: #f8fafc; padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .panel-title { font-size: 1.125rem; font-weight: 600; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 0.5rem; }
+        .panel-body { padding: 1.5rem; }
+        .scrollable-table-container { width: 100%; overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 0.5rem; background: white; }
+        .scrollable-table-container::-webkit-scrollbar { height: 12px; }
+        .scrollable-table-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 6px; }
+        .scrollable-table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; border: 2px solid #f1f5f9; }
+        .scrollable-table-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .data-table { width: 100%; min-width: 1000px; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+        .data-table th { background: #f8fafc; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .data-table tbody tr:nth-child(even) { background: #f9fafb; }
+        .data-table tbody tr:hover { background: #f3f4f6; }
+        .truncate-text { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .assignee-type-btn { border: 2px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; transition: all 0.2s ease; }
+        .assignee-type-btn.active { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
+        .assignee-type-btn:hover:not(.active) { border-color: #cbd5e1; }
+        .tab-btn { padding: 8px 16px; border-radius: 6px; transition: all 0.2s ease; }
+        .tab-btn.active { background-color: #3b82f6; color: white; }
+        .tab-btn:not(.active):hover { background-color: #f1f5f9; }
+        @media (max-width: 639px) { .desktop-table { display: none; } .mobile-cards { display: block; } .desktop-pagination { display: none !important; } }
+        @media (min-width: 640px) { .desktop-table { display: block; } .mobile-cards { display: none; } .mobile-pagination { display: none !important; } }
     </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>
+        // Helper function untuk route
+        function route(name, params = {}) {
+            const routes = {
+                'general_manager.api.tasks': '/general-manajer/api/tasks',
+                'general_manager.api.tasks.statistics': '/general-manajer/api/tasks/statistics',
+                'general_manager.tasks.store': '/general-manajer/tasks',
+                'general_manager.tasks.show': '/general-manajer/tasks/{id}',
+                'general_manager.tasks.update': '/general-manajer/tasks/{id}',
+                'general_manager.tasks.update.status': '/general-manajer/tasks/{id}/status',
+                'general_manager.tasks.assign': '/general-manajer/tasks/{id}/assign',
+                'general_manager.tasks.destroy': '/general-manajer/tasks/{id}',
+                'general_manager.tasks.delete': '/general-manajer/tasks/{id}/delete',
+                'karyawan.api.tasks': '/api/karyawan/tasks',
+                'karyawan.api.today-status': '/api/karyawan/today-status',
+                'karyawan.api.history': '/api/karyawan/history',
+                'karyawan.api.dashboard-data': '/api/karyawan/dashboard-data',
+            };
+            
+            let url = routes[name] || '#';
+            Object.keys(params).forEach(key => {
+                url = url.replace(`{${key}}`, params[key]);
+            });
+            return url;
+        }
+    </script>
 </head>
 
-<body class="font-display bg-background-light text-text-light">
-    @include('general_manajer/templet/header')
-    
-    <!-- Main Content Container -->
+<body class="font-display bg-gray-50 text-gray-800">
+   @include('general_manajer/templet/header')
     <div class="main-content">
-        <main class="flex-1 flex flex-col bg-background-light">
+        <main class="flex-1 flex flex-col">
             <div class="flex-1 p-3 sm:p-8">
-
-                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Kelola Tugas</h2>
+                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">
+                    <span id="pageTitle">Kelola Tugas</span>
+                </h2>
+                
+                <!-- Statistics Cards - Hanya untuk General Manager -->
+                <div id="statisticsSection" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                    <div class="stat-card bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Total Tugas</p>
+                                <p class="text-2xl font-bold text-gray-800" id="totalTasks">0</p>
+                            </div>
+                            <div class="p-3 bg-blue-100 rounded-full">
+                                <span class="material-icons-outlined text-blue-600">task</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Pending</p>
+                                <p class="text-2xl font-bold text-blue-600" id="pendingTasks">0</p>
+                            </div>
+                            <div class="p-3 bg-blue-100 rounded-full">
+                                <span class="material-icons-outlined text-blue-600">pending</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Dalam Proses</p>
+                                <p class="text-2xl font-bold text-yellow-600" id="progressTasks">0</p>
+                            </div>
+                            <div class="p-3 bg-yellow-100 rounded-full">
+                                <span class="material-icons-outlined text-yellow-600">timeline</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Selesai</p>
+                                <p class="text-2xl font-bold text-green-600" id="completedTasks">0</p>
+                            </div>
+                            <div class="p-3 bg-green-100 rounded-full">
+                                <span class="material-icons-outlined text-green-600">check_circle</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Dibatalkan</p>
+                                <p class="text-2xl font-bold text-red-600" id="cancelledTasks">0</p>
+                            </div>
+                            <div class="p-3 bg-red-100 rounded-full">
+                                <span class="material-icons-outlined text-red-600">cancel</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tabs - Hanya untuk General Manager -->
+                <div id="tabsSection" class="flex border-b border-gray-200 mb-6">
+                    <button id="tabMyTasks" class="tab-btn active" data-tab="my-tasks">Tugas Dibuat</button>
+                    <button id="tabTeamTasks" class="tab-btn ml-2" data-tab="team-tasks">Tugas Diterima</button>
+                </div>
                 
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
                         <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Search..." type="text" />
+                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari tugas..." type="text" />
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                        <button class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
-                            Filter
+                        <select id="statusFilter" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
+                            <option value="all">Semua Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="proses">Dalam Proses</option>
+                            <option value="selesai">Selesai</option>
+                            <option value="dibatalkan">Dibatalkan</option>
+                        </select>
+                        
+                        <!-- Filter Divisi - Hanya untuk General Manager -->
+                        <div id="divisiFilterContainer">
+                            <select id="divisiFilter" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
+                                <option value="all">Semua Divisi</option>
+                                <option value="Programmer">Programmer</option>
+                                <option value="Desainer">Desainer</option>
+                                <option value="Digital Marketing">Digital Marketing</option>
+                            </select>
+                        </div>
+                        
+                        <button id="refreshBtn" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none flex items-center gap-2">
+                            <span class="material-icons-outlined">refresh</span>
+                            <span class="hidden sm:inline">Refresh</span>
                         </button>
+                        
+                        <!-- Button Buat Tugas - Hanya untuk General Manager -->
                         <button id="buatTugasBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
                             <span class="material-icons-outlined">add</span>
                             <span class="hidden sm:inline">Buat Tugas Baru</span>
@@ -485,62 +231,67 @@
                     <div class="panel-header">
                         <h3 class="panel-title">
                             <span class="material-icons-outlined text-primary">task_alt</span>
-                            Daftar Tugas
+                            <span id="panelTitle">Daftar Tugas</span>
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="totalCount">0</span> tugas</span>
+                            <span class="text-sm text-gray-600">Total: <span class="font-semibold text-gray-800" id="totalCount">0</span> tugas</span>
+                            <span class="text-sm text-gray-600 ml-2">Menampilkan: <span class="font-semibold text-gray-800" id="showingCount">0</span> tugas</span>
                         </div>
                     </div>
                     <div class="panel-body">
-                        <!-- SCROLLABLE TABLE - TANPA INDICATOR -->
-                        <div class="desktop-table">
-                            <div class="scrollable-table-container table-shadow" id="scrollableTable">
+                        <!-- Loading Indicator -->
+                        <div id="loadingIndicator" class="text-center py-8">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                            <p class="mt-2 text-gray-600">Memuat data...</p>
+                        </div>
+
+                        <!-- Desktop Table -->
+                        <div class="desktop-table" id="desktopTable" style="display: none;">
+                            <div class="scrollable-table-container" id="scrollableTable">
                                 <table class="data-table">
                                     <thead>
                                         <tr>
                                             <th style="min-width: 60px;">No</th>
                                             <th style="min-width: 200px;">Judul</th>
-                                            <th style="min-width: 300px;">Deskripsi</th>
+                                            <th style="min-width: 250px;">Deskripsi</th>
                                             <th style="min-width: 120px;">Deadline</th>
-                                            <th style="min-width: 150px;">Karyawan</th>
-                                            <th style="min-width: 150px;">Projek Manajer</th>
-                                            <th style="min-width: 120px;">Status</th>
+                                            <th style="min-width: 150px;">Ditugaskan Kepada</th>
+                                            <th style="min-width: 100px;">Divisi</th>
+                                            <th style="min-width: 100px;">Status</th>
                                             <th style="min-width: 180px; text-align: center;">Aksi</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="desktopTableBody">
-                                        <!-- Data rows will be populated by JavaScript -->
-                                    </tbody>
+                                    <tbody id="desktopTableBody"></tbody>
                                 </table>
                             </div>
                         </div>
                         
                         <!-- Mobile Card View -->
-                        <div class="mobile-cards space-y-4" id="mobile-cards">
-                            <!-- Mobile cards will be populated by JavaScript -->
+                        <div class="mobile-cards space-y-4" id="mobile-cards" style="display: none;"></div>
+                        
+                        <!-- No Data Message -->
+                        <div id="noDataMessage" class="text-center py-8" style="display: none;">
+                            <span class="material-icons-outlined text-gray-400 text-4xl mb-2">task_alt</span>
+                            <p class="text-gray-600" id="noDataMessageText">Tidak ada data tugas</p>
                         </div>
                         
-                        <!-- Desktop Pagination - SELALU DITAMPILKAN -->
-                        <div id="desktopPaginationContainer" class="desktop-pagination">
+                        <!-- Desktop Pagination -->
+                        <div id="desktopPaginationContainer" class="desktop-pagination" style="display: none;">
                             <button id="desktopPrevPage" class="desktop-nav-btn">
                                 <span class="material-icons-outlined text-sm">chevron_left</span>
                             </button>
-                            <div id="desktopPageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
+                            <div id="desktopPageNumbers" class="flex gap-1"></div>
                             <button id="desktopNextPage" class="desktop-nav-btn">
                                 <span class="material-icons-outlined text-sm">chevron_right</span>
                             </button>
                         </div>
                         
                         <!-- Mobile Pagination -->
-                        <div class="mobile-pagination md:hidden flex justify-center items-center gap-2 mt-4">
+                        <div class="mobile-pagination md:hidden flex justify-center items-center gap-2 mt-4" style="display: none;">
                             <button id="prevPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
                                 <span class="material-icons-outlined text-sm">chevron_left</span>
                             </button>
-                            <div id="pageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
+                            <div id="pageNumbers" class="flex gap-1"></div>
                             <button id="nextPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
                                 <span class="material-icons-outlined text-sm">chevron_right</span>
                             </button>
@@ -548,203 +299,29 @@
                     </div>
                 </div>
             </div>
-            <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light">
-                Copyright ©2025 by digicity.id
+            <footer class="text-center p-4 bg-gray-100 text-gray-600 text-sm border-t border-gray-300">
+                Copyright ©2025 oleh digicity.id
             </footer>
         </main>
     </div>
 
-    <!-- Modal Tambah Tugas -->
-    <div id="tambahModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
+    <!-- Modal Template -->
+    <div id="modalTemplate" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
             <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Buat Tugas Baru</h3>
+                <div class="flex justify-between items-center mb-4 sticky top-0 bg-white py-2">
+                    <h3 class="text-xl font-bold text-gray-800 modal-title"></h3>
                     <button class="close-modal text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="tambahForm">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Judul Tugas</label>
-                        <input type="text" id="tambahJudul" name="judul" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="tambahDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                        <input type="date" id="tambahDeadline" name="deadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Karyawan</label>
-                        <select id="tambahKaryawan" name="karyawan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="">Pilih Karyawan</option>
-                            <option value="Budi Santoso">Budi Santoso</option>
-                            <option value="Ani Yudhoyono">Ani Yudhoyono</option>
-                            <option value="Eko Prabowo">Eko Prabowo</option>
-                            <option value="Dewi Anggraini">Dewi Anggraini</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Projek Manajer</label>
-                        <select id="tambahManajer" name="manajer" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="">Pilih Projek Manajer</option>
-                            <option value="Citra Lestari">Citra Lestari</option>
-                            <option value="Budi Santoso">Budi Santoso</option>
-                            <option value="Eko Prabowo">Eko Prabowo</option>
-                        </select>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select id="tambahStatus" name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="To Do">To Do</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Done">Done</option>
-                        </select>
-                    </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Edit Tugas -->
-    <div id="editModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Tugas</h3>
-                    <button class="close-modal text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form id="editForm">
-                    <input type="hidden" id="editId" name="id">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Judul Tugas</label>
-                        <input type="text" id="editJudul" name="judul" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                        <input type="date" id="editDeadline" name="deadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Karyawan</label>
-                        <select id="editKaryawan" name="karyawan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="Budi Santoso">Budi Santoso</option>
-                            <option value="Ani Yudhoyono">Ani Yudhoyono</option>
-                            <option value="Eko Prabowo">Eko Prabowo</option>
-                            <option value="Dewi Anggraini">Dewi Anggraini</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Projek Manajer</label>
-                        <select id="editManajer" name="manajer" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="Citra Lestari">Citra Lestari</option>
-                            <option value="Budi Santoso">Budi Santoso</option>
-                            <option value="Eko Prabowo">Eko Prabowo</option>
-                        </select>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select id="editStatus" name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="To Do">To Do</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Done">Done</option>
-                        </select>
-                    </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Detail Tugas -->
-    <div id="detailModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Detail Tugas</h3>
-                    <button class="close-modal text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <div class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-1">ID Tugas</h4>
-                            <p class="text-base font-medium" id="detailId"></p>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-1">Judul Tugas</h4>
-                            <p class="text-base font-medium" id="detailJudul"></p>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-1">Deadline</h4>
-                            <p class="text-base font-medium" id="detailDeadline"></p>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-1">Status</h4>
-                            <p id="detailStatus"></p>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-1">Karyawan</h4>
-                            <p class="text-base font-medium" id="detailKaryawan"></p>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-1">Projek Manajer</h4>
-                            <p class="text-base font-medium" id="detailManajer"></p>
-                        </div>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-medium text-gray-500 mb-1">Deskripsi</h4>
-                        <p class="text-base" id="detailDeskripsi"></p>
-                    </div>
-                </div>
-                <div class="flex justify-end gap-2 mt-6">
-                    <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Tutup</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Hapus Tugas -->
-    <div id="deleteModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h3>
-                    <button class="close-modal text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <div class="mb-6">
-                    <p class="text-gray-700">Apakah Anda yakin ingin menghapus tugas <span id="deleteJudul" class="font-semibold"></span>?</p>
-                    <p class="text-sm text-gray-500 mt-2">Tindakan ini tidak dapat dibatalkan.</p>
-                </div>
-                <input type="hidden" id="deleteId">
-                <div class="flex justify-end gap-2">
-                    <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                    <button id="confirmDelete" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Hapus</button>
-                </div>
+                <div class="modal-content"></div>
             </div>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center">
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center z-50">
         <span id="toastMessage" class="mr-2"></span>
         <button id="closeToast" class="ml-2 text-white hover:text-gray-200">
             <span class="material-icons-outlined">close</span>
@@ -752,347 +329,884 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- VARIABEL GLOBAL ---
-            let currentPage = 1;
-            let totalPages = 1;
-            let searchQuery = '';
+        // State Management
+        const state = {
+            currentPage: 1,
+            itemsPerPage: 10,
+            totalPages: 1,
+            allTasks: [],
+            filteredTasks: [],
+            currentUser: @json(auth()->user() ?? null),
+            currentDivisi: @json(auth()->user()?->divisi ?? ''),
+            currentRole: @json(auth()->user()?->role ?? ''),
+            karyawanList: @json($karyawan ?? []),
+            divisiList: @json($divisi ?? ['Programmer', 'Desainer', 'Digital Marketing']),
+            managerList: @json($managers ?? []),
+            currentTab: 'my-tasks'
+        };
 
-            // --- ELEMEN DOM ---
-            const tambahModal = document.getElementById('tambahModal');
-            const editModal = document.getElementById('editModal');
-            const detailModal = document.getElementById('detailModal');
-            const deleteModal = document.getElementById('deleteModal');
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            const totalCount = document.getElementById('totalCount');
-            const searchInput = document.getElementById('searchInput');
-            
-            // --- INISIALISASI ---
-            fetchTugas(); // Ambil data saat halaman dimuat
-            setupEventListeners();
-
-            // --- FUNGSI UTAMA ---
-            function fetchTugas(page = 1) {
-                currentPage = page;
-                let url = `/kelola_tugas/data?page=${page}`;
-                
-                if (searchQuery) {
-                    url += `&search=${encodeURIComponent(searchQuery)}`;
-                }
-                
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => {
-                        renderDesktopTable(data.data);
-                        renderMobileCards(data.data);
-                        renderPagination(data.links);
-                        totalCount.textContent = data.total;
-                        totalPages = data.last_page;
-                    })
-                    .catch(error => console.error('Error fetching data:', error));
-            }
-
-            function renderDesktopTable(tugasList) {
-                const tbody = document.getElementById('desktopTableBody');
-                tbody.innerHTML = '';
-                
-                if (tugasList.length === 0) {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `<td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data tugas</td>`;
-                    tbody.appendChild(row);
-                    return;
-                }
-                
-                tugasList.forEach((tugas, index) => {
-                    const row = document.createElement('tr');
-                    let statusClass = getStatusClass(tugas.status);
-                    const startIndex = (currentPage - 1) * 3; // 3 adalah items per page
-                    const truncatedDesc = tugas.deskripsi.length > 50 
-                        ? tugas.deskripsi.substring(0, 50) + '...' 
-                        : tugas.deskripsi;
-                    
-                    row.innerHTML = `
-                        <td style="min-width: 60px;">${startIndex + index + 1}</td>
-                        <td style="min-width: 200px;">${tugas.judul}</td>
-                        <td style="min-width: 300px;" class="truncate-text" title="${tugas.deskripsi}">${truncatedDesc}</td>
-                        <td style="min-width: 120px;">${tugas.deadline}</td>
-                        <td style="min-width: 150px;">${tugas.karyawan}</td>
-                        <td style="min-width: 150px;">${tugas.manajer}</td>
-                        <td style="min-width: 120px;"><span class="status-badge ${statusClass}">${tugas.status}</span></td>
-                        <td style="min-width: 180px; text-align: center;">
-                            <div class="flex justify-center gap-2">
-                                <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" onclick="openDetailModal(${tugas.id})" title="Lihat Detail"><span class="material-icons-outlined">visibility</span></button>
-                                <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" onclick="openEditModal(${tugas.id})" title="Edit"><span class="material-icons-outlined">edit</span></button>
-                                <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" onclick="openDeleteModal(${tugas.id}, '${tugas.judul}')" title="Hapus"><span class="material-icons-outlined">delete</span></button>
-                            </div>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            }
-
-            function renderMobileCards(tugasList) {
-                const container = document.getElementById('mobile-cards');
-                container.innerHTML = '';
-                
-                if (tugasList.length === 0) {
-                    const card = document.createElement('div');
-                    card.className = 'bg-white rounded-lg border border-border-light p-4 shadow-sm text-center text-gray-500';
-                    card.textContent = 'Tidak ada data tugas';
-                    container.appendChild(card);
-                    return;
-                }
-                
-                tugasList.forEach(tugas => {
-                    let statusClass = getStatusClass(tugas.status);
-                    const truncatedDesc = tugas.deskripsi.length > 80 
-                        ? tugas.deskripsi.substring(0, 80) + '...' 
-                        : tugas.deskripsi;
-                    
-                    const card = document.createElement('div');
-                    card.className = 'bg-white rounded-lg border border-border-light p-4 shadow-sm';
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <h4 class="font-semibold text-base">${tugas.judul}</h4>
-                                <p class="text-sm text-text-muted-light">Deadline: ${tugas.deadline}</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="p-1 rounded-full hover:bg-primary/20 text-gray-700" onclick="openDetailModal(${tugas.id})" title="Lihat Detail"><span class="material-icons-outlined">visibility</span></button>
-                                <button class="p-1 rounded-full hover:bg-primary/20 text-gray-700" onclick="openEditModal(${tugas.id})" title="Edit"><span class="material-icons-outlined">edit</span></button>
-                                <button class="p-1 rounded-full hover:bg-red-500/20 text-gray-700" onclick="openDeleteModal(${tugas.id}, '${tugas.judul}')" title="Hapus"><span class="material-icons-outlined">delete</span></button>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 text-sm">
-                            <div><p class="text-text-muted-light">Karyawan</p><p class="font-medium">${tugas.karyawan}</p></div>
-                            <div><p class="text-text-muted-light">Projek Manajer</p><p class="font-medium">${tugas.manajer}</p></div>
-                            <div><p class="text-text-muted-light">Status</p><p><span class="status-badge ${statusClass}">${tugas.status}</span></p></div>
-                        </div>
-                        <div class="mt-3">
-                            <p class="text-text-muted-light">Deskripsi</p>
-                            <p class="font-medium">${truncatedDesc}</p>
-                            ${tugas.deskripsi.length > 80 ? `<button class="text-primary text-sm mt-1" onclick="openDetailModal(${tugas.id})">Lihat selengkapnya</button>` : ''}
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            }
-            
-            function renderPagination(links) {
-                // Desktop Pagination
-                const desktopPageNumbers = document.getElementById('desktopPageNumbers');
-                desktopPageNumbers.innerHTML = '';
-                links.slice(1, -1).forEach(link => {
-                    const btn = document.createElement('button');
-                    btn.innerHTML = link.label;
-                    btn.className = `desktop-page-btn ${link.active ? 'active' : ''}`;
-                    btn.disabled = !link.url;
-                    btn.onclick = () => fetchTugas(new URL(link.url).searchParams.get('page'));
-                    desktopPageNumbers.appendChild(btn);
-                });
-                document.getElementById('desktopPrevPage').onclick = () => links[0].url ? fetchTugas(new URL(links[0].url).searchParams.get('page')) : null;
-                document.getElementById('desktopNextPage').onclick = () => links[links.length-1].url ? fetchTugas(new URL(links[links.length-1].url).searchParams.get('page')) : null;
-                
-                // Mobile Pagination (sama dengan desktop)
-                const mobilePageNumbers = document.getElementById('pageNumbers');
-                mobilePageNumbers.innerHTML = '';
-                links.slice(1, -1).forEach(link => {
-                    const btn = document.createElement('button');
-                    btn.innerHTML = link.label;
-                    btn.className = `page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm ${link.active ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'}`;
-                    btn.disabled = !link.url;
-                    btn.onclick = () => fetchTugas(new URL(link.url).searchParams.get('page'));
-                    mobilePageNumbers.appendChild(btn);
-                });
-                document.getElementById('prevPage').onclick = () => links[0].url ? fetchTugas(new URL(links[0].url).searchParams.get('page')) : null;
-                document.getElementById('nextPage').onclick = () => links[links.length-1].url ? fetchTugas(new URL(links[links.length-1].url).searchParams.get('page')) : null;
-            }
-
-            // --- EVENT LISTENERS ---
-            function setupEventListeners() {
-                // Modal
-                document.querySelectorAll('.close-modal').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        tambahModal.classList.add('hidden');
-                        editModal.classList.add('hidden');
-                        detailModal.classList.add('hidden');
-                        deleteModal.classList.add('hidden');
-                    });
-                });
-
-                // Form Tambah
-                document.getElementById('tambahForm').addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const formData = new FormData(this);
-                    fetch('/kelola_tugas', {
-                        method: 'POST',
-                        headers: { 
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json'
-                        },
-                        body: formData
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        showToast(data.message);
-                        tambahModal.classList.add('hidden');
-                        this.reset();
-                        fetchTugas(currentPage);
-                    })
-                    .catch(err => {
-                        console.error('Error:', err);
-                        if (err.response && err.response.status === 422) {
-                            err.response.json().then(errors => {
-                                let errorMessage = 'Error: ';
-                                for (const field in errors.errors) {
-                                    errorMessage += errors.errors[field].join(', ') + ' ';
-                                }
-                                showToast(errorMessage);
-                            });
-                        } else {
-                            showToast('Terjadi kesalahan saat menambah tugas');
-                        }
-                    });
-                });
-
-                // Form Edit
-                document.getElementById('editForm').addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const id = document.getElementById('editId').value;
-                    const formData = new FormData(this);
-                    formData.append('_method', 'PUT'); // Method spoofing untuk PUT
-
-                    fetch(`/kelola_tugas/${id}`, {
-                        method: 'POST', // Kirim sebagai POST karena FormData tidak mendukung PUT
-                        headers: { 
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json'
-                        },
-                        body: formData
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        showToast(data.message);
-                        editModal.classList.add('hidden');
-                        fetchTugas(currentPage);
-                    })
-                    .catch(err => {
-                        console.error('Error:', err);
-                        if (err.response && err.response.status === 422) {
-                            err.response.json().then(errors => {
-                                let errorMessage = 'Error: ';
-                                for (const field in errors.errors) {
-                                    errorMessage += errors.errors[field].join(', ') + ' ';
-                                }
-                                showToast(errorMessage);
-                            });
-                        } else {
-                            showToast('Terjadi kesalahan saat memperbarui tugas');
-                        }
-                    });
-                });
-
-                // Tombol Hapus
-                document.getElementById('confirmDelete').addEventListener('click', function() {
-                    const id = document.getElementById('deleteId').value;
-                    fetch(`/kelola_tugas/${id}`, {
-                        method: 'DELETE',
-                        headers: { 
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        showToast(data.message);
-                        deleteModal.classList.add('hidden');
-                        fetchTugas(currentPage);
-                    })
-                    .catch(err => {
-                        console.error('Error:', err);
-                        showToast('Terjadi kesalahan saat menghapus tugas');
-                    });
-                });
-
-                // Toast
-                document.getElementById('closeToast').addEventListener('click', () => {
-                    toast.classList.add('translate-y-20', 'opacity-0');
-                });
-
-                // Search
-                searchInput.addEventListener('input', function() {
-                    searchQuery = this.value;
-                    fetchTugas(1); // Reset ke halaman pertama saat searching
-                });
-            }
-
-            // --- FUNGSI MODAL ---
-            window.openDetailModal = function(id) {
-                fetch(`/kelola_tugas/${id}`)
-                    .then(res => res.json())
-                    .then(tugas => {
-                        document.getElementById('detailId').textContent = '#' + tugas.id;
-                        document.getElementById('detailJudul').textContent = tugas.judul;
-                        document.getElementById('detailDeskripsi').textContent = tugas.deskripsi;
-                        document.getElementById('detailDeadline').textContent = tugas.deadline;
-                        document.getElementById('detailKaryawan').textContent = tugas.karyawan;
-                        document.getElementById('detailManajer').textContent = tugas.manajer;
-                        document.getElementById('detailStatus').innerHTML = `<span class="status-badge ${getStatusClass(tugas.status)}">${tugas.status}</span>`;
-                        detailModal.classList.remove('hidden');
-                    })
-                    .catch(err => {
-                        console.error('Error:', err);
-                        showToast('Terjadi kesalahan saat mengambil detail tugas');
-                    });
-            };
-
-            window.openEditModal = function(id) {
-                fetch(`/kelola_tugas/${id}`)
-                    .then(res => res.json())
-                    .then(tugas => {
-                        document.getElementById('editId').value = tugas.id;
-                        document.getElementById('editJudul').value = tugas.judul;
-                        document.getElementById('editDeskripsi').value = tugas.deskripsi;
-                        document.getElementById('editDeadline').value = tugas.deadline;
-                        document.getElementById('editKaryawan').value = tugas.karyawan;
-                        document.getElementById('editManajer').value = tugas.manajer;
-                        document.getElementById('editStatus').value = tugas.status;
-                        editModal.classList.remove('hidden');
-                    })
-                    .catch(err => {
-                        console.error('Error:', err);
-                        showToast('Terjadi kesalahan saat mengambil data tugas untuk diedit');
-                    });
-            };
-
-            window.openDeleteModal = function(id, judul) {
-                document.getElementById('deleteId').value = id;
-                document.getElementById('deleteJudul').textContent = judul;
-                deleteModal.classList.remove('hidden');
-            };
-
-            // --- UTILITAS ---
-            function getStatusClass(status) {
-                if (status === 'To Do') return 'status-todo';
-                if (status === 'In Progress') return 'status-progress';
-                if (status === 'Done') return 'status-done';
-                return '';
-            }
-
-            function showToast(message) {
+        // Utility Functions
+        const utils = {
+            getStatusClass: (status) => `status-${status}`,
+            getStatusText: (status) => ({ 'pending': 'Pending', 'proses': 'Dalam Proses', 'selesai': 'Selesai', 'dibatalkan': 'Dibatalkan' }[status] || status),
+            getDivisiClass: (divisi) => {
+                if (!divisi) return 'badge-programmer';
+                const divisiLower = divisi.toLowerCase();
+                if (divisiLower.includes('marketing')) return 'badge-marketing';
+                if (divisiLower.includes('program')) return 'badge-programmer';
+                if (divisiLower.includes('desain')) return 'badge-desainer';
+                return 'badge-programmer';
+            },
+            getTypeClass: (type) => ({ 'divisi': 'type-divisi', 'manager': 'type-manager' }[type] || 'type-divisi'),
+            getTypeText: (type) => ({ 'divisi': 'Divisi', 'manager': 'Manajer' }[type] || type),
+            formatDate: (dateString) => dateString ? new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-',
+            formatDateTime: (dateString) => dateString ? new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-',
+            showToast: (message, type = 'success') => {
+                const toast = document.getElementById('toast');
+                const toastMessage = document.getElementById('toastMessage');
+                toast.style.backgroundColor = type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#10b981';
                 toastMessage.textContent = message;
                 toast.classList.remove('translate-y-20', 'opacity-0');
-                setTimeout(() => {
-                    toast.classList.add('translate-y-20', 'opacity-0');
-                }, 3000);
+                setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+            },
+            showLoading: (show) => {
+                const elements = {
+                    loading: document.getElementById('loadingIndicator'),
+                    desktop: document.getElementById('desktopTable'),
+                    mobile: document.getElementById('mobile-cards'),
+                    noData: document.getElementById('noDataMessage'),
+                    desktopPagination: document.getElementById('desktopPaginationContainer'),
+                    mobilePagination: document.querySelector('.mobile-pagination')
+                };
+                
+                if (show) {
+                    Object.values(elements).forEach(el => el.style.display = 'none');
+                    elements.loading.style.display = 'block';
+                } else {
+                    elements.loading.style.display = 'none';
+                }
+            },
+            createModal: (title, content, onSubmit = null, onClose = null) => {
+                const template = document.getElementById('modalTemplate').cloneNode(true);
+                template.id = 'activeModal';
+                template.style.display = 'flex';
+                template.querySelector('.modal-title').textContent = title;
+                template.querySelector('.modal-content').innerHTML = content;
+                
+                const closeModal = () => {
+                    if (onClose) onClose();
+                    template.remove();
+                };
+                
+                template.querySelectorAll('.close-modal').forEach(btn => btn.addEventListener('click', closeModal));
+                template.addEventListener('click', (e) => e.target === template && closeModal());
+                
+                if (onSubmit) {
+                    const form = template.querySelector('form');
+                    form?.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const data = Object.fromEntries(new FormData(form).entries());
+                        try {
+                            await onSubmit(data);
+                            closeModal();
+                        } catch (error) {
+                            console.error('Form submit error:', error);
+                        }
+                    });
+                }
+                
+                document.body.appendChild(template);
+                return template;
+            },
+            setupUIByRole: () => {
+                const isGeneralManager = state.currentRole === 'general_manager';
+                const isKaryawan = state.currentRole === 'karyawan';
+                
+                // Update page title
+                const pageTitle = document.getElementById('pageTitle');
+                if (isKaryawan) {
+                    pageTitle.textContent = `Kelola Tugas - ${state.currentDivisi}`;
+                    // Update no data message for karyawan
+                    document.getElementById('noDataMessageText').textContent = `Tidak ada tugas untuk divisi ${state.currentDivisi}`;
+                } else if (isGeneralManager) {
+                    pageTitle.textContent = 'Kelola Tugas - General Manajer';
+                }
+                
+                // Show/hide statistics section
+                const statsSection = document.getElementById('statisticsSection');
+                statsSection.style.display = isGeneralManager ? 'grid' : 'none';
+                
+                // Show/hide tabs section
+                const tabsSection = document.getElementById('tabsSection');
+                tabsSection.style.display = isGeneralManager ? 'flex' : 'none';
+                
+                // Show/hide divisi filter
+                const divisiFilterContainer = document.getElementById('divisiFilterContainer');
+                divisiFilterContainer.style.display = isGeneralManager ? 'block' : 'none';
+                
+                // Show/hide create task button
+                const buatTugasBtn = document.getElementById('buatTugasBtn');
+                buatTugasBtn.style.display = isGeneralManager ? 'flex' : 'none';
+                
+                // Set default tab for karyawan
+                if (isKaryawan) {
+                    state.currentTab = 'team-tasks';
+                }
             }
+        };
 
-            // Tombol buat tugas
-            document.getElementById('buatTugasBtn').addEventListener('click', () => {
-                tambahModal.classList.remove('hidden');
-                document.getElementById('tambahForm').reset();
+        // API Functions
+        const api = {
+            // Get CSRF token
+            getCsrfToken: () => {
+                return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            },
+            
+            request: async (url, options = {}) => {
+                // Default headers
+                const headers = {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': api.getCsrfToken(),
+                    ...options.headers
+                };
+                
+                // If it's a POST, PUT, or DELETE request, add Content-Type
+                if (['POST', 'PUT', 'DELETE'].includes(options.method)) {
+                    headers['Content-Type'] = 'application/json';
+                }
+                
+                try {
+                    const response = await fetch(url, {
+                        headers,
+                        ...options
+                    });
+                    
+                    if (!response.ok) {
+                        let errorMessage = `Request failed: ${response.status}`;
+                        
+                        try {
+                            const errorData = await response.json();
+                            errorMessage = errorData.message || errorMessage;
+                        } catch (e) {
+                            // If response is not JSON, use default error message
+                        }
+                        
+                        throw new Error(errorMessage);
+                    }
+                    
+                    const data = await response.json();
+                    return data;
+                    
+                } catch (error) {
+                    throw error;
+                }
+            },
+            
+            fetchTasks: async () => {
+                utils.showLoading(true);
+                try {
+                    // Tentukan endpoint berdasarkan role
+                    let endpoint;
+                    if (state.currentRole === 'karyawan') {
+                        endpoint = route('karyawan.api.tasks');
+                    } else {
+                        endpoint = route('general_manager.api.tasks');
+                    }
+                    
+                    const result = await api.request(endpoint);
+                    
+                    state.allTasks = Array.isArray(result) ? result : [];
+                    state.filteredTasks = [...state.allTasks];
+                    
+                    render.renderTable();
+                    
+                    // Hanya update statistics untuk General Manager
+                    if (state.currentRole === 'general_manager') {
+                        await api.updateStatistics();
+                    }
+                } catch (error) {
+                    utils.showToast('Gagal memuat data tugas: ' + error.message, 'error');
+                    state.allTasks = [];
+                    state.filteredTasks = [];
+                    render.renderTable();
+                } finally {
+                    utils.showLoading(false);
+                }
+            },
+            
+            updateStatistics: async () => {
+                try {
+                    const result = await api.request(route('general_manager.api.tasks.statistics'));
+                    document.getElementById('totalTasks').textContent = result.total || 0;
+                    document.getElementById('pendingTasks').textContent = result.pending || 0;
+                    document.getElementById('progressTasks').textContent = result.in_progress || 0;
+                    document.getElementById('completedTasks').textContent = result.completed || 0;
+                    document.getElementById('cancelledTasks').textContent = result.cancelled || 0;
+                } catch (error) {
+                    console.error('Error fetching statistics:', error);
+                }
+            },
+            
+            createTask: async (data) => {
+                const result = await api.request(route('general_manager.tasks.store'), {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                
+                if (result.success) {
+                    utils.showToast('Tugas berhasil dibuat');
+                    await api.fetchTasks();
+                } else {
+                    throw new Error(result.message || 'Failed to create task');
+                }
+            },
+            
+            deleteTask: async (id) => {
+                try {
+                    let result;
+                    
+                    // Try multiple approaches to delete the task
+                    try {
+                        // Approach 1: Try DELETE method first
+                        result = await api.request(route('general_manager.tasks.destroy', { id }), { 
+                            method: 'DELETE'
+                        });
+                    } catch (deleteError) {
+                        try {
+                            // Approach 2: Try a dedicated delete endpoint
+                            result = await api.request(route('general_manager.tasks.delete', { id }), { 
+                                method: 'POST'
+                            });
+                        } catch (postError) {
+                            throw new Error('Gagal menghapus tugas');
+                        }
+                    }
+                    
+                    if (result.success) {
+                        utils.showToast('Tugas berhasil dihapus');
+                        await api.fetchTasks();
+                    } else {
+                        throw new Error(result.message || 'Failed to delete task');
+                    }
+                } catch (error) {
+                    throw error;
+                }
+            },
+            
+            assignTask: async (id, data) => {
+                const result = await api.request(route('general_manager.tasks.assign', { id }), {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                if (result.success) {
+                    utils.showToast('Tugas berhasil ditugaskan');
+                    await api.fetchTasks();
+                } else {
+                    throw new Error(result.message || 'Failed to assign task');
+                }
+            },
+            
+            getTaskDetail: async (id) => {
+                const result = await api.request(route('general_manager.tasks.show', { id }));
+                if (result.success) {
+                    return result.task;
+                } else {
+                    throw new Error(result.message || 'Failed to get task detail');
+                }
+            },
+            
+            updateTask: async (id, data) => {
+                const result = await api.request(route('general_manager.tasks.update', { id }), {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+                if (result.success) {
+                    utils.showToast('Tugas berhasil diperbarui');
+                    await api.fetchTasks();
+                } else {
+                    throw new Error(result.message || 'Failed to update task');
+                }
+            }
+        };
+
+        // Render Functions
+        const render = {
+            filterTasks: () => {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const statusFilter = document.getElementById('statusFilter').value;
+                const divisiFilter = document.getElementById('divisiFilter').value;
+                
+                state.filteredTasks = state.allTasks.filter(task => {
+                    const matchesSearch = 
+                        task.judul?.toLowerCase().includes(searchTerm) ||
+                        task.deskripsi?.toLowerCase().includes(searchTerm) ||
+                        task.assignee_text?.toLowerCase().includes(searchTerm) ||
+                        task.creator_name?.toLowerCase().includes(searchTerm);
+                    
+                    const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
+                    
+                    // Logika filter berdasarkan role
+                    let matchesDivisi = true;
+                    
+                    if (state.currentRole === 'karyawan') {
+                        // Untuk karyawan: hanya tampilkan tugas untuk divisinya
+                        const taskDivisi = task.target_divisi || 
+                                         (task.target_manager ? task.target_manager.divisi : null) ||
+                                         (task.assigned_user ? task.assigned_user.divisi : null);
+                        
+                        // Case-insensitive comparison
+                        const userDivisi = state.currentDivisi?.toLowerCase() || '';
+                        const targetDivisi = taskDivisi?.toLowerCase() || '';
+                        
+                        matchesDivisi = taskDivisi && 
+                                      (targetDivisi === userDivisi || 
+                                       task.is_for_me === true);
+                        
+                    } else if (state.currentRole === 'general_manager') {
+                        // Untuk general manager: gunakan filter dropdown
+                        const taskDivisi = task.target_divisi;
+                        matchesDivisi = divisiFilter === 'all' || 
+                                      (taskDivisi && taskDivisi.toLowerCase() === divisiFilter.toLowerCase());
+                    }
+                    
+                    // Filter berdasarkan tab yang aktif (hanya untuk general manager)
+                    if (state.currentRole === 'general_manager') {
+                        if (state.currentTab === 'my-tasks') {
+                            return matchesSearch && matchesStatus && matchesDivisi && 
+                                   task.created_by === state.currentUser.id;
+                        } else if (state.currentTab === 'team-tasks') {
+                            return matchesSearch && matchesStatus && matchesDivisi;
+                        }
+                    }
+                    
+                    // Untuk karyawan, tampilkan semua tugas untuk divisinya
+                    return matchesSearch && matchesStatus && matchesDivisi;
+                });
+                
+                state.currentPage = 1;
+                render.renderTable();
+            },
+            
+            renderTable: () => {
+                const start = (state.currentPage - 1) * state.itemsPerPage;
+                const end = Math.min(start + state.itemsPerPage, state.filteredTasks.length);
+                const pageTasks = state.filteredTasks.slice(start, end);
+                
+                document.getElementById('totalCount').textContent = state.filteredTasks.length;
+                document.getElementById('showingCount').textContent = pageTasks.length;
+                
+                // Update panel title berdasarkan role dan tab
+                let panelTitle = 'Daftar Tugas';
+                if (state.currentRole === 'karyawan') {
+                    panelTitle = `Tugas Divisi ${state.currentDivisi}`;
+                } else if (state.currentRole === 'general_manager') {
+                    const panelTitles = {
+                        'my-tasks': 'Tugas yang Dibuat',
+                        'team-tasks': 'Tugas yang Diterima'
+                    };
+                    panelTitle = panelTitles[state.currentTab] || 'Daftar Tugas';
+                }
+                document.getElementById('panelTitle').textContent = panelTitle;
+                
+                const desktopTbody = document.getElementById('desktopTableBody');
+                desktopTbody.innerHTML = '';
+                
+                if (pageTasks.length === 0) {
+                    document.getElementById('noDataMessage').style.display = 'block';
+                    document.getElementById('desktopTable').style.display = 'none';
+                    document.getElementById('desktopPaginationContainer').style.display = 'none';
+                    document.querySelector('.mobile-pagination').style.display = 'none';
+                    
+                    // Update no data message based on role
+                    const noDataText = document.getElementById('noDataMessageText');
+                    if (state.currentRole === 'karyawan') {
+                        noDataText.textContent = `Tidak ada tugas ditemukan untuk divisi ${state.currentDivisi}`;
+                    }
+                    
+                    return;
+                }
+                
+                // Render desktop table
+                pageTasks.forEach((task, index) => {
+                    const rowNum = start + index + 1;
+                    const isOwner = state.currentRole === 'general_manager' && 
+                                   state.currentTab === 'my-tasks' && 
+                                   task.created_by === state.currentUser.id;
+                    
+                    desktopTbody.innerHTML += `
+                        <tr>
+                            <td>${rowNum}</td>
+                            <td class="font-medium">${task.judul}</td>
+                            <td class="truncate-text" title="${task.deskripsi}">${task.deskripsi.substring(0, 50)}${task.deskripsi.length > 50 ? '...' : ''}</td>
+                            <td class="${task.is_overdue ? 'text-red-600 font-semibold' : ''}">
+                                ${utils.formatDate(task.deadline)}
+                                ${task.is_overdue ? ' (Terlambat)' : ''}
+                            </td>
+                            <td>${task.assignee_text || '-'}</td>
+                            <td>
+                                <span class="badge ${utils.getDivisiClass(task.target_divisi)}">
+                                    ${task.target_divisi || '-'}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge ${utils.getStatusClass(task.status)} ${task.is_overdue ? 'status-dibatalkan' : ''}">
+                                    ${utils.getStatusText(task.status)}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="flex justify-center gap-2">
+                                    <button onclick="modal.showDetail(${task.id})" class="p-2 rounded-full hover:bg-blue-100" title="Detail">
+                                        <span class="material-icons-outlined text-blue-600">visibility</span>
+                                    </button>
+                                    ${isOwner ? `
+                                        <button onclick="modal.showEdit(${task.id})" class="p-2 rounded-full hover:bg-blue-100" title="Edit">
+                                            <span class="material-icons-outlined text-green-600">edit</span>
+                                        </button>
+                                        <button onclick="modal.showDelete(${task.id})" class="p-2 rounded-full hover:bg-red-100" title="Hapus">
+                                            <span class="material-icons-outlined text-red-600">delete</span>
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                // Render mobile cards
+                const mobileContainer = document.getElementById('mobile-cards');
+                mobileContainer.innerHTML = pageTasks.map((task, index) => {
+                    const rowNum = start + index + 1;
+                    const isOwner = state.currentRole === 'general_manager' && 
+                                   state.currentTab === 'my-tasks' && 
+                                   task.created_by === state.currentUser.id;
+                    
+                    return `
+                        <div class="bg-white rounded-lg border border-gray-300 p-4 shadow-sm">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h4 class="font-semibold text-base">${task.judul}</h4>
+                                    <div class="flex flex-wrap items-center gap-2 mt-1">
+                                        <span class="badge ${utils.getDivisiClass(task.target_divisi)} text-xs">
+                                            ${task.target_divisi || '-'}
+                                        </span>
+                                        <span class="badge ${utils.getStatusClass(task.status)} ${task.is_overdue ? 'status-dibatalkan' : ''} text-xs">
+                                            ${utils.getStatusText(task.status)}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-1">
+                                    <button onclick="modal.showDetail(${task.id})" class="p-2" title="Detail">
+                                        <span class="material-icons-outlined text-blue-600">visibility</span>
+                                    </button>
+                                    ${isOwner ? `
+                                        <button onclick="modal.showEdit(${task.id})" class="p-2" title="Edit">
+                                            <span class="material-icons-outlined text-green-600">edit</span>
+                                        </button>
+                                        <button onclick="modal.showDelete(${task.id})" class="p-2" title="Hapus">
+                                            <span class="material-icons-outlined text-red-600">delete</span>
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-sm mb-3">
+                                <div><p class="text-gray-600">Deadline</p><p class="font-medium ${task.is_overdue ? 'text-red-600' : ''}">${utils.formatDate(task.deadline)} ${task.is_overdue ? '(Terlambat)' : ''}</p></div>
+                                <div><p class="text-gray-600">Ditugaskan kepada</p><p class="font-medium">${task.assignee_text || '-'}</p></div>
+                                <div><p class="text-gray-600">Dibuat oleh</p><p class="font-medium">${task.creator_name || '-'}</p></div>
+                            </div>
+                            <p class="text-sm text-gray-600 truncate">${task.deskripsi.substring(0, 60)}${task.deskripsi.length > 60 ? '...' : ''}</p>
+                        </div>
+                    `;
+                }).join('');
+                
+                document.getElementById('noDataMessage').style.display = 'none';
+                document.getElementById('desktopTable').style.display = 'block';
+                document.getElementById('mobile-cards').style.display = window.innerWidth < 640 ? 'block' : 'none';
+                
+                render.updatePagination();
+            },
+            
+            updatePagination: () => {
+                state.totalPages = Math.ceil(state.filteredTasks.length / state.itemsPerPage);
+                
+                // Desktop pagination
+                const desktopPageNumbers = document.getElementById('desktopPageNumbers');
+                desktopPageNumbers.innerHTML = '';
+                
+                for (let i = 1; i <= state.totalPages; i++) {
+                    const btn = document.createElement('button');
+                    btn.textContent = i;
+                    btn.className = i === state.currentPage ? 'desktop-page-btn active' : 'desktop-page-btn';
+                    btn.addEventListener('click', () => {
+                        state.currentPage = i;
+                        render.renderTable();
+                    });
+                    desktopPageNumbers.appendChild(btn);
+                }
+                
+                document.getElementById('desktopPrevPage').disabled = state.currentPage === 1;
+                document.getElementById('desktopNextPage').disabled = state.currentPage === state.totalPages;
+                
+                // Mobile pagination
+                const mobilePageNumbers = document.getElementById('pageNumbers');
+                mobilePageNumbers.innerHTML = '';
+                
+                for (let i = 1; i <= state.totalPages; i++) {
+                    const btn = document.createElement('button');
+                    btn.textContent = i;
+                    btn.className = `w-8 h-8 rounded-full flex items-center justify-center text-sm ${i === state.currentPage ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'}`;
+                    btn.addEventListener('click', () => {
+                        state.currentPage = i;
+                        render.renderTable();
+                    });
+                    mobilePageNumbers.appendChild(btn);
+                }
+                
+                document.getElementById('prevPage').disabled = state.currentPage === 1;
+                document.getElementById('nextPage').disabled = state.currentPage === state.totalPages;
+                
+                // Show/hide pagination
+                const desktopPagination = document.getElementById('desktopPaginationContainer');
+                const mobilePagination = document.querySelector('.mobile-pagination');
+                
+                if (state.totalPages > 1) {
+                    desktopPagination.style.display = 'flex';
+                    mobilePagination.style.display = window.innerWidth < 640 ? 'flex' : 'none';
+                } else {
+                    desktopPagination.style.display = 'none';
+                    mobilePagination.style.display = 'none';
+                }
+            }
+        };
+
+        // Modal Functions
+        const modal = {
+            showDetail: async (id) => {
+                try {
+                    const task = await api.getTaskDetail(id);
+                    
+                    utils.createModal('Detail Tugas', `
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><h4 class="text-sm text-gray-600">ID</h4><p class="font-medium">#${task.id}</p></div>
+                                <div><h4 class="text-sm text-gray-600">Judul</h4><p class="font-medium">${task.judul}</p></div>
+                                <div><h4 class="text-sm text-gray-600">Deadline</h4><p class="font-medium">${utils.formatDateTime(task.deadline)}</p></div>
+                                <div><h4 class="text-sm text-gray-600">Status</h4><span class="badge ${utils.getStatusClass(task.status)}">${utils.getStatusText(task.status)}</span></div>
+                                <div><h4 class="text-sm text-gray-600">Divisi</h4><span class="badge ${utils.getDivisiClass(task.assigned_user?.divisi || task.target_divisi || task.target_manager?.divisi || '')}">
+                                    ${task.assigned_user?.divisi || task.target_divisi || task.target_manager?.divisi || '-'}
+                                </span></div>
+                                <div><h4 class="text-sm text-gray-600">Ditugaskan kepada</h4><p class="font-medium">${task.assigned_user?.name || task.target_manager?.name || '-'}</p></div>
+                                <div><h4 class="text-sm text-gray-600">Dibuat oleh</h4><p class="font-medium">${task.creator?.name || '-'}</p></div>
+                                <div><h4 class="text-sm text-gray-600">Dibuat pada</h4><p class="font-medium">${utils.formatDateTime(task.created_at)}</p></div>
+                                ${task.completed_at ? `<div><h4 class="text-sm text-gray-600">Selesai pada</h4><p class="font-medium">${utils.formatDateTime(task.completed_at)}</p></div>` : ''}
+                            </div>
+                            <div><h4 class="text-sm text-gray-600">Deskripsi Lengkap</h4><p class="mt-1 whitespace-pre-line">${task.deskripsi}</p></div>
+                            ${task.catatan ? `<div><h4 class="text-sm text-gray-600">Catatan</h4><p class="mt-1 whitespace-pre-line">${task.catatan}</p></div>` : ''}
+                            ${task.catatan_update ? `<div><h4 class="text-sm text-gray-600">Catatan Update</h4><p class="mt-1 whitespace-pre-line">${task.catatan_update}</p></div>` : ''}
+                            <button class="close-modal px-4 py-2 btn-secondary rounded-lg w-full mt-4">Tutup</button>
+                        </div>
+                    `);
+                } catch (error) {
+                    utils.showToast('Gagal memuat detail tugas', 'error');
+                }
+            },
+            
+            showEdit: async (id) => {
+                try {
+                    const task = await api.getTaskDetail(id);
+                    
+                    if (task.created_by !== state.currentUser.id) {
+                        utils.showToast('Anda tidak memiliki izin untuk mengedit tugas ini', 'error');
+                        return;
+                    }
+                    
+                    const assigneeSelection = task.target_type === 'karyawan' ? `
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Pilih Karyawan *</label>
+                            <select name="assigned_to" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
+                                <option value="">Pilih Karyawan</option>
+                                ${state.karyawanList.map(k => `<option value="${k.id}" ${task.assigned_to == k.id ? 'selected' : ''}>${k.name} (${k.email}) - ${k.divisi}</option>`).join('')}
+                            </select>
+                        </div>
+                    ` : task.target_type === 'divisi' ? `
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Pilih Divisi *</label>
+                            <select name="target_divisi" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
+                                <option value="">Pilih Divisi</option>
+                                ${state.divisiList.map(d => `<option value="${d}" ${task.target_divisi === d ? 'selected' : ''}>${d}</option>`).join('')}
+                            </select>
+                        </div>
+                    ` : `
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Pilih Manajer *</label>
+                            <select name="target_manager_id" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
+                                <option value="">Pilih Manajer Divisi</option>
+                                ${state.managerList.map(m => `<option value="${m.id}" ${task.target_manager_id == m.id ? 'selected' : ''}>${m.name} (${m.divisi})</option>`).join('')}
+                            </select>
+                        </div>
+                    `;
+                    
+                    utils.createModal('Edit Tugas', `
+                        <form id="editTaskForm">
+                            <input type="hidden" name="id" value="${task.id}">
+                            <input type="hidden" name="target_type" value="${task.target_type}">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Judul Tugas *</label>
+                                    <input name="judul" value="${task.judul}" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Deskripsi *</label>
+                                    <textarea name="deskripsi" rows="4" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>${task.deskripsi}</textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Deadline *</label>
+                                    <input type="datetime-local" name="deadline" value="${task.deadline ? task.deadline.substring(0, 16) : ''}" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
+                                </div>
+                                <div id="assigneeSelection">${assigneeSelection}</div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Status *</label>
+                                    <select name="status" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
+                                        <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                        <option value="proses" ${task.status === 'proses' ? 'selected' : ''}>Dalam Proses</option>
+                                        <option value="selesai" ${task.status === 'selesai' ? 'selected' : ''}>Selesai</option>
+                                        <option value="dibatalkan" ${task.status === 'dibatalkan' ? 'selected' : ''}>Dibatalkan</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Catatan (Opsional)</label>
+                                    <textarea name="catatan" rows="3" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Masukkan catatan">${task.catatan || ''}</textarea>
+                                </div>
+                                <div class="flex gap-2 pt-4 border-t">
+                                    <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg flex-1">Batal</button>
+                                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg flex-1">Update</button>
+                                </div>
+                            </div>
+                        </form>
+                    `, async (data) => {
+                        await api.updateTask(id, data);
+                    });
+                } catch (error) {
+                    utils.showToast('Gagal memuat data untuk edit', 'error');
+                }
+            },
+            
+            showDelete: async (id) => {
+                try {
+                    const task = await api.getTaskDetail(id);
+                    
+                    if (task.created_by !== state.currentUser.id) {
+                        utils.showToast('Anda tidak memiliki izin untuk menghapus tugas ini', 'error');
+                        return;
+                    }
+                    
+                    const modalEl = utils.createModal('Hapus Tugas', `
+                        <div class="space-y-4">
+                            <div class="text-center">
+                                <span class="material-icons-outlined text-red-600 text-5xl mb-4">warning</span>
+                                <h4 class="text-lg font-medium mb-2">Konfirmasi Hapus Tugas</h4>
+                                <p class="text-gray-600">Apakah Anda yakin ingin menghapus tugas ini?</p>
+                                <p class="font-medium mt-2">"${task.judul}"</p>
+                                <p class="text-sm text-gray-500 mt-1">Tindakan ini tidak dapat dibatalkan.</p>
+                            </div>
+                            <div class="flex gap-2 pt-4 border-t">
+                                <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg flex-1">Batal</button>
+                                <button type="button" id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg flex-1 hover:bg-red-700 transition-colors">Hapus</button>
+                            </div>
+                        </div>
+                    `);
+                    
+                    // Fix: Add event listener directly to the button
+                    const confirmBtn = modalEl.querySelector('#confirmDeleteBtn');
+                    confirmBtn.addEventListener('click', async () => {
+                        try {
+                            // Disable button to prevent multiple clicks
+                            confirmBtn.disabled = true;
+                            confirmBtn.innerHTML = '<span class="material-icons-outlined animate-spin mr-2">refresh</span>Menghapus...';
+                            
+                            await api.deleteTask(id);
+                            modalEl.remove();
+                        } catch (error) {
+                            // Re-enable button if deletion fails
+                            confirmBtn.disabled = false;
+                            confirmBtn.innerHTML = 'Hapus';
+                            utils.showToast('Gagal menghapus tugas: ' + error.message, 'error');
+                        }
+                    });
+                } catch (error) {
+                    utils.showToast('Gagal memuat data untuk hapus', 'error');
+                }
+            },
+            
+            showCreate: () => {
+                const modalEl = utils.createModal('Buat Tugas Baru', `
+                    <form id="createTaskForm">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Judul Tugas *</label>
+                                <input name="judul" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required placeholder="Masukkan judul tugas">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Deskripsi *</label>
+                                <textarea name="deskripsi" rows="4" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required placeholder="Masukkan deskripsi tugas"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Deadline *</label>
+                                <input type="datetime-local" name="deadline" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
+                            </div>
+                            <div>
+                                <div class="flex gap-2 mb-3" id="assigneeTypeContainer">
+                                    <button type="button" class="assignee-type-btn active flex-1" data-type="divisi">
+                                        <div class="flex flex-col items-center">
+                                            <span class="material-icons-outlined mb-1">groups</span>
+                                            <span class="text-xs">Divisi</span>
+                                        </div>
+                                    </button>
+                                    <button type="button" class="assignee-type-btn flex-1" data-type="manager">
+                                        <div class="flex flex-col items-center">
+                                            <span class="material-icons-outlined mb-1">supervisor_account</span>
+                                            <span class="text-xs">Manajer</span>
+                                        </div>
+                                    </button>
+                                </div>
+                                <input type="hidden" name="target_type" value="divisi">
+                            </div>
+                            <div id="assigneeSelection">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Pilih Divisi *</label>
+                                    <select name="target_divisi" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
+                                        <option value="">Pilih Divisi</option>
+                                        ${state.divisiList.map(d => `<option value="${d}">${d}</option>`).join('')}
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Status *</label>
+                                <select name="status" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
+                                    <option value="pending" selected>Pending</option>
+                                    <option value="proses">Dalam Proses</option>
+                                    <option value="selesai">Selesai</option>
+                                    <option value="dibatalkan">Dibatalkan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Catatan (Opsional)</label>
+                                <textarea name="catatan" rows="3" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Masukkan catatan"></textarea>
+                            </div>
+                            <div class="flex gap-2 pt-4 border-t">
+                                <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg flex-1">Batal</button>
+                                <button type="submit" class="px-4 py-2 btn-primary rounded-lg flex-1">Simpan</button>
+                            </div>
+                        </div>
+                    </form>
+                `, async (data) => {
+                    await api.createTask(data);
+                });
+                
+                // Add event listeners for assignee type buttons
+                setTimeout(() => {
+                    const assigneeTypeBtns = modalEl.querySelectorAll('.assignee-type-btn');
+                    assigneeTypeBtns.forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            assigneeTypeBtns.forEach(b => b.classList.remove('active'));
+                            this.classList.add('active');
+                            
+                            const type = this.dataset.type;
+                            modalEl.querySelector('input[name="target_type"]').value = type;
+                            
+                            const assigneeDiv = modalEl.querySelector('#assigneeSelection');
+                            const html = type === 'divisi' ? `
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Pilih Divisi *</label>
+                                    <select name="target_divisi" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
+                                        <option value="">Pilih Divisi</option>
+                                        ${state.divisiList.map(d => `<option value="${d}">${d}</option>`).join('')}
+                                    </select>
+                                </div>
+                            ` : `
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Pilih Manajer Divisi *</label>
+                                    <select name="target_manager_id" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
+                                        <option value="">Pilih Manajer Divisi</option>
+                                        ${state.managerList.map(m => `<option value="${m.id}">${m.name} (${m.divisi})</option>`).join('')}
+                                    </select>
+                                </div>
+                            `;
+                            
+                            assigneeDiv.innerHTML = html;
+                        });
+                    });
+                }, 100);
+            }
+        };
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Setup UI berdasarkan role
+            utils.setupUIByRole();
+            
+            // Initial load
+            api.fetchTasks();
+            
+            // Tab switching - hanya untuk General Manager
+            if (state.currentRole === 'general_manager') {
+                ['tabMyTasks', 'tabTeamTasks'].forEach(tabId => {
+                    document.getElementById(tabId).addEventListener('click', function() {
+                        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
+                        state.currentTab = this.dataset.tab;
+                        state.currentPage = 1;
+                        api.fetchTasks();
+                    });
+                });
+            }
+            
+            // Filters
+            document.getElementById('searchInput').addEventListener('input', render.filterTasks);
+            document.getElementById('statusFilter').addEventListener('change', render.filterTasks);
+            
+            // Divisi filter hanya untuk General Manager
+            if (state.currentRole === 'general_manager') {
+                document.getElementById('divisiFilter').addEventListener('change', render.filterTasks);
+            }
+            
+            // Buttons
+            document.getElementById('refreshBtn').addEventListener('click', () => {
+                api.fetchTasks();
+                utils.showToast('Data diperbarui');
             });
+            
+            // Buat tugas hanya untuk General Manager
+            if (state.currentRole === 'general_manager') {
+                document.getElementById('buatTugasBtn').addEventListener('click', modal.showCreate);
+            }
+            
+            document.getElementById('closeToast').addEventListener('click', () => {
+                document.getElementById('toast').classList.add('translate-y-20', 'opacity-0');
+            });
+            
+            // Pagination
+            ['desktopPrevPage', 'prevPage'].forEach(id => {
+                document.getElementById(id).addEventListener('click', () => {
+                    if (state.currentPage > 1) {
+                        state.currentPage--;
+                        render.renderTable();
+                    }
+                });
+            });
+            
+            ['desktopNextPage', 'nextPage'].forEach(id => {
+                document.getElementById(id).addEventListener('click', () => {
+                    if (state.currentPage < state.totalPages) {
+                        state.currentPage++;
+                        render.renderTable();
+                    }
+                });
+            });
+            
+            // Auto-refresh every 60 seconds
+            setInterval(() => {
+                api.fetchTasks();
+            }, 60000);
         });
     </script>
 </body>
