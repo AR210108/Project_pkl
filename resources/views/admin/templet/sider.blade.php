@@ -258,17 +258,9 @@
                 <span class="sidebar-text">Data Layanan</span>
             </a>
 
-<<<<<<< HEAD
         
 
-            <!-- Menu Absensi -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/admin/absensi" data-page="absensi">
-                <span class="material-icons sidebar-icon">schedule</span>
-                <span class="sidebar-text">Absensi</span>
-            </a>
-=======
->>>>>>> cec98305dcf5834bf7f5e73a9605a0a6f95af918
+          
 
             <!-- Menu Surat Kerjasama (Dropdown) -->
             <div class="relative">
@@ -297,35 +289,9 @@
                 </div>
             </div>
 
-<<<<<<< HEAD
-            <!-- Menu Invoice & Kwitansi -->
-            <div class="relative">
-                <button
-                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors w-full text-left"
-                    onclick="toggleDropdown('invoice-kwitansi-dropdown')" data-page="invoice_kwitansi">
-                    <span class="material-icons sidebar-icon">receipt</span>
-                    <span class="sidebar-text">Invoice & Kwitansi</span>
-                    <span class="material-icons sidebar-icon ml-auto transition-transform duration-200"
-                        id="invoice-kwitansi-icon">expand_more</span>
-                </button>
 
-                <div id="invoice-kwitansi-dropdown" class="pl-6 mt-1 space-y-1 hidden">
-                    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        href="/admin/invoice" data-page="invoice">
-                        <span class="material-icons sidebar-icon">description</span>
-                        <span class="sidebar-text">Invoice</span>
-                    </a>
 
-                    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        href="/admin/kwitansi" data-page="kwitansi">
-                        <span class="material-icons sidebar-icon">payments</span>
-                        <span class="sidebar-text">Kwitansi</span>
-                    </a>
-                </div>
-            </div>
-
-=======
->>>>>>> cec98305dcf5834bf7f5e73a9605a0a6f95af918
+             
             <!-- Catatan Rapat -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 href="/admin/catatan_rapat" data-page="catatan_rapat">

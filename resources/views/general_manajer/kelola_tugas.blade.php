@@ -83,49 +83,10 @@
         .tab-btn:not(.active):hover { background-color: #f1f5f9; }
         @media (max-width: 639px) { .desktop-table { display: none; } .mobile-cards { display: block; } .desktop-pagination { display: none !important; } }
         @media (min-width: 640px) { .desktop-table { display: block; } .mobile-cards { display: none; } .mobile-pagination { display: none !important; } }
-        
-        /* Debug Panel */
-        .debug-panel {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .debug-panel h3 {
-            margin: 0 0 10px 0;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .debug-info {
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 10px;
-            border-radius: 5px;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-        .debug-toggle {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-        .debug-toggle:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script>
-        // Helper function untuk route - DIPERBARUI
+        // Helper function untuk route
         function route(name, params = {}) {
             const routes = {
                 'general_manager.api.tasks': '/general-manajer/api/tasks',
@@ -137,7 +98,10 @@
                 'general_manager.tasks.assign': '/general-manajer/tasks/{id}/assign',
                 'general_manager.tasks.destroy': '/general-manajer/tasks/{id}',
                 'general_manager.tasks.delete': '/general-manajer/tasks/{id}/delete',
-                'karyawan.api.tasks': '/api/tasks/for-karyawan', // Endpoint khusus karyawan
+                'karyawan.api.tasks': '/api/karyawan/tasks',
+                'karyawan.api.today-status': '/api/karyawan/today-status',
+                'karyawan.api.history': '/api/karyawan/history',
+                'karyawan.api.dashboard-data': '/api/karyawan/dashboard-data',
             };
             
             let url = routes[name] || '#';
@@ -154,26 +118,6 @@
     <div class="main-content">
         <main class="flex-1 flex flex-col">
             <div class="flex-1 p-3 sm:p-8">
-                <!-- Debug Panel -->
-                <div class="debug-panel">
-                    <h3>
-                        <span class="material-icons-outlined">bug_report</span>
-                        Debug Information
-                    </h3>
-                    <div class="debug-info">
-                        <div>User ID: <span id="debugUserId">{{ auth()->user()->id ?? 'N/A' }}</span></div>
-                        <div>Role: <span id="debugRole">{{ auth()->user()->role ?? 'N/A' }}</span></div>
-                        <div>Divisi: <span id="debugDivisi">{{ auth()->user()->divisi ?? 'N/A' }}</span></div>
-                        <div>API Status: <span id="debugApiStatus">Not loaded</span></div>
-                        <div>Total Tasks: <span id="debugTotalTasks">0</span></div>
-                        <div>Filtered Tasks: <span id="debugFilteredTasks">0</span></div>
-                    </div>
-                    <button class="debug-toggle" onclick="toggleDebugDetails()">Show/Hide Details</button>
-                    <div id="debugDetails" class="mt-3 hidden">
-                        <pre id="debugConsole" class="text-xs bg-black bg-opacity-50 p-3 rounded overflow-auto max-h-40"></pre>
-                    </div>
-                </div>
-
                 <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">
                     <span id="pageTitle">Kelola Tugas</span>
                 </h2>
@@ -401,44 +345,6 @@
             currentTab: 'my-tasks'
         };
 
-        // Debug logging
-        function debugLog(message, data = null) {
-            const timestamp = new Date().toLocaleTimeString();
-            const logMessage = `[${timestamp}] ${message}`;
-            
-            console.log(logMessage, data || '');
-            
-            // Update debug console
-            const debugConsole = document.getElementById('debugConsole');
-            if (debugConsole) {
-                let text = debugConsole.textContent;
-                text = logMessage + (data ? ': ' + JSON.stringify(data, null, 2) : '') + '\n' + text;
-                debugConsole.textContent = text.substring(0, 5000); // Limit to 5000 chars
-            }
-            
-            // Update debug info
-            updateDebugInfo();
-        }
-
-        function updateDebugInfo() {
-            document.getElementById('debugUserId').textContent = state.currentUser?.id || 'N/A';
-            document.getElementById('debugRole').textContent = state.currentRole || 'N/A';
-            document.getElementById('debugDivisi').textContent = state.currentDivisi || 'N/A';
-            document.getElementById('debugTotalTasks').textContent = state.allTasks.length;
-            document.getElementById('debugFilteredTasks').textContent = state.filteredTasks.length;
-        }
-
-        function toggleDebugDetails() {
-            const details = document.getElementById('debugDetails');
-            details.classList.toggle('hidden');
-        }
-
-        // Initialize debug
-        debugLog('=== SYSTEM INITIALIZED ===');
-        debugLog('Current User', state.currentUser);
-        debugLog('Current Role', state.currentRole);
-        debugLog('Current Divisi', state.currentDivisi);
-
         // Utility Functions
         const utils = {
             getStatusClass: (status) => `status-${status}`,
@@ -516,8 +422,6 @@
                 const isGeneralManager = state.currentRole === 'general_manager';
                 const isKaryawan = state.currentRole === 'karyawan';
                 
-                debugLog('Setting up UI for role', state.currentRole);
-                
                 // Update page title
                 const pageTitle = document.getElementById('pageTitle');
                 if (isKaryawan) {
@@ -571,15 +475,11 @@
                     headers['Content-Type'] = 'application/json';
                 }
                 
-                debugLog('API Request', { url, method: options.method || 'GET' });
-                
                 try {
                     const response = await fetch(url, {
                         headers,
                         ...options
                     });
-                    
-                    debugLog('API Response Status', response.status);
                     
                     if (!response.ok) {
                         let errorMessage = `Request failed: ${response.status}`;
@@ -595,11 +495,9 @@
                     }
                     
                     const data = await response.json();
-                    debugLog('API Response Data', { length: Array.isArray(data) ? data.length : 'N/A', type: typeof data });
                     return data;
                     
                 } catch (error) {
-                    debugLog('API Request Error', error.message);
                     throw error;
                 }
             },
@@ -607,56 +505,18 @@
             fetchTasks: async () => {
                 utils.showLoading(true);
                 try {
-                    debugLog('=== FETCHING TASKS ===');
-                    debugLog('User role', state.currentRole);
-                    debugLog('User divisi', state.currentDivisi);
-                    
                     // Tentukan endpoint berdasarkan role
                     let endpoint;
                     if (state.currentRole === 'karyawan') {
                         endpoint = route('karyawan.api.tasks');
-                        debugLog('Using karyawan endpoint', endpoint);
                     } else {
                         endpoint = route('general_manager.api.tasks');
-                        debugLog('Using general manager endpoint', endpoint);
                     }
                     
                     const result = await api.request(endpoint);
                     
-                    // Log semua tugas untuk debugging
-                    debugLog('Total tasks received', result.length);
-                    
-                    // Debug: Tampilkan tugas untuk divisi Digital Marketing
-                    if (state.currentDivisi === 'Digital Marketing' || state.currentDivisi === 'digital marketing') {
-                        const marketingTasks = result.filter(task => {
-                            const taskDivisi = task.target_divisi || 
-                                             (task.target_manager ? task.target_manager.divisi : null) ||
-                                             (task.assigned_user ? task.assigned_user.divisi : null);
-                            return taskDivisi && taskDivisi.toLowerCase().includes('marketing');
-                        });
-                        debugLog('Marketing tasks found', marketingTasks.length);
-                        debugLog('Marketing tasks details', marketingTasks);
-                    }
-                    
-                    // Debug: Tampilkan semua tugas dengan divisi
-                    result.forEach((task, index) => {
-                        const taskDivisi = task.target_divisi || 
-                                         (task.target_manager ? task.target_manager.divisi : null) ||
-                                         (task.assigned_user ? task.assigned_user.divisi : null);
-                        debugLog(`Task ${index + 1}: ${task.judul}`, {
-                            id: task.id,
-                            divisi: taskDivisi,
-                            target_type: task.target_type,
-                            is_for_me: task.is_for_me
-                        });
-                    });
-                    
                     state.allTasks = Array.isArray(result) ? result : [];
                     state.filteredTasks = [...state.allTasks];
-                    
-                    // Update API status
-                    document.getElementById('debugApiStatus').textContent = 'Loaded successfully';
-                    document.getElementById('debugApiStatus').style.color = '#10b981';
                     
                     render.renderTable();
                     
@@ -665,15 +525,9 @@
                         await api.updateStatistics();
                     }
                 } catch (error) {
-                    debugLog('Error fetching tasks', error.message);
                     utils.showToast('Gagal memuat data tugas: ' + error.message, 'error');
                     state.allTasks = [];
                     state.filteredTasks = [];
-                    
-                    // Update API status
-                    document.getElementById('debugApiStatus').textContent = 'Failed: ' + error.message;
-                    document.getElementById('debugApiStatus').style.color = '#ef4444';
-                    
                     render.renderTable();
                 } finally {
                     utils.showLoading(false);
@@ -689,7 +543,7 @@
                     document.getElementById('completedTasks').textContent = result.completed || 0;
                     document.getElementById('cancelledTasks').textContent = result.cancelled || 0;
                 } catch (error) {
-                    debugLog('Error fetching statistics', error.message);
+                    console.error('Error fetching statistics:', error);
                 }
             },
             
@@ -718,35 +572,13 @@
                             method: 'DELETE'
                         });
                     } catch (deleteError) {
-                        debugLog('DELETE method failed', deleteError.message);
-                        
                         try {
-                            // Approach 2: Try POST with _method=DELETE
-                            result = await api.request(route('general_manager.tasks.destroy', { id }), { 
-                                method: 'POST',
-                                body: JSON.stringify({
-                                    _method: 'DELETE'
-                                })
+                            // Approach 2: Try a dedicated delete endpoint
+                            result = await api.request(route('general_manager.tasks.delete', { id }), { 
+                                method: 'POST'
                             });
                         } catch (postError) {
-                            debugLog('POST with _method=DELETE failed', postError.message);
-                            
-                            try {
-                                // Approach 3: Try PUT with a delete flag
-                                result = await api.request(route('general_manager.tasks.update', { id }), { 
-                                    method: 'PUT',
-                                    body: JSON.stringify({
-                                        delete_task: true
-                                    })
-                                });
-                            } catch (putError) {
-                                debugLog('PUT with delete flag failed', putError.message);
-                                
-                                // Approach 4: Try a dedicated delete endpoint
-                                result = await api.request(route('general_manager.tasks.delete', { id }), { 
-                                    method: 'POST'
-                                });
-                            }
+                            throw new Error('Gagal menghapus tugas');
                         }
                     }
                     
@@ -757,7 +589,6 @@
                         throw new Error(result.message || 'Failed to delete task');
                     }
                 } catch (error) {
-                    debugLog('Delete task error', error.message);
                     throw error;
                 }
             },
@@ -805,13 +636,6 @@
                 const statusFilter = document.getElementById('statusFilter').value;
                 const divisiFilter = document.getElementById('divisiFilter').value;
                 
-                debugLog('=== FILTERING TASKS ===');
-                debugLog('Search term', searchTerm);
-                debugLog('Status filter', statusFilter);
-                debugLog('Divisi filter', divisiFilter);
-                debugLog('User role', state.currentRole);
-                debugLog('User divisi', state.currentDivisi);
-                
                 state.filteredTasks = state.allTasks.filter(task => {
                     const matchesSearch = 
                         task.judul?.toLowerCase().includes(searchTerm) ||
@@ -838,14 +662,6 @@
                                       (targetDivisi === userDivisi || 
                                        task.is_for_me === true);
                         
-                        debugLog(`Task ${task.id} filtering`, {
-                            judul: task.judul,
-                            task_divisi: taskDivisi,
-                            user_divisi: state.currentDivisi,
-                            matches: matchesDivisi,
-                            is_for_me: task.is_for_me
-                        });
-                        
                     } else if (state.currentRole === 'general_manager') {
                         // Untuk general manager: gunakan filter dropdown
                         const taskDivisi = task.target_divisi;
@@ -867,12 +683,6 @@
                     return matchesSearch && matchesStatus && matchesDivisi;
                 });
                 
-                debugLog('Filtering results', {
-                    total: state.allTasks.length,
-                    filtered: state.filteredTasks.length,
-                    tasks: state.filteredTasks.map(t => ({ id: t.id, judul: t.judul, divisi: t.target_divisi }))
-                });
-                
                 state.currentPage = 1;
                 render.renderTable();
             },
@@ -881,12 +691,6 @@
                 const start = (state.currentPage - 1) * state.itemsPerPage;
                 const end = Math.min(start + state.itemsPerPage, state.filteredTasks.length);
                 const pageTasks = state.filteredTasks.slice(start, end);
-                
-                debugLog('Rendering table', {
-                    page: state.currentPage,
-                    showing: pageTasks.length,
-                    total: state.filteredTasks.length
-                });
                 
                 document.getElementById('totalCount').textContent = state.filteredTasks.length;
                 document.getElementById('showingCount').textContent = pageTasks.length;
@@ -1074,7 +878,7 @@
             }
         };
 
-        // Modal Functions (sama seperti sebelumnya)
+        // Modal Functions
         const modal = {
             showDetail: async (id) => {
                 try {
@@ -1337,8 +1141,6 @@
 
         // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
-            debugLog('DOM Content Loaded');
-            
             // Setup UI berdasarkan role
             utils.setupUIByRole();
             
@@ -1369,7 +1171,6 @@
             
             // Buttons
             document.getElementById('refreshBtn').addEventListener('click', () => {
-                debugLog('Manual refresh triggered');
                 api.fetchTasks();
                 utils.showToast('Data diperbarui');
             });
@@ -1404,19 +1205,9 @@
             
             // Auto-refresh every 60 seconds
             setInterval(() => {
-                debugLog('Auto-refresh triggered');
                 api.fetchTasks();
             }, 60000);
         });
-
-        // Make functions available globally
-        window.modal = modal;
-        window.state = state;
-        window.api = api;
-        window.utils = utils;
-        window.render = render;
-        window.debugLog = debugLog;
-        window.toggleDebugDetails = toggleDebugDetails;
     </script>
 </body>
 </html>

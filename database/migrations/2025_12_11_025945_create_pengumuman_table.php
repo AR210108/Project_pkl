@@ -13,11 +13,17 @@ return new class extends Migration
     {
         Schema::create('pengumuman', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')
+                  ->constrained()
+                  ->onDelete('cascade'); // User yang membuat pengumuman
             $table->string('judul');
             $table->text('isi_pesan');
-            $table->string('kepada');
-            $table->string('lampiran')->nullable();
-            $table->timestamps();
+            $table->string('lampiran')->nullable(); // Path/file lampiran
+            $table->timestamps(); // created_at, updated_at
+            
+            // Index untuk performa query
+            $table->index(['user_id', 'created_at']);
+            $table->index('created_at');
         });
     }
 

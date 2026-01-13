@@ -98,75 +98,20 @@
 
 <body class="bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark min-h-screen">
 
-    <!-- FIX: Pastikan $tasks selalu terdefinisi -->
     @php
         // Pastikan $tasks selalu terdefinisi
         $tasks = $tasks ?? collect([]);
         $error = $error ?? null;
-        
-        // Debug info - FIXED: menggunakan field yang benar
-        $debugInfo = [
-            'route' => Route::currentRouteName(),
-            'tasks_count' => $tasks->count(),
-            'user_id' => auth()->id(),
-            'user_name' => auth()->user()->name ?? 'Guest',
-            'user_role' => auth()->user()->role ?? 'guest',
-            'tasks_assigned_to_me' => \App\Models\Task::where('assigned_to', auth()->id())->whereNull('deleted_at')->count()
-        ];
     @endphp
-
-    <!-- DEBUG PANEL (Hanya di development) -->
-    @if(config('app.debug'))
-    <div class="fixed top-4 right-4 bg-blue-600 text-white p-4 z-50 text-xs max-w-md shadow-2xl rounded-xl">
-        <div class="flex items-center justify-between mb-2">
-            <strong class="text-sm">🔍 DEBUG TUGAS</strong>
-            <button onclick="this.parentElement.parentElement.remove()" class="text-white text-lg">&times;</button>
-        </div>
-        <div class="space-y-1">
-            <div><strong>File:</strong> karyawan/list.blade.php</div>
-            <div><strong>Route:</strong> {{ $debugInfo['route'] }}</div>
-            <div><strong>User:</strong> {{ $debugInfo['user_name'] }} (ID: {{ $debugInfo['user_id'] }})</div>
-            <div><strong>Role:</strong> {{ $debugInfo['user_role'] }}</div>
-            <div><strong>Tasks Found:</strong> {{ $debugInfo['tasks_count'] }}</div>
-            <div><strong>Tasks Assigned to Me:</strong> {{ $debugInfo['tasks_assigned_to_me'] }}</div>
-        </div>
-        @if($debugInfo['tasks_count'] > 0)
-        <details class="mt-2">
-            <summary class="cursor-pointer text-cyan-300 text-xs">Lihat Data Tasks</summary>
-            <pre class="bg-black/50 p-2 rounded mt-1 text-xs overflow-x-auto max-h-40 overflow-y-auto">
-{{ json_encode($tasks->take(2)->toArray(), JSON_PRETTY_PRINT) }}
-            </pre>
-        </details>
-        @endif
-        <div class="mt-2 pt-2 border-t border-white/20">
-            <a href="{{ route('karyawan.home') }}" class="text-cyan-300 text-xs block">← Dashboard</a>
-        </div>
-    </div>
-    @endif
 
     <!-- Header -->
     @include('karyawan.templet.header')
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Breadcrumb -->
-        <nav class="flex mb-6" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li class="inline-flex items-center">
-                    <a href="{{ route('karyawan.home') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-primary dark:text-gray-400 dark:hover:text-white">
-                        <span class="material-symbols-outlined mr-2">home</span>
-                        Dashboard
-                    </a>
-                </li>
-                <li aria-current="page">
-                    <div class="flex items-center">
-                        <span class="material-symbols-outlined mx-2 text-gray-400">chevron_right</span>
-                        <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400">Tugas Saya</span>
-                    </div>
-                </li>
-            </ol>
-        </nav>
+      
 
-        <!-- Header -->
+        <!-- Page Header -->
         <div class="mb-8">
             <h1 class="text-3xl font-bold">Tugas Saya</h1>
             <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark mt-2">
@@ -268,14 +213,6 @@
                             <p class="mt-2 text-sm">
                                 Tugas baru akan muncul di sini ketika ditugaskan kepada Anda.
                             </p>
-                            @if(config('app.debug'))
-                                <div class="mt-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs">
-                                    <strong>Debug Info:</strong><br>
-                                    User ID: {{ auth()->id() }}<br>
-                                    Database has tasks: {{ \App\Models\Task::count() }} total<br>
-                                    Tasks assigned to you: {{ \App\Models\Task::where('assigned_to', auth()->id())->whereNull('deleted_at')->count() }}
-                                </div>
-                            @endif
                         </div>
                     @endif
                 </div>
@@ -527,10 +464,6 @@
             closeUploadModal: document.getElementById('closeUploadModal'),
             cancelUpload: document.getElementById('cancelUpload'),
         };
-
-        // Debug info
-        console.log('Tasks loaded from controller:', tasks);
-        console.log('Task cards in DOM:', elements.taskCards.length);
 
         // Fungsi untuk memilih task
         function selectTask(card) {
@@ -888,7 +821,7 @@
         }
 
         // Initialize
-        console.log('Task management system initialized');x
+        console.log('Task management system initialized');
         
         // Jika tidak ada tasks, disable button
         if (tasks.length === 0 && elements.uploadButton) {

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <aside class="w-64 bg-white dark:bg-gray-800 flex flex-col flex-shrink-0">
     <div class="h-20 flex items-center justify-center border-b border-gray-200 dark:border-gray-700">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Brand</h1>
@@ -26,10 +25,6 @@
         </form>
     </div>
 </aside>
-=======
-<!DOCTYPE html>
-<html lang="id">
->>>>>>> cec98305dcf5834bf7f5e73a9605a0a6f95af918
 
 <head>
     <meta charset="UTF-8">

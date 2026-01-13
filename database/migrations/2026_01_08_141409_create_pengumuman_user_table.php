@@ -11,19 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-Schema::create('pengumuman_user', function (Blueprint $table) {
-    $table->id();
-
-    $table->foreignId('pengumuman_id')
-        ->constrained('pengumuman')
-        ->cascadeOnDelete();
-
-    $table->foreignId('user_id')
-        ->constrained('users')
-        ->cascadeOnDelete();
-});
-
-
+        Schema::create('pengumuman_user', function (Blueprint $table) {
+            $table->id();
+            
+            $table->foreignId('pengumuman_id')
+                  ->constrained('pengumuman')
+                  ->cascadeOnDelete();
+                  
+            $table->foreignId('user_id')
+                  ->constrained('users')
+                  ->cascadeOnDelete();
+                  
+            $table->timestamps();
+            
+            // Unique constraint untuk mencegah duplikasi
+            $table->unique(['pengumuman_id', 'user_id'], 'pengumuman_user_unique');
+            
+            // Index untuk performa query
+            $table->index('user_id');
+            $table->index(['pengumuman_id', 'created_at']);
+        });
     }
 
     /**
