@@ -13,23 +13,68 @@ class LayananController extends Controller
         return view('admin/data_layanan', compact('layanans'));
     }
 
+    public function indexLayanan(Request $request)
+    {
+        $query = Layanan::query();
+        
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('deskripsi', 'like', "%{$search}%");
+            });
+        }
+        
+        $pelayanan = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+        $search = $request->query('search');
+        
+        return view('general_manajer.data_layanan', compact('pelayanan', 'search'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
-            'nama_layanan' => 'required',
-            'harga'        => 'nullable|integer',
-            'status'       => 'required',
+            'nama'       => 'required',
+            'harga'      => 'required|integer',
+            'durasi'     => 'required',
+            'deskripsi'  => 'required',
+            'kategori'   => 'required',
         ]);
 
-        Layanan::create($request->all());
+        Layanan::create([
+            'nama' => $request->nama,
+            'harga' => $request->harga,
+            'durasi' => $request->durasi,
+            'deskripsi' => $request->deskripsi,
+            'kategori' => $request->kategori,
+        ]);
 
         return back()->with('success', 'Layanan berhasil ditambahkan!');
     }
 
-    public function update(Request $request, $id)
+    public function edit($id)
     {
         $layanan = Layanan::findOrFail($id);
-        $layanan->update($request->all());
+        return response()->json($layanan);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'nama'       => 'required',
+            'harga'      => 'required|integer',
+            'durasi'     => 'required',
+            'deskripsi'  => 'required',
+            'kategori'   => 'required',
+        ]);
+
+        $layanan = Layanan::findOrFail($id);
+        $layanan->update([
+            'nama' => $request->nama,
+            'harga' => $request->harga,
+            'durasi' => $request->durasi,
+            'deskripsi' => $request->deskripsi,
+            'kategori' => $request->kategori,
+        ]);
 
         return back()->with('success', 'Layanan berhasil diperbarui!');
     }

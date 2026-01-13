@@ -30,7 +30,8 @@ if (!function_exists('redirectToRolePage')) {
     {
         return match ($user->role) {
             'admin', 'finance' => redirect()->route("{$user->role}.beranda"),
-            'karyawan', 'general_manager', 'manager_divisi', 'owner' => redirect()->route("{$user->role}.home"),
+            'general_manager' => redirect()->route('general_manajer.home'),
+            'karyawan', 'manager_divisi', 'owner' => redirect()->route("{$user->role}.home"),
             default => redirect('/login')
         };
     }
@@ -74,6 +75,15 @@ Route::middleware('auth')->group(function () {
         request()->session()->regenerateToken();
         return redirect('/');
     })->name('logout.get');
+});
+
+// Pegawai resource routes (using KaryawanController methods for pegawai management)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/pegawai', [KaryawanController::class, 'indexPegawai'])->name('pegawai.index');
+    Route::post('/pegawai', [KaryawanController::class, 'storePegawai'])->name('pegawai.store');
+    Route::get('/pegawai/{id}/edit', [KaryawanController::class, 'editPegawai'])->name('pegawai.edit');
+    Route::put('/pegawai/{id}', [KaryawanController::class, 'updatePegawai'])->name('pegawai.update');
+    Route::delete('/pegawai/{id}', [KaryawanController::class, 'destroyPegawai'])->name('pegawai.destroy');
 });
 
 /*
