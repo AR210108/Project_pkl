@@ -546,7 +546,7 @@
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Total Kehadiran</p>
                                 <p class="text-xl md:text-2xl font-bold text-green-600">
-                                {{ $statistik['hadir'] }} 
+                                {{ $stats['total_tepat_waktu'] }} 
                             </p>
 
                             </div>
@@ -561,7 +561,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Tidak Hadir</p>
-                                <p class="text-xl md:text-2xl font-bold text-red-600">{{ $statistik['tidakMasuk'] }}</p>
+                                <p class="text-xl md:text-2xl font-bold text-red-600">{{ $stats['total_tidak_masuk'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -574,7 +574,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Izin</p>
-                                <p class="text-xl md:text-2xl font-bold text-blue-600">{{ $statistik['izin'] }}</p>
+                                <p class="text-xl md:text-2xl font-bold text-blue-600">{{ $stats['total_izin'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -587,7 +587,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Cuti</p>
-                                <p class="text-xl md:text-2xl font-bold text-yellow-600">{{ $statistik['cuti'] }}</p>
+                                <p class="text-xl md:text-2xl font-bold text-yellow-600">{{ $stats['total_cuti'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -600,7 +600,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Dinas Luar</p>
-                                <p class="text-xl md:text-2xl font-bold text-purple-600">{{ $statistik['dinas'] }}</p>
+                                <p class="text-xl md:text-2xl font-bold text-purple-600">{{ $stats['total_dinas_luar'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -613,7 +613,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Sakit</p>
-                                <p class="text-xl md:text-2xl font-bold text-orange-600">{{ $statistik['sakit'] }}</p>
+                                <p class="text-xl md:text-2xl font-bold text-orange-600">{{ $stats['total_sakit'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -639,7 +639,7 @@
                             Data Absensi
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="absensiCount">{{ $dataKehadiran->count() }}</span> data</span>
+                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="absensiCount">{{ $attendances->count() }}</span> data</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -698,7 +698,7 @@
                             Daftar Ketidakhadiran
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="ketidakhadiranCount">{{ $dataKetidakhadiran->count() }}</span> data</span>
+                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="ketidakhadiranCount">{{ $ketidakhadiran->count() }}</span> data</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -757,8 +757,8 @@
 
     <script>
         // Data dari controller
-        const absensiData = @json($dataKehadiran);
-        const ketidakhadiranData = @json($dataKetidakhadiran);
+        const absensiData = @json($attendances);
+        const ketidakhadiranData = @json($ketidakhadiran);
 
         // Pagination variables for absensi
         const absensiItemsPerPage = 10; // Diperbesar untuk menampilkan lebih banyak data

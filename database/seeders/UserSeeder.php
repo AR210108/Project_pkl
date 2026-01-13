@@ -12,16 +12,16 @@ class UserSeeder extends Seeder
     {
         // === OWNER & MANAGEMENT ===
         User::create([
-            'name' => 'Budi Santoso',
-            'email' => 'budi@gmail.com',
+            'name' => 'Owner',
+            'email' => 'owner@gmail.com',
             'password' => Hash::make('123'),
             'role' => 'owner',
             'divisi' => null
         ]);
 
         User::create([
-            'name' => 'Siti Rahayu',
-            'email' => 'siti@gmail.com',
+            'name' => 'General Manager',
+            'email' => 'general@gmail.com',
             'password' => Hash::make('123'),
             'role' => 'general_manager',
             'divisi' => null
