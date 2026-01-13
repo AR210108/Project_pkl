@@ -17,6 +17,7 @@ use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\SuratKerjasamaController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\GeneralManagerTaskController;
+use App\Http\Controllers\KaryawanProfileController;
 use App\Http\Controllers\ManagerDivisiTaskController;
 use App\Http\Controllers\PelayananController;
 
