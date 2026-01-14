@@ -43,13 +43,11 @@ if (!function_exists('redirectToRolePage')) {
 | Guest Routes (Pengunjung Belum Login)
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () {
-    if (Auth::check()) {
-        $user = Auth::user();
-        return redirectToRolePage($user);
-    }
-    return view('home');
-})->name('landing');
+Route::get('/users/data', [UserController::class, 'data'])
+    ->middleware('auth');
+// Redirect default ke halaman home
+Route::get('/', [LayananController::class, 'landingPage'])->name('home');
+
 
 Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login-process', [LoginController::class, 'login'])->name('login.process');
