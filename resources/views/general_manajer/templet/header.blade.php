@@ -69,7 +69,7 @@
                 <span class="material-icons">home</span>
                 <span>Beranda</span>
             </a>
-            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded" href="/general-manajer/data-karyawan">
+            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded" href="/general-manajer/data_karyawan">
                 <span class="material-icons">group</span>
                 <span>Data Karyawan</span>
             </a>
