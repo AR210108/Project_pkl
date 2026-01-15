@@ -295,12 +295,11 @@ Route::middleware(['auth', 'role:karyawan'])
 
         //profile
         // PROFILE (BENAR)
-Route::get('/profile', [KaryawanProfileController::class, 'index'])
-    ->name('profile');
+        Route::get('/profile', [KaryawanProfileController::class, 'index'])
+            ->name('profile');
 
-Route::post('/profile/update', [KaryawanProfileController::class, 'update'])
-    ->name('profile.update');
-
+        Route::post('/profile/update', [KaryawanProfileController::class, 'update'])
+            ->name('profile.update');
     });
 
 /*
@@ -371,9 +370,18 @@ Route::middleware(['auth', 'role:general_manager'])
                 ->name('karyawan.by_divisi');
         });
 
-        Route::get('/kelola-absen', function () {
-            return view('general_manajer.kelola_absen');
-        })->name('kelola_absen');
+        // KELOLA ABSENSI
+        Route::get('/kelola-absen', [AbsensiController::class, 'kelolaAbsen'])->name('kelola_absen');
+        
+        // NEW: KELOLA ABSENSI DASHBOARD (with API)
+        Route::get('/kelola-absensi', [AbsensiController::class, 'kelolaAbsensi'])->name('kelola_absensi');
+        
+        // API Routes untuk Absensi (General Manager)
+        Route::prefix('api')->group(function () {
+            Route::get('/absensi', [AbsensiController::class, 'apiIndex'])->name('api.absensi');
+            Route::get('/absensi/ketidakhadiran', [AbsensiController::class, 'apiIndexKetidakhadiran'])->name('api.ketidakhadiran');
+            Route::get('/absensi/stats', [AbsensiController::class, 'apiStatistics'])->name('api.stats');
+        });
     });
 
 /*
@@ -390,9 +398,7 @@ Route::middleware(['auth', 'role:owner'])
             return view('owner.home');
         })->name('home');
 
-        Route::get('/rekap-absen', function () {
-            return view('owner.rekap_absen');
-        })->name('rekap_absen');
+        Route::get('/rekap-absen', [AbsensiController::class, 'rekapAbsensi'])->name('rekap_absen');
 
         Route::get('/laporan', function () {
             return view('owner.laporan');
@@ -593,7 +599,8 @@ Route::get('/absensi', function () {
 
         return match ($user->role) {
             'admin' => redirect()->route('admin.absensi.index'),
-            'general_manager' => redirect()->route('general_manajer.kelola_absen'),
+            'general_manager' => redirect()->route('general_manajer.kelola_absensi'),
+            'owner' => redirect()->route('owner.rekap_absen'),
             default => redirect()->route('karyawan.absensi.page')
         };
     }
@@ -617,6 +624,143 @@ Route::get('/invoices/{invoice}/print', function (\App\Models\Invoice $invoice) 
 |--------------------------------------------------------------------------
 */
 if (config('app.debug')) {
+    // DEBUG ABSENSI GENERAL MANAGER
+    Route::get('/debug/absensi-gm', function () {
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Not authenticated'], 401);
+        }
+        
+        $user = auth()->user();
+        if ($user->role !== 'general_manager') {
+            return response()->json(['error' => 'Only for general manager'], 403);
+        }
+        
+        echo "<h2>Debug Absensi General Manager</h2>";
+        
+        // 1. Cek database
+        echo "<h3>1. Database Check</h3>";
+        $totalUsers = \App\Models\User::where('role', 'karyawan')->count();
+        $totalAbsensi = \App\Models\Absensi::count();
+        $absensiThisMonth = \App\Models\Absensi::whereBetween('tanggal', [
+            now()->startOfMonth()->format('Y-m-d'),
+            now()->endOfMonth()->format('Y-m-d')
+        ])->count();
+        
+        echo "Total karyawan: {$totalUsers}<br>";
+        echo "Total data absensi: {$totalAbsensi}<br>";
+        echo "Absensi bulan ini: {$absensiThisMonth}<br>";
+        
+        // 2. Cek query dari controller
+        echo "<h3>2. Test Query dari kelolaAbsen()</h3>";
+        
+        $startOfMonth = now()->startOfMonth()->format('Y-m-d');
+        $endOfMonth = now()->endOfMonth()->format('Y-m-d');
+        
+        // Query yang seharusnya di controller
+        $queries = [
+            'Hadir' => \App\Models\Absensi::whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+                ->whereNotNull('jam_masuk')
+                ->where('approval_status', 'approved'),
+            
+            'Izin' => \App\Models\Absensi::whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+                ->where('jenis_ketidakhadiran', 'izin')
+                ->where('approval_status', 'approved'),
+            
+            'Cuti' => \App\Models\Absensi::whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+                ->where('jenis_ketidakhadiran', 'cuti')
+                ->where('approval_status', 'approved'),
+            
+            'Sakit' => \App\Models\Absensi::whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+                ->where('jenis_ketidakhadiran', 'sakit')
+                ->where('approval_status', 'approved'),
+            
+            'Dinas Luar' => \App\Models\Absensi::whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+                ->where('jenis_ketidakhadiran', 'dinas-luar')
+                ->where('approval_status', 'approved'),
+        ];
+        
+        foreach ($queries as $label => $query) {
+            $count = $query->count();
+            $sql = $query->toSql();
+            $bindings = $query->getBindings();
+            
+            echo "<strong>{$label}:</strong> {$count}<br>";
+            echo "SQL: {$sql}<br>";
+            echo "Bindings: " . json_encode($bindings) . "<br><br>";
+        }
+        
+        // 3. Cek sample data
+        echo "<h3>3. Sample Data (10 terbaru)</h3>";
+        $sample = \App\Models\Absensi::with('user')
+            ->orderBy('tanggal', 'desc')
+            ->limit(10)
+            ->get();
+        
+        if ($sample->isEmpty()) {
+            echo "<p style='color: red;'>TIDAK ADA DATA ABSENSI!</p>";
+        } else {
+            echo "<table border='1' cellpadding='5'>";
+            echo "<tr><th>ID</th><th>User</th><th>Tanggal</th><th>Jam Masuk</th><th>Jenis</th><th>Approval</th></tr>";
+            
+            foreach ($sample as $item) {
+                echo "<tr>";
+                echo "<td>{$item->id}</td>";
+                echo "<td>" . ($item->user ? $item->user->name : 'N/A') . "</td>";
+                echo "<td>{$item->tanggal}</td>";
+                echo "<td>" . ($item->jam_masuk ?? 'NULL') . "</td>";
+                echo "<td>" . ($item->jenis_ketidakhadiran ?? 'NULL') . "</td>";
+                echo "<td>{$item->approval_status}</td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+        }
+        
+        // 4. Buat data test jika tidak ada
+        if ($totalAbsensi === 0 && $totalUsers > 0) {
+            echo "<h3>4. Membuat Data Test</h3>";
+            
+            $users = \App\Models\User::where('role', 'karyawan')->take(2)->get();
+            $created = 0;
+            
+            foreach ($users as $user) {
+                // Hadir hari ini
+                \App\Models\Absensi::create([
+                    'user_id' => $user->id,
+                    'tanggal' => now()->format('Y-m-d'),
+                    'jam_masuk' => '08:00',
+                    'jam_pulang' => '17:00',
+                    'approval_status' => 'approved',
+                ]);
+                $created++;
+                
+                // Izin kemarin
+                \App\Models\Absensi::create([
+                    'user_id' => $user->id,
+                    'tanggal' => now()->subDay()->format('Y-m-d'),
+                    'jenis_ketidakhadiran' => 'izin',
+                    'keterangan' => 'Ijin keluarga',
+                    'approval_status' => 'approved',
+                ]);
+                $created++;
+                
+                // Cuti 2 hari lalu
+                \App\Models\Absensi::create([
+                    'user_id' => $user->id,
+                    'tanggal' => now()->subDays(2)->format('Y-m-d'),
+                    'jenis_ketidakhadiran' => 'cuti',
+                    'keterangan' => 'Cuti tahunan',
+                    'approval_status' => 'approved',
+                ]);
+                $created++;
+            }
+            
+            echo "Created {$created} test records<br>";
+            echo "Total absensi sekarang: " . \App\Models\Absensi::count() . "<br>";
+        }
+        
+        dd('Debug selesai');
+    })->middleware('auth');
+
     Route::get('/debug/url-test', function () {
         $user = auth()->user();
         if (!$user)
@@ -634,6 +778,13 @@ if (config('app.debug')) {
             'general_manajer.tasks.assign' => route('general_manajer.tasks.assign', ['id' => 1]),
             'general_manajer.api.tasks' => route('general_manajer.api.tasks'),
             'general_manajer.api.tasks.statistics' => route('general_manajer.api.tasks.statistics'),
+            
+            // General Manager Absensi routes
+            'general_manajer.kelola_absensi' => route('general_manajer.kelola_absensi'),
+            'general_manajer.kelola_absen' => route('general_manajer.kelola_absen'),
+            'general_manajer.api.absensi' => route('general_manajer.api.absensi'),
+            'general_manajer.api.ketidakhadiran' => route('general_manajer.api.ketidakhadiran'),
+            'general_manajer.api.stats' => route('general_manajer.api.stats'),
 
             // Karyawan routes
             'karyawan.home' => route('karyawan.home'),
@@ -652,6 +803,10 @@ if (config('app.debug')) {
 
             // Admin routes
             'admin.beranda' => route('admin.beranda'),
+            'admin.absensi.index' => route('admin.absensi.index'),
+
+            // Owner routes
+            'owner.rekap_absen' => route('owner.rekap_absen'),
 
             // Global API routes
             'api.karyawan.history' => route('api.karyawan.history'),
