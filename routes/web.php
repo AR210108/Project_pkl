@@ -17,14 +17,16 @@ use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\SuratKerjasamaController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\GeneralManagerTaskController;
-use App\Http\Controllers\ManagerDivisiTaskController;
 use App\Http\Controllers\KaryawanProfileController;
+use App\Http\Controllers\ManagerDivisiTaskController;
+use App\Http\Controllers\PelayananController;
 
 /*
 |--------------------------------------------------------------------------
 | Helper Functions
 |--------------------------------------------------------------------------
 */
+
 if (!function_exists('redirectToRolePage')) {
     function redirectToRolePage($user)
     {
@@ -42,13 +44,11 @@ if (!function_exists('redirectToRolePage')) {
 | Guest Routes (Pengunjung Belum Login)
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () {
-    if (Auth::check()) {
-        $user = Auth::user();
-        return redirectToRolePage($user);
-    }
-    return view('home');
-})->name('landing');
+Route::get('/users/data', [UserController::class, 'data'])
+    ->middleware('auth');
+// Redirect default ke halaman home
+Route::get('/', [LayananController::class, 'landingPage'])->name('home');
+
 
 Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login-process', [LoginController::class, 'login'])->name('login.process');
@@ -270,7 +270,7 @@ Route::middleware(['auth', 'role:karyawan'])
             // Dashboard data - FIXED ROUTE
             Route::get('/dashboard', [KaryawanController::class, 'getDashboardData'])->name('dashboard');
             Route::get('/dashboard-data', [KaryawanController::class, 'getDashboardData'])->name('dashboard.data'); // Alias untuk kompatibilitas
-    
+
             // Absensi - Status Hari Ini
             Route::get('/today-status', [KaryawanController::class, 'getTodayStatus'])->name('today.status');
 
@@ -295,12 +295,11 @@ Route::middleware(['auth', 'role:karyawan'])
 
         //profile
         // PROFILE (BENAR)
-Route::get('/profile', [KaryawanProfileController::class, 'index'])
-    ->name('profile');
+        Route::get('/profile', [KaryawanProfileController::class, 'index'])
+            ->name('profile');
 
-Route::post('/profile/update', [KaryawanProfileController::class, 'update'])
-    ->name('profile.update');
-
+        Route::post('/profile/update', [KaryawanProfileController::class, 'update'])
+            ->name('profile.update');
     });
 
 /*
@@ -317,9 +316,8 @@ Route::middleware(['auth', 'role:general_manager'])
             return view('general_manajer.home');
         })->name('home');
 
-        Route::get('/data-karyawan', function () {
-            return view('general_manajer.data_karyawan');
-        })->name('data_karyawan');
+        Route::get('general-manajer/data_karyawan', [AdminKaryawanController::class, 'generalKaryawan'])
+            ->name('data_karyawan');
 
         Route::get('/layanan', function () {
             return view('general_manajer.data_layanan');
@@ -387,15 +385,13 @@ Route::middleware(['auth', 'role:owner'])
     ->name('owner.')
     ->group(function () {
         Route::get('/home', function () {
-            return view('owner.home');
+            return view('pemilik.home');
         })->name('home');
 
-        Route::get('/rekap-absen', function () {
-            return view('owner.rekap_absen');
-        })->name('rekap_absen');
+        Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');
 
         Route::get('/laporan', function () {
-            return view('owner.laporan');
+            return view('pemilik.laporan');
         })->name('laporan');
     });
 
@@ -480,14 +476,17 @@ Route::middleware(['auth', 'role:manager_divisi'])
 
             Route::get('/karyawan-by-divisi/{divisi}', [ManagerDivisiTaskController::class, 'getKaryawanByDivisi'])
                 ->name('karyawan.by_divisi');
+            Route::get('/daftar_karyawan/{divisi}', [AdminKaryawanController::class, 'karyawanDivisi'])
+                ->name('karyawan.divisi');
         });
+
 
         Route::get('/pengelola-tugas', function () {
             return view('manager_divisi.pengelola_tugas');
         })->name('pengelola_tugas');
 
         Route::get('/tim-saya', function () {
-            $user = auth()->user();
+            $user = Auth::user();
             $tim = \App\Models\User::where('divisi', $user->divisi)
                 ->where('role', 'karyawan')
                 ->get();
@@ -616,106 +615,106 @@ Route::get('/invoices/{invoice}/print', function (\App\Models\Invoice $invoice) 
 | Debug Routes untuk Testing
 |--------------------------------------------------------------------------
 */
-if (config('app.debug')) {
-    Route::get('/debug/url-test', function () {
-        $user = auth()->user();
-        if (!$user)
-            return 'Not authenticated';
+Route::get('/pemilik', function () {
+    return view('pemilik/home');
+});
+Route::get('/laporan', function () {
+    return view('pemilik/laporan');
+});
 
-        $routes = [
-            // General Manager routes
-            'general_manajer.kelola_tugas' => route('general_manajer.kelola_tugas'),
-            'general_manajer.tasks.store' => route('general_manajer.tasks.store'),
-            'general_manajer.tasks.show' => route('general_manajer.tasks.show', ['id' => 1]),
-            'general_manajer.tasks.update' => route('general_manajer.tasks.update', ['id' => 1]),
-            'general_manajer.tasks.destroy' => route('general_manajer.tasks.destroy', ['id' => 1]),
-            'general_manajer.tasks.delete' => route('general_manajer.tasks.delete', ['id' => 1]),
-            'general_manajer.tasks.update.status' => route('general_manajer.tasks.update.status', ['id' => 1]),
-            'general_manajer.tasks.assign' => route('general_manajer.tasks.assign', ['id' => 1]),
-            'general_manajer.api.tasks' => route('general_manajer.api.tasks'),
-            'general_manajer.api.tasks.statistics' => route('general_manajer.api.tasks.statistics'),
+/*
+|--------------------------------------------------------------------------
+| Routes untuk Finance
+|--------------------------------------------------------------------------
+*/
+Route::get('/finance', function () {
+    return view('finance/beranda');
+});
+Route::get('/data', function () {
+    return view('finance/data_layanan');
+});
+Route::get('/pembayaran', function () {
+    return view('finance/data_pembayaran');
+});
+Route::get('/pemasukan', function () {
+    return view('finance/pemasukan');
+});
+Route::get('/pengeluaran', function () {
+    return view('finance/pengeluaran');
+});
+Route::get('/finance/invoice', function () {
+    return view('finance/invoice');
+});
+Route::get('/pembayaran', function () {
+    return view('finance/data_pembayaran');
+});
+Route::get('/karyawann', function () {
+    return view('finance/daftar_karyawan');
+});
 
-            // Karyawan routes
-            'karyawan.home' => route('karyawan.home'),
-            'karyawan.list' => route('karyawan.list'),
-            'karyawan.tugas' => route('karyawan.tugas'),
-            'karyawan.tugas.show' => route('karyawan.tugas.show', ['id' => 1]),
-            'karyawan.api.dashboard' => route('karyawan.api.dashboard'),
-            'karyawan.api.dashboard-data' => route('karyawan.api.dashboard.data'),
-            'karyawan.api.history' => route('karyawan.api.history'),
-            'karyawan.api.today-status' => route('karyawan.api.today.status'),
-            'karyawan.api.tasks.statistics' => route('karyawan.api.tasks.statistics'),
+/*
+|--------------------------------------------------------------------------
+| Routes untuk Manager Divisi
+|--------------------------------------------------------------------------
+*/
+Route::get('/manager_divisi', function () {
+    return view('manager_divisi/home');
+});
+Route::get('/pengelola_tugas', function () {
+    return view('manager_divisi/pengelola_tugas');
+});
 
-            // Manager Divisi routes
-            'manager_divisi.home' => route('manager_divisi.home'),
-            'manager_divisi.kelola_tugas' => route('manager_divisi.kelola_tugas'),
 
-            // Admin routes
-            'admin.beranda' => route('admin.beranda'),
+Route::get('/manager_divisi', function () {
+    return view('manager_divisi/home');
+});
+Route::get('/pengelola_tugas', action: function () {
+    return view('manager_divisi/pengelola_tugas');
+});
+Route::get('/data_order', function () {
+    return view('manager_divisi/data_order');
+});
+Route::get('/daftar_karyawan', function () {
+    return view('manager_divisi/daftar_karyawan');
+});
+Route::get('/kelola_absensi', function () {
+    return view('manager_divisi/kelola_absensi');
+});
 
-            // Global API routes
-            'api.karyawan.history' => route('api.karyawan.history'),
-            'api.karyawan.dashboard-data' => route('api.karyawan.dashboard-data'),
-            'api.karyawan.today-status' => route('api.karyawan.today-status'),
-            'api.karyawan.absen-masuk' => route('api.karyawan.absen-masuk'),
-            'api.karyawan.absen-pulang' => route('api.karyawan.absen-pulang'),
-            'api.karyawan.submit-izin' => route('api.karyawan.submit-izin'),
-            'api.karyawan.submit-dinas' => route('api.karyawan.submit-dinas'),
-            'api.karyawan.pengajuan-status' => route('api.karyawan.pengajuan-status'),
-            'api.karyawan.tasks' => route('api.karyawan.tasks'),
-        ];
+Route::get('/general_manajer', function () {
+    return view('general_manajer/home');
+});
+Route::get('/data_karyawan', function () {
+    return redirect()->route('pegawai.index');
+});
+Route::get('/layanan', [PelayananController::class, 'index']);
 
-        return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'role' => $user->role,
-                'divisi' => $user->divisi
-            ],
-            'routes' => $routes,
-        ]);
-    })->middleware('auth');
+Route::get('/kelola_order', function () {
+    return view('general_manajer/kelola_order');
+});
+Route::get('/kelola_tugas', [TaskController::class, 'index'])->name('tugas.page');
+Route::get('/kelola_absen', function () {
+    return view('general_manajer/kelola_absen');
+});
 
-    Route::get('/test-karyawan-tugas', function () {
-        $user = auth()->user();
+// routes untuk pelayanan
+Route::post('/layanan', [PelayananController::class, 'store']);
+Route::put('/layanan/{id}', [PelayananController::class, 'update']);
+Route::delete('/layanan/{id}', [PelayananController::class, 'destroy']);
 
-        if ($user->role !== 'karyawan') {
-            return response()->json(['error' => 'Only for karyawan role']);
-        }
+Route::resource('pengumuman', PengumumanController::class);
+// === ROUTE UNTUK CATATAN RAPAT ANDA ===
+// Semua route di dalam group ini memerlukan user sudah login
+Route::middleware(['auth'])->group(function () {
+    Route::get('/catatan_rapat', [CatatanRapatController::class, 'index'])->name('catatan_rapat.index');
+    Route::post('/catatan_rapat', [CatatanRapatController::class, 'store'])->name('catatan_rapat.store');
+    Route::put('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'update'])->name('catatan_rapat.update');
+    Route::delete('/catatan_rapat/{catatanRapat}', [CatatanRapatController::class, 'destroy'])->name('catatan_rapat.destroy');
+});
 
-        $userDivisi = $user->divisi;
+// Rekap
+Route::get('/kelola_absen', [AbsensiController::class, 'kelolaAbsen'])->name('kelola.absen');
+Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');
 
-        $tasksAssignedToMe = \App\Models\Task::where('assigned_to', $user->id)->get();
-        $tasksToDivisi = \App\Models\Task::where('target_type', 'divisi')
-            ->where('target_divisi', $userDivisi)
-            ->get();
-
-        $allTasks = \App\Models\Task::where(function ($query) use ($user, $userDivisi) {
-            $query->where('assigned_to', $user->id)
-                ->orWhere(function ($q) use ($userDivisi) {
-                    $q->where('target_type', 'divisi')
-                        ->where('target_divisi', $userDivisi);
-                });
-        })->get();
-
-        return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'divisi' => $userDivisi,
-            ],
-            'tasks_assigned_to_me' => $tasksAssignedToMe->count(),
-            'tasks_to_divisi' => $tasksToDivisi->count(),
-            'total_tasks' => $allTasks->count(),
-            'tasks_detail' => $allTasks->map(function ($task) {
-                return [
-                    'id' => $task->id,
-                    'judul' => $task->judul,
-                    'target_type' => $task->target_type,
-                    'assigned_to' => $task->assigned_to,
-                    'target_divisi' => $task->target_divisi,
-                ];
-            }),
-        ]);
-    })->middleware('auth');
-}
+//Buat Tugas
+// Tambahkan route untuk tugas

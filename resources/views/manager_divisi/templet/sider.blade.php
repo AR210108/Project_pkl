@@ -256,12 +256,12 @@
                 </a>
 
                 <!-- DATA KARYAWAN -->
-                <a href="/daftar_karyawan"
+                <a href="{{ route('manager_divisi.api.karyawan.divisi', auth()->user()->divisi) }}"
                     class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    :class="window.location.pathname === '/daftar_karyawan' ? 'active' : ''">
+                    :class="window.location.pathname === '/karyawan_by_divisi/{divisi}' ? 'active' : ''">
                     <span class="material-symbols-outlined sidebar-icon">groups</span>
                     <span class="sidebar-text">Data Karyawan</span>
-                </a>
+                </>
 
                 <!-- LAPORAN ABSENSI -->
                 <a href="/kelola_absensi"

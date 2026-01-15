@@ -10,8 +10,7 @@ class Layanan extends Model
         'nama',
         'deskripsi',
         'harga',
-        'durasi',
-        'kategori',
+        'foto',
     ];
+    
 }
-

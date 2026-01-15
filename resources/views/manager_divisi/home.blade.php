@@ -220,11 +220,11 @@
         <!-- Tombol Hamburger untuk Mobile - DIHAPUS -->
         <!-- Overlay untuk Mobile - DIHAPUS -->
 
-        <!-- Sidebar - Dipanggil dari template sider -->
+        <!-- Sidebar - Dipanggil dari template header -->
         @include('manager_divisi/templet/sider')
         
         <main class="flex-1 flex flex-col bg-background-light main-content">
-            <div class="flex-1 p-3 sm:p-8">
+            <div class="flex-1 p-3 sm:p-8"> 
                 <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Beranda</h2>
                 
                 <!-- Stat Cards Grid -->

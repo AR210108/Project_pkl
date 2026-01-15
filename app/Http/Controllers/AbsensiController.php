@@ -71,36 +71,33 @@ class AbsensiController extends Controller
  * @return \Illuminate\View\View
  */
 public function rekapAbsensi()
-{
-    // Mengambil semua data absensi dengan relasi user
-    $absensis = Absensi::with('user')->get();
-    
-    // Mengambil data kehadiran (tanpa status Tidak Masuk, Cuti, Sakit, Izin)
-    $dataKehadiran = Absensi::with('user')
-        ->where('status', '!=', 'Tidak Masuk')
-        ->whereNotIn('status', ['Cuti', 'Sakit', 'Izin'])
-        ->orderBy('tanggal', 'desc')
-        ->get();
+    {
+        // 1. Tentukan tanggal yang ingin ditampilkan (hari ini)
+        $today = Carbon::now()->format('Y-m-d');
         
-    // Mengambil data ketidakhadiran (termasuk Tidak Masuk, Cuti, Sakit, Izin)
-    $dataKetidakhadiran = Absensi::with('user')
-        ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Tidak Masuk'])
-        ->orderBy('tanggal', 'desc')
-        ->get();
-    
-    // Menghitung statistik
-    $statistik = [
-        'hadir' => Absensi::where('status', 'Tepat Waktu')->count(),
-        'terlambat' => Absensi::where('status', 'Terlambat')->count(),
-        'tidakMasuk' => Absensi::where('status', 'Tidak Masuk')->count(),
-        'cuti' => Absensi::where('status', 'Cuti')->count(),
-        'sakit' => Absensi::where('status', 'Sakit')->count(),
-        'izin' => Absensi::where('status', 'Izin')->count(),
-        'dinas' => Absensi::where('status', 'Dinas Luar')->count(),
-    ];
-    
-    return view('pemilik.rekap_absensi', compact('statistik', 'absensis', 'dataKehadiran', 'dataKetidakhadiran'));
-}
+        // Mengambil statistik dari API
+        $statsResponse = $this->apiStatistics();
+        $stats = $statsResponse->getData(true)['data'];
+        
+        // Mengambil data kehadiran (tanpa status Tidak Masuk)
+        $attendances = Absensi::with('user')
+            ->where('status', '!=', 'Tidak Masuk')
+            ->whereNotIn('status', ['Cuti', 'Sakit', 'Izin'])
+            ->orderBy('tanggal', 'desc')
+            ->get();
+            
+        // Mengambil data ketidakhadiran (termasuk Tidak Masuk)
+        $ketidakhadiran = Absensi::with('user')
+            ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Tidak Masuk'])
+            ->orderBy('tanggal', 'desc')
+            ->get();
+            
+        // PERUBAHAN: Hanya mengambil user dengan role 'karyawan' untuk dropdown
+        $users = User::where('role', 'karyawan')->get();
+        
+        return view('pemilik.rekap_absensi', compact('stats', 'attendances', 'ketidakhadiran', 'users'));
+    }
+
 
     /**
      * Menandai karyawan yang tidak hadir pada tanggal tertentu
@@ -157,7 +154,6 @@ public function rekapAbsensi()
     {
         // Pastikan karyawan yang tidak hadir ditandai
         $date = $request->tanggal ?? Carbon::now()->format('Y-m-d');
-        $this->markAbsentEmployees($date);
         
         $query = Absensi::with('user')
             ->where('status', '!=', 'Tidak Masuk')
@@ -199,7 +195,6 @@ public function rekapAbsensi()
     {
         // Pastikan karyawan yang tidak hadir ditandai
         $date = $request->tanggal ?? Carbon::now()->format('Y-m-d');
-        $this->markAbsentEmployees($date);
         
         $query = Absensi::with('user')
             ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Tidak Masuk']);
@@ -537,7 +532,6 @@ public function rekapAbsensi()
         try {
             // Pastikan karyawan yang tidak hadir ditandai
             $today = Carbon::now()->format('Y-m-d');
-            $this->markAbsentEmployees($today);
             
             $stats = [
                 'total_tepat_waktu' => Absensi::where('status', 'Tepat Waktu')->count(),

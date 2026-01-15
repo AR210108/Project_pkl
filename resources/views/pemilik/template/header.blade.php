@@ -281,7 +281,7 @@
                             <i class='bx bx-home-alt text-xl mr-2'></i>
                             Beranda
                         </a>
-                        <a class="nav-link" data-page="rekap" href="/rekap_absensi">
+                        <a class="nav-link" data-page="rekap" href="{{route('rekap.absensi')}}">
                             <i class='bx bx-calendar-check text-xl mr-2'></i>
                             Rekap Absensi
                         </a>
@@ -290,7 +290,7 @@
                             Laporan
                         </a>
                     </nav>
-                    <a class="login-btn" href="/login">
+                    <a class="login-btn" href="{{'logout'}}">
                         <i class='bx bx-log-out-circle text-xl mr-1'></i>
                         Log Out
                     </a>

@@ -232,7 +232,7 @@
         <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             <!-- Menu Beranda -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/admin/home" data-page="admin">
+                href="/admin/home" data-page="home">
                 <span class="material-icons sidebar-icon">home</span>
                 <span class="sidebar-text">Beranda</span>
             </a>
@@ -251,13 +251,13 @@
                 <span class="sidebar-text">Data Karyawan</span>
             </a>
 
-            <!-- Menu Data Layanan -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/admin/layanan" data-page="layanan">
-                <span class="material-icons sidebar-icon">miscellaneous_services</span>
-                <span class="sidebar-text">Data Layanan</span>
-            </a>
-
+          <!-- Menu Data Layanan -->
+<a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+    href="/admin/layanan" data-page="layanan">
+    <!-- Ikon telah diubah dari 'miscellaneous_services' menjadi 'handshake' -->
+    <span class="material-icons sidebar-icon">handshake</span>
+    <span class="sidebar-text">Data Layanan</span>
+</a>
         
 
           
@@ -320,137 +320,89 @@
 
 
 
-    <script>
-        // Fungsi untuk inisialisasi sidebar
-        function initSidebar() {
-            // Ambil elemen yang diperlukan
-            const hamburger = document.getElementById('hamburger');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            const mainContent = document.querySelector('.main-content');
+ <script>
+    function initSidebar() {
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const mainContent = document.querySelector('.main-content');
 
-            // Fungsi untuk membuka sidebar
-            function openSidebar() {
-                sidebar.classList.remove('translate-x-full');
-                overlay.classList.remove('hidden');
-                hamburger.classList.add('hamburger-active');
-                document.body.style.overflow = 'hidden'; // Mencegah scroll saat sidebar terbuka
-            }
-
-            // Fungsi untuk menutup sidebar
-            function closeSidebar() {
-                sidebar.classList.add('translate-x-full');
-                overlay.classList.add('hidden');
-                hamburger.classList.remove('hamburger-active');
-                document.body.style.overflow = ''; // Kembalikan scroll
-            }
-
-            // Event listener untuk hamburger
-            hamburger.addEventListener('click', () => {
-                // Periksa apakah sidebar sedang tersembunyi (untuk mobile)
-                if (sidebar.classList.contains('translate-x-full')) {
-                    openSidebar();
-                } else {
-                    closeSidebar();
-                }
-            });
-
-            // Event listener untuk overlay
-            overlay.addEventListener('click', closeSidebar);
-
-            // Event listener untuk escape key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && !sidebar.classList.contains('translate-x-full')) {
-                    closeSidebar();
-                }
-            });
-
-            // Event listener untuk resize window
-            window.addEventListener('resize', () => {
-                if (window.innerWidth >= 768) {
-                    closeSidebar(); // Tutup sidebar jika layar menjadi besar
-                    if (mainContent) {
-                        mainContent.style.marginLeft = '256px'; // Lebar sidebar yang tetap
-                        mainContent.style.width = 'calc(100% - 256px)'; // Lebar konten utama yang tetap
-                    }
-                } else {
-                    if (mainContent) {
-                        mainContent.style.marginLeft = '0';
-                        mainContent.style.width = '100%';
-                    }
-                }
-            });
-
-            // Event listener untuk menutup sidebar saat link diklik di mobile
-            document.querySelectorAll('nav a').forEach(link => {
-                link.addEventListener('click', () => {
-                    if (window.innerWidth < 768) {
-                        closeSidebar();
-                    }
-                });
-            });
-
-            // Inisialisasi margin konten utama
-            if (window.innerWidth >= 768 && mainContent) {
-                mainContent.style.marginLeft = '256px'; // Lebar sidebar yang tetap
-                mainContent.style.width = 'calc(100% - 256px)'; // Lebar konten utama yang tetap
-            }
-
-            // Menandai halaman aktif
-            setActiveNavItem();
+        function openSidebar() {
+            sidebar.classList.remove('translate-x-full');
+            overlay.classList.remove('hidden');
+            hamburger.classList.add('hamburger-active');
+            document.body.style.overflow = 'hidden';
         }
 
-        // Fungsi untuk menandai item navigasi yang aktif
-        function setActiveNavItem() {
-            // Dapatkan URL saat ini
-            const currentUrl = window.location.pathname;
+        function closeSidebar() {
+            sidebar.classList.add('translate-x-full');
+            overlay.classList.add('hidden');
+            hamburger.classList.remove('hamburger-active');
+            document.body.style.overflow = '';
+        }
 
-            // Dapatkan semua item navigasi
-            const navItems = document.querySelectorAll('.nav-item');
+        hamburger.addEventListener('click', () => {
+            sidebar.classList.contains('translate-x-full')
+                ? openSidebar()
+                : closeSidebar();
+        });
 
-            navItems.forEach(item => {
-                item.classList.remove('active');
-                const href = item.getAttribute('href');
+        overlay.addEventListener('click', closeSidebar);
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && !sidebar.classList.contains('translate-x-full')) {
+                closeSidebar();
+            }
+        });
+
+        // ✅ SIMPAN MENU SAAT DIKLIK
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
                 const page = item.getAttribute('data-page');
-
-                // Check if current URL matches the item's href or data-page
-                if (currentUrl === href || (page && currentUrl.includes(page))) {
-                    item.classList.add('active');
-
-                    // If it's a dropdown button, also open the dropdown
-                    if (item.tagName === 'BUTTON') {
-                        const dropdownId = item.getAttribute('onclick').match(/toggleDropdown\('([^']+)'\)/)[1];
-                        const dropdown = document.getElementById(dropdownId);
-                        const icon = document.getElementById(dropdownId.replace('-dropdown', '-icon'));
-
-                        if (dropdown) {
-                            dropdown.classList.remove('hidden');
-                            if (icon) {
-                                icon.textContent = 'expand_less';
-                            }
-                        }
-                    }
+                if (page) {
+                    sessionStorage.setItem('activeSidebar', page);
                 }
             });
-        }
+        });
 
-        // Toggle dropdown function
-        function toggleDropdown(id) {
-            const dropdown = document.getElementById(id);
-            const icon = document.getElementById(id.replace('-dropdown', '-icon'));
+        setActiveNavItem();
+    }
 
-            dropdown.classList.toggle('hidden');
+    function setActiveNavItem() {
+        const activePage = sessionStorage.getItem('activeSidebar');
 
-            if (dropdown.classList.contains('hidden')) {
-                icon.textContent = 'expand_more';
-            } else {
-                icon.textContent = 'expand_less';
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+
+            if (item.getAttribute('data-page') === activePage) {
+                item.classList.add('active');
+
+                // Jika di dropdown → buka dropdown
+                const dropdown = item.closest('[id$="-dropdown"]');
+                if (dropdown) {
+                    dropdown.classList.remove('hidden');
+                    const icon = document.getElementById(
+                        dropdown.id.replace('-dropdown', '-icon')
+                    );
+                    if (icon) icon.textContent = 'expand_less';
+                }
             }
-        }
+        });
+    }
 
-        // Inisialisasi sidebar saat DOM dimuat
-        document.addEventListener('DOMContentLoaded', initSidebar);
-    </script>
+    function toggleDropdown(id) {
+        const dropdown = document.getElementById(id);
+        const icon = document.getElementById(id.replace('-dropdown', '-icon'));
+
+        dropdown.classList.toggle('hidden');
+        icon.textContent = dropdown.classList.contains('hidden')
+            ? 'expand_more'
+            : 'expand_less';
+    }
+
+    document.addEventListener('DOMContentLoaded', initSidebar);
+</script>
+
 </body>
 
 </html>
