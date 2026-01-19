@@ -7,6 +7,8 @@ use App\Models\Karyawan;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+    
 
 class AdminKaryawanController extends Controller
 {
@@ -41,6 +43,7 @@ class AdminKaryawanController extends Controller
         // Tampilkan ke view dengan data yang sudah dipaginasi
         return view('admin.data_karyawan', compact('karyawan', 'users'));
     }
+
     public function karyawanGeneral(Request $request)
     {
         // Mulai dengan query builder untuk model Karyawan
@@ -62,106 +65,117 @@ class AdminKaryawanController extends Controller
         // Tampilkan ke view dengan data yang sudah dipaginasi
         return view('general_manajer.data_karyawan', compact('karyawan'));
     }
+
     public function karyawanDivisi(Request $request)
-{
-    // Mulai dengan query builder untuk model Karyawan
-    $query = Karyawan::query();
+    {
+        // Mulai dengan query builder untuk model Karyawan
+        $query = Karyawan::query();
 
-    // ========== TAMBAHKAN FILTER BERDASARKAN DIVISI USER YANG LOGIN ==========
-    // Ambil user yang sedang login
-    $user = auth()->user();
-    
-    // Pastikan user adalah manager divisi dan memiliki divisi
-    if ($user && $user->divisi) {
-        // Filter hanya karyawan dengan divisi yang sama dengan manager yang login
-        $query->where('divisi', $user->divisi);
+        // ========== TAMBAHKAN FILTER BERDASARKAN DIVISI USER YANG LOGIN ==========
+        // Ambil user yang sedang login
+        $user = auth()->user();
+
+        // Pastikan user adalah manager divisi dan memiliki divisi
+        if ($user && $user->divisi) {
+            // Filter hanya karyawan dengan divisi yang sama dengan manager yang login
+            $query->where('divisi', $user->divisi);
+        }
+        // ========================================================================
+
+        // Jika ada input pencarian di URL (misal: ?search=John)
+        if ($request->has('search')) {
+            $searchTerm = $request->get('search');
+            // Cari di kolom 'nama', 'jabatan', dan 'alamat'
+            $query->where('nama', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('jabatan', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('alamat', 'LIKE', "%{$searchTerm}%");
+        }
+
+        // Ambil data dengan paginasi (10 data per halaman)
+        $karyawan = $query->paginate(10);
+
+        // AMBIL DATA USERS YANG BELUM MENJADI KARYAWAN
+        // ========== TAMBAHKAN FILTER UNTUK USERS JUGA ==========
+        $userQuery = User::whereNotIn('id', function ($query) {
+            $query->select('user_id')
+                ->from('karyawan')
+                ->whereNotNull('user_id');
+        });
+
+        // Filter users berdasarkan divisi yang sama dengan manager login
+        if ($user && $user->divisi) {
+            $userQuery->where('divisi', $user->divisi);
+        }
+
+        $users = $userQuery->get(['id', 'name', 'divisi', 'role']);
+        // =======================================================
+
+        // Tampilkan ke view dengan data yang sudah dipaginasi
+        // Kirim juga divisi user login ke view jika diperlukan
+        $divisiManager = $user ? $user->divisi : null;
+
+        return view('manager_divisi.daftar_karyawan', compact('karyawan', 'users', 'divisiManager'));
     }
-    // ========================================================================
-
-    // Jika ada input pencarian di URL (misal: ?search=John)
-    if ($request->has('search')) {
-        $searchTerm = $request->get('search');
-        // Cari di kolom 'nama', 'jabatan', dan 'alamat'
-        $query->where('nama', 'LIKE', "%{$searchTerm}%")
-            ->orWhere('jabatan', 'LIKE', "%{$searchTerm}%")
-            ->orWhere('alamat', 'LIKE', "%{$searchTerm}%");
-    }
-
-    // Ambil data dengan paginasi (10 data per halaman)
-    $karyawan = $query->paginate(10);
-
-    // AMBIL DATA USERS YANG BELUM MENJADI KARYAWAN
-    // ========== TAMBAHKAN FILTER UNTUK USERS JUGA ==========
-    $userQuery = User::whereNotIn('id', function ($query) {
-        $query->select('user_id')
-            ->from('karyawan')
-            ->whereNotNull('user_id');
-    });
-    
-    // Filter users berdasarkan divisi yang sama dengan manager login
-    if ($user && $user->divisi) {
-        $userQuery->where('divisi', $user->divisi);
-    }
-    
-    $users = $userQuery->get(['id', 'name', 'divisi', 'role']);
-    // =======================================================
-
-    // Tampilkan ke view dengan data yang sudah dipaginasi
-    // Kirim juga divisi user login ke view jika diperlukan
-    $divisiManager = $user ? $user->divisi : null;
-    
-    return view('manager_divisi.daftar_karyawan', compact('karyawan', 'users', 'divisiManager'));
-}
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'jabatan' => 'required|string|max:100',
-            'divisi' => 'nullable|string|max:100', // Ubah menjadi nullable
-            'alamat' => 'required|string',
-            'kontak' => 'required|string|max:20',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
+        \Log::info('Store Request Data:', $request->all());
 
-        // Cek apakah user sudah menjadi karyawan
-        $existingKaryawan = Karyawan::where('user_id', $request->user_id)->first();
-        if ($existingKaryawan) {
+        try {
+
+            $validated = $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'nama' => 'required|string|max:100',
+                'jabatan' => 'required|string|max:100',
+                'divisi' => 'nullable|string|max:100',
+                'alamat' => 'required|string|min:5|max:500',
+                'kontak' => 'required|string|min:10|max:20',
+                'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            ]);
+
+            $karyawan = new Karyawan();
+            $karyawan->user_id = $validated['user_id'];
+            $karyawan->nama = $validated['nama'];
+            $karyawan->jabatan = $validated['jabatan'];
+            $karyawan->divisi = $validated['divisi'] ?? null;
+            $karyawan->alamat = $validated['alamat'];
+            $karyawan->kontak = $validated['kontak'];
+
+            if ($request->hasFile('foto')) {
+                $file = $request->file('foto');
+
+                $nama_foto = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+
+                $file->storeAs(
+                    'karyawan',     // folder
+                    $nama_foto,     // nama file
+                    'public'        // disk
+                );
+
+                $karyawan->foto = $nama_foto;
+            }
+
+            $karyawan->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Karyawan berhasil ditambahkan',
+                'data' => $karyawan
+            ], 201);
+        } catch (\Exception $e) {
+
+            \Log::error('Error creating karyawan: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'User ini sudah terdaftar sebagai karyawan'
-            ], 400);
+                'message' => 'Terjadi kesalahan server'
+            ], 500);
         }
-
-        // Ambil data user
-        $user = User::find($request->user_id);
-
-        $karyawan = new Karyawan();
-        $karyawan->user_id = $request->user_id;
-        $karyawan->nama = $user->name; // Ambil nama dari user
-        $karyawan->jabatan = $request->jabatan; // Sudah terisi dari role user
-        $karyawan->divisi = $request->divisi; // Sudah terisi otomatis
-        $karyawan->alamat = $request->alamat;
-        $karyawan->kontak = $request->kontak;
-
-        // Handle upload foto
-        if ($request->hasFile('foto')) {
-            $foto = $request->file('foto');
-            $nama_foto = time() . '_' . $foto->getClientOriginalName();
-            $foto->move(public_path('karyawan'), $nama_foto);
-            $karyawan->foto = $nama_foto;
-        }
-
-        $karyawan->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Karyawan berhasil ditambahkan'
-        ]);
     }
+
     /**
      * Update the specified resource in storage.
      */
@@ -189,15 +203,17 @@ class AdminKaryawanController extends Controller
 
             // Jika ada upload foto baru
             if ($request->hasFile('foto')) {
-                // Hapus foto lama dari folder public/karyawan
-                if ($karyawan->foto && file_exists(public_path('karyawan/' . $karyawan->foto))) {
-                    unlink(public_path('karyawan/' . $karyawan->foto));
+
+                // Hapus foto lama
+                if ($karyawan->foto) {
+                    Storage::disk('public')->delete('karyawan/' . $karyawan->foto);
                 }
 
-                // Upload foto baru
+                // Simpan foto baru
                 $file = $request->file('foto');
-                $fotoName = time() . '_' . $file->getClientOriginalName();
-                $file->move(public_path('karyawan'), $fotoName);
+                $fotoName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+                $file->storeAs('karyawan', $fotoName, 'public');
                 $karyawan->foto = $fotoName;
             }
 
@@ -218,9 +234,10 @@ class AdminKaryawanController extends Controller
             $karyawan = Karyawan::findOrFail($id);
 
             // Hapus foto dari folder public/karyawan jika ada
-            if ($karyawan->foto && file_exists(public_path('karyawan/' . $karyawan->foto))) {
-                unlink(public_path('karyawan/' . $karyawan->foto));
+            if ($karyawan->foto) {
+                Storage::disk('public')->delete('karyawan/' . $karyawan->foto);
             }
+
 
             // Hapus data dari database
             $karyawan->delete();

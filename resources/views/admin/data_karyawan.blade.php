@@ -12,7 +12,7 @@
 
 
      <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
      <script>
          tailwind.config = {
              theme: {
@@ -721,7 +721,7 @@
                                                      data-jabatan="{{ $item->user->role ?? $item->jabatan }}"
                                                      data-divisi="{{ $item->user->divisi ?? $item->divisi }}"
                                                      data-alamat="{{ $item->alamat }}" data-kontak="{{ $item->kontak }}"
-                                                     data-foto="{{ $item->foto ?? '' }}">
+                                                     data-foto="{{ $item->foto ? asset('storage/karyawan/' . $item->foto) : '' }}">
                                                      <td style="min-width: 60px;">{{ $no++ }}</td>
                                                      <td style="min-width: 200px;">{{ $item->nama }}</td>
                                                      <td style="min-width: 150px;">
@@ -737,10 +737,12 @@
                                                      <td style="min-width: 250px;">{{ $item->alamat }}</td>
                                                      <td style="min-width: 150px;">{{ $item->kontak }}</td>
                                                      <td style="min-width: 100px;">
+                                                         <!-- Di tabel desktop -->
                                                          @if ($item->foto)
-                                                             <img src="{{ asset('karyawan/' . $item->foto) }}"
+                                                             <img src="{{ asset('storage/karyawan/' . $item->foto) }}"
                                                                  alt="{{ $item->nama }}"
-                                                                 class="h-10 w-10 rounded-full object-cover">
+                                                                 class="h-10 w-10 rounded-full object-cover"
+                                                                 onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($item->nama) }}&background=random';">
                                                          @else
                                                              <div
                                                                  class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
@@ -748,6 +750,7 @@
                                                                      class="material-icons-outlined text-gray-500">person</span>
                                                              </div>
                                                          @endif
+
                                                      </td>
                                                      <td style="min-width: 100px; text-align: center;">
                                                          <div class="flex justify-center gap-2">
@@ -787,13 +790,14 @@
                                          data-id="{{ $item->id }}" data-nama="{{ $item->nama }}"
                                          data-jabatan="{{ $item->jabatan }}" data-divisi="{{ $item->divisi }}"
                                          data-alamat="{{ $item->alamat }}" data-kontak="{{ $item->kontak }}"
-                                         data-foto="{{ $item->foto ?? '' }}">
+                                         data-foto="{{ $item->foto ? asset('storage/karyawan/' . $item->foto) : '' }}">
                                          <div class="flex justify-between items-start mb-3">
                                              <div class="flex items-center gap-3">
                                                  @if ($item->foto)
-                                                     <img src="{{ asset('karyawan/' . $item->foto) }}"
+                                                     <img src="{{ asset('storage/karyawan/' . $item->foto) }}"
                                                          alt="{{ $item->nama }}"
-                                                         class="h-12 w-12 rounded-full object-cover">
+                                                         class="h-12 w-12 rounded-full object-cover"
+                                                         onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($item->nama) }}&background=random';">
                                                  @else
                                                      <div
                                                          class="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
@@ -887,84 +891,90 @@
                          <span class="material-icons-outlined">close</span>
                      </button>
                  </div>
-                 <form id="tambahKaryawanForm" class="space-y-4" enctype="multipart/form-data">
-                     @csrf
-                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Karyawan</label>
-                             <select name="user_id" id="userSelect"
-                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                 required>
-                                 <option value="">Pilih Karyawan</option>
-                                 @foreach ($users as $user)
-                                     <option value="{{ $user->id }}" data-divisi="{{ $user->divisi ?? '' }}"
-                                         data-role="{{ $user->role }}"> <!-- PASTIKAN INI 'role' -->
-                                         {{ $user->name }}
-                                         @if ($user->role || $user->divisi)
-                                             ({{ $user->role }}@if ($user->divisi)
-                                                 - {{ $user->divisi }}
-                                             @endif)
-                                         @endif
-                                     </option>
-                                 @endforeach
-                             </select>
-                         </div>
+                 <!-- Ganti form tambah karyawan dengan ini -->
+<form id="tambahKaryawanForm" class="space-y-4" enctype="multipart/form-data">
+    @csrf
+    
+    <!-- Field user_id - REQUIRED -->
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Pilih User *</label>
+        <select name="user_id" id="userSelect"
+            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+            required>
+            <option value="">-- Pilih User --</option>
+            @foreach ($users as $user)
+                <option value="{{ $user->id }}" 
+                        data-nama="{{ $user->name }}"
+                        data-divisi="{{ $user->divisi ?? '' }}" 
+                        data-role="{{ $user->role ?? 'karyawan' }}">
+                    {{ $user->name }} 
+                    ({{ $user->role ?? 'karyawan' }}) 
+                    {{ $user->divisi ? '- ' . $user->divisi : '' }}
+                </option>
+            @endforeach
+        </select>
+        <p class="text-xs text-gray-500 mt-1">Hanya menampilkan user yang belum menjadi karyawan</p>
+    </div>
 
-                         <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
-                             <input type="text" name="jabatan" id="jabatanInput"
-                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                 placeholder="Jabatan akan otomatis terisi" readonly required>
-                         </div>
+    <!-- Field nama - AUTO FILL (hidden) -->
+    <input type="hidden" name="nama" id="namaInput">
+    
+    <!-- PERBAIKAN: Field jabatan sesuai controller validation -->
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan *</label>
+        <input type="text" name="jabatan" id="jabatanInput"
+            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="Contoh: Karyawan, Manager, Staff" required>
+    </div>
 
-                         <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Divisi <span
-                                     class="text-gray-500 text-sm">(Opsional)</span></label>
-                             <input type="text" name="divisi" id="divisiInput"
-                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                 placeholder="Divisi akan otomatis terisi (kosongkan jika tidak ada)">
-                         </div>
+    <!-- Field divisi - AUTO FILL -->
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
+        <input type="text" name="divisi" id="divisiInput"
+            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="Contoh: Programmer, Marketing, HR">
+    </div>
 
-                         <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Kontak</label>
-                             <input type="text" name="kontak" id="kontakInput"
-                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                 placeholder="Masukkan nomor telepon" required>
-                         </div>
+    <!-- Field kontak - REQUIRED -->
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Kontak *</label>
+        <input type="text" name="kontak" id="kontakInput"
+            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="Contoh: 081234567890" required>
+    </div>
 
-                         <div class="md:col-span-2">
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
-                             <textarea name="alamat" id="alamatInput"
-                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                 rows="3" placeholder="Masukkan alamat lengkap" required></textarea>
-                         </div>
+    <!-- Field alamat - REQUIRED -->
+    <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
+        <textarea name="alamat" id="alamatInput"
+            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+            rows="3" placeholder="Masukkan alamat lengkap" required></textarea>
+    </div>
 
-                         <div class="md:col-span-2">
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
-                             <div class="flex items-center space-x-4">
-                                 <div id="fotoPreview"
-                                     class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
-                                     <span class="material-icons-outlined text-gray-500 text-2xl">person</span>
-                                 </div>
-                                 <div>
-                                     <input type="file" name="foto" id="fotoInput" class="hidden"
-                                         accept="image/*">
-                                     <button type="button" id="pilihFotoBtn"
-                                         class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                                         Pilih Foto
-                                     </button>
-                                     <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG maks. 2MB</p>
-                                 </div>
-                             </div>
-                         </div>
-                     </div>
+    <!-- Field foto - Optional -->
+    <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Foto (Opsional)</label>
+        <div class="flex items-center space-x-4">
+            <div id="fotoPreview" 
+                 class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
+                <span class="material-icons-outlined text-gray-500 text-2xl">person</span>
+            </div>
+            <div>
+                <input type="file" name="foto" id="fotoInput" class="hidden" accept="image/*">
+                <button type="button" id="pilihFotoBtn" 
+                        class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                    Pilih Foto
+                </button>
+                <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG maks. 2MB</p>
+            </div>
+        </div>
+    </div>
 
-                     <div class="flex justify-end gap-2 mt-6">
-                         <button type="button" id="cancelBtn"
-                             class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                         <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan Data</button>
-                     </div>
-                 </form>
+    <div class="flex justify-end gap-2 mt-6">
+        <button type="button" id="cancelBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan Data</button>
+    </div>
+</form>
              </div>
          </div>
      </div>
@@ -1434,6 +1444,46 @@
          const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
          const deleteKaryawanForm = document.getElementById('deleteKaryawanForm');
 
+         if (pilihFotoBtn && fotoInput) {
+             pilihFotoBtn.addEventListener('click', () => {
+                 fotoInput.click();
+             });
+         }
+         if (fotoInput && fotoPreview) {
+             fotoInput.addEventListener('change', function(e) {
+                 const file = e.target.files[0];
+                 if (file) {
+                     const reader = new FileReader();
+                     reader.onload = function(e) {
+                         fotoPreview.innerHTML =
+                             `<img src="${e.target.result}" alt="Preview" class="h-16 w-16 rounded-full object-cover">`;
+                     };
+                     reader.readAsDataURL(file);
+                 }
+             });
+         }
+
+         // Cek elemen EDIT FOTO
+         if (pilihEditFotoBtn && editFotoInput) {
+             pilihEditFotoBtn.addEventListener('click', () => {
+                 editFotoInput.click();
+             });
+         }
+
+         if (editFotoInput && editFotoPreview) {
+             editFotoInput.addEventListener('change', function(e) {
+                 const file = e.target.files[0];
+                 if (file) {
+                     const reader = new FileReader();
+                     reader.onload = function(e) {
+                         editFotoPreview.innerHTML =
+                             `<img src="${e.target.result}" alt="Preview" class="h-16 w-16 rounded-full object-cover">`;
+                     };
+                     reader.readAsDataURL(file);
+                 }
+             });
+         }
+
          // Modal Tambah
          function openTambahModal() {
              tambahKaryawanModal.classList.remove('hidden');
@@ -1454,12 +1504,15 @@
              document.getElementById('editKontak').value = data.kontak;
              document.getElementById('editAlamat').value = data.alamat;
 
-             // Tampilkan foto karyawan jika ada
-             if (data.foto) {
+             // PERBAIKAN: Gunakan data.foto bukan variabel foto yang tidak didefinisikan
+             if (data.foto && data.foto.trim() !== '') {
                  editFotoPreview.innerHTML =
-                     `<img src="${window.location.origin}/karyawan/${data.foto}" alt="${data.nama}" class="h-16 w-16 rounded-full object-cover">`;
+                     `<img src="${window.location.origin}/storage/karyawan/${data.foto}" 
+                  alt="${data.nama}" 
+                  class="h-16 w-16 rounded-full object-cover">`;
              } else {
-                 editFotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
+                 editFotoPreview.innerHTML =
+                     '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
              }
 
              editKaryawanModal.classList.remove('hidden');
@@ -1494,26 +1547,23 @@
          closeDeleteModalBtn.addEventListener('click', closeDeleteModal);
          cancelDeleteBtn.addEventListener('click', closeDeleteModal);
 
-         // Handle foto selection
-         pilihFotoBtn.addEventListener('click', () => {
-             fotoInput.click();
-         });
-
          pilihEditFotoBtn.addEventListener('click', () => {
              editFotoInput.click();
          });
 
-         fotoInput.addEventListener('change', function(e) {
-             const file = e.target.files[0];
-             if (file) {
-                 const reader = new FileReader();
-                 reader.onload = function(e) {
-                     fotoPreview.innerHTML =
-                         `<img src="${e.target.result}" alt="Preview" class="h-16 w-16 rounded-full object-cover">`;
-                 };
-                 reader.readAsDataURL(file);
-             }
-         });
+         if (fotoInput) {
+             fotoInput.addEventListener('change', function(e) {
+                 const file = e.target.files[0];
+                 if (file && fotoPreview) {
+                     const reader = new FileReader();
+                     reader.onload = function(e) {
+                         fotoPreview.innerHTML =
+                             `<img src="${e.target.result}" alt="Preview" class="h-16 w-16 rounded-full object-cover">`;
+                     };
+                     reader.readAsDataURL(file);
+                 }
+             });
+         }
 
          editFotoInput.addEventListener('change', function(e) {
              const file = e.target.files[0];
@@ -1528,64 +1578,273 @@
          });
 
          // ========= AUTO-FILL DIVISI DAN JABATAN BERDASARKAN USER ========= //
-         document.getElementById('userSelect').addEventListener('change', function() {
-             const selectedOption = this.options[this.selectedIndex];
-             const divisi = selectedOption.getAttribute('data-divisi');
-             const role = selectedOption.getAttribute('data-role');
+         // Auto-fill jabatan dan divisi saat memilih user
+// ========= AUTO-FILL BERDASARKAN USER ========= //
+document.getElementById('userSelect').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const userId = selectedOption.value;
+    const userName = selectedOption.getAttribute('data-nama');
+    const divisi = selectedOption.getAttribute('data-divisi') || '';
+    const role = selectedOption.getAttribute('data-role') || 'karyawan';
+    
+    console.log('Selected user:', { userId, userName, divisi, role });
+    
+    // Isi otomatis field yang diperlukan
+    document.getElementById('namaInput').value = userName; // Hidden field
+    document.getElementById('jabatanInput').value = role;
+    document.getElementById('divisiInput').value = divisi;
+});
 
-             // Isi otomatis field divisi dan jabatan
-             document.getElementById('divisiInput').value = divisi || '';
-             document.getElementById('jabatanInput').value = role || '';
+// CREATE (POST) dengan debugging lebih detail
+tambahKaryawanForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
 
-             // Optional: Tampilkan alert atau log
-             console.log('Divisi:', divisi, 'Jabatan:', role);
-         });
+    console.log('Form submission started');
+
+    // Validasi manual
+    const userSelect = document.getElementById('userSelect');
+    const kontakInput = document.getElementById('kontakInput');
+    const alamatInput = document.getElementById('alamatInput');
+    const jabatanInput = document.getElementById('jabatanInput');
+    
+    if (!userSelect.value) {
+        showMinimalPopup('Error', 'Silakan pilih user terlebih dahulu', 'error');
+        return;
+    }
+    
+    // Auto-fill nama dari user yang dipilih
+    const selectedOption = userSelect.options[userSelect.selectedIndex];
+    const namaInput = document.getElementById('namaInput');
+    namaInput.value = selectedOption.getAttribute('data-nama');
+    
+    if (!jabatanInput.value.trim()) {
+        showMinimalPopup('Error', 'Jabatan harus diisi', 'error');
+        return;
+    }
+    
+    if (!kontakInput.value.trim()) {
+        showMinimalPopup('Error', 'Nomor kontak harus diisi', 'error');
+        return;
+    }
+    
+    if (!alamatInput.value.trim()) {
+        showMinimalPopup('Error', 'Alamat harus diisi', 'error');
+        return;
+    }
+
+    // Show loading state
+    const submitBtn = tambahKaryawanForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Menyimpan...';
+    submitBtn.disabled = true;
+
+    let formData = new FormData(tambahKaryawanForm);
+
+    // Debug: Tampilkan data FormData
+    console.log('FormData to be sent:');
+    for (let [key, value] of formData.entries()) {
+        console.log(key + ':', value);
+    }
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        console.log('CSRF Token:', csrfToken);
+        console.log('Sending to:', '/admin/karyawan/store');
+
+        let response = await fetch("/admin/karyawan/store", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": csrfToken,
+                "Accept": "application/json"
+                // JANGAN tambah Content-Type untuk FormData
+            },
+            body: formData
+        });
+
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+        
+        let data;
+        try {
+            const responseText = await response.text();
+            console.log('Raw response:', responseText);
+            
+            data = JSON.parse(responseText);
+            console.log('Parsed response:', data);
+            
+        } catch (jsonError) {
+            console.error('JSON parse error:', jsonError);
+            showMinimalPopup('Error', 'Terjadi kesalahan pada server (Invalid JSON)', 'error');
+            return;
+        }
+
+        if (response.ok) {
+            showMinimalPopup('Berhasil', 'Karyawan berhasil ditambahkan', 'success');
+            
+            // Reset form
+            tambahKaryawanForm.reset();
+            closeTambahModal();
+            
+            // Refresh page setelah 1.5 detik
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            // Handle errors
+            if (data.errors) {
+                let errorMessages = [];
+                for (let field in data.errors) {
+                    errorMessages.push(`${field}: ${data.errors[field].join(', ')}`);
+                }
+                showMinimalPopup('Validasi Gagal', errorMessages.join('\n'), 'error');
+            } else {
+                showMinimalPopup('Error', data.message || `Terjadi kesalahan (Status: ${response.status})`, 'error');
+            }
+        }
+        
+    } catch (error) {
+        console.error('Network error:', error);
+        showMinimalPopup('Error', 'Koneksi jaringan bermasalah: ' + error.message, 'error');
+    } finally {
+        // Reset button
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+});
          // CREATE (POST)
-         tambahKaryawanForm.addEventListener('submit', async function(e) {
-             e.preventDefault();
+         // Pastikan ini di bagian JavaScript
+// ========= AUTO-FILL BERDASARKAN USER ========= //
+document.getElementById('userSelect').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const userId = selectedOption.value;
+    const userName = selectedOption.getAttribute('data-nama');
+    const divisi = selectedOption.getAttribute('data-divisi') || '';
+    const role = selectedOption.getAttribute('data-role') || 'karyawan';
+    
+    console.log('Selected user:', { userId, userName, divisi, role });
+    
+    // Isi otomatis field yang diperlukan
+    document.getElementById('namaInput').value = userName; // Hidden field
+    document.getElementById('jabatanInput').value = role;
+    document.getElementById('divisiInput').value = divisi;
+});
 
-             // Show loading state
-             const submitBtn = tambahKaryawanForm.querySelector('button[type="submit"]');
-             const originalText = submitBtn.textContent;
-             submitBtn.textContent = 'Menyimpan...';
-             submitBtn.disabled = true;
+// CREATE (POST) dengan debugging lebih detail
+tambahKaryawanForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
 
-             let formData = new FormData(tambahKaryawanForm);
+    console.log('Form submission started');
 
-             try {
-                 let response = await fetch("/admin/karyawan/store", {
-                     method: "POST",
-                     headers: {
-                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute(
-                             "content"),
-                         "Accept": "application/json"
-                     },
-                     body: formData
-                 });
+    // Validasi manual
+    const userSelect = document.getElementById('userSelect');
+    const kontakInput = document.getElementById('kontakInput');
+    const alamatInput = document.getElementById('alamatInput');
+    const jabatanInput = document.getElementById('jabatanInput');
+    
+    if (!userSelect.value) {
+        showMinimalPopup('Error', 'Silakan pilih user terlebih dahulu', 'error');
+        return;
+    }
+    
+    // Auto-fill nama dari user yang dipilih
+    const selectedOption = userSelect.options[userSelect.selectedIndex];
+    const namaInput = document.getElementById('namaInput');
+    namaInput.value = selectedOption.getAttribute('data-nama');
+    
+    if (!jabatanInput.value.trim()) {
+        showMinimalPopup('Error', 'Jabatan harus diisi', 'error');
+        return;
+    }
+    
+    if (!kontakInput.value.trim()) {
+        showMinimalPopup('Error', 'Nomor kontak harus diisi', 'error');
+        return;
+    }
+    
+    if (!alamatInput.value.trim()) {
+        showMinimalPopup('Error', 'Alamat harus diisi', 'error');
+        return;
+    }
 
-                 if (!response.ok) {
-                     throw new Error(`HTTP error! status: ${response.status}`);
-                 }
+    // Show loading state
+    const submitBtn = tambahKaryawanForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Menyimpan...';
+    submitBtn.disabled = true;
 
-                 let res = await response.json();
+    let formData = new FormData(tambahKaryawanForm);
 
-                 if (res.success) {
-                     showMinimalPopup('Berhasil', 'Karyawan berhasil ditambahkan', 'success');
-                     setTimeout(() => {
-                         location.reload();
-                     }, 1500);
-                 } else {
-                     showMinimalPopup('Error', res.message || 'Terjadi kesalahan saat menyimpan data', 'error');
-                 }
-             } catch (error) {
-                 console.error('Error:', error);
-                 showMinimalPopup('Error', 'Terjadi kesalahan saat menyimpan data', 'error');
-             } finally {
-                 // Reset button state
-                 submitBtn.textContent = originalText;
-                 submitBtn.disabled = false;
-             }
-         });
+    // Debug: Tampilkan data FormData
+    console.log('FormData to be sent:');
+    for (let [key, value] of formData.entries()) {
+        console.log(key + ':', value);
+    }
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        console.log('CSRF Token:', csrfToken);
+        console.log('Sending to:', '/admin/karyawan/store');
+
+        let response = await fetch("/admin/karyawan/store", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": csrfToken,
+                "Accept": "application/json"
+                // JANGAN tambah Content-Type untuk FormData
+            },
+            body: formData
+        });
+
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+        
+        let data;
+        try {
+            const responseText = await response.text();
+            console.log('Raw response:', responseText);
+            
+            data = JSON.parse(responseText);
+            console.log('Parsed response:', data);
+            
+        } catch (jsonError) {
+            console.error('JSON parse error:', jsonError);
+            showMinimalPopup('Error', 'Terjadi kesalahan pada server (Invalid JSON)', 'error');
+            return;
+        }
+
+        if (response.ok) {
+            showMinimalPopup('Berhasil', 'Karyawan berhasil ditambahkan', 'success');
+            
+            // Reset form
+            tambahKaryawanForm.reset();
+            closeTambahModal();
+            
+            // Refresh page setelah 1.5 detik
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            // Handle errors
+            if (data.errors) {
+                let errorMessages = [];
+                for (let field in data.errors) {
+                    errorMessages.push(`${field}: ${data.errors[field].join(', ')}`);
+                }
+                showMinimalPopup('Validasi Gagal', errorMessages.join('\n'), 'error');
+            } else {
+                showMinimalPopup('Error', data.message || `Terjadi kesalahan (Status: ${response.status})`, 'error');
+            }
+        }
+        
+    } catch (error) {
+        console.error('Network error:', error);
+        showMinimalPopup('Error', 'Koneksi jaringan bermasalah: ' + error.message, 'error');
+    } finally {
+        // Reset button
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+});
 
          // UPDATE (PUT)
          editKaryawanForm.addEventListener('submit', async function(e) {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Data Orderan</title>
+    <title>Data Project</title>
     
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
@@ -633,14 +633,14 @@
         <div class="flex-1 flex flex-col main-content">
             <div class="flex-1 p-3 sm:p-8">
                 <header class="mb-4 sm:mb-8">
-                    <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">Data Orderan</h1>
+                    <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">Data Project</h1>
                 </header>
                 
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
                         <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama orderan atau deskripsi..." type="text" />
+                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama project atau deskripsi..." type="text" />
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <div class="relative">
@@ -671,11 +671,6 @@
                                 </div>
                             </div>
                         </div>
-                        <button id="tambahOrderanBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
-                            <span class="material-icons-outlined">add</span>
-                            <span class="hidden sm:inline">Tambah Orderan</span>
-                            <span class="sm:hidden">Tambah</span>
-                        </button>
                     </div>
                 </div>
                 
@@ -684,10 +679,10 @@
                     <div class="panel-header">
                         <h3 class="panel-title">
                             <span class="material-icons-outlined text-primary">shopping_cart</span>
-                            Data Orderan
+                            Data Project
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">2</span> orderan</span>
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">2</span> project</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -698,7 +693,7 @@
                                     <thead>
                                         <tr>
                                             <th style="min-width: 60px;">No</th>
-                                            <th style="min-width: 200px;">Nama Orderan</th>
+                                            <th style="min-width: 200px;">Nama Project</th>
                                             <th style="min-width: 250px;">Deskripsi</th>
                                             <th style="min-width: 150px;">Harga</th>
                                             <th style="min-width: 150px;">Deadline</th>
@@ -708,90 +703,6 @@
                                         </tr>
                                     </thead>
                                     <tbody id="desktopTableBody">
-                                        <tr class="orderan-row" 
-                                            data-id="1" 
-                                            data-nama="Website Company Profile" 
-                                            data-deskripsi="Pembuatan web profil perusahaan..." 
-                                            data-harga="5000000" 
-                                            data-deadline="12 Okt 2025"
-                                            data-progres="75"
-                                            data-status="selesai">
-                                            <td style="min-width: 60px;">1</td>
-                                            <td style="min-width: 200px;">Website Company Profile</td>
-                                            <td style="min-width: 250px;">Pembuatan web profil perusahaan...</td>
-                                            <td style="min-width: 150px;">Rp 5.000.000</td>
-                                            <td style="min-width: 150px;">12 Okt 2025</td>
-                                            <td style="min-width: 150px;">
-                                                <div class="w-full bg-gray-400 rounded-full h-2 dark:bg-gray-600">
-                                                    <div class="bg-primary h-2 rounded-full" style="width: 75%"></div>
-                                                </div>
-                                            </td>
-                                            <td style="min-width: 150px;">
-                                                <span class="status-badge status-selesai">
-                                                    Selesai
-                                                </span>
-                                            </td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                            data-id="1"
-                                                            data-nama="Website Company Profile"
-                                                            data-deskripsi="Pembuatan web profil perusahaan..."
-                                                            data-harga="5000000"
-                                                            data-deadline="12 Okt 2025"
-                                                            data-progres="75"
-                                                            data-status="selesai">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                            data-id="1">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr class="orderan-row" 
-                                            data-id="2" 
-                                            data-nama="Aplikasi Kasir Android" 
-                                            data-deskripsi="Aplikasi POS untuk retail..." 
-                                            data-harga="12000000" 
-                                            data-deadline="20 Nov 2025"
-                                            data-progres="30"
-                                            data-status="proses">
-                                            <td style="min-width: 60px;">2</td>
-                                            <td style="min-width: 200px;">Aplikasi Kasir Android</td>
-                                            <td style="min-width: 250px;">Aplikasi POS untuk retail...</td>
-                                            <td style="min-width: 150px;">Rp 12.000.000</td>
-                                            <td style="min-width: 150px;">20 Nov 2025</td>
-                                            <td style="min-width: 150px;">
-                                                <div class="w-full bg-gray-400 rounded-full h-2 dark:bg-gray-600">
-                                                    <div class="bg-primary h-2 rounded-full" style="width: 30%"></div>
-                                                </div>
-                                            </td>
-                                            <td style="min-width: 150px;">
-                                                <span class="status-badge status-proses">
-                                                    Proses
-                                                </span>
-                                            </td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                            data-id="2"
-                                                            data-nama="Aplikasi Kasir Android"
-                                                            data-deskripsi="Aplikasi POS untuk retail..."
-                                                            data-harga="12000000"
-                                                            data-deadline="20 Nov 2025"
-                                                            data-progres="30"
-                                                            data-status="proses">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                            data-id="2">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -951,63 +862,12 @@
         </div>
     </div>
 
-    <!-- Modal Tambah Orderan -->
-    <div id="tambahOrderanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Tambah Orderan Baru</h3>
-                    <button id="closeModalBtn" class="text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form action="#" method="POST" id="tambahOrderanForm" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
-                            <input type="text" name="nama_orderan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama orderan" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                            <input type="text" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan harga" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                            <input type="text" name="deadline" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deadline" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <select name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih status</option>
-                                <option value="pending">Pending</option>
-                                <option value="proses">Proses</option>
-                                <option value="selesai">Selesai</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi orderan" required></textarea>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
-                        <input type="number" name="progres" min="0" max="100" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan progres (0-100)" required>
-                    </div>
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" id="batalTambahBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan Data</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal Edit Orderan -->
     <div id="editOrderanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Orderan</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Edit Project</h3>
                     <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
@@ -1016,8 +876,8 @@
                     <input type="hidden" id="editId" name="id">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
-                            <input type="text" id="editNamaOrderan" name="nama_orderan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama orderan" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
+                            <input type="text" id="editNamaOrderan" name="nama_orderan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama Project" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
@@ -1039,7 +899,7 @@
                     </div>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi orderan" required></textarea>
+                        <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi Project" required></textarea>
                     </div>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
@@ -1066,7 +926,7 @@
                 </div>
                 <form id="deleteForm" method="POST" action="#">
                     <div class="mb-6">
-                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus orderan ini?</p>
+                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus project ini?</p>
                         <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
                         <input type="hidden" id="deleteId" name="id">
                     </div>

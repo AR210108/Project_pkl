@@ -14,7 +14,7 @@ class DataProjectController extends Controller
     public function index()
     {
         $project = Project::orderBy('id', 'desc')->paginate(3);
-        return view('admin.data_project', compact('project'));
+        return view('general_manajer.data_project', compact('project'));
     }
 
     /**

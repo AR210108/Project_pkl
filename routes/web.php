@@ -60,22 +60,15 @@ Route::post('/login-process', [LoginController::class, 'login'])->name('login.pr
 */
 
 Route::middleware('auth')->group(function () {
-    // Route logout dengan POST
+
     Route::post('/logout', function () {
         Auth::logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
         return redirect('/');
     })->name('logout');
-
-    // Route GET untuk logout (backup/fallback)
-    Route::get('/logout-get', function () {
-        Auth::logout();
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
-        return redirect('/');
-    })->name('logout.get');
 });
+
 
 // Pegawai resource routes (using KaryawanController methods for pegawai management)
 Route::middleware(['auth'])->group(function () {
@@ -309,23 +302,32 @@ Route::middleware(['auth', 'role:karyawan'])
 */
 
 Route::middleware(['auth', 'role:general_manager'])
-    ->prefix('general-manajer')
+    ->prefix('general_manajer')
     ->name('general_manajer.')
     ->group(function () {
         Route::get('/home', function () {
             return view('general_manajer.home');
         })->name('home');
 
-        Route::get('general-manajer/data_karyawan', [AdminKaryawanController::class, 'generalKaryawan'])
+        Route::get('general_manajer/data_karyawan', [AdminKaryawanController::class, 'generalKaryawan'])
             ->name('data_karyawan');
 
         Route::get('/layanan', function () {
             return view('general_manajer.data_layanan');
         })->name('layanan');
 
-        Route::get('/kelola-order', function () {
-            return view('general_manajer.kelola_order');
-        })->name('kelola_order');
+        // DATA PROJECT (GENERAL MANAGER)
+        Route::get('/data_project', [DataProjectController::class, 'index'])
+            ->name('data_project');
+
+        Route::post('/data_project', [DataProjectController::class, 'store'])
+            ->name('data_project.store');
+
+        Route::put('/data_project/{id}', [DataProjectController::class, 'update'])
+            ->name('data_project.update');
+
+        Route::delete('/data_project/{id}', [DataProjectController::class, 'destroy'])
+            ->name('data_project.destroy');
 
         // TUGAS MANAGEMENT UNTUK GENERAL MANAGER
         Route::get('/kelola-tugas', [GeneralManagerTaskController::class, 'index'])
@@ -387,12 +389,11 @@ Route::middleware(['auth', 'role:owner'])
         Route::get('/home', function () {
             return view('pemilik.home');
         })->name('home');
-
-        Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');
-
         Route::get('/laporan', function () {
             return view('pemilik.laporan');
         })->name('laporan');
+
+        Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');
     });
 
 /*
@@ -612,18 +613,6 @@ Route::get('/invoices/{invoice}/print', function (\App\Models\Invoice $invoice) 
 
 /*
 |--------------------------------------------------------------------------
-| Debug Routes untuk Testing
-|--------------------------------------------------------------------------
-*/
-Route::get('/pemilik', function () {
-    return view('pemilik/home');
-});
-Route::get('/laporan', function () {
-    return view('pemilik/laporan');
-});
-
-/*
-|--------------------------------------------------------------------------
 | Routes untuk Finance
 |--------------------------------------------------------------------------
 */
@@ -689,9 +678,7 @@ Route::get('/data_karyawan', function () {
 });
 Route::get('/layanan', [PelayananController::class, 'index']);
 
-Route::get('/kelola_order', function () {
-    return view('general_manajer/kelola_order');
-});
+
 Route::get('/kelola_tugas', [TaskController::class, 'index'])->name('tugas.page');
 Route::get('/kelola_absen', function () {
     return view('general_manajer/kelola_absen');

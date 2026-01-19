@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Data Orderan - Dashboard</title>
+    <title>Data Project - Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
@@ -484,7 +484,7 @@
             <main class="flex-1 flex flex-col bg-background-light">
                 <div class="flex-1 p-3 sm:p-8">
 
-                    <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Data Orderan</h2>
+                    <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Data Project</h2>
                     
                     <!-- Search and Filter Section -->
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -496,9 +496,9 @@
                             <button id="filterBtn" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
                                 Filter
                             </button>
-                            <button id="tambahOrderanBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
+                            <button id="tambahProjectBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
                                 <span class="material-icons-outlined">add</span>
-                                <span class="hidden sm:inline">Tambah Orderan</span>
+                                <span class="hidden sm:inline">Tambah Project</span>
                                 <span class="sm:hidden">Tambah</span>
                             </button>
                         </div>
@@ -509,10 +509,10 @@
                         <div class="panel-header">
                             <h3 class="panel-title">
                                 <span class="material-icons-outlined text-primary">view_list</span>
-                                Daftar Orderan
+                                Daftar Project
                             </h3>
                             <div class="flex items-center gap-2">
-                                <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light">{{ $orderan->total() }}</span> orderan</span>
+                                <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light">{{ $project->total() }}</span> project</span>
                             </div>
                         </div>
                         <div class="panel-body">
@@ -523,7 +523,7 @@
                                         <thead>
                                             <tr>
                                                 <th style="min-width: 60px;">No</th>
-                                                <th style="min-width: 200px;">Nama Orderan</th>
+                                                <th style="min-width: 200px;">Nama Project</th>
                                                 <th style="min-width: 300px;">Deskripsi</th>
                                                 <th style="min-width: 120px;">Harga</th>
                                                 <th style="min-width: 120px;">Deadline</th>
@@ -533,9 +533,9 @@
                                             </tr>
                                         </thead>
                                         <tbody id="desktopTableBody">
-                                            @foreach($orderan as $index => $item)
+                                            @foreach($project as $index => $item)
                                                 <tr>
-                                                    <td style="min-width: 60px;">{{ ($orderan->currentPage() - 1) * $orderan->perPage() + $index + 1 }}</td>
+                                                    <td style="min-width: 60px;">{{ ($project->currentPage() - 1) * $project->perPage() + $index + 1 }}</td>
                                                     <td style="min-width: 200px;">{{ $item->nama }}</td>
                                                     <td style="min-width: 300px;" class="truncate-text" title="{{ $item->deskripsi }}">
                                                         {{ Str::limit($item->deskripsi, 50) }}
@@ -585,7 +585,7 @@
                             
                             <!-- Mobile Card View -->
                             <div class="mobile-cards space-y-4" id="mobile-cards">
-                                @foreach($orderan as $item)
+                                @foreach($project as $item)
                                     <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm">
                                         <div class="flex justify-between items-start mb-3">
                                             <div>
@@ -651,18 +651,18 @@
                             
                             <!-- Desktop Pagination -->
                             <div class="desktop-pagination">
-                                <button class="desktop-nav-btn" @if($orderan->currentPage() == 1) disabled @endif onclick="window.location.href='{{ $orderan->previousPageUrl() }}'">
+                                <button class="desktop-nav-btn" @if($project->currentPage() == 1) disabled @endif onclick="window.location.href='{{ $project->previousPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_left</span>
                                 </button>
                                 <div class="flex gap-1">
-                                    @for($i = 1; $i <= $orderan->lastPage(); $i++)
-                                        <button class="desktop-page-btn {{ $i == $orderan->currentPage() ? 'active' : '' }}" 
-                                            onclick="window.location.href='{{ $orderan->url($i) }}'">
+                                    @for($i = 1; $i <= $project->lastPage(); $i++)
+                                        <button class="desktop-page-btn {{ $i == $project->currentPage() ? 'active' : '' }}" 
+                                            onclick="window.location.href='{{ $project->url($i) }}'">
                                             {{ $i }}
                                         </button>
                                     @endfor
                                 </div>
-                                <button class="desktop-nav-btn" @if($orderan->currentPage() == $orderan->lastPage()) disabled @endif onclick="window.location.href='{{ $orderan->nextPageUrl() }}'">
+                                <button class="desktop-nav-btn" @if($project->currentPage() == $project->lastPage()) disabled @endif onclick="window.location.href='{{ $project->nextPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_right</span>
                                 </button>
                             </div>
@@ -670,19 +670,19 @@
                             <!-- Mobile Pagination -->
                             <div class="mobile-pagination md:hidden flex justify-center items-center gap-2 mt-4">
                                 <button class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" 
-                                    @if($orderan->currentPage() == 1) disabled @endif onclick="window.location.href='{{ $orderan->previousPageUrl() }}'">
+                                    @if($project->currentPage() == 1) disabled @endif onclick="window.location.href='{{ $project->previousPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_left</span>
                                 </button>
                                 <div class="flex gap-1">
-                                    @for($i = 1; $i <= $orderan->lastPage(); $i++)
-                                        <button class="page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm {{ $i == $orderan->currentPage() ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600' }}" 
-                                            onclick="window.location.href='{{ $orderan->url($i) }}'">
+                                    @for($i = 1; $i <= $project->lastPage(); $i++)
+                                        <button class="page-btn w-8 h-8 rounded-full flex items-center justify-center text-sm {{ $i == $project->currentPage() ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600' }}" 
+                                            onclick="window.location.href='{{ $project->url($i) }}'">
                                             {{ $i }}
                                         </button>
                                     @endfor
                                 </div>
                                 <button class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" 
-                                    @if($orderan->currentPage() == $orderan->lastPage()) disabled @endif onclick="window.location.href='{{ $orderan->nextPageUrl() }}'">
+                                    @if($project->currentPage() == $project->lastPage()) disabled @endif onclick="window.location.href='{{ $project->nextPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_right</span>
                                 </button>
                             </div>
@@ -696,20 +696,20 @@
         </div>
     </div>
 
-    <!-- Modal Tambah Orderan -->
+    <!-- Modal Tambah  -->
     <div id="tambahModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Tambah Orderan Baru</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Tambah Project Baru</h3>
                     <button class="close-modal text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="tambahForm" action="{{ route('general_manajer.orderan.store') }}" method="POST">
+                <form id="tambahForm" action="{{ route('general_manajer.data_project.store') }}" method="POST">
                     @csrf
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
                         <input type="text" name="nama" id="tambahNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                         @error('nama')
                             <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -764,22 +764,22 @@
         </div>
     </div>
 
-    <!-- Modal Edit Orderan -->
+    <!-- Modal Edit  -->
     <div id="editModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Orderan</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Edit Project</h3>
                     <button class="close-modal text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="editForm" action="{{ route('general_manajer.orderan.update', '') }}" method="POST">
+                <form id="editForm" action="{{ route('general_manajer.data_project.update', '') }}" method="POST">
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="id" id="editId">
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orderan</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
                         <input type="text" name="nama" id="editNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                     </div>
                     <div class="mb-4">
@@ -816,21 +816,21 @@
         </div>
     </div>
 
-    <!-- Modal Detail Orderan -->
+    <!-- Modal Detail  -->
     <div id="detailModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Detail Orderan</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Detail Project</h3>
                 </div>
                 <div class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-1">ID Orderan</h4>
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">ID Project</h4>
                             <p class="text-base font-medium" id="detailId"></p>
                         </div>
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-1">Nama Orderan</h4>
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Nama Project</h4>
                             <p class="text-base font-medium" id="detailNama"></p>
                         </div>
                         <div>
@@ -867,7 +867,7 @@
         </div>
     </div>
 
-    <!-- Modal Hapus Orderan -->
+    <!-- Modal Hapus  -->
     <div id="deleteModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
             <div class="p-6">
@@ -878,10 +878,10 @@
                     </button>
                 </div>
                 <div class="mb-6">
-                    <p class="text-gray-700">Apakah Anda yakin ingin menghapus orderan <span id="deleteNama" class="font-semibold"></span>?</p>
+                    <p class="text-gray-700">Apakah Anda yakin ingin menghapus project <span id="deleteNama" class="font-semibold"></span>?</p>
                     <p class="text-sm text-gray-500 mt-2">Tindakan ini tidak dapat dibatalkan.</p>
                 </div>
-                <form id="deleteForm" action="{{ route('general_manajer.orderan.destroy', '') }}" method="POST">
+                <form id="deleteForm" action="{{ route('general_manajer.data_project.destroy', '') }}" method="POST">
                     @csrf
                     @method('DELETE')
                     <input type="hidden" name="id" id="deleteId">
@@ -932,7 +932,7 @@
         const toastMessage = document.getElementById('toastMessage');
         
         // Buttons
-        const tambahOrderanBtn = document.getElementById('tambahOrderanBtn');
+        const tambahProjectnBtn = document.getElementById('tambahProjectBtn');
         const closeModals = document.querySelectorAll('.close-modal');
         const closeToastBtn = document.getElementById('closeToast');
         
@@ -942,7 +942,7 @@
         const deleteForm = document.getElementById('deleteForm');
         
         // Show tambah modal
-        tambahOrderanBtn.addEventListener('click', function() {
+        tambahProjectBtn.addEventListener('click', function() {
             tambahModal.classList.remove('hidden');
             tambahForm.reset();
         });
@@ -1026,7 +1026,7 @@
             const formData = new FormData(editForm);
             const id = document.getElementById('editId').value;
             
-            fetch(`/general_manajer/orderan/${id}`, {
+            fetch(`/general_manajer/project/${id}`, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -1072,7 +1072,7 @@
             const formData = new FormData(deleteForm);
             const id = document.getElementById('deleteId').value;
             
-            fetch(`/general_manajer/orderan/${id}`, {
+            fetch(`/general_manajer/project/${id}`, {
                 method: 'POST',
                 body: formData,
                 headers: {

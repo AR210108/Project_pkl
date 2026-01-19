@@ -20,6 +20,14 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
+            'name' => 'Finance',
+            'email' => 'finance@gmail.com',
+            'password' => Hash::make('123'),
+            'role' => 'finance',
+            'divisi' => null
+        ]);
+
+        User::create([
             'name' => 'General Manager',
             'email' => 'general@gmail.com',
             'password' => Hash::make('123'),
