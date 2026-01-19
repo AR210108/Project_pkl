@@ -26,6 +26,7 @@ use App\Http\Controllers\PelayananController;
 | Helper Functions
 |--------------------------------------------------------------------------
 */
+
 if (!function_exists('redirectToRolePage')) {
     function redirectToRolePage($user)
     {
@@ -277,7 +278,7 @@ Route::middleware(['auth', 'role:karyawan'])
             // Dashboard data - FIXED ROUTE
             Route::get('/dashboard', [KaryawanController::class, 'getDashboardData'])->name('dashboard');
             Route::get('/dashboard-data', [KaryawanController::class, 'getDashboardData'])->name('dashboard.data'); // Alias untuk kompatibilitas
-    
+
             // Absensi - Status Hari Ini
             Route::get('/today-status', [KaryawanController::class, 'getTodayStatus'])->name('today.status');
 
@@ -302,12 +303,11 @@ Route::middleware(['auth', 'role:karyawan'])
 
         //profile
         // PROFILE (BENAR)
-Route::get('/profile', [KaryawanProfileController::class, 'index'])
-    ->name('profile');
+        Route::get('/profile', [KaryawanProfileController::class, 'index'])
+            ->name('profile');
 
-Route::post('/profile/update', [KaryawanProfileController::class, 'update'])
-    ->name('profile.update');
-
+        Route::post('/profile/update', [KaryawanProfileController::class, 'update'])
+            ->name('profile.update');
     });
 
 /*
@@ -323,10 +323,10 @@ Route::middleware(['auth', 'role:general_manager'])
         Route::get('/home', function () {
             return view('general_manajer.home');
         })->name('home');
-        
+
         Route::get('general-manajer/data_karyawan', [AdminKaryawanController::class, 'generalKaryawan'])
             ->name('data_karyawan');
-        
+
         Route::get('/layanan', function () {
             return view('general_manajer.data_layanan');
         })->name('layanan');
@@ -395,9 +395,9 @@ Route::middleware(['auth', 'role:owner'])
         Route::get('/home', function () {
             return view('pemilik.home');
         })->name('home');
-        
+
         Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');
-        
+
         Route::get('/laporan', function () {
             return view('pemilik.laporan');
         })->name('laporan');
@@ -484,7 +484,10 @@ Route::middleware(['auth', 'role:manager_divisi'])
 
             Route::get('/karyawan-by-divisi/{divisi}', [ManagerDivisiTaskController::class, 'getKaryawanByDivisi'])
                 ->name('karyawan.by_divisi');
+            Route::get('/daftar_karyawan/{divisi}', [AdminKaryawanController::class, 'karyawanDivisi'])
+                ->name('karyawan.divisi');
         });
+
 
         Route::get('/pengelola-tugas', function () {
             return view('manager_divisi.pengelola_tugas');
@@ -620,7 +623,7 @@ Route::get('/invoices/{invoice}/print', function (\App\Models\Invoice $invoice) 
 | Debug Routes untuk Testing
 |--------------------------------------------------------------------------
 */
-Route::get('/pemilik', function () { 
+Route::get('/pemilik', function () {
     return view('pemilik/home');
 });
 Route::get('/laporan', function () {
@@ -670,21 +673,21 @@ Route::get('/pengelola_tugas', function () {
 });
 
 
-    Route::get('/manager_divisi', function () {
-        return view('manager_divisi/home');
-    });
-    Route::get('/pengelola_tugas', action: function () {
-        return view('manager_divisi/pengelola_tugas');
-    });
-    Route::get('/data_order', function () {
-        return view('manager_divisi/data_order');
-    });
-    Route::get('/daftar_karyawan', function () {
-        return view('manager_divisi/daftar_karyawan');
-    });
-    Route::get('/kelola_absensi', function () {
-        return view('manager_divisi/kelola_absensi');
-    });
+Route::get('/manager_divisi', function () {
+    return view('manager_divisi/home');
+});
+Route::get('/pengelola_tugas', action: function () {
+    return view('manager_divisi/pengelola_tugas');
+});
+Route::get('/data_order', function () {
+    return view('manager_divisi/data_order');
+});
+Route::get('/daftar_karyawan', function () {
+    return view('manager_divisi/daftar_karyawan');
+});
+Route::get('/kelola_absensi', function () {
+    return view('manager_divisi/kelola_absensi');
+});
 
 Route::get('/general_manajer', function () {
     return view('general_manajer/home');

@@ -290,7 +290,7 @@
                             Laporan
                         </a>
                     </nav>
-                    <a class="login-btn" href="/login">
+                    <a class="login-btn" href="{{'logout'}}">
                         <i class='bx bx-log-out-circle text-xl mr-1'></i>
                         Log Out
                     </a>
