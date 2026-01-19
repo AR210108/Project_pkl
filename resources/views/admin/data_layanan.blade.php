@@ -1869,216 +1869,161 @@
             });
         });
 
-        // ============================
-        // SUBMIT FORM TAMBAH - WITH NOTIFICATION
-        // ============================
-        tambahLayananForm.addEventListener('submit', function(e) {
-            // Prevent default form submission
-            e.preventDefault();
-            
-            // Create FormData to handle file upload
-            const formData = new FormData(this);
-            
-            // Send form data using fetch
-            fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                // Check if response is ok (status in the range 200-299)
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text(); // Get response as text first
-            })
-            .then(text => {
-                try {
-                    // Try to parse as JSON
-                    return JSON.parse(text);
-                } catch (e) {
-                    // If not JSON, check if it contains HTML (redirect)
-                    if (text.includes('<!DOCTYPE html') || text.includes('<html')) {
-                        // Assume success and redirect
-                        return { success: true, message: 'Layanan berhasil ditambahkan' };
-                    }
-                    // If not HTML, throw error
-                    throw new Error('Invalid response format');
-                }
-            })
-            .then(data => {
-                if (data.success) {
-                    // Close modal
-                    tambahLayananModal.classList.add('hidden');
-                    resetTambahForm();
-                    
-                    // Show success notification
-                    showMinimalPopup('Berhasil', data.message || 'Layanan berhasil ditambahkan', 'success');
-                    
-                    // Reload page after a short delay to show updated data
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    // Show error notification
-                    showMinimalPopup('Error', data.message || 'Terjadi kesalahan saat menambah layanan', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // Show error notification
-                showMinimalPopup('Error', 'Terjadi kesalahan saat menambah layanan', 'error');
-            });
-        });
-
-        // ============================
-        // SUBMIT FORM EDIT - WITH NOTIFICATION (FIXED)
-        // ============================
-        editLayananForm.addEventListener('submit', function(e) {
-            // Prevent default form submission
-            e.preventDefault();
-            
-            // Get the ID from the hidden input
-            const id = document.getElementById('editId').value;
-            
-            // Create FormData to handle file upload
-            const formData = new FormData(this);
-            
-            // Send form data using fetch
-            fetch(`/admin/layanan/${id}`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                // Check if response is ok (status in the range 200-299)
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text(); // Get response as text first
-            })
-            .then(text => {
-                try {
-                    // Try to parse as JSON
-                    return JSON.parse(text);
-                } catch (e) {
-                    // If not JSON, check if it contains HTML (redirect)
-                    if (text.includes('<!DOCTYPE html') || text.includes('<html')) {
-                        // Assume success and redirect
-                        return { success: true, message: 'Layanan berhasil diperbarui' };
-                    }
-                    // If not HTML, throw error
-                    throw new Error('Invalid response format');
-                }
-            })
-            .then(data => {
-                if (data.success) {
-                    // Close modal
-                    editLayananModal.classList.add('hidden');
-                    resetEditForm();
-                    
-                    // Show success notification
-                    showMinimalPopup('Berhasil', data.message || 'Layanan berhasil diperbarui', 'success');
-                    
-                    // Reload page after a short delay to show updated data
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    // Show error notification
-                    showMinimalPopup('Error', data.message || 'Terjadi kesalahan saat memperbarui layanan', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // Show error notification
-                showMinimalPopup('Error', 'Terjadi kesalahan saat memperbarui layanan', 'error');
-            });
-        });
-
-        // ============================
-        // SUBMIT FORM DELETE - WITH NOTIFICATION (FIXED)
-        // ============================
-        document.getElementById('deleteForm').addEventListener('submit', function(e) {
-            // Prevent default form submission
-            e.preventDefault();
-            
-            // Get the ID from the hidden input
-            const id = document.getElementById('deleteId').value;
-            
-            // Send form data using fetch
-            fetch(`/admin/layanan/${id}`, {
-                method: 'POST',
-                body: new FormData(this),
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                // Check if response is ok (status in the range 200-299)
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text(); // Get response as text first
-            })
-            .then(text => {
-                try {
-                    // Try to parse as JSON
-                    return JSON.parse(text);
-                } catch (e) {
-                    // If not JSON, check if it contains HTML (redirect)
-                    if (text.includes('<!DOCTYPE html') || text.includes('<html')) {
-                        // Assume success and redirect
-                        return { success: true, message: 'Layanan berhasil dihapus' };
-                    }
-                    // If not HTML, throw error
-                    throw new Error('Invalid response format');
-                }
-            })
-            .then(data => {
-                if (data.success) {
-                    // Close modal
-                    deleteModal.classList.add('hidden');
-                    
-                    // Show success notification
-                    showMinimalPopup('Berhasil', data.message || 'Layanan berhasil dihapus', 'success');
-                    
-                    // Reload page after a short delay to show updated data
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    // Show error notification
-                    showMinimalPopup('Error', data.message || 'Terjadi kesalahan saat menghapus layanan', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // Show error notification
-                showMinimalPopup('Error', 'Terjadi kesalahan saat menghapus layanan', 'error');
-            });
-        });
+// ============================
+// SUBMIT FORM TAMBAH - DENGAN DEBUGGING LEBIH BAIK
+// ============================
+tambahLayananForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.innerHTML;
+    
+    // Tampilkan loading state
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span> Menyimpan...';
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
+        }
+    })
+    .then(async response => {
+        const data = await response.json(); // Coba parse JSON dulu
         
-        // Close modals when clicking outside
-        window.addEventListener('click', function(event) {
-            // Image modal
-            const imageModal = document.getElementById('imageModal');
-            if (event.target === imageModal) {
-                closeImageModal();
-            }
-            
-            // Detail modal
-            const detailModal = document.getElementById('detailModal');
-            if (event.target === detailModal) {
-                closeDetailModal();
-            }
-        });
+        if (!response.ok) {
+            // Jika response tidak OK, lempar error dengan pesan dari server
+            throw new Error(data.message || `HTTP error! status: ${response.status}`);
+        }
+        
+        return data; // Jika OK, kembalikan data
+    })
+    .then(data => {
+        if (data.success) {
+            tambahLayananModal.classList.add('hidden');
+            resetTambahForm();
+            showMinimalPopup('Berhasil', data.message || 'Layanan berhasil ditambahkan', 'success');
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            // Handle jika success: false dari server
+            showMinimalPopup('Gagal', data.message || 'Gagal menambah layanan.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error Detail:', error); // Lihat console untuk detail lengkap
+        showMinimalPopup('Error', error.message, 'error'); // Tampilkan pesan error asli
+    })
+    .finally(() => {
+        // Kembalikan button ke semula
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonText;
+    });
+});
+
+// ============================
+// SUBMIT FORM EDIT - DENGAN DEBUGGING LEBIH BAIK
+// ============================
+editLayananForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const id = document.getElementById('editId').value;
+    const formData = new FormData(this);
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.innerHTML;
+    
+    // Tampilkan loading state
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span> Memperbarui...';
+
+    fetch(`/admin/layanan/${id}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
+        }
+    })
+    .then(async response => {
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || `HTTP error! status: ${response.status}`);
+        }
+        
+        return data;
+    })
+    .then(data => {
+        if (data.success) {
+            editLayananModal.classList.add('hidden');
+            resetEditForm();
+            showMinimalPopup('Berhasil', data.message || 'Layanan berhasil diperbarui', 'success');
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showMinimalPopup('Gagal', data.message || 'Gagal memperbarui layanan.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error Detail:', error);
+        showMinimalPopup('Error', error.message, 'error');
+    })
+    .finally(() => {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonText;
+    });
+});
+
+       // ============================
+// SUBMIT FORM DELETE - DENGAN DEBUGGING LEBIH BAIK
+// ============================
+document.getElementById('deleteForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const id = document.getElementById('deleteId').value;
+    const formData = new FormData(this);
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.innerHTML;
+    
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span> Menghapus...';
+
+    fetch(`/admin/layanan/${id}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
+        }
+    })
+    .then(async response => {
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || `HTTP error! status: ${response.status}`);
+        }
+        
+        return data;
+    })
+    .then(data => {
+        if (data.success) {
+            deleteModal.classList.add('hidden');
+            showMinimalPopup('Berhasil', data.message || 'Layanan berhasil dihapus', 'success');
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showMinimalPopup('Gagal', data.message || 'Gagal menghapus layanan.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error Detail:', error);
+        showMinimalPopup('Error', error.message, 'error');
+    })
+    .finally(() => {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonText;
+    });
+});
     </script>
 </body>
 

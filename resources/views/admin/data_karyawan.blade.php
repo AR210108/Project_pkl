@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="utf-8" />
@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
  <link rel="icon" type="image/png" href="{{ asset('logo1.jpeg') }}">
-
 
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
@@ -1031,7 +1030,8 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="deleteKaryawanForm" method="POST" action="{{ route('admin.karyawan.delete', '') }}">
+                <!-- PERBAIKAN: Hapus atribut action yang statis -->
+                <form id="deleteKaryawanForm" method="POST">
                     @csrf
                     @method('DELETE')
                     <div class="mb-6">
@@ -1438,7 +1438,8 @@
     // Modal Delete
     function openDeleteModal(id) {
         document.getElementById('deleteId').value = id;
-        deleteKaryawanForm.action = `/admin/karyawan/delete/${id}`;
+        // PERBAIKAN: Set action secara dinamis di JS, bukan di HTML
+        deleteKaryawanForm.action = `/admin/karyawan/${id}`;
         deleteKaryawanModal.classList.remove('hidden');
     }
     function closeDeleteModal() {
@@ -1492,50 +1493,175 @@
     // ========= CRUD ========= //
 
     // CREATE (POST)
-    tambahKaryawanForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        // Show loading state
-        const submitBtn = tambahKaryawanForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Menyimpan...';
-        submitBtn.disabled = true;
+    // ========= CRUD ========= //
 
-        let formData = new FormData(tambahKaryawanForm);
+// CREATE (POST) - VERSI DEBUGGING
+tambahKaryawanForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitBtn = tambahKaryawanForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Menyimpan...';
+    submitBtn.disabled = true;
 
+    let formData = new FormData(tambahKaryawanForm);
+
+    try {
+        let response = await fetch("/admin/karyawan", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+                "Accept": "application/json"
+            },
+            body: formData
+        });
+
+        // --- DEBUGGING: Periksa status dan respons ---
+        console.log('Create Response Status:', response.status);
+        console.log('Create Response Headers:', response.headers.get('Content-Type'));
+
+        // Coba ambil sebagai teks dulu
+        const responseText = await response.text();
+        console.log('Create Raw Response Text:', responseText);
+
+        // Coba parse sebagai JSON
+        let res;
         try {
-            let response = await fetch("/admin/karyawan/store", {
-                method: "POST",
-                headers: {
-                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
-                    "Accept": "application/json"
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            let res = await response.json();
-            
-            if (res.success) {
-                showMinimalPopup('Berhasil', 'Karyawan berhasil ditambahkan', 'success');
-                setTimeout(() => {
-                    location.reload();
-                }, 1500);
-            } else {
-                showMinimalPopup('Error', res.message || 'Terjadi kesalahan saat menyimpan data', 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showMinimalPopup('Error', 'Terjadi kesalahan saat menyimpan data', 'error');
-        } finally {
-            // Reset button state
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
+            res = JSON.parse(responseText);
+        } catch (e) {
+            console.error('Gagal parse JSON. Respons mungkin bukan JSON.');
+            // Jika bukan JSON, asumsi ini adalah error dan lempar error
+            throw new Error('Server returned non-JSON response. Check console for details.');
         }
-    });
+
+        if (res.success) {
+            showMinimalPopup('Berhasil', 'Karyawan berhasil ditambahkan', 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showMinimalPopup('Error', res.message || 'Terjadi kesalahan saat menyimpan data', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showMinimalPopup('Error', 'Terjadi kesalahan saat menyimpan data. Cek console untuk detail.', 'error');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+});
+
+// UPDATE (PUT) - VERSI DEBUGGING
+editKaryawanForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitBtn = editKaryawanForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Memperbarui...';
+    submitBtn.disabled = true;
+
+    let id = document.getElementById("editId").value;
+    let formData = new FormData(editKaryawanForm);
+    formData.append('_method', 'PUT');
+
+    try {
+        let response = await fetch(`/admin/karyawan/${id}`, {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+                "Accept": "application/json"
+            },
+            body: formData
+        });
+
+        // --- DEBUGGING: Periksa status dan respons ---
+        console.log('Update Response Status:', response.status);
+        console.log('Update Response Headers:', response.headers.get('Content-Type'));
+
+        const responseText = await response.text();
+        console.log('Update Raw Response Text:', responseText);
+
+        let res;
+        try {
+            res = JSON.parse(responseText);
+        } catch (e) {
+            console.error('Gagal parse JSON. Respons mungkin bukan JSON.');
+            throw new Error('Server returned non-JSON response. Check console for details.');
+        }
+        
+        if (res.success) {
+            showMinimalPopup('Berhasil', 'Data karyawan berhasil diperbarui', 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showMinimalPopup('Error', res.message || 'Terjadi kesalahan saat memperbarui data', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showMinimalPopup('Error', 'Terjadi kesalahan saat memperbarui data. Cek console untuk detail.', 'error');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+});
+
+// DELETE (DELETE) - VERSI DEBUGGING
+deleteKaryawanForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitBtn = deleteKaryawanForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Menghapus...';
+    submitBtn.disabled = true;
+
+    let formData = new FormData(deleteKaryawanForm);
+    formData.append('_method', 'DELETE');
+
+    const deleteUrl = deleteKaryawanForm.action; 
+
+    try {
+        let response = await fetch(deleteUrl, {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+                "Accept": "application/json"
+            },
+            body: formData
+        });
+
+        // --- DEBUGGING: Periksa status dan respons ---
+        console.log('Delete Response Status:', response.status);
+        console.log('Delete Response Headers:', response.headers.get('Content-Type'));
+
+        const responseText = await response.text();
+        console.log('Delete Raw Response Text:', responseText);
+
+        let res;
+        try {
+            res = JSON.parse(responseText);
+        } catch (e) {
+            console.error('Gagal parse JSON. Respons mungkin bukan JSON.');
+            throw new Error('Server returned non-JSON response. Check console for details.');
+        }
+        
+        if (res.success) {
+            showMinimalPopup('Berhasil', 'Data karyawan berhasil dihapus', 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showMinimalPopup('Error', res.message || 'Terjadi kesalahan saat menghapus data', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showMinimalPopup('Error', 'Terjadi kesalahan saat menghapus data. Cek console untuk detail.', 'error');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        closeDeleteModal();
+    }
+});
 
     // UPDATE (PUT)
     editKaryawanForm.addEventListener('submit', async function(e) {
@@ -1549,13 +1675,15 @@
 
         let id = document.getElementById("editId").value;
         let formData = new FormData(editKaryawanForm);
+        
+        // Tambahkan _method ke FormData untuk Laravel
+        formData.append('_method', 'PUT');
 
         try {
-            let response = await fetch(`/admin/karyawan/update/${id}`, {
-                method: "POST",
+            let response = await fetch(`/admin/karyawan/${id}`, {
+                method: "POST", // Gunakan POST dengan _method di FormData
                 headers: {
                     "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
-                    "X-HTTP-Method-Override": "PUT",
                     "Accept": "application/json"
                 },
                 body: formData
@@ -1595,18 +1723,26 @@
         submitBtn.textContent = 'Menghapus...';
         submitBtn.disabled = true;
 
+        let formData = new FormData(deleteKaryawanForm);
+        // Tambahkan _method ke FormData untuk Laravel
+        formData.append('_method', 'DELETE');
+
+        // PENTING: Pastikan URL di sini benar-benar cocok dengan route di web.php
+        const deleteUrl = deleteKaryawanForm.action; 
+
         try {
-            let response = await fetch(deleteKaryawanForm.action, {
-                method: "POST",
+            let response = await fetch(deleteUrl, {
+                method: "POST", // Gunakan POST dengan _method di FormData
                 headers: {
                     "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
-                    "X-HTTP-Method-Override": "DELETE",
                     "Accept": "application/json"
                 },
-                body: new FormData(deleteKaryawanForm)
+                body: formData
             });
 
             if (!response.ok) {
+                // Log error untuk debugging
+                console.error('Delete failed:', response.status, response.statusText);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
