@@ -113,16 +113,14 @@ Route::middleware(['auth', 'role:admin'])
             return redirect()->route('admin.user');
         });
 
-        // KARYAWAN MANAGEMENT - PERBAIKAN UTAMA DI SINI
-        // Route untuk menampilkan halaman data karyawan
+        // KARYAWAN MANAGEMENT
         Route::get('/data_karyawan', [AdminKaryawanController::class, 'index'])->name('data_karyawan');
-
-        Route::resource('karyawan', AdminKaryawanController::class)->names([
-            'index' => 'admin.karyawan.index',
-            'store' => 'admin.karyawan.store',
-            'update' => 'admin.karyawan.update',
-            'destroy' => 'admin.karyawan.delete',
-        ]);
+        Route::controller(AdminKaryawanController::class)->group(function () {
+            Route::get('/karyawan', 'index')->name('karyawan.index');
+            Route::post('/karyawan/store', 'store')->name('karyawan.store');
+            Route::post('/karyawan/update/{id}', 'update')->name('karyawan.update');
+            Route::delete('/karyawan/delete/{id}', 'destroy')->name('karyawan.delete');
+        });
 
         // ABSENSI MANAGEMENT
         Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
@@ -172,7 +170,7 @@ Route::middleware(['auth', 'role:admin'])
             return redirect()->route('admin.surat_kerjasama.index');
         });
 
-        // Route untuk sidebar: /admin/template_surat (hanya placeholder)
+        // Route untuk sidebar: /template_surat (hanya placeholder)
         Route::get('/template_surat', function () {
             return view('admin.template_surat');
         })->name('template_surat');
@@ -394,8 +392,7 @@ Route::middleware(['auth', 'role:owner'])
         Route::get('/laporan', function () {
             return view('pemilik.laporan');
         })->name('laporan');
-
-        Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');
+        
     });
 
 /*
@@ -612,6 +609,12 @@ Route::resource('invoices', InvoiceController::class);
 Route::get('/invoices/{invoice}/print', function (\App\Models\Invoice $invoice) {
     return view('invoices.print', compact('invoice'));
 })->name('invoices.print');
+
+/*
+|--------------------------------------------------------------------------
+| Debug Routes untuk Testing
+|--------------------------------------------------------------------------
+*/
 
 /*
 |--------------------------------------------------------------------------

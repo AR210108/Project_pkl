@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="id">
  <head>
@@ -12,6 +13,23 @@
 
      <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
      <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+=======
+ <!DOCTYPE html>
+ <html lang="id">
+
+ <head>
+     <meta charset="utf-8" />
+     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+     <title>Daftar Karyawan - Dashboard</title>
+     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+     <link rel="icon" type="image/png" href="{{ asset('logo1.jpeg') }}">
+
+
+     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+>>>>>>> 8e96c1bbf121feda481f0097c02ca4458f78f84c
      <script>
          tailwind.config = {
              theme: {
@@ -1050,36 +1068,15 @@
                          </div>
                      </div>
 
-    <!-- Popup Modal untuk Konfirmasi Hapus -->
-    <div id="deleteKaryawanModal"
-        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h3>
-                    <button id="closeDeleteModalBtn" class="text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <!-- PERBAIKAN: Hapus atribut action yang statis -->
-                <form id="deleteKaryawanForm" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <div class="mb-6">
-                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus data karyawan ini?</p>
-                        <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
-                        <input type="hidden" id="deleteId" name="id">
-                    </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" id="cancelDeleteBtn"
-                            class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+                     <div class="flex justify-end gap-2 mt-6">
+                         <button type="button" id="cancelEditBtn"
+                             class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                         <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Data</button>
+                     </div>
+                 </form>
+             </div>
+         </div>
+     </div>
 
      <!-- Popup Modal untuk Konfirmasi Hapus -->
      <div id="deleteKaryawanModal"
@@ -1205,16 +1202,10 @@
              };
          }
 
-    // Modal Delete
-    function openDeleteModal(id) {
-        document.getElementById('deleteId').value = id;
-        // PERBAIKAN: Set action secara dinamis di JS, bukan di HTML
-        deleteKaryawanForm.action = `/admin/karyawan/${id}`;
-        deleteKaryawanModal.classList.remove('hidden');
-    }
-    function closeDeleteModal() {
-        deleteKaryawanModal.classList.add('hidden');
-    }
+         function goToPage(page) {
+             currentPage = page;
+             renderPagination();
+             updateVisibleItems();
 
              // Reset scroll position when changing pages
              const scrollableTable = document.getElementById('scrollableTable');
@@ -1260,9 +1251,15 @@
              document.getElementById('totalCount').textContent = visibleRows.length;
          }
 
-    // CREATE (POST)
-    // ========= CRUD ========= //
+         // === FILTER ===
+         function initializeFilter() {
+             const filterBtn = document.getElementById('filterBtn');
+             const filterDropdown = document.getElementById('filterDropdown');
+             const applyFilterBtn = document.getElementById('applyFilter');
+             const resetFilterBtn = document.getElementById('resetFilter');
+             const filterAll = document.getElementById('filterAll');
 
+<<<<<<< HEAD
 
 // UPDATE (PUT) - VERSI DEBUGGING
 editKaryawanForm.addEventListener('submit', async function(e) {
@@ -1375,6 +1372,34 @@ deleteKaryawanForm.addEventListener('submit', async function(e) {
         closeDeleteModal();
     }
 });
+=======
+             // Toggle filter dropdown
+             filterBtn.addEventListener('click', function(e) {
+                 e.stopPropagation();
+                 filterDropdown.classList.toggle('show');
+             });
+
+             // Close dropdown when clicking outside
+             document.addEventListener('click', function() {
+                 filterDropdown.classList.remove('show');
+             });
+
+             // Prevent dropdown from closing when clicking inside
+             filterDropdown.addEventListener('click', function(e) {
+                 e.stopPropagation();
+             });
+
+             // Handle "All" checkbox
+             filterAll.addEventListener('change', function() {
+                 if (this.checked) {
+                     // Uncheck all other checkboxes
+                     document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(
+                         cb => {
+                             cb.checked = false;
+                         });
+                 }
+             });
+>>>>>>> 8e96c1bbf121feda481f0097c02ca4458f78f84c
 
              // Handle other checkboxes
              document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
@@ -1386,21 +1411,21 @@ deleteKaryawanForm.addEventListener('submit', async function(e) {
                  });
              });
 
-        let id = document.getElementById("editId").value;
-        let formData = new FormData(editKaryawanForm);
-        
-        // Tambahkan _method ke FormData untuk Laravel
-        formData.append('_method', 'PUT');
+             // Apply filter
+             applyFilterBtn.addEventListener('click', function() {
+                 const filterAll = document.getElementById('filterAll');
+                 const filterManager = document.getElementById('filterManager');
+                 const filterStaff = document.getElementById('filterStaff');
+                 const filterIntern = document.getElementById('filterIntern');
 
-        try {
-            let response = await fetch(`/admin/karyawan/${id}`, {
-                method: "POST", // Gunakan POST dengan _method di FormData
-                headers: {
-                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
-                    "Accept": "application/json"
-                },
-                body: formData
-            });
+                 activeFilters = [];
+                 if (filterAll.checked) {
+                     activeFilters.push('all');
+                 } else {
+                     if (filterManager.checked) activeFilters.push('manager');
+                     if (filterStaff.checked) activeFilters.push('staff');
+                     if (filterIntern.checked) activeFilters.push('intern');
+                 }
 
                  applyFilters();
                  filterDropdown.classList.remove('show');
@@ -1426,28 +1451,19 @@ deleteKaryawanForm.addEventListener('submit', async function(e) {
              // Reset to first page
              currentPage = 1;
 
-        let formData = new FormData(deleteKaryawanForm);
-        // Tambahkan _method ke FormData untuk Laravel
-        formData.append('_method', 'DELETE');
+             // Apply filters to rows
+             karyawanRows.forEach(row => {
+                 const jabatan = row.getAttribute('data-jabatan').toLowerCase();
+                 const nama = row.getAttribute('data-nama').toLowerCase();
+                 const alamat = row.getAttribute('data-alamat').toLowerCase();
 
-        // PENTING: Pastikan URL di sini benar-benar cocok dengan route di web.php
-        const deleteUrl = deleteKaryawanForm.action; 
-
-        try {
-            let response = await fetch(deleteUrl, {
-                method: "POST", // Gunakan POST dengan _method di FormData
-                headers: {
-                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
-                    "Accept": "application/json"
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                // Log error untuk debugging
-                console.error('Delete failed:', response.status, response.statusText);
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+                 // Check if jabatan matches filter
+                 let jabatanMatches = false;
+                 if (activeFilters.includes('all')) {
+                     jabatanMatches = true;
+                 } else {
+                     jabatanMatches = activeFilters.some(filter => jabatan.includes(filter.toLowerCase()));
+                 }
 
                  // Check if search term matches
                  let searchMatches = true;
