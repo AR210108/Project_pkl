@@ -231,10 +231,13 @@
         
         <!-- Footer Sidebar -->
         <div class="sidebar-footer border-t border-gray-200 flex-shrink-0">
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="#">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+            <button type="submit" class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
                 <span class="material-icons sidebar-icon">logout</span>
                 <span class="sidebar-text">Log Out</span>
-            </a>
+            </button>
+            </form>
         </div>
     </aside>
 

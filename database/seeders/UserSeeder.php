@@ -50,6 +50,21 @@ class UserSeeder extends Seeder
                 'role' => 'karyawan',
                 'divisi' => 'programmer',
             ],
+        [
+            'name' => 'Finance',
+            'email' => 'finance@gmail.com',
+            'password' => Hash::make('123'),
+            'role' => 'finance',
+            'divisi' => null
+        ],
+
+        [
+            'name' => 'General Manager',
+            'email' => 'general@gmail.com',
+            'password' => Hash::make('123'),
+            'role' => 'general_manager',
+            'divisi' => null
+        ],
 
             // === DIVISI DIGITAL MARKETING ===
             [
@@ -102,6 +117,13 @@ class UserSeeder extends Seeder
                 'role' => 'karyawan',
                 'divisi' => 'desainer',
             ],
+        [
+            'name' => 'Dewi Lestari',
+            'email' => 'dewi@gmail.com',
+            'password' => Hash::make('123'),
+            'role' => 'karyawan',
+            'divisi' => 'programmer'
+        ],
 
             // === KARYAWAN TAMBAHAN ===
             [

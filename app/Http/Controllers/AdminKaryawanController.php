@@ -120,7 +120,7 @@ class AdminKaryawanController extends Controller
     {
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'jabatan' => 'required|string|max:100',
+            'jabatan' => 'nullable|string|max:100',
             'divisi' => 'nullable|string|max:100', // Ubah menjadi nullable
             'alamat' => 'required|string',
             'kontak' => 'required|string|max:20',

@@ -9,8 +9,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
         rel="stylesheet" />
-     <link rel="icon" type="image/png" href="{{ asset('logo1.jpeg') }}">
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"
+    <link rel="icon" type="image/png" href="{{ asset('logo1.jpeg') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"
         rel="stylesheet" />
     <script>
         tailwind.config = {
@@ -211,28 +211,225 @@
         }
 
         .calendar-animate {
-    transition: transform 0.35s ease, opacity 0.35s ease;
-}
+            transition: transform 0.35s ease, opacity 0.35s ease;
+        }
 
-.calendar-slide-left {
-    transform: translateX(-20px);
-    opacity: 0;
-}
+        .calendar-slide-left {
+            transform: translateX(-20px);
+            opacity: 0;
+        }
 
-.calendar-slide-right {
-    transform: translateX(20px);
-    opacity: 0;
-}
+        .calendar-slide-right {
+            transform: translateX(20px);
+            opacity: 0;
+        }
 
-.event-animate {
-    transition: all 0.3s ease;
-}
+        .event-animate {
+            transition: all 0.3s ease;
+        }
 
-.event-hidden {
-    opacity: 0;
-    transform: translateY(8px);
-}
+        .event-hidden {
+            opacity: 0;
+            transform: translateY(8px);
+        }
 
+        /* Compact Calendar Styles */
+        .calendar-container {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            height: 100%;
+        }
+
+        .calendar-header {
+            background: linear-gradient(to right, #3b82f6, #2563eb);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .calendar-nav-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .calendar-nav-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .calendar-nav-button .material-symbols-rounded {
+            font-size: 0.875rem;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.125rem;
+            padding: 0.25rem 0.5rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-size: 0.625rem;
+            font-weight: 600;
+            color: #64748b;
+            padding: 0.25rem 0;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.125rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            font-size: 0.75rem;
+        }
+
+        .calendar-day:hover {
+            background: #f1f5f9;
+            transform: scale(1.05);
+        }
+
+        .calendar-day.today {
+            background: #3b82f6;
+            color: white;
+            font-weight: 600;
+        }
+
+        .calendar-day.today:hover {
+            background: #2563eb;
+        }
+
+        .calendar-day.selected {
+            background: #dbeafe;
+            color: #1e40af;
+            font-weight: 600;
+        }
+
+        .calendar-day.selected:hover {
+            background: #bfdbfe;
+        }
+
+        .calendar-day.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 0.125rem;
+            width: 0.125rem;
+            height: 0.125rem;
+            background: #ef4444;
+            border-radius: 50%;
+        }
+
+        .calendar-day.today.has-event::after {
+            background: white;
+        }
+
+        .calendar-day.selected.has-event::after {
+            background: #1e40af;
+        }
+
+        /* Compact Notes Container */
+        .notes-container {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            height: 100%;
+            width: 230%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notes-header {
+            background: linear-gradient(to right, #3b82f6, #2563eb);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-header h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .notes-body {
+            flex: 1;
+            padding: 0.5rem;
+            overflow-y: auto;
+        }
+
+        .note-item {
+            padding: 0.375rem;
+            border-left: 2px solid #3b82f6;
+            margin-bottom: 0.375rem;
+            background: #f8fafc;
+            border-radius: 0 0.25rem 0.25rem 0;
+            transition: all 0.2s ease;
+        }
+
+        .note-item:hover {
+            background: #f1f5f9;
+            transform: translateX(2px);
+        }
+
+        .note-date {
+            font-size: 0.625rem;
+            color: #64748b;
+            margin-bottom: 0.125rem;
+        }
+
+        .note-title {
+            font-weight: 600;
+            font-size: 0.75rem;
+            margin-bottom: 0.125rem;
+            color: #1f2937;
+        }
+
+        .note-content {
+            font-size: 0.6875rem;
+            color: #4b5563;
+            line-height: 1.2;
+        }
+
+        .calendar-notes-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    max-width: 600px;
+    /* Hapus margin: 0 auto; */
+    margin-left: 0; /* Tambahkan ini untuk memastikan rata kiri */
+    margin-right: auto; /* Tambahkan ini untuk menjaga responsivitas */
+}
 
         /* Mobile responsive */
         @media (max-width: 768px) {
@@ -334,6 +531,17 @@
                 font-size: 0.7rem !important;
                 line-height: 1 !important;
                 margin-top: 0.25rem !important;
+            }
+
+            /* Stack calendar and notes on mobile */
+            .calendar-notes-container {
+                grid-template-columns: 1fr !important;
+                max-width: 100% !important;
+            }
+
+            .calendar-container, .notes-container {
+                width: 100% !important;
+                margin-bottom: 0.5rem !important;
             }
         }
 
@@ -473,36 +681,48 @@
                     </div>
                 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="panel">
-        <div class="panel-header">
-            <div class="flex gap-2">
-    <button onclick="prevDate()">‹</button>
-    <button onclick="nextDate()">›</button>
-</div>
+                <!-- Compact Calendar and Notes Side by Side -->
+                <div class="calendar-notes-container">
+                    <!-- Compact Calendar -->
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <button class="calendar-nav-button" onclick="prevMonth()">
+                                <span class="material-symbols-rounded">chevron_left</span>
+                            </button>
+                            <h3 id="calendarTitle" class="text-sm font-semibold">
+                                <!-- diisi JS -->
+                            </h3>
+                            <button class="calendar-nav-button" onclick="nextMonth()">
+                                <span class="material-symbols-rounded">chevron_right</span>
+                            </button>
+                        </div>
+                        <div class="calendar-weekdays">
+                            <div class="calendar-weekday">Min</div>
+                            <div class="calendar-weekday">Sen</div>
+                            <div class="calendar-weekday">Sel</div>
+                            <div class="calendar-weekday">Rab</div>
+                            <div class="calendar-weekday">Kam</div>
+                            <div class="calendar-weekday">Jum</div>
+                            <div class="calendar-weekday">Sab</div>
+                        </div>
+                        <div id="calendarDays" class="calendar-days">
+                            <!-- diisi JS -->
+                        </div>
+                    </div>
 
-<h3 class="panel-title" id="calendarTitle">
-    <span class="material-symbols-rounded text-primary">calendar_month</span>
-    <!-- diisi JS -->
-</h3>
-        </div>
-
-        <div class="panel-body">
-            <div class="w-full mb-6">
-                <div id="calendarDates"
-                     class="flex justify-between mb-4 calendar-animate">
+                    <!-- Compact Notes -->
+                    <div class="notes-container">
+                        <div class="notes-header">
+                            <h3>Catatan Meeting</h3>
+                            <button class="calendar-nav-button" onclick="addNote()">
+                                <span class="material-symbols-rounded">add</span>
+                            </button>
+                        </div>
+                        <div class="notes-body" id="notesContainer">
+                            <!-- diisi JS -->
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div id="calendarEvent"
-                 class="event-animate w-full h-12 md:h-16 border-2 border-gray-200 border-dashed
-                        rounded-xl flex items-center justify-center text-gray-500 text-xs md:text-sm">
-                Pilih tanggal
-            </div>
-        </div>
-    </div>
-</div>
-
 
                 <!-- Tab Navigation for Meeting Notes and Announcements -->
                 <div class="tab-nav">
@@ -631,7 +851,7 @@
                                                             </span>
                                                         @endforeach
                                                     @else
-                                                        {{ ucfirst($item->kepada) }}
+                                                        {{ $item->users->take(2)->pluck('name')->join(', ') }}
                                                     @endif
                                                 </td>
 
@@ -666,8 +886,6 @@
         </main>
     </div>
     <script>
-        let offset = 0;
-
         // Simple dark mode toggle logic for demonstration (optional)
         // Check system preference on load
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -698,114 +916,147 @@
             }
         }
 
+        // Calendar functionality
         const events = @json($events);
-        const today = "{{ $today->format('Y-m-d') }}";
-        const calendarContainer = document.getElementById('calendarDates');
-        const eventBox = document.getElementById('calendarEvent');
+        const today = new Date();
+        const calendarTitle = document.getElementById('calendarTitle');
+        const calendarDays = document.getElementById('calendarDays');
+        const notesContainer = document.getElementById('notesContainer');
+        
+        let currentMonth = today.getMonth();
+        let currentYear = today.getFullYear();
+        let selectedDate = null;
 
-        const baseDate = new Date(); // hari ini
-        const daysToShow = 5;
-
-        function formatDate(date) {
-            return date.toISOString().split('T')[0];
+        function updateCalendarTitle() {
+            const monthNames = [
+                "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+                "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+            ];
+            
+            calendarTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
         }
 
-function renderCalendar(direction = 'right') {
-    updateCalendarTitle(); // ⬅️ tambahkan ini
-    // trigger animasi keluar
-    calendarContainer.classList.add(
-        direction === 'right' ? 'calendar-slide-right' : 'calendar-slide-left'
-    );
-
-    setTimeout(() => {
-        calendarContainer.innerHTML = '';
-
-        for (let i = -2; i <= 2; i++) {
-            const d = new Date(baseDate);
-            d.setDate(baseDate.getDate() + offset + i);
-
-            const dateStr = formatDate(d);
-            const isToday = dateStr === today;
-
-            const div = document.createElement('div');
-            div.className = `
-                flex flex-col items-center space-y-2 calendar-date cursor-pointer
-                ${isToday ? 'bg-primary text-white p-2 rounded-xl scale-110 shadow-lg' : ''}
-            `;
-
-            div.innerHTML = `
-                <span class="text-xs ${isToday ? 'text-white/80' : 'text-gray-500'}">
-                    ${d.toLocaleString('id-ID', { month: 'short' })}
-                </span>
-                <span class="text-sm font-bold">${d.getDate()}</span>
-            `;
-
-            if (events[dateStr]) {
-                div.innerHTML += `<span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>`;
+        function renderCalendar() {
+            updateCalendarTitle();
+            
+            // Clear previous calendar days
+            calendarDays.innerHTML = '';
+            
+            // Get first day of month and number of days in month
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            // Add empty cells for days before the first day of the month
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                calendarDays.appendChild(emptyDay);
             }
-
-            div.onclick = () => showEvents(dateStr);
-            calendarContainer.appendChild(div);
+            
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                
+                // Check if this day is today
+                const currentDate = new Date();
+                if (currentYear === currentDate.getFullYear() && 
+                    currentMonth === currentDate.getMonth() && 
+                    day === currentDate.getDate()) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Check if this day has events
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                if (events[dateStr]) {
+                    dayElement.classList.add('has-event');
+                }
+                
+                // Add click event to select date
+                dayElement.addEventListener('click', function() {
+                    // Remove selected class from all days
+                    document.querySelectorAll('.calendar-day').forEach(el => {
+                        el.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked day
+                    this.classList.add('selected');
+                    
+                    // Update selected date
+                    selectedDate = new Date(currentYear, currentMonth, day);
+                    
+                    // Show events for selected date
+                    showEvents(dateStr);
+                });
+                
+                calendarDays.appendChild(dayElement);
+            }
         }
 
-        // slide masuk
-        calendarContainer.classList.remove(
-            'calendar-slide-left',
-            'calendar-slide-right'
-        );
-    }, 200);
-}
-
-
-function showEvents(date) {
-    eventBox.classList.add('event-hidden');
-
-    setTimeout(() => {
-        if (events[date]) {
-            eventBox.innerHTML = events[date]
-                .map(e => `• ${e.keputusan}`)
-                .join('<br>');
-            eventBox.classList.remove('text-gray-500');
-        } else {
-            eventBox.innerHTML = 'Tidak ada keputusan pada tanggal ini';
-            eventBox.classList.add('text-gray-500');
+        function showEvents(dateStr) {
+            notesContainer.innerHTML = '';
+            
+            if (events[dateStr]) {
+                events[dateStr].forEach(event => {
+                    const noteItem = document.createElement('div');
+                    noteItem.className = 'note-item';
+                    
+                    const noteDate = document.createElement('div');
+                    noteDate.className = 'note-date';
+                    noteDate.textContent = dateStr;
+                    
+                    const noteTitle = document.createElement('div');
+                    noteTitle.className = 'note-title';
+                    noteTitle.textContent = event.topik || 'Meeting';
+                    
+                    const noteContent = document.createElement('div');
+                    noteContent.className = 'note-content';
+                    noteContent.textContent = event.keputusan || 'Tidak ada keputusan';
+                    
+                    noteItem.appendChild(noteDate);
+                    noteItem.appendChild(noteTitle);
+                    noteItem.appendChild(noteContent);
+                    
+                    notesContainer.appendChild(noteItem);
+                });
+            } else {
+                const noEvents = document.createElement('div');
+                noEvents.className = 'text-center text-gray-500 py-4 text-xs';
+                noEvents.textContent = 'Tidak ada catatan pada tanggal ini';
+                notesContainer.appendChild(noEvents);
+            }
         }
 
-        eventBox.classList.remove('event-hidden');
-    }, 200);
-}
+        function prevMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
 
-function nextDate() {
-    offset++;
-    renderCalendar('right');
-}
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
 
-function prevDate() {
-    offset--;
-    renderCalendar('left');
-}
+        function addNote() {
+            // This would typically open a modal or form to add a new note
+            alert('Fitur tambah catatan akan segera tersedia');
+        }
 
-const calendarTitle = document.getElementById('calendarTitle');
-
-function updateCalendarTitle() {
-    const d = new Date(baseDate);
-    d.setDate(baseDate.getDate() + offset);
-
-    const monthYear = d.toLocaleDateString('id-ID', {
-        month: 'long',
-        year: 'numeric'
-    });
-
-    calendarTitle.innerHTML = `
-        <span class="material-symbols-rounded text-primary">calendar_month</span>
-        ${monthYear}
-    `;
-}
-
+        // Initialize calendar
         renderCalendar();
-        showEvents(today);
+        
+        // Show today's events by default
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        showEvents(todayStr);
     </script>
-
 </body>
-
 </html>

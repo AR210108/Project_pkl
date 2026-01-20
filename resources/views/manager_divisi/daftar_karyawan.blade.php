@@ -673,12 +673,6 @@
                                 </div>
                             </div>
                         </div>
-                        <button id="tambahKaryawanBtn"
-                            class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
-                            <span class="material-icons-outlined">add</span>
-                            <span class="hidden sm:inline">Tambah Karyawan</span>
-                            <span class="sm:hidden">Tambah</span>
-                        </button>
                     </div>
                 </div>
 
@@ -708,7 +702,6 @@
                                             <th style="min-width: 250px;">Alamat</th>
                                             <th style="min-width: 150px;">Kontak</th>
                                             <th style="min-width: 100px;">Foto</th>
-                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="desktopTableBody">
@@ -723,33 +716,19 @@
                                                 <td>{{ $k->divisi }}</td>
                                                 <td>{{ $k->alamat }}</td>
                                                 <td>{{ $k->kontak }}</td>
-                                                <td>
-                                                    @if ($k->foto)
-                                                        <img src="{{ asset('uploads/karyawan/' . $k->foto) }}"
-                                                            alt="Foto" class="w-10 h-10 rounded-full object-cover">
-                                                    @else
-                                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($k->nama) }}"
-                                                            alt="Foto" class="w-10 h-10 rounded-full object-cover">
-                                                    @endif
-                                                </td>
-                                                <td style="text-align: center;">
-                                                    <div class="flex justify-center gap-2">
-                                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20"
-                                                            data-id="{{ $k->id }}"
-                                                            data-nama="{{ $k->nama }}"
-                                                            data-jabatan="{{ $k->jabatan }}"
-                                                            data-divisi="{{ $k->divisi }}"
-                                                            data-alamat="{{ $k->alamat }}"
-                                                            data-kontak="{{ $k->kontak }}"
-                                                            data-status="{{ $k->status }}">
-                                                            <span class="material-icons-outlined">edit</span>
-                                                        </button>
-                                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20"
-                                                            data-id="{{ $k->id }}">
-                                                            <span class="material-icons-outlined">delete</span>
-                                                        </button>
-                                                    </div>
-                                                </td>
+<td>
+    @if ($k->foto)
+        <img src="{{ asset('storage/karyawan/' . $k->foto) }}"
+             alt="Foto" 
+             class="w-10 h-10 rounded-full object-cover"
+             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($k->nama) }}';">
+    @else
+        <img src="https://ui-avatars.com/api/?name={{ urlencode($k->nama) }}"
+             alt="Foto" 
+             class="w-10 h-10 rounded-full object-cover">
+    @endif
+</td>
+                                        
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -980,189 +959,6 @@
             </footer>
         </div>
     </div>
-
-    <!-- Modal Tambah Karyawan -->
-    <div id="tambahKaryawanModal"
-        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Tambah Karyawan Baru</h3>
-                    <button id="closeModalBtn" class="text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form action="#" method="POST" id="tambahKaryawanForm" class="space-y-4">
-                    @csrf
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Karyawan</label>
-                            <input type="text" name="nama"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="Masukkan nama karyawan" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
-                            <input type="text" name="jabatan"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="Masukkan jabatan" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
-                            <select name="divisi"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih divisi</option>
-                                <option value="IT">IT</option>
-                                <option value="HR">HR</option>
-                                <option value="Marketing">Marketing</option>
-                                <option value="Finance">Finance</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Kontak</label>
-                            <input type="text" name="kontak"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="Masukkan nomor kontak" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <select name="status"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih status</option>
-                                <option value="aktif">Aktif</option>
-                                <option value="cuti">Cuti</option>
-                                <option value="tidak aktif">Tidak Aktif</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
-                            <input type="file" name="foto"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
-                        <textarea name="alamat" rows="3"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                            placeholder="Masukkan alamat karyawan" required></textarea>
-                    </div>
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" id="batalTambahBtn"
-                            class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan Data</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Edit Karyawan -->
-    <div id="editKaryawanModal"
-        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Karyawan</h3>
-                    <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form method="POST" action="#" id="editKaryawanForm" class="space-y-4">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" id="editId" name="id">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Karyawan</label>
-                            <input type="text" id="editNama" name="nama"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="Masukkan nama karyawan" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
-                            <input type="text" id="editJabatan" name="jabatan"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="Masukkan jabatan" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
-                            <select id="editDivisi" name="divisi"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih divisi</option>
-                                <option value="IT">IT</option>
-                                <option value="HR">HR</option>
-                                <option value="Marketing">Marketing</option>
-                                <option value="Finance">Finance</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Kontak</label>
-                            <input type="text" id="editKontak" name="kontak"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="Masukkan nomor kontak" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <select id="editStatus" name="status"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih status</option>
-                                <option value="aktif">Aktif</option>
-                                <option value="cuti">Cuti</option>
-                                <option value="tidak aktif">Tidak Aktif</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
-                            <input type="file" name="foto"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
-                        <textarea id="editAlamat" name="alamat" rows="3"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                            placeholder="Masukkan alamat karyawan" required></textarea>
-                    </div>
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" id="batalEditBtn"
-                            class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Data</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Delete Konfirmasi -->
-    <div id="deleteModal"
-        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h3>
-                    <button id="closeDeleteModalBtn" class="text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form id="deleteForm" method="POST" action="#">
-                    @csrf
-                    @method('DELETE')
-                    <div class="mb-6">
-                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus karyawan ini?</p>
-                        <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
-                        <input type="hidden" id="deleteId" name="id">
-                    </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" id="batalDeleteBtn"
-                            class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- Minimalist Popup -->
     <div id="minimalPopup" class="minimal-popup">
         <div class="minimal-popup-icon">
@@ -1495,123 +1291,6 @@
         // Close popup when clicking the close button
         document.querySelector('.minimal-popup-close').addEventListener('click', function() {
             document.getElementById('minimalPopup').classList.remove('show');
-        });
-
-        // Modal elements
-        const tambahKaryawanModal = document.getElementById('tambahKaryawanModal');
-        const editKaryawanModal = document.getElementById('editKaryawanModal');
-        const deleteModal = document.getElementById('deleteModal');
-
-        // Buttons
-        const tambahKaryawanBtn = document.getElementById('tambahKaryawanBtn');
-        const batalTambahBtn = document.getElementById('batalTambahBtn');
-        const batalEditBtn = document.getElementById('batalEditBtn');
-        const batalDeleteBtn = document.getElementById('batalDeleteBtn');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const closeEditModalBtn = document.getElementById('closeEditModalBtn');
-        const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
-
-        // Forms
-        const tambahKaryawanForm = document.getElementById('tambahKaryawanForm');
-        const editKaryawanForm = document.getElementById('editKaryawanForm');
-
-        // Open tambah modal
-        tambahKaryawanBtn.addEventListener('click', () => {
-            tambahKaryawanModal.classList.remove('hidden');
-        });
-
-        // Close tambah modal
-        batalTambahBtn.addEventListener('click', () => {
-            tambahKaryawanModal.classList.add('hidden');
-            tambahKaryawanForm.reset();
-        });
-
-        closeModalBtn.addEventListener('click', () => {
-            tambahKaryawanModal.classList.add('hidden');
-            tambahKaryawanForm.reset();
-        });
-
-        // Close edit modal
-        batalEditBtn.addEventListener('click', () => {
-            editKaryawanModal.classList.add('hidden');
-            editKaryawanForm.reset();
-        });
-
-        closeEditModalBtn.addEventListener('click', () => {
-            editKaryawanModal.classList.add('hidden');
-            editKaryawanForm.reset();
-        });
-
-        // Close delete modal
-        batalDeleteBtn.addEventListener('click', () => {
-            deleteModal.classList.add('hidden');
-        });
-
-        closeDeleteModalBtn.addEventListener('click', () => {
-            deleteModal.classList.add('hidden');
-        });
-
-        // ============================
-        // HANDLE EDIT BUTTON
-        // ============================
-        document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                // SET VALUE
-                document.getElementById('editId').value = button.dataset.id;
-                document.getElementById('editNama').value = button.dataset.nama;
-                document.getElementById('editJabatan').value = button.dataset.jabatan;
-                document.getElementById('editDivisi').value = button.dataset.divisi;
-                document.getElementById('editAlamat').value = button.dataset.alamat;
-                document.getElementById('editKontak').value = button.dataset.kontak;
-                document.getElementById('editStatus').value = button.dataset.status;
-
-                // SET ACTION URL DINAMIS
-                editKaryawanForm.action = `/manager_divisi/karyawan/${button.dataset.id}`;
-
-                editKaryawanModal.classList.remove('hidden');
-            });
-        });
-
-        // ============================
-        // HANDLE DELETE BUTTON
-        // ============================
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const id = button.dataset.id;
-
-                // Set action form delete
-                document.getElementById('deleteForm').action = `/manager_divisi/karyawan/${id}`;
-                document.getElementById('deleteId').value = id;
-
-                // Tampilkan modal
-                deleteModal.classList.remove('hidden');
-            });
-        });
-
-        // ============================
-        // SUBMIT FORM EDIT
-        // (untuk Laravel biarkan form submit saja)
-        // ============================
-        editKaryawanForm.addEventListener('submit', (e) => {
-            // Jangan prevent kalau mau kirim ke backend
-            // e.preventDefault();
-            // editKaryawanForm.submit();  // opsional
-
-            editKaryawanModal.classList.add('hidden');
-        });
-
-        // ============================
-        // SUBMIT FORM DELETE
-        // ============================
-        document.getElementById('deleteForm').addEventListener('submit', (e) => {
-            deleteModal.classList.add('hidden');
-        });
-
-        // ============================
-        // SUBMIT FORM TAMBAH
-        // ============================
-        tambahKaryawanForm.addEventListener('submit', (e) => {
-            tambahKaryawanModal.classList.add('hidden');
         });
     </script>
 </body>

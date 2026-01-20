@@ -1,31 +1,3 @@
-<aside class="w-64 bg-white dark:bg-gray-800 flex flex-col flex-shrink-0">
-    <div class="h-20 flex items-center justify-center border-b border-gray-200 dark:border-gray-700">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Brand</h1>
-    </div>
-    <nav class="flex-1 px-4 py-6 space-y-2">
-        <a class="flex items-center px-4 py-2.5 rounded-lg transition-all duration-300 {{ request()->is('/manager_divisi/home') ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" href="/manager_divisi/home">
-            <span class="material-symbols-outlined mr-3">home</span>
-            <span class="font-semibold">Beranda</span>
-        </a>
-        <a class="flex items-center px-4 py-2.5 rounded-lg transition-all duration-300 {{ request()->is('/manager_divisi/pengelola_tugas') ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" href="/manager_divisi/pengelola_tugas">
-            <span class="material-symbols-outlined mr-3">assignment</span>
-            <span class="font-medium">Kelola Tugas</span>
-        </a>
-    </nav>
-    <div class="px-4 py-6 border-t border-gray-200 dark:border-gray-700">
-        <a class="flex items-center px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300"
-            href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <span class="material-symbols-outlined mr-3">logout</span>
-            <span class="font-medium">Log Out</span>
-        </a>
-        
-        <!-- Form Logout (Hidden) -->
-        <form id="logout-form" action="/logout" method="POST" style="display: none;">
-            @csrf
-        </form>
-    </div>
-</aside>
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -232,25 +204,25 @@
             <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
 
                 <!-- BERANDA -->
-                <a href="/manager_divisi"
+                <a href="/manager_divisi/home"
                     class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    :class="window.location.pathname === '/manager_divisi' ? 'active' : ''">
+                    :class="window.location.pathname === '/manager_divisi/home ' ? 'active' : ''">
                     <span class="material-symbols-outlined sidebar-icon">home</span>
                     <span class="sidebar-text">Beranda</span>
                 </a>
 
                 <!-- DATA ORDERAN -->
-                <a href="/data_order"
+                <a href="/manager_divisi/data_project"
                     class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    :class="window.location.pathname === '/data_order' ? 'active' : ''">
+                    :class="window.location.pathname === '/manager_divisi/data_project' ? 'active' : ''">
                     <span class="material-symbols-outlined sidebar-icon">assignment</span>
-                    <span class="sidebar-text">Data Orderan</span>
+                    <span class="sidebar-text">Data Project</span>
                 </a>
 
                 <!-- KELOLA TUGAS -->
-                <a href="/pengelola_tugas"
+                <a href="/manager_divisi/pengelola_tugas"
                     class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    :class="window.location.pathname === '/pengelola_tugas' ? 'active' : ''">
+                    :class="window.location.pathname === '/manager_divisi/pengelola_tugas' ? 'active' : ''">
                     <span class="material-symbols-outlined sidebar-icon">assignment</span>
                     <span class="sidebar-text">Kelola Tugas</span>
                 </a>
@@ -264,9 +236,9 @@
                 </>
 
                 <!-- LAPORAN ABSENSI -->
-                <a href="/kelola_absensi"
+                <a href="/manager_divisi/kelola_absensi"
                     class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    :class="window.location.pathname === '/kelola_absensi' ? 'active' : ''">
+                    :class="window.location.pathname === '/manager_divisi/kelola_absensi' ? 'active' : ''">
                     <span class="material-symbols-outlined sidebar-icon">fact_check</span>
                     <span class="sidebar-text">Laporan Absensi</span>
                 </a>
