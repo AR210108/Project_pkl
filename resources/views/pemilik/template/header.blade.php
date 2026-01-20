@@ -253,17 +253,19 @@
                 
                 <!-- Desktop Navigation - Centered -->
                 <nav class="hidden md:flex items-center space-x-4 lg:space-x-8 absolute left-1/2 transform -translate-x-1/2">
-                    <a class="nav-link text-sm font-medium text-gray-700" data-page="home" href="/pemilik">Beranda</a>
+                    <a class="nav-link text-sm font-medium text-gray-700" data-page="home" href="/owner/home">Beranda</a>
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="rekap" href="/rekap_absensi">Rekap Absensi</a>
-                    <a class="nav-link text-sm font-medium text-gray-700" data-page="laporan" href="/laporan">Laporan</a>
+                    <a class="nav-link text-sm font-medium text-gray-700" data-page="laporan" href="/owner/laporan">Laporan</a>
                 </nav>
                 
                 <!-- Login Button -->
-                <a class="hidden md:flex items-center bg-black text-white text-sm font-medium py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors"
-                    href="/login">
+                <form action="{{ route('logout') }}">
+                    @csrf
+                <button type="submit" class="hidden md:flex items-center bg-black text-white text-sm font-medium py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors">
                     <i class='bx bx-log-out-circle text-xl mr-2'></i>
                     Log Out
-                </a>
+                </button>
+                </form>
                 
                 <!-- Mobile Menu Button -->
                 <button id="mobileMenuBtn" class="md:hidden flex flex-col justify-center items-center w-8 h-8 hamburger mobile-nav-clickable">

@@ -67,14 +67,6 @@ Route::middleware('auth')->group(function () {
         request()->session()->regenerateToken();
         return redirect('/');
     })->name('logout');
-
-    // Route GET untuk logout (backup/fallback)
-    Route::get('/logout-get', function () {
-        Auth::logout();
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
-        return redirect('/');
-    })->name('logout.get');
 });
 
 // Pegawai resource routes (using KaryawanController methods for pegawai management)
@@ -393,6 +385,7 @@ Route::middleware(['auth', 'role:owner'])
         Route::get('/laporan', function () {
             return view('pemilik.laporan');
         })->name('laporan');
+        
     });
 
 /*
@@ -615,12 +608,6 @@ Route::get('/invoices/{invoice}/print', function (\App\Models\Invoice $invoice) 
 | Debug Routes untuk Testing
 |--------------------------------------------------------------------------
 */
-Route::get('/pemilik', function () {
-    return view('pemilik/home');
-});
-Route::get('/laporan', function () {
-    return view('pemilik/laporan');
-});
 
 /*
 |--------------------------------------------------------------------------
@@ -715,6 +702,6 @@ Route::middleware(['auth'])->group(function () {
 // Rekap
 Route::get('/kelola_absen', [AbsensiController::class, 'kelolaAbsen'])->name('kelola.absen');
 Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');
-
+Route::get('/api/kehadiran-per-divisi', [AbsensiController::class, 'apiKehadiranPerDivisi']);
 //Buat Tugas
 // Tambahkan route untuk tugas
