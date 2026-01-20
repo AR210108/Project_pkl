@@ -440,6 +440,10 @@ Route::middleware(['auth', 'role:manager_divisi'])
         Route::get('/kelola-tugas', [ManagerDivisiTaskController::class, 'index'])
             ->name('kelola_tugas');
 
+            Route::get('/data_project', [DataProjectController::class, 'managerDivisi'])
+                ->name('data_project');
+            Route::put('/data_project/{id}',[DataProjectController::class, 'update']
+            )->name('data_project.update');
         // ROUTE GROUP UNTUK TASKS
         Route::prefix('tasks')->name('tasks.')->group(function () {
             Route::post('/', [ManagerDivisiTaskController::class, 'store'])
@@ -478,28 +482,14 @@ Route::middleware(['auth', 'role:manager_divisi'])
                 ->name('karyawan.by_divisi');
             Route::get('/daftar_karyawan/{divisi}', [AdminKaryawanController::class, 'karyawanDivisi'])
                 ->name('karyawan.divisi');
+
         });
 
-
-        Route::get('/pengelola-tugas', function () {
-            return view('manager_divisi.pengelola_tugas');
-        })->name('pengelola_tugas');
-
-        Route::get('/tim-saya', function () {
-            $user = Auth::user();
-            $tim = \App\Models\User::where('divisi', $user->divisi)
-                ->where('role', 'karyawan')
-                ->get();
-            return view('manager_divisi.tim_saya', compact('tim'));
-        })->name('tim_saya');
-
-        Route::get('/absensi-tim', function () {
-            return view('manager_divisi.absensi_tim');
-        })->name('absensi_tim');
-
-        Route::get('/laporan-kinerja', function () {
-            return view('manager_divisi.laporan_kinerja');
-        })->name('laporan_kinerja');
+    Route::get('/pengelola_tugas', function () {
+        return view('manager_divisi.pengelola_tugas');
+    })->name('pengelola_tugas');
+Route::get('/kelola_absensi', [AbsensiController::class, 'absenManager'])
+    ->name('kelola_absensi');
     });
 
 /*
@@ -651,29 +641,6 @@ Route::get('/karyawann', function () {
 | Routes untuk Manager Divisi
 |--------------------------------------------------------------------------
 */
-Route::get('/manager_divisi', function () {
-    return view('manager_divisi/home');
-});
-Route::get('/pengelola_tugas', function () {
-    return view('manager_divisi/pengelola_tugas');
-});
-
-
-Route::get('/manager_divisi', function () {
-    return view('manager_divisi/home');
-});
-Route::get('/pengelola_tugas', action: function () {
-    return view('manager_divisi/pengelola_tugas');
-});
-Route::get('/data_order', function () {
-    return view('manager_divisi/data_order');
-});
-Route::get('/daftar_karyawan', function () {
-    return view('manager_divisi/daftar_karyawan');
-});
-Route::get('/kelola_absensi', function () {
-    return view('manager_divisi/kelola_absensi');
-});
 
 Route::get('/general_manajer', function () {
     return view('general_manajer/home');

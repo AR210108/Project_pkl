@@ -746,10 +746,10 @@
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                         <select name="status" id="tambahStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Active">Active</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Cancelled">Cancelled</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Dalam Pengerjaan">Dalam Pengerjaan</option>
+                            <option value="Selesai">Selesai</option>
+                            <option value="Dibatalkan">Dibatalkan</option>
                         </select>
                         @error('status')
                             <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -801,10 +801,10 @@
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                         <select name="status" id="editStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Active">Active</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Cancelled">Cancelled</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Dalam Pengerjaan">Dalam Pengerjaan</option>
+                            <option value="Selesai">Selesai</option>
+                            <option value="Dibatalkan">Dibatalkan</option>
                         </select>
                     </div>
                     <div class="flex justify-end gap-2">
@@ -1181,13 +1181,13 @@
         // Set status badge
         const statusElement = document.getElementById('detailStatus');
         let statusClass = '';
-        if (status === 'In Progress') {
+        if (status === 'Pending') {
             statusClass = 'status-inprogress';
-        } else if (status === 'Active') {
+        } else if (status === 'Dalam Pengerjaan') {
             statusClass = 'status-active';
-        } else if (status === 'Completed') {
+        } else if (status === 'Selesai') {
             statusClass = 'status-done';
-        } else if (status === 'Cancelled') {
+        } else if (status === 'Dibatalkan') {
             statusClass = 'status-todo';
         }
         statusElement.innerHTML = `<span class="status-badge ${statusClass}">${status}</span>`;

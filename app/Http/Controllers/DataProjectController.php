@@ -17,6 +17,12 @@ class DataProjectController extends Controller
         return view('general_manajer.data_project', compact('project'));
     }
 
+    public function managerDivisi()
+    {
+        $projects = Project::orderBy('id', 'desc')->paginate(3);
+        return view('manager_divisi.data_project', compact('projects'));
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -28,7 +34,7 @@ class DataProjectController extends Controller
             'harga' => 'required|string|max:50',
             'deadline' => 'required|date',
             'progres' => 'nullable|integer|min:0|max:100',
-            'status' => 'required|in:In Progress,Active,Completed,Cancelled'
+            'status' => 'required|in:Pending,Dalam Pengerjaan,Selesai,Dibatalkan'
         ]);
 
         if ($validator->fails()) {
@@ -71,7 +77,7 @@ class DataProjectController extends Controller
             'harga' => 'required|string|max:50',
             'deadline' => 'required|date',
             'progres' => 'required|integer|min:0|max:100',
-            'status' => 'required|in:In Progress,Active,Completed,Cancelled'
+            'status' => 'required|in:Pending,Dalam Pengerjaan,Selesai,Dibatalkan'
         ]);
 
         if ($validator->fails()) {
