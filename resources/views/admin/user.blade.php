@@ -815,7 +815,7 @@
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold text-gray-800">Tambah User Baru</h3>
-                    <button onclick="closeModalTambah()" class="text-gray-800 hover:text-gray-500">
+                    <button id="closeModalTambahBtn" class="text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
@@ -845,7 +845,7 @@
                     </div>
 
                     <div class="flex justify-end gap-2">
-                        <button type="button" onclick="closeModalTambah()" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="button" id="batalTambahBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
                         <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan Data</button>
                     </div>
                 </form>
@@ -859,7 +859,7 @@
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold text-gray-800">Edit User</h3>
-                    <button onclick="closeModalEdit()" class="text-gray-800 hover:text-gray-500">
+                    <button id="closeModalEditBtn" class="text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
@@ -890,7 +890,7 @@
                     </div>
 
                     <div class="flex justify-end gap-2">
-                        <button type="button" onclick="closeModalEdit()" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="button" id="batalEditBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
                         <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Data</button>
                     </div>
                 </form>
@@ -1187,21 +1187,52 @@
             // === MODAL TAMBAH ===
             const modalTambah = document.getElementById('modalTambah');
             const tambahUserBtn = document.getElementById('tambahUserBtn');
+            const closeModalTambahBtn = document.getElementById('closeModalTambahBtn');
+            const batalTambahBtn = document.getElementById('batalTambahBtn');
             
+            // Event listener untuk tombol tambah user
             tambahUserBtn.addEventListener('click', function() {
                 openModalTambah();
             });
             
+            // Event listener untuk tombol close di modal tambah
+            closeModalTambahBtn.addEventListener('click', function() {
+                closeModalTambah();
+            });
+            
+            // Event listener untuk tombol batal di modal tambah
+            batalTambahBtn.addEventListener('click', function() {
+                closeModalTambah();
+            });
+            
+            // Fungsi untuk membuka modal tambah
             function openModalTambah() {
                 modalTambah.classList.remove('hidden');
             }
             
+            // Fungsi untuk menutup modal tambah
             function closeModalTambah() {
                 modalTambah.classList.add('hidden');
+                // Reset form
+                document.querySelector('#modalTambah form').reset();
             }
 
             // === MODAL EDIT ===
             const modalEdit = document.getElementById('modalEdit');
+            const closeModalEditBtn = document.getElementById('closeModalEditBtn');
+            const batalEditBtn = document.getElementById('batalEditBtn');
+            
+            // Event listener untuk tombol close di modal edit
+            closeModalEditBtn.addEventListener('click', function() {
+                closeModalEdit();
+            });
+            
+            // Event listener untuk tombol batal di modal edit
+            batalEditBtn.addEventListener('click', function() {
+                closeModalEdit();
+            });
+            
+            // Fungsi untuk membuka modal edit
             window.openModalEdit = function(id, name, email, role) {
                 modalEdit.classList.remove('hidden');
 
@@ -1212,9 +1243,24 @@
                 document.getElementById("formEdit").action = "/admin/user/update/" + id;
             }
             
+            // Fungsi untuk menutup modal edit
             function closeModalEdit() {
                 modalEdit.classList.add('hidden');
+                // Reset form
+                document.querySelector('#modalEdit form').reset();
             }
+            
+            // === MODAL CLOSE ON CLICK OUTSIDE ===
+            // Event listener untuk menutup modal ketika klik di luar modal
+            window.addEventListener('click', function(event) {
+                // Cek apakah yang diklik adalah modal backdrop
+                if (event.target === modalTambah) {
+                    closeModalTambah();
+                }
+                if (event.target === modalEdit) {
+                    closeModalEdit();
+                }
+            });
             
             // === MINIMALIST POPUP ===
             function showMinimalPopup(title, message, type = 'success') {

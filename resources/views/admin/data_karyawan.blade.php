@@ -1,6 +1,5 @@
- <!DOCTYPE html>
- <html lang="id">
-
+<!DOCTYPE html>
+<html lang="id">
  <head>
      <meta charset="utf-8" />
      <meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -1051,15 +1050,36 @@
                          </div>
                      </div>
 
-                     <div class="flex justify-end gap-2 mt-6">
-                         <button type="button" id="cancelEditBtn"
-                             class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                         <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Data</button>
-                     </div>
-                 </form>
-             </div>
-         </div>
-     </div>
+    <!-- Popup Modal untuk Konfirmasi Hapus -->
+    <div id="deleteKaryawanModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h3>
+                    <button id="closeDeleteModalBtn" class="text-gray-800 hover:text-gray-500">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
+                </div>
+                <!-- PERBAIKAN: Hapus atribut action yang statis -->
+                <form id="deleteKaryawanForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <div class="mb-6">
+                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus data karyawan ini?</p>
+                        <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
+                        <input type="hidden" id="deleteId" name="id">
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button type="button" id="cancelDeleteBtn"
+                            class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
      <!-- Popup Modal untuk Konfirmasi Hapus -->
      <div id="deleteKaryawanModal"
@@ -1072,7 +1092,7 @@
                          <span class="material-icons-outlined">close</span>
                      </button>
                  </div>
-                 <form id="deleteKaryawanForm" method="POST" action="{{ route('admin.karyawan.delete', '') }}">
+                 <form id="deleteKaryawanForm" method="POST">
                      @csrf
                      @method('DELETE')
                      <div class="mb-6">
@@ -1106,6 +1126,30 @@
      </div>
 
      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Modal functions
+         const tambahKaryawanBtn = document.getElementById('tambahKaryawanBtn');
+         const tambahKaryawanModal = document.getElementById('tambahKaryawanModal');
+         const closeModalBtn = document.getElementById('closeModalBtn');
+         const cancelBtn = document.getElementById('cancelBtn');
+         const tambahKaryawanForm = document.getElementById('tambahKaryawanForm');
+         const pilihFotoBtn = document.getElementById('pilihFotoBtn');
+         const fotoInput = document.getElementById('fotoInput');
+         const fotoPreview = document.getElementById('fotoPreview');
+
+         const editKaryawanModal = document.getElementById('editKaryawanModal');
+         const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+         const cancelEditBtn = document.getElementById('cancelEditBtn');
+         const editKaryawanForm = document.getElementById('editKaryawanForm');
+         const pilihEditFotoBtn = document.getElementById('pilihEditFotoBtn');
+         const editFotoInput = document.getElementById('editFotoInput');
+         const editFotoPreview = document.getElementById('editFotoPreview');
+
+         const deleteKaryawanModal = document.getElementById('deleteKaryawanModal');
+         const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
+         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+         const deleteKaryawanForm = document.getElementById('deleteKaryawanForm');
          // Inisialisasi variabel untuk pagination, filter, dan search
          let currentPage = 1;
          const itemsPerPage = 5;
@@ -1161,10 +1205,16 @@
              };
          }
 
-         function goToPage(page) {
-             currentPage = page;
-             renderPagination();
-             updateVisibleItems();
+    // Modal Delete
+    function openDeleteModal(id) {
+        document.getElementById('deleteId').value = id;
+        // PERBAIKAN: Set action secara dinamis di JS, bukan di HTML
+        deleteKaryawanForm.action = `/admin/karyawan/${id}`;
+        deleteKaryawanModal.classList.remove('hidden');
+    }
+    function closeDeleteModal() {
+        deleteKaryawanModal.classList.add('hidden');
+    }
 
              // Reset scroll position when changing pages
              const scrollableTable = document.getElementById('scrollableTable');
@@ -1210,40 +1260,121 @@
              document.getElementById('totalCount').textContent = visibleRows.length;
          }
 
-         // === FILTER ===
-         function initializeFilter() {
-             const filterBtn = document.getElementById('filterBtn');
-             const filterDropdown = document.getElementById('filterDropdown');
-             const applyFilterBtn = document.getElementById('applyFilter');
-             const resetFilterBtn = document.getElementById('resetFilter');
-             const filterAll = document.getElementById('filterAll');
+    // CREATE (POST)
+    // ========= CRUD ========= //
 
-             // Toggle filter dropdown
-             filterBtn.addEventListener('click', function(e) {
-                 e.stopPropagation();
-                 filterDropdown.classList.toggle('show');
-             });
 
-             // Close dropdown when clicking outside
-             document.addEventListener('click', function() {
-                 filterDropdown.classList.remove('show');
-             });
+// UPDATE (PUT) - VERSI DEBUGGING
+editKaryawanForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitBtn = editKaryawanForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Memperbarui...';
+    submitBtn.disabled = true;
 
-             // Prevent dropdown from closing when clicking inside
-             filterDropdown.addEventListener('click', function(e) {
-                 e.stopPropagation();
-             });
+    let id = document.getElementById("editId").value;
+    let formData = new FormData(editKaryawanForm);
+    formData.append('_method', 'PUT');
 
-             // Handle "All" checkbox
-             filterAll.addEventListener('change', function() {
-                 if (this.checked) {
-                     // Uncheck all other checkboxes
-                     document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(
-                         cb => {
-                             cb.checked = false;
-                         });
-                 }
-             });
+    try {
+        let response = await fetch(`/admin/karyawan/${id}`, {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+                "Accept": "application/json"
+            },
+            body: formData
+        });
+
+        // --- DEBUGGING: Periksa status dan respons ---
+        console.log('Update Response Status:', response.status);
+        console.log('Update Response Headers:', response.headers.get('Content-Type'));
+
+        const responseText = await response.text();
+        console.log('Update Raw Response Text:', responseText);
+
+        let res;
+        try {
+            res = JSON.parse(responseText);
+        } catch (e) {
+            console.error('Gagal parse JSON. Respons mungkin bukan JSON.');
+            throw new Error('Server returned non-JSON response. Check console for details.');
+        }
+        
+        if (res.success) {
+            showMinimalPopup('Berhasil', 'Data karyawan berhasil diperbarui', 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showMinimalPopup('Error', res.message || 'Terjadi kesalahan saat memperbarui data', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showMinimalPopup('Error', 'Terjadi kesalahan saat memperbarui data. Cek console untuk detail.', 'error');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+});
+
+// DELETE (DELETE) - VERSI DEBUGGING
+deleteKaryawanForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitBtn = deleteKaryawanForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Menghapus...';
+    submitBtn.disabled = true;
+
+    let formData = new FormData(deleteKaryawanForm);
+    formData.append('_method', 'DELETE');
+
+    const deleteUrl = deleteKaryawanForm.action; 
+
+    try {
+        let response = await fetch(deleteUrl, {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+                "Accept": "application/json"
+            },
+            body: formData
+        });
+
+        // --- DEBUGGING: Periksa status dan respons ---
+        console.log('Delete Response Status:', response.status);
+        console.log('Delete Response Headers:', response.headers.get('Content-Type'));
+
+        const responseText = await response.text();
+        console.log('Delete Raw Response Text:', responseText);
+
+        let res;
+        try {
+            res = JSON.parse(responseText);
+        } catch (e) {
+            console.error('Gagal parse JSON. Respons mungkin bukan JSON.');
+            throw new Error('Server returned non-JSON response. Check console for details.');
+        }
+        
+        if (res.success) {
+            showMinimalPopup('Berhasil', 'Data karyawan berhasil dihapus', 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showMinimalPopup('Error', res.message || 'Terjadi kesalahan saat menghapus data', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showMinimalPopup('Error', 'Terjadi kesalahan saat menghapus data. Cek console untuk detail.', 'error');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        closeDeleteModal();
+    }
+});
 
              // Handle other checkboxes
              document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
@@ -1255,21 +1386,21 @@
                  });
              });
 
-             // Apply filter
-             applyFilterBtn.addEventListener('click', function() {
-                 const filterAll = document.getElementById('filterAll');
-                 const filterManager = document.getElementById('filterManager');
-                 const filterStaff = document.getElementById('filterStaff');
-                 const filterIntern = document.getElementById('filterIntern');
+        let id = document.getElementById("editId").value;
+        let formData = new FormData(editKaryawanForm);
+        
+        // Tambahkan _method ke FormData untuk Laravel
+        formData.append('_method', 'PUT');
 
-                 activeFilters = [];
-                 if (filterAll.checked) {
-                     activeFilters.push('all');
-                 } else {
-                     if (filterManager.checked) activeFilters.push('manager');
-                     if (filterStaff.checked) activeFilters.push('staff');
-                     if (filterIntern.checked) activeFilters.push('intern');
-                 }
+        try {
+            let response = await fetch(`/admin/karyawan/${id}`, {
+                method: "POST", // Gunakan POST dengan _method di FormData
+                headers: {
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+                    "Accept": "application/json"
+                },
+                body: formData
+            });
 
                  applyFilters();
                  filterDropdown.classList.remove('show');
@@ -1295,19 +1426,28 @@
              // Reset to first page
              currentPage = 1;
 
-             // Apply filters to rows
-             karyawanRows.forEach(row => {
-                 const jabatan = row.getAttribute('data-jabatan').toLowerCase();
-                 const nama = row.getAttribute('data-nama').toLowerCase();
-                 const alamat = row.getAttribute('data-alamat').toLowerCase();
+        let formData = new FormData(deleteKaryawanForm);
+        // Tambahkan _method ke FormData untuk Laravel
+        formData.append('_method', 'DELETE');
 
-                 // Check if jabatan matches filter
-                 let jabatanMatches = false;
-                 if (activeFilters.includes('all')) {
-                     jabatanMatches = true;
-                 } else {
-                     jabatanMatches = activeFilters.some(filter => jabatan.includes(filter.toLowerCase()));
-                 }
+        // PENTING: Pastikan URL di sini benar-benar cocok dengan route di web.php
+        const deleteUrl = deleteKaryawanForm.action; 
+
+        try {
+            let response = await fetch(deleteUrl, {
+                method: "POST", // Gunakan POST dengan _method di FormData
+                headers: {
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+                    "Accept": "application/json"
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                // Log error untuk debugging
+                console.error('Delete failed:', response.status, response.statusText);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
                  // Check if search term matches
                  let searchMatches = true;
@@ -1421,28 +1561,7 @@
              document.getElementById('minimalPopup').classList.remove('show');
          });
 
-         // Modal functions
-         const tambahKaryawanBtn = document.getElementById('tambahKaryawanBtn');
-         const tambahKaryawanModal = document.getElementById('tambahKaryawanModal');
-         const closeModalBtn = document.getElementById('closeModalBtn');
-         const cancelBtn = document.getElementById('cancelBtn');
-         const tambahKaryawanForm = document.getElementById('tambahKaryawanForm');
-         const pilihFotoBtn = document.getElementById('pilihFotoBtn');
-         const fotoInput = document.getElementById('fotoInput');
-         const fotoPreview = document.getElementById('fotoPreview');
-
-         const editKaryawanModal = document.getElementById('editKaryawanModal');
-         const closeEditModalBtn = document.getElementById('closeEditModalBtn');
-         const cancelEditBtn = document.getElementById('cancelEditBtn');
-         const editKaryawanForm = document.getElementById('editKaryawanForm');
-         const pilihEditFotoBtn = document.getElementById('pilihEditFotoBtn');
-         const editFotoInput = document.getElementById('editFotoInput');
-         const editFotoPreview = document.getElementById('editFotoPreview');
-
-         const deleteKaryawanModal = document.getElementById('deleteKaryawanModal');
-         const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
-         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-         const deleteKaryawanForm = document.getElementById('deleteKaryawanForm');
+         
 
          if (pilihFotoBtn && fotoInput) {
              pilihFotoBtn.addEventListener('click', () => {
@@ -1729,122 +1848,6 @@ document.getElementById('userSelect').addEventListener('change', function() {
     document.getElementById('divisiInput').value = divisi;
 });
 
-// CREATE (POST) dengan debugging lebih detail
-tambahKaryawanForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-
-    console.log('Form submission started');
-
-    // Validasi manual
-    const userSelect = document.getElementById('userSelect');
-    const kontakInput = document.getElementById('kontakInput');
-    const alamatInput = document.getElementById('alamatInput');
-    const jabatanInput = document.getElementById('jabatanInput');
-    
-    if (!userSelect.value) {
-        showMinimalPopup('Error', 'Silakan pilih user terlebih dahulu', 'error');
-        return;
-    }
-    
-    // Auto-fill nama dari user yang dipilih
-    const selectedOption = userSelect.options[userSelect.selectedIndex];
-    const namaInput = document.getElementById('namaInput');
-    namaInput.value = selectedOption.getAttribute('data-nama');
-    
-    if (!jabatanInput.value.trim()) {
-        showMinimalPopup('Error', 'Jabatan harus diisi', 'error');
-        return;
-    }
-    
-    if (!kontakInput.value.trim()) {
-        showMinimalPopup('Error', 'Nomor kontak harus diisi', 'error');
-        return;
-    }
-    
-    if (!alamatInput.value.trim()) {
-        showMinimalPopup('Error', 'Alamat harus diisi', 'error');
-        return;
-    }
-
-    // Show loading state
-    const submitBtn = tambahKaryawanForm.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Menyimpan...';
-    submitBtn.disabled = true;
-
-    let formData = new FormData(tambahKaryawanForm);
-
-    // Debug: Tampilkan data FormData
-    console.log('FormData to be sent:');
-    for (let [key, value] of formData.entries()) {
-        console.log(key + ':', value);
-    }
-
-    try {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        console.log('CSRF Token:', csrfToken);
-        console.log('Sending to:', '/admin/karyawan/store');
-
-        let response = await fetch("/admin/karyawan/store", {
-            method: "POST",
-            headers: {
-                "X-CSRF-TOKEN": csrfToken,
-                "Accept": "application/json"
-                // JANGAN tambah Content-Type untuk FormData
-            },
-            body: formData
-        });
-
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-        
-        let data;
-        try {
-            const responseText = await response.text();
-            console.log('Raw response:', responseText);
-            
-            data = JSON.parse(responseText);
-            console.log('Parsed response:', data);
-            
-        } catch (jsonError) {
-            console.error('JSON parse error:', jsonError);
-            showMinimalPopup('Error', 'Terjadi kesalahan pada server (Invalid JSON)', 'error');
-            return;
-        }
-
-        if (response.ok) {
-            showMinimalPopup('Berhasil', 'Karyawan berhasil ditambahkan', 'success');
-            
-            // Reset form
-            tambahKaryawanForm.reset();
-            closeTambahModal();
-            
-            // Refresh page setelah 1.5 detik
-            setTimeout(() => {
-                location.reload();
-            }, 1500);
-        } else {
-            // Handle errors
-            if (data.errors) {
-                let errorMessages = [];
-                for (let field in data.errors) {
-                    errorMessages.push(`${field}: ${data.errors[field].join(', ')}`);
-                }
-                showMinimalPopup('Validasi Gagal', errorMessages.join('\n'), 'error');
-            } else {
-                showMinimalPopup('Error', data.message || `Terjadi kesalahan (Status: ${response.status})`, 'error');
-            }
-        }
-        
-    } catch (error) {
-        console.error('Network error:', error);
-        showMinimalPopup('Error', 'Koneksi jaringan bermasalah: ' + error.message, 'error');
-    } finally {
-        // Reset button
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-    }
-});
 
          // UPDATE (PUT)
          editKaryawanForm.addEventListener('submit', async function(e) {
@@ -1855,21 +1858,6 @@ tambahKaryawanForm.addEventListener('submit', async function(e) {
              const originalText = submitBtn.textContent;
              submitBtn.textContent = 'Memperbarui...';
              submitBtn.disabled = true;
-
-             let id = document.getElementById("editId").value;
-             let formData = new FormData(editKaryawanForm);
-
-             try {
-                 let response = await fetch(`/admin/karyawan/update/${id}`, {
-                     method: "POST",
-                     headers: {
-                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute(
-                             "content"),
-                         "X-HTTP-Method-Override": "PUT",
-                         "Accept": "application/json"
-                     },
-                     body: formData
-                 });
 
                  if (!response.ok) {
                      throw new Error(`HTTP error! status: ${response.status}`);
@@ -1957,6 +1945,7 @@ tambahKaryawanForm.addEventListener('submit', async function(e) {
                  openDeleteModal(id);
              });
          });
+        });
      </script>
 
  </body>

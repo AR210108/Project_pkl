@@ -550,9 +550,9 @@
                                                     </td>
                                                     <td style="min-width: 120px;">
                                                         <span class="status-badge 
-                                                            @if($item->status == 'In Progress') status-inprogress 
-                                                            @elseif($item->status == 'Active') status-active 
-                                                            @elseif($item->status == 'Completed') status-done 
+                                                            @if($item->status == 'Pending') status-Pending 
+                                                            @elseif($item->status == 'Dalam Pengerjaan ') status-Dalam Pengerjaan 
+                                                            @elseif($item->status == 'Selesai') status-Selesai 
                                                             @else status-todo @endif">
                                                             {{ $item->status }}
                                                         </span>
@@ -619,9 +619,9 @@
                                                 <p class="text-text-muted-light">Status</p>
                                                 <p>
                                                     <span class="status-badge 
-                                                        @if($item->status == 'In Progress') status-inprogress 
-                                                        @elseif($item->status == 'Active') status-active 
-                                                        @elseif($item->status == 'Completed') status-done 
+                                                        @if($item->status == 'Pending') status-Pending 
+                                                        @elseif($item->status == 'Dalam Pengerjaan') status-Dalam Pengerjaan 
+                                                        @elseif($item->status == 'Selesai') status-Selesai 
                                                         @else status-todo @endif">
                                                         {{ $item->status }}
                                                     </span>
