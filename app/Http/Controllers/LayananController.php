@@ -10,6 +10,14 @@ use Illuminate\Support\Facades\Validator;
 
 class LayananController extends Controller
 {
+    public function financeIndex()
+{
+    // Ambil data dari database
+    $layanans = Layanan::all();
+
+    // Kirim data ke view
+    return view('finance.data_layanan', compact('layanans'));
+}
     /**
      * Display a listing of the resource.
      */

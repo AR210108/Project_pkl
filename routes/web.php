@@ -611,14 +611,12 @@ Route::get('/invoices/{invoice}/print', function (\App\Models\Invoice $invoice) 
 | Routes untuk Finance
 |--------------------------------------------------------------------------
 */
-Route::get('/finance', function () {
-    return view('finance/beranda');
-});
-Route::get('/data', function () {
-    return view('finance/data_layanan');
-});
+Route::get('/data', [LayananController::class, 'financeIndex']);
 Route::get('/pembayaran', function () {
     return view('finance/data_pembayaran');
+});
+Route::get('/finance', function () {
+    return view('finance/beranda');
 });
 Route::get('/pemasukan', function () {
     return view('finance/pemasukan');
@@ -635,7 +633,6 @@ Route::get('/pembayaran', function () {
 Route::get('/karyawann', function () {
     return view('finance/daftar_karyawan');
 });
-
 /*
 |--------------------------------------------------------------------------
 | Routes untuk Manager Divisi
