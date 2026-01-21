@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Daftar Karyawan | Project Management</title>
+    <title>Data Karyawan | Project Management</title>
 
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script>
@@ -631,7 +631,7 @@
         <main class="flex-1 flex flex-col main-content">
             <div class="flex-grow p-3 sm:p-8">
 
-                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Daftar karyawan</h2>
+                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Data karyawan</h2>
                 
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -676,7 +676,7 @@
                     <div class="panel-header">
                         <h3 class="panel-title">
                             <span class="material-icons-outlined text-primary">people</span>
-                            Daftar Karyawan
+                            Data Karyawan
                         </h3>
                         <div class="flex items-center gap-2">
                             <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">0</span> karyawan</span>
@@ -716,12 +716,12 @@
     <td>{{ $karyawan->alamat }}</td>
     <td>{{ $karyawan->kontak }}</td>
     <td>
-        @if($karyawan->foto)
-            <img src="{{ asset('storage/'.$karyawan->foto) }}"
-                 class="h-10 w-10 rounded-full object-cover">
-        @else
-            <span class="material-icons-outlined">person</span>
-        @endif
+@if($karyawan->foto)
+    <img src="{{ asset('karyawan/'.$karyawan->foto) }}"
+         class="h-10 w-10 rounded-full object-cover">
+@else
+    <span class="material-icons-outlined">person</span>
+@endif
     </td>
     <td class="text-center flex gap-2 justify-center">
     <!-- EDIT -->
@@ -745,8 +745,6 @@
 </tr>
 @endforeach
 </tbody>
-
-                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -792,17 +790,18 @@
                                 placeholder="Masukkan nama karyawan" required>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
-                            <select id="editJabatan" name="jabatan"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                required>
-                                <option value="">Pilih Jabatan</option>
-                                <option value="Manager">Manager</option>
-                                <option value="Staff">Staff</option>
-                                <option value="Intern">Intern</option>
-                            </select>
-                        </div>
+<div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
+    <input
+        type="text"
+        id="editJabatan"
+        name="jabatan"
+        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+        placeholder="Masukkan jabatan"
+        required
+    >
+</div>
+
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
@@ -905,21 +904,18 @@
     </div>
 <!-- Tambahkan di body sebelum script utama -->
 <script>
+
+    function initSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    if (!sidebar || !overlay) return; // ⬅️ WAJIB
+
+    sidebar.style.transform = 'translateX(0)';
+    overlay.style.display = 'block';
+}
     // Data karyawan dari PHP untuk JavaScript (untuk modal edit saja)
-    const karyawanData = [
-        @foreach($karyawans as $karyawan)
-        {
-            id: {{ $karyawan->id }},
-            nama: "{{ $karyawan->nama }}",
-            jabatan: "{{ $karyawan->jabatan }}",
-            divisi: "{{ $karyawan->divisi }}",
-            gaji: {{ $karyawan->gaji }},
-            alamat: "{{ $karyawan->alamat }}",
-            kontak: "{{ $karyawan->kontak }}",
-            foto: "{{ $karyawan->foto ? asset('storage/'.$karyawan->foto) : '' }}"
-        },
-        @endforeach
-    ];
+const karyawanData = @json($karyawanJson);
     
     // Inisialisasi variabel untuk filter dan search
     let activeFilters = ['all'];
@@ -930,6 +926,7 @@
         initializeModals();
         initializeFilter();
         initializeSearch();
+        initSidebar();
         
         // Set data attributes pada rows yang sudah ada di Blade
         const rows = document.querySelectorAll('.karyawan-row');
@@ -1159,24 +1156,17 @@
     }
 
 function openEditModal(karyawanId) {
-        console.log('ID yang diterima:', karyawanId);
-    console.log('karyawanData:', karyawanData);
-    
     const karyawan = karyawanData.find(k => k.id === karyawanId);
-    console.log('Data yang ditemukan:', karyawan);
-    // Cari data karyawan berdasarkan ID
-    const karyawan = karyawanData.find(k => k.id === karyawanId);
+
     if (!karyawan) {
         showMinimalPopup('Error', 'Data karyawan tidak ditemukan', 'error');
         return;
     }
-    
+
     const editForm = document.getElementById('editKaryawanForm');
     const baseRoute = "{{ route('finance.karyawan.update', '') }}";
-    
     editForm.action = baseRoute + '/' + karyawan.id;
-    
-    document.getElementById('editId').value = karyawan.id;
+
     document.getElementById('editNama').value = karyawan.nama;
     document.getElementById('editJabatan').value = karyawan.jabatan;
     document.getElementById('editDivisi').value = karyawan.divisi;
@@ -1185,14 +1175,13 @@ function openEditModal(karyawanId) {
     document.getElementById('editAlamat').value = karyawan.alamat;
 
     const fotoPreview = document.getElementById('editFotoPreview');
-    if (karyawan.foto) {
-        fotoPreview.innerHTML = `<img src="${karyawan.foto}" alt="${karyawan.nama}" class="h-16 w-16 rounded-full object-cover">`;
-    } else {
-        fotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
-    }
+    fotoPreview.innerHTML = karyawan.foto
+        ? `<img src="${karyawan.foto}" class="h-16 w-16 rounded-full object-cover">`
+        : `<span class="material-icons-outlined text-gray-500 text-2xl">person</span>`;
 
     document.getElementById('editKaryawanModal').classList.remove('hidden');
 }
+
 
     function closeEditModal() {
         document.getElementById('editKaryawanModal').classList.add('hidden');

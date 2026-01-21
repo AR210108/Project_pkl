@@ -618,8 +618,8 @@ Route::get('/invoices/{invoice}/print', function (\App\Models\Invoice $invoice) 
 |--------------------------------------------------------------------------
 */
 Route::get('/data', [LayananController::class, 'financeIndex']);
-Route::get('/pembayaran', function () {
-    return view('finance/data_pembayaran');
+Route::get('/data_orderan', function () {
+    return view('finance/data_orderan');
 });
 Route::get('/finance', function () {
     return view('finance/beranda');
@@ -633,10 +633,6 @@ Route::get('/pengeluaran', function () {
 Route::get('/finance/invoice', function () {
     return view('finance/invoice');
 });
-Route::get('/pembayaran', function () {
-    return view('finance/data_pembayaran');
-});
-
 
 /*
 |--------------------------------------------------------------------------

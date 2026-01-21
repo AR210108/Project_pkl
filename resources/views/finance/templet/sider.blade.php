@@ -213,7 +213,7 @@
                 <span class="sidebar-text">Data Layanan</span>
             </a>
             
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/pembayaran">
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/data_orderan">
                 <span class="material-icons">receipt_long</span>
                 <span class="sidebar-text">Data Orderan</span>
             </a>
