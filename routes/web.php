@@ -309,7 +309,7 @@ Route::middleware(['auth', 'role:general_manager'])
             return view('general_manajer.home');
         })->name('home');
 
-        Route::get('general_manajer/data_karyawan', [AdminKaryawanController::class, 'generalKaryawan'])
+        Route::get('/data_karyawan', [AdminKaryawanController::class, 'karyawanGeneral'])
             ->name('data_karyawan');
 
         Route::get('/layanan', function () {
@@ -370,10 +370,7 @@ Route::middleware(['auth', 'role:general_manager'])
             Route::get('/karyawan-by-divisi/{divisi}', [GeneralManagerTaskController::class, 'getKaryawanByDivisi'])
                 ->name('karyawan.by_divisi');
         });
-
-        Route::get('/kelola-absen', function () {
-            return view('general_manajer.kelola_absen');
-        })->name('kelola_absen');
+    Route::get('/kelola_absen', [AbsensiController::class, 'absenGeneral'])->name('kelola_absen');
     });
 
 /*
@@ -414,12 +411,21 @@ Route::middleware(['auth', 'role:finance'])
         })->name('data_layanan');
 
         Route::get('/pembayaran', function () {
-            return view('finance.data_pembayaran');
+            return view('finance.data_orderan');
         })->name('pembayaran');
 
         Route::get('/laporan-keuangan', function () {
             return view('finance.laporan_keuangan');
         })->name('laporan_keuangan');
+            Route::get('/daftar_karyawan', [AdminKaryawanController::class, 'karyawanFinance'])
+            ->name('daftar_karyawan');
+        // EDIT (UPDATE)
+        Route::put('/karyawan/{karyawan}', [AdminKaryawanController::class, 'update'])
+            ->name('karyawan.update');
+
+        // HAPUS
+        Route::delete('/karyawan/{karyawan}', [AdminKaryawanController::class, 'destroy'])
+            ->name('karyawan.destroy');
     });
 
 /*
@@ -632,9 +638,7 @@ Route::get('/finance/invoice', function () {
 Route::get('/pembayaran', function () {
     return view('finance/data_pembayaran');
 });
-Route::get('/karyawann', function () {
-    return view('finance/daftar_karyawan');
-});
+
 
 /*
 |--------------------------------------------------------------------------
@@ -645,9 +649,7 @@ Route::get('/karyawann', function () {
 Route::get('/general_manajer', function () {
     return view('general_manajer/home');
 });
-Route::get('/data_karyawan', function () {
-    return redirect()->route('pegawai.index');
-});
+
 Route::get('/layanan', [PelayananController::class, 'index']);
 
 
@@ -672,7 +674,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Rekap
-Route::get('/kelola_absen', [AbsensiController::class, 'kelolaAbsen'])->name('kelola.absen');
+
 Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');
 
 //Buat Tugas

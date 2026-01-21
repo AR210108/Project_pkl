@@ -41,6 +41,7 @@ class AdminKaryawanController extends Controller
         // Tampilkan ke view dengan data yang sudah dipaginasi
         return view('admin.data_karyawan', compact('karyawan', 'users'));
     }
+
     public function karyawanGeneral(Request $request)
     {
         // Mulai dengan query builder untuk model Karyawan
@@ -56,12 +57,47 @@ class AdminKaryawanController extends Controller
         }
 
         // Ambil data dengan paginasi (10 data per halaman)
-        // Laravel akan otomatis menjaga parameter pencarian di link paginasi
         $karyawan = $query->paginate(10);
 
+        // AMBIL DATA USERS YANG BELUM MENJADI KARYAWAN
+        $users = User::whereNotIn('id', function ($query) {
+            $query->select('user_id')
+                ->from('karyawan')
+                ->whereNotNull('user_id');
+        })->get(['id', 'name', 'divisi', 'role']); // Tambahkan role
+
         // Tampilkan ke view dengan data yang sudah dipaginasi
-        return view('general_manajer.data_karyawan', compact('karyawan'));
+        return view('general_manajer.data_karyawan', compact('karyawan', 'users'));
     }
+    
+    public function karyawanFinance(Request $request)
+    {
+        // Mulai dengan query builder untuk model Karyawan
+        $query = Karyawan::query();
+
+        // Jika ada input pencarian di URL (misal: ?search=John)
+        if ($request->has('search')) {
+            $searchTerm = $request->get('search');
+            // Cari di kolom 'nama', 'jabatan', dan 'alamat'
+            $query->where('nama', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('jabatan', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('alamat', 'LIKE', "%{$searchTerm}%");
+        }
+
+        // Ambil data dengan paginasi (10 data per halaman)
+        $karyawans = $query->paginate(10);
+
+        // AMBIL DATA USERS YANG BELUM MENJADI KARYAWAN
+        $users = User::whereNotIn('id', function ($query) {
+            $query->select('user_id')
+                ->from('karyawan')
+                ->whereNotNull('user_id');
+        })->get(['id', 'name', 'divisi', 'role']); // Tambahkan role
+
+        // Tampilkan ke view dengan data yang sudah dipaginasi
+        return view('finance.daftar_karyawan', compact('karyawans', 'users'));
+    }
+
     public function karyawanDivisi(Request $request)
 {
     // Mulai dengan query builder untuk model Karyawan

@@ -85,7 +85,7 @@
                 <span class="material-icons">task_alt</span>
                 <span>Kelola Tugas</span>
             </a>
-            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded" href="/general_manajer/kelola-absen">
+            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded" href="/general_manajer/kelola_absen">
                 <span class="material-icons">manage_accounts</span>
                 <span>Kelola Absen</span>
             </a>

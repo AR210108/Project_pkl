@@ -6,649 +6,243 @@ use App\Models\Absensi;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class AbsensiController extends Controller
 {
-    /**
-     * Menampilkan halaman utama absensi dengan statistik dan data
-     * 
-     * @return \Illuminate\View\View
-     */
+    /* =====================================================
+     |  ADMIN
+     ===================================================== */
     public function index()
     {
-        // 1. Tentukan tanggal yang ingin ditampilkan (hari ini)
-        $today = Carbon::now()->format('Y-m-d');
-
-        // 2. Identifikasi karyawan yang tidak hadir dan tambahkan ke database
+        $today = Carbon::today()->format('Y-m-d');
         $this->markAbsentEmployees($today);
 
-        // Mengambil statistik dari API
-        $statsResponse = $this->apiStatistics();
-        $stats = $statsResponse->getData(true)['data'];
+        $stats = $this->apiStatistics()->getData(true)['data'];
 
-        // Mengambil data kehadiran (tanpa status Tidak Masuk)
         $attendances = Absensi::with('user')
-            ->where('status', '!=', 'Tidak Masuk')
-            ->whereNotIn('status', ['Cuti', 'Sakit', 'Izin'])
-            ->orderBy('tanggal', 'desc')
+            ->whereNotIn('status', ['Tidak Masuk', 'Cuti', 'Sakit', 'Izin'])
+            ->latest('tanggal')
             ->get();
 
-        // Mengambil data ketidakhadiran (termasuk Tidak Masuk)
         $ketidakhadiran = Absensi::with('user')
             ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Tidak Masuk'])
-            ->orderBy('tanggal', 'desc')
+            ->latest('tanggal')
             ->get();
 
-        // PERUBAHAN: Hanya mengambil user dengan role 'karyawan' untuk dropdown
         $users = User::where('role', 'karyawan')->get();
 
         return view('admin.absensi', compact('stats', 'attendances', 'ketidakhadiran', 'users'));
     }
 
-    /**
-     * Menampilkan halaman kelola absensi
-     * 
-     * @return \Illuminate\View\View
-     */
-    public function kelolaAbsen()
+    /* =====================================================
+     |  GENERAL MANAGER
+     ===================================================== */
+    public function absenGeneral()
     {
-        // Mengambil statistik dari API
-        $statsResponse = $this->apiStatistics();
-        $stats = $statsResponse->getData(true)['data'];
+        $today = Carbon::today()->format('Y-m-d');
+        $this->markAbsentEmployees($today);
 
-        // Mengambil semua user dengan role 'karyawan' untuk dropdown
+        $stats = $this->apiStatistics()->getData(true)['data'];
+
+        $attendances = Absensi::with('user')
+            ->whereNotIn('status', ['Tidak Masuk', 'Cuti', 'Sakit', 'Izin'])
+            ->latest('tanggal')
+            ->get();
+
+        $ketidakhadiran = Absensi::with('user')
+            ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Tidak Masuk'])
+            ->latest('tanggal')
+            ->get();
+
         $users = User::where('role', 'karyawan')->get();
 
         return view('general_manajer.kelola_absen', compact('stats', 'users'));
     }
+
+    /* =====================================================
+     |  MANAGER DIVISI
+     ===================================================== */
 public function absenManager()
 {
-    $userLogin = Auth::user();
-    $divisi = $userLogin->divisi;
+    $user = Auth::user();
 
-    $absensis = Absensi::with('user')
-        ->whereHas('user', function ($query) use ($divisi) {
-            $query->where('divisi', $divisi);
-        })
-        ->orderBy('tanggal', 'desc')
-        ->get();
+    // Query dasar
+    $query = Absensi::with('user')
+        ->whereHas('user', fn ($q) => $q->where('divisi', $user->divisi));
+
+    // Statistik (pakai collection, tidak masalah)
+    $allAbsensis = $query->get();
 
     $stats = [
-        'total_tepat_waktu' => $absensis->where('status', 'Tepat Waktu')->count(),
-        'total_terlambat'   => $absensis->where('status', 'Terlambat')->count(),
-        'total_tidak_masuk' => $absensis->where('status', 'Tidak Masuk')->count(),
-        'total_cuti'        => $absensis->where('status', 'Cuti')->count(),
-        'total_sakit'       => $absensis->where('status', 'Sakit')->count(),
-        'total_izin'        => $absensis->where('status', 'Izin')->count(),
-        'total_dinas_luar'  => $absensis->where('status', 'Dinas Luar')->count(),
+        'total_tepat_waktu' => $allAbsensis->where('status', 'Tepat Waktu')->count(),
+        'total_terlambat'   => $allAbsensis->where('status', 'Terlambat')->count(),
+        'total_tidak_masuk' => $allAbsensis->where('status', 'Tidak Masuk')->count(),
+        'total_cuti'        => $allAbsensis->where('status', 'Cuti')->count(),
+        'total_sakit'       => $allAbsensis->where('status', 'Sakit')->count(),
+        'total_izin'        => $allAbsensis->where('status', 'Izin')->count(),
+        'total_dinas_luar'  => $allAbsensis->where('status', 'Dinas Luar')->count(),
     ];
 
-    
+    // ❗ Pagination KHUSUS tabel
     $ketidakhadiran = Absensi::with('user')
-        ->whereHas('user', function ($q) use ($userLogin) {
-            $q->where('divisi', $userLogin->divisi);
-        })
-        ->whereIn('status', [
-            'Cuti',
-            'Izin',
-            'Sakit',
-            'Dinas Luar',
-            'Tidak Masuk'
-        ])
-        ->latest()
-        ->paginate(5);
+        ->whereHas('user', fn ($q) => $q->where('divisi', $user->divisi))
+        ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Tidak Masuk'])
+        ->latest('tanggal')
+        ->paginate(10);
 
-    return view('manager_divisi.kelola_absensi', compact('absensis', 'stats', 'ketidakhadiran'));
+    return view(
+        'manager_divisi.kelola_absensi',
+        compact('stats', 'ketidakhadiran', 'allAbsensis')
+    );
+}
+
+    /* =====================================================
+     |  PEMILIK
+     ===================================================== */
+    public function rekapAbsensi()
+    {
+        $stats = $this->apiStatistics()->getData(true)['data'];
+
+        $attendances = Absensi::with('user')
+            ->whereNotIn('status', ['Tidak Masuk', 'Cuti', 'Sakit', 'Izin'])
+            ->latest('tanggal')
+            ->get();
+
+        $ketidakhadiran = Absensi::with('user')
+            ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Tidak Masuk'])
+            ->latest('tanggal')
+            ->get();
+
+        $users = User::where('role', 'karyawan')->get();
+
+        return view('pemilik.rekap_absensi', compact(
+            'stats', 'attendances', 'ketidakhadiran', 'users'
+        ));
+    }
+
+    /* =====================================================
+     |  AUTO TANDAI TIDAK MASUK
+     ===================================================== */
+private function markAbsentEmployees($date)
+{
+    $employees = User::where('role', 'karyawan')->get(); // ⬅ ambil object User
+    $hadir = Absensi::whereDate('tanggal', $date)->pluck('user_id');
+
+    $tidakHadir = $employees->whereNotIn('id', $hadir);
+
+    foreach ($tidakHadir as $user) {
+        Absensi::firstOrCreate(
+            [
+                'user_id' => $user->id,
+                'tanggal' => $date,
+                'status'  => 'Tidak Masuk'
+            ],
+            [
+                'name' => $user->name, // ✅ SEKARANG VALID
+                'approval_status' => 'approved',
+                'approved_by' => Auth::id(),
+                'approved_at' => now()
+            ]
+        );
+    }
 }
 
 
-    /**
-     * Menampilkan halaman rekap absensi
-     * 
-     * @return \Illuminate\View\View
-     */
-    public function rekapAbsensi()
-    {
-        // 1. Tentukan tanggal yang ingin ditampilkan (hari ini)
-        $today = Carbon::now()->format('Y-m-d');
-
-        // Mengambil statistik dari API
-        $statsResponse = $this->apiStatistics();
-        $stats = $statsResponse->getData(true)['data'];
-
-        // Mengambil data kehadiran (tanpa status Tidak Masuk)
-        $attendances = Absensi::with('user')
-            ->where('status', '!=', 'Tidak Masuk')
-            ->whereNotIn('status', ['Cuti', 'Sakit', 'Izin'])
-            ->orderBy('tanggal', 'desc')
-            ->get();
-
-        // Mengambil data ketidakhadiran (termasuk Tidak Masuk)
-        $ketidakhadiran = Absensi::with('user')
-            ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Tidak Masuk'])
-            ->orderBy('tanggal', 'desc')
-            ->get();
-
-        // PERUBAHAN: Hanya mengambil user dengan role 'karyawan' untuk dropdown
-        $users = User::where('role', 'karyawan')->get();
-
-        return view('pemilik.rekap_absensi', compact('stats', 'attendances', 'ketidakhadiran', 'users'));
-    }
-
-
-    /**
-     * Menandai karyawan yang tidak hadir pada tanggal tertentu
-     * 
-     * @param string $date
-     * @return void
-     */
-    private function markAbsentEmployees($date)
-    {
-        // 1. Ambil SEMUA karyawan (PERBAIKAN: Hanya yang role 'karyawan')
-        $allEmployees = User::where('role', 'karyawan')->get();
-
-        // 2. Ambil semua data absensi untuk tanggal yang ditentukan
-        $dateAttendances = Absensi::whereDate('tanggal', $date)->get();
-
-        // 3. Dapatkan ID karyawan yang sudah absen pada tanggal tersebut
-        $checkedInEmployeeIds = $dateAttendances->pluck('user_id')->toArray();
-
-        // 4. Cari karyawan yang belum absen
-        $absentEmployees = $allEmployees->whereNotIn('id', $checkedInEmployeeIds);
-
-        // 5. Untuk setiap karyawan yang tidak absen, buat record "Tidak Hadir"
-        foreach ($absentEmployees as $employee) {
-            // Opsional: Cek dulu agar tidak duplikat jika script dijalankan berkali-kali
-            $alreadyMarkedAbsent = Absensi::where('user_id', $employee->id)
-                ->whereDate('tanggal', $date)
-                ->where('status', 'Tidak Masuk')
-                ->exists();
-
-            if (!$alreadyMarkedAbsent) {
-                Absensi::create([
-                    'user_id' => $employee->id,
-                    'name' => $employee->name,
-                    'tanggal' => $date,
-                    'status' => 'Tidak Masuk',
-                    'status_type' => 'no-show',
-                    'jam_masuk' => null,
-                    'jam_pulang' => null,
-                    'approval_status' => 'approved', // Otomatis disetujui untuk ketidakhadiran
-                    'approved_by' => Auth::check() ? Auth::user()->id : null,
-                    'approved_at' => now(),
-                ]);
-            }
-        }
-    }
-
-    /**
-     * API untuk menampilkan data absensi dengan filter
-     * 
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+    /* =====================================================
+     |  API
+     ===================================================== */
     public function apiIndex(Request $request)
     {
-        // Pastikan karyawan yang tidak hadir ditandai
-        $date = $request->tanggal ?? Carbon::now()->format('Y-m-d');
+        $query = Absensi::with('user');
 
-        $query = Absensi::with('user')
-            ->where('status', '!=', 'Tidak Masuk')
-            ->whereNotIn('status', ['Cuti', 'Sakit', 'Izin']);
-
-        // Filter berdasarkan pencarian (nama user atau tanggal)
         if ($request->search) {
-            $search = $request->search;
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%");
-            })->orWhere('tanggal', 'like', "%{$search}%");
+            $query->whereHas('user', fn ($q) =>
+                $q->where('name', 'like', "%{$request->search}%")
+            );
         }
 
-        // Filter berdasarkan tanggal
         if ($request->tanggal) {
             $query->whereDate('tanggal', $request->tanggal);
         }
 
-        // Filter berdasarkan status
         if ($request->status) {
             $query->where('status', $request->status);
         }
 
-        $absensis = $query->orderBy('tanggal', 'desc')->get();
-
         return response()->json([
             'success' => true,
-            'data' => $absensis
+            'data' => $query->latest('tanggal')->get()
         ]);
     }
 
-    /**
-     * API untuk menampilkan data ketidakhadiran (cuti, sakit, izin, tidak masuk)
-     * 
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function apiIndexKetidakhadiran(Request $request)
-    {
-        // Pastikan karyawan yang tidak hadir ditandai
-        $date = $request->tanggal ?? Carbon::now()->format('Y-m-d');
-
-        $query = Absensi::with('user')
-            ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Tidak Masuk']);
-
-        // Filter berdasarkan pencarian (nama user, tanggal, atau tanggal akhir)
-        if ($request->search) {
-            $search = $request->search;
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%");
-            })
-                ->orWhere('tanggal', 'like', "%{$search}%")
-                ->orWhere('tanggal_akhir', 'like', "%{$search}%");
-        }
-
-        // Filter berdasarkan status persetujuan
-        if ($request->approval_status) {
-            $query->where('approval_status', $request->approval_status);
-        }
-
-        $ketidakhadiran = $query->orderBy('tanggal', 'desc')->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $ketidakhadiran
-        ]);
-    }
-
-    /**
-     * API untuk menyimpan data absensi baru (termasuk sakit dan izin)
-     * 
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function apiStore(Request $request)
     {
-        $validated = $request->validate([
+        $data = $request->validate([
             'user_id' => 'required|exists:users,id',
             'tanggal' => 'required|date',
-            'jam_masuk' => 'nullable|date_format:H:i',
-            'jam_pulang' => 'nullable|date_format:H:i',
-            'is_early_checkout' => 'nullable|boolean',
-            'early_checkout_reason' => 'nullable|string',
-            'status' => 'required|in:Tepat Waktu,Terlambat,Tidak Masuk,Sakit,Izin,Dinas Luar',
-            'status_type' => 'required|in:on-time,late,no-show,absent',
-            'late_minutes' => 'nullable|integer|min:0',
-            'reason' => 'nullable|string',
-            'location' => 'nullable|string|max:255',
-            'purpose' => 'nullable|string|max:255',
-            'tanggal_akhir' => 'nullable|date|after_or_equal:tanggal', // Untuk sakit/izin multi-hari
+            'status'  => 'required|string',
+            'jam_masuk' => 'nullable',
+            'jam_pulang' => 'nullable',
         ]);
 
-        try {
-            // PERBAIKAN: Ambil nama user untuk ditambahkan ke data
-            $user = User::find($validated['user_id']);
-            $validated['name'] = $user->name;
+        $data['approval_status'] = 'approved';
 
-            $data = $this->prepareAbsensiData($validated);
-            $absensi = Absensi::create($data);
+        Absensi::create($data);
 
-            $message = 'Data absensi berhasil ditambahkan';
-            if (in_array($data['status'], ['Sakit', 'Izin'])) {
-                $message = 'Pengajuan ' . strtolower($data['status']) . ' berhasil dibuat dan menunggu persetujuan admin';
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'data' => $absensi->load('user')
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menambah data. ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * API untuk menyimpan data cuti baru
-     * 
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function apiStoreCuti(Request $request)
-    {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'tanggal' => 'required|date',
-            'tanggal_akhir' => 'required|date|after_or_equal:tanggal',
-            'jenis_cuti' => 'required|string|max:255',
-            'alasan_cuti' => 'required|string',
+        return response()->json([
+            'success' => true,
+            'message' => 'Absensi berhasil ditambahkan'
         ]);
-
-        try {
-            // PERBAIKAN: Ambil nama user untuk ditambahkan ke data
-            $user = User::find($validated['user_id']);
-            $validated['name'] = $user->name;
-
-            $data = $this->prepareCutiData($validated);
-            $cuti = Absensi::create($data);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengajuan cuti berhasil dibuat dan menunggu persetujuan admin',
-                'data' => $cuti->load('user')
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menambah data cuti. ' . $e->getMessage()
-            ], 500);
-        }
     }
 
-    /**
-     * API untuk menampilkan detail absensi
-     * 
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function apiShow($id)
-    {
-        try {
-            $absensi = Absensi::with('user')->findOrFail($id);
-
-            return response()->json([
-                'success' => true,
-                'data' => $absensi
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data tidak ditemukan'
-            ], 404);
-        }
-    }
-
-    /**
-     * API untuk memperbarui data absensi
-     * 
-     * @param Request $request
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function apiUpdate(Request $request, $id)
-    {
-        $absensi = Absensi::findOrFail($id);
-
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'tanggal' => 'required|date',
-            'jam_masuk' => 'nullable|date_format:H:i',
-            'jam_pulang' => 'nullable|date_format:H:i',
-            'is_early_checkout' => 'nullable|boolean',
-            'early_checkout_reason' => 'nullable|string',
-            'status' => 'required|in:Tepat Waktu,Terlambat,Tidak Masuk,Sakit,Izin,Dinas Luar',
-            'status_type' => 'required|in:on-time,late,no-show,absent',
-            'late_minutes' => 'nullable|integer|min:0',
-            'reason' => 'nullable|string',
-            'location' => 'nullable|string|max:255',
-            'purpose' => 'nullable|string|max:255',
-        ]);
-
-        try {
-            // PERBAIKAN: Ambil nama user untuk ditambahkan ke data
-            $user = User::find($validated['user_id']);
-            $validated['name'] = $user->name;
-
-            $data = $this->prepareAbsensiData($validated);
-            $absensi->update($data);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Data absensi berhasil diperbarui',
-                'data' => $absensi->load('user')
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memperbarui data. ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * API untuk memperbarui data cuti
-     * 
-     * @param Request $request
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function apiUpdateCuti(Request $request, $id)
-    {
-        $cuti = Absensi::findOrFail($id);
-
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'tanggal' => 'required|date',
-            'tanggal_akhir' => 'required|date|after_or_equal:tanggal',
-            'jenis_cuti' => 'required|string|max:255',
-            'alasan_cuti' => 'required|string',
-            'approval_status' => 'required|in:pending,approved,rejected',
-            'rejection_reason' => 'required_if:approval_status,rejected|string|max:255',
-        ]);
-
-        try {
-            // PERBAIKAN: Ambil nama user untuk ditambahkan ke data
-            $user = User::find($validated['user_id']);
-            $validated['name'] = $user->name;
-
-            $data = $this->prepareCutiData($validated);
-
-            // Jika status persetujuan berubah, simpan informasi perubahan
-            if (isset($validated['approval_status'])) {
-                $data['approval_status'] = $validated['approval_status'];
-                $data['rejection_reason'] = $validated['approval_status'] === 'rejected'
-                    ? $validated['rejection_reason']
-                    : null;
-
-                // Jika status berubah dari pending ke approved/rejected, simpan informasi approver
-                if ($cuti->approval_status === 'pending' && $validated['approval_status'] !== 'pending') {
-                    $data['approved_by'] = Auth::user()->id;
-                    $data['approved_at'] = now();
-                }
-            }
-
-            $cuti->update($data);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Data cuti berhasil diperbarui',
-                'data' => $cuti->load('user')
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memperbarui data cuti. ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * API untuk menghapus data absensi
-     * 
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function apiDestroy($id)
     {
-        DB::beginTransaction();
-        try {
-            $absensi = Absensi::findOrFail($id);
-            $recordType = $absensi->status;
-            $absensi->delete();
+        Absensi::findOrFail($id)->delete();
 
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => "Data dengan status '{$recordType}' berhasil dihapus."
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menghapus data'
-            ], 500);
-        }
-    }
-
-    /**
-     * API untuk verifikasi pengajuan (Cuti, Sakit, Izin)
-     * 
-     * @param Request $request
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function apiVerify(Request $request, $id)
-    {
-        // PERBAIKAN: Gunakan format aturan validasi yang benar
-        $validated = $request->validate([
-            'approval_status' => 'required|in:approved,rejected',
-            'rejection_reason' => 'required_if:approval_status,rejected|string|max:255',
+        return response()->json([
+            'success' => true,
+            'message' => 'Data absensi berhasil dihapus'
         ]);
-
-        DB::beginTransaction();
-        try {
-            $absensi = Absensi::findOrFail($id);
-
-            // Pastikan hanya bisa verifikasi yang statusnya pending
-            if ($absensi->approval_status !== 'pending') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Hanya dapat memverifikasi pengajuan dengan status pending.'
-                ], 400);
-            }
-
-            $absensi->update([
-                'approval_status' => $validated['approval_status'],
-                'rejection_reason' => $validated['approval_status'] === 'rejected'
-                    ? $validated['rejection_reason']
-                    : null,
-                'approved_by' => Auth::user()->id,
-                'approved_at' => now(),
-            ]);
-
-            DB::commit();
-
-            $statusText = $validated['approval_status'] === 'approved' ? 'disetujui' : 'ditolak';
-            $message = "Pengajuan {$absensi->status} berhasil {$statusText}.";
-
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'data' => $absensi->load('user')
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memverifikasi data. ' . $e->getMessage()
-            ], 500);
-        }
     }
 
-    /**
-     * API untuk mendapatkan statistik absensi
-     * 
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function apiStatistics()
-    {
-        try {
-            // Pastikan karyawan yang tidak hadir ditandai
-            $today = Carbon::now()->format('Y-m-d');
+public function apiStatistics(Request $request = null)
+{
+    try {
+        $today = Carbon::today()->format('Y-m-d');
 
-            $stats = [
-                'total_tepat_waktu' => Absensi::where('status', 'Tepat Waktu')->count(),
-                'total_terlambat' => Absensi::where('status', 'Terlambat')->count(),
-                'total_tidak_masuk' => Absensi::where('status', 'Tidak Masuk')->count(),
-                'total_cuti' => Absensi::where('status', 'Cuti')->count(),
-                'total_sakit' => Absensi::where('status', 'Sakit')->count(),
-                'total_izin' => Absensi::where('status', 'Izin')->count(),
-                'total_dinas_luar' => Absensi::where('status', 'Dinas Luar')->count(),
-                'total_pending' => Absensi::where('approval_status', 'pending')->count(),
-                'total_approved' => Absensi::where('approval_status', 'approved')->count(),
-                'total_rejected' => Absensi::where('approval_status', 'rejected')->count(),
-                // Statistik pending per kategori
-                'total_cuti_pending' => Absensi::where('status', 'Cuti')->where('approval_status', 'pending')->count(),
-                'total_sakit_pending' => Absensi::where('status', 'Sakit')->where('approval_status', 'pending')->count(),
-                'total_izin_pending' => Absensi::where('status', 'Izin')->where('approval_status', 'pending')->count(),
-            ];
+        $startDate = $request?->get('tanggal_mulai') ?? $today;
+        $endDate   = $request?->get('tanggal_akhir') ?? $today;
+        $divisi    = $request?->get('divisi');
 
-            return response()->json([
-                'success' => true,
-                'data' => $stats
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memuat statistik'
-            ], 500);
-        }
-    }
+        $query = Absensi::whereBetween('tanggal', [$startDate, $endDate]);
 
-    /**
-     * Menyiapkan data absensi sebelum disimpan
-     * 
-     * @param array $data
-     * @return array
-     */
-    private function prepareAbsensiData(array $data): array
-    {
-        // Jika status adalah Sakit atau Izin, atur tipe dan status persetujuan
-        if (in_array($data['status'], ['Sakit', 'Izin'])) {
-            $data['status_type'] = 'absent';
-            $data['approval_status'] = 'pending'; // Menunggu verifikasi admin
-        } else {
-            // Reset field yang tidak relevan untuk absensi biasa
-            $data['tanggal_akhir'] = null;
-            $data['jenis_cuti'] = null;
-            $data['alasan_cuti'] = null;
-            $data['approval_status'] = 'approved'; // Otomatis disetujui untuk kehadiran biasa
+        if ($divisi) {
+            $query->whereHas('user', fn ($q) =>
+                $q->where('divisi', $divisi)
+            );
         }
 
-        $data['rejection_reason'] = null;
+        $stats = [
+            'total_tepat_waktu' => (clone $query)->where('status', 'Tepat Waktu')->count(),
+            'total_terlambat'   => (clone $query)->where('status', 'Terlambat')->count(),
+            'total_tidak_masuk' => (clone $query)->where('status', 'Tidak Masuk')->count(),
+            'total_cuti'        => (clone $query)->where('status', 'Cuti')->count(),
+            'total_sakit'       => (clone $query)->where('status', 'Sakit')->count(),
+            'total_izin'        => (clone $query)->where('status', 'Izin')->count(),
+            'total_dinas_luar'        => (clone $query)->where('status', 'Dinas Luar')->count(),
+        ];
 
-        return $data;
+        return response()->json([
+            'success' => true,
+            'data' => $stats
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
     }
-
-    /**
-     * Menyiapkan data cuti sebelum disimpan
-     * 
-     * @param array $data
-     * @return array
-     */
-    private function prepareCutiData(array $data): array
-    {
-        // Set field khusus untuk data cuti
-        $data['status'] = 'Cuti';
-        $data['status_type'] = 'absent';
-        $data['approval_status'] = 'pending'; // Menunggu verifikasi admin
-        $data['jam_masuk'] = null;
-        $data['jam_pulang'] = null;
-        $data['is_early_checkout'] = false;
-        $data['late_minutes'] = 0;
-        $data['reason'] = null;
-        $data['location'] = null;
-        $data['purpose'] = null;
-        $data['rejection_reason'] = null;
-
-        return $data;
-    }
+}
 }
