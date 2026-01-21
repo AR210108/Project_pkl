@@ -279,15 +279,14 @@
                 </nav>
 
                 <!-- Login Button -->
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit"
-                            class="hidden md:flex items-center bg-black text-white text-sm font-medium py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors">
-                            <i class='bx bx-log-out-circle text-xl mr-2'></i>
-                            Log Out
-                        </button>
-                    </form>
-
+                <form action="{{ route('logout') }}">
+                    @csrf
+                <button type="submit" class="hidden md:flex items-center bg-black text-white text-sm font-medium py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors">
+                    <i class='bx bx-log-out-circle text-xl mr-2'></i>
+                    Log Out
+                </button>
+                </form>
+                
                 <!-- Mobile Menu Button -->
                 <button id="mobileMenuBtn"
                     class="md:hidden flex flex-col justify-center items-center w-8 h-8 hamburger mobile-nav-clickable">

@@ -559,473 +559,91 @@
                                             <th style="min-width: 100px; text-align: center;">Aksi</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="desktopTableBody">
-                                        <!-- Data dari card pertama -->
-                                        <tr class="layanan-row" data-id="1" data-nama="Website Sekolah" data-deskripsi="Pembuatan website untuk sekolah dengan fitur lengkap" data-harga="10000000">
-                                            <td style="min-width: 60px;">1</td>
-                                            <td style="min-width: 200px;">Website Sekolah</td>
-                                            <td style="min-width: 250px;">Pembuatan website untuk sekolah dengan fitur lengkap</td>
-                                            <td style="min-width: 150px;">Rp. 10.000.000</td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="1" data-nama="Website Sekolah" data-deskripsi="Pembuatan website untuk sekolah dengan fitur lengkap" data-harga="10000000">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="1">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- Data dari card kedua -->
-                                        <tr class="layanan-row" data-id="2" data-nama="Aplikasi Mobile" data-deskripsi="Pengembangan aplikasi mobile untuk iOS dan Android" data-harga="15000000">
-                                            <td style="min-width: 60px;">2</td>
-                                            <td style="min-width: 200px;">Aplikasi Mobile</td>
-                                            <td style="min-width: 250px;">Pengembangan aplikasi mobile untuk iOS dan Android</td>
-                                            <td style="min-width: 150px;">Rp. 15.000.000</td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="2" data-nama="Aplikasi Mobile" data-deskripsi="Pengembangan aplikasi mobile untuk iOS dan Android" data-harga="15000000">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="2">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- Data dari card ketiga -->
-                                        <tr class="layanan-row" data-id="3" data-nama="Desain UI/UX" data-deskripsi="Jasa desain UI/UX untuk aplikasi dan website" data-harga="7500000">
-                                            <td style="min-width: 60px;">3</td>
-                                            <td style="min-width: 200px;">Desain UI/UX</td>
-                                            <td style="min-width: 250px;">Jasa desain UI/UX untuk aplikasi dan website</td>
-                                            <td style="min-width: 150px;">Rp. 7.500.000</td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="3" data-nama="Desain UI/UX" data-deskripsi="Jasa desain UI/UX untuk aplikasi dan website" data-harga="7500000">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="3">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- Data dari card keempat -->
-                                        <tr class="layanan-row" data-id="4" data-nama="SEO Optimization" data-deskripsi="Optimasi SEO untuk meningkatkan peringkat website" data-harga="5000000">
-                                            <td style="min-width: 60px;">4</td>
-                                            <td style="min-width: 200px;">SEO Optimization</td>
-                                            <td style="min-width: 250px;">Optimasi SEO untuk meningkatkan peringkat website</td>
-                                            <td style="min-width: 150px;">Rp. 5.000.000</td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="4" data-nama="SEO Optimization" data-deskripsi="Optimasi SEO untuk meningkatkan peringkat website" data-harga="5000000">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="4">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- Data dari card kelima -->
-                                        <tr class="layanan-row" data-id="5" data-nama="Sistem ERP" data-deskripsi="Implementasi sistem ERP untuk manufaktur" data-harga="25000000">
-                                            <td style="min-width: 60px;">5</td>
-                                            <td style="min-width: 200px;">Sistem ERP</td>
-                                            <td style="min-width: 250px;">Implementasi sistem ERP untuk manufaktur</td>
-                                            <td style="min-width: 150px;">Rp. 25.000.000</td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="5" data-nama="Sistem ERP" data-deskripsi="Implementasi sistem ERP untuk manufaktur" data-harga="25000000">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="5">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- Data dari card keenam -->
-                                        <tr class="layanan-row" data-id="6" data-nama="E-Commerce" data-deskripsi="Pembuatan toko online dengan fitur pembayaran lengkap" data-harga="12000000">
-                                            <td style="min-width: 60px;">6</td>
-                                            <td style="min-width: 200px;">E-Commerce</td>
-                                            <td style="min-width: 250px;">Pembuatan toko online dengan fitur pembayaran lengkap</td>
-                                            <td style="min-width: 150px;">Rp. 12.000.000</td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="6" data-nama="E-Commerce" data-deskripsi="Pembuatan toko online dengan fitur pembayaran lengkap" data-harga="12000000">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="6">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- Data dari card ketujuh -->
-                                        <tr class="layanan-row" data-id="7" data-nama="Aplikasi Kasir" data-deskripsi="Sistem kasir modern untuk restoran dan retail" data-harga="8000000">
-                                            <td style="min-width: 60px;">7</td>
-                                            <td style="min-width: 200px;">Aplikasi Kasir</td>
-                                            <td style="min-width: 250px;">Sistem kasir modern untuk restoran dan retail</td>
-                                            <td style="min-width: 150px;">Rp. 8.000.000</td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="7" data-nama="Aplikasi Kasir" data-deskripsi="Sistem kasir modern untuk restoran dan retail" data-harga="8000000">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="7">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- Data tambahan -->
-                                        <tr class="layanan-row" data-id="8" data-nama="Company Profile" data-deskripsi="Website profil perusahaan profesional" data-harga="9000000">
-                                            <td style="min-width: 60px;">8</td>
-                                            <td style="min-width: 200px;">Company Profile</td>
-                                            <td style="min-width: 250px;">Website profil perusahaan profesional</td>
-                                            <td style="min-width: 150px;">Rp. 9.000.000</td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="8" data-nama="Company Profile" data-deskripsi="Website profil perusahaan profesional" data-harga="9000000">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="8">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr class="layanan-row" data-id="9" data-nama="Digital Marketing" data-deskripsi="Strategi pemasaran digital untuk bisnis" data-harga="6000000">
-                                            <td style="min-width: 60px;">9</td>
-                                            <td style="min-width: 200px;">Digital Marketing</td>
-                                            <td style="min-width: 250px;">Strategi pemasaran digital untuk bisnis</td>
-                                            <td style="min-width: 150px;">Rp. 6.000.000</td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="9" data-nama="Digital Marketing" data-deskripsi="Strategi pemasaran digital untuk bisnis" data-harga="6000000">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="9">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr class="layanan-row" data-id="10" data-nama="Mobile Banking" data-deskripsi="Aplikasi mobile banking dengan fitur keamanan tinggi" data-harga="30000000">
-                                            <td style="min-width: 60px;">10</td>
-                                            <td style="min-width: 200px;">Mobile Banking</td>
-                                            <td style="min-width: 250px;">Aplikasi mobile banking dengan fitur keamanan tinggi</td>
-                                            <td style="min-width: 150px;">Rp. 30.000.000</td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="10" data-nama="Mobile Banking" data-deskripsi="Aplikasi mobile banking dengan fitur keamanan tinggi" data-harga="30000000">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="10">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr class="layanan-row" data-id="11" data-nama="Aplikasi Chat" data-deskripsi="Aplikasi chatting real-time untuk internal perusahaan" data-harga="11000000">
-                                            <td style="min-width: 60px;">11</td>
-                                            <td style="min-width: 200px;">Aplikasi Chat</td>
-                                            <td style="min-width: 250px;">Aplikasi chatting real-time untuk internal perusahaan</td>
-                                            <td style="min-width: 150px;">Rp. 11.000.000</td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="11" data-nama="Aplikasi Chat" data-deskripsi="Aplikasi chatting real-time untuk internal perusahaan" data-harga="11000000">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="11">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr class="layanan-row" data-id="12" data-nama="Sistem Inventory" data-deskripsi="Sistem manajemen inventory untuk gudang" data-harga="13500000">
-                                            <td style="min-width: 60px;">12</td>
-                                            <td style="min-width: 200px;">Sistem Inventory</td>
-                                            <td style="min-width: 250px;">Sistem manajemen inventory untuk gudang</td>
-                                            <td style="min-width: 150px;">Rp. 13.500.000</td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="12" data-nama="Sistem Inventory" data-deskripsi="Sistem manajemen inventory untuk gudang" data-harga="13500000">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="12">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
+                                   <!-- GANTI ISI TUBUH TABEL DESKTOP -->
+<tbody id="desktopTableBody">
+    @forelse ($layanans as $index => $layanan)
+    <tr class="layanan-row" data-id="{{ $layanan->id }}" data-nama="{{ $layanan->nama_layanan }}" data-deskripsi="{{ $layanan->deskripsi }}" data-harga="{{ $layanan->harga }}">
+        <td style="min-width: 60px;">{{ $index + 1 }}</td>
+        <td style="min-width: 200px;">{{ $layanan->nama_layanan }}</td>
+        <td style="min-width: 250px;">{{ $layanan->deskripsi ?? 'Tidak ada deskripsi' }}</td>
+        <td style="min-width: 150px;">Rp. {{ number_format($layanan->harga, 0, ',', '.') }}</td>
+        <td style="min-width: 100px; text-align: center;">
+            <div class="flex justify-center gap-2">
+                <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
+                        data-id="{{ $layanan->id }}" 
+                        data-nama="{{ $layanan->nama_layanan }}" 
+                        data-deskripsi="{{ $layanan->deskripsi }}" 
+                        data-harga="{{ $layanan->harga }}">
+                    <span class="material-icons-outlined">edit</span>
+                </button>
+                <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="{{ $layanan->id }}">
+                    <span class="material-icons-outlined">delete</span>
+                </button>
+            </div>
+        </td>
+    </tr>
+    @empty
+    <tr>
+        <td colspan="5" class="text-center py-8 text-gray-500">Belum ada data layanan.</td>
+    </tr>
+    @endforelse
+</tbody>
                                 </table>
                             </div>
                         </div>
                         
-                        <!-- Mobile Card View -->
-                        <div class="mobile-cards space-y-4" id="mobile-cards">
-                            <!-- Card 1 -->
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" data-id="1" data-nama="Website Sekolah" data-deskripsi="Pembuatan website untuk sekolah dengan fitur lengkap" data-harga="10000000">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">school</span>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-base">Website Sekolah</h4>
-                                            <p class="text-sm text-text-muted-light">Rp. 10.000.000</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="1" data-nama="Website Sekolah" data-deskripsi="Pembuatan website untuk sekolah dengan fitur lengkap" data-harga="10000000">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="1">
-                                            <span class="material-icons-outlined">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <p class="text-text-muted-light">No</p>
-                                        <p class="font-medium">1</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Harga</p>
-                                        <p class="font-medium">Rp. 10.000.000</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Pembuatan website untuk sekolah dengan fitur lengkap</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Card 2 -->
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" data-id="2" data-nama="Aplikasi Mobile" data-deskripsi="Pengembangan aplikasi mobile untuk iOS dan Android" data-harga="15000000">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">phone_android</span>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-base">Aplikasi Mobile</h4>
-                                            <p class="text-sm text-text-muted-light">Rp. 15.000.000</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="2" data-nama="Aplikasi Mobile" data-deskripsi="Pengembangan aplikasi mobile untuk iOS dan Android" data-harga="15000000">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="2">
-                                            <span class="material-icons-outlined">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <p class="text-text-muted-light">No</p>
-                                        <p class="font-medium">2</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Harga</p>
-                                        <p class="font-medium">Rp. 15.000.000</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Pengembangan aplikasi mobile untuk iOS dan Android</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Card 3 -->
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" data-id="3" data-nama="Desain UI/UX" data-deskripsi="Jasa desain UI/UX untuk aplikasi dan website" data-harga="7500000">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">palette</span>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-base">Desain UI/UX</h4>
-                                            <p class="text-sm text-text-muted-light">Rp. 7.500.000</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="3" data-nama="Desain UI/UX" data-deskripsi="Jasa desain UI/UX untuk aplikasi dan website" data-harga="7500000">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="3">
-                                            <span class="material-icons-outlined">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <p class="text-text-muted-light">No</p>
-                                        <p class="font-medium">3</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Harga</p>
-                                        <p class="font-medium">Rp. 7.500.000</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Jasa desain UI/UX untuk aplikasi dan website</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Card 4 -->
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" data-id="4" data-nama="SEO Optimization" data-deskripsi="Optimasi SEO untuk meningkatkan peringkat website" data-harga="5000000">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">search</span>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-base">SEO Optimization</h4>
-                                            <p class="text-sm text-text-muted-light">Rp. 5.000.000</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="4" data-nama="SEO Optimization" data-deskripsi="Optimasi SEO untuk meningkatkan peringkat website" data-harga="5000000">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="4">
-                                            <span class="material-icons-outlined">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <p class="text-text-muted-light">No</p>
-                                        <p class="font-medium">4</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Harga</p>
-                                        <p class="font-medium">Rp. 5.000.000</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Optimasi SEO untuk meningkatkan peringkat website</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Card 5 -->
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" data-id="5" data-nama="Sistem ERP" data-deskripsi="Implementasi sistem ERP untuk manufaktur" data-harga="25000000">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">business</span>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-base">Sistem ERP</h4>
-                                            <p class="text-sm text-text-muted-light">Rp. 25.000.000</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="5" data-nama="Sistem ERP" data-deskripsi="Implementasi sistem ERP untuk manufaktur" data-harga="25000000">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="5">
-                                            <span class="material-icons-outlined">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <p class="text-text-muted-light">No</p>
-                                        <p class="font-medium">5</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Harga</p>
-                                        <p class="font-medium">Rp. 25.000.000</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Implementasi sistem ERP untuk manufaktur</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Card 6 -->
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" data-id="6" data-nama="E-Commerce" data-deskripsi="Pembuatan toko online dengan fitur pembayaran lengkap" data-harga="12000000">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">shopping_cart</span>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-base">E-Commerce</h4>
-                                            <p class="text-sm text-text-muted-light">Rp. 12.000.000</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="6" data-nama="E-Commerce" data-deskripsi="Pembuatan toko online dengan fitur pembayaran lengkap" data-harga="12000000">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="6">
-                                            <span class="material-icons-outlined">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <p class="text-text-muted-light">No</p>
-                                        <p class="font-medium">6</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Harga</p>
-                                        <p class="font-medium">Rp. 12.000.000</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Pembuatan toko online dengan fitur pembayaran lengkap</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Card 7 -->
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" data-id="7" data-nama="Aplikasi Kasir" data-deskripsi="Sistem kasir modern untuk restoran dan retail" data-harga="8000000">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span class="material-icons-outlined text-primary">point_of_sale</span>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-base">Aplikasi Kasir</h4>
-                                            <p class="text-sm text-text-muted-light">Rp. 8.000.000</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id="7" data-nama="Aplikasi Kasir" data-deskripsi="Sistem kasir modern untuk restoran dan retail" data-harga="8000000">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="7">
-                                            <span class="material-icons-outlined">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <p class="text-text-muted-light">No</p>
-                                        <p class="font-medium">7</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Harga</p>
-                                        <p class="font-medium">Rp. 8.000.000</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">Sistem kasir modern untuk restoran dan retail</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                       <!-- GANTI ISI KARTU MOBILE -->
+<div class="mobile-cards space-y-4" id="mobile-cards">
+    @forelse ($layanans as $index => $layanan)
+    <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" 
+         data-id="{{ $layanan->id }}" 
+         data-nama="{{ $layanan->nama_layanan }}" 
+         data-deskripsi="{{ $layanan->deskripsi }}" 
+         data-harga="{{ $layanan->harga }}">
+        <div class="flex justify-between items-start mb-3">
+            <div class="flex items-center gap-3">
+                <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span class="material-icons-outlined text-primary">miscellaneous_services</span>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-base">{{ $layanan->nama_layanan }}</h4>
+                    <p class="text-sm text-text-muted-light">Rp. {{ number_format($layanan->harga, 0, ',', '.') }}</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
+                        data-id="{{ $layanan->id }}" 
+                        data-nama="{{ $layanan->nama_layanan }}" 
+                        data-deskripsi="{{ $layanan->deskripsi }}" 
+                        data-harga="{{ $layanan->harga }}">
+                    <span class="material-icons-outlined">edit</span>
+                </button>
+                <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="{{ $layanan->id }}">
+                    <span class="material-icons-outlined">delete</span>
+                </button>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+            <div>
+                <p class="text-text-muted-light">No</p>
+                <p class="font-medium">{{ $index + 1 }}</p>
+            </div>
+            <div>
+                <p class="text-text-muted-light">Harga</p>
+                <p class="font-medium">Rp. {{ number_format($layanan->harga, 0, ',', '.') }}</p>
+            </div>
+            <div class="col-span-2">
+                <p class="text-text-muted-light">Deskripsi</p>
+                <p class="font-medium">{{ $layanan->deskripsi ?? 'Tidak ada deskripsi' }}</p>
+            </div>
+        </div>
+    </div>
+    @empty
+    <div class="bg-white rounded-lg border border-border-light p-8 text-center text-gray-500">
+        Belum ada data layanan.
+    </div>
+    @endforelse
+</div>
                         
                         <!-- Pagination -->
                         <div id="paginationContainer" class="desktop-pagination">
