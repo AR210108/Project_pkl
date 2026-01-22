@@ -8,9 +8,13 @@ use App\Models\Task;
 use App\Models\User;
 use App\Models\Pegawai;
 use App\Models\Karyawan;
+use App\Models\CatatanRapat;
+use App\Models\Pengumuman;
+use App\Models\PengumumanUser;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
@@ -105,11 +109,13 @@ class KaryawanController extends Controller
     {
         $userId = Auth::id();
         $today = now()->toDateString();
+        $user = Auth::user(); // Get the full user object
+        $userRole = $user->role; // Get the user's role
 
         // 1. Ambil status absensi hari ini
         $absenToday = Absensi::where('user_id', $userId)
-                            ->where('tanggal', $today)
-                            ->first();
+            ->where('tanggal', $today)
+            ->first();
 
         $attendanceStatus = 'Belum Absen';
         if ($absenToday) {
@@ -118,28 +124,48 @@ class KaryawanController extends Controller
 
         // Hitung Jumlah Ketidakhadiran (Sakit, Izin, Cuti yang disetujui)
         $ketidakhadiranCount = Absensi::where('user_id', $userId)
-                                ->where('approval_status', 'approved')
-                                ->whereIn('status', ['Cuti', 'Sakit', 'Izin'])
-                                ->count();
+            ->where('approval_status', 'approved')
+            ->whereIn('status', ['Cuti', 'Sakit', 'Izin'])
+            ->count();
 
         // Hitung Jumlah Tugas dari tabel tasks
-        $userDivisi = Auth::user()->divisi;
-        $tugasCount = Task::where(function($query) use ($userId, $userDivisi) {
-                        // Tugas yang ditugaskan langsung ke user
-                        $query->where('assigned_to', $userId)
-                              // ATAU tugas yang ditugaskan ke divisi user
-                              ->orWhere(function($q) use ($userDivisi) {
-                                  $q->where('target_type', 'divisi')
-                                    ->where('target_divisi', $userDivisi);
-                              });
-                    })
-                    ->whereNotIn('status', ['selesai', 'dibatalkan'])
-                    ->count();
+        $userDivisi = $user->divisi;
+        $tugasCount = Task::where(function ($query) use ($userId, $userDivisi) {
+            // Tugas yang ditugaskan langsung ke user
+            $query->where('assigned_to', $userId)
+                // ATAU tugas yang ditugaskan ke divisi user
+                ->orWhere(function ($q) use ($userDivisi) {
+                    $q->where('target_type', 'divisi')
+                        ->where('target_divisi', $userDivisi);
+                });
+        })
+            ->whereNotIn('status', ['selesai', 'dibatalkan'])
+            ->count();
+
+        // Additional data based on role
+        $roleBasedData = [];
+
+        if ($userRole === 'general_manager') {
+            // Get data for general manager
+            $roleBasedData['totalKaryawan'] = Karyawan::count();
+            $roleBasedData['totalDivisi'] = Karyawan::distinct('divisi')->count('divisi');
+            $roleBasedData['pendingApprovals'] = Absensi::where('approval_status', 'pending')->count();
+        } elseif ($userRole === 'manager') {
+            // Get data for manager
+            $roleBasedData['teamMembers'] = Karyawan::where('divisi', $userDivisi)->count();
+            $roleBasedData['teamPendingApprovals'] = Absensi::join('users', 'absensis.user_id', '=', 'users.id')
+                ->where('users.divisi', $userDivisi)
+                ->where('absensis.approval_status', 'pending')
+                ->count();
+        }
 
         return view('karyawan.home', [
             'attendance_status' => $attendanceStatus,
             'ketidakhadiran_count' => $ketidakhadiranCount,
             'tugas_count' => $tugasCount,
+            'user_role' => $userRole,
+            'user_divisi' => $userDivisi,
+            'role_based_data' => $roleBasedData,
         ]);
     }
 
@@ -161,7 +187,7 @@ class KaryawanController extends Controller
             $user = Auth::user();
             $userDivisi = $user->divisi;
             $userName = $user->name;
-            
+
             Log::info('=== KARYAWAN TUGAS LIST ===', [
                 'controller' => 'KaryawanController@listPage',
                 'user_id' => $userId,
@@ -170,164 +196,54 @@ class KaryawanController extends Controller
                 'role' => $user->role,
                 'timestamp' => now()->toDateTimeString(),
             ]);
-            
-            // LOG 1: Cek data user di database
-            $dbUser = User::find($userId);
-            Log::info('Database User Check:', [
-                'db_user_id' => $dbUser->id,
-                'db_user_name' => $dbUser->name,
-                'db_user_divisi' => $dbUser->divisi,
-                'db_user_role' => $dbUser->role,
-                'match_with_auth' => ($dbUser->divisi === $userDivisi) ? 'YES' : 'NO',
-            ]);
-            
-            // LOG 2: Cek total tugas di database
-            $totalTasksInDB = Task::count();
-            Log::info('Total Tasks in Database:', ['count' => $totalTasksInDB]);
-            
-            // LOG 3: Cek tugas untuk Digital Marketing secara spesifik
-            $marketingTasks = Task::where('target_divisi', 'Digital Marketing')->get();
-            Log::info('Marketing Tasks in Database:', [
-                'count' => $marketingTasks->count(),
-                'tasks' => $marketingTasks->map(function($task) {
-                    return [
-                        'id' => $task->id,
-                        'judul' => $task->judul,
-                        'target_type' => $task->target_type,
-                        'status' => $task->status,
-                    ];
-                })->toArray()
-            ]);
-            
+
             // PERBAIKAN UTAMA: Query yang lebih komprehensif
-            $tasks = Task::where(function($query) use ($userId, $userDivisi) {
-                    // 1. Tugas untuk divisi (yang paling penting!)
-                    $query->where('target_type', 'divisi')
-                          ->where('target_divisi', $userDivisi);
-                })
-                ->orWhere(function($query) use ($userId) {
+            $tasks = Task::where(function ($query) use ($userId, $userDivisi) {
+                // 1. Tugas untuk divisi (yang paling penting!)
+                $query->where('target_type', 'divisi')
+                    ->where('target_divisi', $userDivisi);
+            })
+                ->orWhere(function ($query) use ($userId) {
                     // 2. Tugas yang ditugaskan langsung ke user
                     $query->where('assigned_to', $userId)
-                          ->where('target_type', 'karyawan');
+                        ->where('target_type', 'karyawan');
                 })
-                ->orWhere(function($query) use ($userId) {
+                ->orWhere(function ($query) use ($userId) {
                     // 3. Tugas untuk manajer (jika user adalah manajer)
                     $query->where('target_manager_id', $userId)
-                          ->where('target_type', 'manager');
+                        ->where('target_type', 'manager');
                 })
                 ->with([
-                    'creator:id,name', 
+                    'creator:id,name',
                     'assignedUser:id,name,divisi',
                     'targetManager:id,name,divisi'
                 ])
                 ->orderBy('deadline', 'asc')
                 ->get();
-            
-            // LOG 4: Debug hasil query
-            $queryResults = [
-                'total_found' => $tasks->count(),
-                'by_divisi' => $tasks->where('target_type', 'divisi')->where('target_divisi', $userDivisi)->count(),
-                'by_assigned' => $tasks->where('target_type', 'karyawan')->where('assigned_to', $userId)->count(),
-                'by_manager' => $tasks->where('target_type', 'manager')->where('target_manager_id', $userId)->count(),
-            ];
-            
-            Log::info('Query Results:', $queryResults);
-            
-            // LOG 5: Detail setiap tugas yang ditemukan
-            foreach ($tasks as $index => $task) {
-                Log::info("Task #" . ($index + 1) . " Details:", [
-                    'id' => $task->id,
-                    'judul' => $task->judul,
-                    'target_type' => $task->target_type,
-                    'target_divisi' => $task->target_divisi,
-                    'assigned_to' => $task->assigned_to,
-                    'target_manager_id' => $task->target_manager_id,
-                    'status' => $task->status,
-                    'created_by' => $task->created_by,
-                    'creator_name' => $task->creator->name ?? null,
-                    'deadline' => $task->deadline ? $task->deadline->format('Y-m-d') : null,
-                ]);
-            }
-            
-            // LOG 6: Cek apakah ada masalah dengan nilai divisi
-            $allDivisiValues = Task::distinct()->pluck('target_divisi')->filter();
-            Log::info('All Divisi Values in Tasks Table:', ['values' => $allDivisiValues->toArray()]);
-            
-            // LOG 7: Cek tugas yang mungkin terlewat (case sensitivity)
-            $caseInsensitiveTasks = Task::whereRaw('LOWER(target_divisi) = ?', [strtolower($userDivisi)])
-                ->where('target_type', 'divisi')
-                ->get();
-                
-            Log::info('Case-Insensitive Search Results:', [
-                'search_term' => strtolower($userDivisi),
-                'found' => $caseInsensitiveTasks->count(),
-                'tasks' => $caseInsensitiveTasks->map(function($task) {
-                    return [
-                        'id' => $task->id,
-                        'judul' => $task->judul,
-                        'actual_divisi' => $task->target_divisi,
-                    ];
-                })->toArray()
-            ]);
-            
-            // LOG 8: Jika tidak ada tugas, coba query manual
-            if ($tasks->isEmpty()) {
-                Log::warning('NO TASKS FOUND! Running diagnostic queries...');
-                
-                // Query 1: Cek semua tugas untuk melihat struktur
-                $allTasksSample = Task::limit(5)->get();
-                Log::warning('Sample of All Tasks:', [
-                    'sample' => $allTasksSample->map(function($task) {
-                        return [
-                            'id' => $task->id,
-                            'judul' => $task->judul,
-                            'target_type' => $task->target_type,
-                            'target_divisi' => $task->target_divisi,
-                            'status' => $task->status,
-                        ];
-                    })->toArray()
-                ]);
-                
-                // Query 2: Cek dengan raw SQL untuk menghindari Eloquent issues
-                $rawSql = "SELECT * FROM tasks WHERE 
-                          (target_type = 'divisi' AND target_divisi = ?) OR
-                          (target_type = 'karyawan' AND assigned_to = ?) OR
-                          (target_type = 'manager' AND target_manager_id = ?)
-                          ORDER BY deadline ASC";
-                
-                $rawResults = DB::select($rawSql, [$userDivisi, $userId, $userId]);
-                Log::warning('Raw SQL Query Results:', [
-                    'sql' => $rawSql,
-                    'params' => [$userDivisi, $userId, $userId],
-                    'count' => count($rawResults),
-                ]);
-            }
-            
+
             return view('karyawan.list', compact('tasks'));
-            
+
         } catch (\Exception $e) {
             Log::error('CRITICAL ERROR in KaryawanController@listPage: ' . $e->getMessage());
             Log::error('Stack Trace: ' . $e->getTraceAsString());
-            Log::error('File: ' . $e->getFile());
-            Log::error('Line: ' . $e->getLine());
-            
+
             return view('karyawan.list', [
                 'tasks' => collect([]),
                 'error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
             ]);
         }
     }
-    
+
     /**
      * Menampilkan halaman daftar ABSENSI karyawan.
      */
     public function absensiListPage()
     {
         $userId = Auth::id();
-        
+
         $absensis = Absensi::where('user_id', $userId)
-                          ->orderBy('tanggal', 'desc')
-                          ->paginate(15);
+            ->orderBy('tanggal', 'desc')
+            ->paginate(15);
 
         return view('karyawan.absensi_list', compact('absensis'));
     }
@@ -338,167 +254,12 @@ class KaryawanController extends Controller
     public function detailPage($id)
     {
         $absensi = Absensi::findOrFail($id);
-        
+
         if ($absensi->user_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki akses ke data ini.');
         }
-        
-        return view('karyawan.detail', compact('absensi'));
-    }
 
-    /**
-     * Test endpoint untuk debugging database.
-     */
-    public function testDatabase()
-    {
-        try {
-            $user = Auth::user();
-            if (!$user) {
-                return response()->json(['error' => 'User not authenticated'], 401);
-            }
-            
-            Log::info('=== DATABASE TEST ENDPOINT CALLED ===', [
-                'user_id' => $user->id,
-                'user_name' => $user->name,
-                'user_divisi' => $user->divisi,
-            ]);
-            
-            $results = [];
-            
-            // 1. Test: Cek user di database
-            $results['user_check'] = [
-                'table' => 'users',
-                'query' => "SELECT id, name, divisi, role FROM users WHERE id = {$user->id}",
-                'data' => User::select('id', 'name', 'divisi', 'role')->find($user->id),
-            ];
-            
-            // 2. Test: Cek semua nilai divisi di tabel tasks
-            $results['all_divisi_values'] = [
-                'table' => 'tasks',
-                'query' => "SELECT DISTINCT target_divisi FROM tasks WHERE target_divisi IS NOT NULL AND target_divisi != ''",
-                'data' => DB::table('tasks')
-                    ->select('target_divisi')
-                    ->distinct()
-                    ->whereNotNull('target_divisi')
-                    ->where('target_divisi', '!=', '')
-                    ->get()
-                    ->pluck('target_divisi')
-                    ->toArray(),
-            ];
-            
-            // 3. Test: Query spesifik untuk divisi user
-            $userDivisi = $user->divisi;
-            $results['tasks_for_user_divisi'] = [
-                'table' => 'tasks',
-                'query' => "SELECT * FROM tasks WHERE target_divisi = '{$userDivisi}' AND target_type = 'divisi'",
-                'data' => Task::where('target_divisi', $userDivisi)
-                    ->where('target_type', 'divisi')
-                    ->select('id', 'judul', 'target_type', 'target_divisi', 'status', 'created_at')
-                    ->get()
-                    ->toArray(),
-            ];
-            
-            // 4. Test: Query case-insensitive
-            $results['tasks_case_insensitive'] = [
-                'table' => 'tasks',
-                'query' => "SELECT * FROM tasks WHERE LOWER(target_divisi) = LOWER('{$userDivisi}')",
-                'data' => DB::table('tasks')
-                    ->select('id', 'judul', 'target_type', 'target_divisi', 'status')
-                    ->whereRaw('LOWER(target_divisi) = ?', [strtolower($userDivisi)])
-                    ->get()
-                    ->toArray(),
-            ];
-            
-            // 5. Test: Total tugas di database
-            $results['total_tasks'] = [
-                'table' => 'tasks',
-                'query' => "SELECT COUNT(*) as total FROM tasks",
-                'data' => ['total' => Task::count()],
-            ];
-            
-            // 6. Test: Cek jika ada tugas untuk user ID
-            $results['tasks_for_user_id'] = [
-                'table' => 'tasks',
-                'query' => "SELECT * FROM tasks WHERE assigned_to = {$user->id}",
-                'data' => Task::where('assigned_to', $user->id)
-                    ->select('id', 'judul', 'target_type', 'assigned_to', 'status')
-                    ->get()
-                    ->toArray(),
-            ];
-            
-            return response()->json([
-                'success' => true,
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'divisi' => $user->divisi,
-                    'role' => $user->role,
-                ],
-                'tests' => $results,
-                'timestamp' => now()->toDateTimeString(),
-            ]);
-            
-        } catch (\Exception $e) {
-            Log::error('Database Test Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ], 500);
-        }
-    }
-    
-    /**
-     * Create test task for debugging.
-     */
-    public function createTestTask(Request $request)
-    {
-        try {
-            $user = Auth::user();
-            $userDivisi = $user->divisi;
-            
-            Log::info('=== CREATING TEST TASK ===', [
-                'user_id' => $user->id,
-                'user_name' => $user->name,
-                'user_divisi' => $userDivisi,
-            ]);
-            
-            // Buat tugas test
-            $task = Task::create([
-                'judul' => '[TEST] Tugas untuk ' . $userDivisi . ' - ' . now()->format('d/m/Y H:i'),
-                'deskripsi' => 'Ini adalah tugas test yang dibuat otomatis untuk debugging. Divisi: ' . $userDivisi,
-                'deadline' => now()->addDays(7),
-                'status' => 'pending',
-                'target_type' => 'divisi',
-                'target_divisi' => $userDivisi,
-                'created_by' => $user->id,
-                'is_broadcast' => true,
-            ]);
-            
-            Log::info('Test Task Created Successfully:', [
-                'task_id' => $task->id,
-                'task_judul' => $task->judul,
-                'target_divisi' => $task->target_divisi,
-            ]);
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Test task created successfully!',
-                'task' => [
-                    'id' => $task->id,
-                    'judul' => $task->judul,
-                    'target_divisi' => $task->target_divisi,
-                    'target_type' => $task->target_type,
-                ]
-            ]);
-            
-        } catch (\Exception $e) {
-            Log::error('Create Test Task Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return view('karyawan.detail', compact('absensi'));
     }
 
     // =================================================================
@@ -512,8 +273,8 @@ class KaryawanController extends Controller
     {
         $today = now()->toDateString();
         $absen = Absensi::where('user_id', Auth::id())
-                        ->where('tanggal', $today)
-                        ->first();
+            ->where('tanggal', $today)
+            ->first();
 
         if (!$absen) {
             return response()->json([
@@ -542,27 +303,27 @@ class KaryawanController extends Controller
     public function getHistory()
     {
         $history = Absensi::where('user_id', Auth::id())
-                          ->orderBy('tanggal', 'desc')
-                          ->get()
-                          ->map(function ($item) {
-                              return [
-                                  'id' => $item->id,
-                                  'date' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
-                                  'checkIn' => $item->jam_masuk,
-                                  'checkOut' => $item->jam_pulang,
-                                  'status' => $item->status,
-                                  'statusType' => $item->status_type,
-                                  'lateMinutes' => $item->late_minutes,
-                                  'isEarlyCheckout' => $item->is_early_checkout,
-                                  'earlyCheckoutReason' => $item->early_checkout_reason,
-                                  'approvalStatus' => $item->approval_status,
-                                  'userName' => $item->name,
-                                  'reason' => $item->reason,
-                                  'location' => $item->location,
-                                  'purpose' => $item->purpose,
-                              ];
-                          })
-                          ->all();
+            ->orderBy('tanggal', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'date' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
+                    'checkIn' => $item->jam_masuk,
+                    'checkOut' => $item->jam_pulang,
+                    'status' => $item->status,
+                    'statusType' => $item->status_type,
+                    'lateMinutes' => $item->late_minutes,
+                    'isEarlyCheckout' => $item->is_early_checkout,
+                    'earlyCheckoutReason' => $item->early_checkout_reason,
+                    'approvalStatus' => $item->approval_status,
+                    'userName' => $item->name,
+                    'reason' => $item->reason,
+                    'location' => $item->location,
+                    'purpose' => $item->purpose,
+                ];
+            })
+            ->all();
 
         return response()->json($history);
     }
@@ -576,8 +337,8 @@ class KaryawanController extends Controller
         $today = now()->toDateString();
 
         $absenToday = Absensi::where('user_id', $userId)
-                            ->where('tanggal', $today)
-                            ->first();
+            ->where('tanggal', $today)
+            ->first();
 
         $attendanceStatus = 'Belum Absen';
         if ($absenToday) {
@@ -585,20 +346,20 @@ class KaryawanController extends Controller
         }
 
         $ketidakhadiranCount = Absensi::where('user_id', $userId)
-                                ->where('approval_status', 'approved')
-                                ->whereIn('status', ['Cuti', 'Sakit', 'Izin'])
-                                ->count();
+            ->where('approval_status', 'approved')
+            ->whereIn('status', ['Cuti', 'Sakit', 'Izin'])
+            ->count();
 
         $userDivisi = Auth::user()->divisi;
-        $tugasCount = Task::where(function($query) use ($userId, $userDivisi) {
-                        $query->where('assigned_to', $userId)
-                              ->orWhere(function($q) use ($userDivisi) {
-                                  $q->where('target_type', 'divisi')
-                                    ->where('target_divisi', $userDivisi);
-                              });
-                    })
-                    ->whereNotIn('status', ['selesai', 'dibatalkan'])
-                    ->count();
+        $tugasCount = Task::where(function ($query) use ($userId, $userDivisi) {
+            $query->where('assigned_to', $userId)
+                ->orWhere(function ($q) use ($userDivisi) {
+                    $q->where('target_type', 'divisi')
+                        ->where('target_divisi', $userDivisi);
+                });
+        })
+            ->whereNotIn('status', ['selesai', 'dibatalkan'])
+            ->count();
 
         return response()->json([
             'attendance_status' => $attendanceStatus,
@@ -613,35 +374,35 @@ class KaryawanController extends Controller
     public function getPengajuanStatus()
     {
         $userId = Auth::id();
-        
+
         $pendingSubmissions = Absensi::where('user_id', $userId)
-                                    ->where('approval_status', 'pending')
-                                    ->orderBy('tanggal', 'desc')
-                                    ->get()
-                                    ->map(function ($item) {
-                                        return [
-                                            'id' => $item->id,
-                                            'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
-                                            'status' => $item->status,
-                                            'approval_status' => $item->approval_status,
-                                            'reason' => $item->reason,
-                                        ];
-                                    });
+            ->where('approval_status', 'pending')
+            ->orderBy('tanggal', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
+                    'status' => $item->status,
+                    'approval_status' => $item->approval_status,
+                    'reason' => $item->reason,
+                ];
+            });
 
         $recentSubmissions = Absensi::where('user_id', $userId)
-                                    ->whereIn('approval_status', ['approved', 'rejected'])
-                                    ->where('tanggal', '>=', now()->subDays(7)->toDateString())
-                                    ->orderBy('tanggal', 'desc')
-                                    ->get()
-                                    ->map(function ($item) {
-                                        return [
-                                            'id' => $item->id,
-                                            'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
-                                            'status' => $item->status,
-                                            'approval_status' => $item->approval_status,
-                                            'reason' => $item->reason,
-                                        ];
-                                    });
+            ->whereIn('approval_status', ['approved', 'rejected'])
+            ->where('tanggal', '>=', now()->subDays(7)->toDateString())
+            ->orderBy('tanggal', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
+                    'status' => $item->status,
+                    'approval_status' => $item->approval_status,
+                    'reason' => $item->reason,
+                ];
+            });
 
         return response()->json([
             'pending' => $pendingSubmissions,
@@ -656,19 +417,19 @@ class KaryawanController extends Controller
     {
         try {
             $today = now()->toDateString();
-            
+
             $existingAbsence = Absensi::where('user_id', Auth::id())
-                                      ->where('tanggal', $today)
-                                      ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Dinas Luar'])
-                                      ->where('approval_status', 'approved')
-                                      ->first();
+                ->where('tanggal', $today)
+                ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Dinas Luar'])
+                ->where('approval_status', 'approved')
+                ->first();
 
             if ($existingAbsence) {
                 return response()->json([
                     'message' => 'Anda tidak dapat melakukan absen masuk karena telah mengajukan "' . $existingAbsence->status . '" pada hari ini.'
                 ], 403);
             }
-            
+
             $nowLocal = now();
             $userName = Auth::user()->name;
 
@@ -677,9 +438,9 @@ class KaryawanController extends Controller
                 return response()->json(['message' => 'Kamu sudah absen masuk hari ini'], 409);
             }
 
-            $workStartTime = $nowLocal->copy()->setTime(9, 5, 0); 
+            $workStartTime = $nowLocal->copy()->setTime(9, 5, 0);
             $lateMinutes = $nowLocal->greaterThan($workStartTime) ? $workStartTime->diffInMinutes($nowLocal) : 0;
-            
+
             $status = $lateMinutes > 0 ? 'Terlambat' : 'Tepat Waktu';
             $statusType = $lateMinutes > 0 ? 'late' : 'on-time';
 
@@ -731,7 +492,7 @@ class KaryawanController extends Controller
 
             $workEndTime = $nowLocal->copy()->setTime(17, 0, 0);
             $isEarlyCheckout = $nowLocal->lessThan($workEndTime);
-            
+
             $reason = null;
             if ($isEarlyCheckout) {
                 $request->validate([
@@ -816,7 +577,7 @@ class KaryawanController extends Controller
 
         $userName = Auth::user()->name;
         $period = CarbonPeriod::create($request->start_date, $request->end_date);
-        
+
         DB::beginTransaction();
         try {
             foreach ($period as $date) {
@@ -842,7 +603,7 @@ class KaryawanController extends Controller
             return response()->json(['message' => 'Gagal mengajukan dinas luar. Terjadi kesalahan pada server.'], 500);
         }
     }
-    
+
     /**
      * API untuk mendapatkan tugas karyawan (digunakan oleh frontend)
      */
@@ -852,37 +613,32 @@ class KaryawanController extends Controller
             $userId = Auth::id();
             $user = Auth::user();
             $userDivisi = $user->divisi;
-            
-            Log::info('=== API GET TASKS FOR KARYAWAN ===', [
-                'user_id' => $userId,
-                'user_divisi' => $userDivisi,
-            ]);
-            
-            $tasks = Task::where(function($query) use ($userId, $userDivisi) {
-                    $query->where('target_type', 'divisi')
-                          ->where('target_divisi', $userDivisi);
-                })
-                ->orWhere(function($query) use ($userId) {
+
+            $tasks = Task::where(function ($query) use ($userId, $userDivisi) {
+                $query->where('target_type', 'divisi')
+                    ->where('target_divisi', $userDivisi);
+            })
+                ->orWhere(function ($query) use ($userId) {
                     $query->where('assigned_to', $userId)
-                          ->where('target_type', 'karyawan');
+                        ->where('target_type', 'karyawan');
                 })
-                ->orWhere(function($query) use ($userId) {
+                ->orWhere(function ($query) use ($userId) {
                     $query->where('target_manager_id', $userId)
-                          ->where('target_type', 'manager');
+                        ->where('target_type', 'manager');
                 })
                 ->with([
-                    'creator:id,name', 
+                    'creator:id,name',
                     'assignedUser:id,name,divisi',
                     'targetManager:id,name,divisi'
                 ])
                 ->orderBy('deadline', 'asc')
                 ->get();
-            
+
             // Transform data untuk frontend
-            $transformedTasks = $tasks->map(function($task) use ($userId, $userDivisi) {
+            $transformedTasks = $tasks->map(function ($task) use ($userId, $userDivisi) {
                 $assigneeText = '-';
                 $assigneeDivisi = '-';
-                
+
                 if ($task->target_type === 'karyawan' && $task->assignedUser) {
                     $assigneeText = $task->assignedUser->name;
                     $assigneeDivisi = $task->assignedUser->divisi ?? '-';
@@ -893,11 +649,11 @@ class KaryawanController extends Controller
                     $assigneeText = 'Manajer: ' . $task->targetManager->name;
                     $assigneeDivisi = $task->targetManager->divisi ?? '-';
                 }
-                
-                $isOverdue = $task->deadline && 
-                             now()->gt($task->deadline) && 
-                             !in_array($task->status, ['selesai', 'dibatalkan']);
-                
+
+                $isOverdue = $task->deadline &&
+                    now()->gt($task->deadline) &&
+                    !in_array($task->status, ['selesai', 'dibatalkan']);
+
                 $isForMe = false;
                 if ($task->target_type === 'divisi') {
                     $isForMe = strtolower($task->target_divisi) === strtolower($userDivisi);
@@ -906,7 +662,7 @@ class KaryawanController extends Controller
                 } elseif ($task->target_type === 'karyawan' && $task->assigned_to === $userId) {
                     $isForMe = true;
                 }
-                
+
                 return [
                     'id' => $task->id,
                     'judul' => $task->judul,
@@ -923,11 +679,9 @@ class KaryawanController extends Controller
                     'created_at' => $task->created_at->format('Y-m-d H:i:s'),
                 ];
             });
-            
-            Log::info('API Response Tasks Count:', ['count' => $transformedTasks->count()]);
-            
+
             return response()->json($transformedTasks);
-            
+
         } catch (\Exception $e) {
             Log::error('API Error: ' . $e->getMessage());
             return response()->json([
@@ -935,5 +689,312 @@ class KaryawanController extends Controller
                 'message' => 'Failed to load tasks: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    // =================================================================
+    // METHOD UNTUK MEETING NOTES DAN PENGUMUMAN (MENGGUNAKAN RELASI)
+    // =================================================================
+
+    /**
+     * API untuk mendapatkan catatan rapat berdasarkan tanggal
+     */
+    public function getMeetingNotes(Request $request)
+    {
+        try {
+            Log::info('=== GET MEETING NOTES (USING MODEL RELATIONSHIPS) ===');
+            
+            $date = $request->query('date');
+            Log::info('Requested date:', ['date' => $date]);
+            
+            if (!$date) {
+                Log::warning('No date parameter provided');
+                return response()->json(['error' => 'Date parameter is required'], 400);
+            }
+
+            $userId = Auth::id();
+            Log::info('User ID:', ['user_id' => $userId]);
+            
+            if (!$userId) {
+                Log::error('User not authenticated');
+                return response()->json(['error' => 'User not authenticated'], 401);
+            }
+            
+            // Check if tables exist
+            if (!Schema::hasTable('catatan_rapats') || !Schema::hasTable('catatan_rapat_penugasan')) {
+                Log::error('Required tables do not exist');
+                return response()->json(['error' => 'Tables not found'], 500);
+            }
+            
+            // Get notes assigned to this user using the penugasan relationship
+            $notes = CatatanRapat::whereHas('penugasan', function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                })
+                ->where('tanggal', $date)
+                ->with(['user:id,name', 'penugasan' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                }])
+                ->get();
+                
+            Log::info('Found notes:', ['count' => $notes->count()]);
+            
+            $formattedNotes = $notes->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'tanggal' => $item->tanggal,
+                    'formatted_tanggal' => $item->formatted_tanggal,
+                    'topik' => $item->topik,
+                    'hasil_diskusi' => $item->hasil_diskusi,
+                    'keputusan' => $item->keputusan,
+                    'creator' => $item->user ? $item->user->name : 'Unknown',
+                ];
+            });
+
+            Log::info('Final result:', [
+                'count' => $formattedNotes->count(),
+                'notes' => $formattedNotes->toArray()
+            ]);
+            
+            return response()->json($formattedNotes);
+
+        } catch (\Exception $e) {
+            Log::error('Error in getMeetingNotes: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return response()->json([
+                'error' => 'Internal server error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API untuk mendapatkan daftar tanggal yang memiliki catatan rapat
+     */
+    public function getMeetingNotesDates()
+    {
+        try {
+            Log::info('=== GET MEETING NOTES DATES (USING MODEL RELATIONSHIPS) ===');
+
+            $userId = Auth::id();
+            Log::info('User ID:', ['user_id' => $userId]);
+            
+            if (!$userId) {
+                Log::error('User not authenticated');
+                return response()->json(['error' => 'User not authenticated'], 401);
+            }
+
+            // Check if tables exist
+            if (!Schema::hasTable('catatan_rapats') || !Schema::hasTable('catatan_rapat_penugasan')) {
+                Log::error('Required tables do not exist');
+                return response()->json([]);
+            }
+            
+            // Get distinct dates for notes assigned to this user using the penugasan relationship
+            $dates = CatatanRapat::whereHas('penugasan', function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                })
+                ->select('tanggal')
+                ->distinct()
+                ->orderBy('tanggal', 'desc')
+                ->pluck('tanggal');
+
+            Log::info('Found dates:', ['count' => $dates->count(), 'dates' => $dates->toArray()]);
+            return response()->json($dates);
+
+        } catch (\Exception $e) {
+            Log::error('Error in getMeetingNotesDates: ' . $e->getMessage());
+            return response()->json([], 200); // Return empty array on error
+        }
+    }
+
+    /**
+     * API untuk mendapatkan pengumuman (MENGGUNAKAN MODEL PENGUMUMAN)
+     */
+    public function getAnnouncements()
+    {
+        try {
+            Log::info('=== GET ANNOUNCEMENTS (USING MODEL RELATIONSHIPS) ===');
+
+            $userId = Auth::id();
+            Log::info('User ID:', ['user_id' => $userId]);
+            
+            if (!$userId) {
+                Log::error('User not authenticated');
+                return response()->json(['error' => 'User not authenticated'], 401);
+            }
+
+            // Check if tables exist
+            if (!Schema::hasTable('pengumuman') || !Schema::hasTable('pengumuman_user')) {
+                Log::error('Required tables do not exist');
+                return response()->json([]);
+            }
+            
+            // Get announcements for this user using the scopeForUser method
+            $announcements = Pengumuman::forUser($userId)
+                ->with(['creator:id,name']) // Load the creator's name
+                ->orderBy('created_at', 'desc')
+                ->get();
+                
+            Log::info('Found announcements:', ['count' => $announcements->count()]);
+            
+            $formattedAnnouncements = $announcements->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'judul' => $item->judul,
+                    'isi_pesan' => $item->isi_pesan,
+                    'ringkasan' => $item->ringkasan, // Menggunakan accessor dari model
+                    'lampiran' => $item->lampiran,
+                    'lampiran_url' => $item->lampiran_url, // Menggunakan accessor dari model
+                    'created_at' => $item->created_at->format('Y-m-d H:i:s'),
+                    'tanggal_indo' => $item->tanggal_indo, // Menggunakan accessor dari model
+                    'creator' => $item->creator ? $item->creator->name : 'System',
+                ];
+            });
+
+            Log::info('Final result:', [
+                'count' => $formattedAnnouncements->count(),
+                'announcements' => $formattedAnnouncements->toArray()
+            ]);
+            
+            return response()->json($formattedAnnouncements);
+
+        } catch (\Exception $e) {
+            Log::error('Error in getAnnouncements: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return response()->json([], 200); // Return empty array on error
+        }
+    }
+
+    /**
+     * Debug endpoint untuk meeting notes dengan penugasan
+     */
+    public function debugMeetingNotesPenugasan(Request $request)
+    {
+        $userId = Auth::id();
+        $date = $request->query('date', now()->toDateString());
+        
+        // Get all penugasan for user
+        $allPenugasans = DB::table('catatan_rapat_penugasan')
+            ->where('user_id', $userId)
+            ->get();
+        
+        // Get assigned note IDs
+        $assignedNoteIds = $allPenugasans->pluck('catatan_rapat_id')->toArray();
+        
+        // Get notes for specific date
+        $dateNotes = CatatanRapat::whereIn('id', $assignedNoteIds)
+            ->where('tanggal', $date)
+            ->with(['user:id,name'])
+            ->get();
+        
+        // Get all assigned notes
+        $allAssignedNotes = CatatanRapat::whereIn('id', $assignedNoteIds)
+            ->with(['user:id,name'])
+            ->get();
+        
+        // Get notes using relationship
+        $relationshipNotes = CatatanRapat::whereHas('penugasan', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+            ->where('tanggal', $date)
+            ->with(['user:id,name', 'penugasan'])
+            ->get();
+        
+        return response()->json([
+            'user_id' => $userId,
+            'requested_date' => $date,
+            'all_penugasans_count' => $allPenugasans->count(),
+            'assigned_note_ids' => $assignedNoteIds,
+            'all_assigned_notes_count' => $allAssignedNotes->count(),
+            'date_notes_count' => $dateNotes->count(),
+            'relationship_notes_count' => $relationshipNotes->count(),
+            'all_penugasans' => $allPenugasans->toArray(),
+            'all_assigned_notes' => $allAssignedNotes->toArray(),
+            'date_notes' => $dateNotes->toArray(),
+            'relationship_notes' => $relationshipNotes->toArray(),
+        ]);
+    }
+
+    /**
+     * Debug endpoint untuk pengumuman
+     */
+    public function debugPengumuman(Request $request)
+    {
+        $userId = Auth::id();
+        
+        // Get all pengumuman_user for user
+        $allPengumumanUsers = DB::table('pengumuman_user')
+            ->where('user_id', $userId)
+            ->get();
+        
+        // Get assigned pengumuman IDs
+        $assignedPengumumanIds = $allPengumumanUsers->pluck('pengumuman_id')->toArray();
+        
+        // Get all assigned announcements
+        $allAssignedAnnouncements = Pengumuman::whereIn('id', $assignedPengumumanIds)
+            ->with(['creator:id,name'])
+            ->get();
+        
+        // Get announcements using scopeForUser method
+        $scopeAnnouncements = Pengumuman::forUser($userId)
+            ->with(['creator:id,name'])
+            ->get();
+        
+        return response()->json([
+            'user_id' => $userId,
+            'all_pengumuman_users_count' => $allPengumumanUsers->count(),
+            'assigned_pengumuman_ids' => $assignedPengumumanIds,
+            'all_assigned_announcements_count' => $allAssignedAnnouncements->count(),
+            'scope_announcements_count' => $scopeAnnouncements->count(),
+            'all_pengumuman_users' => $allPengumumanUsers->toArray(),
+            'all_assigned_announcements' => $allAssignedAnnouncements->toArray(),
+            'scope_announcements' => $scopeAnnouncements->toArray(),
+        ]);
+    }
+
+    /**
+     * Test endpoint untuk debugging API endpoints
+     */
+    public function testApiEndpoints()
+    {
+        $userId = Auth::id();
+        
+        // Test database connection
+        try {
+            DB::connection()->getPdo();
+            $dbStatus = 'Connected';
+        } catch (\Exception $e) {
+            $dbStatus = 'Error: ' . $e->getMessage();
+        }
+        
+        // Check tables
+        $tables = [
+            'catatan_rapats' => Schema::hasTable('catatan_rapats'),
+            'catatan_rapat_penugasan' => Schema::hasTable('catatan_rapat_penugasan'),
+            'pengumuman' => Schema::hasTable('pengumuman'), // Perbaiki nama tabel
+            'pengumuman_user' => Schema::hasTable('pengumuman_user'),
+        ];
+        
+        // Check data
+        $data = [
+            'user_id' => $userId,
+            'db_status' => $dbStatus,
+            'tables' => $tables,
+            'meeting_notes_penugasan_count' => 0,
+            'announcements_count' => 0,
+        ];
+        
+        if ($tables['catatan_rapat_penugasan']) {
+            $data['meeting_notes_penugasan_count'] = DB::table('catatan_rapat_penugasan')
+                ->where('user_id', $userId)
+                ->count();
+        }
+        
+        if ($tables['pengumuman_user']) {
+            $data['announcements_count'] = DB::table('pengumuman_user')
+                ->where('user_id', $userId)
+                ->count();
+        }
+        
+        return response()->json($data);
     }
 }

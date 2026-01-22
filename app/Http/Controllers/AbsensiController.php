@@ -53,33 +53,41 @@ class AbsensiController extends Controller
     /* =====================================================
      |  MANAGER DIVISI
      ===================================================== */
-    public function absenManager()
-    {
-        $user = Auth::user();
 
-        $query = Absensi::with('user')
-            ->whereHas('user', fn ($q) => $q->where('divisi', $user->divisi));
+public function absenManager()
+{
+    $user = Auth::user();
 
-        $allAbsensis = $query->get();
+    // Query dasar
+    $query = Absensi::with('user')
+        ->whereHas('user', fn ($q) => $q->where('divisi', $user->divisi));
 
-        $stats = [
-            'total_tepat_waktu' => $allAbsensis->where('status', 'Tepat Waktu')->count(),
-            'total_terlambat'   => $allAbsensis->where('status', 'Terlambat')->count(),
-            'total_tidak_masuk' => $allAbsensis->where('status', 'Tidak Masuk')->count(),
-            'total_cuti'        => $allAbsensis->where('status', 'Cuti')->count(),
-            'total_sakit'       => $allAbsensis->where('status', 'Sakit')->count(),
-            'total_izin'        => $allAbsensis->where('status', 'Izin')->count(),
-            'total_dinas_luar'  => $allAbsensis->where('status', 'Dinas Luar')->count(),
-        ];
+    // Statistik (pakai collection, tidak masalah)
+    $allAbsensis = $query->get();
 
-        $ketidakhadiran = Absensi::with('user')
-            ->whereHas('user', fn ($q) => $q->where('divisi', $user->divisi))
-            ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Tidak Masuk'])
-            ->latest('tanggal')
-            ->paginate(10);
+    $stats = [
+        'total_tepat_waktu' => $allAbsensis->where('status', 'Tepat Waktu')->count(),
+        'total_terlambat'   => $allAbsensis->where('status', 'Terlambat')->count(),
+        'total_tidak_masuk' => $allAbsensis->where('status', 'Tidak Masuk')->count(),
+        'total_cuti'        => $allAbsensis->where('status', 'Cuti')->count(),
+        'total_sakit'       => $allAbsensis->where('status', 'Sakit')->count(),
+        'total_izin'        => $allAbsensis->where('status', 'Izin')->count(),
+        'total_dinas_luar'  => $allAbsensis->where('status', 'Dinas Luar')->count(),
+    ];
 
-        return view('manager_divisi.kelola_absensi', compact('stats', 'ketidakhadiran', 'allAbsensis'));
-    }
+    // ❗ Pagination KHUSUS tabel
+    $ketidakhadiran = Absensi::with('user')
+        ->whereHas('user', fn ($q) => $q->where('divisi', $user->divisi))
+        ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Tidak Masuk'])
+        ->latest('tanggal')
+        ->paginate(10);
+
+    return view(
+        'manager_divisi.kelola_absensi',
+        compact('stats', 'ketidakhadiran', 'allAbsensis')
+    );
+}
+
 
     /* =====================================================
      |  PEMILIK (dengan filter)

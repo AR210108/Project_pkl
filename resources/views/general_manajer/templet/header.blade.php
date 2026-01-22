@@ -73,7 +73,11 @@
                 <span class="material-icons">group</span>
                 <span>Data Karyawan</span>
             </a>
-            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded" href="/general_manajer/layanan">
+            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded" href="/tim_dan_divisi">
+                <span class="material-icons">business</span>
+                <span>Manajemen Tim & Divisi</span>
+            </a>
+            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded" href="/general-manajer/layanan">
                 <span class="material-icons">miscellaneous_services</span>
                 <span>Data Layanan</span>
             </a>
