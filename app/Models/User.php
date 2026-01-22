@@ -85,6 +85,11 @@ class User extends Authenticatable
         return $this->hasMany(Pengumuman::class, 'user_id');
     }
 
+    public function absensis()
+{
+    return $this->hasMany(Absensi::class);
+}
+
     /**
      * Relasi dengan catatan rapat sebagai peserta
      */

@@ -409,11 +409,6 @@
                                 Filter
                             </button>
                         </form>
-                        <button id="tambahKaryawanBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
-                            <span class="material-icons-outlined">add</span>
-                            <span class="hidden sm:inline">Tambah Karyawan</span>
-                            <span class="sm:hidden">Tambah</span>
-                        </button>
                     </div>
                 </div>
                 
@@ -534,49 +529,6 @@
         </main>
     </div>
 
-    <!-- Modal Tambah Karyawan -->
-    <div id="tambahModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Tambah Karyawan</h3>
-                    <button class="close-modal text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <!-- PERUBAHAN: Form action dan atribut name -->
-                <form action="{{ route('pegawai.store') }}" method="POST">
-                    @csrf
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
-                        <input type="text" name="nama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
-                        <textarea name="alamat" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Kontak</label>
-                        <input type="tel" name="kontak" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
-                        <input type="text" name="jabatan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
-                        <input type="text" name="divisi" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal Edit Karyawan -->
     <div id="editModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
@@ -623,29 +575,7 @@
     <!-- PERUBAHAN: JavaScript disederhanakan, hanya untuk modal -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Modal elements
-            const tambahModal = document.getElementById('tambahModal');
-            const tambahKaryawanBtn = document.getElementById('tambahKaryawanBtn');
             const closeModals = document.querySelectorAll('.close-modal');
-            
-            // Show tambah modal
-            tambahKaryawanBtn.addEventListener('click', function() {
-                tambahModal.classList.remove('hidden');
-            });
-            
-            // Close modals
-            closeModals.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    tambahModal.classList.add('hidden');
-                });
-            });
-            
-            // Close modal when clicking outside
-            window.addEventListener('click', function(event) {
-                if (event.target === tambahModal) {
-                    tambahModal.classList.add('hidden');
-                }
-            });
 
             // Edit modal logic: fetch data and fill form
             const editModal = document.getElementById('editModal');

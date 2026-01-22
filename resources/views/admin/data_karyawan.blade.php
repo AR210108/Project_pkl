@@ -914,7 +914,7 @@
                              <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
                              <input type="text" name="jabatan" id="jabatanInput"
                                  class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                 placeholder="Jabatan akan otomatis terisi" readonly required>
+                                 placeholder="Jabatan akan otomatis terisi" readonly>
                          </div>
 
                          <div>
@@ -1541,51 +1541,61 @@
              console.log('Divisi:', divisi, 'Jabatan:', role);
          });
          // CREATE (POST)
-         tambahKaryawanForm.addEventListener('submit', async function(e) {
-             e.preventDefault();
+         // CREATE (POST)
+         // CREATE (POST)
+tambahKaryawanForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-             // Show loading state
-             const submitBtn = tambahKaryawanForm.querySelector('button[type="submit"]');
-             const originalText = submitBtn.textContent;
-             submitBtn.textContent = 'Menyimpan...';
-             submitBtn.disabled = true;
+    const submitBtn = tambahKaryawanForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
 
-             let formData = new FormData(tambahKaryawanForm);
+    submitBtn.textContent = 'Menyimpan...';
+    submitBtn.disabled = true;
 
-             try {
-                 let response = await fetch("/admin/karyawan/store", {
-                     method: "POST",
-                     headers: {
-                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute(
-                             "content"),
-                         "Accept": "application/json"
-                     },
-                     body: formData
-                 });
+    const formData = new FormData(tambahKaryawanForm);
 
-                 if (!response.ok) {
-                     throw new Error(`HTTP error! status: ${response.status}`);
-                 }
+    try {
+        const response = await fetch("/admin/karyawan/store", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute("content"),
+                "Accept": "application/json"
+            },
+            body: formData
+        });
 
-                 let res = await response.json();
+        const res = await response.json();
 
-                 if (res.success) {
-                     showMinimalPopup('Berhasil', 'Karyawan berhasil ditambahkan', 'success');
-                     setTimeout(() => {
-                         location.reload();
-                     }, 1500);
-                 } else {
-                     showMinimalPopup('Error', res.message || 'Terjadi kesalahan saat menyimpan data', 'error');
-                 }
-             } catch (error) {
-                 console.error('Error:', error);
-                 showMinimalPopup('Error', 'Terjadi kesalahan saat menyimpan data', 'error');
-             } finally {
-                 // Reset button state
-                 submitBtn.textContent = originalText;
-                 submitBtn.disabled = false;
-             }
-         });
+        // ⛔ VALIDASI ERROR
+        if (!response.ok) {
+            if (response.status === 422 && res.errors) {
+                const message = res.errors.foto
+                    ? res.errors.foto[0]
+                    : Object.values(res.errors)[0][0];
+
+                showMinimalPopup('Validasi Gagal', message, 'warning');
+                return;
+            }
+
+            showMinimalPopup('Error', res.message || 'Terjadi kesalahan', 'error');
+            return;
+        }
+
+        // ✅ SUKSES
+        showMinimalPopup('Berhasil', res.message, 'success');
+        setTimeout(() => location.reload(), 1500);
+
+    } catch (error) {
+        console.error(error);
+        showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+});
+
 
          // UPDATE (PUT)
          editKaryawanForm.addEventListener('submit', async function(e) {
