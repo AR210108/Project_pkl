@@ -7,6 +7,7 @@
     <title>Digital Agency Landing Page</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
         tailwind.config = {
@@ -550,6 +551,35 @@
             font-size: 0.75rem;
             margin-left: 0.25rem;
         }
+        
+        /* WhatsApp Button Styles - Original Colors */
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            color: black;
+            border-radius: 0.5rem;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+        
+        .whatsapp-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            background-color: #f8fafc;
+        }
+        
+        .whatsapp-btn .bx {
+            margin-right: 8px;
+            font-size: 20px;
+        }
     </style>
 </head>
 
@@ -605,8 +635,10 @@
                             <p class="mb-8 text-white/90 mx-auto max-w-2xl">Kami digital agency adalah perusahaan
                                 yang membantu bisnis lain membawa ke produk atau jasanya secara online melalui berbagai
                                 layanan digital.</p>
-                            <button class="bg-white text-black font-medium py-3 px-8 rounded-lg hover:bg-gray-100 transition-colors shadow-md mx-auto">
-                                List Layanan
+                            <!-- PERUBAHAN: Tombol Hubungi Kami dengan warna asli dan icon Boxicons -->
+                            <button id="whatsappBtn" class="whatsapp-btn mx-auto">
+                                <i class='bx bxl-whatsapp'></i>
+                                Hubungi Kami
                             </button>
                         </div>
                     </div>
@@ -1171,6 +1203,26 @@
                     document.body.style.overflow = 'auto'; // Kembalikan scroll
                 }
             });
+            
+            // --- Logika untuk Tombol WhatsApp ---
+            const whatsappBtn = document.getElementById('whatsappBtn');
+            
+            // Nomor WhatsApp tujuan
+            const whatsappNumber = '6281214137112'; // Ganti dengan nomor WhatsApp yang sesuai
+            
+            // Pesan default untuk WhatsApp
+            const defaultMessage = "Halo, saya tertarik dengan layanan yang ditawarkan. Mohon informasi lebih lanjut.";
+            
+            // Event listener untuk tombol WhatsApp
+            if (whatsappBtn) {
+                whatsappBtn.addEventListener('click', function() {
+                    const encodedMessage = encodeURIComponent(defaultMessage);
+                    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+                    
+                    // Buka WhatsApp di tab baru
+                    window.open(whatsappUrl, '_blank');
+                });
+            }
             
             // --- Logika untuk navigasi aktif berdasarkan scroll ---
             const sections = document.querySelectorAll('section[id]');

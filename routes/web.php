@@ -703,5 +703,19 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/kelola_absen', [AbsensiController::class, 'kelolaAbsen'])->name('kelola.absen');
 Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');
 
-//Buat Tugas
-// Tambahkan route untuk tugas
+Route::middleware(['auth'])->group(function () {
+    Route::get('/api/karyawan/meeting-notes', [KaryawanController::class, 'getMeetingNotes']);
+    Route::get('/api/karyawan/meeting-notes-dates', [KaryawanController::class, 'getMeetingNotesDates']);
+    Route::get('/api/karyawan/announcements', [KaryawanController::class, 'getAnnouncements']);
+    Route::get('/api/karyawan/announcements-by-date', [KaryawanController::class, 'getAnnouncementsByDate']);
+    Route::get('/api/karyawan/announcements-dates', [KaryawanController::class, 'getAnnouncementsDates']);
+    Route::get('/api/karyawan/calendar-dates', [KaryawanController::class, 'getCalendarDates']);
+    Route::get('/debug-meeting-notes-penugasan', [KaryawanController::class, 'debugMeetingNotesPenugasan']);
+    Route::get('/debug-pengumuman', [KaryawanController::class, 'debugPengumuman']);
+    Route::get('/test-api', [KaryawanController::class, 'testApiEndpoints']);
+});
+
+
+Route::get('/tim_dan_divisi', function () {
+    return view('general_manajer/tim_dan_divisi');
+});

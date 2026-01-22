@@ -139,4 +139,22 @@ class User extends Authenticatable
         
         return $initials;
     }
+public function catatanRapats()
+{
+    return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_penugasan', 'user_id', 'catatan_rapat_id');
+}
+
+public function catatanRapatPenugasans()
+{
+    return $this->hasMany(CatatanRapatPenugasan::class, 'user_id');
+}
+
+/**
+ * Pengumuman yang ditugaskan ke user ini
+ */
+public function pengumumanDiterima()
+{
+    return $this->belongsToMany(Pengumuman::class, 'pengumuman_user', 'user_id', 'pengumuman_id')
+        ->withTimestamps();
+}
 }
