@@ -275,17 +275,17 @@
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="rekap" href="/rekap_absensi">Rekap
                         Absensi</a>
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="laporan"
-                        href="/laporan">Laporan</a>
+                        href="/owner/laporan">Laporan</a>
                 </nav>
 
-                <!-- Login Button -->
-                <form action="{{ route('logout') }}">
-                    @csrf
-                <button type="submit" class="hidden md:flex items-center bg-black text-white text-sm font-medium py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors">
-                    <i class='bx bx-log-out-circle text-xl mr-2'></i>
-                    Log Out
-                </button>
-                </form>
+<form action="{{ route('logout') }}" method="POST">
+    @csrf
+    <button type="submit"
+        class="hidden md:flex items-center bg-black text-white text-sm font-medium py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors">
+        <i class='bx bx-log-out-circle text-xl mr-2'></i>
+        Log Out
+    </button>
+</form>
                 
                 <!-- Mobile Menu Button -->
                 <button id="mobileMenuBtn"

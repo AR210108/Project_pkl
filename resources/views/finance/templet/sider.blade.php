@@ -201,7 +201,7 @@
                         <span class="sidebar-text">Invoice</span>
                     </a>
                     
-                    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/kwetansi">
+                    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/kwitansi">
                         <span class="material-icons sidebar-icon">receipt_long</span>
                         <span class="sidebar-text">Kwitansi</span>
                     </a>

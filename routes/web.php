@@ -19,7 +19,6 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\GeneralManagerTaskController;
 use App\Http\Controllers\KaryawanProfileController;
 use App\Http\Controllers\ManagerDivisiTaskController;
-use App\Http\Controllers\PelayananController;
 
 /*
 |--------------------------------------------------------------------------
@@ -163,8 +162,9 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/{id}/edit', [SuratKerjasamaController::class, 'edit'])->name('edit');
             Route::put('/{id}', [SuratKerjasamaController::class, 'update'])->name('update');
             Route::delete('/{id}', [SuratKerjasamaController::class, 'destroy'])->name('destroy');
-        });
-
+            });
+            
+            Route::get('/data_project', [DataProjectController::class, 'admin'])->name('data_project');
         // Route untuk sidebar: /admin/surat_kerjasama → redirect ke index
         Route::get('/surat_kerjasama', function () {
             return redirect()->route('admin.surat_kerjasama.index');
@@ -312,9 +312,9 @@ Route::middleware(['auth', 'role:general_manager'])
         Route::get('/data_karyawan', [AdminKaryawanController::class, 'karyawanGeneral'])
             ->name('data_karyawan');
 
-        Route::get('/layanan', function () {
-            return view('general_manajer.data_layanan');
-        })->name('layanan');
+        Route::get('/layanan', [LayananController::class, 'Generalindex'])
+            ->name('layanan');
+
 
         // DATA PROJECT (GENERAL MANAGER)
         Route::get('/data_project', [DataProjectController::class, 'index'])
@@ -644,7 +644,6 @@ Route::get('/general_manajer', function () {
     return view('general_manajer/home');
 });
 
-Route::get('/layanan', [PelayananController::class, 'index']);
 
 
 Route::get('/kelola_tugas', [TaskController::class, 'index'])->name('tugas.page');
@@ -652,10 +651,6 @@ Route::get('/kelola_absen', function () {
     return view('general_manajer/kelola_absen');
 });
 
-// routes untuk pelayanan
-Route::post('/layanan', [PelayananController::class, 'store']);
-Route::put('/layanan/{id}', [PelayananController::class, 'update']);
-Route::delete('/layanan/{id}', [PelayananController::class, 'destroy']);
 
 Route::resource('pengumuman', PengumumanController::class);
 // === ROUTE UNTUK CATATAN RAPAT ANDA ===
