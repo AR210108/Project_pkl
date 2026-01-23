@@ -832,7 +832,6 @@ class AbsensiController extends Controller
         try {
             // Pastikan karyawan yang tidak hadir ditandai
             $today = Carbon::now()->format('Y-m-d');
-            $this->markAbsentEmployees($today);
             
             $stats = [
                 'total_hadir' => Absensi::whereNotNull('jam_masuk')->where('approval_status', 'approved')->count(),

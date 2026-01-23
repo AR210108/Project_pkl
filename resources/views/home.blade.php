@@ -14,15 +14,15 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: "#0f172a", // Biru sangat tua mendekati hitam
-                        "background-light": "#ffffff", // Putih untuk background utama
-                        "background-dark": "#f8fafc", // Putih sangat terang untuk mode gelap
-                        "card-light": "#111827", // Hitam untuk kartu
-                        "card-dark": "#1f2937", // Abu-abu untuk kartu mode gelap
-                        "text-light": "#111827", // Hitam untuk teks
-                        "text-dark": "#f9fafb", // Putih terang untuk teks mode gelap
-                        "border-light": "#e5e7eb", // Abu-abu terang untuk border
-                        "border-dark": "#4b5563", // Abu-abu untuk border mode gelap
+                        primary: "#0f172a",
+                        "background-light": "#ffffff",
+                        "background-dark": "#f8fafc",
+                        "card-light": "#111827",
+                        "card-dark": "#1f2937",
+                        "text-light": "#111827",
+                        "text-dark": "#f9fafb",
+                        "border-light": "#e5e7eb",
+                        "border-dark": "#4b5563",
                     },
                     fontFamily: {
                         display: ["Poppins", "sans-serif"],
@@ -39,14 +39,13 @@
             font-family: 'Poppins', sans-serif;
         }
         
-        /* Smooth Scrolling untuk seluruh halaman */
         html {
             scroll-behavior: smooth;
         }
         
-        /* Sticky Navigation */
+        /* Header yang menempel di atas saat di-scroll */
         .sticky-header {
-            position: fixed;
+            position: fixed; /* Diubah dari relative */
             top: 0;
             left: 0;
             right: 0;
@@ -61,12 +60,11 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
         
-        /* Padding untuk konten agar tidak tertutup header */
+        /* Tambahkan padding-top pada konten utama untuk menghindari tertutup header */
         .main-content {
-            padding-top: 80px;
+            padding-top: 80px; /* Sesuaikan dengan tinggi header */
         }
         
-        /* Hamburger Menu Animation */
         .hamburger-line {
             transition: all 0.3s ease;
         }
@@ -83,17 +81,16 @@
             transform: rotate(-45deg) translate(7px, -6px);
         }
         
-        /* Mobile Navigation - Menyatu dengan Header */
         .mobile-nav {
             max-height: 0;
             overflow: hidden;
-            background-color: rgba(255, 255, 255, 0.95); /* Warna sama dengan header */
+            background-color: rgba(255, 255, 255, 0.95);
             transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            border-radius: 0 0 1rem 1rem; /* Border radius hanya di bagian bawah */
+            border-radius: 0 0 1rem 1rem;
         }
         
         .mobile-nav.active {
-            max-height: 70vh; /* Tinggi maksimum saat aktif */
+            max-height: 70vh;
         }
         
         .mobile-nav-content {
@@ -102,30 +99,8 @@
             flex-direction: column;
         }
         
-        .mobile-nav-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(15, 23, 42, 0.1); /* Border dengan warna primary */
-            margin-bottom: 1rem;
-        }
-        
-        .mobile-nav .brand {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #0f172a; /* Warna primary */
-        }
-        
-        .mobile-nav nav {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-        
         .mobile-nav .nav-link {
-            color: #0f172a; /* Warna primary */
+            color: #0f172a;
             font-size: 1.125rem;
             font-weight: 500;
             text-decoration: none;
@@ -139,29 +114,13 @@
         
         .mobile-nav .nav-link:hover,
         .mobile-nav .nav-link.active {
-            color: #0f172a; /* Warna primary */
-            background-color: rgba(15, 23, 42, 0.1); /* Background dengan warna primary */
-        }
-        
-        .mobile-nav .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 1rem;
-            width: 0;
-            height: 2px;
-            background-color: #0f172a; /* Warna primary */
-            transition: width 0.3s ease;
-        }
-        
-        .mobile-nav .nav-link:hover::after,
-        .mobile-nav .nav-link.active::after {
-            width: 30px;
+            color: #0f172a;
+            background-color: rgba(15, 23, 42, 0.1);
         }
         
         .mobile-nav .login-btn {
-            background-color: #0f172a; /* Warna primary */
-            color: white; /* Teks putih */
+            background-color: #0f172a;
+            color: white;
             font-weight: 600;
             padding: 0.75rem 1.5rem;
             border-radius: 0.5rem;
@@ -172,29 +131,10 @@
         }
         
         .mobile-nav .login-btn:hover {
-            background-color: rgba(15, 23, 42, 0.9); /* Warna primary dengan opacity */
+            background-color: rgba(15, 23, 42, 0.9);
             transform: translateY(-2px);
         }
         
-        .mobile-nav .close-btn {
-            color: #0f172a; /* Warna primary */
-            font-size: 1.75rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-        
-        .mobile-nav .close-btn:hover {
-            background-color: rgba(15, 23, 42, 0.1); /* Background dengan warna primary */
-            transform: rotate(90deg);
-        }
-        
-        /* Gaya untuk Container Portofolio */
         .portfolio-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -221,7 +161,6 @@
             scroll-snap-align: start;
         }
         
-        /* Gaya untuk Modal */
         .modal {
             display: none;
             position: fixed;
@@ -260,30 +199,28 @@
             color: #f9fafb;
         }
         
-        /* Gaya untuk Container Layanan - Desktop */
-        .layanan-container {
-            max-height: 320px;
-            overflow-y: hidden;
-            scrollbar-width: thin;
-            scrollbar-color: #d1d5db #f3f4f6;
-            transition: max-height 0.5s ease-in-out;
+        /* Gaya untuk Container Layanan Tambahan (Desktop) */
+        .layanan-grid-wrapper {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s ease-in-out;
+            position: relative;
         }
-        
-        .layanan-container.expanded {
-            max-height: 620px;
+
+        .layanan-grid-wrapper.expanded {
+            max-height: 600px; /* Tinggi tetap untuk scroll terbatas */
             overflow-y: auto;
+            padding-right: 8px; /* Ruang untuk scrollbar */
         }
-        
-        .layanan-container::-webkit-scrollbar {
+
+        .layanan-grid-wrapper::-webkit-scrollbar {
             width: 8px;
         }
-        
-        .layanan-container::-webkit-scrollbar-track {
+        .layanan-grid-wrapper::-webkit-scrollbar-track {
             background: #f3f4f6;
             border-radius: 4px;
         }
-        
-        .layanan-container::-webkit-scrollbar-thumb {
+        .layanan-grid-wrapper::-webkit-scrollbar-thumb {
             background-color: #d1d5db;
             border-radius: 4px;
         }
@@ -318,9 +255,8 @@
             scroll-snap-align: start;
         }
 
-        /* Media query untuk menampilkan/hide container layanan */
         @media (max-width: 768px) {
-            .layanan-container {
+            .layanan-grid-wrapper {
                 display: none;
             }
             .layanan-container-mobile {
@@ -328,42 +264,77 @@
             }
         }
         
-        /* Active navigation link */
+        /* Perbaikan untuk navigasi hover */
         .nav-link {
             position: relative;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
         }
         
         .nav-link::after {
             content: '';
             position: absolute;
-            bottom: -5px;
-            left: 0;
+            bottom: 0;
+            left: 50%;
             width: 0;
-            height: 2px;
-            background-color: #0f172a; /* Biru sangat tua mendekati hitam */
-            transition: width 0.3s ease;
+            height: 3px;
+            background-color: #0f172a;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+            border-radius: 2px;
         }
         
         .nav-link:hover {
-            color: #0f172a; /* Biru sangat tua mendekati hitam */
+            color: #0f172a;
+            background-color: rgba(15, 23, 42, 0.05);
+            transform: translateY(-2px);
         }
         
         .nav-link:hover::after {
-            width: 100%;
+            width: 80%;
         }
         
         .nav-link.active {
-            color: #0f172a; /* Biru sangat tua mendekati hitam */
+            color: #0f172a;
+            font-weight: 600;
+            background-color: rgba(15, 23, 42, 0.08);
         }
         
         .nav-link.active::after {
-            width: 100%;
+            width: 80%;
         }
         
-        /* Card hover effects */
+        /* Efek hover untuk tombol login di desktop */
+        .login-btn-desktop {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-btn-desktop:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-btn-desktop::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .login-btn-desktop:hover::before {
+            left: 100%;
+        }
+        
         .service-card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
         }
         
         .service-card:hover {
@@ -388,7 +359,6 @@
             transform: translateY(-3px);
         }
         
-        /* Button hover effects */
         .btn-primary {
             transition: all 0.3s ease;
             position: relative;
@@ -413,7 +383,6 @@
             opacity: 1;
         }
         
-        /* Gradient backgrounds */
         .gradient-primary {
             background: linear-gradient(135deg, #000000, #111827);
         }
@@ -426,7 +395,6 @@
             background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
         }
         
-        /* Decorative elements */
         .decorative-circle {
             position: absolute;
             border-radius: 50%;
@@ -458,24 +426,17 @@
             left: -75px;
         }
         
-        /* Mobile Layanan Improvements */
         .layanan-scroll-indicator {
             display: flex;
             justify-content: center;
-            margin-bottom: 1rem;
+            margin-top: 1rem;
             animation: pulse 2s infinite;
         }
         
         @keyframes pulse {
-            0% {
-                opacity: 0.6;
-            }
-            50% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0.6;
-            }
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
         }
         
         .layanan-scroll-indicator span {
@@ -494,40 +455,26 @@
             font-size: 1rem;
         }
         
-        /* Mobile service card improvements */
         @media (max-width: 768px) {
             .service-card {
-                width: 280px !important;
+                width: 240px !important;
                 flex-shrink: 0;
             }
-            
-            .service-card .relative {
-                min-height: 180px;
-            }
-            
             .service-card h3 {
-                font-size: 1.125rem;
+                font-size: 1rem;
                 margin-bottom: 0.5rem;
             }
-            
             .service-card p {
-                font-size: 0.875rem;
+                font-size: 0.8rem;
                 line-height: 1.4;
-            }
-            
-            .service-card .absolute span {
-                font-size: 0.75rem;
-                padding: 0.25rem 0.5rem;
             }
         }
         
-        /* Add shadow effect for mobile cards */
         .layanan-container-mobile .service-card {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             border: 1px solid rgba(229, 231, 235, 0.5);
         }
         
-        /* Contact Card Styles */
         .contact-card {
             background-color: #f8fafc;
             border-radius: 1rem;
@@ -572,6 +519,37 @@
             color: #4b5563;
             line-height: 1.5;
         }
+        
+        /* Style untuk deskripsi layanan satu baris */
+        .service-description {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+        }
+        
+        /* Style untuk tombol detail layanan */
+        .service-detail-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            margin-top: 0.5rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .service-detail-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .service-detail-btn .material-icons-outlined {
+            font-size: 0.75rem;
+            margin-left: 0.25rem;
+        }
     </style>
 </head>
 
@@ -580,11 +558,8 @@
     <header id="header" class="sticky-header">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex justify-between items-center">
-                <!-- Brand Logo -->
                 <div class="text-2xl font-bold text-black">Brand</div>
-                
-                <!-- Desktop Navigation - Centered -->
-                <nav class="hidden lg:flex items-center space-x-8 absolute left-1/2 transform -translate-x-1/2">
+                <nav class="hidden lg:flex items-center space-x-4 absolute left-1/2 transform -translate-x-1/2">
                     <a class="nav-link text-sm font-medium text-gray-700 active" href="#beranda" data-section="beranda">Beranda</a>
                     <a class="nav-link text-sm font-medium text-gray-700" href="#layanan" data-section="layanan">Layanan</a>
                     <a class="nav-link text-sm font-medium text-gray-700" href="#tentang" data-section="tentang">Tentang</a>
@@ -592,22 +567,16 @@
                     <a class="nav-link text-sm font-medium text-gray-700" href="#artikel" data-section="artikel">Artikel</a>
                     <a class="nav-link text-sm font-medium text-gray-700" href="#kontak" data-section="kontak">Kontak</a>
                 </nav>
-                
-                <!-- Login Button -->
-                <a class="hidden lg:block bg-black text-white text-sm font-medium py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors"
+                <a class="hidden lg:block login-btn-desktop bg-black text-white text-sm font-medium py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors"
                     href="{{ url('/login') }}">
                     Login
                 </a>
-                
-                <!-- Mobile Menu Button -->
-                <button id="mobileMenuBtn" class="lg:hidden flex flex-col justify-center items-center w-8 h-8 hamburger">
+                <button id="mobileMenuBtn" class="lg:hidden flex flex flex-col justify-center items-center w-8 h-8 hamburger">
                     <span class="hamburger-line w-6 h-0.5 bg-black mb-1.5"></span>
                     <span class="hamburger-line w-6 h-0.5 bg-black mb-1.5"></span>
                     <span class="hamburger-line w-6 h-0.5 bg-black"></span>
                 </button>
             </div>
-            
-            <!-- Mobile Navigation - Menyatu dengan Header -->
             <div id="mobileNav" class="mobile-nav">
                 <div class="mobile-nav-content">
                     <nav>
@@ -621,10 +590,8 @@
                     <a class="login-btn" href="{{ url('/login') }}">Login</a>
                 </div>
             </div>
-        </div>
     </header>
     
-    <!-- Main Content -->
     <main class="main-content">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <section class="py-20 gradient-primary rounded-2xl shadow-lg relative overflow-hidden" id="beranda">
@@ -632,21 +599,20 @@
                 <div class="decorative-circle circle-2"></div>
                 <div class="decorative-circle circle-3"></div>
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div class="grid grid-cols-12">
+                    <div class="grid grid grid-cols-12">
                         <div class="col-start-1 col-span-12 text-center">
-                            <h1 class="text-4xl md:text-7xl font-bold text-white mb-4">DIGITAL
-                                AGENCY</h1>
+                            <h1 class="text-4xl md:text-7xl font-bold text-white mb-4">DIGITAL AGENCY</h1>
                             <p class="mb-8 text-white/90 mx-auto max-w-2xl">Kami digital agency adalah perusahaan
                                 yang membantu bisnis lain membawa ke produk atau jasanya secara online melalui berbagai
                                 layanan digital.</p>
-                            <button
-                                class="bg-white text-black font-medium py-3 px-8 rounded-lg hover:bg-gray-100 transition-colors shadow-md mx-auto">
+                            <button class="bg-white text-black font-medium py-3 px-8 rounded-lg hover:bg-gray-100 transition-colors shadow-md mx-auto">
                                 List Layanan
                             </button>
                         </div>
                     </div>
                 </div>
             </section>
+            
             <section class="py-24 text-left bg-background-light" id="layanan">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="gradient-subtle p-8 md:p-12 rounded-2xl shadow-sm">
@@ -657,200 +623,142 @@
                         </div>
                         
                         <!-- Desktop Layanan Container -->
-                        <div id="layananContainer" class="layanan-container mb-10">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                                <div class="service-card bg-card-light p-6 rounded-2xl flex flex-col shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Future UI</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Digital Agency</h3>
-                                    <p class="text-sm text-gray-300">Kota Bandung</p>
+                        <div id="layananContainer" class="mb-10">
+                            @if($layanans->isNotEmpty())
+                                <!-- ======================================= -->
+                                <!-- BAGIAN 1: GRID LAYANAN STATIS (4 PERTAMA) -->
+                                <!-- Grid ini tidak akan pernah tergulung -->
+                                <!-- ======================================= -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                                    @foreach($layanans->take(4) as $layanan)
+                                        <div class="service-card bg-card-light p-4 rounded-xl flex flex-col shadow-sm border border-border-light" 
+                                             data-service-id="{{ $layanan->id ?? $loop->iteration }}"
+                                             data-service-name="{{ $layanan->nama_layanan ?? 'Layanan ' . $loop->iteration }}"
+                                             data-service-price="{{ $layanan->harga ? 'Rp ' . number_format($layanan->harga, 0, ',', '.') : 'Tidak tersedia' }}"
+                                             data-service-description="{{ $layanan->deskripsi ?? 'Deskripsi untuk layanan ' . $loop->iteration . '. Ini adalah contoh deskripsi yang berbeda untuk setiap layanan.' }}"
+                                             data-service-image="{{ $layanan->foto ? Storage::url($layanan->foto) : '' }}">
+                                            <div class="relative pt-[60%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-3 overflow-hidden">
+                                                @if($layanan->harga)
+                                                    <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-black text-xs font-semibold px-2 py-1 rounded-full z-10">
+                                                        Rp {{ number_format($layanan->harga, 0, ',', '.') }}
+                                                    </span>
+                                                @endif
+                                                @if($layanan->foto)
+                                                    <img src="{{ Storage::url($layanan->foto) }}" alt="{{ $layanan->nama_layanan }}" class="absolute inset-0 w-full h-full object-cover">
+                                                @else
+                                                    <div class="absolute inset-0 flex items-center justify-center text-white">
+                                                        <span class="text-4xl font-bold">{{ $loop->iteration }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <h3 class="font-bold text-white mb-1 text-sm">{{ $layanan->nama_layanan ?? 'Layanan ' . $loop->iteration }}</h3>
+                                            <p class="service-description text-xs text-gray-300">{{ $layanan->deskripsi ?? 'Deskripsi untuk layanan ' . $loop->iteration . '. Ini adalah contoh deskripsi yang berbeda untuk setiap layanan.' }}</p>
+                                            <button class="service-detail-btn mt-2">
+                                                Lihat Detail
+                                                <span class="material-icons-outlined">arrow_forward</span>
+                                            </button>
+                                        </div>
+                                    @endforeach
                                 </div>
-                                <div class="service-card bg-card-light p-6 rounded-2xl flex flex-col shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Future UI</span>
+
+                                @php
+                                    $remainingLayanans = $layanans->skip(4);
+                                @endphp
+
+                                @if($remainingLayanans->isNotEmpty())
+                                    <!-- Garis pemisah visual untuk membedakan bagian statis dan yang dapat di-scroll -->
+                                    <hr class="my-6 border-gray-300">
+
+                                    <!-- ======================================= -->
+                                    <!-- BAGIAN 2: GRID LAYANAN YANG DAPAT DI-SCROLL -->
+                                    <!-- Container ini yang akan di-scroll -->
+                                    <!-- ======================================= -->
+                                    <div id="layananGridWrapper" class="layanan-grid-wrapper">
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                            @foreach($remainingLayanans as $layanan)
+                                                <div class="service-card bg-card-light p-4 rounded-xl flex flex-col shadow-sm border border-border-light"
+                                                     data-service-id="{{ $layanan->id ?? ($loop->iteration + 4) }}"
+                                                     data-service-name="{{ $layanan->nama_layanan ?? 'Layanan ' . ($loop->iteration + 4) }}"
+                                                     data-service-price="{{ $layanan->harga ? 'Rp ' . number_format($layanan->harga, 0, ',', '.') : 'Tidak tersedia' }}"
+                                                     data-service-description="{{ $layanan->deskripsi ?? 'Deskripsi untuk layanan ' . ($loop->iteration + 4) . '. Ini adalah contoh deskripsi yang berbeda untuk setiap layanan.' }}"
+                                                     data-service-image="{{ $layanan->foto ? Storage::url($layanan->foto) : '' }}">
+                                                    <div class="relative pt-[60%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-3 overflow-hidden">
+                                                        @if($layanan->harga)
+                                                            <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-black text-xs font-semibold px-2 py-1 rounded-full z-10">
+                                                                Rp {{ number_format($layanan->harga, 0, ',', '.') }}
+                                                            </span>
+                                                        @endif
+                                                        @if($layanan->foto)
+                                                            <img src="{{ Storage::url($layanan->foto) }}" alt="{{ $layanan->nama_layanan }}" class="absolute inset-0 w-full h-full object-cover">
+                                                        @else
+                                                            <div class="absolute inset-0 flex items-center justify-center text-white">
+                                                                <span class="text-4xl font-bold">{{ $loop->iteration + 4 }}</span>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                    <h3 class="font-bold text-white mb-1 text-sm">{{ $layanan->nama_layanan ?? 'Layanan ' . ($loop->iteration + 4) }}</h3>
+                                                    <p class="service-description text-xs text-gray-300">{{ $layanan->deskripsi ?? 'Deskripsi untuk layanan ' . ($loop->iteration + 4) . '. Ini adalah contoh deskripsi yang berbeda untuk setiap layanan.' }}</p>
+                                                    <button class="service-detail-btn mt-2">
+                                                        Lihat Detail
+                                                        <span class="material-icons-outlined">arrow_forward</span>
+                                                    </button>
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
-                                    <h3 class="font-bold text-white mb-1">Digital Agency</h3>
-                                    <p class="text-sm text-gray-300">Kota Bandung</p>
-                                </div>
-                                <div class="service-card bg-card-light p-6 rounded-2xl flex flex-col shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Future UI</span>
+
+                                    <!-- Indikator Scroll untuk sisa layanan -->
+                                    <div id="scrollIndicator" class="layanan-scroll-indicator hidden md:flex" style="display: none;">
+                                        <span>
+                                            <span class="material-icons-outlined">keyboard_arrow_down</span>
+                                            Scroll untuk melihat lebih banyak
+                                        </span>
                                     </div>
-                                    <h3 class="font-bold text-white mb-1">Digital Agency</h3>
-                                    <p class="text-sm text-gray-300">Kota Bandung</p>
-                                </div>
-                                <div class="service-card bg-card-light p-6 rounded-2xl flex flex-col shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Total 10 UI</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Digital Agency</h3>
-                                    <p class="text-sm text-gray-300">Kota Bandung</p>
-                                </div>
-                                <div class="service-card bg-card-light p-6 rounded-2xl flex flex-col shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">UI/UX</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Pembuatan Website</h3>
-                                    <p class="text-sm text-gray-300">Desain dan pengembangan website profesional dan responsif.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-6 rounded-2xl flex flex-col shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Marketing</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">SEO Optimization</h3>
-                                    <p class="text-sm text-gray-300">Meningkatkan peringkat website Anda di mesin pencari.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-6 rounded-2xl flex flex-col shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Sosmed</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Manajemen Sosial Media</h3>
-                                    <p class="text-sm text-gray-300">Mengelola dan mengembangkan kehadiran brand di media sosial.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-6 rounded-2xl flex flex-col shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Ads</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Iklan Digital (Google Ads)</h3>
-                                    <p class="text-sm text-gray-300">Kampanye iklan yang tertarget untuk meningkatkan traffic dan konversi.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-6 rounded-2xl flex flex-col shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Content</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Pembuatan Konten</h3>
-                                    <p class="text-sm text-gray-300">Membuat konten menarik dan relevan untuk audiens Anda.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-6 rounded-2xl flex flex-col shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Strategy</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Strategi Brand</h3>
-                                    <p class="text-sm text-gray-300">Membangun identitas brand yang kuat dan konsisten.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-6 rounded-2xl flex flex-col shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Mobile</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Pengembangan Aplikasi Mobile</h3>
-                                    <p class="text-sm text-gray-300">Membangun aplikasi mobile native dan cross-platform untuk iOS dan Android.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-6 rounded-2xl flex flex-col shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Email</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Email Marketing</h3>
-                                    <p class="text-sm text-gray-300">Membuat dan mengelola kampanye email marketing yang efektif.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-6 rounded-2xl flex flex-col shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Analytics</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Analitik Digital</h3>
-                                    <p class="text-sm text-gray-300">Menganalisis data digital untuk mengoptimalkan strategi pemasaran.</p>
-                                </div>
-                            </div>
+                                @endif
+                            @else
+                                <p class="text-center text-gray-500">Belum ada layanan tersedia.</p>
+                            @endif
                         </div>
-                        
-                        <!-- Mobile Layanan Container -->
+
+                        <!-- Mobile Layanan Container (Tidak berubah) -->
                         <div id="layananContainerMobile" class="layanan-container-mobile mb-4">
-                            <div class="flex gap-4" style="width: max-content;">
-                                <div class="service-card bg-card-light p-5 rounded-2xl flex flex-col w-72 flex-shrink-0 shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Future UI</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Digital Agency</h3>
-                                    <p class="text-sm text-gray-300">Kota Bandung</p>
+                            @if($layanans->isNotEmpty())
+                                <div class="flex gap-3" style="width: max-content;">
+                                    @foreach($layanans as $index => $layanan)
+                                        <div class="service-card bg-card-light p-4 rounded-xl flex flex-col w-56 flex-shrink-0 shadow-sm border border-border-light"
+                                             data-service-id="{{ $layanan->id ?? ($index + 1) }}"
+                                             data-service-name="{{ $layanan->nama_layanan ?? 'Layanan ' . ($index + 1) }}"
+                                             data-service-price="{{ $layanan->harga ? 'Rp ' . number_format($layanan->harga, 0, ',', '.') : 'Tidak tersedia' }}"
+                                             data-service-description="{{ $layanan->deskripsi ?? 'Deskripsi untuk layanan ' . ($index + 1) . '. Ini adalah contoh deskripsi yang berbeda untuk setiap layanan.' }}"
+                                             data-service-image="{{ $layanan->foto ? Storage::url($layanan->foto) : '' }}">
+                                            <div class="relative pt-[60%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-3 overflow-hidden">
+                                                @if($layanan->harga)
+                                                    <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-black text-xs font-semibold px-2 py-1 rounded-full z-10">
+                                                        Rp {{ number_format($layanan->harga, 0, ',', '.') }}
+                                                    </span>
+                                                @endif
+                                                @if($layanan->foto)
+                                                    <img src="{{ Storage::url($layanan->foto) }}" alt="{{ $layanan->nama_layanan }}" class="absolute inset-0 w-full h-full object-cover">
+                                                @else
+                                                    <div class="absolute inset-0 flex items-center justify-center text-white">
+                                                        <span class="text-4xl font-bold">{{ $index + 1 }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <h3 class="font-bold text-white mb-1 text-sm">{{ $layanan->nama_layanan ?? 'Layanan ' . ($index + 1) }}</h3>
+                                            <p class="service-description text-xs text-gray-300">{{ $layanan->deskripsi ?? 'Deskripsi untuk layanan ' . ($index + 1) . '. Ini adalah contoh deskripsi yang berbeda untuk setiap layanan.' }}</p>
+                                            <button class="service-detail-btn mt-2">
+                                                Lihat Detail
+                                                <span class="material-icons-outlined">arrow_forward</span>
+                                            </button>
+                                        </div>
+                                    @endforeach
                                 </div>
-                                <div class="service-card bg-card-light p-5 rounded-2xl flex flex-col w-72 flex-shrink-0 shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Future UI</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Digital Agency</h3>
-                                    <p class="text-sm text-gray-300">Kota Bandung</p>
-                                </div>
-                                <div class="service-card bg-card-light p-5 rounded-2xl flex flex-col w-72 flex-shrink-0 shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Future UI</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Digital Agency</h3>
-                                    <p class="text-sm text-gray-300">Kota Bandung</p>
-                                </div>
-                                <div class="service-card bg-card-light p-5 rounded-2xl flex flex-col w-72 flex-shrink-0 shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Total 10 UI</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Digital Agency</h3>
-                                    <p class="text-sm text-gray-300">Kota Bandung</p>
-                                </div>
-                                <div class="service-card bg-card-light p-5 rounded-2xl flex flex-col w-72 flex-shrink-0 shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">UI/UX</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Pembuatan Website</h3>
-                                    <p class="text-sm text-gray-300">Desain dan pengembangan website profesional dan responsif.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-5 rounded-2xl flex flex-col w-72 flex-shrink-0 shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Marketing</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">SEO Optimization</h3>
-                                    <p class="text-sm text-gray-300">Meningkatkan peringkat website Anda di mesin pencari.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-5 rounded-2xl flex flex-col w-72 flex-shrink-0 shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Sosmed</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Manajemen Sosial Media</h3>
-                                    <p class="text-sm text-gray-300">Mengelola dan mengembangkan kehadiran brand di media sosial.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-5 rounded-2xl flex flex-col w-72 flex-shrink-0 shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Ads</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Iklan Digital (Google Ads)</h3>
-                                    <p class="text-sm text-gray-300">Kampanye iklan yang tertarget untuk meningkatkan traffic dan konversi.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-5 rounded-2xl flex flex-col w-72 flex-shrink-0 shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Content</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Pembuatan Konten</h3>
-                                    <p class="text-sm text-gray-300">Membuat konten menarik dan relevan untuk audiens Anda.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-5 rounded-2xl flex flex-col w-72 flex-shrink-0 shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Strategy</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Strategi Brand</h3>
-                                    <p class="text-sm text-gray-300">Membangun identitas brand yang kuat dan konsisten.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-5 rounded-2xl flex flex-col w-72 flex-shrink-0 shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Mobile</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Pengembangan Aplikasi Mobile</h3>
-                                    <p class="text-sm text-gray-300">Membangun aplikasi mobile native dan cross-platform untuk iOS dan Android.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-5 rounded-2xl flex flex-col w-72 flex-shrink-0 shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Email</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Email Marketing</h3>
-                                    <p class="text-sm text-gray-300">Membuat dan mengelola kampanye email marketing yang efektif.</p>
-                                </div>
-                                <div class="service-card bg-card-light p-5 rounded-2xl flex flex-col w-72 flex-shrink-0 shadow-sm border border-border-light">
-                                    <div class="relative pt-[75%] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                        <span class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-full">Analytics</span>
-                                    </div>
-                                    <h3 class="font-bold text-white mb-1">Analitik Digital</h3>
-                                    <p class="text-sm text-gray-300">Menganalisis data digital untuk mengoptimalkan strategi pemasaran.</p>
-                                </div>
-                            </div>
+                            @else
+                                <p class="text-center text-gray-500 px-4">Belum ada layanan tersedia.</p>
+                            @endif
                         </div>
                         
-                        <!-- Indikator Scroll untuk Layanan (Hanya di Mobile) -->
                         <div class="layanan-scroll-indicator md:hidden">
                             <span>
                                 <span class="material-icons-outlined">swipe</span>
@@ -858,16 +766,19 @@
                             </span>
                         </div>
                         
-                        <!-- Tombol Toggle untuk Desktop -->
-                        <div class="hidden md:flex justify-center">
-                            <button id="layananToggleBtn" class="btn-primary bg-black text-white font-medium py-3 px-8 rounded-lg flex items-center">
-                                <span id="layananToggleText">Lihat Lainnya</span>
-                                <span id="layananToggleIcon" class="material-icons-outlined ml-2">expand_more</span>
-                            </button>
-                        </div>
+                        <!-- Tombol "Lihat Lainnya" hanya muncul jika ada lebih dari 4 layanan -->
+                        @if($layanans->count() > 4)
+                            <div class="hidden md:flex justify-center">
+                                <button id="layananToggleBtn" class="btn-primary bg-black text-white font-medium py-3 px-8 rounded-lg flex items-center">
+                                    <span id="layananToggleText">Lihat Lainnya</span>
+                                    <span id="layananToggleIcon" class="material-icons-outlined ml-2">expand_more</span>
+                                </button>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </section>
+
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <section class="py-12 md:py-24 text-center max-w-3xl mx-auto" id="tentang">
                     <div class="flex items-center mb-8">
@@ -937,7 +848,7 @@
                                     <span class="material-icons-outlined text-base">chevron_right</span>
                                 </button>
                             </div>
-                            <div class="portfolio-card bg-card-light p-6 rounded-2xl flex flex-col w-72 shadow-sm border border-border-light">
+                            <div class="portfolio-card bg-card-light p-6 rounded-2xl flex-col w-72 shadow-sm border border-border-light">
                                 <div class="relative flex-grow aspect-[4/5] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
                                     <button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center text-black hover:bg-white transition-colors">
                                         <span class="material-icons-outlined text-base">arrow_forward</span>
@@ -956,7 +867,7 @@
                                     </button>
                                 </div>
                                 <h3 class="font-bold text-white text-lg mb-4">Travel Booking Platform</h3>
-                                <button class="w-full btn-primary bg-black text-white text-sm font-medium py-2 px-4 rounded-lg flex justify-between items-center portfolio-btn" data-title="Travel Booking Platform" data-description="Platform pemesanan perjalanan terintegrasi dengan fitur pencarian tiket pesawat, hotel, dan paket liburan. Dilengkapi dengan sistem rekomendasi berbasis AI untuk pengalaman personalisasi." data-tech="Angular, Node.js, Express, MongoDB, Machine Learning">
+                                <button class="w-full btn-primary bg-black text-white text-sm font-medium py-2 px-4 rounded-lg flex justify-between items-center portfolio-btn" data-title="Travel Booking Platform" data-description="Platform pemesanan perjalanan terintegrasi dengan fitur pencarian tiket pesawat pesawat, hotel, dan paket liburan. Dilengkapi dengan sistem rekomendasi berbasis AI untuk pengalaman personalisasi." data-tech="Angular, Node.js, Express, MongoDB, Machine Learning">
                                     <span>Lihat Detail</span>
                                     <span class="material-icons-outlined text-base">chevron_right</span>
                                 </button>
@@ -982,7 +893,7 @@
                             <p class="text-sm text-black mb-1">bilibibib</p>
                             <h3 class="text-xl font-bold text-black mb-2">Judul artikel</h3>
                             <p class="text-sm text-gray-700">isi
-                                artikel<br />--------------------<br />--------------------<br />--------------------<br />--------------------<br />--------------------</p>
+                                artikel<br />--------------------<br />--------------------<br />--------------------<br />--------------------<br />--------------------<br />--------------------<br />--------------------</p>
                         </div>
                         <div class="space-y-6">
                             <div class="article-card flex items-center gap-6">
@@ -990,7 +901,7 @@
                                 <div>
                                     <h4 class="font-bold text-black mb-2">Isi artikel</h4>
                                     <p class="text-sm text-gray-700">
-                                        --------------------<br />--------------------<br />--------------------</p>
+                                        --------------------<br />--------------------<br />--------------------<br />--------------------</p>
                                 </div>
                             </div>
                             <div class="article-card flex items-center gap-6">
@@ -998,7 +909,7 @@
                                 <div>
                                     <h4 class="font-bold text-black mb-2">Isi artikel</h4>
                                     <p class="text-sm text-gray-700">
-                                        --------------------<br />--------------------<br />--------------------</p>
+                                        --------------------<br />--------------------<br />--------------------<br />--------------------</p>
                                 </div>
                             </div>
                             <div class="article-card flex items-center gap-6">
@@ -1006,7 +917,7 @@
                                 <div>
                                     <h4 class="font-bold text-black mb-2">Isi artikel</h4>
                                     <p class="text-sm text-gray-700">
-                                        --------------------<br />--------------------<br />--------------------</p>
+                                        --------------------<br />--------------------<br />--------------------<br />--------------------</p>
                                 </div>
                             </div>
                         </div>
@@ -1052,15 +963,15 @@
                         <form class="space-y-6">
                             <div>
                                 <label class="sr-only" for="name">Name</label>
-                                <input class="w-full bg-white border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-black focus:border-black text-black shadow-sm" id="name" name="name" placeholder="Nama Anda" type="text" />
+                                <input class="w-full bg-white border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-black focus:ring-black focus:border-black text-black shadow-sm" id="name" name="name" placeholder="Nama Anda" type="text" />
                             </div>
                             <div>
                                 <label class="sr-only" for="email">Email</label>
-                                <input class="w-full bg-white border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-black focus:border-black text-black shadow-sm" id="email" name="email" placeholder="Email Anda" type="email" />
+                                <input class="w-full bg-white border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-black focus:ring-black focus:border-black text-black shadow-sm" id="email" name="email" placeholder="Email Anda" type="email" />
                             </div>
                             <div>
                                 <label class="sr-only" for="message">Message</label>
-                                <textarea class="w-full bg-white border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-black focus:border-black text-black shadow-sm" id="message" name="message" placeholder="Pesan Anda" rows="6"></textarea>
+                                <textarea class="w-full bg-white border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-black focus:ring-black focus:border-black text-black shadow-sm" id="message" name="message" placeholder="Pesan Anda" rows="6"></textarea>
                             </div>
                             <button class="w-full btn-primary bg-black text-white font-medium py-3 px-8 rounded-lg" type="submit">
                                 Kirim Pesan
@@ -1076,8 +987,8 @@
                     </div>
                 </div>
             </footer>
-        </main>
-    </div>
+        </div>
+    </main>
 
     <!-- Modal Portofolio -->
     <div id="portfolioModal" class="modal">
@@ -1091,191 +1002,239 @@
                     <h3 class="text-lg font-semibold text-white mb-2">Teknologi yang Digunakan:</h3>
                     <div id="modalTech" class="flex flex-wrap gap-2"></div>
                 </div>
-                <div class="flex justify-between">
-                    <button class="btn-primary bg-black text-white font-medium py-2 px-6 rounded-lg">
-                        Kunjungi Website
-                    </button>
-                    <button class="bg-gray-700 text-white font-medium py-2 px-6 rounded-lg hover:bg-gray-600 transition-colors">
-                        Hubungi Kami
-                    </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Layanan -->
+    <div id="layananModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal close-modal-layanan">&times;</span>
+            <div class="p-6">
+                <h2 id="layananModalTitle" class="text-2xl font-bold text-white mb-4"></h2>
+                <div id="layananModalImageContainer" class="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-6 overflow-hidden">
+                    <img id="layananModalImage" src="" alt="" class="w-full h-full object-cover hidden">
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-lg font-semibold text-white mb-2">Harga:</h3>
+                    <p id="layananModalPrice" class="text-gray-300"></p>
+                </div>
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-white mb-2">Deskripsi:</h3>
+                    <p id="layananModalDescription" class="text-gray-300"></p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Sticky Header
-        const header = document.getElementById('header');
-        
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
-        
-        // Mobile Navigation
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mobileNav = document.getElementById('mobileNav');
-        const closeMobileNav = document.getElementById('closeMobileNav');
-        
-        // Pastikan navigasi mobile tersembunyi saat halaman dimuat
         document.addEventListener('DOMContentLoaded', function() {
-            mobileNav.classList.remove('active');
-            mobileMenuBtn.classList.remove('active');
-        });
-        
-        mobileMenuBtn.addEventListener('click', function() {
-            mobileMenuBtn.classList.toggle('active');
-            mobileNav.classList.toggle('active');
-        });
-        
-        closeMobileNav.addEventListener('click', function() {
-            mobileMenuBtn.classList.remove('active');
-            mobileNav.classList.remove('active');
-        });
-        
-        // Close mobile nav when clicking on a link
-        const mobileNavLinks = mobileNav.querySelectorAll('.nav-link');
-        mobileNavLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                mobileMenuBtn.classList.remove('active');
-                mobileNav.classList.remove('active');
-            });
-        });
-        
-        // Also close when clicking on login button
-        const mobileLoginBtn = mobileNav.querySelector('.login-btn');
-        mobileLoginBtn.addEventListener('click', function() {
-            mobileMenuBtn.classList.remove('active');
-            mobileNav.classList.remove('active');
-        });
-        
-        // Navigation active state
-        const navLinks = document.querySelectorAll('.nav-link');
-        const sections = document.querySelectorAll('section[id]');
-        
-        // Function to update active navigation link
-        function updateActiveNav() {
-            const scrollY = window.pageYOffset;
+            // --- Logika untuk Header Sticky ---
+            const header = document.getElementById('header');
             
-            // Handle special case for beranda section when at the top of the page
-            if (scrollY < 100) {
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('data-section') === 'beranda') {
-                        link.classList.add('active');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            // --- Logika untuk Tombol "Lihat Lainnya" ---
+            const layananToggleBtn = document.getElementById('layananToggleBtn');
+            const layananGridWrapper = document.getElementById('layananGridWrapper');
+            const layananToggleText = document.getElementById('layananToggleText');
+            const layananToggleIcon = document.getElementById('layananToggleIcon');
+            const scrollIndicator = document.getElementById('scrollIndicator');
+            
+            // Event listener untuk tombol toggle
+            if (layananToggleBtn) {
+                layananToggleBtn.addEventListener('click', function() {
+                    const isExpanded = layananGridWrapper.classList.contains('expanded');
+
+                    if (isExpanded) {
+                        // Tutup
+                        layananGridWrapper.classList.remove('expanded');
+                        layananToggleText.textContent = 'Lihat Lainnya';
+                        layananToggleIcon.textContent = 'expand_more';
+                        scrollIndicator.style.display = 'none';
+                    } else {
+                        // Buka sisa layanan dalam container scroll
+                        layananGridWrapper.classList.add('expanded');
+                        layananToggleText.textContent = 'Tutup';
+                        layananToggleIcon.textContent = 'expand_less';
+                        
+                        // Tampilkan indikator scroll
+                        scrollIndicator.style.display = 'flex';
                     }
                 });
-                return;
+            }
+
+            // --- Logika untuk Modal Layanan ---
+            const layananModal = document.getElementById('layananModal');
+            const layananModalTitle = document.getElementById('layananModalTitle');
+            const layananModalImage = document.getElementById('layananModalImage');
+            const layananModalImageContainer = document.getElementById('layananModalImageContainer');
+            const layananModalPrice = document.getElementById('layananModalPrice');
+            const layananModalDescription = document.getElementById('layananModalDescription');
+            const closeModalLayanan = document.querySelector('.close-modal-layanan');
+            
+            // Event listener untuk tombol detail pada setiap kartu layanan
+            const serviceDetailBtns = document.querySelectorAll('.service-detail-btn');
+            serviceDetailBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const serviceCard = this.closest('.service-card');
+                    
+                    // Ambil data dari atribut data
+                    const serviceName = serviceCard.getAttribute('data-service-name');
+                    const servicePrice = serviceCard.getAttribute('data-service-price');
+                    const serviceDescription = serviceCard.getAttribute('data-service-description');
+                    const serviceImage = serviceCard.getAttribute('data-service-image');
+                    
+                    // Isi modal dengan data
+                    layananModalTitle.textContent = serviceName;
+                    layananModalPrice.textContent = servicePrice;
+                    layananModalDescription.textContent = serviceDescription;
+                    
+                    // Tampilkan gambar jika ada
+                    if (serviceImage) {
+                        layananModalImage.src = serviceImage;
+                        layananModalImage.alt = serviceName;
+                        layananModalImage.classList.remove('hidden');
+                    } else {
+                        layananModalImage.classList.add('hidden');
+                    }
+                    
+                    // Tampilkan modal
+                    layananModal.style.display = 'block';
+                    document.body.style.overflow = 'hidden'; // Mencegah scroll di background
+                });
+            });
+            
+            // Event listener untuk tombol close modal
+            closeModalLayanan.addEventListener('click', function() {
+                layananModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Kembalikan scroll
+            });
+            
+            // Tutup modal saat klik di luar konten modal
+            window.addEventListener('click', function(event) {
+                if (event.target === layananModal) {
+                    layananModal.style.display = 'none';
+                    document.body.style.overflow = 'auto'; // Kembalikan scroll
+                }
+            });
+            
+            // --- Logika untuk Modal Portofolio ---
+            const portfolioModal = document.getElementById('portfolioModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDescription = document.getElementById('modalDescription');
+            const modalTech = document.getElementById('modalTech');
+            const closeModalPortfolio = document.querySelector('.close-modal-portfolio');
+            
+            // Event listener untuk tombol detail pada setiap kartu portofolio
+            const portfolioBtns = document.querySelectorAll('.portfolio-btn');
+            portfolioBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const title = this.getAttribute('data-title');
+                    const description = this.getAttribute('data-description');
+                    const tech = this.getAttribute('data-tech').split(', ');
+                    
+                    modalTitle.textContent = title;
+                    modalDescription.textContent = description;
+                    
+                    // Kosongkan dan isi ulang container teknologi
+                    modalTech.innerHTML = '';
+                    tech.forEach(techItem => {
+                        const techBadge = document.createElement('span');
+                        techBadge.className = 'bg-gray-700 text-white text-sm px-3 py-1 rounded-full';
+                        techBadge.textContent = techItem;
+                        modalTech.appendChild(techBadge);
+                    });
+                    
+                    portfolioModal.style.display = 'block';
+                    document.body.style.overflow = 'hidden'; // Mencegah scroll di background
+                });
+            });
+            
+            // Event listener untuk tombol close modal
+            closeModalPortfolio.addEventListener('click', function() {
+                portfolioModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Kembalikan scroll
+            });
+            
+            // Tutup modal saat klik di luar konten modal
+            window.addEventListener('click', function(event) {
+                if (event.target === portfolioModal) {
+                    portfolioModal.style.display = 'none';
+                    document.body.style.overflow = 'auto'; // Kembalikan scroll
+                }
+            });
+            
+            // --- Logika untuk navigasi aktif berdasarkan scroll ---
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            function updateActiveNav() {
+                const scrollPosition = window.scrollY + 100;
+                
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.offsetHeight;
+                    const sectionId = section.getAttribute('id');
+                    
+                    if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('data-section') === sectionId) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
             }
             
-            sections.forEach(section => {
-                const sectionHeight = section.offsetHeight;
-                const sectionTop = section.offsetTop - 100;
-                const sectionId = section.getAttribute('id');
-                
-                if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-                    navLinks.forEach(link => {
-                        link.classList.remove('active');
-                        if (link.getAttribute('data-section') === sectionId) {
-                            link.classList.add('active');
-                        }
-                    });
-                }
-            });
-        }
-        
-        // Add click event to navigation links
-        navLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Remove active class from all links
-                navLinks.forEach(l => l.classList.remove('active'));
-                
-                // Add active class to clicked link
-                this.classList.add('active');
-                
-                // If it's a link to a section, update active state on scroll
-                const targetSection = this.getAttribute('href');
-                if (targetSection.startsWith('#')) {
-                    // Update active state when scrolling to section
-                    setTimeout(updateActiveNav, 100);
-                }
-            });
-        });
-        
-        // Update active navigation on scroll
-        window.addEventListener('scroll', updateActiveNav);
-        
-        // Initial call to set active nav on page load
-        updateActiveNav();
-        
-        // Modal Portfolio
-        const portfolioModal = document.getElementById('portfolioModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalDescription = document.getElementById('modalDescription');
-        const modalTech = document.getElementById('modalTech');
-        const closePortfolioModal = document.querySelector('.close-modal-portfolio');
-        
-        const portfolioBtns = document.querySelectorAll('.portfolio-btn');
-        
-        portfolioBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const title = this.getAttribute('data-title');
-                const description = this.getAttribute('data-description');
-                const tech = this.getAttribute('data-tech').split(', ');
-                
-                modalTitle.textContent = title;
-                modalDescription.textContent = description;
-                
-                modalTech.innerHTML = '';
-                tech.forEach(techItem => {
-                    const techTag = document.createElement('span');
-                    techTag.className = 'bg-gray-700 text-white text-sm font-medium py-1 px-3 rounded-full';
-                    techTag.textContent = techItem;
-                    modalTech.appendChild(techTag);
+            // Update navigasi aktif saat scroll
+            window.addEventListener('scroll', updateActiveNav);
+            
+            // Smooth scroll untuk navigasi
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetSection = document.querySelector(targetId);
+                    
+                    if (targetSection) {
+                        const offsetTop = targetSection.offsetTop - 80;
+                        window.scrollTo({
+                            top: offsetTop,
+                            behavior: 'smooth'
+                        });
+                    }
                 });
-                
-                portfolioModal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
             });
-        });
-        
-        closePortfolioModal.addEventListener('click', function() {
-            portfolioModal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        });
-        
-        // Layanan Toggle
-        const layananContainer = document.getElementById('layananContainer');
-        const layananToggleBtn = document.getElementById('layananToggleBtn');
-        const layananToggleText = document.getElementById('layananToggleText');
-        const layananToggleIcon = document.getElementById('layananToggleIcon');
-        
-        layananToggleBtn.addEventListener('click', function() {
-            if (layananContainer.classList.contains('expanded')) {
-                layananContainer.classList.remove('expanded');
-                layananToggleText.textContent = 'Lihat Lainnya';
-                layananToggleIcon.textContent = 'expand_more';
-                // Scroll ke atas saat ditutup
-                layananContainer.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
+            
+            // Inisialisasi navigasi aktif
+            updateActiveNav();
+            
+            // --- Logika untuk Mobile Menu ---
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileNav = document.getElementById('mobileNav');
+            
+            mobileMenuBtn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                mobileNav.classList.toggle('active');
+            });
+            
+            // Tutup mobile menu saat link diklik
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav .nav-link');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileMenuBtn.classList.remove('active');
+                    mobileNav.classList.remove('active');
                 });
-            } else {
-                layananContainer.classList.add('expanded');
-                layananToggleText.textContent = 'Tutup';
-                layananToggleIcon.textContent = 'expand_less';
-            }
-        });
-
-        // Tutup modal saat klik di luar area modal
-        window.addEventListener('click', function(event) {
-            if (event.target === portfolioModal) {
-                portfolioModal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
+            });
         });
     </script>
 </body>

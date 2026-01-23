@@ -108,9 +108,6 @@
     @include('karyawan.templet.header')
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Breadcrumb -->
-      
-
         <!-- Page Header -->
         <div class="mb-8">
             <h1 class="text-3xl font-bold">Tugas Saya</h1>
@@ -180,6 +177,12 @@
                                             </span>
                                             {{ $priority === 'high' ? 'Tinggi' : ($priority === 'medium' ? 'Sedang' : 'Rendah') }}
                                         </span>
+                                        @if($task->submission_file)
+                                            <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                                <span class="material-symbols-outlined text-xs">check_circle</span>
+                                                Telah Diupload
+                                            </span>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -254,7 +257,7 @@
         </main>
     </div>
 
-    <!-- Task Detail Modal - DESAIN BARU -->
+    <!-- Task Detail Modal -->
     <div id="taskDetailModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div class="p-6 md:p-8">
@@ -303,7 +306,7 @@
                     
                     <!-- File Terlampir Section -->
                     <div class="mt-6 md:mt-8" id="fileAttachmentSection" style="display: none;">
-                        <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-2 text-base md:text-lg">File Terlampir</h4>
+                        <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-2 text-base md:text-lg">File Hasil Tugas</h4>
                         <div id="fileAttachmentList" class="space-y-3">
                             <!-- Files will be populated here -->
                         </div>
@@ -317,7 +320,6 @@
                         
                         <!-- Comments Container -->
                         <div id="commentsContainer" class="space-y-4 md:space-y-6 mb-6 max-h-64 overflow-y-auto p-2">
-                            <!-- Comments will be loaded here via AJAX -->
                             <div class="text-center py-8 text-gray-500 dark:text-gray-400">
                                 <span class="material-symbols-outlined text-4xl mb-2">chat</span>
                                 <p>Belum ada komentar</p>
@@ -377,13 +379,13 @@
                         <div>
                             <label class="block text-sm font-medium mb-2">File Hasil Tugas</label>
                             <div class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-8 text-center hover:border-primary transition">
-                                <input type="file" id="taskFile" name="file" class="hidden" accept=".pdf,.doc,.docx,.zip,.rar,.jpg,.jpeg,.png,.gif">
+                                <input type="file" id="taskFile" name="file" class="hidden" accept=".pdf,.doc,.docx,.zip,.rar,.jpg,.jpeg,.png,.gif,.txt,.xlsx,.xls,.ppt,.pptx">
                                 <span class="material-symbols-outlined text-4xl text-gray-400 mb-3">cloud_upload</span>
                                 <p class="text-gray-600 dark:text-gray-400 mb-2">
                                     Klik atau drag file ke sini
                                 </p>
                                 <p class="text-xs text-gray-500">
-                                    PDF, DOC, ZIP, RAR, JPG, PNG (max. 10MB)
+                                    PDF, DOC, ZIP, JPG, PNG, TXT, XLSX, PPT (max. 10MB)
                                 </p>
                                 <button type="button" id="fileUploadTrigger" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-purple-700">
                                     Pilih File
@@ -428,6 +430,18 @@
         const currentUser = @json(auth()->user() ?? null);
         let currentTaskId = null;
 
+        // ✅ PERBAIKAN: API Routes yang benar
+        const API_ROUTES = {
+            taskDetail: (id) => `/api/tasks/${id}/detail`,
+            taskComments: (id) => `/api/tasks/${id}/comments`,
+            storeComment: (id) => `/api/tasks/${id}/comments`,
+            uploadFile: (id) => `/api/tasks/${id}/upload-file`,  // ✅ PERBAIKI INI!
+            downloadFile: (id) => `/api/tasks/${id}/download`,
+            downloadSubmission: (id) => `/api/tasks/${id}/download`,
+            downloadTaskFile: (taskId, fileId) => `/api/tasks/files/${fileId}/download`,
+            getTaskFiles: (id) => `/api/tasks/${id}/files`,
+        };
+
         const elements = {
             taskCards: document.querySelectorAll('.task-card'),
             taskTitle: document.getElementById('taskTitle'),
@@ -463,6 +477,9 @@
             modalUploadButton: document.getElementById('modalUploadButton'),
             closeUploadModal: document.getElementById('closeUploadModal'),
             cancelUpload: document.getElementById('cancelUpload'),
+            commentsContainer: document.getElementById('commentsContainer'),
+            fileAttachmentSection: document.getElementById('fileAttachmentSection'),
+            fileAttachmentList: document.getElementById('fileAttachmentList'),
         };
 
         // Fungsi untuk memilih task
@@ -476,7 +493,19 @@
             currentTaskId = parseInt(card.dataset.taskId);
             elements.taskTitle.textContent = card.dataset.taskTitle;
             elements.taskDescription.textContent = card.dataset.taskFullDescription;
-            elements.uploadButton.disabled = false;
+            
+            // Cek jika tugas sudah selesai, disable upload button
+            const taskStatus = card.dataset.taskStatus;
+            if (taskStatus === 'selesai') {
+                elements.uploadButton.disabled = true;
+                elements.uploadButton.textContent = 'TUGAS SUDAH SELESAI';
+                elements.uploadButton.className = 'w-full mt-6 bg-gray-400 text-white font-bold py-4 rounded-xl cursor-not-allowed';
+            } else {
+                elements.uploadButton.disabled = false;
+                elements.uploadButton.textContent = 'UPLOAD HASIL TUGAS';
+                elements.uploadButton.className = 'w-full mt-6 bg-primary text-white font-bold py-4 rounded-xl hover:bg-purple-700 transition';
+            }
+            
             elements.uploadTaskId.value = currentTaskId;
             
             // Update sidebar details
@@ -538,30 +567,43 @@
 
         // Fungsi untuk download file
         function downloadFile(filePath) {
-            const url = `/storage/${filePath}`;
+            const url = `/api/tasks/${currentTaskId}/download`;
             window.open(url, '_blank');
         }
 
-        // Fungsi untuk membuka modal detail dengan desain baru
-        function openDetailModal() {
-            if (!currentTaskId) return;
-            
-            const card = document.querySelector(`[data-task-id="${currentTaskId}"]`);
-            if (!card) return;
-            
-            // Cari task dari array tasks
-            const taskElement = Array.from(tasks).find(t => t.id == currentTaskId);
-            
+        // Fungsi untuk load task detail via API
+        async function loadTaskDetail(taskId) {
+            try {
+                const response = await fetch(API_ROUTES.taskDetail(taskId), {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.task) {
+                    return result.task;
+                }
+            } catch (error) {
+                console.error('Error loading task detail:', error);
+            }
+            return null;
+        }
+
+        // Fungsi untuk update modal dengan data detail
+        async function updateModalWithDetail(task) {
             // Set title
-            elements.modalTaskTitle.textContent = card.dataset.taskTitle;
+            elements.modalTaskTitle.textContent = task.judul;
             
             // Set description
-            const description = card.dataset.taskFullDescription || 'Tidak ada deskripsi';
-            elements.modalTaskDescription.textContent = description;
+            elements.modalTaskDescription.textContent = task.deskripsi || 'Tidak ada deskripsi';
             
             // Format tanggal deadline
-            if (card.dataset.taskDeadline && card.dataset.taskDeadline !== 'null') {
-                const deadline = new Date(card.dataset.taskDeadline);
+            if (task.deadline) {
+                const deadline = new Date(task.deadline);
                 elements.modalTaskDeadline.textContent = deadline.toLocaleDateString('id-ID', {
                     weekday: 'long',
                     year: 'numeric',
@@ -575,58 +617,214 @@
             }
             
             // Assigner
-            elements.modalTaskAssigner.textContent = card.dataset.taskAssigner || 'Admin';
+            elements.modalTaskAssigner.textContent = task.assigned_by || 'Admin';
             
-            if (taskElement) {
-                // Status dengan styling
-                const status = taskElement.status || 'pending';
-                let statusText = 'Tidak diketahui';
-                let statusClass = 'text-gray-600 dark:text-gray-400';
-                
-                if (status === 'pending') {
-                    statusText = 'PENDING';
-                    statusClass = 'text-yellow-600 dark:text-yellow-400';
-                } else if (status === 'proses') {
-                    statusText = 'PROSES';
-                    statusClass = 'text-blue-600 dark:text-blue-400';
-                } else if (status === 'selesai') {
-                    statusText = 'SELESAI';
-                    statusClass = 'text-green-600 dark:text-green-400';
-                } else if (status === 'dibatalkan') {
-                    statusText = 'DIBATALKAN';
-                    statusClass = 'text-red-600 dark:text-red-400';
-                }
-                
-                elements.modalTaskStatus.textContent = statusText;
-                elements.modalTaskStatus.className = `${statusClass} text-sm md:text-base`;
-                
-                // Priority dengan styling
-                const priority = taskElement.priority || 'medium';
-                let priorityText = 'Tidak diketahui';
-                let priorityClass = 'text-gray-600 dark:text-gray-400';
-                
-                if (priority === 'high') {
-                    priorityText = 'TINGGI';
-                    priorityClass = 'text-red-600 dark:text-red-400';
-                } else if (priority === 'medium') {
-                    priorityText = 'SEDANG';
-                    priorityClass = 'text-yellow-600 dark:text-yellow-400';
-                } else if (priority === 'low') {
-                    priorityText = 'RENDAH';
-                    priorityClass = 'text-green-600 dark:text-green-400';
-                }
-                
-                elements.modalTaskPriority.textContent = priorityText;
-                elements.modalTaskPriority.className = `${priorityClass} text-sm md:text-base`;
+            // Status dengan styling
+            const status = task.status || 'pending';
+            let statusText = 'Tidak diketahui';
+            let statusClass = 'text-gray-600 dark:text-gray-400';
+            
+            if (status === 'pending') {
+                statusText = 'PENDING';
+                statusClass = 'text-yellow-600 dark:text-yellow-400';
+            } else if (status === 'proses') {
+                statusText = 'PROSES';
+                statusClass = 'text-blue-600 dark:text-blue-400';
+            } else if (status === 'selesai') {
+                statusText = 'SELESAI';
+                statusClass = 'text-green-600 dark:text-green-400';
+            } else if (status === 'dibatalkan') {
+                statusText = 'DIBATALKAN';
+                statusClass = 'text-red-600 dark:text-red-400';
             }
             
-            // Hide file section for now (since we don't have file data)
-            document.getElementById('fileAttachmentSection').style.display = 'none';
+            elements.modalTaskStatus.textContent = statusText;
+            elements.modalTaskStatus.className = `${statusClass} text-sm md:text-base`;
             
-            // Load comments (you'll need to implement this API)
-            // loadComments(currentTaskId);
+            // Priority dengan styling
+            const priority = task.priority || 'medium';
+            let priorityText = 'Tidak diketahui';
+            let priorityClass = 'text-gray-600 dark:text-gray-400';
+            
+            if (priority === 'high') {
+                priorityText = 'TINGGI';
+                priorityClass = 'text-red-600 dark:text-red-400';
+            } else if (priority === 'medium') {
+                priorityText = 'SEDANG';
+                priorityClass = 'text-yellow-600 dark:text-yellow-400';
+            } else if (priority === 'low') {
+                priorityText = 'RENDAH';
+                priorityClass = 'text-green-600 dark:text-green-400';
+            }
+            
+            elements.modalTaskPriority.textContent = priorityText;
+            elements.modalTaskPriority.className = `${priorityClass} text-sm md:text-base`;
+            
+            // Tampilkan file jika ada
+            if (task.submission_file) {
+                elements.fileAttachmentSection.style.display = 'block';
+                const submittedDate = task.submitted_at ? new Date(task.submitted_at).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) : '-';
+                
+                elements.fileAttachmentList.innerHTML = `
+                    <div class="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-green-600 dark:text-green-400">task_alt</span>
+                            <div>
+                                <p class="font-medium text-green-800 dark:text-green-300">File Hasil Tugas</p>
+                                <p class="text-xs text-green-600 dark:text-green-400">Diunggah pada: ${submittedDate}</p>
+                                ${task.submission_notes ? `<p class="text-xs text-green-700 dark:text-green-300 mt-1">📝 Catatan: ${task.submission_notes}</p>` : ''}
+                            </div>
+                        </div>
+                        <button onclick="window.open('${task.submission_url}', '_blank')" 
+                            class="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">download</span>
+                            Download
+                        </button>
+                    </div>
+                `;
+                
+                // Disable upload button di modal jika sudah upload
+                elements.modalUploadButton.disabled = true;
+                elements.modalUploadButton.textContent = 'SUDAH DIUPLOAD';
+                elements.modalUploadButton.className = 'px-6 py-3 bg-green-600 text-white rounded-lg cursor-not-allowed text-sm md:text-base w-full sm:w-auto';
+            } else {
+                elements.fileAttachmentSection.style.display = 'none';
+                elements.modalUploadButton.disabled = false;
+                elements.modalUploadButton.textContent = 'Upload Hasil Tugas';
+                elements.modalUploadButton.className = 'px-6 py-3 bg-primary text-white rounded-lg hover:bg-purple-700 transition text-sm md:text-base w-full sm:w-auto';
+            }
+            
+            // Load comments
+            loadComments(currentTaskId);
+        }
+
+        // Fungsi untuk membuka modal detail
+        async function openDetailModal() {
+            if (!currentTaskId) return;
+            
+            const taskDetail = await loadTaskDetail(currentTaskId);
+            if (taskDetail) {
+                await updateModalWithDetail(taskDetail);
+            }
             
             elements.taskDetailModal.classList.remove('hidden');
+        }
+
+        // Fungsi untuk load komentar
+        async function loadComments(taskId) {
+            try {
+                const response = await fetch(API_ROUTES.taskComments(taskId), {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.comments) {
+                    renderComments(result.comments);
+                }
+            } catch (error) {
+                console.error('Error loading comments:', error);
+                renderComments([]);
+            }
+        }
+
+        // Fungsi untuk render komentar
+        function renderComments(comments) {
+            if (!elements.commentsContainer) return;
+            
+            if (comments.length === 0) {
+                elements.commentsContainer.innerHTML = `
+                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <span class="material-symbols-outlined text-4xl mb-2">chat</span>
+                        <p>Belum ada komentar</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            elements.commentsContainer.innerHTML = comments.map(comment => `
+                <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                                <span class="material-symbols-outlined text-primary text-sm">person</span>
+                            </div>
+                            <div>
+                                <span class="font-medium text-sm">${comment.user.name}</span>
+                                <span class="text-xs px-2 py-0.5 ml-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                                    ${comment.user.role}
+                                </span>
+                            </div>
+                        </div>
+                        <span class="text-xs text-gray-500">${comment.created_at}</span>
+                    </div>
+                    <p class="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-line mt-2">${comment.content}</p>
+                </div>
+            `).join('');
+            
+            // Scroll ke bawah
+            elements.commentsContainer.scrollTop = elements.commentsContainer.scrollHeight;
+        }
+
+        // Fungsi untuk mengirim komentar
+        async function submitComment() {
+            if (!currentTaskId) {
+                showNotification('Peringatan', 'Pilih tugas terlebih dahulu', 'warning');
+                return;
+            }
+            
+            const content = elements.commentInput.value.trim();
+            if (!content) {
+                showNotification('Peringatan', 'Komentar tidak boleh kosong', 'warning');
+                return;
+            }
+            
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+                
+                const response = await fetch(API_ROUTES.storeComment(currentTaskId), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ content: content })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Clear input
+                    elements.commentInput.value = '';
+                    
+                    // Add new comment to list
+                    const commentsResponse = await fetch(API_ROUTES.taskComments(currentTaskId));
+                    const commentsResult = await commentsResponse.json();
+                    
+                    if (commentsResult.success) {
+                        renderComments(commentsResult.comments);
+                    }
+                    
+                    showNotification('Sukses', 'Komentar berhasil dikirim');
+                } else {
+                    showNotification('Error', result.message || 'Gagal mengirim komentar', 'error');
+                }
+            } catch (error) {
+                console.error('Error submitting comment:', error);
+                showNotification('Error', 'Terjadi kesalahan saat mengirim komentar', 'error');
+            }
         }
 
         // Fungsi untuk show notification
@@ -666,6 +864,25 @@
                     selectTask(elements.taskCards[0]);
                 }
             }, 100);
+        }
+
+        // Event Listeners untuk komentar
+        if (elements.submitComment) {
+            elements.submitComment.addEventListener('click', submitComment);
+        }
+
+        if (elements.cancelComment) {
+            elements.cancelComment.addEventListener('click', () => {
+                elements.commentInput.value = '';
+            });
+        }
+
+        if (elements.commentInput) {
+            elements.commentInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    submitComment();
+                }
+            });
         }
 
         // Event Listeners untuk modal detail
@@ -721,6 +938,33 @@
             });
         }
 
+        // Drag and drop functionality
+        const dropZone = elements.uploadModal?.querySelector('.border-dashed');
+        if (dropZone) {
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-primary', 'bg-primary/5');
+            });
+
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-primary', 'bg-primary/5');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-primary', 'bg-primary/5');
+                
+                if (e.dataTransfer.files.length > 0) {
+                    elements.taskFile.files = e.dataTransfer.files;
+                    if (elements.fileName) {
+                        elements.fileName.textContent = `File terpilih: ${e.dataTransfer.files[0].name}`;
+                        elements.fileName.classList.remove('hidden');
+                    }
+                }
+            });
+        }
+
         // Close upload modal
         if (elements.closeUploadModal) {
             elements.closeUploadModal.addEventListener('click', () => {
@@ -742,7 +986,7 @@
             });
         }
 
-        // Form submit untuk upload
+        // ✅ PERBAIKAN: Form submit untuk upload menggunakan endpoint yang benar
         if (elements.uploadForm) {
             elements.uploadForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -752,43 +996,121 @@
                     return;
                 }
                 
-                const formData = new FormData(elements.uploadForm);
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-                formData.append('_token', csrfToken);
+                const fileInput = elements.taskFile;
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    showNotification('Error', 'Silakan pilih file terlebih dahulu', 'error');
+                    return;
+                }
                 
-                showNotification('Memproses', 'Mengupload file...', 'warning');
+                // Buat FormData
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                
+                const notes = elements.fileNotes ? elements.fileNotes.value : '';
+                if (notes) {
+                    formData.append('notes', notes);
+                }
+                
+                // Tambahkan CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (csrfToken) {
+                    formData.append('_token', csrfToken.content);
+                }
+                
+                showNotification('Memproses', 'Mengupload file dan memperbarui status...', 'warning');
                 
                 try {
-                    // Gunakan API route untuk upload
-                    const response = await fetch(`/api/tasks/${currentTaskId}/upload`, {
+                    // ✅ GUNAKAN ENDPOINT YANG BENAR: /upload-file
+                    const response = await fetch(`/api/tasks/${currentTaskId}/upload-file`, {
                         method: 'POST',
                         body: formData,
                         headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
-                        }
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                            // JANGAN tambahkan 'Content-Type' untuk FormData
+                        },
+                        credentials: 'include' // untuk kirim session cookie
                     });
                     
                     const result = await response.json();
                     
+                    if (!response.ok) {
+                        // Cek jika ada error validasi
+                        if (result.errors) {
+                            const errorMessages = Object.values(result.errors).flat().join(', ');
+                            showNotification('Error', `Validasi gagal: ${errorMessages}`, 'error');
+                        } else {
+                            showNotification('Error', result.message || 'Gagal mengupload file', 'error');
+                        }
+                        return;
+                    }
+                    
                     if (result.success) {
-                        showNotification('Sukses', 'File berhasil diupload');
+                        showNotification('Sukses', result.message || 'File berhasil diupload dan status tugas diperbarui menjadi SELESAI!');
+                        
+                        // Update UI
                         if (elements.uploadModal) {
                             elements.uploadModal.classList.add('hidden');
                             elements.uploadForm.reset();
                             if (elements.fileName) elements.fileName.classList.add('hidden');
                         }
                         
-                        // Reload halaman setelah 2 detik
+                        // Update task card status
+                        const card = document.querySelector(`[data-task-id="${currentTaskId}"]`);
+                        if (card) {
+                            card.dataset.taskStatus = 'selesai';
+                            
+                            // Update status badge
+                            const statusBadge = card.querySelector('.inline-block.px-3');
+                            if (statusBadge) {
+                                statusBadge.className = 'mt-2 inline-block px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+                                statusBadge.textContent = 'SELESAI';
+                            }
+                            
+                            // Add uploaded badge
+                            const badgeContainer = card.querySelector('.flex.items-center.gap-2.mt-2');
+                            if (badgeContainer && !badgeContainer.querySelector('.bg-green-100')) {
+                                const uploadedBadge = document.createElement('span');
+                                uploadedBadge.className = 'inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+                                uploadedBadge.innerHTML = '<span class="material-symbols-outlined text-xs">check_circle</span>Telah Diupload';
+                                badgeContainer.appendChild(uploadedBadge);
+                            }
+                            
+                            // Update sidebar
+                            updateSidebarDetails(card);
+                            
+                            // Update upload button
+                            if (elements.uploadButton) {
+                                elements.uploadButton.disabled = true;
+                                elements.uploadButton.textContent = 'TUGAS SUDAH SELESAI';
+                                elements.uploadButton.className = 'w-full mt-6 bg-gray-400 text-white font-bold py-4 rounded-xl cursor-not-allowed';
+                            }
+                        }
+                        
+                        // Reload task detail untuk mendapatkan data terbaru
+                        try {
+                            const taskResponse = await fetch(API_ROUTES.taskDetail(currentTaskId));
+                            const taskResult = await taskResponse.json();
+                            
+                            if (taskResult.success && elements.taskDetailModal && !elements.taskDetailModal.classList.contains('hidden')) {
+                                await updateModalWithDetail(taskResult.task);
+                            }
+                        } catch (error) {
+                            console.error('Error reloading task detail:', error);
+                        }
+                        
+                        // Tambahkan delay sebelum reload halaman
                         setTimeout(() => {
-                            window.location.reload();
+                            // Optional: Reload page untuk update data terbaru
+                            // window.location.reload();
                         }, 2000);
+                        
                     } else {
                         showNotification('Error', result.message || 'Gagal mengupload file', 'error');
                     }
                 } catch (error) {
                     console.error('Upload error:', error);
-                    showNotification('Error', 'Terjadi kesalahan saat mengupload: ' + error.message, 'error');
+                    showNotification('Error', 'Terjadi kesalahan jaringan saat mengupload', 'error');
                 }
             });
         }
@@ -828,6 +1150,26 @@
             elements.uploadButton.disabled = true;
             elements.uploadButton.textContent = 'Tidak ada tugas';
         }
+        
+        // Debug routes
+        async function debugRoutes() {
+            try {
+                console.log('=== DEBUG ROUTES ===');
+                console.log('Current Task ID:', currentTaskId);
+                
+                // Test route yang benar
+                if (currentTaskId) {
+                    const correctResponse = await fetch(`/api/tasks/${currentTaskId}/upload-file`, { method: 'HEAD' });
+                    console.log(`Route /api/tasks/${currentTaskId}/upload-file status:`, correctResponse.status);
+                }
+                
+            } catch (error) {
+                console.error('Debug error:', error);
+            }
+        }
+        
+        // Jalankan debug
+        setTimeout(debugRoutes, 1000);
     </script>
 </body>
 </html>

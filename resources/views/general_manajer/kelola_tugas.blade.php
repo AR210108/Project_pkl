@@ -1054,30 +1054,11 @@
                                 <input type="datetime-local" name="deadline" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
                             </div>
                             <div>
-                                <div class="flex gap-2 mb-3" id="assigneeTypeContainer">
-                                    <button type="button" class="assignee-type-btn active flex-1" data-type="divisi">
-                                        <div class="flex flex-col items-center">
-                                            <span class="material-icons-outlined mb-1">groups</span>
-                                            <span class="text-xs">Divisi</span>
-                                        </div>
-                                    </button>
-                                    <button type="button" class="assignee-type-btn flex-1" data-type="manager">
-                                        <div class="flex flex-col items-center">
-                                            <span class="material-icons-outlined mb-1">supervisor_account</span>
-                                            <span class="text-xs">Manajer</span>
-                                        </div>
-                                    </button>
-                                </div>
-                                <input type="hidden" name="target_type" value="divisi">
-                            </div>
-                            <div id="assigneeSelection">
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Pilih Divisi *</label>
-                                    <select name="target_divisi" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
-                                        <option value="">Pilih Divisi</option>
-                                        ${state.divisiList.map(d => `<option value="${d}">${d}</option>`).join('')}
-                                    </select>
-                                </div>
+                                <label class="block text-sm font-medium mb-1">Ditugaskan Kepada *</label>
+                                <select name="target_manager_id" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
+                                    <option value="">Pilih Manajer Divisi</option>
+                                    ${state.managerList.map(m => `<option value="${m.id}">${m.name} (${m.divisi})</option>`).join('')}
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium mb-1">Status *</label>
@@ -1102,39 +1083,12 @@
                     await api.createTask(data);
                 });
                 
-                // Add event listeners for assignee type buttons
+                // Set default target_type to manager since we removed the toggle buttons
                 setTimeout(() => {
-                    const assigneeTypeBtns = modalEl.querySelectorAll('.assignee-type-btn');
-                    assigneeTypeBtns.forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            assigneeTypeBtns.forEach(b => b.classList.remove('active'));
-                            this.classList.add('active');
-                            
-                            const type = this.dataset.type;
-                            modalEl.querySelector('input[name="target_type"]').value = type;
-                            
-                            const assigneeDiv = modalEl.querySelector('#assigneeSelection');
-                            const html = type === 'divisi' ? `
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Pilih Divisi *</label>
-                                    <select name="target_divisi" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
-                                        <option value="">Pilih Divisi</option>
-                                        ${state.divisiList.map(d => `<option value="${d}">${d}</option>`).join('')}
-                                    </select>
-                                </div>
-                            ` : `
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Pilih Manajer Divisi *</label>
-                                    <select name="target_manager_id" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" required>
-                                        <option value="">Pilih Manajer Divisi</option>
-                                        ${state.managerList.map(m => `<option value="${m.id}">${m.name} (${m.divisi})</option>`).join('')}
-                                    </select>
-                                </div>
-                            `;
-                            
-                            assigneeDiv.innerHTML = html;
-                        });
-                    });
+                    const targetTypeInput = modalEl.querySelector('input[name="target_type"]');
+                    if(targetTypeInput) {
+                        targetTypeInput.value = 'manager';
+                    }
                 }, 100);
             }
         };
