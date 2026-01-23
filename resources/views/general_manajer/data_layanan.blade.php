@@ -476,123 +476,145 @@
                 </div>
                 
                 <!-- Data Table Panel -->
-                <div class="panel">
-                    <div class="panel-header">
-                        <h3 class="panel-title">
-                            <span class="material-icons-outlined text-primary">miscellaneous_services</span>
-                            Daftar Layanan
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light">{{ $pelayanan->total() }}</span> layanan</span>
+<!-- Data Table Panel -->
+<div class="panel">
+    <div class="panel-header">
+        <h3 class="panel-title">
+            <span class="material-icons-outlined text-primary">miscellaneous_services</span>
+            Daftar Layanan
+        </h3>
+        <div class="flex items-center gap-2">
+            <span class="text-sm text-text-muted-light">
+                Total: <span class="font-semibold text-text-light">{{ $layanan->count() }}</span> layanan
+            </span>
+        </div>
+    </div>
+
+    <div class="panel-body">
+        <!-- SCROLLABLE TABLE - TANPA INDICATOR -->
+        <div class="desktop-table">
+            <div class="scrollable-table-container table-shadow" id="scrollableTable">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 60px;">No</th>
+                            <th style="min-width: 100px;">Nama Layanan</th>
+                            <th style="min-width: 120px;">Harga</th>
+                            <th style="min-width: 100px;">Deskripsi</th>
+                            <th style="min-width: 150px; text-align: center;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($layanan as $item)
+                            <tr>
+                                <td style="min-width: 60px;">{{ $loop->iteration }}</td>
+                                <td style="min-width: 100px;">{{ $item->nama_layanan }}</td>
+                                <td style="min-width: 120px;">Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
+                                <td style="min-width: 100px;" class="truncate-text" title="{{ $item->deskripsi }}">
+                                    {{ \Illuminate\Support\Str::limit($item->deskripsi, 50) }}
+                                </td>
+                                <td style="min-width: 150px; text-align: center;">
+                                    <div class="flex justify-center gap-2">
+                                        <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                            onclick="openDetailModal('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->harga }}', '{{ $item->durasi }}', '{{ $item->deskripsi }}', '{{ $item->kategori }}')"
+                                            title="Lihat Detail">
+                                            <span class="material-icons-outlined">visibility</span>
+                                        </button>
+
+                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                            onclick="openEditModal('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->harga }}', '{{ $item->durasi }}', '{{ $item->deskripsi }}', '{{ $item->kategori }}')"
+                                            title="Edit">
+                                            <span class="material-icons-outlined">edit</span>
+                                        </button>
+
+                                        <form action="/layanan/{{ $item->id }}" method="POST"
+                                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus ini?');" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" title="Hapus">
+                                                <span class="material-icons-outlined">delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-gray-500">
+                                    Data layanan belum tersedia.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div class="mobile-cards space-y-4">
+            @forelse($layanan as $item)
+                <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h4 class="font-semibold text-base">{{ $item->nama }}</h4>
+                            <p class="text-sm text-text-muted-light">Rp {{ number_format($item->harga, 0, ',', '.') }}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                onclick="openEditModal('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->harga }}', '{{ $item->durasi }}', '{{ $item->deskripsi }}', '{{ $item->kategori }}')"
+                                title="Edit">
+                                <span class="material-icons-outlined">edit</span>
+                            </button>
+
+                            <form action="/layanan/{{ $item->id }}" method="POST"
+                                onsubmit="return confirm('Apakah Anda yakin ingin menghapus ini?');" class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" title="Hapus">
+                                    <span class="material-icons-outlined">delete</span>
+                                </button>
+                            </form>
                         </div>
                     </div>
-                    <div class="panel-body">
-                        <!-- SCROLLABLE TABLE - TANPA INDICATOR -->
-                        <div class="desktop-table">
-                            <div class="scrollable-table-container table-shadow" id="scrollableTable">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th style="min-width: 60px;">No</th>
-                                            <th style="min-width: 200px;">Nama Layanan</th>
-                                            <th style="min-width: 120px;">Harga</th>
-                                            <th style="min-width: 100px;">Durasi</th>
-                                            <th style="min-width: 300px;">Deskripsi</th>
-                                            <th style="min-width: 120px;">Kategori</th>
-                                            <th style="min-width: 150px; text-align: center;">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($pelayanan as $item)
-                                            <tr>
-                                                <td style="min-width: 60px;">{{ $pelayanan->firstItem() + $loop->index }}</td>
-                                                <td style="min-width: 200px;">{{ $item->nama }}</td>
-                                                <td style="min-width: 120px;">Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
-                                                <td style="min-width: 100px;">{{ $item->durasi }}</td>
-                                                <td style="min-width: 300px;" class="truncate-text" title="{{ $item->deskripsi }}">{{ \Illuminate\Support\Str::limit($item->deskripsi, 50) }}</td>
-                                                <td style="min-width: 120px;"><span class="status-badge status-{{ strtolower($item->kategori) }}">{{ $item->kategori }}</span></td>
-                                                <td style="min-width: 150px; text-align: center;">
-                                                    <div class="flex justify-center gap-2">
-                                                        <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                            onclick="openDetailModal('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->harga }}', '{{ $item->durasi }}', '{{ $item->deskripsi }}', '{{ $item->kategori }}')"
-                                                            title="Lihat Detail">
-                                                            <span class="material-icons-outlined">visibility</span>
-                                                        </button>
-                                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                            onclick="openEditModal('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->harga }}', '{{ $item->durasi }}', '{{ $item->deskripsi }}', '{{ $item->kategori }}')"
-                                                            title="Edit">
-                                                            <span class="material-icons-outlined">edit</span>
-                                                        </button>
-                                                        <form action="/layanan/{{ $item->id }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus ini?');" class="inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" title="Hapus">
-                                                                <span class="material-icons-outlined">delete</span>
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <p class="text-text-muted-light">Durasi</p>
+                            <p class="font-medium">{{ $item->durasi }}</p>
                         </div>
-                        
-                        <!-- Mobile Card View -->
-                        <div class="mobile-cards space-y-4">
-                            @foreach($pelayanan as $item)
-                                <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <div>
-                                            <h4 class="font-semibold text-base">{{ $item->nama }}</h4>
-                                            <p class="text-sm text-text-muted-light">Rp {{ number_format($item->harga, 0, ',', '.') }}</p>
-                                        </div>
-                                        <div class="flex gap-2">
-                                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                onclick="openEditModal('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->harga }}', '{{ $item->durasi }}', '{{ $item->deskripsi }}', '{{ $item->kategori }}')"
-                                                title="Edit">
-                                                <span class="material-icons-outlined">edit</span>
-                                            </button>
-                                            <form action="/layanan/{{ $item->id }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus ini?');" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" title="Hapus">
-                                                    <span class="material-icons-outlined">delete</span>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-2 text-sm">
-                                        <div>
-                                            <p class="text-text-muted-light">Durasi</p>
-                                            <p class="font-medium">{{ $item->durasi }}</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-text-muted-light">Kategori</p>
-                                            <p><span class="status-badge status-{{ strtolower($item->kategori) }}">{{ $item->kategori }}</span></p>
-                                        </div>
-                                    </div>
-                                    <div class="mt-3">
-                                        <p class="text-text-muted-light">Deskripsi</p>
-                                        <p class="font-medium">{{ \Illuminate\Support\Str::limit($item->deskripsi, 80) }}</p>
-                                        @if(strlen($item->deskripsi) > 80)
-                                            <button class="text-primary text-sm mt-1" 
-                                                onclick="openDetailModal('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->harga }}', '{{ $item->durasi }}', '{{ $item->deskripsi }}', '{{ $item->kategori }}')">
-                                                Lihat selengkapnya
-                                            </button>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
+                        <div>
+                            <p class="text-text-muted-light">Kategori</p>
+                            <p>
+                                <span class="status-badge status-{{ strtolower($item->kategori) }}">
+                                    {{ $item->kategori }}
+                                </span>
+                            </p>
                         </div>
-                        
-                        <!-- Pagination -->
-                        <div class="flex justify-center mt-6">
-                            {{ $pelayanan->links() }}
-                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <p class="text-text-muted-light">Deskripsi</p>
+                        <p class="font-medium">{{ \Illuminate\Support\Str::limit($item->deskripsi, 80) }}</p>
+
+                        @if(strlen($item->deskripsi) > 80)
+                            <button class="text-primary text-sm mt-1"
+                                onclick="openDetailModal('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->harga }}', '{{ $item->durasi }}', '{{ $item->deskripsi }}', '{{ $item->kategori }}')">
+                                Lihat selengkapnya
+                            </button>
+                        @endif
                     </div>
                 </div>
+            @empty
+                <div class="text-center py-4 text-gray-500">
+                    Data layanan belum tersedia.
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Pagination dihapus karena controller pakai ->get() --}}
+    </div>
+</div>
+
             </div>
             <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light">
                 Copyright ©2025 by digicity.id
