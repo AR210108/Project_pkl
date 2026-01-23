@@ -275,7 +275,7 @@
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="rekap" href="/rekap_absensi">Rekap
                         Absensi</a>
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="laporan"
-                        href="/laporan">Laporan</a>
+                        href="/owner/laporan">Laporan</a>
                 </nav>
 
                 <!-- Login Button -->

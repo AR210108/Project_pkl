@@ -222,11 +222,6 @@
                 <span class="material-icons sidebar-icon">people</span>
                 <span class="sidebar-text">Data Karyawan</span>
             </a>
-
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/rekap_absensi">
-                <span class="material-icons sidebar-icon">summarize</span>
-                <span class="sidebar-text">Rekap Absensi</span>
-            </a>
         </nav>
         
         <!-- Footer Sidebar -->
