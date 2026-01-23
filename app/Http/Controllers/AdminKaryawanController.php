@@ -41,6 +41,7 @@ class AdminKaryawanController extends Controller
         // Tampilkan ke view dengan data yang sudah dipaginasi
         return view('admin.data_karyawan', compact('karyawan', 'users'));
     }
+
     public function karyawanGeneral(Request $request)
     {
         // Mulai dengan query builder untuk model Karyawan
@@ -56,12 +57,62 @@ class AdminKaryawanController extends Controller
         }
 
         // Ambil data dengan paginasi (10 data per halaman)
-        // Laravel akan otomatis menjaga parameter pencarian di link paginasi
         $karyawan = $query->paginate(10);
 
+        // AMBIL DATA USERS YANG BELUM MENJADI KARYAWAN
+        $users = User::whereNotIn('id', function ($query) {
+            $query->select('user_id')
+                ->from('karyawan')
+                ->whereNotNull('user_id');
+        })->get(['id', 'name', 'divisi', 'role']); // Tambahkan role
+
         // Tampilkan ke view dengan data yang sudah dipaginasi
-        return view('general_manajer.data_karyawan', compact('karyawan'));
+        return view('general_manajer.data_karyawan', compact('karyawan', 'users'));
     }
+    
+    public function karyawanFinance(Request $request)
+    {
+        // Mulai dengan query builder untuk model Karyawan
+        $query = Karyawan::query();
+
+        // Jika ada input pencarian di URL (misal: ?search=John)
+        if ($request->has('search')) {
+            $searchTerm = $request->get('search');
+            // Cari di kolom 'nama', 'jabatan', dan 'alamat'
+            $query->where('nama', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('jabatan', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('alamat', 'LIKE', "%{$searchTerm}%");
+        }
+
+        // Ambil data dengan paginasi (10 data per halaman)
+        $karyawans = $query->paginate(10);
+
+        // AMBIL DATA USERS YANG BELUM MENJADI KARYAWAN
+        $users = User::whereNotIn('id', function ($query) {
+            $query->select('user_id')
+                ->from('karyawan')
+                ->whereNotNull('user_id');
+        })->get(['id', 'name', 'divisi', 'role']); // Tambahkan role
+
+    $karyawanJson = $karyawans->getCollection()->map(function ($k) {
+    return [
+        'id' => $k->id,
+        'nama' => $k->nama,
+        'jabatan' => $k->jabatan,
+        'divisi' => $k->divisi,
+        'gaji' => $k->gaji,
+        'alamat' => $k->alamat,
+        'kontak' => $k->kontak,
+        'foto' => $k->foto ? asset('storage/'.$k->foto) : ''
+    ];
+});
+
+
+
+        // Tampilkan ke view dengan data yang sudah dipaginasi
+        return view('finance.daftar_karyawan', compact('karyawans', 'users', 'karyawanJson'));
+    }
+
     public function karyawanDivisi(Request $request)
 {
     // Mulai dengan query builder untuk model Karyawan
@@ -175,6 +226,7 @@ class AdminKaryawanController extends Controller
                 'nama' => 'required|string|max:255',
                 'jabatan' => 'required|string|max:255',
                 'divisi' => 'required|string|max:255',
+                'gaji' => 'nullable|string|max:255',
                 'alamat' => 'required|string',
                 'kontak' => 'required|string|max:255',
                 'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Foto tidak wajib diubah
@@ -184,6 +236,7 @@ class AdminKaryawanController extends Controller
             $karyawan->nama = $validated['nama'];
             $karyawan->jabatan = $validated['jabatan'];
             $karyawan->divisi = $validated['divisi'];
+            $karyawan->gaji = $validated['gaji'];
             $karyawan->alamat = $validated['alamat'];
             $karyawan->kontak = $validated['kontak'];
 
@@ -212,22 +265,25 @@ class AdminKaryawanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
-    {
-        try {
-            $karyawan = Karyawan::findOrFail($id);
+public function destroy($id)
+{
+    $karyawan = Karyawan::find($id);
 
-            // Hapus foto dari folder public/karyawan jika ada
-            if ($karyawan->foto && file_exists(public_path('karyawan/' . $karyawan->foto))) {
-                unlink(public_path('karyawan/' . $karyawan->foto));
-            }
-
-            // Hapus data dari database
-            $karyawan->delete();
-
-            return response()->json(['success' => true, 'message' => 'Data Karyawan berhasil dihapus!']);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal menghapus data: ' . $e->getMessage()], 500);
-        }
+    if (!$karyawan) {
+        return redirect()
+            ->route('finance.daftar_karyawan')
+            ->with('error', 'Data karyawan sudah tidak tersedia');
     }
+
+    // hapus foto
+    if ($karyawan->foto && file_exists(public_path('karyawan/' . $karyawan->foto))) {
+        unlink(public_path('karyawan/' . $karyawan->foto));
+    }
+
+    $karyawan->delete();
+
+    return redirect()
+        ->route('finance.daftar_karyawan')
+        ->with('success', 'Data karyawan berhasil dihapus');
+}
 }

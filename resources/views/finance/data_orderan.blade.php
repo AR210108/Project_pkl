@@ -758,9 +758,8 @@
                                         <tr>
                                             <th style="min-width: 60px;">No</th>
                                             <th style="min-width: 200px;">Layanan</th>
-                                            <th style="min-width: 150px;">Kategori</th>
+                                            <th style="min-width: 150px;">Deskripsi</th>
                                             <th style="min-width: 150px;">Harga</th>
-                                            <th style="min-width: 200px;">Klien</th>
                                             <th style="min-width: 150px; text-align: center;">Pembayaran Awal</th>
                                             <th style="min-width: 150px;">Pelunasan</th>
                                             <th style="min-width: 120px;">Status</th>

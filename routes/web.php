@@ -19,7 +19,6 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\GeneralManagerTaskController;
 use App\Http\Controllers\KaryawanProfileController;
 use App\Http\Controllers\ManagerDivisiTaskController;
-use App\Http\Controllers\PelayananController;
 
 /*
 |--------------------------------------------------------------------------
@@ -163,7 +162,12 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/{id}/edit', [SuratKerjasamaController::class, 'edit'])->name('edit');
             Route::put('/{id}', [SuratKerjasamaController::class, 'update'])->name('update');
             Route::delete('/{id}', [SuratKerjasamaController::class, 'destroy'])->name('destroy');
-        });
+            });
+            
+            Route::get('/data_project', [DataProjectController::class, 'admin'])->name('data_project');
+            Route::post('/project', [DataProjectController::class, 'store'])->name('project.store');
+            Route::put('/project/{id}', [DataProjectController::class, 'update'])->name('project.update');
+            Route::put('/project/{id}', [DataProjectController::class, 'destroy'])->name('project.destroy');
 
         // Route untuk sidebar: /admin/surat_kerjasama → redirect ke index
         Route::get('/surat_kerjasama', function () {
@@ -293,6 +297,9 @@ Route::middleware(['auth', 'role:karyawan'])
 
         Route::post('/profile/update', [KaryawanProfileController::class, 'update'])
             ->name('profile.update');
+        Route::get('/pengajuan_cuti', function () {
+    return view('karyawan.cuti');
+});
     });
 
 /*
@@ -309,12 +316,12 @@ Route::middleware(['auth', 'role:general_manager'])
             return view('general_manajer.home');
         })->name('home');
 
-        Route::get('general_manajer/data_karyawan', [AdminKaryawanController::class, 'generalKaryawan'])
+        Route::get('/data_karyawan', [AdminKaryawanController::class, 'karyawanGeneral'])
             ->name('data_karyawan');
 
-        Route::get('/layanan', function () {
-            return view('general_manajer.data_layanan');
-        })->name('layanan');
+        Route::get('/layanan', [LayananController::class, 'Generalindex'])
+            ->name('layanan');
+
 
         // DATA PROJECT (GENERAL MANAGER)
         Route::get('/data_project', [DataProjectController::class, 'index'])
@@ -370,10 +377,10 @@ Route::middleware(['auth', 'role:general_manager'])
             Route::get('/karyawan-by-divisi/{divisi}', [GeneralManagerTaskController::class, 'getKaryawanByDivisi'])
                 ->name('karyawan.by_divisi');
         });
-
-        Route::get('/kelola-absen', function () {
-            return view('general_manajer.kelola_absen');
-        })->name('kelola_absen');
+        Route::get('/tim_dan_divisi', function () {
+    return view('general_manajer/tim_dan_divisi');
+});
+    Route::get('/kelola_absen', [AbsensiController::class, 'absenGeneral'])->name('kelola_absen');
     });
 
 /*
@@ -414,12 +421,21 @@ Route::middleware(['auth', 'role:finance'])
         })->name('data_layanan');
 
         Route::get('/pembayaran', function () {
-            return view('finance.data_pembayaran');
+            return view('finance.data_orderan');
         })->name('pembayaran');
 
         Route::get('/laporan-keuangan', function () {
             return view('finance.laporan_keuangan');
         })->name('laporan_keuangan');
+            Route::get('/daftar_karyawan', [AdminKaryawanController::class, 'karyawanFinance'])
+            ->name('daftar_karyawan');
+        // EDIT (UPDATE)
+        Route::put('/karyawan/{karyawan}', [AdminKaryawanController::class, 'update'])
+            ->name('karyawan.update');
+
+        // HAPUS
+        Route::delete('/karyawan/{karyawan}', [AdminKaryawanController::class, 'destroy'])
+            ->name('karyawan.destroy');
     });
 
 /*
@@ -612,8 +628,8 @@ Route::get('/invoices/{invoice}/print', function (\App\Models\Invoice $invoice) 
 |--------------------------------------------------------------------------
 */
 Route::get('/data', [LayananController::class, 'financeIndex']);
-Route::get('/pembayaran', function () {
-    return view('finance/data_pembayaran');
+Route::get('/data_orderan', function () {
+    return view('finance/data_orderan');
 });
 Route::get('/finance', function () {
     return view('finance/beranda');
@@ -627,12 +643,7 @@ Route::get('/pengeluaran', function () {
 Route::get('/finance/invoice', function () {
     return view('finance/invoice');
 });
-Route::get('/pembayaran', function () {
-    return view('finance/data_pembayaran');
-});
-Route::get('/karyawann', function () {
-    return view('finance/daftar_karyawan');
-});
+
 /*
 |--------------------------------------------------------------------------
 | Routes untuk Manager Divisi
@@ -642,10 +653,7 @@ Route::get('/karyawann', function () {
 Route::get('/general_manajer', function () {
     return view('general_manajer/home');
 });
-Route::get('/data_karyawan', function () {
-    return redirect()->route('pegawai.index');
-});
-Route::get('/layanan', [PelayananController::class, 'index']);
+
 
 
 Route::get('/kelola_tugas', [TaskController::class, 'index'])->name('tugas.page');
@@ -653,10 +661,6 @@ Route::get('/kelola_absen', function () {
     return view('general_manajer/kelola_absen');
 });
 
-// routes untuk pelayanan
-Route::post('/layanan', [PelayananController::class, 'store']);
-Route::put('/layanan/{id}', [PelayananController::class, 'update']);
-Route::delete('/layanan/{id}', [PelayananController::class, 'destroy']);
 
 Route::resource('pengumuman', PengumumanController::class);
 // === ROUTE UNTUK CATATAN RAPAT ANDA ===
@@ -669,8 +673,18 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Rekap
-Route::get('/kelola_absen', [AbsensiController::class, 'kelolaAbsen'])->name('kelola.absen');
-Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');
-Route::get('/api/kehadiran-per-divisi', [AbsensiController::class, 'apiKehadiranPerDivisi']);
-//Buat Tugas
-// Tambahkan route untuk tugas
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/api/karyawan/meeting-notes', [KaryawanController::class, 'getMeetingNotes']);
+    Route::get('/api/karyawan/meeting-notes-dates', [KaryawanController::class, 'getMeetingNotesDates']);
+    Route::get('/api/karyawan/announcements', [KaryawanController::class, 'getAnnouncements']);
+    Route::get('/api/karyawan/announcements-by-date', [KaryawanController::class, 'getAnnouncementsByDate']);
+    Route::get('/api/karyawan/announcements-dates', [KaryawanController::class, 'getAnnouncementsDates']);
+    Route::get('/api/karyawan/calendar-dates', [KaryawanController::class, 'getCalendarDates']);
+    Route::get('/debug-meeting-notes-penugasan', [KaryawanController::class, 'debugMeetingNotesPenugasan']);
+    Route::get('/debug-pengumuman', [KaryawanController::class, 'debugPengumuman']);
+    Route::get('/test-api', [KaryawanController::class, 'testApiEndpoints']);
+});
+
+
+

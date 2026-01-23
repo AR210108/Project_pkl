@@ -26,6 +26,12 @@ class LayananController extends Controller
         $layanans = Layanan::latest()->get();
         return view('admin/data_layanan', compact('layanans'));
     }
+
+    public function Generalindex()
+    {
+        $layanan = Layanan::latest()->get();
+        return view('general_manajer/data_layanan', compact('layanan'));
+    }
     /**
      * Store a newly created resource in storage.
      */

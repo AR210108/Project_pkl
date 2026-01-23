@@ -770,7 +770,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="absensiTableBody">
-                                        @foreach ($absensis as $i => $absen)
+                                        @foreach ($allAbsensis as $i => $absen)
                                             <tr class="absensi-row" data-id="{{ $absen->id }}">
                                                 <td>{{ $i + 1 }}</td>
                                                 <td>{{ optional($absen->user)->name ?? 'User tidak ditemukan' }}</td>
