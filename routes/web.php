@@ -165,6 +165,10 @@ Route::middleware(['auth', 'role:admin'])
             });
             
             Route::get('/data_project', [DataProjectController::class, 'admin'])->name('data_project');
+            Route::post('/project', [DataProjectController::class, 'store'])->name('project.store');
+            Route::put('/project/{id}', [DataProjectController::class, 'update'])->name('project.update');
+            Route::put('/project/{id}', [DataProjectController::class, 'destroy'])->name('project.destroy');
+
         // Route untuk sidebar: /admin/surat_kerjasama → redirect ke index
         Route::get('/surat_kerjasama', function () {
             return redirect()->route('admin.surat_kerjasama.index');
