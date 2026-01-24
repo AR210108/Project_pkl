@@ -485,15 +485,8 @@ Route::middleware(['auth', 'role:manager_divisi'])
 
         Route::get('/data_project', [DataProjectController::class, 'managerDivisi'])
             ->name('data_project');
-<<<<<<< HEAD
         Route::put('/data_project/{id}', [DataProjectController::class, 'update']
             )->name('data_project.update');
-=======
-        Route::put(
-            '/data_project/{id}',
-            [DataProjectController::class, 'update']
-        )->name('data_project.update');
->>>>>>> 0127543639751c7dee09fc36b594620e56cf0938
         // ROUTE GROUP UNTUK TASKS
         Route::prefix('tasks')->name('tasks.')->group(function () {
             Route::post('/', [ManagerDivisiTaskController::class, 'store'])
