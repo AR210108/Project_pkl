@@ -297,6 +297,9 @@ Route::middleware(['auth', 'role:karyawan'])
 
         Route::post('/profile/update', [KaryawanProfileController::class, 'update'])
             ->name('profile.update');
+        Route::get('/pengajuan_cuti', function () {
+    return view('karyawan.cuti');
+});
     });
 
 /*
@@ -375,6 +378,10 @@ Route::middleware(['auth', 'role:general_manager'])
                 ->name('karyawan.by_divisi');
         });
         Route::get('/kelola_absen', [AbsensiController::class, 'absenGeneral'])->name('kelola_absen');
+        Route::get('/tim_dan_divisi', function () {
+    return view('general_manajer/tim_dan_divisi');
+});
+    Route::get('/kelola_absen', [AbsensiController::class, 'absenGeneral'])->name('kelola_absen');
     });
 
 /*
@@ -393,6 +400,7 @@ Route::middleware(['auth', 'role:owner'])
         Route::get('/laporan', function () {
             return view('pemilik.laporan');
         })->name('laporan');
+        Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');
     });
 
 /*
@@ -681,6 +689,4 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-Route::get('/tim_dan_divisi', function () {
-    return view('general_manajer/tim_dan_divisi');
-});
+

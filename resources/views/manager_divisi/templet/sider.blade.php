@@ -169,6 +169,20 @@
         [x-cloak] {
             display: none !important;
         }
+
+        /* Logo styling */
+        .sidebar-header img {
+            max-height: 3rem;
+            /* 48px, sesuai dengan tinggi header */
+            width: auto;
+            object-fit: contain;
+            transition: all 0.3s ease;
+        }
+
+        /* Efek hover untuk logo */
+        .sidebar-header:hover img {
+            transform: scale(1.05);
+        }
     </style>
 </head>
 
@@ -197,7 +211,8 @@
 
             <!-- BRAND -->
             <div class="sidebar-header flex items-center justify-center border-b border-gray-200 flex-shrink-0">
-                <h1 class="sidebar-title">Brand</h1>
+                <img src="{{ asset('images/logo_inovindo.jpg') }}" alt="Inovindo Logo"
+                    class="h-12 w-auto object-contain">
             </div>
 
             <!-- MENU -->
@@ -233,15 +248,15 @@
                     :class="window.location.pathname === '/karyawan_by_divisi/{divisi}' ? 'active' : ''">
                     <span class="material-symbols-outlined sidebar-icon">groups</span>
                     <span class="sidebar-text">Data Karyawan</span>
-                </>
+                    </>
 
-                <!-- LAPORAN ABSENSI -->
-                <a href="/manager_divisi/kelola_absensi"
-                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    :class="window.location.pathname === '/manager_divisi/kelola_absensi' ? 'active' : ''">
-                    <span class="material-symbols-outlined sidebar-icon">fact_check</span>
-                    <span class="sidebar-text">Laporan Absensi</span>
-                </a>
+                    <!-- LAPORAN ABSENSI -->
+                    <a href="/manager_divisi/kelola_absensi"
+                        class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                        :class="window.location.pathname === '/manager_divisi/kelola_absensi' ? 'active' : ''">
+                        <span class="material-symbols-outlined sidebar-icon">fact_check</span>
+                        <span class="sidebar-text">Laporan Absensi</span>
+                    </a>
 
             </nav>
 

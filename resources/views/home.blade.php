@@ -580,6 +580,12 @@
             margin-right: 8px;
             font-size: 20px;
         }
+        /* Logo styling */
+.sidebar-logo {
+    height: 2rem; /* Sama dengan ukuran teks asli */
+    width: auto;
+    object-fit: contain;
+}
     </style>
 </head>
 
@@ -588,7 +594,7 @@
     <header id="header" class="sticky-header">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex justify-between items-center">
-                <div class="text-2xl font-bold text-black">Brand</div>
+                <img src="{{ asset('images/logo_inovindo.jpg') }}" alt="Inovindo Logo" class="h-8 w-auto object-contain">
                 <nav class="hidden lg:flex items-center space-x-4 absolute left-1/2 transform -translate-x-1/2">
                     <a class="nav-link text-sm font-medium text-gray-700 active" href="#beranda" data-section="beranda">Beranda</a>
                     <a class="nav-link text-sm font-medium text-gray-700" href="#layanan" data-section="layanan">Layanan</a>
