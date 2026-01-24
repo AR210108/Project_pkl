@@ -28,6 +28,7 @@ class Kwitansi extends Model
         'sub_total',
         'fee_maintenance',
         'total',
+        'status',
     ];
 
     /**

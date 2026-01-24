@@ -162,12 +162,12 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/{id}/edit', [SuratKerjasamaController::class, 'edit'])->name('edit');
             Route::put('/{id}', [SuratKerjasamaController::class, 'update'])->name('update');
             Route::delete('/{id}', [SuratKerjasamaController::class, 'destroy'])->name('destroy');
-            });
-            
-            Route::get('/data_project', [DataProjectController::class, 'admin'])->name('data_project');
-            Route::post('/project', [DataProjectController::class, 'store'])->name('project.store');
-            Route::put('/project/{id}', [DataProjectController::class, 'update'])->name('project.update');
-            Route::put('/project/{id}', [DataProjectController::class, 'destroy'])->name('project.destroy');
+        });
+
+        Route::get('/project', [DataProjectController::class, 'admin'])->name('project');
+        Route::post('/project', [DataProjectController::class, 'store'])->name('project.store');
+        Route::put('/project/{id}', [DataProjectController::class, 'update'])->name('project.update');
+        Route::put('/project/{id}', [DataProjectController::class, 'destroy'])->name('project.destroy');
 
         // Route untuk sidebar: /admin/surat_kerjasama → redirect ke index
         Route::get('/surat_kerjasama', function () {
@@ -374,7 +374,7 @@ Route::middleware(['auth', 'role:general_manager'])
             Route::get('/karyawan-by-divisi/{divisi}', [GeneralManagerTaskController::class, 'getKaryawanByDivisi'])
                 ->name('karyawan.by_divisi');
         });
-    Route::get('/kelola_absen', [AbsensiController::class, 'absenGeneral'])->name('kelola_absen');
+        Route::get('/kelola_absen', [AbsensiController::class, 'absenGeneral'])->name('kelola_absen');
     });
 
 /*
@@ -393,7 +393,6 @@ Route::middleware(['auth', 'role:owner'])
         Route::get('/laporan', function () {
             return view('pemilik.laporan');
         })->name('laporan');
-        
     });
 
 /*
@@ -421,7 +420,7 @@ Route::middleware(['auth', 'role:finance'])
         Route::get('/laporan-keuangan', function () {
             return view('finance.laporan_keuangan');
         })->name('laporan_keuangan');
-            Route::get('/daftar_karyawan', [AdminKaryawanController::class, 'karyawanFinance'])
+        Route::get('/daftar_karyawan', [AdminKaryawanController::class, 'karyawanFinance'])
             ->name('daftar_karyawan');
         // EDIT (UPDATE)
         Route::put('/karyawan/{karyawan}', [AdminKaryawanController::class, 'update'])
@@ -450,10 +449,12 @@ Route::middleware(['auth', 'role:manager_divisi'])
         Route::get('/kelola-tugas', [ManagerDivisiTaskController::class, 'index'])
             ->name('kelola_tugas');
 
-            Route::get('/data_project', [DataProjectController::class, 'managerDivisi'])
-                ->name('data_project');
-            Route::put('/data_project/{id}',[DataProjectController::class, 'update']
-            )->name('data_project.update');
+        Route::get('/data_project', [DataProjectController::class, 'managerDivisi'])
+            ->name('data_project');
+        Route::put(
+            '/data_project/{id}',
+            [DataProjectController::class, 'update']
+        )->name('data_project.update');
         // ROUTE GROUP UNTUK TASKS
         Route::prefix('tasks')->name('tasks.')->group(function () {
             Route::post('/', [ManagerDivisiTaskController::class, 'store'])
@@ -492,14 +493,13 @@ Route::middleware(['auth', 'role:manager_divisi'])
                 ->name('karyawan.by_divisi');
             Route::get('/daftar_karyawan/{divisi}', [AdminKaryawanController::class, 'karyawanDivisi'])
                 ->name('karyawan.divisi');
-
         });
 
-    Route::get('/pengelola_tugas', function () {
-        return view('manager_divisi.pengelola_tugas');
-    })->name('pengelola_tugas');
-Route::get('/kelola_absensi', [AbsensiController::class, 'absenManager'])
-    ->name('kelola_absensi');
+        Route::get('/pengelola_tugas', function () {
+            return view('manager_divisi.pengelola_tugas');
+        })->name('pengelola_tugas');
+        Route::get('/kelola_absensi', [AbsensiController::class, 'absenManager'])
+            ->name('kelola_absensi');
     });
 
 /*
