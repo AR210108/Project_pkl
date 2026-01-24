@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('project', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('layanan_id')
+              ->constrained('layanans') // kalau tabel kamu namanya "layanan"
+              ->cascadeOnDelete();
             $table->string('nama');
             $table->text('deskripsi');
-            $table->string('harga');
+            $table->string('harga')->nullable();
             $table->date('deadline');
             $table->integer('progres')->nullable();
             $table->enum('status', ['Pending', 'Dalam Pengerjaan', 'Selesai', 'Dibatalkan'])->default('Pending');

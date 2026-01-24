@@ -1219,16 +1219,10 @@
                 </div>
                 <form action="{{ route('admin.layanan.store') }}" method="POST" id="tambahLayananForm" class="space-y-4" enctype="multipart/form-data">
                     @csrf
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
                             <input type="text" name="nama_layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama layanan" required>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                            <input type="text" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan harga" required>
-                        </div>
-                    </div>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                         <textarea name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi layanan" required></textarea>
@@ -1275,10 +1269,6 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
                             <input type="text" id="editNamaLayanan" name="nama_layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama layanan" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                            <input type="text" id="editHarga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan harga" required>
                         </div>
                     </div>
                     <div class="mt-4">

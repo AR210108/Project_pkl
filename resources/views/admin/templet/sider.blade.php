@@ -283,25 +283,25 @@
             <div class="relative">
                 <button
                     class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors w-full text-left"
-                    onclick="toggleDropdown('surat-kerjasama-dropdown')" data-page="surat_kerjasama">
+                    onclick="toggleDropdown('dokumen-dropdown')" data-page="dokumen">
                     <span class="material-icons sidebar-icon">description</span>
-                    <span class="sidebar-text">Surat Kerjasama</span>
+                    <span class="sidebar-text">Dokumen</span>
                     <span class="material-icons sidebar-icon ml-auto transition-transform duration-200"
                         id="surat-kerjasama-icon">expand_more</span>
                 </button>
 
                 <!-- Dropdown -->
-                <div id="surat-kerjasama-dropdown" class="pl-6 mt-1 space-y-1 hidden">
+                <div id="dokumen-dropdown" class="pl-6 mt-1 space-y-1 hidden">
                     <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        href="/template_surat" data-page="template_surat">
+                        href="/admin/invoice" data-page="template_surat">
                         <span class="material-icons sidebar-icon">article</span>
-                        <span class="sidebar-text">Template Surat</span>
+                        <span class="sidebar-text">Invoice</span>
                     </a>
 
                     <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        href="/admin/surat_kerjasama" data-page="list_surat">
+                        href="/admin/kwitansi" data-page="list_surat">
                         <span class="material-icons sidebar-icon">list_alt</span>
-                        <span class="sidebar-text">List Surat</span>
+                        <span class="sidebar-text">Kwitansi</span>
                     </a>
                 </div>
             </div>
@@ -312,6 +312,20 @@
                 <span class="material-icons sidebar-icon">note</span>
                 <span class="sidebar-text">Catatan Rapat</span>
             </a>
+<<<<<<< HEAD
+=======
+            <!-- Catatan Rapat -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+<<<<<<< HEAD
+                href="/admin/project" data-page="project">
+                <span class="material-icons sidebar-icon">note</span>
+=======
+                href="/admin/data_project" data-page="data_project">
+                <span class="material-icons sidebar-icon">dashboard</span>
+>>>>>>> caa0af186ec6aaef54a4c02d9387a88ec4a02538
+                <span class="sidebar-text">Data Project</span>
+            </a>
+>>>>>>> 0127543639751c7dee09fc36b594620e56cf0938
 
             <!-- Pengumuman -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"

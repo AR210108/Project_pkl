@@ -403,6 +403,7 @@ Route::middleware(['auth', 'role:general_manager'])
             Route::get('/karyawan-by-divisi/{divisi}', [GeneralManagerTaskController::class, 'getKaryawanByDivisi'])
                 ->name('karyawan.by_divisi');
         });
+        Route::get('/kelola_absen', [AbsensiController::class, 'absenGeneral'])->name('kelola_absen');
         Route::get('/tim_dan_divisi', function () {
             return view('general_manajer/tim_dan_divisi');
         });
@@ -484,8 +485,15 @@ Route::middleware(['auth', 'role:manager_divisi'])
 
         Route::get('/data_project', [DataProjectController::class, 'managerDivisi'])
             ->name('data_project');
+<<<<<<< HEAD
         Route::put('/data_project/{id}', [DataProjectController::class, 'update']
             )->name('data_project.update');
+=======
+        Route::put(
+            '/data_project/{id}',
+            [DataProjectController::class, 'update']
+        )->name('data_project.update');
+>>>>>>> 0127543639751c7dee09fc36b594620e56cf0938
         // ROUTE GROUP UNTUK TASKS
         Route::prefix('tasks')->name('tasks.')->group(function () {
             Route::post('/', [ManagerDivisiTaskController::class, 'store'])

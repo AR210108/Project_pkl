@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('sub_total', 15, 2)->default(0);
             $table->decimal('fee_maintenance', 15, 2)->default(0);
             $table->decimal('total', 15, 2)->default(0);
+            $table->enum('status', ['Pembayawan Awal', 'Lunas'])->default('Pembayawan Awal');
             
             // Foreign key ke tabel invoices
             $table->foreignId('invoice_id')->nullable()->constrained('invoices');
