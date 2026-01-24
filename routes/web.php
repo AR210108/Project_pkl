@@ -19,6 +19,8 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\GeneralManagerTaskController;
 use App\Http\Controllers\KaryawanProfileController;
 use App\Http\Controllers\ManagerDivisiTaskController;
+use App\Http\Controllers\SettingController; // Tambahkan controller ini
+use App\Http\Controllers\LandingPageController; // Tambahkan controller ini
 
 /*
 |--------------------------------------------------------------------------
@@ -45,9 +47,12 @@ if (!function_exists('redirectToRolePage')) {
 */
 Route::get('/users/data', [UserController::class, 'data'])
     ->middleware('auth');
-// Redirect default ke halaman home
-Route::get('/', [LayananController::class, 'landingPage'])->name('home');
 
+// Landing Page (ubah dari LayananController ke LandingPageController)
+Route::get('/', [LandingPageController::class, 'index'])->name('home');
+
+// API endpoint untuk kontak (public)
+Route::get('/api/contact', [LandingPageController::class, 'getContactInfo'])->name('api.contact');
 
 Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login-process', [LoginController::class, 'login'])->name('login.process');
@@ -67,7 +72,6 @@ Route::middleware('auth')->group(function () {
         return redirect('/');
     })->name('logout');
 });
-
 
 // Pegawai resource routes (using KaryawanController methods for pegawai management)
 Route::middleware(['auth'])->group(function () {
@@ -162,19 +166,19 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/{id}/edit', [SuratKerjasamaController::class, 'edit'])->name('edit');
             Route::put('/{id}', [SuratKerjasamaController::class, 'update'])->name('update');
             Route::delete('/{id}', [SuratKerjasamaController::class, 'destroy'])->name('destroy');
-            });
+        });
             
-            Route::get('/data_project', [DataProjectController::class, 'admin'])->name('data_project');
-            Route::post('/project', [DataProjectController::class, 'store'])->name('project.store');
-            Route::put('/project/{id}', [DataProjectController::class, 'update'])->name('project.update');
-            Route::put('/project/{id}', [DataProjectController::class, 'destroy'])->name('project.destroy');
+        Route::get('/data_project', [DataProjectController::class, 'admin'])->name('data_project');
+        Route::post('/project', [DataProjectController::class, 'store'])->name('project.store');
+        Route::put('/project/{id}', [DataProjectController::class, 'update'])->name('project.update');
+        Route::delete('/project/{id}', [DataProjectController::class, 'destroy'])->name('project.destroy');
 
         // Route untuk sidebar: /admin/surat_kerjasama → redirect ke index
         Route::get('/surat_kerjasama', function () {
             return redirect()->route('admin.surat_kerjasama.index');
         });
 
-        // Route untuk sidebar: /template_surat (hanya placeholder)
+        // Route untuk sidebar: /admin/template_surat (hanya placeholder)
         Route::get('/template_surat', function () {
             return view('admin.template_surat');
         })->name('template_surat');
@@ -197,9 +201,32 @@ Route::middleware(['auth', 'role:admin'])
         });
 
         // SYSTEM SETTINGS
-        Route::get('/settings', function () {
-            return view('admin.settings');
-        })->name('settings');
+        Route::prefix('settings')->name('settings.')->group(function () {
+            // Halaman utama pengaturan
+            Route::get('/', [SettingController::class, 'index'])->name('index');
+            
+            // Pengaturan Profil
+            Route::post('/profile', [SettingController::class, 'updateProfile'])->name('profile.update');
+            
+            // Pengaturan Akun
+            Route::post('/account', [SettingController::class, 'updateAccount'])->name('account.update');
+            
+            // Pengaturan Notifikasi
+            Route::post('/notifications', [SettingController::class, 'updateNotifications'])->name('notifications.update');
+            
+            // Pengaturan Kata Sandi
+            Route::post('/password', [SettingController::class, 'updatePassword'])->name('password.update');
+            
+            // Keluar dari semua perangkat
+            Route::post('/logout-all', [SettingController::class, 'logoutAll'])->name('logout.all');
+            
+            // Pengaturan Kontak (untuk landing page)
+            Route::get('/contact', [SettingController::class, 'contact'])->name('contact');
+            Route::post('/contact', [SettingController::class, 'updateContact'])->name('contact.update');
+            
+            // API untuk mendapatkan data kontak
+            Route::get('/contact-data', [SettingController::class, 'getContactData'])->name('contact.data');
+        });
 
         // Route untuk sidebar: /admin/catatan_rapat → redirect ke global route
         Route::get('/catatan_rapat', function () {
@@ -298,8 +325,8 @@ Route::middleware(['auth', 'role:karyawan'])
         Route::post('/profile/update', [KaryawanProfileController::class, 'update'])
             ->name('profile.update');
         Route::get('/pengajuan_cuti', function () {
-    return view('karyawan.cuti');
-});
+            return view('karyawan.cuti');
+        });
     });
 
 /*
@@ -321,7 +348,6 @@ Route::middleware(['auth', 'role:general_manager'])
 
         Route::get('/layanan', [LayananController::class, 'Generalindex'])
             ->name('layanan');
-
 
         // DATA PROJECT (GENERAL MANAGER)
         Route::get('/data_project', [DataProjectController::class, 'index'])
@@ -378,9 +404,9 @@ Route::middleware(['auth', 'role:general_manager'])
                 ->name('karyawan.by_divisi');
         });
         Route::get('/tim_dan_divisi', function () {
-    return view('general_manajer/tim_dan_divisi');
-});
-    Route::get('/kelola_absen', [AbsensiController::class, 'absenGeneral'])->name('kelola_absen');
+            return view('general_manajer/tim_dan_divisi');
+        });
+        Route::get('/kelola_absen', [AbsensiController::class, 'absenGeneral'])->name('kelola_absen');
     });
 
 /*
@@ -427,7 +453,7 @@ Route::middleware(['auth', 'role:finance'])
         Route::get('/laporan-keuangan', function () {
             return view('finance.laporan_keuangan');
         })->name('laporan_keuangan');
-            Route::get('/daftar_karyawan', [AdminKaryawanController::class, 'karyawanFinance'])
+        Route::get('/daftar_karyawan', [AdminKaryawanController::class, 'karyawanFinance'])
             ->name('daftar_karyawan');
         // EDIT (UPDATE)
         Route::put('/karyawan/{karyawan}', [AdminKaryawanController::class, 'update'])
@@ -456,9 +482,9 @@ Route::middleware(['auth', 'role:manager_divisi'])
         Route::get('/kelola-tugas', [ManagerDivisiTaskController::class, 'index'])
             ->name('kelola_tugas');
 
-            Route::get('/data_project', [DataProjectController::class, 'managerDivisi'])
-                ->name('data_project');
-            Route::put('/data_project/{id}',[DataProjectController::class, 'update']
+        Route::get('/data_project', [DataProjectController::class, 'managerDivisi'])
+            ->name('data_project');
+        Route::put('/data_project/{id}', [DataProjectController::class, 'update']
             )->name('data_project.update');
         // ROUTE GROUP UNTUK TASKS
         Route::prefix('tasks')->name('tasks.')->group(function () {
@@ -498,14 +524,13 @@ Route::middleware(['auth', 'role:manager_divisi'])
                 ->name('karyawan.by_divisi');
             Route::get('/daftar_karyawan/{divisi}', [AdminKaryawanController::class, 'karyawanDivisi'])
                 ->name('karyawan.divisi');
-
         });
 
-    Route::get('/pengelola_tugas', function () {
-        return view('manager_divisi.pengelola_tugas');
-    })->name('pengelola_tugas');
-Route::get('/kelola_absensi', [AbsensiController::class, 'absenManager'])
-    ->name('kelola_absensi');
+        Route::get('/pengelola_tugas', function () {
+            return view('manager_divisi.pengelola_tugas');
+        })->name('pengelola_tugas');
+        Route::get('/kelola_absensi', [AbsensiController::class, 'absenManager'])
+            ->name('kelola_absensi');
     });
 
 /*
@@ -654,13 +679,10 @@ Route::get('/general_manajer', function () {
     return view('general_manajer/home');
 });
 
-
-
 Route::get('/kelola_tugas', [TaskController::class, 'index'])->name('tugas.page');
 Route::get('/kelola_absen', function () {
     return view('general_manajer/kelola_absen');
 });
-
 
 Route::resource('pengumuman', PengumumanController::class);
 // === ROUTE UNTUK CATATAN RAPAT ANDA ===
@@ -685,6 +707,3 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/debug-pengumuman', [KaryawanController::class, 'debugPengumuman']);
     Route::get('/test-api', [KaryawanController::class, 'testApiEndpoints']);
 });
-
-
-
