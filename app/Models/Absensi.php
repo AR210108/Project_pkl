@@ -32,7 +32,6 @@ class Absensi extends Model
         'is_early_checkout',
         'early_checkout_reason',
         'jenis_ketidakhadiran',
-        // 'late_minutes', // DIHAPUS
         'reason',
         'keterangan',
         'location',
@@ -54,7 +53,6 @@ class Absensi extends Model
         'jam_masuk' => 'datetime:H:i',
         'jam_pulang' => 'datetime:H:i',
         'is_early_checkout' => 'boolean',
-        // 'late_minutes' => 'integer', // DIHAPUS
         'approved_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
@@ -65,11 +63,8 @@ class Absensi extends Model
      * @var array
      */
     protected $attributes = [
-        // 'status' => 'Tepat Waktu', // DIHAPUS
-        // 'status_type' => 'on-time', // DIHAPUS
         'approval_status' => 'approved',
         'is_early_checkout' => false,
-        // 'late_minutes' => 0, // DIHAPUS
     ];
 
     /**
@@ -79,7 +74,7 @@ class Absensi extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
     /**
@@ -91,6 +86,10 @@ class Absensi extends Model
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
+
+    /* =====================================================
+     |  SCOPES
+     ===================================================== */
 
     /**
      * Scope untuk filter data absensi (kehadiran)
@@ -191,6 +190,10 @@ class Absensi extends Model
         return $query->whereBetween('tanggal', [$startDate, $endDate]);
     }
 
+    /* =====================================================
+     |  ACCESSORS & MUTATORS
+     ===================================================== */
+
     /**
      * Accessor untuk mendapatkan tipe data
      * SEKARANG BERBASIS: ada jam masuk atau jenis ketidakhadiran
@@ -286,77 +289,30 @@ class Absensi extends Model
     }
 
     /**
-     * Check apakah data ini adalah kehadiran
+     * Accessor untuk mendapatkan keterlambatan dalam menit
      */
-    public function isKehadiran()
-    {
-        return !is_null($this->jam_masuk);
-    }
-
-    /**
-     * Check apakah data ini adalah ketidakhadiran
-     */
-    public function isKetidakhadiran()
-    {
-        return !is_null($this->jenis_ketidakhadiran);
-    }
-
-    /**
-     * Check apakah butuh approval
-     */
-    public function needsApproval()
-    {
-        return $this->jenis_ketidakhadiran && $this->approval_status === 'pending';
-    }
-
-    /**
-     * Check apakah sudah disetujui
-     */
-    public function isApproved()
-    {
-        return $this->approval_status === 'approved';
-    }
-
-    /**
-     * Check apakah ditolak
-     */
-    public function isRejected()
-    {
-        return $this->approval_status === 'rejected';
-    }
-
-    /**
-     * Check apakah terlambat (jika masih perlu fitur ini)
-     */
-    public function isTerlambat()
-    {
-        if (!$this->jam_masuk) {
-            return false;
-        }
-        
-        $jamMasuk = Carbon::parse($this->jam_masuk);
-        $jamBatas = Carbon::parse('08:00'); // Contoh: jam 8 pagi batas waktu
-        
-        return $jamMasuk->gt($jamBatas);
-    }
-
-    /**
-     * Get keterlambatan dalam menit (jika masih perlu fitur ini)
-     */
-    public function getKeterlambatanAttribute()
+    public function getLateMinutesAttribute()
     {
         if (!$this->jam_masuk) {
             return 0;
         }
         
         $jamMasuk = Carbon::parse($this->jam_masuk);
-        $jamBatas = Carbon::parse('08:00'); // Contoh: jam 8 pagi batas waktu
+        $jamBatas = Carbon::parse('08:00');
         
         if ($jamMasuk->lte($jamBatas)) {
             return 0;
         }
         
         return $jamMasuk->diffInMinutes($jamBatas);
+    }
+
+    /**
+     * Accessor untuk cek apakah terlambat
+     */
+    public function getIsTerlambatAttribute()
+    {
+        return $this->late_minutes > 0;
     }
 
     /**
@@ -429,5 +385,49 @@ class Absensi extends Model
             'rejected' => 'Ditolak',
             default => 'Tidak Diketahui',
         };
+    }
+
+    /* =====================================================
+     |  METHODS
+     ===================================================== */
+
+    /**
+     * Check apakah data ini adalah kehadiran
+     */
+    public function isKehadiran()
+    {
+        return !is_null($this->jam_masuk);
+    }
+
+    /**
+     * Check apakah data ini adalah ketidakhadiran
+     */
+    public function isKetidakhadiran()
+    {
+        return !is_null($this->jenis_ketidakhadiran);
+    }
+
+    /**
+     * Check apakah butuh approval
+     */
+    public function needsApproval()
+    {
+        return $this->jenis_ketidakhadiran && $this->approval_status === 'pending';
+    }
+
+    /**
+     * Check apakah sudah disetujui
+     */
+    public function isApproved()
+    {
+        return $this->approval_status === 'approved';
+    }
+
+    /**
+     * Check apakah ditolak
+     */
+    public function isRejected()
+    {
+        return $this->approval_status === 'rejected';
     }
 }

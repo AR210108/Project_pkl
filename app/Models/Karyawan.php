@@ -17,6 +17,7 @@ class Karyawan extends Model
         'nama',
         'jabatan',
         'divisi',
+        'gaji',
         'alamat',
         'kontak',
         'foto'

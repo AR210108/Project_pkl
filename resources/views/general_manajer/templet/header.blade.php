@@ -164,13 +164,10 @@
             
             <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general-manajer/kelola-order">
                 <span class="material-icons">receipt_long</span>
-                <span>Kelola Order</span>
+                <span>Data Project</span>
             </a>
             
-            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general-manajer/kelola-tugas">
-                <span class="material-icons">task_alt</span>
-                <span>Kelola Tugas</span>
-            </a>
+          
             
             <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general-manajer/kelola-absen">
                 <span class="material-icons">manage_accounts</span>

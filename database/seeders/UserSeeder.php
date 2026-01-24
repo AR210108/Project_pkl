@@ -10,152 +10,160 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // === OWNER & MANAGEMENT ===
-        User::create([
-            'name' => 'Owner',
-            'email' => 'owner@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'owner',
-            'divisi' => null
-        ]);
+        $users = [
+            // === OWNER & MANAGEMENT ===
+            [
+                'name' => 'Owner',
+                'email' => 'owner@gmail.com',
+                'role' => 'owner',
+                'divisi' => null,
+            ],
+            [
+                'name' => 'General Manager',
+                'email' => 'general@gmail.com',
+                'role' => 'general_manager',
+                'divisi' => null,
+            ],
 
-        User::create([
+            // === DIVISI PROGRAMMER ===
+            [
+                'name' => 'Ahmad Fauzi',
+                'email' => 'ahmad@gmail.com',
+                'role' => 'manager_divisi',
+                'divisi' => 'programmer',
+            ],
+            [
+                'name' => 'Dewi Lestari',
+                'email' => 'dewi@gmail.com',
+                'role' => 'karyawan',
+                'divisi' => 'programmer',
+            ],
+            [
+                'name' => 'Rizki Pratama',
+                'email' => 'rizki@gmail.com',
+                'role' => 'karyawan',
+                'divisi' => 'programmer',
+            ],
+            [
+                'name' => 'Maya Indah',
+                'email' => 'maya@gmail.com',
+                'role' => 'karyawan',
+                'divisi' => 'programmer',
+            ],
+        [
+            'name' => 'Finance',
+            'email' => 'finance@gmail.com',
+            'password' => Hash::make('123'),
+            'role' => 'finance',
+            'divisi' => null
+        ],
+
+        [
             'name' => 'General Manager',
             'email' => 'general@gmail.com',
             'password' => Hash::make('123'),
             'role' => 'general_manager',
             'divisi' => null
-        ]);
+        ],
 
-        // === DIVISI PROGRAMMER ===
-        User::create([
-            'name' => 'Ahmad Fauzi',
-            'email' => 'ahmad@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'manager_divisi',
-            'divisi' => 'programmer'
-        ]);
+            // === DIVISI DIGITAL MARKETING ===
+            [
+                'name' => 'Agus Wijaya',
+                'email' => 'agus@gmail.com',
+                'role' => 'manager_divisi',
+                'divisi' => 'digital_marketing',
+            ],
+            [
+                'name' => 'Lisa Marlina',
+                'email' => 'lisa@gmail.com',
+                'role' => 'karyawan',
+                'divisi' => 'digital_marketing',
+            ],
+            [
+                'name' => 'Rudi Hartono',
+                'email' => 'rudi.hartono@gmail.com',
+                'role' => 'karyawan',
+                'divisi' => 'digital_marketing',
+            ],
+            [
+                'name' => 'Nina Sari',
+                'email' => 'nina@gmail.com',
+                'role' => 'karyawan',
+                'divisi' => 'digital_marketing',
+            ],
 
-        User::create([
+            // === DIVISI DESAINER ===
+            [
+                'name' => 'Yuni Astuti',
+                'email' => 'yuni@gmail.com',
+                'role' => 'manager_divisi',
+                'divisi' => 'desainer',
+            ],
+            [
+                'name' => 'Ferdy Kurniawan',
+                'email' => 'ferdy@gmail.com',
+                'role' => 'karyawan',
+                'divisi' => 'desainer',
+            ],
+            [
+                'name' => 'Ratna Dewi',
+                'email' => 'ratna@gmail.com',
+                'role' => 'karyawan',
+                'divisi' => 'desainer',
+            ],
+            [
+                'name' => 'Hendra Setiawan',
+                'email' => 'hendra@gmail.com',
+                'role' => 'karyawan',
+                'divisi' => 'desainer',
+            ],
+        [
             'name' => 'Dewi Lestari',
-            'email' => 'c',
+            'email' => 'dewi@gmail.com',
             'password' => Hash::make('123'),
             'role' => 'karyawan',
             'divisi' => 'programmer'
-        ]);
+        ],
 
-        User::create([
-            'name' => 'Rizki Pratama',
-            'email' => 'rizki@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'karyawan',
-            'divisi' => 'programmer'
-        ]);
+            // === KARYAWAN TAMBAHAN ===
+            [
+                'name' => 'Joko Susilo',
+                'email' => 'joko@gmail.com',
+                'role' => 'karyawan',
+                'divisi' => 'programmer',
+            ],
+            [
+                'name' => 'Rina Melati',
+                'email' => 'rina@gmail.com',
+                'role' => 'karyawan',
+                'divisi' => 'digital_marketing',
+            ],
+            [
+                'name' => 'Bambang Surya',
+                'email' => 'bambang@gmail.com',
+                'role' => 'karyawan',
+                'divisi' => 'desainer',
+            ],
 
-        User::create([
-            'name' => 'Maya Indah',
-            'email' => 'maya@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'karyawan',
-            'divisi' => 'programmer'
-        ]);
+            // === ADMIN ===
+            [
+                'name' => 'Admin Utama',
+                'email' => 'admin@gmail.com',
+                'role' => 'admin',
+                'divisi' => null,
+            ],
+        ];
 
-        // === DIVISI DIGITAL MARKETING ===
-        User::create([
-            'name' => 'Agus Wijaya',
-            'email' => 'agus@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'manager_divisi',
-            'divisi' => 'digital_marketing'
-        ]);
-
-        User::create([
-            'name' => 'Lisa Marlina',
-            'email' => 'lisa@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'karyawan',
-            'divisi' => 'digital_marketing'
-        ]);
-
-        User::create([
-            'name' => 'Rudi Hartono',
-            'email' => 'rudi.hartono@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'karyawan',
-            'divisi' => 'digital_marketing'
-        ]);
-
-        User::create([
-            'name' => 'Nina Sari',
-            'email' => 'nina@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'karyawan',
-            'divisi' => 'digital_marketing'
-        ]);
-
-        // === DIVISI DESAINER ===
-        User::create([
-            'name' => 'Yuni Astuti',
-            'email' => 'yuni@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'manager_divisi',
-            'divisi' => 'desainer'
-        ]);
-
-        User::create([
-            'name' => 'Ferdy Kurniawan',
-            'email' => 'ferdy@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'karyawan',
-            'divisi' => 'desainer'
-        ]);
-
-        User::create([
-            'name' => 'Ratna Dewi',
-            'email' => 'ratna@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'karyawan',
-            'divisi' => 'desainer'
-        ]);
-
-        User::create([
-            'name' => 'Hendra Setiawan',
-            'email' => 'hendra@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'karyawan',
-            'divisi' => 'desainer'
-        ]);
-
-        // === KARYAWAN TAMBAHAN ===
-        User::create([
-            'name' => 'Joko Susilo',
-            'email' => 'joko@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'karyawan',
-            'divisi' => 'programmer'
-        ]);
-
-        User::create([
-            'name' => 'Rina Melati',
-            'email' => 'rina@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'karyawan',
-            'divisi' => 'digital_marketing'
-        ]);
-
-        User::create([
-            'name' => 'Bambang Surya',
-            'email' => 'bambang@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'karyawan',
-            'divisi' => 'desainer'
-        ]);
-          User::create([
-            'name' => 'Admin Utama',
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'admin',
-            'divisi' => null
-        ]);
+        foreach ($users as $user) {
+            User::updateOrCreate(
+                ['email' => $user['email']],
+                [
+                    'name' => $user['name'],
+                    'password' => Hash::make('123'),
+                    'role' => $user['role'],
+                    'divisi' => $user['divisi'],
+                ]
+            );
+        }
     }
 }

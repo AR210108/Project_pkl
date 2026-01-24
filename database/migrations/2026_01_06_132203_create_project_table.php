@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('harga');
             $table->date('deadline');
             $table->integer('progres')->nullable();
-            $table->enum('status', ['In Progress', 'Active', 'Completed', 'Cancelled'])->default('In Progress');
+            $table->enum('status', ['Pending', 'Dalam Pengerjaan', 'Selesai', 'Dibatalkan'])->default('Pending');
             $table->timestamps();
         });
     }

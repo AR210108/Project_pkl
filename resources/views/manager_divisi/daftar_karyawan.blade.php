@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -58,58 +59,58 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        
+
         .material-icons-outlined {
             font-size: 24px;
             vertical-align: middle;
         }
-        
+
         /* Card hover effects */
         .stat-card {
             transition: all 0.3s ease;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
-        
+
         .stat-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        
+
         /* Table styles */
         .order-table {
             transition: all 0.2s ease;
         }
-        
+
         .order-table tr:hover {
             background-color: rgba(59, 130, 246, 0.05);
         }
-        
+
         /* Button styles */
         .btn-primary {
             background-color: #3b82f6;
             color: white;
             transition: all 0.2s ease;
         }
-        
+
         .btn-primary:hover {
             background-color: #2563eb;
         }
-        
+
         .btn-secondary {
             background-color: #f1f5f9;
             color: #64748b;
             transition: all 0.2s ease;
         }
-        
+
         .btn-secondary:hover {
             background-color: #e2e8f0;
         }
-        
+
         /* Modal styles */
         .modal {
             transition: opacity 0.25s ease;
         }
-        
+
         .modal-backdrop {
             background-color: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
@@ -123,50 +124,50 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
-        
+
         .status-aktif {
             background-color: rgba(16, 185, 129, 0.15);
             color: #065f46;
         }
-        
+
         .status-cuti {
             background-color: rgba(245, 158, 11, 0.15);
             color: #92400e;
         }
-        
+
         .status-tidak-aktif {
             background-color: rgba(239, 68, 68, 0.15);
             color: #991b1b;
         }
-        
+
         /* Custom styles untuk transisi */
         .sidebar-transition {
             transition: transform 0.3s ease-in-out;
         }
-        
+
         /* Animasi hamburger */
         .hamburger-line {
             transition: all 0.3s ease-in-out;
         }
-        
+
         .hamburger-active .line1 {
             transform: rotate(45deg) translate(5px, 5px);
         }
-        
+
         .hamburger-active .line2 {
             opacity: 0;
         }
-        
+
         .hamburger-active .line3 {
             transform: rotate(-45deg) translate(7px, -6px);
         }
-        
+
         /* Gaya untuk indikator aktif/hover */
         .nav-item {
             position: relative;
             overflow: hidden;
         }
-        
+
         .nav-item::before {
             content: '';
             position: absolute;
@@ -178,7 +179,7 @@
             transform: translateX(100%);
             transition: transform 0.3s ease;
         }
-        
+
         @media (min-width: 768px) {
             .nav-item::before {
                 right: auto;
@@ -186,12 +187,12 @@
                 transform: translateX(-100%);
             }
         }
-        
+
         .nav-item:hover::before,
         .nav-item.active::before {
             transform: translateX(0);
         }
-        
+
         /* Memastikan sidebar tetap di posisinya saat scroll */
         .sidebar-fixed {
             position: fixed;
@@ -199,93 +200,94 @@
             overflow-y: auto;
             z-index: 40;
         }
-        
+
         /* Menyesuaikan konten utama agar tidak tertutup sidebar */
         .main-content {
             margin-left: 0;
             transition: margin-left 0.3s ease-in-out;
         }
-        
+
         @media (min-width: 768px) {
             .main-content {
-                margin-left: 256px; /* Lebar sidebar */
+                margin-left: 256px;
+                /* Lebar sidebar */
             }
         }
-        
+
         /* Scrollbar kustom untuk sidebar */
         .sidebar-fixed::-webkit-scrollbar {
             width: 6px;
         }
-        
+
         .sidebar-fixed::-webkit-scrollbar-track {
             background: #f1f1f1;
         }
-        
+
         .sidebar-fixed::-webkit-scrollbar-thumb {
             background: #888;
             border-radius: 3px;
         }
-        
+
         .sidebar-fixed::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
-        
+
         /* Table mobile adjustments */
         @media (max-width: 639px) {
             .desktop-table {
                 display: none;
             }
-            
+
             .mobile-cards {
                 display: block;
             }
-            
+
             /* Hide desktop pagination on mobile */
             .desktop-pagination {
                 display: none !important;
             }
         }
-        
+
         @media (min-width: 640px) {
             .desktop-table {
                 display: block;
             }
-            
+
             .mobile-cards {
                 display: none;
             }
-            
+
             /* Hide mobile pagination on desktop */
             .mobile-pagination {
                 display: none !important;
             }
         }
-        
+
         /* Form input styles */
         .form-input {
             border: 1px solid #e2e8f0;
             transition: all 0.2s ease;
         }
-        
+
         .form-input:focus {
             border-color: #3b82f6;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
-        
+
         /* Pagination styles */
         .page-btn {
             transition: all 0.2s ease;
         }
-        
+
         .page-btn:hover:not(:disabled) {
             transform: scale(1.1);
         }
-        
+
         .page-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
+
         /* Desktop pagination styles */
         .desktop-pagination {
             display: flex;
@@ -294,7 +296,7 @@
             gap: 8px;
             margin-top: 24px;
         }
-        
+
         .desktop-page-btn {
             min-width: 32px;
             height: 32px;
@@ -307,21 +309,21 @@
             transition: all 0.2s ease;
             cursor: pointer;
         }
-        
+
         .desktop-page-btn.active {
             background-color: #3b82f6;
             color: white;
         }
-        
+
         .desktop-page-btn:not(.active) {
             background-color: #f1f5f9;
             color: #64748b;
         }
-        
+
         .desktop-page-btn:not(.active):hover {
             background-color: #e2e8f0;
         }
-        
+
         .desktop-nav-btn {
             display: flex;
             justify-content: center;
@@ -334,16 +336,16 @@
             transition: all 0.2s ease;
             cursor: pointer;
         }
-        
+
         .desktop-nav-btn:hover:not(:disabled) {
             background-color: #e2e8f0;
         }
-        
+
         .desktop-nav-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
+
         /* Panel Styles */
         .panel {
             background: white;
@@ -352,7 +354,7 @@
             overflow: hidden;
             border: 1px solid #e2e8f0;
         }
-        
+
         .panel-header {
             background: #f8fafc;
             padding: 1rem 1.5rem;
@@ -361,7 +363,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .panel-title {
             font-size: 1.125rem;
             font-weight: 600;
@@ -371,11 +373,11 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .panel-body {
             padding: 1.5rem;
         }
-        
+
         /* SCROLLABLE TABLE */
         .scrollable-table-container {
             width: 100%;
@@ -385,38 +387,38 @@
             border-radius: 0.5rem;
             background: white;
         }
-        
+
         .scrollable-table-container {
             scrollbar-width: auto;
             -webkit-overflow-scrolling: touch;
         }
-        
+
         .scrollable-table-container::-webkit-scrollbar {
             height: 12px;
             width: 12px;
         }
-        
+
         .scrollable-table-container::-webkit-scrollbar-track {
             background: #f1f5f9;
             border-radius: 6px;
         }
-        
+
         .scrollable-table-container::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 6px;
             border: 2px solid #f1f5f9;
         }
-        
+
         .scrollable-table-container::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
-        
+
         .data-table {
             width: 100%;
             min-width: 1200px;
             border-collapse: collapse;
         }
-        
+
         .data-table th,
         .data-table td {
             padding: 12px 16px;
@@ -424,7 +426,7 @@
             border-bottom: 1px solid #e2e8f0;
             white-space: nowrap;
         }
-        
+
         .data-table th {
             background: #f8fafc;
             font-weight: 600;
@@ -433,19 +435,19 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
-        
+
         .data-table tbody tr:nth-child(even) {
             background: #f9fafb;
         }
-        
+
         .data-table tbody tr:hover {
             background: #f3f4f6;
         }
-        
+
         .table-shadow {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        
+
         /* Minimalist Popup Styles */
         .minimal-popup {
             position: fixed;
@@ -464,19 +466,19 @@
             max-width: 350px;
             border-left: 4px solid #10b981;
         }
-        
+
         .minimal-popup.show {
             transform: translateX(0);
         }
-        
+
         .minimal-popup.error {
             border-left-color: #ef4444;
         }
-        
+
         .minimal-popup.warning {
             border-left-color: #f59e0b;
         }
-        
+
         .minimal-popup-icon {
             flex-shrink: 0;
             width: 24px;
@@ -486,37 +488,37 @@
             justify-content: center;
             border-radius: 50%;
         }
-        
+
         .minimal-popup.success .minimal-popup-icon {
             background-color: rgba(16, 185, 129, 0.1);
             color: #10b981;
         }
-        
+
         .minimal-popup.error .minimal-popup-icon {
             background-color: rgba(239, 68, 68, 0.1);
             color: #ef4444;
         }
-        
+
         .minimal-popup.warning .minimal-popup-icon {
             background-color: rgba(245, 158, 11, 0.1);
             color: #f59e0b;
         }
-        
+
         .minimal-popup-content {
             flex-grow: 1;
         }
-        
+
         .minimal-popup-title {
             font-weight: 600;
             color: #1e293b;
             margin-bottom: 2px;
         }
-        
+
         .minimal-popup-message {
             font-size: 14px;
             color: #64748b;
         }
-        
+
         .minimal-popup-close {
             flex-shrink: 0;
             background: none;
@@ -527,12 +529,12 @@
             border-radius: 4px;
             transition: all 0.2s ease;
         }
-        
+
         .minimal-popup-close:hover {
             background-color: #f1f5f9;
             color: #64748b;
         }
-        
+
         /* Filter Dropdown Styles */
         .filter-dropdown {
             position: absolute;
@@ -547,11 +549,11 @@
             z-index: 100;
             display: none;
         }
-        
+
         .filter-dropdown.show {
             display: block;
         }
-        
+
         .filter-option {
             display: flex;
             align-items: center;
@@ -560,22 +562,22 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
+
         .filter-option:hover {
             color: #3b82f6;
         }
-        
+
         .filter-option input[type="checkbox"] {
             width: 18px;
             height: 18px;
             cursor: pointer;
         }
-        
+
         .filter-option label {
             cursor: pointer;
             user-select: none;
         }
-        
+
         .filter-actions {
             display: flex;
             gap: 8px;
@@ -583,7 +585,7 @@
             padding-top: 12px;
             border-top: 1px solid #e2e8f0;
         }
-        
+
         .filter-actions button {
             flex: 1;
             padding: 6px 12px;
@@ -594,25 +596,25 @@
             transition: all 0.2s ease;
             border: none;
         }
-        
+
         .filter-apply {
             background-color: #3b82f6;
             color: white;
         }
-        
+
         .filter-apply:hover {
             background-color: #2563eb;
         }
-        
+
         .filter-reset {
             background-color: #f1f5f9;
             color: #64748b;
         }
-        
+
         .filter-reset:hover {
             background-color: #e2e8f0;
         }
-        
+
         /* Hidden class for filtering */
         .hidden-by-filter {
             display: none !important;
@@ -631,16 +633,20 @@
                 <header class="mb-4 sm:mb-8">
                     <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">Daftar Karyawan</h1>
                 </header>
-                
+
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
-                        <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama karyawan atau jabatan..." type="text" />
+                        <span
+                            class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                        <input id="searchInput"
+                            class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input"
+                            placeholder="Cari nama karyawan atau jabatan..." type="text" />
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <div class="relative">
-                            <button id="filterBtn" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
+                            <button id="filterBtn"
+                                class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
                                 <span class="material-icons-outlined text-sm">filter_list</span>
                                 Filter
                             </button>
@@ -667,14 +673,9 @@
                                 </div>
                             </div>
                         </div>
-                        <button id="tambahKaryawanBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
-                            <span class="material-icons-outlined">add</span>
-                            <span class="hidden sm:inline">Tambah Karyawan</span>
-                            <span class="sm:hidden">Tambah</span>
-                        </button>
                     </div>
                 </div>
-                
+
                 <!-- Data Table Panel -->
                 <div class="panel">
                     <div class="panel-header">
@@ -683,7 +684,8 @@
                             Data Karyawan
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">4</span> karyawan</span>
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount"
+                                    class="font-semibold text-text-light">4</span> karyawan</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -697,197 +699,54 @@
                                             <th style="min-width: 200px;">Nama</th>
                                             <th style="min-width: 150px;">Jabatan</th>
                                             <th style="min-width: 150px;">Divisi</th>
-                                            <th style="min-width: 200px;">Alamat</th>
+                                            <th style="min-width: 250px;">Alamat</th>
                                             <th style="min-width: 150px;">Kontak</th>
-                                            <th style="min-width: 100px;">Status</th>
                                             <th style="min-width: 100px;">Foto</th>
-                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="desktopTableBody">
-                                        <tr class="karyawan-row" 
-                                            data-id="1" 
-                                            data-nama="Ahmad Fauzi" 
-                                            data-jabatan="Senior Developer" 
-                                            data-divisi="IT" 
-                                            data-alamat="Jl. Merdeka No. 123, Jakarta" 
-                                            data-kontak="08123456789" 
-                                            data-status="aktif">
-                                            <td style="min-width: 60px;">1</td>
-                                            <td style="min-width: 200px;">Ahmad Fauzi</td>
-                                            <td style="min-width: 150px;">Senior Developer</td>
-                                            <td style="min-width: 150px;">IT</td>
-                                            <td style="min-width: 200px;">Jl. Merdeka No. 123, Jakarta</td>
-                                            <td style="min-width: 150px;">08123456789</td>
-                                            <td style="min-width: 100px;">
-                                                <span class="status-badge status-aktif">Aktif</span>
-                                            </td>
-                                            <td style="min-width: 100px;">
-                                                <div class="w-10 h-10 rounded-full overflow-hidden">
-                                                    <img src="https://picsum.photos/seed/employee1/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
-                                                </div>
-                                            </td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                            data-id="1"
-                                                            data-nama="Ahmad Fauzi"
-                                                            data-jabatan="Senior Developer"
-                                                            data-divisi="IT"
-                                                            data-alamat="Jl. Merdeka No. 123, Jakarta"
-                                                            data-kontak="08123456789"
-                                                            data-status="aktif">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                            data-id="1">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr class="karyawan-row" 
-                                            data-id="2" 
-                                            data-nama="Siti Nurhaliza" 
-                                            data-jabatan="HR Manager" 
-                                            data-divisi="HR" 
-                                            data-alamat="Jl. Sudirman No. 456, Bandung" 
-                                            data-kontak="08234567890" 
-                                            data-status="cuti">
-                                            <td style="min-width: 60px;">2</td>
-                                            <td style="min-width: 200px;">Siti Nurhaliza</td>
-                                            <td style="min-width: 150px;">HR Manager</td>
-                                            <td style="min-width: 150px;">HR</td>
-                                            <td style="min-width: 200px;">Jl. Sudirman No. 456, Bandung</td>
-                                            <td style="min-width: 150px;">08234567890</td>
-                                            <td style="min-width: 100px;">
-                                                <span class="status-badge status-cuti">Cuti</span>
-                                            </td>
-                                            <td style="min-width: 100px;">
-                                                <div class="w-10 h-10 rounded-full overflow-hidden">
-                                                    <img src="https://picsum.photos/seed/employee2/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
-                                                </div>
-                                            </td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                            data-id="2"
-                                                            data-nama="Siti Nurhaliza"
-                                                            data-jabatan="HR Manager"
-                                                            data-divisi="HR"
-                                                            data-alamat="Jl. Sudirman No. 456, Bandung"
-                                                            data-kontak="08234567890"
-                                                            data-status="cuti">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                            data-id="2">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr class="karyawan-row" 
-                                            data-id="3" 
-                                            data-nama="Budi Santoso" 
-                                            data-jabatan="Marketing Manager" 
-                                            data-divisi="Marketing" 
-                                            data-alamat="Jl. Gatot Subroto No. 789, Surabaya" 
-                                            data-kontak="08345678901" 
-                                            data-status="aktif">
-                                            <td style="min-width: 60px;">3</td>
-                                            <td style="min-width: 200px;">Budi Santoso</td>
-                                            <td style="min-width: 150px;">Marketing Manager</td>
-                                            <td style="min-width: 150px;">Marketing</td>
-                                            <td style="min-width: 200px;">Jl. Gatot Subroto No. 789, Surabaya</td>
-                                            <td style="min-width: 150px;">08345678901</td>
-                                            <td style="min-width: 100px;">
-                                                <span class="status-badge status-aktif">Aktif</span>
-                                            </td>
-                                            <td style="min-width: 100px;">
-                                                <div class="w-10 h-10 rounded-full overflow-hidden">
-                                                    <img src="https://picsum.photos/seed/employee3/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
-                                                </div>
-                                            </td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                            data-id="3"
-                                                            data-nama="Budi Santoso"
-                                                            data-jabatan="Marketing Manager"
-                                                            data-divisi="Marketing"
-                                                            data-alamat="Jl. Gatot Subroto No. 789, Surabaya"
-                                                            data-kontak="08345678901"
-                                                            data-status="aktif">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                            data-id="3">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr class="karyawan-row" 
-                                            data-id="4" 
-                                            data-nama="Dewi Lestari" 
-                                            data-jabatan="Finance Manager" 
-                                            data-divisi="Finance" 
-                                            data-alamat="Jl. Thamrin No. 321, Medan" 
-                                            data-kontak="08456789012" 
-                                            data-status="tidak aktif">
-                                            <td style="min-width: 60px;">4</td>
-                                            <td style="min-width: 200px;">Dewi Lestari</td>
-                                            <td style="min-width: 150px;">Finance Manager</td>
-                                            <td style="min-width: 150px;">Finance</td>
-                                            <td style="min-width: 200px;">Jl. Thamrin No. 321, Medan</td>
-                                            <td style="min-width: 150px;">08456789012</td>
-                                            <td style="min-width: 100px;">
-                                                <span class="status-badge status-tidak-aktif">Tidak Aktif</span>
-                                            </td>
-                                            <td style="min-width: 100px;">
-                                                <div class="w-10 h-10 rounded-full overflow-hidden">
-                                                    <img src="https://picsum.photos/seed/employee4/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
-                                                </div>
-                                            </td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                            data-id="4"
-                                                            data-nama="Dewi Lestari"
-                                                            data-jabatan="Finance Manager"
-                                                            data-divisi="Finance"
-                                                            data-alamat="Jl. Thamrin No. 321, Medan"
-                                                            data-kontak="08456789012"
-                                                            data-status="tidak aktif">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                            data-id="4">
-                                                        <span class="material-icons-outlined">delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        @foreach ($karyawan as $index => $k)
+                                            <tr class="karyawan-row" data-id="{{ $k->id }}"
+                                                data-nama="{{ $k->nama }}" data-jabatan="{{ $k->jabatan }}"
+                                                data-divisi="{{ $k->divisi }}" data-alamat="{{ $k->alamat }}"
+                                                data-kontak="{{ $k->kontak }}" data-status="{{ $k->status }}">
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>{{ $k->nama }}</td>
+                                                <td>{{ $k->jabatan }}</td>
+                                                <td>{{ $k->divisi }}</td>
+                                                <td>{{ $k->alamat }}</td>
+                                                <td>{{ $k->kontak }}</td>
+<td>
+    @if ($k->foto)
+        <img src="{{ asset('storage/karyawan/' . $k->foto) }}"
+             alt="Foto" 
+             class="w-10 h-10 rounded-full object-cover"
+             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($k->nama) }}';">
+    @else
+        <img src="https://ui-avatars.com/api/?name={{ urlencode($k->nama) }}"
+             alt="Foto" 
+             class="w-10 h-10 rounded-full object-cover">
+    @endif
+</td>
+                                        
+                                            </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                        
+
                         <!-- Mobile Card View -->
                         <div class="mobile-cards space-y-4" id="mobile-cards">
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card" 
-                                 data-id="1" 
-                                 data-nama="Ahmad Fauzi" 
-                                 data-jabatan="Senior Developer" 
-                                 data-divisi="IT" 
-                                 data-alamat="Jl. Merdeka No. 123, Jakarta" 
-                                 data-kontak="08123456789" 
-                                 data-status="aktif">
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card"
+                                data-id="1" data-nama="Ahmad Fauzi" data-jabatan="Senior Developer"
+                                data-divisi="IT" data-alamat="Jl. Merdeka No. 123, Jakarta" data-kontak="08123456789"
+                                data-status="aktif">
                                 <div class="flex justify-between items-start mb-3">
                                     <div class="flex items-center gap-3">
                                         <div class="h-12 w-12 rounded-full overflow-hidden">
-                                            <img src="https://picsum.photos/seed/employee1/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
+                                            <img src="https://picsum.photos/seed/employee1/100/100.jpg" alt="Foto"
+                                                class="w-full h-full object-cover">
                                         </div>
                                         <div>
                                             <h4 class="font-semibold text-base">Ahmad Fauzi</h4>
@@ -895,18 +754,14 @@
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                data-id="1"
-                                                data-nama="Ahmad Fauzi"
-                                                data-jabatan="Senior Developer"
-                                                data-divisi="IT"
-                                                data-alamat="Jl. Merdeka No. 123, Jakarta"
-                                                data-kontak="08123456789"
-                                                data-status="aktif">
+                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                            data-id="1" data-nama="Ahmad Fauzi" data-jabatan="Senior Developer"
+                                            data-divisi="IT" data-alamat="Jl. Merdeka No. 123, Jakarta"
+                                            data-kontak="08123456789" data-status="aktif">
                                             <span class="material-icons-outlined">edit</span>
                                         </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                data-id="1">
+                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
+                                            data-id="1">
                                             <span class="material-icons-outlined">delete</span>
                                         </button>
                                     </div>
@@ -932,19 +787,16 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card" 
-                                 data-id="2" 
-                                 data-nama="Siti Nurhaliza" 
-                                 data-jabatan="HR Manager" 
-                                 data-divisi="HR" 
-                                 data-alamat="Jl. Sudirman No. 456, Bandung" 
-                                 data-kontak="08234567890" 
-                                 data-status="cuti">
+
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card"
+                                data-id="2" data-nama="Siti Nurhaliza" data-jabatan="HR Manager" data-divisi="HR"
+                                data-alamat="Jl. Sudirman No. 456, Bandung" data-kontak="08234567890"
+                                data-status="cuti">
                                 <div class="flex justify-between items-start mb-3">
                                     <div class="flex items-center gap-3">
                                         <div class="h-12 w-12 rounded-full overflow-hidden">
-                                            <img src="https://picsum.photos/seed/employee2/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
+                                            <img src="https://picsum.photos/seed/employee2/100/100.jpg" alt="Foto"
+                                                class="w-full h-full object-cover">
                                         </div>
                                         <div>
                                             <h4 class="font-semibold text-base">Siti Nurhaliza</h4>
@@ -952,18 +804,14 @@
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                data-id="2"
-                                                data-nama="Siti Nurhaliza"
-                                                data-jabatan="HR Manager"
-                                                data-divisi="HR"
-                                                data-alamat="Jl. Sudirman No. 456, Bandung"
-                                                data-kontak="08234567890"
-                                                data-status="cuti">
+                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                            data-id="2" data-nama="Siti Nurhaliza" data-jabatan="HR Manager"
+                                            data-divisi="HR" data-alamat="Jl. Sudirman No. 456, Bandung"
+                                            data-kontak="08234567890" data-status="cuti">
                                             <span class="material-icons-outlined">edit</span>
                                         </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                data-id="2">
+                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
+                                            data-id="2">
                                             <span class="material-icons-outlined">delete</span>
                                         </button>
                                     </div>
@@ -989,19 +837,16 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card" 
-                                 data-id="3" 
-                                 data-nama="Budi Santoso" 
-                                 data-jabatan="Marketing Manager" 
-                                 data-divisi="Marketing" 
-                                 data-alamat="Jl. Gatot Subroto No. 789, Surabaya" 
-                                 data-kontak="08345678901" 
-                                 data-status="aktif">
+
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card"
+                                data-id="3" data-nama="Budi Santoso" data-jabatan="Marketing Manager"
+                                data-divisi="Marketing" data-alamat="Jl. Gatot Subroto No. 789, Surabaya"
+                                data-kontak="08345678901" data-status="aktif">
                                 <div class="flex justify-between items-start mb-3">
                                     <div class="flex items-center gap-3">
                                         <div class="h-12 w-12 rounded-full overflow-hidden">
-                                            <img src="https://picsum.photos/seed/employee3/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
+                                            <img src="https://picsum.photos/seed/employee3/100/100.jpg" alt="Foto"
+                                                class="w-full h-full object-cover">
                                         </div>
                                         <div>
                                             <h4 class="font-semibold text-base">Budi Santoso</h4>
@@ -1009,18 +854,14 @@
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                data-id="3"
-                                                data-nama="Budi Santoso"
-                                                data-jabatan="Marketing Manager"
-                                                data-divisi="Marketing"
-                                                data-alamat="Jl. Gatot Subroto No. 789, Surabaya"
-                                                data-kontak="08345678901"
-                                                data-status="aktif">
+                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                            data-id="3" data-nama="Budi Santoso" data-jabatan="Marketing Manager"
+                                            data-divisi="Marketing" data-alamat="Jl. Gatot Subroto No. 789, Surabaya"
+                                            data-kontak="08345678901" data-status="aktif">
                                             <span class="material-icons-outlined">edit</span>
                                         </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                data-id="3">
+                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
+                                            data-id="3">
                                             <span class="material-icons-outlined">delete</span>
                                         </button>
                                     </div>
@@ -1046,19 +887,16 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card" 
-                                 data-id="4" 
-                                 data-nama="Dewi Lestari" 
-                                 data-jabatan="Finance Manager" 
-                                 data-divisi="Finance" 
-                                 data-alamat="Jl. Thamrin No. 321, Medan" 
-                                 data-kontak="08456789012" 
-                                 data-status="tidak aktif">
+
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card"
+                                data-id="4" data-nama="Dewi Lestari" data-jabatan="Finance Manager"
+                                data-divisi="Finance" data-alamat="Jl. Thamrin No. 321, Medan"
+                                data-kontak="08456789012" data-status="tidak aktif">
                                 <div class="flex justify-between items-start mb-3">
                                     <div class="flex items-center gap-3">
                                         <div class="h-12 w-12 rounded-full overflow-hidden">
-                                            <img src="https://picsum.photos/seed/employee4/100/100.jpg" alt="Foto" class="w-full h-full object-cover">
+                                            <img src="https://picsum.photos/seed/employee4/100/100.jpg" alt="Foto"
+                                                class="w-full h-full object-cover">
                                         </div>
                                         <div>
                                             <h4 class="font-semibold text-base">Dewi Lestari</h4>
@@ -1066,18 +904,14 @@
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                                                data-id="4"
-                                                data-nama="Dewi Lestari"
-                                                data-jabatan="Finance Manager"
-                                                data-divisi="Finance"
-                                                data-alamat="Jl. Thamrin No. 321, Medan"
-                                                data-kontak="08456789012"
-                                                data-status="tidak aktif">
+                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                            data-id="4" data-nama="Dewi Lestari" data-jabatan="Finance Manager"
+                                            data-divisi="Finance" data-alamat="Jl. Thamrin No. 321, Medan"
+                                            data-kontak="08456789012" data-status="tidak aktif">
                                             <span class="material-icons-outlined">edit</span>
                                         </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
-                                                data-id="4">
+                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
+                                            data-id="4">
                                             <span class="material-icons-outlined">delete</span>
                                         </button>
                                     </div>
@@ -1104,7 +938,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Pagination -->
                         <div id="paginationContainer" class="desktop-pagination">
                             <button id="prevPage" class="desktop-nav-btn">
@@ -1125,160 +959,6 @@
             </footer>
         </div>
     </div>
-
-    <!-- Modal Tambah Karyawan -->
-    <div id="tambahKaryawanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Tambah Karyawan Baru</h3>
-                    <button id="closeModalBtn" class="text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form action="#" method="POST" id="tambahKaryawanForm" class="space-y-4">
-                    @csrf
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Karyawan</label>
-                            <input type="text" name="nama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama karyawan" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
-                            <input type="text" name="jabatan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan jabatan" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
-                            <select name="divisi" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih divisi</option>
-                                <option value="IT">IT</option>
-                                <option value="HR">HR</option>
-                                <option value="Marketing">Marketing</option>
-                                <option value="Finance">Finance</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Kontak</label>
-                            <input type="text" name="kontak" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nomor kontak" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <select name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih status</option>
-                                <option value="aktif">Aktif</option>
-                                <option value="cuti">Cuti</option>
-                                <option value="tidak aktif">Tidak Aktif</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
-                            <input type="file" name="foto" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
-                        <textarea name="alamat" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan alamat karyawan" required></textarea>
-                    </div>
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" id="batalTambahBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan Data</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Edit Karyawan -->
-    <div id="editKaryawanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Karyawan</h3>
-                    <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form method="POST" action="#" id="editKaryawanForm" class="space-y-4">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" id="editId" name="id">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Karyawan</label>
-                            <input type="text" id="editNama" name="nama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama karyawan" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
-                            <input type="text" id="editJabatan" name="jabatan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan jabatan" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
-                            <select id="editDivisi" name="divisi" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih divisi</option>
-                                <option value="IT">IT</option>
-                                <option value="HR">HR</option>
-                                <option value="Marketing">Marketing</option>
-                                <option value="Finance">Finance</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Kontak</label>
-                            <input type="text" id="editKontak" name="kontak" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nomor kontak" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <select id="editStatus" name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih status</option>
-                                <option value="aktif">Aktif</option>
-                                <option value="cuti">Cuti</option>
-                                <option value="tidak aktif">Tidak Aktif</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
-                            <input type="file" name="foto" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
-                        <textarea id="editAlamat" name="alamat" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan alamat karyawan" required></textarea>
-                    </div>
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" id="batalEditBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Data</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Delete Konfirmasi -->
-    <div id="deleteModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h3>
-                    <button id="closeDeleteModalBtn" class="text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form id="deleteForm" method="POST" action="#">
-                    @csrf
-                    @method('DELETE')
-                    <div class="mb-6">
-                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus karyawan ini?</p>
-                        <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
-                        <input type="hidden" id="deleteId" name="id">
-                    </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" id="batalDeleteBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- Minimalist Popup -->
     <div id="minimalPopup" class="minimal-popup">
         <div class="minimal-popup-icon">
@@ -1299,11 +979,11 @@
         const itemsPerPage = 5;
         let activeFilters = ['all'];
         let searchTerm = '';
-        
+
         // Dapatkan semua elemen karyawan
         const karyawanRows = document.querySelectorAll('.karyawan-row');
         const karyawanCards = document.querySelectorAll('.karyawan-card');
-        
+
         // Inisialisasi pagination, filter, dan search
         initializePagination();
         initializeFilter();
@@ -1315,17 +995,17 @@
             renderPagination();
             updateVisibleItems();
         }
-        
+
         function renderPagination() {
             const visibleRows = getFilteredRows();
             const totalPages = Math.ceil(visibleRows.length / itemsPerPage);
             const pageNumbersContainer = document.getElementById('pageNumbers');
             const prevButton = document.getElementById('prevPage');
             const nextButton = document.getElementById('nextPage');
-            
+
             // Clear existing page numbers
             pageNumbersContainer.innerHTML = '';
-            
+
             // Generate page numbers
             for (let i = 1; i <= totalPages; i++) {
                 const pageNumber = document.createElement('button');
@@ -1334,70 +1014,70 @@
                 pageNumber.addEventListener('click', () => goToPage(i));
                 pageNumbersContainer.appendChild(pageNumber);
             }
-            
+
             // Update navigation buttons
             prevButton.disabled = currentPage === 1;
             nextButton.disabled = currentPage === totalPages || totalPages === 0;
-            
+
             // Add event listeners for navigation buttons
             prevButton.onclick = () => {
                 if (currentPage > 1) goToPage(currentPage - 1);
             };
-            
+
             nextButton.onclick = () => {
                 if (currentPage < totalPages) goToPage(currentPage + 1);
             };
         }
-        
+
         function goToPage(page) {
             currentPage = page;
             renderPagination();
             updateVisibleItems();
-            
+
             // Reset scroll position when changing pages
             const scrollableTable = document.getElementById('scrollableTable');
             if (scrollableTable) {
                 scrollableTable.scrollLeft = 0;
             }
         }
-        
+
         function getFilteredRows() {
             return Array.from(karyawanRows).filter(row => !row.classList.contains('hidden-by-filter'));
         }
-        
+
         function getFilteredCards() {
             return Array.from(karyawanCards).filter(card => !card.classList.contains('hidden-by-filter'));
         }
-        
+
         function updateVisibleItems() {
             const visibleRows = getFilteredRows();
             const visibleCards = getFilteredCards();
-            
+
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
-            
+
             // Hide all rows and cards first
             karyawanRows.forEach(row => row.style.display = 'none');
             karyawanCards.forEach(card => card.style.display = 'none');
-            
+
             // Show only the rows for current page
             visibleRows.forEach((row, index) => {
                 if (index >= startIndex && index < endIndex) {
                     row.style.display = '';
                 }
             });
-            
+
             // Show only the cards for current page
             visibleCards.forEach((card, index) => {
                 if (index >= startIndex && index < endIndex) {
                     card.style.display = '';
                 }
             });
-            
+
             // Update total count
             document.getElementById('totalCount').textContent = visibleRows.length;
         }
-        
+
         // === FILTER ===
         function initializeFilter() {
             const filterBtn = document.getElementById('filterBtn');
@@ -1405,33 +1085,34 @@
             const applyFilterBtn = document.getElementById('applyFilter');
             const resetFilterBtn = document.getElementById('resetFilter');
             const filterAll = document.getElementById('filterAll');
-            
+
             // Toggle filter dropdown
             filterBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 filterDropdown.classList.toggle('show');
             });
-            
+
             // Close dropdown when clicking outside
             document.addEventListener('click', function() {
                 filterDropdown.classList.remove('show');
             });
-            
+
             // Prevent dropdown from closing when clicking inside
             filterDropdown.addEventListener('click', function(e) {
                 e.stopPropagation();
             });
-            
+
             // Handle "All" checkbox
             filterAll.addEventListener('change', function() {
                 if (this.checked) {
                     // Uncheck all other checkboxes
-                    document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
-                        cb.checked = false;
-                    });
+                    document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(
+                        cb => {
+                            cb.checked = false;
+                        });
                 }
             });
-            
+
             // Handle other checkboxes
             document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
                 cb.addEventListener('change', function() {
@@ -1441,14 +1122,14 @@
                     }
                 });
             });
-            
+
             // Apply filter
             applyFilterBtn.addEventListener('click', function() {
                 const filterAll = document.getElementById('filterAll');
                 const filterAktif = document.getElementById('filterAktif');
                 const filterCuti = document.getElementById('filterCuti');
                 const filterTidakAktif = document.getElementById('filterTidakAktif');
-                
+
                 activeFilters = [];
                 if (filterAll.checked) {
                     activeFilters.push('all');
@@ -1457,13 +1138,13 @@
                     if (filterCuti.checked) activeFilters.push('cuti');
                     if (filterTidakAktif.checked) activeFilters.push('tidak aktif');
                 }
-                
+
                 applyFilters();
                 filterDropdown.classList.remove('show');
                 const visibleCount = getFilteredRows().length;
                 showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} karyawan`, 'success');
             });
-            
+
             // Reset filter
             resetFilterBtn.addEventListener('click', function() {
                 document.getElementById('filterAll').checked = true;
@@ -1477,18 +1158,18 @@
                 showMinimalPopup('Filter Direset', 'Menampilkan semua karyawan', 'success');
             });
         }
-        
+
         function applyFilters() {
             // Reset to first page
             currentPage = 1;
-            
+
             // Apply filters to rows
             karyawanRows.forEach(row => {
                 const status = row.getAttribute('data-status').toLowerCase();
                 const nama = row.getAttribute('data-nama').toLowerCase();
                 const jabatan = row.getAttribute('data-jabatan').toLowerCase();
                 const divisi = row.getAttribute('data-divisi').toLowerCase();
-                
+
                 // Check if status matches filter
                 let statusMatches = false;
                 if (activeFilters.includes('all')) {
@@ -1496,31 +1177,31 @@
                 } else {
                     statusMatches = activeFilters.some(filter => status.includes(filter.toLowerCase()));
                 }
-                
+
                 // Check if search term matches
                 let searchMatches = true;
                 if (searchTerm) {
                     const searchLower = searchTerm.toLowerCase();
-                    searchMatches = nama.includes(searchLower) || 
-                                   jabatan.includes(searchLower) ||
-                                   divisi.includes(searchLower) ||
-                                   status.includes(searchLower);
+                    searchMatches = nama.includes(searchLower) ||
+                        jabatan.includes(searchLower) ||
+                        divisi.includes(searchLower) ||
+                        status.includes(searchLower);
                 }
-                
+
                 if (statusMatches && searchMatches) {
                     row.classList.remove('hidden-by-filter');
                 } else {
                     row.classList.add('hidden-by-filter');
                 }
             });
-            
+
             // Apply same filters to cards
             karyawanCards.forEach(card => {
                 const status = card.getAttribute('data-status').toLowerCase();
                 const nama = card.getAttribute('data-nama').toLowerCase();
                 const jabatan = card.getAttribute('data-jabatan').toLowerCase();
                 const divisi = card.getAttribute('data-divisi').toLowerCase();
-                
+
                 // Check if status matches filter
                 let statusMatches = false;
                 if (activeFilters.includes('all')) {
@@ -1528,34 +1209,34 @@
                 } else {
                     statusMatches = activeFilters.some(filter => status.includes(filter.toLowerCase()));
                 }
-                
+
                 // Check if search term matches
                 let searchMatches = true;
                 if (searchTerm) {
                     const searchLower = searchTerm.toLowerCase();
-                    searchMatches = nama.includes(searchLower) || 
-                                   jabatan.includes(searchLower) ||
-                                   divisi.includes(searchLower) ||
-                                   status.includes(searchLower);
+                    searchMatches = nama.includes(searchLower) ||
+                        jabatan.includes(searchLower) ||
+                        divisi.includes(searchLower) ||
+                        status.includes(searchLower);
                 }
-                
+
                 if (statusMatches && searchMatches) {
                     card.classList.remove('hidden-by-filter');
                 } else {
                     card.classList.add('hidden-by-filter');
                 }
             });
-            
+
             // Update pagination and visible items
             renderPagination();
             updateVisibleItems();
         }
-        
+
         // === SEARCH ===
         function initializeSearch() {
             const searchInput = document.getElementById('searchInput');
             let searchTimeout;
-            
+
             searchInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
@@ -1568,7 +1249,7 @@
         // Initialize scroll detection for table
         function initializeScrollDetection() {
             const scrollableTable = document.getElementById('scrollableTable');
-            
+
             if (scrollableTable) {
                 // Add scroll event listener
                 scrollableTable.addEventListener('scroll', function() {
@@ -1584,14 +1265,14 @@
             const popupTitle = popup.querySelector('.minimal-popup-title');
             const popupMessage = popup.querySelector('.minimal-popup-message');
             const popupIcon = popup.querySelector('.minimal-popup-icon span');
-            
+
             // Set content
             popupTitle.textContent = title;
             popupMessage.textContent = message;
-            
+
             // Set type
             popup.className = 'minimal-popup show ' + type;
-            
+
             // Set icon
             if (type === 'success') {
                 popupIcon.textContent = 'check';
@@ -1600,133 +1281,16 @@
             } else if (type === 'warning') {
                 popupIcon.textContent = 'warning';
             }
-            
+
             // Auto hide after 3 seconds
             setTimeout(() => {
                 popup.classList.remove('show');
             }, 3000);
         }
-        
+
         // Close popup when clicking the close button
         document.querySelector('.minimal-popup-close').addEventListener('click', function() {
             document.getElementById('minimalPopup').classList.remove('show');
-        });
-
-        // Modal elements
-        const tambahKaryawanModal = document.getElementById('tambahKaryawanModal');
-        const editKaryawanModal = document.getElementById('editKaryawanModal');
-        const deleteModal = document.getElementById('deleteModal');
-
-        // Buttons
-        const tambahKaryawanBtn = document.getElementById('tambahKaryawanBtn');
-        const batalTambahBtn = document.getElementById('batalTambahBtn');
-        const batalEditBtn = document.getElementById('batalEditBtn');
-        const batalDeleteBtn = document.getElementById('batalDeleteBtn');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const closeEditModalBtn = document.getElementById('closeEditModalBtn');
-        const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
-
-        // Forms
-        const tambahKaryawanForm = document.getElementById('tambahKaryawanForm');
-        const editKaryawanForm = document.getElementById('editKaryawanForm');
-
-        // Open tambah modal
-        tambahKaryawanBtn.addEventListener('click', () => {
-            tambahKaryawanModal.classList.remove('hidden');
-        });
-
-        // Close tambah modal
-        batalTambahBtn.addEventListener('click', () => {
-            tambahKaryawanModal.classList.add('hidden');
-            tambahKaryawanForm.reset();
-        });
-
-        closeModalBtn.addEventListener('click', () => {
-            tambahKaryawanModal.classList.add('hidden');
-            tambahKaryawanForm.reset();
-        });
-
-        // Close edit modal
-        batalEditBtn.addEventListener('click', () => {
-            editKaryawanModal.classList.add('hidden');
-            editKaryawanForm.reset();
-        });
-
-        closeEditModalBtn.addEventListener('click', () => {
-            editKaryawanModal.classList.add('hidden');
-            editKaryawanForm.reset();
-        });
-
-        // Close delete modal
-        batalDeleteBtn.addEventListener('click', () => {
-            deleteModal.classList.add('hidden');
-        });
-
-        closeDeleteModalBtn.addEventListener('click', () => {
-            deleteModal.classList.add('hidden');
-        });
-
-        // ============================
-        // HANDLE EDIT BUTTON
-        // ============================
-        document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                // SET VALUE
-                document.getElementById('editId').value = button.dataset.id;
-                document.getElementById('editNama').value = button.dataset.nama;
-                document.getElementById('editJabatan').value = button.dataset.jabatan;
-                document.getElementById('editDivisi').value = button.dataset.divisi;
-                document.getElementById('editAlamat').value = button.dataset.alamat;
-                document.getElementById('editKontak').value = button.dataset.kontak;
-                document.getElementById('editStatus').value = button.dataset.status;
-
-                // SET ACTION URL DINAMIS
-                editKaryawanForm.action = `/manager_divisi/karyawan/${button.dataset.id}`;
-
-                editKaryawanModal.classList.remove('hidden');
-            });
-        });
-
-        // ============================
-        // HANDLE DELETE BUTTON
-        // ============================
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const id = button.dataset.id;
-
-                // Set action form delete
-                document.getElementById('deleteForm').action = `/manager_divisi/karyawan/${id}`;
-                document.getElementById('deleteId').value = id;
-
-                // Tampilkan modal
-                deleteModal.classList.remove('hidden');
-            });
-        });
-
-        // ============================
-        // SUBMIT FORM EDIT
-        // (untuk Laravel biarkan form submit saja)
-        // ============================
-        editKaryawanForm.addEventListener('submit', (e) => {
-            // Jangan prevent kalau mau kirim ke backend
-            // e.preventDefault();
-            // editKaryawanForm.submit();  // opsional
-
-            editKaryawanModal.classList.add('hidden');
-        });
-
-        // ============================
-        // SUBMIT FORM DELETE
-        // ============================
-        document.getElementById('deleteForm').addEventListener('submit', (e) => {
-            deleteModal.classList.add('hidden');
-        });
-
-        // ============================
-        // SUBMIT FORM TAMBAH
-        // ============================
-        tambahKaryawanForm.addEventListener('submit', (e) => {
-            tambahKaryawanModal.classList.add('hidden');
         });
     </script>
 </body>

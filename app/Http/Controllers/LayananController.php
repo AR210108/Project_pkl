@@ -6,23 +6,175 @@ use App\Models\Layanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
 
 class LayananController extends Controller
 {
+    public function financeIndex()
+{
+    // Ambil data dari database
+    $layanans = Layanan::all();
+
+    // Kirim data ke view
+    return view('finance.data_layanan', compact('layanans'));
+}
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        $layanans = Layanan::latest()->paginate(10);
+        $layanans = Layanan::latest()->get();
         return view('admin/data_layanan', compact('layanans'));
     }
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        // 1. Validasi input
+        $validator = Validator::make($request->all(), [
+            'nama_layanan' => 'required|string|max:255',
+            'harga'        => 'required|numeric|min:0',
+            'deskripsi'    => 'required|string',
+            'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal.',
+                'errors' => $validator->errors()
+            ], 422); // HTTP Status 422: Unprocessable Entity
+        }
+
+        // 2. Proses data dan simpan
+        try {
+            $data = $request->only(['nama_layanan', 'harga', 'deskripsi']);
+            
+            // Handle foto upload
+            if ($request->hasFile('foto')) {
+                $foto = $request->file('foto');
+                $fotoName = time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
+                $foto->storeAs('public/layanan', $fotoName);
+                $data['foto'] = 'layanan/' . $fotoName;
+            }
+
+            $layanan = Layanan::create($data);
+
+            // 3. Kembalikan respons JSON sukses
+            return response()->json([
+                'success' => true,
+                'message' => 'Layanan berhasil ditambahkan!',
+                'data' => $layanan
+            ], 201); // HTTP Status 201: Created
+
+        } catch (\Exception $e) {
+            // 4. Tangkap kesalahan dan kembalikan respons error
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan data.',
+                'error' => $e->getMessage()
+            ], 500); // HTTP Status 500: Internal Server Error
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id)
+    {
+        // 1. Cari layanan
+        $layanan = Layanan::findOrFail($id);
+
+        // 2. Validasi input
+        $validator = Validator::make($request->all(), [
+            'nama_layanan' => 'required|string|max:255',
+            'harga'        => 'required|numeric|min:0',
+            'deskripsi'    => 'required|string',
+            'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+        
+        // 3. Proses data dan update
+        try {
+            $data = $request->only(['nama_layanan', 'harga', 'deskripsi']);
+
+            // Handle foto upload
+            if ($request->hasFile('foto')) {
+                // Hapus foto lama jika ada
+                if ($layanan->foto) {
+                    Storage::delete('public/' . $layanan->foto);
+                }
+                
+                $foto = $request->file('foto');
+                $fotoName = time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
+                $foto->storeAs('public/layanan', $fotoName);
+                $data['foto'] = 'layanan/' . $fotoName;
+            }
+            
+            $layanan->update($data);
+
+            // 4. Kembalikan respons JSON sukses
+            return response()->json([
+                'success' => true,
+                'message' => 'Layanan berhasil diperbarui!',
+                'data' => $layanan
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memperbarui data.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
+    {
+        try {
+            $layanan = Layanan::findOrFail($id);
+            
+            // Hapus foto dari storage jika ada
+            if ($layanan->foto) {
+                Storage::delete('public/' . $layanan->foto);
+            }
+            
+            $layanan->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Layanan berhasil dihapus!'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menghapus data.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Method lainnya tidak berubah
     public function indexLayanan(Request $request)
     {
         $query = Layanan::query();
         
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                    ->orWhere('deskripsi', 'like', "%{$search}%");
+                $q->where('nama_layanan', 'like', "%{$search}%") // Ganti 'nama' -> 'nama_layanan'
+                  ->orWhere('deskripsi', 'like', "%{$search}%");
             });
         }
         
@@ -32,82 +184,9 @@ class LayananController extends Controller
         return view('general_manajer.data_layanan', compact('pelayanan', 'search'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nama_layanan' => 'required',
-            'harga'        => 'nullable|integer',
-            'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        $data = $request->all();
-        
-        // Handle photo upload
-        if ($request->hasFile('foto')) {
-            $foto = $request->file('foto');
-            $fotoName = time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
-            $foto->storeAs('public/layanan', $fotoName);
-            $data['foto'] = 'layanan/' . $fotoName;
-        }
-
-        Layanan::create($data);
-
-        return back()->with('success', 'Layanan berhasil ditambahkan!');
-    }
-
-    public function edit($id)
-    {
-        $layanan = Layanan::findOrFail($id);
-        
-        $request->validate([
-            'nama_layanan' => 'required',
-            'harga'        => 'nullable|integer',
-            'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        $data = $request->all();
-        
-        // Handle photo upload
-        if ($request->hasFile('foto')) {
-            // Delete old photo if exists
-            if ($layanan->foto) {
-                Storage::delete('public/' . $layanan->foto);
-            }
-            
-            $foto = $request->file('foto');
-            $fotoName = time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
-            $foto->storeAs('public/layanan', $fotoName);
-            $data['foto'] = 'layanan/' . $fotoName;
-        }
-        
-        $layanan->update($data);
-
-        return back()->with('success', 'Layanan berhasil diperbarui!');
-    }
-
-    public function destroy($id)
-    {
-        $layanan = Layanan::findOrFail($id);
-        
-        // Delete photo if exists
-        if ($layanan->foto) {
-            Storage::delete('public/' . $layanan->foto);
-        }
-        
-        $layanan->delete();
-
-        return back()->with('success', 'Layanan berhasil dihapus!');
-    }
     public function landingPage()
-{
-    $layanans = Layanan::latest()->get(); 
-    
-    // Debug: Baris ini akan menampilkan data $layanans dan menghentikan proses.
-    // Jika muncul data, berarti controller berjalan baik.
-    // Jika tidak, ada masalah dengan pengambilan data.
-    // dd($layanans); 
-    
-    return view('home', compact('layanans'));
-}
-    
+    {
+        $layanans = Layanan::latest()->get(); 
+        return view('home', compact('layanans'));
+    }
 }
