@@ -142,10 +142,8 @@
                 </div>
             </section>
             
-           
-            
-            <!-- Standard cards for all roles -->
-            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+            <!-- Updated cards section with new metrics -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
                     <div
                         class="bg-blue-100 dark:bg-blue-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
@@ -156,26 +154,7 @@
                         <p class="text-lg font-semibold text-gray-900 dark:text-white" id="attendance-status">Memuat...</p>
                     </div>
                 </div>
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <div
-                        class="bg-green-100 dark:bg-green-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-green-500">schedule</span>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Jam Kerja</p>
-                        <p class="text-lg font-semibold text-gray-900 dark:text-white">09:00 - 17:00</p>
-                    </div>
-                </div>
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <div
-                        class="bg-yellow-100 dark:bg-yellow-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-yellow-500">event_busy</span>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Jumlah Ketidakhadiran</p>
-                        <p class="text-lg font-semibold text-gray-900 dark:text-white" id="ketidakhadiran-count">{{ $ketidakhadiran_count ?? 0 }}</p>
-                    </div>
-                </div>
+                
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
                     <div
                         class="bg-purple-100 dark:bg-purple-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
@@ -186,8 +165,81 @@
                         <p class="text-lg font-semibold text-gray-900 dark:text-white" id="tugas-count">{{ $tugas_count ?? 0 }}</p>
                     </div>
                 </div>
+                
+                <!-- New Card: Gaji Tahun Ini -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
+                    <div
+                        class="bg-green-100 dark:bg-green-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-green-500">payments</span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Gaji Tahun Ini</p>
+                        <p class="text-lg font-semibold text-gray-900 dark:text-white">Rp 60.000.000</p>
+                    </div>
+                </div>
+                
+                <!-- New Card: Total Hadir -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
+                    <div
+                        class="bg-blue-100 dark:bg-blue-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-blue-500">check_circle</span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Hadir</p>
+                        <p class="text-lg font-semibold text-gray-900 dark:text-white">210 hari</p>
+                    </div>
+                </div>
+                
+                <!-- New Card: Total Terlambat -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
+                    <div
+                        class="bg-red-100 dark:bg-red-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-red-500">schedule</span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Terlambat</p>
+                        <p class="text-lg font-semibold text-gray-900 dark:text-white">8 kali</p>
+                    </div>
+                </div>
+                
+                <!-- New Card: Total Izin -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
+                    <div
+                        class="bg-yellow-100 dark:bg-yellow-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-yellow-500">event_available</span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Izin</p>
+                        <p class="text-lg font-semibold text-gray-900 dark:text-white">5 hari</p>
+                    </div>
+                </div>
+                
+                <!-- New Card: Total Sakit -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
+                    <div
+                        class="bg-orange-100 dark:bg-orange-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-orange-500">sick</span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Sakit</p>
+                        <p class="text-lg font-semibold text-gray-900 dark:text-white">3 hari</p>
+                    </div>
+                </div>
+                
+                <!-- New Card: Total Absen -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
+                    <div
+                        class="bg-gray-100 dark:bg-gray-700 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-gray-500">event_busy</span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Absen</p>
+                        <p class="text-lg font-semibold text-gray-900 dark:text-white">2 hari</p>
+                    </div>
+                </div>
             </section>
-             <!-- Calendar and Meeting Notes Section -->
+            
+            <!-- Calendar and Meeting Notes Section -->
             <section class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm mt-8">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Calendar Section -->
@@ -261,6 +313,7 @@
                     </div>
                 </div>
             </section>
+            
             <!-- Role-specific additional cards -->
             @if($user_role === 'general_manager')
                 <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
@@ -413,11 +466,6 @@
                 if (data.attendance_status) {
                     const statusElement = document.getElementById('attendance-status');
                     if(statusElement) statusElement.innerHTML = formatAttendanceStatus(data.attendance_status);
-                }
-                
-                if (data.ketidakhadiran_count !== undefined) {
-                    const ketidakhadiranElement = document.getElementById('ketidakhadiran-count');
-                    if(ketidakhadiranElement) ketidakhadiranElement.textContent = data.ketidakhadiran_count;
                 }
                 
                 if (data.tugas_count !== undefined) {
@@ -664,6 +712,7 @@
                 `;
             }
         }
+        
         // Calendar navigation
         document.getElementById('prev-month').addEventListener('click', function() {
             currentDate.setMonth(currentDate.getMonth() - 1);

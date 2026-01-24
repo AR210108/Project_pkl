@@ -191,13 +191,26 @@
             /* 10px 16px, dengan !important */
         }
 
+        /* PERUBAHAN: Mengurangi tinggi header dari 5rem (80px) menjadi 3rem (48px) */
         .sidebar-header {
-            height: 5rem !important;
-            /* 80px, dengan !important */
-            min-height: 5rem !important;
-            /* 80px, dengan !important */
+            height: 4rem !important;
+            /* 48px, sebelumnya 80px */
+            min-height: 4rem !important;
+            /* 48px, sebelumnya 80px */
             max-height: 5rem !important;
-            /* 80px, dengan !important */
+            /* 48px, sebelumnya 80px */
+            padding: 0.5rem !important;
+            /* Menambahkan padding untuk memberikan ruang di sekitar logo */
+        }
+
+        /* PERUBAHAN: Menyesuaikan ukuran logo agar pas dengan header yang lebih kecil */
+        .sidebar-logo {
+            max-height: 100% !important;
+            /* Maksimal tinggi logo sama dengan tinggi header */
+            width: auto !important;
+            /* Menjaga aspek rasio logo */
+            object-fit: contain !important;
+            /* Memastikan logo terlihat penuh tanpa terpotong */
         }
 
         .sidebar-footer {
@@ -225,8 +238,9 @@
     <aside id="sidebar"
         class="sidebar-fixed bg-white flex flex-col sidebar-transition transform translate-x-full md:translate-x-0 right-0 md:left-0 md:right-auto shadow-lg">
 
+        <!-- PERUBAHAN: Mengurangi ukuran header dan menyesuaikan kelas logo -->
         <div class="sidebar-header flex items-center justify-center border-b border-gray-200 flex-shrink-0">
-            <h1 class="sidebar-title">Brand</h1>
+            <img src="{{ asset('images/logo_inovindo.jpg') }}" alt="Login Background" class="sidebar-logo">
         </div>
 
         <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
@@ -301,7 +315,7 @@
             <!-- Catatan Rapat -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 href="/admin/data_project" data-page="data_project">
-                <span class="material-icons sidebar-icon">note</span>
+                <span class="material-icons sidebar-icon">dashboard</span>
                 <span class="sidebar-text">Data Project</span>
             </a>
 
