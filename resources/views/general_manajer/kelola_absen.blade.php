@@ -533,6 +533,19 @@
 <body class="font-display bg-background-light text-text-light">
     @include('general_manajer/templet/header')
 
+    <!-- Initialize $stats variable -->
+    @php
+        // Initialize stats with default values if not provided
+        $stats = $stats ?? [
+            'total_tepat_waktu' => 0,
+            'total_tidak_masuk' => 0,
+            'total_izin' => 0,
+            'total_cuti' => 0,
+            'total_dinas_luar' => 0,
+            'total_sakit' => 0,
+        ];
+    @endphp
+
     <!-- Main Content Container -->
     <div class="main-content">
         <main class="flex-1 flex flex-col bg-background-light">
@@ -552,7 +565,7 @@
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Total Kehadiran</p>
                                 <p class="text-xl md:text-2xl font-bold text-green-600">
-                                    {{ $stats['total_tepat_waktu'] }}</p>
+                                    {{ $stats['total_tepat_waktu'] ?? 0 }}</p>
                             </div>
                         </div>
                     </div>
@@ -565,7 +578,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Tidak Hadir</p>
-                                <p class="text-xl md:text-2xl font-bold text-red-600">{{ $stats['total_tidak_masuk'] }}
+                                <p class="text-xl md:text-2xl font-bold text-red-600">{{ $stats['total_tidak_masuk'] ?? 0 }}
                                 </p>
                             </div>
                         </div>
@@ -579,7 +592,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Izin</p>
-                                <p class="text-xl md:text-2xl font-bold text-blue-600">{{ $stats['total_izin'] }}</p>
+                                <p class="text-xl md:text-2xl font-bold text-blue-600">{{ $stats['total_izin'] ?? 0 }}</p>
                             </div>
                         </div>
                     </div>
@@ -593,7 +606,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Cuti</p>
-                                <p class="text-xl md:text-2xl font-bold text-yellow-600">{{ $stats['total_cuti'] }}</p>
+                                <p class="text-xl md:text-2xl font-bold text-yellow-600">{{ $stats['total_cuti'] ?? 0 }}</p>
                             </div>
                         </div>
                     </div>
@@ -608,7 +621,7 @@
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Dinas Luar</p>
                                 <p class="text-xl md:text-2xl font-bold text-purple-600">
-                                    {{ $stats['total_dinas_luar'] }}</p>
+                                    {{ $stats['total_dinas_luar'] ?? 0 }}</p>
                             </div>
                         </div>
                     </div>
@@ -621,7 +634,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Sakit</p>
-                                <p class="text-xl md:text-2xl font-bold text-orange-600">{{ $stats['total_sakit'] }}</p>
+                                <p class="text-xl md:text-2xl font-bold text-orange-600">{{ $stats['total_sakit'] ?? 0 }}</p>
                             </div>
                         </div>
                     </div>
@@ -1188,5 +1201,4 @@
         }
     </script>
 </body>
-
 </html>
