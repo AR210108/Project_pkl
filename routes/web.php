@@ -225,6 +225,9 @@ Route::middleware(['auth', 'role:karyawan'])
         // Profile routes
         Route::get('/profile', [KaryawanProfileController::class, 'index'])->name('profile');
         Route::post('/profile/update', [KaryawanProfileController::class, 'update'])->name('profile.update');
+        Route::get('/pengajuan_cuti', function () {
+            return view('karyawan.cuti');
+        });
     });
 
 /*
