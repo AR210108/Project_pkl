@@ -265,15 +265,21 @@
                 <span class="sidebar-text">Data Karyawan</span>
             </a>
 
-          <!-- Menu Data Layanan -->
-<a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-    href="/admin/layanan" data-page="layanan">
-    <!-- Ikon telah diubah dari 'miscellaneous_services' menjadi 'handshake' -->
-    <span class="material-icons sidebar-icon">handshake</span>
-    <span class="sidebar-text">Data Layanan</span>
-</a>
-        
+            <!-- Menu Data Layanan -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="/admin/layanan" data-page="layanan">
+                <span class="material-icons sidebar-icon">handshake</span>
+                <span class="sidebar-text">Data Layanan</span>
+            </a>
 
+            <!-- Menu Data Project -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="/admin/data_project" data-page="data_project">
+                <span class="material-icons sidebar-icon">dashboard</span>
+                <span class="sidebar-text">Data Project</span>
+            </a>
+
+            <!-- Menu Surat Kerjasama (Dropdown) -->
             <div class="relative">
                 <button
                     class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors w-full text-left"
@@ -300,25 +306,11 @@
                 </div>
             </div>
 
-
-
-             
             <!-- Catatan Rapat -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 href="/admin/catatan_rapat" data-page="catatan_rapat">
                 <span class="material-icons sidebar-icon">note</span>
                 <span class="sidebar-text">Catatan Rapat</span>
-            </a>
-            <!-- Catatan Rapat -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-<<<<<<< HEAD
-                href="/admin/project" data-page="project">
-                <span class="material-icons sidebar-icon">note</span>
-=======
-                href="/admin/data_project" data-page="data_project">
-                <span class="material-icons sidebar-icon">dashboard</span>
->>>>>>> caa0af186ec6aaef54a4c02d9387a88ec4a02538
-                <span class="sidebar-text">Data Project</span>
             </a>
 
             <!-- Pengumuman -->
@@ -327,103 +319,138 @@
                 <span class="material-icons sidebar-icon">campaign</span>
                 <span class="sidebar-text">Pengumuman</span>
             </a>
-        </nav>
-<form action="{{ route('logout') }}" method="POST">
-    @csrf
-    <button type="submit"
-        class="nav-item w-full flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-        <span class="material-icons sidebar-icon">logout</span>
-        <span class="sidebar-text">Log Out</span>
-    </button>
-</form>
 
+            <!-- Menu Pengaturan Kontak dan Tentang -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="/admin/settings/contact" data-page="settings_contact">
+                <span class="material-icons sidebar-icon">settings</span>
+                <span class="sidebar-text">Pengaturan Konten</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer border-t border-gray-200">
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit"
+                    class="nav-item w-full flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                    <span class="material-icons sidebar-icon">logout</span>
+                    <span class="sidebar-text">Log Out</span>
+                </button>
+            </form>
+        </div>
     </aside>
 
+    <script>
+        function initSidebar() {
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const mainContent = document.querySelector('.main-content');
 
-
-
- <script>
-    function initSidebar() {
-        const hamburger = document.getElementById('hamburger');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        const mainContent = document.querySelector('.main-content');
-
-        function openSidebar() {
-            sidebar.classList.remove('translate-x-full');
-            overlay.classList.remove('hidden');
-            hamburger.classList.add('hamburger-active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeSidebar() {
-            sidebar.classList.add('translate-x-full');
-            overlay.classList.add('hidden');
-            hamburger.classList.remove('hamburger-active');
-            document.body.style.overflow = '';
-        }
-
-        hamburger.addEventListener('click', () => {
-            sidebar.classList.contains('translate-x-full')
-                ? openSidebar()
-                : closeSidebar();
-        });
-
-        overlay.addEventListener('click', closeSidebar);
-
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape' && !sidebar.classList.contains('translate-x-full')) {
-                closeSidebar();
+            function openSidebar() {
+                sidebar.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                hamburger.classList.add('hamburger-active');
+                document.body.style.overflow = 'hidden';
             }
-        });
 
-        // ✅ SIMPAN MENU SAAT DIKLIK
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const page = item.getAttribute('data-page');
-                if (page) {
-                    sessionStorage.setItem('activeSidebar', page);
+            function closeSidebar() {
+                sidebar.classList.add('translate-x-full');
+                overlay.classList.add('hidden');
+                hamburger.classList.remove('hamburger-active');
+                document.body.style.overflow = '';
+            }
+
+            hamburger.addEventListener('click', () => {
+                sidebar.classList.contains('translate-x-full')
+                    ? openSidebar()
+                    : closeSidebar();
+            });
+
+            overlay.addEventListener('click', closeSidebar);
+
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('translate-x-full')) {
+                    closeSidebar();
                 }
             });
-        });
 
-        setActiveNavItem();
-    }
+            // ✅ SIMPAN MENU SAAT DIKLIK
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const page = item.getAttribute('data-page');
+                    if (page) {
+                        sessionStorage.setItem('activeSidebar', page);
+                    }
+                });
+            });
 
-    function setActiveNavItem() {
-        const activePage = sessionStorage.getItem('activeSidebar');
+            setActiveNavItem();
+        }
 
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('active');
+        function setActiveNavItem() {
+            const activePage = sessionStorage.getItem('activeSidebar');
 
-            if (item.getAttribute('data-page') === activePage) {
-                item.classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
 
-                // Jika di dropdown → buka dropdown
-                const dropdown = item.closest('[id$="-dropdown"]');
-                if (dropdown) {
-                    dropdown.classList.remove('hidden');
-                    const icon = document.getElementById(
-                        dropdown.id.replace('-dropdown', '-icon')
-                    );
-                    if (icon) icon.textContent = 'expand_less';
+                if (item.getAttribute('data-page') === activePage) {
+                    item.classList.add('active');
+
+                    // Jika di dropdown → buka dropdown
+                    const dropdown = item.closest('[id$="-dropdown"]');
+                    if (dropdown) {
+                        dropdown.classList.remove('hidden');
+                        const icon = document.getElementById(
+                            dropdown.id.replace('-dropdown', '-icon')
+                        );
+                        if (icon) icon.textContent = 'expand_less';
+                    }
                 }
+            });
+        }
+
+        function toggleDropdown(id) {
+            const dropdown = document.getElementById(id);
+            const icon = document.getElementById(id.replace('-dropdown', '-icon'));
+
+            dropdown.classList.toggle('hidden');
+            icon.textContent = dropdown.classList.contains('hidden')
+                ? 'expand_more'
+                : 'expand_less';
+        }
+            const logoutForm = document.querySelector('form[action*="logout"]');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    // Kirim form logout menggunakan fetch
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: new FormData(this),
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Redirect ke halaman login
+                                window.location.href = '/login';
+                            } else {
+                                // Tampilkan pesan error
+                                alert('Logout gagal. Silakan coba lagi.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Terjadi kesalahan. Silakan coba lagi.');
+                        });
+                });
             }
         });
-    }
 
-    function toggleDropdown(id) {
-        const dropdown = document.getElementById(id);
-        const icon = document.getElementById(id.replace('-dropdown', '-icon'));
-
-        dropdown.classList.toggle('hidden');
-        icon.textContent = dropdown.classList.contains('hidden')
-            ? 'expand_more'
-            : 'expand_less';
-    }
-
-    document.addEventListener('DOMContentLoaded', initSidebar);
-</script>
+        document.addEventListener('DOMContentLoaded', initSidebar);
+    </script>
 
 </body>
 

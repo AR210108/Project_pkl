@@ -79,7 +79,7 @@
                 @endif
 
                 <!-- Input Email -->
-                <div>
+                <div class="mb-2">
                     <label for="email" class="block text-sm font-semibold text-gray-700 mb-2 ml-1">Email</label>
                     <input id="email" type="email" name="email" value="{{ old('email') }}" required placeholder="Masukkan email"
                         class="@error('email') border-red-500 @enderror w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 focus:ring-2 focus:ring-custom-blue-500 focus:border-transparent transition-all outline-none placeholder-gray-400">
