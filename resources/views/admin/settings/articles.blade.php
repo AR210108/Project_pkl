@@ -106,6 +106,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .panel-title {
@@ -334,12 +336,147 @@
         .breadcrumb-separator {
             margin: 0 0.5rem;
         }
+
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+
+            .main-content {
+                width: 100%;
+            }
+
+            /* PERUBAHAN PENTING DI SINI */
+            .panel-header {
+                padding: 0.75rem 1rem;
+                flex-wrap: nowrap; /* CEGAH pembungkusan ke baris baru */
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            /* Buat tombol sedikit lebih kecil agar muat */
+            .panel-header button {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.875rem;
+            }
+
+            .panel-body {
+                padding: 1rem;
+            }
+
+            .panel-title {
+                font-size: 1rem;
+                /* Hapus margin-bottom yang ditambahkan sebelumnya */
+            }
+
+            /* Modal adjustments */
+            .modal-content {
+                width: 95%;
+                margin: 2% auto;
+            }
+
+            .modal-header {
+                padding: 0.75rem 1rem;
+            }
+
+            .modal-body {
+                padding: 1rem;
+            }
+
+            .modal-title {
+                font-size: 1.1rem;
+            }
+
+            /* Trix Editor adjustment */
+            trix-editor {
+                min-height: 300px; /* Reduce height on mobile */
+            }
+
+            /* Form buttons in modal */
+            .modal-body .flex.justify-end {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .modal-body .flex.justify-end button {
+                width: 100%;
+            }
+
+            /* Popup adjustments */
+            .minimal-popup {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+                transform: translateY(-100px);
+            }
+
+            .minimal-popup.show {
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .panel-header {
+                padding: 0.5rem 0.75rem;
+            }
+
+            /* Buat tombol lebih kecil lagi di layar sangat kecil */
+            .panel-header button {
+                padding: 0.5rem 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            .panel-body {
+                padding: 0.75rem;
+            }
+
+            .panel-title {
+                font-size: 0.9rem;
+            }
+
+            /* Further modal adjustments for very small screens */
+            .modal-content {
+                width: 98%;
+                margin: 1% auto;
+            }
+
+            .modal-header {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .modal-body {
+                padding: 0.75rem;
+            }
+
+            .modal-title {
+                font-size: 1rem;
+            }
+
+            /* Further Trix Editor adjustment */
+            trix-editor {
+                min-height: 250px; /* Further reduce height */
+            }
+
+            /* Further popup adjustments */
+            .minimal-popup {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                padding: 12px 16px;
+            }
+        }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="font-display bg-background-light text-text-light">
-    <div class="flex min-h-screen">
+    <div class="flex min-h-screen app-container">
         @include('admin/templet/sider')
 
         <!-- MAIN -->
@@ -363,7 +500,8 @@
                         </h3>
                         <button id="addArticleBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2">
                             <span class="material-icons-outlined text-sm">add</span>
-                            Tambah Artikel
+                            <span class="hidden sm:inline">Tambah Artikel</span>
+                            <span class="sm:hidden">Tambah</span>
                         </button>
                     </div>
                     <div class="panel-body">
@@ -474,9 +612,9 @@
                             class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input">
                     </div>
 
-                    <div class="flex justify-end gap-2">
-                        <button type="button" id="cancelBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan</button>
+                    <div class="flex flex-col sm:flex-row justify-end gap-2">
+                        <button type="button" id="cancelBtn" class="px-4 py-2 btn-secondary rounded-lg w-full sm:w-auto">Batal</button>
+                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg w-full sm:w-auto">Simpan</button>
                     </div>
                 </form>
             </div>

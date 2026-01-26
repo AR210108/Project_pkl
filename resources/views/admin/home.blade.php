@@ -628,6 +628,54 @@
             }
 
         }
+        
+        /* Card-based layout for tables on mobile */
+        .mobile-table-cards {
+            display: none;
+        }
+        
+        .mobile-table-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .mobile-table-card-header {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+        
+        .mobile-table-card-row {
+            display: flex;
+            margin-bottom: 0.5rem;
+        }
+        
+        .mobile-table-card-label {
+            font-weight: 600;
+            width: 40%;
+            color: #64748b;
+        }
+        
+        .mobile-table-card-value {
+            width: 60%;
+            color: #1f2937;
+        }
+        
+        @media (max-width: 768px) {
+            .data-table-container {
+                display: none;
+            }
+            
+            .mobile-table-cards {
+                display: block;
+            }
+        }
     </style>
 </head>
 
@@ -752,62 +800,112 @@
                         </h3>
                     </div>
                     <div class="panel-body">
-                        <div class="overflow-x-auto">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Tanggal</th>
-                                        <th class="text-center">Peserta</th>
-                                        <th class="text-center">Topik Rapat</th>
-                                        <th class="text-center">Hasil Diskusi</th>
-                                        <th class="text-center">Keputusan</th>
-                                        <th class="text-center">Penugasan</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if ($catatanRapat->count() > 0)
-                                        @foreach ($catatanRapat as $rapat)
-                                            <tr>
-                                                <td class="font-medium">{{ $loop->iteration }}</td>
-
-                                                <td>
-                                                    {{ \Carbon\Carbon::parse($rapat->tanggal)->translatedFormat('d F Y') }}
-                                                </td>
-
-                                                <td class="text-center">
-                                                    @foreach ($rapat->peserta as $user)
-                                                        <span class="block">{{ $user->name }}</span>
-                                                    @endforeach
-                                                </td>
-
-                                                <td class="text-center">{{ $rapat->topik }}</td>
-
-                                                <td class="text-center">
-                                                    {{ Str::limit($rapat->hasil_diskusi, 30) }}
-                                                </td>
-
-                                                <td class="text-center">
-                                                    {{ Str::limit($rapat->keputusan, 30) }}
-                                                </td>
-
-                                                <td class="text-center">
-                                                    @foreach ($rapat->penugasan as $user)
-                                                        <span class="block">{{ $user->name }}</span>
-                                                    @endforeach
-                                                </td>
-
-                                            </tr>
-                                        @endforeach
-                                    @else
+                        <!-- Desktop Table View -->
+                        <div class="data-table-container">
+                            <div class="overflow-x-auto">
+                                <table class="data-table">
+                                    <thead>
                                         <tr>
-                                            <td colspan="7" class="text-center py-6 text-gray-500">
-                                                Belum ada catatan meeting
-                                            </td>
+                                            <th>No</th>
+                                            <th>Tanggal</th>
+                                            <th class="text-center">Peserta</th>
+                                            <th class="text-center">Topik Rapat</th>
+                                            <th class="text-center">Hasil Diskusi</th>
+                                            <th class="text-center">Keputusan</th>
+                                            <th class="text-center">Penugasan</th>
                                         </tr>
-                                    @endif
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @if ($catatanRapat->count() > 0)
+                                            @foreach ($catatanRapat as $rapat)
+                                                <tr>
+                                                    <td class="font-medium">{{ $loop->iteration }}</td>
+
+                                                    <td>
+                                                        {{ \Carbon\Carbon::parse($rapat->tanggal)->translatedFormat('d F Y') }}
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        @foreach ($rapat->peserta as $user)
+                                                            <span class="block">{{ $user->name }}</span>
+                                                        @endforeach
+                                                    </td>
+
+                                                    <td class="text-center">{{ $rapat->topik }}</td>
+
+                                                    <td class="text-center">
+                                                        {{ Str::limit($rapat->hasil_diskusi, 30) }}
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        {{ Str::limit($rapat->keputusan, 30) }}
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        @foreach ($rapat->penugasan as $user)
+                                                            <span class="block">{{ $user->name }}</span>
+                                                        @endforeach
+                                                    </td>
+
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                            <tr>
+                                                <td colspan="7" class="text-center py-6 text-gray-500">
+                                                    Belum ada catatan meeting
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile Card View -->
+                        <div class="mobile-table-cards">
+                            @if ($catatanRapat->count() > 0)
+                                @foreach ($catatanRapat as $rapat)
+                                    <div class="mobile-table-card">
+                                        <div class="mobile-table-card-header">
+                                            #{{ $loop->iteration }} - {{ \Carbon\Carbon::parse($rapat->tanggal)->translatedFormat('d F Y') }}
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Topik:</div>
+                                            <div class="mobile-table-card-value">{{ $rapat->topik }}</div>
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Peserta:</div>
+                                            <div class="mobile-table-card-value">
+                                                @foreach ($rapat->peserta as $user)
+                                                    <span class="block">{{ $user->name }}</span>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Hasil:</div>
+                                            <div class="mobile-table-card-value">{{ Str::limit($rapat->hasil_diskusi, 50) }}</div>
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Keputusan:</div>
+                                            <div class="mobile-table-card-value">{{ Str::limit($rapat->keputusan, 50) }}</div>
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Penugasan:</div>
+                                            <div class="mobile-table-card-value">
+                                                @foreach ($rapat->penugasan as $user)
+                                                    <span class="block">{{ $user->name }}</span>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="mobile-table-card">
+                                    <div class="text-center py-6 text-gray-500">
+                                        Belum ada catatan meeting
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -821,66 +919,119 @@
                         </h3>
                     </div>
                     <div class="panel-body">
-                        <div class="overflow-x-auto min-h-[100px]">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Judul</th>
-                                        <th class="text-center">Isi</th>
-                                        <th class="text-center">Kepada</th>
-                                        <th class="text-center">Lampiran</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if ($pengumumanTerbaru->count() > 0)
-                                        @foreach ($pengumumanTerbaru as $item)
+                        <!-- Desktop Table View -->
+                        <div class="data-table-container">
+                            <div class="overflow-x-auto min-h-[100px]">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Judul</th>
+                                            <th class="text-center">Isi</th>
+                                            <th class="text-center">Kepada</th>
+                                            <th class="text-center">Lampiran</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if ($pengumumanTerbaru->count() > 0)
+                                            @foreach ($pengumumanTerbaru as $item)
+                                                <tr>
+                                                    <td class="font-medium">
+                                                        {{ $loop->iteration }}
+                                                    </td>
+                                                    <td class="font-medium">
+                                                        {{ $item->judul }}
+                                                    </td>
+
+
+                                                    <td>
+                                                        {{ \Illuminate\Support\Str::limit($item->isi_pesan, 50) }}
+                                                    </td>
+                                                    <td>
+                                                        @if ($item->kepada === 'specific')
+                                                            @foreach ($item->users as $user)
+                                                                <span
+                                                                    class="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                                                                    {{ $user->name }}
+                                                                </span>
+                                                            @endforeach
+                                                        @else
+                                                            {{ $item->users->take(2)->pluck('name')->join(', ') }}
+                                                        @endif
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        @if ($item->lampiran)
+                                                            <a href="{{ asset('storage/' . $item->lampiran) }}"
+                                                                class="text-blue-600 hover:underline" target="_blank">
+                                                                Lihat
+                                                            </a>
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @else
                                             <tr>
-                                                <td class="font-medium">
-                                                    {{ $loop->iteration }}
-                                                </td>
-                                                <td class="font-medium">
-                                                    {{ $item->judul }}
-                                                </td>
-
-
-                                                <td>
-                                                    {{ \Illuminate\Support\Str::limit($item->isi_pesan, 50) }}
-                                                </td>
-                                                <td>
-                                                    @if ($item->kepada === 'specific')
-                                                        @foreach ($item->users as $user)
-                                                            <span
-                                                                class="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
-                                                                {{ $user->name }}
-                                                            </span>
-                                                        @endforeach
-                                                    @else
-                                                        {{ $item->users->take(2)->pluck('name')->join(', ') }}
-                                                    @endif
-                                                </td>
-
-                                                <td class="text-center">
-                                                    @if ($item->lampiran)
-                                                        <a href="{{ asset('storage/' . $item->lampiran) }}"
-                                                            class="text-blue-600 hover:underline" target="_blank">
-                                                            Lihat
-                                                        </a>
-                                                    @else
-                                                        -
-                                                    @endif
+                                                <td colspan="5" class="text-center py-8 text-gray-500">
+                                                    Tidak ada pengumuman terbaru
                                                 </td>
                                             </tr>
-                                        @endforeach
-                                    @else
-                                        <tr>
-                                            <td colspan="5" class="text-center py-8 text-gray-500">
-                                                Tidak ada pengumuman terbaru
-                                            </td>
-                                        </tr>
-                                    @endif
-                                </tbody>
-                            </table>
+                                        @endif
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile Card View -->
+                        <div class="mobile-table-cards">
+                            @if ($pengumumanTerbaru->count() > 0)
+                                @foreach ($pengumumanTerbaru as $item)
+                                    <div class="mobile-table-card">
+                                        <div class="mobile-table-card-header">
+                                            #{{ $loop->iteration }} - {{ $item->judul }}
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Isi:</div>
+                                            <div class="mobile-table-card-value">{{ \Illuminate\Support\Str::limit($item->isi_pesan, 100) }}</div>
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Kepada:</div>
+                                            <div class="mobile-table-card-value">
+                                                @if ($item->kepada === 'specific')
+                                                    @foreach ($item->users as $user)
+                                                        <span class="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs mr-1 mb-1">
+                                                            {{ $user->name }}
+                                                        </span>
+                                                    @endforeach
+                                                @else
+                                                    {{ $item->users->take(2)->pluck('name')->join(', ') }}
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Lampiran:</div>
+                                            <div class="mobile-table-card-value">
+                                                @if ($item->lampiran)
+                                                    <a href="{{ asset('storage/' . $item->lampiran) }}"
+                                                        class="text-blue-600 hover:underline" target="_blank">
+                                                        Lihat
+                                                    </a>
+                                                @else
+                                                    -
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="mobile-table-card">
+                                    <div class="text-center py-8 text-gray-500">
+                                        Tidak ada pengumuman terbaru
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

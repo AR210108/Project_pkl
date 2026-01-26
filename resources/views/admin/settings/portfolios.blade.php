@@ -90,6 +90,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .panel-title {
@@ -273,12 +275,164 @@
         .breadcrumb-separator {
             margin: 0 0.5rem;
         }
+
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+
+            .main-content {
+                width: 100%;
+            }
+
+            /* PERUBAHAN PENTING DI SINI */
+            .panel-header {
+                padding: 0.75rem 1rem;
+                flex-wrap: nowrap; /* CEGAH pembungkusan ke baris baru */
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            /* Buat tombol sedikit lebih kecil agar muat */
+            .panel-header button {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.875rem;
+            }
+
+            .panel-body {
+                padding: 1rem;
+            }
+
+            .panel-title {
+                font-size: 1rem;
+            }
+
+            /* --- PERUBAHAN BARU: Kecilkan Kartu Portofolio di Mobile --- */
+            .portfolio-image {
+                height: 140px; /* Kurangi tinggi gambar */
+            }
+
+            .portfolio-content {
+                padding: 0.75rem; /* Kurangi padding konten */
+            }
+
+            .portfolio-content h4 {
+                font-size: 1rem; /* Kurangi ukuran font judul */
+                margin-bottom: 0.5rem; /* Kurangi margin bawah */
+            }
+
+            .portfolio-content p {
+                font-size: 0.8rem; /* Kurangi ukuran font paragraf */
+                margin-bottom: 0.5rem;
+            }
+            
+            .portfolio-actions {
+                padding: 0 0.75rem 0.75rem; /* Kurangi padding aksi */
+            }
+
+            .portfolio-actions button {
+                padding: 0.375rem; /* Kurangi padding tombol aksi */
+            }
+            /* --- Akhir Perubahan Baru --- */
+
+            /* Modal adjustments */
+            .modal-content {
+                width: 95%;
+                margin: 2% auto;
+            }
+
+            .modal-header {
+                padding: 0.75rem 1rem;
+            }
+
+            .modal-body {
+                padding: 1rem;
+            }
+
+            .modal-title {
+                font-size: 1.1rem;
+            }
+
+            /* Form buttons in modal */
+            .modal-body .flex.justify-end {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .modal-body .flex.justify-end button {
+                width: 100%;
+            }
+
+            /* Popup adjustments */
+            .minimal-popup {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+                transform: translateY(-100px);
+            }
+
+            .minimal-popup.show {
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .panel-header {
+                padding: 0.5rem 0.75rem;
+            }
+
+            /* Buat tombol lebih kecil lagi di layar sangat kecil */
+            .panel-header button {
+                padding: 0.5rem 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            .panel-body {
+                padding: 0.75rem;
+            }
+
+            .panel-title {
+                font-size: 0.9rem;
+            }
+
+            /* Further modal adjustments for very small screens */
+            .modal-content {
+                width: 98%;
+                margin: 1% auto;
+            }
+
+            .modal-header {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .modal-body {
+                padding: 0.75rem;
+            }
+
+            .modal-title {
+                font-size: 1rem;
+            }
+
+            /* Further popup adjustments */
+            .minimal-popup {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                padding: 12px 16px;
+            }
+        }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="font-display bg-background-light text-text-light">
-    <div class="flex min-h-screen">
+    <div class="flex min-h-screen app-container">
         @include('admin/templet/sider')
 
         <!-- MAIN -->
@@ -301,11 +455,13 @@
                         </h3>
                         <button id="addPortfolioBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2">
                             <span class="material-icons-outlined text-sm">add</span>
-                            Tambah Portofolio
+                            <span class="hidden sm:inline">Tambah Portofolio</span>
+                            <span class="sm:hidden">Tambah</span>
                         </button>
                     </div>
                     <div class="panel-body">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- PERUBAHAN GRID DI SINI -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             @forelse ($portfolios as $portfolio)
                                 <div class="portfolio-card" data-id="{{ $portfolio->id }}">
                                     <div class="portfolio-image">
@@ -402,9 +558,9 @@
                             class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input">
                     </div>
 
-                    <div class="flex justify-end gap-2">
-                        <button type="button" id="cancelBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan</button>
+                    <div class="flex flex-col sm:flex-row justify-end gap-2">
+                        <button type="button" id="cancelBtn" class="px-4 py-2 btn-secondary rounded-lg w-full sm:w-auto">Batal</button>
+                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg w-full sm:w-auto">Simpan</button>
                     </div>
                 </form>
             </div>
@@ -426,215 +582,206 @@
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // --- Minimalist Popup ---
-        function showMinimalPopup(title, message, type = 'success') {
-            const popup = document.getElementById('minimalPopup');
-            const popupTitle = popup.querySelector('.minimal-popup-title');
-            const popupMessage = popup.querySelector('.minimal-popup-message');
-            const popupIcon = popup.querySelector('.minimal-popup-icon span');
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Minimalist Popup ---
+            function showMinimalPopup(title, message, type = 'success') {
+                const popup = document.getElementById('minimalPopup');
+                const popupTitle = popup.querySelector('.minimal-popup-title');
+                const popupMessage = popup.querySelector('.minimal-popup-message');
+                const popupIcon = popup.querySelector('.minimal-popup-icon span');
 
-            popupTitle.textContent = title;
-            popupMessage.textContent = message;
-            popup.className = 'minimal-popup show ' + type;
+                popupTitle.textContent = title;
+                popupMessage.textContent = message;
+                popup.className = 'minimal-popup show ' + type;
 
-            if (type === 'success') {
-                popupIcon.textContent = 'check';
-            } else if (type === 'error') {
-                popupIcon.textContent = 'error';
-            } else if (type === 'warning') {
-                popupIcon.textContent = 'warning';
+                if (type === 'success') {
+                    popupIcon.textContent = 'check';
+                } else if (type === 'error') {
+                    popupIcon.textContent = 'error';
+                } else if (type === 'warning') {
+                    popupIcon.textContent = 'warning';
+                }
+
+                setTimeout(() => {
+                    popup.classList.remove('show');
+                }, 3000);
             }
 
-            setTimeout(() => {
-                popup.classList.remove('show');
-            }, 3000);
-        }
+            // --- Close popup ---
+            document.querySelector('.minimal-popup-close').addEventListener('click', function () {
+                document.getElementById('minimalPopup').classList.remove('show');
+            });
 
-        // --- Close popup ---
-        document.querySelector('.minimal-popup-close').addEventListener('click', function () {
-            document.getElementById('minimalPopup').classList.remove('show');
-        });
+            // --- Modal handling ---
+            const modal = document.getElementById('portfolioModal');
+            const addPortfolioBtn = document.getElementById('addPortfolioBtn');
+            const closeModalBtn = document.getElementById('closeModal');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const modalTitle = document.getElementById('modalTitle');
+            const portfolioForm = document.getElementById('portfolioForm');
+            const portfolioIdInput = document.getElementById('portfolioId');
+            const titleInput = document.getElementById('titleInput');
+            const descriptionInput = document.getElementById('descriptionInput');
+            const technologiesUsedInput = document.getElementById('technologiesUsedInput');
+            const imageInput = document.getElementById('imageInput');
+            const imagePreview = document.getElementById('imagePreview');
+            const orderInput = document.getElementById('orderInput');
 
-        // --- Modal handling ---
-        const modal = document.getElementById('portfolioModal');
-        const addPortfolioBtn = document.getElementById('addPortfolioBtn');
-        const closeModalBtn = document.getElementById('closeModal');
-        const cancelBtn = document.getElementById('cancelBtn');
-        const modalTitle = document.getElementById('modalTitle');
-        const portfolioForm = document.getElementById('portfolioForm');
-        const portfolioIdInput = document.getElementById('portfolioId');
-        const titleInput = document.getElementById('titleInput');
-        const descriptionInput = document.getElementById('descriptionInput');
-        const technologiesUsedInput = document.getElementById('technologiesUsedInput');
-        const imageInput = document.getElementById('imageInput');
-        const imagePreview = document.getElementById('imagePreview');
-        const orderInput = document.getElementById('orderInput');
+            // --- Open modal for add ---
+            addPortfolioBtn.addEventListener('click', function () {
+                modalTitle.textContent = 'Tambah Portofolio';
+                portfolioForm.reset();
+                portfolioIdInput.value = '';
+                imagePreview.innerHTML = '<span class="material-icons-outlined text-gray-400">image</span>';
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            });
 
-        // --- Open modal for add ---
-        addPortfolioBtn.addEventListener('click', function () {
-            modalTitle.textContent = 'Tambah Portofolio';
-            portfolioForm.reset();
-            portfolioIdInput.value = '';
-            imagePreview.innerHTML = '<span class="material-icons-outlined text-gray-400">image</span>';
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        });
-
-        // --- Close modal ---
-        closeModalBtn.addEventListener('click', function () {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        });
-
-        cancelBtn.addEventListener('click', function () {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        });
-
-        // --- Close modal when clicking outside ---
-        window.addEventListener('click', function (event) {
-            if (event.target === modal) {
+            // --- Close modal ---
+            function closeModal() {
                 modal.style.display = 'none';
                 document.body.style.overflow = 'auto';
             }
-        });
-
-        // --- Image preview ---
-        imageInput.addEventListener('change', function () {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // --- Edit portfolio ---
-        document.querySelectorAll('.edit-portfolio-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const portfolioId = this.getAttribute('data-id');
-
-                // PERBAIKAN: Gunakan URL yang benar
-                fetch(`/admin/settings/portfolios/${portfolioId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const portfolio = data.portfolio;
-
-                            modalTitle.textContent = 'Edit Portofolio';
-                            portfolioIdInput.value = portfolio.id;
-                            titleInput.value = portfolio.title;
-                            descriptionInput.value = portfolio.description;
-                            technologiesUsedInput.value = portfolio.technologies_used || '';
-                            orderInput.value = portfolio.order;
-
-                            // Show image if exists
-                            if (portfolio.image) {
-                                imagePreview.innerHTML = `<img src="/storage/${portfolio.image}" alt="${portfolio.title}">`;
-                            } else {
-                                imagePreview.innerHTML = '<span class="material-icons-outlined text-gray-400">image</span>';
-                            }
-
-                            modal.style.display = 'block';
-                            document.body.style.overflow = 'hidden';
-                        } else {
-                            showMinimalPopup('Error', data.message, 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showMinimalPopup('Error', 'Gagal memuat data portofolio', 'error');
-                    });
+            closeModalBtn.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+            window.addEventListener('click', function (event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
             });
-        });
 
-        // --- Delete portfolio ---
-        document.querySelectorAll('.delete-portfolio-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                if (confirm('Apakah Anda yakin ingin menghapus portofolio ini?')) {
+            // --- Image preview ---
+            imageInput.addEventListener('change', function () {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // --- Edit portfolio ---
+            document.querySelectorAll('.edit-portfolio-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
                     const portfolioId = this.getAttribute('data-id');
 
                     // PERBAIKAN: Gunakan URL yang benar
-                    fetch(`/admin/settings/portfolios/${portfolioId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Accept': 'application/json'
-                        }
-                    })
+                    fetch(`/admin/settings/portfolios/${portfolioId}`)
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                showMinimalPopup('Berhasil', data.message, 'success');
-                                // Remove portfolio card from DOM
-                                document.querySelector(`.portfolio-card[data-id="${portfolioId}"]`).remove();
+                                const portfolio = data.portfolio;
+
+                                modalTitle.textContent = 'Edit Portofolio';
+                                portfolioIdInput.value = portfolio.id;
+                                titleInput.value = portfolio.title;
+                                descriptionInput.value = portfolio.description;
+                                technologiesUsedInput.value = portfolio.technologies_used || '';
+                                orderInput.value = portfolio.order;
+
+                                // Show image if exists
+                                if (portfolio.image) {
+                                    imagePreview.innerHTML = `<img src="/storage/${portfolio.image}" alt="${portfolio.title}">`;
+                                } else {
+                                    imagePreview.innerHTML = '<span class="material-icons-outlined text-gray-400">image</span>';
+                                }
+
+                                modal.style.display = 'block';
+                                document.body.style.overflow = 'hidden';
                             } else {
                                 showMinimalPopup('Error', data.message, 'error');
                             }
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
+                            showMinimalPopup('Error', 'Gagal memuat data portofolio', 'error');
                         });
-                }
+                });
             });
-        });
 
-        // --- Submit form ---
-        portfolioForm.addEventListener('submit', function (e) {
-            e.preventDefault();
+            // --- Delete portfolio ---
+            document.querySelectorAll('.delete-portfolio-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (confirm('Apakah Anda yakin ingin menghapus portofolio ini?')) {
+                        const portfolioId = this.getAttribute('data-id');
 
-            const formData = new FormData(this);
-            const isEdit = portfolioIdInput.value !== '';
-            
-            // PERBAIKAN: Gunakan URL yang benar
-            const url = isEdit ? `/admin/settings/portfolios/${portfolioIdInput.value}` : '/admin/settings/portfolios';
-            const method = isEdit ? 'PUT' : 'POST';
-
-            fetch(url, {
-                method: method,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                },
-                body: formData
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(err => { throw err; });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        showMinimalPopup('Berhasil', data.message, 'success');
-                        modal.style.display = 'none';
-                        document.body.style.overflow = 'auto';
-
-                        // Reload page to show updated data
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1500);
-                    } else {
-                        showMinimalPopup('Error', data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    // Tampilkan pesan error validasi jika ada
-                    if (error.errors) {
-                        const firstError = Object.values(error.errors)[0][0];
-                        showMinimalPopup('Validasi Gagal', firstError, 'warning');
-                    } else {
-                        showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
+                        // PERBAIKAN: Gunakan URL yang benar
+                        fetch(`/admin/settings/portfolios/${portfolioId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'Accept': 'application/json'
+                            }
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    showMinimalPopup('Berhasil', data.message, 'success');
+                                    // Remove portfolio card from DOM
+                                    document.querySelector(`.portfolio-card[data-id="${portfolioId}"]`).remove();
+                                } else {
+                                    showMinimalPopup('Error', data.message, 'error');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
+                            });
                     }
                 });
-        });
+            });
 
-    }); // <-- AKHIR DARI document.addEventListener
+            // --- Submit form ---
+            portfolioForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const isEdit = portfolioIdInput.value !== '';
+                
+                // PERBAIKAN: Gunakan URL yang benar
+                const url = isEdit ? `/admin/settings/portfolios/${portfolioIdInput.value}` : '/admin/settings/portfolios';
+                const method = isEdit ? 'PUT' : 'POST';
+
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => { throw err; });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            showMinimalPopup('Berhasil', data.message, 'success');
+                            closeModal();
+                            // Reload page to show updated data
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            showMinimalPopup('Error', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Tampilkan pesan error validasi jika ada
+                        if (error.errors) {
+                            const firstError = Object.values(error.errors)[0][0];
+                            showMinimalPopup('Validasi Gagal', firstError, 'warning');
+                        } else {
+                            showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
+                        }
+                    });
+            });
+        });
     </script>
 </body>
 
