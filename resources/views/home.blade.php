@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="scroll-smooth" lang="en">
+<html class="scroll-smooth" lang="id">
 
 <head>
     <meta charset="utf-8" />
@@ -46,7 +46,7 @@
         
         /* Header yang menempel di atas saat di-scroll */
         .sticky-header {
-            position: fixed; /* Diubah dari relative */
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -63,7 +63,7 @@
         
         /* Tambahkan padding-top pada konten utama untuk menghindari tertutup header */
         .main-content {
-            padding-top: 80px; /* Sesuaikan dengan tinggi header */
+            padding-top: 80px;
         }
         
         .hamburger-line {
@@ -209,9 +209,9 @@
         }
 
         .layanan-grid-wrapper.expanded {
-            max-height: 600px; /* Tinggi tetap untuk scroll terbatas */
+            max-height: 600px;
             overflow-y: auto;
-            padding-right: 8px; /* Ruang untuk scrollbar */
+            padding-right: 8px;
         }
 
         .layanan-grid-wrapper::-webkit-scrollbar {
@@ -580,12 +580,21 @@
             margin-right: 8px;
             font-size: 20px;
         }
-        /* Logo styling */
-.sidebar-logo {
-    height: 2rem; /* Sama dengan ukuran teks asli */
-    width: auto;
-    object-fit: contain;
-}
+        
+        /* Loading indicator */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 
@@ -641,10 +650,10 @@
                             <p class="mb-8 text-white/90 mx-auto max-w-2xl">Kami digital agency adalah perusahaan
                                 yang membantu bisnis lain membawa ke produk atau jasanya secara online melalui berbagai
                                 layanan digital.</p>
-                            <!-- PERUBAHAN: Tombol Hubungi Kami dengan warna asli dan icon Boxicons -->
+                            <!-- PERUBAHAN: Tombol Hubungi Kami dengan indikator loading -->
                             <button id="whatsappBtn" class="whatsapp-btn mx-auto">
                                 <i class='bx bxl-whatsapp'></i>
-                                Hubungi Kami
+                                <span id="whatsappBtnText">Hubungi Kami</span>
                             </button>
                         </div>
                     </div>
@@ -898,7 +907,7 @@
                                     <span class="material-icons-outlined text-base">chevron_right</span>
                                 </button>
                             </div>
-                            <div class="portfolio-card bg-card-light p-6 rounded-2xl flex flex-col w-72 shadow-sm border border-border-light">
+                            <div class="portfolio-card bg-card-light p-6 rounded-2xl flex-col w-72 shadow-sm border border-border-light">
                                 <div class="relative flex-grow aspect-[4/5] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
                                     <button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center text-black hover:bg-white transition-colors">
                                         <span class="material-icons-outlined text-base">arrow_forward</span>
@@ -976,7 +985,7 @@
                                 </div>
                                 <div class="contact-text">
                                     <div class="contact-label">Lokasi</div>
-                                    <div class="contact-value">Jl. Batusari Komplek Buana Citra Ciwastra No.D-3, Buahbatu, Kec. Bojongsoang, Kabupaten Bandung, Jawa Barat 40287</div>
+                                    <div class="contact-value contact-address">Jl. Batusari Komplek Buana Citra Ciwastra No.D-3, Buahbatu, Kec. Bojongsoang, Kabupaten Bandung, Jawa Barat 40287</div>
                                 </div>
                             </div>
                             <div class="contact-item">
@@ -985,7 +994,7 @@
                                 </div>
                                 <div class="contact-text">
                                     <div class="contact-label">Email</div>
-                                    <div class="contact-value">inovindocorp@gmail.com</div>
+                                    <div class="contact-value contact-email">inovindocorp@gmail.com</div>
                                 </div>
                             </div>
                             <div class="contact-item">
@@ -994,11 +1003,11 @@
                                 </div>
                                 <div class="contact-text">
                                     <div class="contact-label">No WA/Telepon</div>
-                                    <div class="contact-value">+62 817 - 251 - 196</div>
+                                    <div class="contact-value contact-phone">+62 817 - 251 - 196</div>
                                 </div>
                             </div>
                         </div>
-                        <form class="space-y-6">
+                        <form class="space-y-6" id="contactForm">
                             <div>
                                 <label class="sr-only" for="name">Name</label>
                                 <input class="w-full bg-white border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-black focus:ring-black focus:border-black text-black shadow-sm" id="name" name="name" placeholder="Nama Anda" type="text" />
@@ -1011,7 +1020,7 @@
                                 <label class="sr-only" for="message">Message</label>
                                 <textarea class="w-full bg-white border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-black focus:ring-black focus:border-black text-black shadow-sm" id="message" name="message" placeholder="Pesan Anda" rows="6"></textarea>
                             </div>
-                            <button class="w-full btn-primary bg-black text-white font-medium py-3 px-8 rounded-lg" type="submit">
+                            <button class="w-full btn-primary bg-black text-white font-medium py-3 px-8 rounded-lg" type="submit" id="submitBtn">
                                 Kirim Pesan
                             </button>
                         </form>
@@ -1065,8 +1074,69 @@
         </div>
     </div>
 
+    <!-- Notifikasi Popup -->
+    <div id="notificationPopup" class="fixed top-4 right-4 bg-white rounded-lg shadow-lg p-4 max-w-sm transform translate-x-full transition-transform duration-300 z-50">
+        <div class="flex items-start">
+            <div id="notificationIcon" class="flex-shrink-0 mr-3">
+                <span class="material-icons-outlined text-green-500">check_circle</span>
+            </div>
+            <div class="flex-1">
+                <h4 id="notificationTitle" class="text-sm font-medium text-gray-900">Berhasil</h4>
+                <p id="notificationMessage" class="text-sm text-gray-500 mt-1">Pesan Anda telah terkirim</p>
+            </div>
+            <button id="closeNotification" class="ml-4 text-gray-400 hover:text-gray-500">
+                <span class="material-icons-outlined text-sm">close</span>
+            </button>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // --- Ambil data kontak dari API ---
+            let contactData = {
+                email: 'inovindocorp@gmail.com',
+                phone: '+62 817 - 251 - 196',
+                address: 'Jl. Batusari Komplek Buana Citra Ciwastra No.D-3, Buahbatu, Kec. Bojongsoang, Kabupaten Bandung, Jawa Barat 40287',
+                whatsapp_message: 'Halo, saya tertarik dengan layanan yang ditawarkan. Mohon informasi lebih lanjut.'
+            };
+
+            // Ambil data kontak dari API
+            fetch('/api/contact')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        contactData = data.data;
+                        
+                        // Update elemen kontak di landing page
+                        updateContactElements();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching contact data:', error);
+                    // Tetap gunakan data default jika gagal mengambil dari API
+                    updateContactElements();
+                });
+
+            // Fungsi untuk update elemen kontak
+            function updateContactElements() {
+                // Update elemen kontak
+                const emailElements = document.querySelectorAll('.contact-email');
+                const phoneElements = document.querySelectorAll('.contact-phone');
+                const addressElements = document.querySelectorAll('.contact-address');
+                
+                emailElements.forEach(el => {
+                    el.textContent = contactData.email;
+                });
+                
+                phoneElements.forEach(el => {
+                    el.textContent = contactData.phone;
+                });
+                
+                addressElements.forEach(el => {
+                    el.textContent = contactData.address;
+                });
+            }
+
             // --- Logika untuk Header Sticky ---
             const header = document.getElementById('header');
             
@@ -1146,21 +1216,21 @@
                     
                     // Tampilkan modal
                     layananModal.style.display = 'block';
-                    document.body.style.overflow = 'hidden'; // Mencegah scroll di background
+                    document.body.style.overflow = 'hidden';
                 });
             });
             
             // Event listener untuk tombol close modal
             closeModalLayanan.addEventListener('click', function() {
                 layananModal.style.display = 'none';
-                document.body.style.overflow = 'auto'; // Kembalikan scroll
+                document.body.style.overflow = 'auto';
             });
             
             // Tutup modal saat klik di luar konten modal
             window.addEventListener('click', function(event) {
                 if (event.target === layananModal) {
                     layananModal.style.display = 'none';
-                    document.body.style.overflow = 'auto'; // Kembalikan scroll
+                    document.body.style.overflow = 'auto';
                 }
             });
             
@@ -1192,43 +1262,112 @@
                     });
                     
                     portfolioModal.style.display = 'block';
-                    document.body.style.overflow = 'hidden'; // Mencegah scroll di background
+                    document.body.style.overflow = 'hidden';
                 });
             });
             
             // Event listener untuk tombol close modal
             closeModalPortfolio.addEventListener('click', function() {
                 portfolioModal.style.display = 'none';
-                document.body.style.overflow = 'auto'; // Kembalikan scroll
+                document.body.style.overflow = 'auto';
             });
             
             // Tutup modal saat klik di luar konten modal
             window.addEventListener('click', function(event) {
                 if (event.target === portfolioModal) {
                     portfolioModal.style.display = 'none';
-                    document.body.style.overflow = 'auto'; // Kembalikan scroll
+                    document.body.style.overflow = 'auto';
                 }
             });
             
             // --- Logika untuk Tombol WhatsApp ---
             const whatsappBtn = document.getElementById('whatsappBtn');
-            
-            // Nomor WhatsApp tujuan
-            const whatsappNumber = '6281214137112'; // Ganti dengan nomor WhatsApp yang sesuai
-            
-            // Pesan default untuk WhatsApp
-            const defaultMessage = "Halo, saya tertarik dengan layanan yang ditawarkan. Mohon informasi lebih lanjut.";
+            const whatsappBtnText = document.getElementById('whatsappBtnText');
             
             // Event listener untuk tombol WhatsApp
             if (whatsappBtn) {
                 whatsappBtn.addEventListener('click', function() {
-                    const encodedMessage = encodeURIComponent(defaultMessage);
-                    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+                    // Tampilkan loading
+                    whatsappBtnText.innerHTML = '<span class="loading"></span> Menghubungi...';
+                    whatsappBtn.disabled = true;
+                    
+                    // Ambil nomor WhatsApp dan pesan dari data kontak
+                    const phoneNumber = contactData.phone.replace(/\s/g, '').replace(/-/g, '').replace('+', '');
+                    const message = encodeURIComponent(contactData.whatsapp_message);
+                    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
                     
                     // Buka WhatsApp di tab baru
                     window.open(whatsappUrl, '_blank');
+                    
+                    // Kembalikan tombol ke状态 normal setelah delay
+                    setTimeout(() => {
+                        whatsappBtnText.textContent = 'Hubungi Kami';
+                        whatsappBtn.disabled = false;
+                    }, 1000);
                 });
             }
+            
+            // --- Logika untuk Form Kontak ---
+            const contactForm = document.getElementById('contactForm');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Tampilkan loading
+                    const originalText = submitBtn.textContent;
+                    submitBtn.innerHTML = '<span class="loading"></span> Mengirim...';
+                    submitBtn.disabled = true;
+                    
+                    // Simulasi pengiriman form (ganti dengan endpoint yang sesuai)
+                    setTimeout(() => {
+                        // Tampilkan notifikasi sukses
+                        showNotification('Berhasil', 'Pesan Anda telah terkirim. Kami akan segera menghubungi Anda.', 'success');
+                        
+                        // Reset form
+                        contactForm.reset();
+                        
+                        // Kembalikan tombol ke状态 normal
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                    }, 1500);
+                });
+            }
+            
+            // --- Fungsi Notifikasi ---
+            function showNotification(title, message, type = 'success') {
+                const popup = document.getElementById('notificationPopup');
+                const icon = document.getElementById('notificationIcon');
+                const titleEl = document.getElementById('notificationTitle');
+                const messageEl = document.getElementById('notificationMessage');
+                
+                // Set konten
+                titleEl.textContent = title;
+                messageEl.textContent = message;
+                
+                // Set icon berdasarkan tipe
+                if (type === 'success') {
+                    icon.innerHTML = '<span class="material-icons-outlined text-green-500">check_circle</span>';
+                } else if (type === 'error') {
+                    icon.innerHTML = '<span class="material-icons-outlined text-red-500">error</span>';
+                } else if (type === 'warning') {
+                    icon.innerHTML = '<span class="material-icons-outlined text-yellow-500">warning</span>';
+                }
+                
+                // Tampilkan popup
+                popup.classList.remove('translate-x-full');
+                
+                // Sembunyikan popup setelah 5 detik
+                setTimeout(() => {
+                    popup.classList.add('translate-x-full');
+                }, 5000);
+            }
+            
+            // Event listener untuk tombol close notifikasi
+            document.getElementById('closeNotification').addEventListener('click', function() {
+                document.getElementById('notificationPopup').classList.add('translate-x-full');
+            });
             
             // --- Logika untuk navigasi aktif berdasarkan scroll ---
             const sections = document.querySelectorAll('section[id]');

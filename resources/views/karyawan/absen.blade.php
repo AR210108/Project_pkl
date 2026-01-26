@@ -355,6 +355,19 @@
             gap: 0.5rem;
         }
 
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
         .file-helper {
             font-size: 0.75rem;
             color: var(--text-secondary);
@@ -382,6 +395,12 @@
             .card {
                 padding: 1.5rem;
             }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+            }
         }
 
         /* Timezone info */
@@ -402,7 +421,6 @@
         <main class="flex-grow w-full max-w-7xl mx-auto">
             <div class="text-center mb-8">
                 <h2 class="text-4xl font-bold" style="color: var(--text-primary);">ABSENSI KARYAWAN</h2>
-
             </div>
 
             <!-- Clock -->
@@ -442,19 +460,51 @@
                         <h3 class="font-bold text-xl flex items-center" style="color: var(--text-primary);">
                             <span class="material-icons text-primary mr-2">history</span>Riwayat Absensi
                         </h3>
-                        <!-- Filter with Icon -->
-                        <div class="relative">
-                            <select id="history-filter" class="filter-select">
-                                <option value="week">Minggu Ini</option>
-                                <option value="month" selected>Bulan Ini</option>
-                                <option value="year">Tahun Ini</option>
-                            </select>
-                            <!-- Custom Icon Overlay -->
-                            <span
-                                class="material-icons absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400"
-                                style="font-size: 20px;">
-                                filter_list
-                            </span>
+                        
+                        <!-- Filter Group -->
+                        <div class="filter-group">
+                            <label class="filter-label">Filter:</label>
+                            <div class="relative">
+                                <select id="history-filter" class="filter-select">
+                                    <option value="week">Minggu Ini</option>
+                                    <option value="month" selected>Bulan Ini</option>
+                                    <option value="year">Tahun Ini</option>
+                                    <option value="custom">Pilih Periode</option>
+                                </select>
+                                <span class="material-icons absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400"
+                                    style="font-size: 20px;">
+                                    filter_list
+                                </span>
+                            </div>
+                            
+                            <!-- Custom Filter (Tampil hanya ketika pilih periode) -->
+                            <div id="custom-filter-container" class="hidden flex items-center gap-2">
+                                <div class="relative">
+                                    <select id="filter-month" class="filter-select">
+                                        <option value="">Pilih Bulan</option>
+                                        <option value="1">Januari</option>
+                                        <option value="2">Februari</option>
+                                        <option value="3">Maret</option>
+                                        <option value="4">April</option>
+                                        <option value="5">Mei</option>
+                                        <option value="6">Juni</option>
+                                        <option value="7">Juli</option>
+                                        <option value="8">Agustus</option>
+                                        <option value="9">September</option>
+                                        <option value="10">Oktober</option>
+                                        <option value="11">November</option>
+                                        <option value="12">Desember</option>
+                                    </select>
+                                </div>
+                                <div class="relative">
+                                    <select id="filter-year" class="filter-select">
+                                        <option value="">Pilih Tahun</option>
+                                    </select>
+                                </div>
+                                <button id="apply-custom-filter" class="filter-select bg-primary text-white hover:bg-primary-dark">
+                                    Terapkan
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -525,6 +575,9 @@
     let currentPage = 1;
     const recordsPerPage = 5;
     let attendanceHistoryData = [];
+    let currentFilterType = 'month';
+    let customMonth = '';
+    let customYear = '';
     
     // --- KONSTAN TIMEZONE & JAM BATAS ---
     const TIMEZONE = 'Asia/Jakarta'; // WIB (UTC+7)
@@ -947,6 +1000,89 @@
         }
     }
 
+    // --- FUNGSI FILTER TAHUN ---
+    function populateYearFilter() {
+        const yearSelect = document.getElementById('filter-year');
+        const currentYear = new Date().getFullYear();
+        
+        // Kosongkan dulu
+        yearSelect.innerHTML = '<option value="">Pilih Tahun</option>';
+        
+        // Tambahkan 5 tahun ke belakang dan 2 tahun ke depan
+        for (let year = currentYear + 2; year >= currentYear - 5; year--) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelect.appendChild(option);
+        }
+        
+        // Set default ke tahun sekarang
+        yearSelect.value = currentYear;
+    }
+
+    // --- FUNGSI TOGGLE FILTER CUSTOM ---
+    function toggleCustomFilter() {
+        const filterType = document.getElementById('history-filter').value;
+        const customContainer = document.getElementById('custom-filter-container');
+        
+        if (filterType === 'custom') {
+            customContainer.classList.remove('hidden');
+            customContainer.classList.add('flex');
+        } else {
+            customContainer.classList.remove('flex');
+            customContainer.classList.add('hidden');
+            // Reset custom filter
+            customMonth = '';
+            customYear = '';
+        }
+    }
+
+    // --- FUNGSI UNTUK MENGAMBIL DATA DENGAN FILTER ---
+    async function fetchAttendanceHistory() {
+        try {
+            const filterType = currentFilterType;
+            let endpoint = '/history';
+            let queryParams = [];
+            
+            if (filterType === 'custom' && customMonth && customYear) {
+                queryParams.push(`month=${customMonth}`);
+                queryParams.push(`year=${customYear}`);
+            } else {
+                queryParams.push(`filter=${filterType}`);
+            }
+            
+            if (queryParams.length > 0) {
+                endpoint += '?' + queryParams.join('&');
+            }
+            
+            console.log("📡 Fetching history with endpoint:", endpoint);
+            
+            const res = await apiFetch(endpoint);
+            
+            if (res && res.data && Array.isArray(res.data)) {
+                attendanceHistoryData = res.data;
+                
+                // Debug: lihat data yang diterima
+                console.log('History data received:', attendanceHistoryData.length, 'records');
+                if (attendanceHistoryData.length > 0) {
+                    console.log('Sample record:', {
+                        tanggal: attendanceHistoryData[0].tanggal,
+                        jam_masuk: attendanceHistoryData[0].jam_masuk
+                    });
+                }
+            } else {
+                attendanceHistoryData = [];
+            }
+            
+            renderHistoryTable();
+            
+        } catch (error) {
+            console.error('Gagal memuat riwayat:', error);
+            attendanceHistoryData = [];
+            renderHistoryTable();
+        }
+    }
+
     // --- UI UPDATE FUNCTIONS ---
 
     function updateMainActionButton(hasCheckedIn) {
@@ -1267,72 +1403,16 @@
     // --- HISTORY FUNCTIONS ---
 
     async function fetchAndRenderHistory() {
-        try {
-            const filterValue = document.getElementById('history-filter').value;
-            const res = await apiFetch(`/history?filter=${filterValue}`);
-            
-            if (res && res.data && Array.isArray(res.data)) {
-                attendanceHistoryData = res.data;
-                
-                // Debug: lihat data yang diterima
-                console.log('History data received:', attendanceHistoryData);
-                if (attendanceHistoryData.length > 0) {
-                    console.log('Sample record:', {
-                        tanggal: attendanceHistoryData[0].tanggal,
-                        jam_masuk_raw: attendanceHistoryData[0].jam_masuk,
-                        jam_masuk_formatted: formatTime(attendanceHistoryData[0].jam_masuk),
-                        jam_pulang_raw: attendanceHistoryData[0].jam_pulang,
-                        jam_pulang_formatted: formatTime(attendanceHistoryData[0].jam_pulang)
-                    });
-                }
-            } else {
-                attendanceHistoryData = [];
-            }
-            
-            renderHistoryTable();
-            
-        } catch (error) {
-            console.error('Gagal memuat riwayat:', error);
-            attendanceHistoryData = [];
-            renderHistoryTable();
-        }
+        await fetchAttendanceHistory();
     }
 
     function renderHistoryTable() {
         const tbody = document.getElementById('history-tbody');
         const emptyState = document.getElementById('empty-state');
-        const filterValue = document.getElementById('history-filter').value;
         const pagination = document.getElementById('pagination');
 
-        // Filter data berdasarkan periode
-        let filteredData = [...attendanceHistoryData];
-        const now = new Date();
-
-        if (filterValue === 'week') {
-            const oneWeekAgo = new Date(now);
-            oneWeekAgo.setDate(now.getDate() - 7);
-            filteredData = filteredData.filter(item => {
-                const itemDate = new Date(item.tanggal);
-                return itemDate >= oneWeekAgo;
-            });
-        } else if (filterValue === 'month') {
-            filteredData = filteredData.filter(item => {
-                const itemDate = new Date(item.tanggal);
-                return itemDate.getMonth() === now.getMonth() && 
-                       itemDate.getFullYear() === now.getFullYear();
-            });
-        } else if (filterValue === 'year') {
-            filteredData = filteredData.filter(item => {
-                const itemDate = new Date(item.tanggal);
-                return itemDate.getFullYear() === now.getFullYear();
-            });
-        }
-
-        // Urutkan dari tanggal terbaru
-        filteredData.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-
         // Tampilkan empty state jika tidak ada data
-        if (filteredData.length === 0) {
+        if (attendanceHistoryData.length === 0) {
             tbody.style.display = 'none';
             emptyState.style.display = 'block';
             pagination.style.display = 'none';
@@ -1344,12 +1424,12 @@
         tbody.innerHTML = '';
 
         // Pagination logic
-        const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+        const totalPages = Math.ceil(attendanceHistoryData.length / recordsPerPage);
         if (currentPage > totalPages) currentPage = 1;
         
         const startIndex = (currentPage - 1) * recordsPerPage;
         const endIndex = startIndex + recordsPerPage;
-        const pageData = filteredData.slice(startIndex, endIndex);
+        const pageData = attendanceHistoryData.slice(startIndex, endIndex);
 
         // Render rows
         pageData.forEach((record, index) => {
@@ -1513,12 +1593,6 @@
             const dateStr = `${days[now.getDay()]}, ${String(now.getDate()).padStart(2, '0')} ${months[now.getMonth()]} ${now.getFullYear()}`;
             document.getElementById('clock-date').textContent = dateStr;
         }
-        
-        // Update timezone info
-        
-        
-        // Update footer timezone info
-       
     }
 
     // --- EVENT LISTENERS & INITIALIZATION ---
@@ -1533,14 +1607,47 @@
         updateClock();
         setInterval(updateClock, 1000);
         
+        // Setup tahun filter
+        populateYearFilter();
+        
         // Load initial data
         fetchAndDisplayTodayStatus();
         fetchAndRenderHistory();
         
         // Setup filter event listener
         document.getElementById('history-filter').addEventListener('change', () => {
+            const filterType = document.getElementById('history-filter').value;
+            currentFilterType = filterType;
             currentPage = 1;
-            renderHistoryTable();
+            
+            // Toggle custom filter visibility
+            toggleCustomFilter();
+            
+            // Jika bukan custom, langsung fetch data
+            if (filterType !== 'custom') {
+                fetchAttendanceHistory();
+            }
+        });
+        
+        // Setup custom filter apply button
+        document.getElementById('apply-custom-filter').addEventListener('click', () => {
+            const month = document.getElementById('filter-month').value;
+            const year = document.getElementById('filter-year').value;
+            
+            if (!month || !year) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Filter Tidak Lengkap',
+                    text: 'Harap pilih bulan dan tahun terlebih dahulu',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+            
+            customMonth = month;
+            customYear = year;
+            currentPage = 1;
+            fetchAttendanceHistory();
         });
         
         // --- MAIN ACTION BUTTON (Check-in/Check-out) ---

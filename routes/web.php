@@ -19,6 +19,8 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\GeneralManagerTaskController;
 use App\Http\Controllers\KaryawanProfileController;
 use App\Http\Controllers\ManagerDivisiTaskController;
+use App\Http\Controllers\SettingController; // Tambahkan controller ini
+use App\Http\Controllers\LandingPageController; // Tambahkan controller ini
 
 /*
 |--------------------------------------------------------------------------
