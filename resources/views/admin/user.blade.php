@@ -707,6 +707,7 @@
                                         <tr>
                                             <th style="min-width: 60px;">No</th>
                                             <th style="min-width: 200px;">Username</th>
+                                            <th style="min-width: 200px;">Divisi</th>
                                             <th style="min-width: 250px;">Email</th>
                                             <th style="min-width: 120px;">Role</th>
                                             <th style="min-width: 100px; text-align: center;">Aksi</th>
@@ -714,18 +715,25 @@
                                     </thead>
                                     <tbody id="desktopTableBody">
                                         @foreach ($users as $i => $u)
-                                            <tr class="user-row" data-id="{{ $u->id }}" data-name="{{ $u->name }}" data-email="{{ $u->email }}" data-role="{{ $u->role }}" data-index="{{ $i }}">
+<tr class="user-row"
+ data-id="{{ $u->id }}"
+ data-name="{{ $u->name }}"
+ data-divisi="{{ $u->divisi }}"
+ data-email="{{ $u->email }}"
+ data-role="{{ $u->role }}"
+ data-index="{{ $i }}">
                                                 <td style="min-width: 60px;">{{ $i+1 }}</td>
-                                                <td style="min-width: 200px;">{{ $u->name }}</td>
-                                                <td style="min-width: 250px;">{{ $u->email }}</td>
-                                                <td style="min-width: 120px;">
+<td style="min-width: 200px;">{{ $u->name }}</td>
+<td style="min-width: 200px;">{{ $u->divisi ?? '-' }}</td>
+<td style="min-width: 250px;">{{ $u->email }}</td>
+<td style="min-width: 120px;">
                                                     <span class="status-badge {{ $u->role == 'admin' ? 'status-admin' : 'status-karyawan' }}">
                                                         {{ $u->role }}
                                                     </span>
                                                 </td>
                                                 <td style="min-width: 100px; text-align: center;">
                                                     <div class="flex justify-center gap-2">
-                                                        <button onclick="openModalEdit({{ $u->id }}, '{{ $u->name }}', '{{ $u->email }}', '{{ $u->role }}')"
+                                                        <button onclick="openModalEdit({{ $u->id }}, '{{ $u->name }}', '{{ $u->divisi }}', '{{ $u->email }}', '{{ $u->role }}')"
                                                             class="p-1 rounded-full hover:bg-primary/20 text-gray-700">
                                                             <span class="material-icons-outlined">edit</span>
                                                         </button>
@@ -775,6 +783,10 @@
                                             <p class="text-text-muted-light">No</p>
                                             <p class="font-medium">{{ $i+1 }}</p>
                                         </div>
+                                            <div>
+        <p class="text-text-muted-light">Divisi</p>
+        <p class="font-medium">{{ $u->divisi ?? '-' }}</p>
+    </div>
                                         <div>
                                             <p class="text-text-muted-light">Role</p>
                                             <p>
@@ -827,6 +839,18 @@
                         <input name="name" required class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama user">
                     </div>
 
+<div class="mb-4">
+    <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
+    <select name="divisi" required
+        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+        
+        <option value="">-- Pilih Divisi --</option>
+        <option value="IT">IT</option>
+        <option value="Desain">Desain</option>
+        <option value="Marketing">Marketing</option>
+        <option value="Admin">Admin</option>
+    </select>
+</div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                         <input name="email" required type="email" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan email">
@@ -870,7 +894,18 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
                         <input id="edit_name" name="name" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                     </div>
-
+<div class="mb-4">
+    <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
+    <select id="edit_divisi" name="divisi"
+        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+        
+        <option value="">-- Pilih Divisi --</option>
+        <option value="IT">IT</option>
+        <option value="Desain">Desain</option>
+        <option value="Marketing">Marketing</option>
+        <option value="Admin">Admin</option>
+    </select>
+</div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                         <input id="edit_email" name="email" type="email" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
@@ -1202,15 +1237,16 @@
 
             // === MODAL EDIT ===
             const modalEdit = document.getElementById('modalEdit');
-            window.openModalEdit = function(id, name, email, role) {
-                modalEdit.classList.remove('hidden');
+window.openModalEdit = function(id, name, divisi, email, role) {
+    modalEdit.classList.remove('hidden');
 
-                document.getElementById("edit_name").value = name;
-                document.getElementById("edit_email").value = email;
-                document.getElementById("edit_role").value = role;
+    document.getElementById("edit_name").value = name;
+    document.getElementById("edit_divisi").value = divisi;
+    document.getElementById("edit_email").value = email;
+    document.getElementById("edit_role").value = role;
 
-                document.getElementById("formEdit").action = "/admin/user/update/" + id;
-            }
+    document.getElementById("formEdit").action = "/admin/user/update/" + id;
+}
             
             function closeModalEdit() {
                 modalEdit.classList.add('hidden');
