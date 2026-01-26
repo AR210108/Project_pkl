@@ -619,7 +619,7 @@
                                                 <p class="text-text-muted-light">Status</p>
                                                 <p>
                                                     <span class="status-badge 
-                                                        @if($item->status == 'In Progress') status-inprogress 
+                                                        @if($item->status == 'Pending') status-inprogress 
                                                         @elseif($item->status == 'Active') status-active 
                                                         @elseif($item->status == 'Completed') status-done 
                                                         @else status-todo @endif">
@@ -706,28 +706,43 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="tambahForm" action="{{ route('project.store') }}" method="POST">
+                <form id="tambahForm" action="{{ route('admin.project.store') }}" method="POST">
                     @csrf
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
-                        <input type="text" name="nama" id="tambahNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                        @error('nama')
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
-                        @enderror
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Layanan</label>
+                        <select name="layanan_id" id="tambahLayanan"
+                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                            required>
+                            <option value="">-- Pilih Layanan --</option>
+                            @foreach($layanans as $layanan)
+                                <option value="{{ $layanan->id }}"
+                                    data-nama="{{ $layanan->nama_layanan }}"
+                                    data-deskripsi="{{ $layanan->deskripsi }}"
+                                    data-harga="{{ $layanan->harga }}">
+                                    {{ $layanan->nama_layanan }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
+                        <input type="text" name="nama" id="tambahNama"
+                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                            readonly required>
+                    </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea name="deskripsi" id="tambahDeskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
-                        @error('deskripsi')
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
-                        @enderror
+                        <textarea name="deskripsi" id="tambahDeskripsi"
+                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                            rows="3" readonly required></textarea>
                     </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                        <input type="text" name="harga" id="tambahHarga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                        @error('harga')
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
-                        @enderror
+                        <input type="number" name="harga" id="tambahHarga"
+                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                            readonly required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
@@ -739,10 +754,10 @@
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                         <select name="status" id="tambahStatus" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Active">Active</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Cancelled">Cancelled</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Dalam Pengerjaan">Dalam Pengerjaan</option>
+                            <option value="Selesai">Selesai</option>
+                            <option value="Dibatalkan">Dibatalkan</option>
                         </select>
                         @error('status')
                             <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -767,10 +782,10 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="editForm" action="{{ route('project.update', '') }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" name="id" id="editId">
+<form id="editForm" method="POST">
+    @csrf
+    @method('PUT')
+    <input type="hidden" name="id" id="editId">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
                         <input type="text" name="nama" id="editNama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
@@ -861,7 +876,7 @@
                     <p class="text-gray-700">Apakah Anda yakin ingin menghapus project <span id="deleteNama" class="font-semibold"></span>?</p>
                     <p class="text-sm text-gray-500 mt-2">Tindakan ini tidak dapat dibatalkan.</p>
                 </div>
-                <form id="deleteForm" action="{{ route('project.destroy', '') }}" method="POST">
+                <form id="deleteForm" method="POST">
                     @csrf
                     @method('DELETE')
                     <input type="hidden" name="id" id="deleteId">
@@ -902,31 +917,49 @@
     @endif
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Modal elements
-            const tambahModal = document.getElementById('tambahModal');
-            const editModal = document.getElementById('editModal');
-            const detailModal = document.getElementById('detailModal');
-            const deleteModal = document.getElementById('deleteModal');
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            // Buttons
-            const tambahProjectBtn = document.getElementById('tambahProjectBtn');
-            const closeModals = document.querySelectorAll('.close-modal');
-            const closeToastBtn = document.getElementById('closeToast');
-            
-            // Forms
-            const tambahForm = document.getElementById('tambahForm');
-            const editForm = document.getElementById('editForm');
-            const deleteForm = document.getElementById('deleteForm');
+document.addEventListener('DOMContentLoaded', function () {
+
+    const tambahModal = document.getElementById('tambahModal');
+    const editModal = document.getElementById('editModal');
+    const detailModal = document.getElementById('detailModal');
+    const deleteModal = document.getElementById('deleteModal');
+
+    const tambahForm = document.getElementById('tambahForm');
+    const editForm = document.getElementById('editForm');
+    const deleteForm = document.getElementById('deleteForm');
+
+    const tambahProjectBtn = document.getElementById('tambahProjectBtn');
+    const closeModals = document.querySelectorAll('.close-modal');
+
+    const tambahLayanan = document.getElementById('tambahLayanan');
+    const tambahNama = document.getElementById('tambahNama');
+    const tambahDeskripsi = document.getElementById('tambahDeskripsi');
+    const tambahHarga = document.getElementById('tambahHarga');
+
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+    const closeToastBtn = document.getElementById('closeToast');
             
             // Show tambah modal
-            tambahProjectBtn.addEventListener('click', function() {
-                tambahModal.classList.remove('hidden');
-                tambahForm.reset();
-            });
+    tambahProjectBtn.addEventListener('click', function () {
+        tambahModal.classList.remove('hidden');
+        tambahForm.reset();
+
+        // kosongkan field autofill
+        tambahLayanan.value = '';
+        tambahNama.value = '';
+        tambahDeskripsi.value = '';
+        tambahHarga.value = '';
+    });
             
+        tambahLayanan.addEventListener('change', function () {
+        const selected = this.options[this.selectedIndex];
+
+        tambahNama.value = selected.getAttribute('data-nama') || '';
+        tambahDeskripsi.value = selected.getAttribute('data-deskripsi') || '';
+        tambahHarga.value = selected.getAttribute('data-harga') || '';
+    });
+
             // Close modals
             closeModals.forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -1019,38 +1052,58 @@
                 });
             });
             
-            // Handle delete form submission with AJAX
-            deleteForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(deleteForm);
-                const id = document.getElementById('deleteId').value;
-                
-                fetch(`/project/${id}`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showToast(data.message);
-                        deleteModal.classList.add('hidden');
-                        // Reload page to show updated data
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        showToast('Terjadi kesalahan. Silakan coba lagi.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showToast('Terjadi kesalahan. Silakan coba lagi.');
-                });
-            });
+// Handle delete form submission with AJAX
+deleteForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(deleteForm);
+    const id = document.getElementById('deleteId').value;
+
+    fetch(`/project/${id}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document
+                .querySelector('meta[name="csrf-token"]')
+                .getAttribute('content'),
+            'Accept': 'application/json'
+        }
+    })
+    .then(async (response) => {
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.log("ERROR RESPONSE:", data);
+            throw data;
+        }
+
+        return data;
+    })
+    .then(data => {
+        if (data.success) {
+            showToast(data.message);
+            deleteModal.classList.add('hidden');
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+
+        if (error.errors) {
+            const firstError = Object.values(error.errors)[0][0];
+            showToast(firstError);
+        } else {
+            showToast('Terjadi kesalahan. Silakan coba lagi.');
+        }
+    });
+
+}); // ← 🔥 INI YANG KURANG
+
             
             // Close toast notification
             closeToastBtn.addEventListener('click', function() {
@@ -1081,14 +1134,14 @@
             // Set status badge
             const statusElement = document.getElementById('detailStatus');
             let statusClass = '';
-            if (status === 'In Progress') {
-                statusClass = 'status-inprogress';
-            } else if (status === 'Active') {
-                statusClass = 'status-active';
-            } else if (status === 'Completed') {
-                statusClass = 'status-done';
-            } else if (status === 'Cancelled') {
-                statusClass = 'status-todo';
+            if (status === 'Pending') {
+                statusClass = 'status-pending';
+            } else if (status === 'Dalam Pengerjaan') {
+                statusClass = 'status-dalampengerjaan';
+            } else if (status === 'Selesai') {
+                statusClass = 'status-selesai';
+            } else if (status === 'Dibatalkan') {
+                statusClass = 'status-dibatalkan';
             }
             statusElement.innerHTML = `<span class="status-badge ${statusClass}">${status}</span>`;
             
@@ -1119,7 +1172,7 @@
             document.getElementById('editStatus').value = status;
             
             // Update form action with the correct ID
-            document.getElementById('editForm').action = `/project/${id}`;
+            document.getElementById('editForm').action = `/admin/project/${id}`;
             
             document.getElementById('editModal').classList.remove('hidden');
         }
@@ -1130,7 +1183,7 @@
             document.getElementById('deleteNama').textContent = nama;
             
             // Update form action with the correct ID
-            document.getElementById('deleteForm').action = `/project/${id}`;
+            document.getElementById('deleteForm').action = `/admin/project/${id}`;
             
             document.getElementById('deleteModal').classList.remove('hidden');
         }

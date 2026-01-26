@@ -422,14 +422,16 @@
         }
 
         .calendar-notes-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    max-width: 600px;
-    /* Hapus margin: 0 auto; */
-    margin-left: 0; /* Tambahkan ini untuk memastikan rata kiri */
-    margin-right: auto; /* Tambahkan ini untuk menjaga responsivitas */
-}
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            max-width: 600px;
+            /* Hapus margin: 0 auto; */
+            margin-left: 0;
+            /* Tambahkan ini untuk memastikan rata kiri */
+            margin-right: auto;
+            /* Tambahkan ini untuk menjaga responsivitas */
+        }
 
         /* Mobile responsive */
         @media (max-width: 768px) {
@@ -539,7 +541,8 @@
                 max-width: 100% !important;
             }
 
-            .calendar-container, .notes-container {
+            .calendar-container,
+            .notes-container {
                 width: 100% !important;
                 margin-bottom: 0.5rem !important;
             }
@@ -647,7 +650,8 @@
                         <div class="card-content">
                             <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah Karyawan</p>
                             <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">
-                                {{ $jumlahKaryawan }}</p>
+                                {{ $jumlahKaryawan }}
+                            </p>
                         </div>
                     </div>
                     <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card">
@@ -657,7 +661,8 @@
                         <div class="card-content">
                             <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah User</p>
                             <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">
-                                {{ $jumlahUser }}</p>
+                                {{ $jumlahUser }}
+                            </p>
                         </div>
                     </div>
                     <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card">
@@ -667,7 +672,8 @@
                         <div class="card-content">
                             <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah Layanan</p>
                             <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">
-                                {{ $jumlahLayanan }}</p>
+                                {{ $jumlahLayanan }}
+                            </p>
                         </div>
                     </div>
                     <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card">
@@ -675,8 +681,10 @@
                             <span class="material-symbols-rounded text-yellow-600">handshake</span>
                         </div>
                         <div class="card-content">
-                            <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah surat kerjasama</p>
-                            <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">$10.000.000</p>
+                            <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah Data Project</p>
+                            <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">
+                                {{ $jumlahProject ?? 0 }}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -714,9 +722,6 @@
                     <div class="notes-container">
                         <div class="notes-header">
                             <h3>Catatan Meeting</h3>
-                            <button class="calendar-nav-button" onclick="addNote()">
-                                <span class="material-symbols-rounded">add</span>
-                            </button>
                         </div>
                         <div class="notes-body" id="notesContainer">
                             <!-- diisi JS -->
@@ -893,7 +898,7 @@
         }
 
         // Function to switch between tabs
-        window.switchTab = function(tabName) {
+        window.switchTab = function (tabName) {
             // Get tab buttons and panels
             const meetingTab = document.getElementById('meetingTab');
             const announcementTab = document.getElementById('announcementTab');
@@ -922,7 +927,7 @@
         const calendarTitle = document.getElementById('calendarTitle');
         const calendarDays = document.getElementById('calendarDays');
         const notesContainer = document.getElementById('notesContainer');
-        
+
         let currentMonth = today.getMonth();
         let currentYear = today.getFullYear();
         let selectedDate = null;
@@ -932,92 +937,92 @@
                 "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
                 "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
             ];
-            
+
             calendarTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
         }
 
         function renderCalendar() {
             updateCalendarTitle();
-            
+
             // Clear previous calendar days
             calendarDays.innerHTML = '';
-            
+
             // Get first day of month and number of days in month
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            
+
             // Add empty cells for days before the first day of the month
             for (let i = 0; i < firstDay; i++) {
                 const emptyDay = document.createElement('div');
                 emptyDay.className = 'calendar-day';
                 calendarDays.appendChild(emptyDay);
             }
-            
+
             // Add days of the month
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day';
                 dayElement.textContent = day;
-                
+
                 // Check if this day is today
                 const currentDate = new Date();
-                if (currentYear === currentDate.getFullYear() && 
-                    currentMonth === currentDate.getMonth() && 
+                if (currentYear === currentDate.getFullYear() &&
+                    currentMonth === currentDate.getMonth() &&
                     day === currentDate.getDate()) {
                     dayElement.classList.add('today');
                 }
-                
+
                 // Check if this day has events
                 const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 if (events[dateStr]) {
                     dayElement.classList.add('has-event');
                 }
-                
+
                 // Add click event to select date
-                dayElement.addEventListener('click', function() {
+                dayElement.addEventListener('click', function () {
                     // Remove selected class from all days
                     document.querySelectorAll('.calendar-day').forEach(el => {
                         el.classList.remove('selected');
                     });
-                    
+
                     // Add selected class to clicked day
                     this.classList.add('selected');
-                    
+
                     // Update selected date
                     selectedDate = new Date(currentYear, currentMonth, day);
-                    
+
                     // Show events for selected date
                     showEvents(dateStr);
                 });
-                
+
                 calendarDays.appendChild(dayElement);
             }
         }
 
         function showEvents(dateStr) {
             notesContainer.innerHTML = '';
-            
+
             if (events[dateStr]) {
                 events[dateStr].forEach(event => {
                     const noteItem = document.createElement('div');
                     noteItem.className = 'note-item';
-                    
+
                     const noteDate = document.createElement('div');
                     noteDate.className = 'note-date';
                     noteDate.textContent = dateStr;
-                    
+
                     const noteTitle = document.createElement('div');
                     noteTitle.className = 'note-title';
                     noteTitle.textContent = event.topik || 'Meeting';
-                    
+
                     const noteContent = document.createElement('div');
                     noteContent.className = 'note-content';
                     noteContent.textContent = event.keputusan || 'Tidak ada keputusan';
-                    
+
                     noteItem.appendChild(noteDate);
                     noteItem.appendChild(noteTitle);
                     noteItem.appendChild(noteContent);
-                    
+
                     notesContainer.appendChild(noteItem);
                 });
             } else {
@@ -1053,10 +1058,11 @@
 
         // Initialize calendar
         renderCalendar();
-        
+
         // Show today's events by default
         const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         showEvents(todayStr);
     </script>
 </body>
+
 </html>

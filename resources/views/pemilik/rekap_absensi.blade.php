@@ -624,7 +624,7 @@
                 </div>
 <!-- Filter Section -->
                 <div class="bg-white p-4 md:p-6 rounded-xl shadow-md mb-6 md:mb-8">
-                    <form method="GET" action="{{ route('rekap.absensi') }}"
+                    <form method="GET" action="{{ route('owner.rekap.absensi') }}"
                         class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <!-- Tanggal Mulai -->
                         <div>
@@ -665,7 +665,7 @@
                                 <span class="material-icons-outlined align-middle mr-1 text-sm">filter_list</span>
                                 Filter
                             </button>
-                            <a href="{{ route('rekap.absensi') }}"
+                            <a href="{{ route('owner.rekap.absensi') }}"
                                 class="btn-secondary flex-1 text-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition duration-200">
                                 <span class="material-icons-outlined align-middle mr-1 text-sm">refresh</span>
                                 Reset

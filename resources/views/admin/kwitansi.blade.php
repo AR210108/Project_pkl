@@ -813,11 +813,21 @@
                             <input type="number" id="feeMaintenance" name="fee_maintenance" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
                         </div>
                     </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp)</label>
                         <input type="text" id="total" name="total_display" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700" readonly>
                         <!-- Hidden input for the actual numeric total value -->
                         <input type="hidden" id="totalValue" name="total" value="0">
+                    </div>
+                        <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                        <select id="status" name="metode_pembayaran" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required >
+                            <option value="">Pilih Status</option>
+                            <option value="Bank Transfer">Pembayaran Awal</option>
+                            <option value="E-Wallet">Lunas</option>
+                        </select>
+                        </div>
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" id="cancelBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -1200,14 +1210,13 @@
             existingCards.forEach(card => card.remove());
             
             // Fetch data from API
-            fetch('/api/kwitansi', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                }
-            })
+fetch('/admin/kwitansi', {
+    method: 'GET',
+    headers: {
+        'Accept': 'application/json'
+    }
+})
+
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`Server error: ${response.status} ${response.statusText}`);
@@ -1468,14 +1477,14 @@
             const formData = new FormData(form);
             
             // Send data to API
-            fetch('/api/kwitansi', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                },
-                body: formData
-            })
+fetch('/admin/kwitansi', {
+    method: 'POST',
+    headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Accept': 'application/json'
+    },
+    body: formData
+})
             .then(response => {
                 if (!response.ok) {
                     return response.json().then(data => {

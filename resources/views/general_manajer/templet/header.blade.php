@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,12 +17,15 @@
         .hamburger-line {
             transition: all 0.3s ease-in-out;
         }
+
         .hamburger-active .line1 {
             transform: rotate(45deg) translate(5px, 5px);
         }
+
         .hamburger-active .line2 {
             opacity: 0;
         }
+
         .hamburger-active .line3 {
             transform: rotate(-45deg) translate(7px, -6px);
         }
@@ -119,6 +123,7 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-100">
     <!-- Hamburger Menu Button (Mobile) -->
     <button id="hamburger" class="md:hidden fixed top-4 right-4 z-50 p-3 bg-white shadow-lg rounded-lg hover:shadow-xl">
@@ -350,4 +355,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -26,6 +26,6 @@ public function up()
      */
     public function down(): void
     {
-        Schema::dropIfExists('layanan');
+        Schema::dropIfExists('layanans');
     }
 };
