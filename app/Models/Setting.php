@@ -25,7 +25,7 @@ class Setting extends Model
     public static function getValue($key, $default = null)
     {
         $setting = static::where('key', $key)->first();
-        
+
         return $setting ? $setting->value : $default;
     }
 
@@ -49,7 +49,7 @@ class Setting extends Model
     public static function getContactData()
     {
         $setting = static::where('key', 'contact_info')->first();
-        
+
         if ($setting) {
             return json_decode($setting->value, true);
         }
@@ -60,6 +60,20 @@ class Setting extends Model
             'phone' => '+62 817 - 251 - 196',
             'address' => 'Jl. Batusari Komplek Buana Citra Ciwastra No.D-3, Buahbatu, Kec. Bojongsoang, Kabupaten Bandung, Jawa Barat 40287',
             'whatsapp_message' => 'Halo, saya tertarik dengan layanan yang ditawarkan. Mohon informasi lebih lanjut.'
+        ];
+    }
+    public static function getAboutData()
+    {
+        $setting = static::where('key', 'about_info')->first();
+
+        if ($setting) {
+            return json_decode($setting->value, true);
+        }
+
+        // Default values
+        return [
+            'title' => 'TENTANG',
+            'description' => 'Kami digital agency adalah perusahaan yang membantu bisnis lain membawa ke produk atau jasanya secara online melalui berbagai layanan digital. Layanan yang ditawarkan meliputi strategi pemasaran digital, pembuatan dan pengelolaan situs web, manajemen media sosial, optimasi mesin pencari (SEO), serta kampanye iklan di Google Ads, iklan display, dan video.'
         ];
     }
 }

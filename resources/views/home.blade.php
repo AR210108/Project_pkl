@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -830,15 +831,16 @@
                 <section class="py-12 md:py-24 text-center max-w-3xl mx-auto" id="tentang">
                     <div class="flex items-center mb-8">
                         <div class="flex-grow h-px bg-gray-300"></div>
-                        <h2 class="mx-4 text-3xl font-bold text-black">TENTANG</h2>
+                        <h2 class="mx-4 text-3xl font-bold text-black about-title">TENTANG</h2>
                         <div class="flex-grow h-px bg-gray-300"></div>
                     </div>
-                    <p class="text-gray-700 leading-relaxed">Kami digital agency adalah perusahaan
+                    <p class="text-gray-700 leading-relaxed about-description">Kami digital agency adalah perusahaan
                         yang membantu bisnis lain membawa ke produk atau jasanya secara online melalui berbagai layanan
                         digital. Layanan yang ditawarkan meliputi strategi pemasaran digital, pembuatan dan pengelolaan
                         situs web, manajemen media sosial, optimasi mesin pencari (SEO), serta kampanye iklan di Google
                         Ads, iklan display, dan video.</p>
                 </section>
+                <!-- PERBAIKAN: BAGIAN PORTOFOLIO SUDAH DINAMIS -->
                 <section class="py-12 md:py-24" id="portofolio">
                     <div class="flex items-center mb-12">
                         <div class="flex-grow h-px bg-gray-300"></div>
@@ -846,79 +848,9 @@
                         <div class="flex-grow h-px bg-gray-300"></div>
                     </div>
                     <div class="portfolio-container pb-4">
+                        <!-- Container ini akan diisi secara dinamis oleh JavaScript -->
                         <div class="flex gap-8" style="width: max-content;">
-                            <div class="portfolio-card bg-card-light p-6 rounded-2xl flex flex-col w-72 shadow-sm border border-border-light">
-                                <div class="relative flex-grow aspect-[4/5] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                    <button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center text-black hover:bg-white transition-colors">
-                                        <span class="material-icons-outlined text-base">arrow_forward</span>
-                                    </button>
-                                </div>
-                                <h3 class="font-bold text-white text-lg mb-4">E-Commerce Platform</h3>
-                                <button class="w-full btn-primary bg-black text-white text-sm font-medium py-2 px-4 rounded-lg flex justify-between items-center portfolio-btn" data-title="E-Commerce Platform" data-description="Platform e-commerce modern dengan fitur lengkap untuk memudahkan transaksi online. Kami mengembangkan solusi yang responsif dan user-friendly untuk meningkatkan konversi penjualan." data-tech="React, Node.js, MongoDB, Stripe API">
-                                    <span>Lihat Detail</span>
-                                    <span class="material-icons-outlined text-base">chevron_right</span>
-                                </button>
-                            </div>
-                            <div class="portfolio-card bg-card-light p-6 rounded-2xl flex flex-col w-72 shadow-sm border border-border-light">
-                                <div class="relative flex-grow aspect-[4/5] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                    <button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center text-black hover:bg-white transition-colors">
-                                        <span class="material-icons-outlined text-base">arrow_forward</span>
-                                    </button>
-                                </div>
-                                <h3 class="font-bold text-white text-lg mb-4">Mobile Banking App</h3>
-                                <button class="w-full btn-primary bg-black text-white text-sm font-medium py-2 px-4 rounded-lg flex justify-between items-center portfolio-btn" data-title="Mobile Banking App" data-description="Aplikasi perbankan mobile yang aman dan intuitif dengan fitur transfer, pembayaran tagihan, dan manajemen keuangan pribadi. Dilengkapi dengan sistem keamanan berlapis untuk melindungi data pengguna." data-tech="React Native, Node.js, PostgreSQL, Biometric Authentication">
-                                    <span>Lihat Detail</span>
-                                    <span class="material-icons-outlined text-base">chevron_right</span>
-                                </button>
-                            </div>
-                            <div class="portfolio-card bg-card-light p-6 rounded-2xl flex flex-col w-72 shadow-sm border border-border-light">
-                                <div class="relative flex-grow aspect-[4/5] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                    <button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center text-black hover:bg-white transition-colors">
-                                        <span class="material-icons-outlined text-base">arrow_forward</span>
-                                    </button>
-                                </div>
-                                <h3 class="font-bold text-white text-lg mb-4">Healthcare Dashboard</h3>
-                                <button class="w-full btn-primary bg-black text-white text-sm font-medium py-2 px-4 rounded-lg flex justify-between items-center portfolio-btn" data-title="Healthcare Dashboard" data-description="Dashboard kesehatan terintegrasi untuk memonitor pasien dan mengelola jadwal tenaga medis. Sistem ini membantu rumah sakit meningkatkan efisiensi operasional dan kualitas layanan pasien." data-tech="Vue.js, Python, Django, PostgreSQL, Chart.js">
-                                    <span>Lihat Detail</span>
-                                    <span class="material-icons-outlined text-base">chevron_right</span>
-                                </button>
-                            </div>
-                            <div class="portfolio-card bg-card-light p-6 rounded-2xl flex flex-col w-72 shadow-sm border border-border-light">
-                                <div class="relative flex-grow aspect-[4/5] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                    <button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center text-black hover:bg-white transition-colors">
-                                        <span class="material-icons-outlined text-base">arrow_forward</span>
-                                    </button>
-                                </div>
-                                <h3 class="font-bold text-white text-lg mb-4">Educational Platform</h3>
-                                <button class="w-full btn-primary bg-black text-white text-sm font-medium py-2 px-4 rounded-lg flex justify-between items-center portfolio-btn" data-title="Educational Platform" data-description="Platform pembelajaran online dengan fitur video interaktif, kuis, dan sistem penilaian otomatis. Dirancang untuk mendukung pembelajaran jarak jauh dengan pengalaman yang engaging." data-tech="Next.js, TypeScript, Prisma, PostgreSQL, WebRTC">
-                                    <span>Lihat Detail</span>
-                                    <span class="material-icons-outlined text-base">chevron_right</span>
-                                </button>
-                            </div>
-                            <div class="portfolio-card bg-card-light p-6 rounded-2xl flex-col w-72 shadow-sm border border-border-light">
-                                <div class="relative flex-grow aspect-[4/5] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                    <button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center text-black hover:bg-white transition-colors">
-                                        <span class="material-icons-outlined text-base">arrow_forward</span>
-                                    </button>
-                                </div>
-                                <h3 class="font-bold text-white text-lg mb-4">Food Delivery App</h3>
-                                <button class="w-full btn-primary bg-black text-white text-sm font-medium py-2 px-4 rounded-lg flex justify-between items-center portfolio-btn" data-title="Food Delivery App" data-description="Aplikasi pengantaran makanan dengan sistem pemesanan yang intuitif dan tracking real-time. Terintegrasi dengan berbagai restoran dan sistem pembayaran digital untuk kemudahan pengguna." data-tech="Flutter, Firebase, Google Maps API, Razorpay">
-                                    <span>Lihat Detail</span>
-                                    <span class="material-icons-outlined text-base">chevron_right</span>
-                                </button>
-                            </div>
-                            <div class="portfolio-card bg-card-light p-6 rounded-2xl flex-col w-72 shadow-sm border border-border-light">
-                                <div class="relative flex-grow aspect-[4/5] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4">
-                                    <button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center text-black hover:bg-white transition-colors">
-                                        <span class="material-icons-outlined text-base">arrow_forward</span>
-                                    </button>
-                                </div>
-                                <h3 class="font-bold text-white text-lg mb-4">Travel Booking Platform</h3>
-                                <button class="w-full btn-primary bg-black text-white text-sm font-medium py-2 px-4 rounded-lg flex justify-between items-center portfolio-btn" data-title="Travel Booking Platform" data-description="Platform pemesanan perjalanan terintegrasi dengan fitur pencarian tiket pesawat pesawat, hotel, dan paket liburan. Dilengkapi dengan sistem rekomendasi berbasis AI untuk pengalaman personalisasi." data-tech="Angular, Node.js, Express, MongoDB, Machine Learning">
-                                    <span>Lihat Detail</span>
-                                    <span class="material-icons-outlined text-base">chevron_right</span>
-                                </button>
-                            </div>
+                            <!-- Portofolio akan dimuat melalui JavaScript -->
                         </div>
                     </div>
                     <div class="flex justify-center mt-4">
@@ -934,40 +866,8 @@
                         <h2 class="mx-4 text-3xl font-bold text-black">ARTIKEL</h2>
                         <div class="flex-grow h-px bg-gray-300"></div>
                     </div>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div class="article-card flex flex-col">
-                            <div class="aspect-[4/3] bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl mb-4"></div>
-                            <p class="text-sm text-black mb-1">bilibibib</p>
-                            <h3 class="text-xl font-bold text-black mb-2">Judul artikel</h3>
-                            <p class="text-sm text-gray-700">isi
-                                artikel<br />--------------------<br />--------------------<br />--------------------<br />--------------------<br />--------------------<br />--------------------<br />--------------------</p>
-                        </div>
-                        <div class="space-y-6">
-                            <div class="article-card flex items-center gap-6">
-                                <div class="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl flex-shrink-0"></div>
-                                <div>
-                                    <h4 class="font-bold text-black mb-2">Isi artikel</h4>
-                                    <p class="text-sm text-gray-700">
-                                        --------------------<br />--------------------<br />--------------------<br />--------------------</p>
-                                </div>
-                            </div>
-                            <div class="article-card flex items-center gap-6">
-                                <div class="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl flex-shrink-0"></div>
-                                <div>
-                                    <h4 class="font-bold text-black mb-2">Isi artikel</h4>
-                                    <p class="text-sm text-gray-700">
-                                        --------------------<br />--------------------<br />--------------------<br />--------------------</p>
-                                </div>
-                            </div>
-                            <div class="article-card flex items-center gap-6">
-                                <div class="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl flex-shrink-0"></div>
-                                <div>
-                                    <h4 class="font-bold text-black mb-2">Isi artikel</h4>
-                                    <p class="text-sm text-gray-700">
-                                        --------------------<br />--------------------<br />--------------------<br />--------------------</p>
-                                </div>
-                            </div>
-                        </div>
+                    <div id="articlesContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Artikel akan dimuat melalui JavaScript -->
                     </div>
                 </section>
                 <section class="py-12 md:py-24" id="kontak">
@@ -1010,15 +910,15 @@
                         <form class="space-y-6" id="contactForm">
                             <div>
                                 <label class="sr-only" for="name">Name</label>
-                                <input class="w-full bg-white border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-black focus:ring-black focus:border-black text-black shadow-sm" id="name" name="name" placeholder="Nama Anda" type="text" />
+                                <input class="w-full bg-white border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-black focus:ring-black focus:border-black text-black shadow-sm" id="name" name="name" placeholder="Nama Anda" type="text" required />
                             </div>
                             <div>
                                 <label class="sr-only" for="email">Email</label>
-                                <input class="w-full bg-white border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-black focus:ring-black focus:border-black text-black shadow-sm" id="email" name="email" placeholder="Email Anda" type="email" />
+                                <input class="w-full bg-white border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-black focus:ring-black focus:border-black text-black shadow-sm" id="email" name="email" placeholder="Email Anda" type="email" required />
                             </div>
                             <div>
                                 <label class="sr-only" for="message">Message</label>
-                                <textarea class="w-full bg-white border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-black focus:ring-black focus:border-black text-black shadow-sm" id="message" name="message" placeholder="Pesan Anda" rows="6"></textarea>
+                                <textarea class="w-full bg-white border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-black focus:ring-black focus:border-black text-black shadow-sm" id="message" name="message" placeholder="Pesan Anda" rows="6" required></textarea>
                             </div>
                             <button class="w-full btn-primary bg-black text-white font-medium py-3 px-8 rounded-lg" type="submit" id="submitBtn">
                                 Kirim Pesan
@@ -1037,13 +937,15 @@
         </div>
     </main>
 
-    <!-- Modal Portofolio -->
+    <!-- PERBAIKAN: MODAL PORTOFOLIO SUDAH DITAMBAHKAN ELEMEN GAMBAR -->
     <div id="portfolioModal" class="modal">
         <div class="modal-content">
             <span class="close-modal close-modal-portfolio">&times;</span>
             <div class="p-6">
                 <h2 id="modalTitle" class="text-2xl font-bold text-white mb-4"></h2>
-                <div class="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-6"></div>
+                <div id="modalImageContainer" class="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-6 overflow-hidden">
+                    <img id="modalImage" src="" alt="" class="w-full h-full object-cover hidden">
+                </div>
                 <p id="modalDescription" class="text-gray-300 mb-6"></p>
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold text-white mb-2">Teknologi yang Digunakan:</h3>
@@ -1090,56 +992,80 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- Ambil data kontak dari API ---
-            let contactData = {
-                email: 'inovindocorp@gmail.com',
-                phone: '+62 817 - 251 - 196',
-                address: 'Jl. Batusari Komplek Buana Citra Ciwastra No.D-3, Buahbatu, Kec. Bojongsoang, Kabupaten Bandung, Jawa Barat 40287',
-                whatsapp_message: 'Halo, saya tertarik dengan layanan yang ditawarkan. Mohon informasi lebih lanjut.'
-            };
+        <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Halaman beranda dimuat. Memulai inisialisasi...");
 
-            // Ambil data kontak dari API
-            fetch('/api/contact')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        contactData = data.data;
-                        
-                        // Update elemen kontak di landing page
-                        updateContactElements();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching contact data:', error);
-                    // Tetap gunakan data default jika gagal mengambil dari API
+        // --- Inisialisasi EmailJS ---
+        try {
+            (function() {
+                emailjs.init("oife-AzTJDPCJCsXd");
+            })();
+        } catch (e) {
+            console.error("Gagal menginisialisasi EmailJS:", e);
+        }
+        
+        // --- Ambil data kontak dari API ---
+        let contactData = {
+            email: 'inovindocorp@gmail.com',
+            phone: '+62 817 - 251 - 196',
+            address: 'Jl. Batusari Komplek Buana Citra Ciwastra No.D-3, Buahbatu, Kec. Bojongsoang, Kabupaten Bandung, Jawa Barat 40287',
+            whatsapp_message: 'Halo, saya tertarik dengan layanan yang ditawarkan. Mohon informasi lebih lanjut.'
+        };
+
+        fetch('/api/contact')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    contactData = data.data;
                     updateContactElements();
-                });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching contact data:', error);
+                updateContactElements();
+            });
 
-            // Fungsi untuk update elemen kontak
-            function updateContactElements() {
-                // Update elemen kontak
-                const emailElements = document.querySelectorAll('.contact-email');
-                const phoneElements = document.querySelectorAll('.contact-phone');
-                const addressElements = document.querySelectorAll('.contact-address');
-                
-                emailElements.forEach(el => {
-                    el.textContent = contactData.email;
-                });
-                
-                phoneElements.forEach(el => {
-                    el.textContent = contactData.phone;
-                });
-                
-                addressElements.forEach(el => {
-                    el.textContent = contactData.address;
-                });
-            }
-
-            // --- Logika untuk Header Sticky ---
-            const header = document.getElementById('header');
+        function updateContactElements() {
+            const emailElements = document.querySelectorAll('.contact-email');
+            const phoneElements = document.querySelectorAll('.contact-phone');
+            const addressElements = document.querySelectorAll('.contact-address');
             
+            if(emailElements) emailElements.forEach(el => el.textContent = contactData.email);
+            if(phoneElements) phoneElements.forEach(el => el.textContent = contactData.phone);
+            if(addressElements) addressElements.forEach(el => el.textContent = contactData.address);
+        }
+
+        // --- Ambil data tentang dari API ---
+        let aboutData = {
+            title: 'TENTANG',
+            description: 'Kami digital agency adalah perusahaan yang membantu bisnis lain membawa ke produk atau jasanya secara online melalui berbagai layanan digital.'
+        };
+
+        fetch('/api/about')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    aboutData = data.data;
+                    updateAboutElements();
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching about data:', error);
+                updateAboutElements();
+            });
+
+        function updateAboutElements() {
+            const titleElements = document.querySelectorAll('.about-title');
+            const descriptionElements = document.querySelectorAll('.about-description');
+            
+            if(titleElements) titleElements.forEach(el => el.textContent = aboutData.title);
+            if(descriptionElements) descriptionElements.forEach(el => el.textContent = aboutData.description);
+        }
+
+        // --- Logika untuk Header Sticky ---
+        const header = document.getElementById('header');
+        if (header) {
             window.addEventListener('scroll', function() {
                 if (window.scrollY > 50) {
                     header.classList.add('scrolled');
@@ -1147,206 +1073,223 @@
                     header.classList.remove('scrolled');
                 }
             });
+        } else {
+            console.error("Elemen #header tidak ditemukan! Ini bisa menyebabkan error saat logout.");
+        }
 
-            // --- Logika untuk Tombol "Lihat Lainnya" ---
-            const layananToggleBtn = document.getElementById('layananToggleBtn');
-            const layananGridWrapper = document.getElementById('layananGridWrapper');
-            const layananToggleText = document.getElementById('layananToggleText');
-            const layananToggleIcon = document.getElementById('layananToggleIcon');
-            const scrollIndicator = document.getElementById('scrollIndicator');
-            
-            // Event listener untuk tombol toggle
-            if (layananToggleBtn) {
-                layananToggleBtn.addEventListener('click', function() {
-                    const isExpanded = layananGridWrapper.classList.contains('expanded');
+        // --- Logika untuk Tombol "Lihat Lainnya" ---
+        const layananToggleBtn = document.getElementById('layananToggleBtn');
+        const layananGridWrapper = document.getElementById('layananGridWrapper');
+        const layananToggleText = document.getElementById('layananToggleText');
+        const layananToggleIcon = document.getElementById('layananToggleIcon');
+        const scrollIndicator = document.getElementById('scrollIndicator');
+        
+        if (layananToggleBtn && layananGridWrapper) {
+            layananToggleBtn.addEventListener('click', function() {
+                const isExpanded = layananGridWrapper.classList.contains('expanded');
+                if (isExpanded) {
+                    layananGridWrapper.classList.remove('expanded');
+                    if(layananToggleText) layananToggleText.textContent = 'Lihat Lainnya';
+                    if(layananToggleIcon) layananToggleIcon.textContent = 'expand_more';
+                    if(scrollIndicator) scrollIndicator.style.display = 'none';
+                } else {
+                    layananGridWrapper.classList.add('expanded');
+                    if(layananToggleText) layananToggleText.textContent = 'Tutup';
+                    if(layananToggleIcon) layananToggleIcon.textContent = 'expand_less';
+                    if(scrollIndicator) scrollIndicator.style.display = 'flex';
+                }
+            });
+        } else {
+            console.error("Elemen untuk toggle layanan tidak ditemukan. Pastikan Anda berada di halaman utama, bukan halaman admin.");
+        }
 
-                    if (isExpanded) {
-                        // Tutup
-                        layananGridWrapper.classList.remove('expanded');
-                        layananToggleText.textContent = 'Lihat Lainnya';
-                        layananToggleIcon.textContent = 'expand_more';
-                        scrollIndicator.style.display = 'none';
-                    } else {
-                        // Buka sisa layanan dalam container scroll
-                        layananGridWrapper.classList.add('expanded');
-                        layananToggleText.textContent = 'Tutup';
-                        layananToggleIcon.textContent = 'expand_less';
-                        
-                        // Tampilkan indikator scroll
-                        scrollIndicator.style.display = 'flex';
-                    }
-                });
+        // --- PERBAIKAN: Logika untuk Modal Layanan (TYPO SUDAH DIPERBAIKI) ---
+        const layananModal = document.getElementById('layananModal');
+        const closeModalLayanan = document.querySelector('.close-modal-layanan');
+        
+        // Fungsi untuk membuka modal layanan
+function openLayananModal(serviceCard) {
+    if (!serviceCard || !layananModal) {
+        console.error("Tidak dapat membuka modal: elemen tidak ditemukan.");
+        return;
+    }
+
+    const serviceName = serviceCard.getAttribute('data-service-name');
+    const servicePrice = serviceCard.getAttribute('data-service-price');
+    const serviceDescription = serviceCard.getAttribute('data-service-description');
+    const serviceImage = serviceCard.getAttribute('data-service-image');
+    
+    // Deklarasi variabel yang BENAR
+    const layananModalTitle = document.getElementById('layananModalTitle');
+    const layananModalImage = document.getElementById('layananModalImage');
+    const layananModalPrice = document.getElementById('layananModalPrice');
+    const layananModalDescription = document.getElementById('layananModalDescription');
+    const layananModalImageContainer = document.getElementById('layananModalImageContainer');
+
+    // --- PERBAIKAN SEJATI: Gunakan variabel yang BENAR di dalam kondisi if ---
+    if(layananModalTitle) layananModalTitle.textContent = serviceName;
+    if(layananModalPrice) layananModalPrice.textContent = servicePrice;
+    if(layananModalDescription) layananModalDescription.textContent = serviceDescription;
+    
+    if (serviceImage && layananModalImage) {
+        layananModalImage.src = serviceImage;
+        layananModalImage.alt = serviceName;
+        layananModalImage.classList.remove('hidden');
+    } else if (layananModalImage) {
+        layananModalImage.classList.add('hidden');
+    }
+    
+    layananModal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+        // Gunakan event delegation untuk menangani klik pada tombol detail
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.service-detail-btn')) {
+                e.preventDefault();
+                const btn = e.target.closest('.service-detail-btn');
+                const serviceCard = btn.closest('.service-card');
+                openLayananModal(serviceCard);
             }
-
-            // --- Logika untuk Modal Layanan ---
-            const layananModal = document.getElementById('layananModal');
-            const layananModalTitle = document.getElementById('layananModalTitle');
-            const layananModalImage = document.getElementById('layananModalImage');
-            const layananModalImageContainer = document.getElementById('layananModalImageContainer');
-            const layananModalPrice = document.getElementById('layananModalPrice');
-            const layananModalDescription = document.getElementById('layananModalDescription');
-            const closeModalLayanan = document.querySelector('.close-modal-layanan');
-            
-            // Event listener untuk tombol detail pada setiap kartu layanan
-            const serviceDetailBtns = document.querySelectorAll('.service-detail-btn');
-            serviceDetailBtns.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const serviceCard = this.closest('.service-card');
-                    
-                    // Ambil data dari atribut data
-                    const serviceName = serviceCard.getAttribute('data-service-name');
-                    const servicePrice = serviceCard.getAttribute('data-service-price');
-                    const serviceDescription = serviceCard.getAttribute('data-service-description');
-                    const serviceImage = serviceCard.getAttribute('data-service-image');
-                    
-                    // Isi modal dengan data
-                    layananModalTitle.textContent = serviceName;
-                    layananModalPrice.textContent = servicePrice;
-                    layananModalDescription.textContent = serviceDescription;
-                    
-                    // Tampilkan gambar jika ada
-                    if (serviceImage) {
-                        layananModalImage.src = serviceImage;
-                        layananModalImage.alt = serviceName;
-                        layananModalImage.classList.remove('hidden');
-                    } else {
-                        layananModalImage.classList.add('hidden');
-                    }
-                    
-                    // Tampilkan modal
-                    layananModal.style.display = 'block';
-                    document.body.style.overflow = 'hidden';
-                });
-            });
-            
-            // Event listener untuk tombol close modal
+        });
+        
+        if (closeModalLayanan) {
             closeModalLayanan.addEventListener('click', function() {
-                layananModal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            });
-            
-            // Tutup modal saat klik di luar konten modal
-            window.addEventListener('click', function(event) {
-                if (event.target === layananModal) {
+                if(layananModal) {
                     layananModal.style.display = 'none';
                     document.body.style.overflow = 'auto';
                 }
             });
-            
-            // --- Logika untuk Modal Portofolio ---
-            const portfolioModal = document.getElementById('portfolioModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalDescription = document.getElementById('modalDescription');
-            const modalTech = document.getElementById('modalTech');
-            const closeModalPortfolio = document.querySelector('.close-modal-portfolio');
-            
-            // Event listener untuk tombol detail pada setiap kartu portofolio
-            const portfolioBtns = document.querySelectorAll('.portfolio-btn');
-            portfolioBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const title = this.getAttribute('data-title');
-                    const description = this.getAttribute('data-description');
-                    const tech = this.getAttribute('data-tech').split(', ');
-                    
-                    modalTitle.textContent = title;
-                    modalDescription.textContent = description;
-                    
-                    // Kosongkan dan isi ulang container teknologi
-                    modalTech.innerHTML = '';
-                    tech.forEach(techItem => {
-                        const techBadge = document.createElement('span');
-                        techBadge.className = 'bg-gray-700 text-white text-sm px-3 py-1 rounded-full';
-                        techBadge.textContent = techItem;
-                        modalTech.appendChild(techBadge);
-                    });
-                    
-                    portfolioModal.style.display = 'block';
-                    document.body.style.overflow = 'hidden';
-                });
-            });
-            
-            // Event listener untuk tombol close modal
+        }
+        
+        window.addEventListener('click', function(event) {
+            if (event.target === layananModal) {
+                if(layananModal) {
+                    layananModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            }
+        });
+        
+        // --- Logika untuk Modal Portofolio (Penutup) ---
+        const portfolioModal = document.getElementById('portfolioModal');
+        const closeModalPortfolio = document.querySelector('.close-modal-portfolio');
+        
+        if (closeModalPortfolio) {
             closeModalPortfolio.addEventListener('click', function() {
-                portfolioModal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            });
-            
-            // Tutup modal saat klik di luar konten modal
-            window.addEventListener('click', function(event) {
-                if (event.target === portfolioModal) {
+                if(portfolioModal) {
                     portfolioModal.style.display = 'none';
                     document.body.style.overflow = 'auto';
                 }
             });
-            
-            // --- Logika untuk Tombol WhatsApp ---
-            const whatsappBtn = document.getElementById('whatsappBtn');
-            const whatsappBtnText = document.getElementById('whatsappBtnText');
-            
-            // Event listener untuk tombol WhatsApp
-            if (whatsappBtn) {
-                whatsappBtn.addEventListener('click', function() {
-                    // Tampilkan loading
+        }
+        
+        window.addEventListener('click', function(event) {
+            if (event.target === portfolioModal) {
+                if(portfolioModal) {
+                    portfolioModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            }
+        });
+        
+        // --- Logika untuk Tombol WhatsApp ---
+        const whatsappBtn = document.getElementById('whatsappBtn');
+        if (whatsappBtn) {
+            whatsappBtn.addEventListener('click', function() {
+                const whatsappBtnText = document.getElementById('whatsappBtnText');
+                if(whatsappBtnText) {
                     whatsappBtnText.innerHTML = '<span class="loading"></span> Menghubungi...';
                     whatsappBtn.disabled = true;
                     
-                    // Ambil nomor WhatsApp dan pesan dari data kontak
                     const phoneNumber = contactData.phone.replace(/\s/g, '').replace(/-/g, '').replace('+', '');
                     const message = encodeURIComponent(contactData.whatsapp_message);
                     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
                     
-                    // Buka WhatsApp di tab baru
                     window.open(whatsappUrl, '_blank');
                     
-                    // Kembalikan tombol ke状态 normal setelah delay
                     setTimeout(() => {
                         whatsappBtnText.textContent = 'Hubungi Kami';
                         whatsappBtn.disabled = false;
                     }, 1000);
-                });
-            }
-            
-            // --- Logika untuk Form Kontak ---
-            const contactForm = document.getElementById('contactForm');
-            const submitBtn = document.getElementById('submitBtn');
-            
-            if (contactForm) {
-                contactForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    // Tampilkan loading
-                    const originalText = submitBtn.textContent;
+                }
+            });
+        } else {
+            console.error("KESALAH KRITIS: Tombol #whatsappBtn tidak ditemukan.");
+        }
+        
+        // --- Logika untuk Form Kontak dengan EmailJS ---
+        const contactForm = document.getElementById('contactForm');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        if (contactForm) {
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(contactForm);
+                const name = formData.get('name');
+                const email = formData.get('email');
+                const message = formData.get('message');
+                
+                if (!name || !email || !message) {
+                    showNotification('Error', 'Mohon lengkapi semua field yang diperlukan.', 'error');
+                    return;
+                }
+                
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    showNotification('Error', 'Mohon masukkan alamat email yang valid.', 'error');
+                    return;
+                }
+                
+                const originalText = submitBtn.textContent;
+                if(submitBtn) {
                     submitBtn.innerHTML = '<span class="loading"></span> Mengirim...';
                     submitBtn.disabled = true;
-                    
-                    // Simulasi pengiriman form (ganti dengan endpoint yang sesuai)
-                    setTimeout(() => {
-                        // Tampilkan notifikasi sukses
-                        showNotification('Berhasil', 'Pesan Anda telah terkirim. Kami akan segera menghubungi Anda.', 'success');
-                        
-                        // Reset form
-                        contactForm.reset();
-                        
-                        // Kembalikan tombol ke状态 normal
+                }
+                
+                emailjs.send('service_v697ved', 'template_5hgs37q', {
+                    from_name: name,
+                    from_email: email,
+                    message: message,
+                    to_email: 'aseprinda212008@gmail.com'
+                })
+                .then(function(response) {
+                    showNotification('Berhasil', 'Pesan Anda telah terkirim. Kami akan segera menghubungi Anda.', 'success');
+                    contactForm.reset();
+                    if(submitBtn) {
                         submitBtn.textContent = originalText;
                         submitBtn.disabled = false;
-                    }, 1500);
+                    }
+                }, function(error) {
+                    console.error('Gagal mengirim email:', error);
+                    showNotification('Error', 'Terjadi kesalahan saat mengirim pesan. Silakan coba lagi nanti.', 'error');
+                    if(submitBtn) {
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                    }
                 });
+            });
+        } else {
+            console.error("KESALAH KRITIS: Form #contactForm tidak ditemukan.");
+        }
+        
+        // --- Fungsi Notifikasi ---
+        function showNotification(title, message, type = 'success') {
+            const popup = document.getElementById('notificationPopup');
+            if (!popup) {
+                console.error("KESALAH KRITIS: Popup notifikasi #notificationPopup tidak ditemukan.");
+                return;
             }
+
+            const icon = document.getElementById('notificationIcon');
+            const titleEl = document.getElementById('notificationTitle');
+            const messageEl = document.getElementById('notificationMessage');
             
-            // --- Fungsi Notifikasi ---
-            function showNotification(title, message, type = 'success') {
-                const popup = document.getElementById('notificationPopup');
-                const icon = document.getElementById('notificationIcon');
-                const titleEl = document.getElementById('notificationTitle');
-                const messageEl = document.getElementById('notificationMessage');
-                
-                // Set konten
-                titleEl.textContent = title;
-                messageEl.textContent = message;
-                
-                // Set icon berdasarkan tipe
+            if(titleEl) titleEl.textContent = title;
+            if(messageEl) messageEl.textContent = message;
+            
+            if (icon) {
                 if (type === 'success') {
                     icon.innerHTML = '<span class="material-icons-outlined text-green-500">check_circle</span>';
                 } else if (type === 'error') {
@@ -1354,28 +1297,31 @@
                 } else if (type === 'warning') {
                     icon.innerHTML = '<span class="material-icons-outlined text-yellow-500">warning</span>';
                 }
-                
-                // Tampilkan popup
-                popup.classList.remove('translate-x-full');
-                
-                // Sembunyikan popup setelah 5 detik
-                setTimeout(() => {
-                    popup.classList.add('translate-x-full');
-                }, 5000);
             }
             
-            // Event listener untuk tombol close notifikasi
-            document.getElementById('closeNotification').addEventListener('click', function() {
-                document.getElementById('notificationPopup').classList.add('translate-x-full');
+            popup.classList.remove('translate-x-full');
+            
+            setTimeout(() => {
+                if(popup) popup.classList.add('translate-x-full');
+            }, 5000);
+        }
+        
+        const closeNotificationBtn = document.getElementById('closeNotification');
+        if (closeNotificationBtn) {
+            closeNotificationBtn.addEventListener('click', function() {
+                const popup = document.getElementById('notificationPopup');
+                if(popup) popup.classList.add('translate-x-full');
             });
+        }
+
+        // --- Logika untuk navigasi aktif berdasarkan scroll ---
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        function updateActiveNav() {
+            const scrollPosition = window.scrollY + 100;
             
-            // --- Logika untuk navigasi aktif berdasarkan scroll ---
-            const sections = document.querySelectorAll('section[id]');
-            const navLinks = document.querySelectorAll('.nav-link');
-            
-            function updateActiveNav() {
-                const scrollPosition = window.scrollY + 100;
-                
+            if(sections && navLinks) {
                 sections.forEach(section => {
                     const sectionTop = section.offsetTop;
                     const sectionHeight = section.offsetHeight;
@@ -1391,13 +1337,16 @@
                     }
                 });
             }
-            
-            // Update navigasi aktif saat scroll
+        }
+        
+        if (sections && navLinks) {
             window.addEventListener('scroll', updateActiveNav);
-            
-            // Smooth scroll untuk navigasi
             navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
+                    if (!this.getAttribute('href')) {
+                        console.error("KESALAH KRITIS: Link navigasi tidak memiliki atribut href:", this);
+                        return;
+                    }
                     e.preventDefault();
                     const targetId = this.getAttribute('href');
                     const targetSection = document.querySelector(targetId);
@@ -1408,31 +1357,261 @@
                             top: offsetTop,
                             behavior: 'smooth'
                         });
+                    } else {
+                        console.error("KESALAH KRITIS: Target section tidak ditemukan untuk href:", targetId);
                     }
                 });
             });
-            
-            // Inisialisasi navigasi aktif
             updateActiveNav();
-            
-            // --- Logika untuk Mobile Menu ---
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const mobileNav = document.getElementById('mobileNav');
-            
+        } else {
+            console.error("KESALAH KRITIS: Elemen navigasi (sections atau navLinks) tidak ditemukan.");
+        }
+        
+        // --- Logika untuk Mobile Menu ---
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileNav = document.getElementById('mobileNav');
+        
+        if (mobileMenuBtn && mobileNav) {
             mobileMenuBtn.addEventListener('click', function() {
                 this.classList.toggle('active');
                 mobileNav.classList.toggle('active');
             });
             
-            // Tutup mobile menu saat link diklik
             const mobileNavLinks = document.querySelectorAll('.mobile-nav .nav-link');
-            mobileNavLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    mobileMenuBtn.classList.remove('active');
-                    mobileNav.classList.remove('active');
+            if (mobileNavLinks) {
+                mobileNavLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenuBtn.classList.remove('active');
+                        mobileNav.classList.remove('active');
+                    });
                 });
-            });
-        });
+            }
+        } else {
+            console.error("KESALAH KRITIS: Elemen mobile menu tidak ditemukan.");
+        }
+
+        // --- MEMUAT ARTIKEL ---
+        function loadArticles() {
+            console.log("Memuat data artikel...");
+            fetch('/api/articles')
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`Network response was not ok: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data artikel yang diterima:', data);
+
+                    const articlesContainer = document.getElementById('articlesContainer');
+                    if (!articlesContainer) {
+                        console.error("KESALAH KRITIS: Container #articlesContainer tidak ditemukan! Artikel tidak akan dimuat.");
+                        return;
+                    }
+                    
+                    articlesContainer.innerHTML = '';
+
+                    if (data.success && data.data && data.data.length > 0) {
+                        const firstArticle = data.data[0];
+                        const firstArticleHtml = `
+                            <div class="article-card flex flex-col">
+                                <div class="aspect-[4/3] bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl mb-4 overflow-hidden">
+                                    ${firstArticle.image ? 
+                                        `<img src="/storage/${firstArticle.image}" alt="${firstArticle.title}" class="w-full h-full object-cover">` : 
+                                        `<div class="flex items-center justify-center h-full text-white"><span class="material-icons-outlined text-4xl">article</span></div>`
+                                    }
+                                </div>
+                                <p class="text-sm text-gray-500 mb-1">${new Date(firstArticle.updated_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                <h3 class="text-xl font-bold text-black mb-2">${firstArticle.title}</h3>
+                                <p class="text-sm text-gray-700 leading-relaxed">${firstArticle.excerpt || firstArticle.content.substring(0, 200) + '...'}</p>
+                            </div>
+                        `;
+                        articlesContainer.innerHTML = firstArticleHtml;
+
+                        if (data.data.length > 1) {
+                            let otherArticlesHtml = '<div class="space-y-6">';
+                            for (let i = 1; i < data.data.length; i++) {
+                                const article = data.data[i];
+                                otherArticlesHtml += `
+                                    <div class="article-card flex items-center gap-6">
+                                        <div class="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl flex-shrink-0 overflow-hidden">
+                                            ${article.image ? 
+                                                `<img src="/storage/${article.image}" alt="${article.title}" class="w-full h-full object-cover">` : 
+                                                `<div class="flex items-center justify-center h-full text-white"><span class="material-icons-outlined text-2xl">article</span></div>`
+                                            }
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-black mb-2">${article.title}</h4>
+                                            <p class="text-sm text-gray-700 leading-relaxed">${article.excerpt || article.content.substring(0, 100) + '...'}</p>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                            otherArticlesHtml += '</div>';
+                            articlesContainer.innerHTML += otherArticlesHtml;
+                        }
+                    } else {
+                        articlesContainer.innerHTML = `
+                            <div class="col-span-2 text-center py-12">
+                                <span class="material-icons-outlined text-6xl text-gray-300">article</span>
+                                <h3 class="text-xl font-semibold text-gray-500 mt-4">Belum Ada Artikel</h3>
+                                <p class="text-gray-400 mt-2">Artikel akan segera tersedia. Silakan kunjungi kembali nanti.</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching articles:', error);
+                    const articlesContainer = document.getElementById('articlesContainer');
+                    if (articlesContainer) {
+                        articlesContainer.innerHTML = `
+                            <div class="col-span-2 text-center py-12">
+                                <span class="material-icons-outlined text-6xl text-red-300">error_outline</span>
+                                <h3 class="text-xl font-semibold text-red-500 mt-4">Gagal Memuat Artikel</h3>
+                                <p class="text-red-400 mt-2">Terjadi kesalahan, silakan refresh halaman.</p>
+                            </div>
+                        `;
+                    }
+                });
+        }
+
+        // --- FUNGSI UNTUK MEMUAT PORTOFOLIO (VERSI DIPERBAIKI) ---
+        function loadPortfolios() {
+            console.log("Memuat data portofolio...");
+            fetch('/api/portfolios')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Network response was not ok: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data portofolio yang diterima:', data);
+
+                    const portfolioContainer = document.querySelector('.portfolio-container > div');
+                    if (!portfolioContainer) {
+                        console.error("Container portofolio tidak ditemukan!");
+                        return;
+                    }
+                    
+                    portfolioContainer.innerHTML = '';
+
+                    if (data.success && data.data && data.data.length > 0) {
+                        data.data.forEach(portfolio => {
+                            const techArray = portfolio.technologies_used ? portfolio.technologies_used.split(',').map(tech => tech.trim()) : [];
+                            const techString = techArray.join(', ');
+                            const imageUrl = portfolio.image ? `/storage/${portfolio.image}` : null;
+                            
+                            const portfolioHtml = `
+                                <div class="portfolio-card bg-card-light p-6 rounded-2xl flex flex-col w-72 shadow-sm border border-border-light">
+                                    <div class="relative flex-grow aspect-[4/5] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4 overflow-hidden">
+                                        ${portfolio.image ? 
+                                            `<img src="/storage/${portfolio.image}" alt="${portfolio.title}" class="w-full h-full object-cover">` : 
+                                            `<div class="flex items-center justify-center h-full text-white"><span class="material-icons-outlined text-4xl">work</span></div>`
+                                        }
+                                        <button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center text-black hover:bg-white transition-colors">
+                                            <span class="material-icons-outlined text-base">arrow_forward</span>
+                                        </button>
+                                    </div>
+                                    <h3 class="font-bold text-white text-lg mb-4">${portfolio.title}</h3>
+                                    <button class="w-full btn-primary bg-black text-white text-sm font-medium py-2 px-4 rounded-lg flex justify-between items-center portfolio-btn" 
+                                            data-title="${portfolio.title}" 
+                                            data-description="${portfolio.description}" 
+                                            data-tech="${techString}"
+                                            data-image="${imageUrl}">
+                                        <span>Lihat Detail</span>
+                                        <span class="material-icons-outlined text-base">chevron_right</span>
+                                    </button>
+                                </div>
+                            `;
+                            portfolioContainer.innerHTML += portfolioHtml;
+                        });
+                        
+                        // Setelah portofolio dimuat, pasang event listener untuk tombol detail
+                        attachPortfolioEventListeners();
+                    } else {
+                        portfolioContainer.innerHTML = `
+                            <div class="text-center py-12" style="width: 100%;">
+                                <span class="material-icons-outlined text-6xl text-gray-300">work</span>
+                                <h3 class="text-xl font-semibold text-gray-500 mt-4">Belum Ada Portofolio</h3>
+                                <p class="text-gray-400 mt-2">Portofolio akan segera tersedia.</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching portfolios:', error);
+                    const portfolioContainer = document.querySelector('.portfolio-container > div');
+                    if (portfolioContainer) {
+                        portfolioContainer.innerHTML = `
+                            <div class="text-center py-12" style="width: 100%;">
+                                <span class="material-icons-outlined text-6xl text-red-300">error_outline</span>
+                                <h3 class="text-xl font-semibold text-red-500 mt-4">Gagal Memuat Portofolio</h3>
+                                <p class="text-red-400 mt-2">Terjadi kesalahan, silakan refresh halaman.</p>
+                            </div>
+                        `;
+                    }
+                });
+        }
+
+        // --- FUNGSI UNTUK MENAMBAHKAN EVENT LISTENER (VERSI DIPERBAIKI) ---
+        function attachPortfolioEventListeners() {
+            const portfolioBtns = document.querySelectorAll('.portfolio-btn');
+            if (portfolioBtns) {
+                portfolioBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const title = this.getAttribute('data-title');
+                        const description = this.getAttribute('data-description');
+                        const tech = this.getAttribute('data-tech').split(', ');
+                        const imageUrl = this.getAttribute('data-image');
+                        
+                        const portfolioModal = document.getElementById('portfolioModal');
+                        if(portfolioModal) {
+                            const modalTitle = document.getElementById('modalTitle');
+                            const modalDescription = document.getElementById('modalDescription');
+                            const modalTech = document.getElementById('modalTech');
+                            const modalImage = document.getElementById('modalImage');
+                            const modalImageContainer = document.getElementById('modalImageContainer');
+
+                            if(modalTitle) modalTitle.textContent = title;
+                            if(modalDescription) modalDescription.textContent = description;
+                            
+                            if(modalTech) {
+                                modalTech.innerHTML = '';
+                                tech.forEach(techItem => {
+                                    const techBadge = document.createElement('span');
+                                    techBadge.className = 'bg-gray-700 text-white text-sm px-3 py-1 rounded-full';
+                                    techBadge.textContent = techItem;
+                                    modalTech.appendChild(techBadge);
+                                });
+                            }
+
+                            // --- PERBAIKAN: LOGIKA UNTUK MENAMPILKAN GAMBAR DI MODAL ---
+                            if (modalImage && modalImageContainer) {
+                                if (imageUrl) {
+                                    modalImage.src = imageUrl;
+                                    modalImage.alt = title;
+                                    modalImage.classList.remove('hidden');
+                                    modalImageContainer.classList.remove('bg-gradient-to-br', 'from-gray-800', 'to-gray-900');
+                                } else {
+                                    modalImage.classList.add('hidden');
+                                    modalImageContainer.classList.add('bg-gradient-to-br', 'from-gray-800', 'to-gray-900');
+                                }
+                            }
+                            
+                            portfolioModal.style.display = 'block';
+                            document.body.style.overflow = 'hidden';
+                        }
+                    });
+                });
+            }
+        }
+
+        // --- PANGGIL FUNGSI UNTUK MEMUAT DATA ---
+        loadArticles();
+        loadPortfolios();
+    }); // <-- AKHIR DARI document.addEventListener
     </script>
 </body>
 

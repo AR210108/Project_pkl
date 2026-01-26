@@ -52,7 +52,16 @@ Route::get('/users/data', [UserController::class, 'data'])
 Route::get('/', [LandingPageController::class, 'index'])->name('home');
 
 // API endpoint untuk kontak (public)
-Route::get('/api/contact', [LandingPageController::class, 'getContactInfo'])->name('api.contact');
+Route::get('/api/contact', [SettingController::class, 'getContactData'])->name('api.contact');
+
+// API endpoint untuk tentang (public)
+Route::get('/api/about', [SettingController::class, 'getAboutData'])->name('api.about');
+
+// API endpoint untuk artikel (public)
+Route::get('/api/articles', [SettingController::class, 'getArticlesData'])->name('api.articles');
+
+// --- TAMBAHKAN ROUTE API PORTOFOLIO (PUBLIC) ---
+Route::get('/api/portfolios', [SettingController::class, 'getPortfoliosData'])->name('api.portfolios');
 
 Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login-process', [LoginController::class, 'login'])->name('login.process');
@@ -167,7 +176,7 @@ Route::middleware(['auth', 'role:admin'])
             Route::put('/{id}', [SuratKerjasamaController::class, 'update'])->name('update');
             Route::delete('/{id}', [SuratKerjasamaController::class, 'destroy'])->name('destroy');
         });
-            
+
         Route::get('/data_project', [DataProjectController::class, 'admin'])->name('data_project');
         Route::post('/project', [DataProjectController::class, 'store'])->name('project.store');
         Route::put('/project/{id}', [DataProjectController::class, 'update'])->name('project.update');
@@ -204,28 +213,78 @@ Route::middleware(['auth', 'role:admin'])
         Route::prefix('settings')->name('settings.')->group(function () {
             // Halaman utama pengaturan
             Route::get('/', [SettingController::class, 'index'])->name('index');
-            
+
             // Pengaturan Profil
             Route::post('/profile', [SettingController::class, 'updateProfile'])->name('profile.update');
-            
+
             // Pengaturan Akun
             Route::post('/account', [SettingController::class, 'updateAccount'])->name('account.update');
-            
+
             // Pengaturan Notifikasi
             Route::post('/notifications', [SettingController::class, 'updateNotifications'])->name('notifications.update');
-            
+
             // Pengaturan Kata Sandi
             Route::post('/password', [SettingController::class, 'updatePassword'])->name('password.update');
-            
+
             // Keluar dari semua perangkat
             Route::post('/logout-all', [SettingController::class, 'logoutAll'])->name('logout.all');
-            
+
             // Pengaturan Kontak (untuk landing page)
             Route::get('/contact', [SettingController::class, 'contact'])->name('contact');
             Route::post('/contact', [SettingController::class, 'updateContact'])->name('contact.update');
-            
+
             // API untuk mendapatkan data kontak
             Route::get('/contact-data', [SettingController::class, 'getContactData'])->name('contact.data');
+
+            // Pengaturan Tentang (untuk landing page)
+            Route::get('/about', [SettingController::class, 'about'])->name('about');
+            Route::post('/about', [SettingController::class, 'updateAbout'])->name('about.update');
+
+            // API untuk mendapatkan data tentang
+            Route::get('/about-data', [SettingController::class, 'getAboutData'])->name('about.data');
+
+            // ==========================================================
+            // ROUTE UNTUK PENGELOLAAN ARTIKEL
+            // ==========================================================
+            // Menampilkan halaman pengaturan artikel
+            Route::get('/articles', [SettingController::class, 'articles'])->name('articles');
+
+            // >>> TAMBAHKAN ROUTE INI UNTUK MENGAMBIL DATA SATU ARTIKEL <<<
+            Route::get('/articles/{id}', [SettingController::class, 'getArticle'])->name('articles.get');
+
+            // Menyimpan artikel baru
+            Route::post('/articles', [SettingController::class, 'storeArticle'])->name('articles.store');
+
+            // Mengupdate artikel
+            Route::put('/articles/{id}', [SettingController::class, 'updateArticle'])->name('articles.update');
+
+            // Menghapus artikel
+            Route::delete('/articles/{id}', [SettingController::class, 'deleteArticle'])->name('articles.delete');
+
+            // Mendapatkan data artikel untuk API (internal)
+            Route::get('/articles-data', [SettingController::class, 'getArticlesData'])->name('articles.data');
+
+            // ==========================================================
+            // --- TAMBAHKAN ROUTE UNTUK PENGELOLAAN PORTOFOLIO ---
+            // ==========================================================
+            // Menampilkan halaman pengaturan portofolio
+            Route::get('/portfolios', [SettingController::class, 'portfolios'])->name('portfolios');
+
+            // Mendapatkan data satu portofolio untuk diedit
+            Route::get('/portfolios/{id}', [SettingController::class, 'getPortfolio'])->name('portfolios.get');
+
+            // Menyimpan portofolio baru
+            Route::post('/portfolios', [SettingController::class, 'storePortfolio'])->name('portfolios.store');
+
+            // Mengupdate portofolio
+            Route::put('/portfolios/{id}', [SettingController::class, 'updatePortfolio'])->name('portfolios.update');
+
+            // Menghapus portofolio
+            Route::delete('/portfolios/{id}', [SettingController::class, 'deletePortfolio'])->name('portfolios.delete');
+
+            // Mendapatkan data portofolio untuk API (internal)
+            Route::get('/portfolios-data', [SettingController::class, 'getPortfoliosData'])->name('portfolios.data');
+
         });
 
         // Route untuk sidebar: /admin/catatan_rapat → redirect ke global route
@@ -294,7 +353,7 @@ Route::middleware(['auth', 'role:karyawan'])
             // Dashboard data - FIXED ROUTE
             Route::get('/dashboard', [KaryawanController::class, 'getDashboardData'])->name('dashboard');
             Route::get('/dashboard-data', [KaryawanController::class, 'getDashboardData'])->name('dashboard.data'); // Alias untuk kompatibilitas
-
+    
             // Absensi - Status Hari Ini
             Route::get('/today-status', [KaryawanController::class, 'getTodayStatus'])->name('today.status');
 
@@ -485,8 +544,10 @@ Route::middleware(['auth', 'role:manager_divisi'])
 
         Route::get('/data_project', [DataProjectController::class, 'managerDivisi'])
             ->name('data_project');
-        Route::put('/data_project/{id}', [DataProjectController::class, 'update']
-            )->name('data_project.update');
+        Route::put(
+            '/data_project/{id}',
+            [DataProjectController::class, 'update']
+        )->name('data_project.update');
         // ROUTE GROUP UNTUK TASKS
         Route::prefix('tasks')->name('tasks.')->group(function () {
             Route::post('/', [ManagerDivisiTaskController::class, 'store'])

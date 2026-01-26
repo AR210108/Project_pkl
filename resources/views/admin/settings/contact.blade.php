@@ -39,42 +39,42 @@
         body {
             font-family: 'Poppins', sans-serif;
         }
-        
+
         .material-icons-outlined {
             font-size: 24px;
             vertical-align: middle;
         }
-        
+
         .btn-primary {
             background-color: #3b82f6;
             color: white;
             transition: all 0.2s ease;
         }
-        
+
         .btn-primary:hover {
             background-color: #2563eb;
         }
-        
+
         .btn-secondary {
             background-color: #f1f5f9;
             color: #64748b;
             transition: all 0.2s ease;
         }
-        
+
         .btn-secondary:hover {
             background-color: #e2e8f0;
         }
-        
+
         .form-input {
             border: 1px solid #e2e8f0;
             transition: all 0.2s ease;
         }
-        
+
         .form-input:focus {
             border-color: #3b82f6;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
-        
+
         .panel {
             background: white;
             border-radius: 0.75rem;
@@ -82,7 +82,7 @@
             overflow: hidden;
             border: 1px solid #e2e8f0;
         }
-        
+
         .panel-header {
             background: #f8fafc;
             padding: 1rem 1.5rem;
@@ -91,7 +91,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .panel-title {
             font-size: 1.125rem;
             font-weight: 600;
@@ -101,11 +101,11 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .panel-body {
             padding: 1.5rem;
         }
-        
+
         .minimal-popup {
             position: fixed;
             top: 20px;
@@ -123,19 +123,19 @@
             max-width: 350px;
             border-left: 4px solid #10b981;
         }
-        
+
         .minimal-popup.show {
             transform: translateX(0);
         }
-        
+
         .minimal-popup.error {
             border-left-color: #ef4444;
         }
-        
+
         .minimal-popup.warning {
             border-left-color: #f59e0b;
         }
-        
+
         .minimal-popup-icon {
             flex-shrink: 0;
             width: 24px;
@@ -145,18 +145,18 @@
             justify-content: center;
             border-radius: 50%;
         }
-        
+
         .minimal-popup.success .minimal-popup-icon {
             background-color: rgba(16, 185, 129, 0.1);
             color: #10b981;
         }
-        
+
         .tab-container {
             display: flex;
             border-bottom: 1px solid #e2e8f0;
             margin-bottom: 1.5rem;
         }
-        
+
         .tab-button {
             padding: 0.75rem 1.5rem;
             font-weight: 500;
@@ -167,15 +167,15 @@
             position: relative;
             transition: all 0.2s ease;
         }
-        
+
         .tab-button:hover {
             color: #3b82f6;
         }
-        
+
         .tab-button.active {
             color: #3b82f6;
         }
-        
+
         .tab-button.active::after {
             content: '';
             position: absolute;
@@ -185,33 +185,34 @@
             height: 2px;
             background-color: #3b82f6;
         }
-        
+
         .tab-content {
             display: none;
         }
-        
+
         .tab-content.active {
             display: block;
         }
-        
-        .contact-preview {
+
+        .contact-preview,
+        .about-preview {
             background-color: #f8fafc;
             border-radius: 0.75rem;
             padding: 1.5rem;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
             border: 1px solid #e2e8f0;
         }
-        
+
         .contact-item {
             display: flex;
             align-items: flex-start;
             margin-bottom: 1.5rem;
         }
-        
+
         .contact-item:last-child {
             margin-bottom: 0;
         }
-        
+
         .contact-icon {
             background-color: #0f172a;
             color: white;
@@ -224,7 +225,7 @@
             margin-right: 1rem;
             flex-shrink: 0;
         }
-        
+
         .whatsapp-btn {
             display: inline-flex;
             align-items: center;
@@ -241,13 +242,13 @@
             border: none;
             outline: none;
         }
-        
+
         .whatsapp-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
             background-color: #f8fafc;
         }
-        
+
         .whatsapp-btn .bx {
             margin-right: 8px;
             font-size: 20px;
@@ -268,9 +269,10 @@
                 <!-- Tab Navigation -->
                 <div class="tab-container">
                     <button class="tab-button active" data-tab="contact">Kontak</button>
-                    <button class="tab-button" data-tab="preview">Pratinjau</button>
+                    <button class="tab-button" data-tab="about">Tentang</button>
+                    <button class="tab-button" data-tab="articles">Artikel</button>
+                    <button class="tab-button" data-tab="portfolios">Portofolio</button>
                 </div>
-
                 <!-- Tab Content -->
                 <div class="tab-content active" id="contact-tab">
                     <div class="panel">
@@ -292,7 +294,8 @@
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">No WhatsApp/Telepon</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">No
+                                            WhatsApp/Telepon</label>
                                         <input type="tel" name="phone" id="phoneInput"
                                             class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                                             value="{{ $contactData['phone'] }}" required>
@@ -306,7 +309,8 @@
                                     </div>
 
                                     <div class="md:col-span-2">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Pesan Default WhatsApp</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Pesan Default
+                                            WhatsApp</label>
                                         <textarea name="whatsapp_message" id="whatsappMessageInput"
                                             class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                                             rows="2" required>{{ $contactData['whatsapp_message'] }}</textarea>
@@ -316,63 +320,95 @@
                                 <div class="flex justify-end gap-2 mt-6">
                                     <button type="button" id="cancelContactBtn"
                                         class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan Perubahan</button>
+                                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan
+                                        Perubahan</button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
 
-                <div class="tab-content" id="preview-tab">
+                <div class="tab-content" id="about-tab">
                     <div class="panel">
                         <div class="panel-header">
                             <h3 class="panel-title">
-                                <span class="material-icons-outlined text-primary">preview</span>
-                                Pratinjau Halaman Kontak
+                                <span class="material-icons-outlined text-primary">info</span>
+                                Informasi Tentang
                             </h3>
                         </div>
                         <div class="panel-body">
-                            <div class="contact-preview">
-                                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                                    <span class="material-icons-outlined text-primary">contact_phone</span>
-                                    Hubungi Kami
-                                </h3>
-                                <div class="contact-item">
-                                    <div class="contact-icon">
-                                        <span class="material-icons-outlined">location_on</span>
+                            <form id="aboutForm" class="space-y-4">
+                                @csrf
+                                <div class="grid grid-cols-1 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Judul</label>
+                                        <input type="text" name="title" id="titleInput"
+                                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                            value="{{ $aboutData['title'] }}" required>
                                     </div>
-                                    <div class="contact-text">
-                                        <div class="font-semibold text-gray-900">Lokasi</div>
-                                        <div class="text-gray-600" id="previewAddress">{{ $contactData['address'] }}</div>
-                                    </div>
-                                </div>
-                                <div class="contact-item">
-                                    <div class="contact-icon">
-                                        <span class="material-icons-outlined">email</span>
-                                    </div>
-                                    <div class="contact-text">
-                                        <div class="font-semibold text-gray-900">Email</div>
-                                        <div class="text-gray-600" id="previewEmail">{{ $contactData['email'] }}</div>
-                                    </div>
-                                </div>
-                                <div class="contact-item">
-                                    <div class="contact-icon">
-                                        <span class="material-icons-outlined">phone</span>
-                                    </div>
-                                    <div class="contact-text">
-                                        <div class="font-semibold text-gray-900">No WA/Telepon</div>
-                                        <div class="text-gray-600" id="previewPhone">{{ $contactData['phone'] }}</div>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="mt-6 text-center">
-                                <p class="text-sm text-gray-500 mb-4">Pratinjau tombol WhatsApp yang akan muncul di halaman landing page:</p>
-                                <button id="previewWhatsappBtn" class="whatsapp-btn mx-auto">
-                                    <i class='bx bxl-whatsapp'></i>
-                                    Hubungi Kami
-                                </button>
-                            </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                                        <textarea name="description" id="descriptionInput"
+                                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                            rows="5" required>{{ $aboutData['description'] }}</textarea>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end gap-2 mt-6">
+                                    <button type="button" id="cancelAboutBtn"
+                                        class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan
+                                        Perubahan</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="articles-tab">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">
+                                <span class="material-icons-outlined text-primary">article</span>
+                                Pengaturan Artikel
+                            </h3>
+                            <a href="{{ route('admin.settings.articles') }}"
+                                class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2">
+                                <span class="material-icons-outlined text-sm">settings</span>
+                                Kelola Artikel
+                            </a>
+                        </div>
+                        <div class="panel-body">
+                            <p class="text-gray-600 mb-4">Kelola artikel yang akan ditampilkan di halaman landing page.
+                                Anda dapat menambah, mengedit, atau menghapus artikel.</p>
+                            <p class="text-gray-600">Klik tombol "Kelola Artikel" untuk mengatur artikel secara lengkap.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tambahkan konten tab baru -->
+                <div class="tab-content" id="portfolios-tab">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">
+                                <span class="material-icons-outlined text-primary">work</span>
+                                Pengaturan Portofolio
+                            </h3>
+                            <a href="{{ route('admin.settings.portfolios') }}"
+                                class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2">
+                                <span class="material-icons-outlined text-sm">settings</span>
+                                Kelola Portofolio
+                            </a>
+                        </div>
+                        <div class="panel-body">
+                            <p class="text-gray-600 mb-4">Kelola portofolio yang akan ditampilkan di halaman landing
+                                page.
+                                Anda dapat menambah, mengedit, atau menghapus portofolio.</p>
+                            <p class="text-gray-600">Klik tombol "Kelola Portofolio" untuk mengatur portofolio secara
+                                lengkap.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -398,118 +434,264 @@
     </div>
 
     <script>
-        // Minimalist Popup
-        function showMinimalPopup(title, message, type = 'success') {
-            const popup = document.getElementById('minimalPopup');
-            const popupTitle = popup.querySelector('.minimal-popup-title');
-            const popupMessage = popup.querySelector('.minimal-popup-message');
-            const popupIcon = popup.querySelector('.minimal-popup-icon span');
+        document.addEventListener('DOMContentLoaded', function () {
+            // Minimalist Popup
+            function showMinimalPopup(title, message, type = 'success') {
+                const popup = document.getElementById('minimalPopup');
+                const popupTitle = popup.querySelector('.minimal-popup-title');
+                const popupMessage = popup.querySelector('.minimal-popup-message');
+                const popupIcon = popup.querySelector('.minimal-popup-icon span');
 
-            popupTitle.textContent = title;
-            popupMessage.textContent = message;
-            popup.className = 'minimal-popup show ' + type;
+                popupTitle.textContent = title;
+                popupMessage.textContent = message;
+                popup.className = 'minimal-popup show ' + type;
 
-            if (type === 'success') {
-                popupIcon.textContent = 'check';
-            } else if (type === 'error') {
-                popupIcon.textContent = 'error';
-            } else if (type === 'warning') {
-                popupIcon.textContent = 'warning';
+                if (type === 'success') {
+                    popupIcon.textContent = 'check';
+                } else if (type === 'error') {
+                    popupIcon.textContent = 'error';
+                } else if (type === 'warning') {
+                    popupIcon.textContent = 'warning';
+                }
+
+                setTimeout(() => {
+                    popup.classList.remove('show');
+                }, 3000);
             }
 
-            setTimeout(() => {
-                popup.classList.remove('show');
-            }, 3000);
-        }
-
-        // Close popup
-        document.querySelector('.minimal-popup-close').addEventListener('click', function() {
-            document.getElementById('minimalPopup').classList.remove('show');
-        });
-
-        // Tab Navigation
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.addEventListener('click', function() {
-                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-                this.classList.add('active');
-                const tabId = this.getAttribute('data-tab');
-                document.getElementById(tabId + '-tab').classList.add('active');
+            // Close popup
+            document.querySelector('.minimal-popup-close').addEventListener('click', function () {
+                document.getElementById('minimalPopup').classList.remove('show');
             });
-        });
 
-        // Update preview when form values change
-        document.getElementById('emailInput').addEventListener('input', function() {
-            document.getElementById('previewEmail').textContent = this.value;
-        });
+            // Tab Navigation
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function () {
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-        document.getElementById('phoneInput').addEventListener('input', function() {
-            document.getElementById('previewPhone').textContent = this.value;
-        });
-
-        document.getElementById('addressInput').addEventListener('input', function() {
-            document.getElementById('previewAddress').textContent = this.value;
-        });
-
-        // Contact Form
-        document.getElementById('contactForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Menyimpan...';
-            submitBtn.disabled = true;
-
-            const formData = new FormData(this);
-
-            try {
-                const response = await fetch("/admin/settings/contact", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
-                        "Accept": "application/json"
-                    },
-                    body: formData
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId + '-tab').classList.add('active');
                 });
+            });
 
-                const res = await response.json();
+            // Contact Form
+            document.getElementById('contactForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
 
-                if (!response.ok) {
-                    if (response.status === 422 && res.errors) {
-                        const message = Object.values(res.errors)[0][0];
-                        showMinimalPopup('Validasi Gagal', message, 'warning');
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Menyimpan...';
+                submitBtn.disabled = true;
+
+                const formData = new FormData(this);
+
+                try {
+                    const response = await fetch("/admin/settings/contact", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+                            "Accept": "application/json"
+                        },
+                        body: formData
+                    });
+
+                    const res = await response.json();
+
+                    if (!response.ok) {
+                        if (response.status === 422 && res.errors) {
+                            const message = Object.values(res.errors)[0][0];
+                            showMinimalPopup('Validasi Gagal', message, 'warning');
+                            return;
+                        }
+
+                        showMinimalPopup('Error', res.message || 'Terjadi kesalahan', 'error');
                         return;
                     }
 
-                    showMinimalPopup('Error', res.message || 'Terjadi kesalahan', 'error');
-                    return;
+                    showMinimalPopup('Berhasil', res.message, 'success');
+                } catch (error) {
+                    console.error(error);
+                    showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
+                } finally {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
                 }
+            });
 
-                showMinimalPopup('Berhasil', res.message, 'success');
-            } catch (error) {
-                console.error(error);
-                showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
-            } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
+            // About Form
+            document.getElementById('aboutForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Menyimpan...';
+                submitBtn.disabled = true;
+
+                const formData = new FormData(this);
+
+                try {
+                    const response = await fetch("/admin/settings/about", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+                            "Accept": "application/json"
+                        },
+                        body: formData
+                    });
+
+                    const res = await response.json();
+
+                    if (!response.ok) {
+                        if (response.status === 422 && res.errors) {
+                            const message = Object.values(res.errors)[0][0];
+                            showMinimalPopup('Validasi Gagal', message, 'warning');
+                            return;
+                        }
+
+                        showMinimalPopup('Error', res.message || 'Terjadi kesalahan', 'error');
+                        return;
+                    }
+
+                    showMinimalPopup('Berhasil', res.message, 'success');
+                } catch (error) {
+                    console.error(error);
+                    showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
+                } finally {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
+
+            // Cancel buttons
+            document.getElementById('cancelContactBtn').addEventListener('click', function () {
+                location.reload();
+            });
+
+            document.getElementById('cancelAboutBtn').addEventListener('click', function () {
+                location.reload();
+            });
+        });
+        // Tambahkan fungsi untuk memuat portofolio
+        function loadPortfolios() {
+            console.log("Memuat data portofolio...");
+            fetch('/api/portfolios')
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`Network response was not ok: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data portofolio yang diterima:', data);
+
+                    const portfolioContainer = document.querySelector('.portfolio-container > div');
+                    if (!portfolioContainer) {
+                        console.error("KESALAH KRITIS: Container portofolio tidak ditemukan! Portofolio tidak akan dimuat.");
+                        return;
+                    }
+
+                    portfolioContainer.innerHTML = '';
+
+                    if (data.success && data.data && data.data.length > 0) {
+                        data.data.forEach(portfolio => {
+                            const techArray = portfolio.technologies_used ? portfolio.technologies_used.split(',').map(tech => tech.trim()) : [];
+                            const techString = techArray.join(', ');
+
+                            const portfolioHtml = `
+                        <div class="portfolio-card bg-card-light p-6 rounded-2xl flex flex-col w-72 shadow-sm border border-border-light">
+                            <div class="relative flex-grow aspect-[4/5] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4 overflow-hidden">
+                                ${portfolio.image ?
+                                    `<img src="/storage/${portfolio.image}" alt="${portfolio.title}" class="w-full h-full object-cover">` :
+                                    `<div class="flex items-center justify-center h-full text-white"><span class="material-icons-outlined text-4xl">work</span></div>`
+                                }
+                                <button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center text-black hover:bg-white transition-colors">
+                                    <span class="material-icons-outlined text-base">arrow_forward</span>
+                                </button>
+                            </div>
+                            <h3 class="font-bold text-white text-lg mb-4">${portfolio.title}</h3>
+                            <button class="w-full btn-primary bg-black text-white text-sm font-medium py-2 px-4 rounded-lg flex justify-between items-center portfolio-btn" data-title="${portfolio.title}" data-description="${portfolio.description}" data-tech="${techString}">
+                                <span>Lihat Detail</span>
+                                <span class="material-icons-outlined text-base">chevron_right</span>
+                            </button>
+                        </div>
+                    `;
+                            portfolioContainer.innerHTML += portfolioHtml;
+                        });
+
+                        // Re-attach event listeners to new portfolio buttons
+                        attachPortfolioEventListeners();
+                    } else {
+                        portfolioContainer.innerHTML = `
+                    <div class="col-span-2 text-center py-12">
+                        <span class="material-icons-outlined text-6xl text-gray-300">work</span>
+                        <h3 class="text-xl font-semibold text-gray-500 mt-4">Belum Ada Portofolio</h3>
+                        <p class="text-gray-400 mt-2">Portofolio akan segera tersedia. Silakan kunjungi kembali nanti.</p>
+                    </div>
+                `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching portfolios:', error);
+                    const portfolioContainer = document.querySelector('.portfolio-container > div');
+                    if (portfolioContainer) {
+                        portfolioContainer.innerHTML = `
+                    <div class="col-span-2 text-center py-12">
+                        <span class="material-icons-outlined text-6xl text-red-300">error_outline</span>
+                        <h3 class="text-xl font-semibold text-red-500 mt-4">Gagal Memuat Portofolio</h3>
+                        <p class="text-red-400 mt-2">Terjadi kesalahan, silakan refresh halaman.</p>
+                    </div>
+                `;
+                    }
+                });
+        }
+
+        // Fungsi untuk menambahkan event listener ke tombol portofolio
+        function attachPortfolioEventListeners() {
+            const portfolioBtns = document.querySelectorAll('.portfolio-btn');
+            if (portfolioBtns) {
+                portfolioBtns.forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const title = this.getAttribute('data-title');
+                        const description = this.getAttribute('data-description');
+                        const tech = this.getAttribute('data-tech').split(', ');
+
+                        if (portfolioModal) {
+                            const modalTitle = document.getElementById('modalTitle');
+                            const modalDescription = document.getElementById('modalDescription');
+                            const modalTech = document.getElementById('modalTech');
+
+                            if (modalTitle) modalTitle.textContent = title;
+                            if (modalDescription) modalDescription.textContent = description;
+
+                            if (modalTech) {
+                                modalTech.innerHTML = '';
+                                tech.forEach(techItem => {
+                                    const techBadge = document.createElement('span');
+                                    techBadge.className = 'bg-gray-700 text-white text-sm px-3 py-1 rounded-full';
+                                    techBadge.textContent = techItem;
+                                    modalTech.appendChild(techBadge);
+                                });
+                            }
+
+                            portfolioModal.style.display = 'block';
+                            document.body.style.overflow = 'hidden';
+                        } else {
+                            console.error("KESALAH KRITIS: Modal portofolio tidak ditemukan.");
+                        }
+                    });
+                });
             }
-        });
+        }
 
-        // WhatsApp Button in Preview
-        document.getElementById('previewWhatsappBtn').addEventListener('click', function() {
-            const phoneNumber = document.getElementById('phoneInput').value.replace(/\s/g, '').replace(/-/g, '').replace('+', '');
-            const message = document.getElementById('whatsappMessageInput').value;
-            
-            const encodedMessage = encodeURIComponent(message);
-            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-            
-            window.open(whatsappUrl, '_blank');
-        });
+        // Panggil fungsi untuk memuat portofolio di dalam event listener DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function () {
+            // ... kode yang sudah ada ...
 
-        // Cancel button
-        document.getElementById('cancelContactBtn').addEventListener('click', function() {
-            location.reload();
+            // Panggil fungsi untuk memuat portofolio
+            loadPortfolios();
         });
     </script>
 </body>

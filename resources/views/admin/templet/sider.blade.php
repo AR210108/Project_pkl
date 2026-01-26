@@ -320,11 +320,11 @@
                 <span class="sidebar-text">Pengumuman</span>
             </a>
 
-            <!-- Menu Pengaturan Kontak (TAMBAHAN) -->
+            <!-- Menu Pengaturan Kontak dan Tentang -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 href="/admin/settings/contact" data-page="settings_contact">
-                <span class="material-icons sidebar-icon">contact_phone</span>
-                <span class="sidebar-text">Pengaturan Kontak</span>
+                <span class="material-icons sidebar-icon">settings</span>
+                <span class="sidebar-text">Pengaturan Konten</span>
             </a>
         </nav>
 
@@ -419,12 +419,9 @@
                 ? 'expand_more'
                 : 'expand_less';
         }
-
-        // Fungsi untuk menangani submit form logout
-        document.addEventListener('DOMContentLoaded', function() {
             const logoutForm = document.querySelector('form[action*="logout"]');
             if (logoutForm) {
-                logoutForm.addEventListener('submit', function(e) {
+                logoutForm.addEventListener('submit', function (e) {
                     e.preventDefault();
                     // Kirim form logout menggunakan fetch
                     fetch(this.action, {
@@ -434,20 +431,20 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         }
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Redirect ke halaman login
-                            window.location.href = '/login';
-                        } else {
-                            // Tampilkan pesan error
-                            alert('Logout gagal. Silakan coba lagi.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Terjadi kesalahan. Silakan coba lagi.');
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Redirect ke halaman login
+                                window.location.href = '/login';
+                            } else {
+                                // Tampilkan pesan error
+                                alert('Logout gagal. Silakan coba lagi.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Terjadi kesalahan. Silakan coba lagi.');
+                        });
                 });
             }
         });
