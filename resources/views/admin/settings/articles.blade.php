@@ -204,6 +204,7 @@
             padding: 0 1rem 1rem;
         }
 
+        /* Modal styles - Modified for centering */
         .modal {
             display: none;
             position: fixed;
@@ -214,16 +215,28 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             overflow-y: auto;
+            /* Added for centering */
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .modal-content {
             background-color: white;
-            margin: 5% auto;
+            margin: auto; /* Changed from 5% auto to auto for perfect centering */
             padding: 0;
             border-radius: 0.75rem;
             width: 90%;
             max-width: 800px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            /* Added for vertical centering */
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Delete modal specific styling */
+        #deleteModal .modal-content {
+            max-width: 500px;
         }
 
         .modal-header {
@@ -337,7 +350,7 @@
             margin: 0 0.5rem;
         }
 
-        /* Mobile responsive styles */
+        /* Mobile responsive adjustments for centered modal */
         @media (max-width: 768px) {
             .app-container {
                 flex-direction: column;
@@ -376,9 +389,16 @@
             }
 
             /* Modal adjustments */
+            .modal {
+                padding: 10px;
+            }
+            
             .modal-content {
                 width: 95%;
-                margin: 2% auto;
+                /* Adjust centering for mobile */
+                top: 50%;
+                transform: translateY(-50%);
+                margin: auto;
             }
 
             .modal-header {
@@ -441,9 +461,16 @@
             }
 
             /* Further modal adjustments for very small screens */
+            .modal {
+                padding: 5px;
+            }
+            
             .modal-content {
                 width: 98%;
-                margin: 1% auto;
+                /* Ensure centering on very small screens */
+                top: 50%;
+                transform: translateY(-50%);
+                margin: auto;
             }
 
             .modal-header {
@@ -621,6 +648,33 @@
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal - Added to match second file -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Konfirmasi Hapus</h3>
+                <button class="modal-close" id="closeDeleteModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="deleteForm" method="POST" action="">
+                    @csrf
+                    @method('DELETE')
+                    <div class="mb-6">
+                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus artikel ini?</p>
+                        <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
+                        <input type="hidden" id="deleteId" name="id">
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button type="button" id="cancelDeleteBtn"
+                            class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Minimalist Popup -->
     <div id="minimalPopup" class="minimal-popup">
         <div class="minimal-popup-icon">
@@ -639,12 +693,17 @@
         document.addEventListener('DOMContentLoaded', function () {
             // --- Deklarasi Semua Elemen yang Dibutuhkan ---
             const articleModal = document.getElementById('articleModal');
+            const deleteModal = document.getElementById('deleteModal'); // Added delete modal
             const articleForm = document.getElementById('articleForm');
+            const deleteForm = document.getElementById('deleteForm'); // Added delete form
             const addArticleBtn = document.getElementById('addArticleBtn');
             const closeModalBtn = document.getElementById('closeModal');
+            const closeDeleteModalBtn = document.getElementById('closeDeleteModal'); // Added close delete modal button
             const cancelBtn = document.getElementById('cancelBtn');
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn'); // Added cancel delete button
             const modalTitle = document.getElementById('modalTitle');
             const articleIdInput = document.getElementById('articleId');
+            const deleteIdInput = document.getElementById('deleteId'); // Added delete id input
             const methodInput = document.getElementById('_method'); // Ambil elemen _method
             const titleInput = document.getElementById('titleInput');
             const excerptInput = document.getElementById('excerptInput');
@@ -694,7 +753,7 @@
                 document.body.style.overflow = 'hidden';
             });
 
-            // Tutup Modal
+            // Tutup Modal Artikel
             const closeModal = () => {
                 articleModal.style.display = 'none';
                 document.body.style.overflow = 'auto';
@@ -702,6 +761,15 @@
             closeModalBtn.addEventListener('click', closeModal);
             cancelBtn.addEventListener('click', closeModal);
             window.addEventListener('click', (event) => { if (event.target === articleModal) closeModal(); });
+
+            // Tutup Modal Hapus
+            const closeDeleteModal = () => {
+                deleteModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            };
+            closeDeleteModalBtn.addEventListener('click', closeDeleteModal);
+            cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+            window.addEventListener('click', (event) => { if (event.target === deleteModal) closeDeleteModal(); });
 
             // Preview Gambar
             imageInput.addEventListener('change', function () {
@@ -748,30 +816,18 @@
                 });
             });
 
-            // Hapus Artikel
+            // Hapus Artikel - Modified to use modal instead of confirm
             document.querySelectorAll('.delete-article-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
-                    if (confirm('Apakah Anda yakin ingin menghapus artikel ini?')) {
-                        const idToDelete = this.getAttribute('data-id');
-                        fetch(`/admin/settings/articles/${idToDelete}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' } })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    showMinimalPopup('Berhasil', data.message, 'success');
-                                    document.querySelector(`.article-card[data-id="${idToDelete}"]`).remove();
-                                } else {
-                                    showMinimalPopup('Error', data.message, 'error');
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Delete Error:', error);
-                                showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
-                            });
-                    }
+                    const idToDelete = this.getAttribute('data-id');
+                    deleteIdInput.value = idToDelete;
+                    deleteForm.action = `/admin/settings/articles/${idToDelete}`;
+                    deleteModal.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
                 });
             });
 
-            // Submit Form
+            // Submit Form Artikel
             articleForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 
@@ -810,6 +866,49 @@
                     } else {
                         showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
                     }
+                });
+            });
+
+            // Submit Form Hapus
+            deleteForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                
+                const idToDelete = deleteIdInput.value;
+                
+                // Show loading state
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Menghapus...';
+                submitBtn.disabled = true;
+                
+                fetch(`/admin/settings/articles/${idToDelete}`, {
+                    method: 'DELETE',
+                    headers: { 
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 
+                        'Accept': 'application/json' 
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) return response.json().then(err => { throw err; });
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showMinimalPopup('Berhasil', data.message, 'success');
+                        closeDeleteModal();
+                        document.querySelector(`.article-card[data-id="${idToDelete}"]`).remove();
+                    } else {
+                        showMinimalPopup('Error', data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Delete Error:', error);
+                    showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
+                })
+                .finally(() => {
+                    // Reset button state
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
                 });
             });
 
