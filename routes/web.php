@@ -22,6 +22,7 @@ use App\Http\Controllers\ManagerDivisiTaskController;
 use App\Http\Controllers\SettingController; // Tambahkan controller ini
 use App\Http\Controllers\LandingPageController; // Tambahkan controller ini
 use App\Http\Controllers\TimDivisiController;
+use App\Http\Controllers\OwnerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -528,7 +529,7 @@ Route::middleware(['auth', 'role:owner'])
         Route::get('/laporan', function () {
             return view('pemilik.laporan');
         })->name('laporan');
-        Route::get('/rekap-absen', [AbsensiController::class, 'rekapAbsensi'])->name('rekap_absen'); // MODIFIED
+        Route::get('/rekap-absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap_absen'); // MODIFIED
     });
 
 /*
@@ -1009,3 +1010,13 @@ if (config('app.debug')) {
         ]);
     });
 }
+
+// API untuk data owner
+Route::middleware(['auth', 'role:owner'])->prefix('api/owner')->name('api.owner.')->group(function () {
+    Route::get('/data', [OwnerController::class, 'getData'])->name('data');
+});
+
+// API untuk jumlah layanan
+Route::middleware(['auth'])->prefix('api/services')->name('api.services.')->group(function () {
+    Route::get('/count', [LayananController::class, 'getCount'])->name('count');
+});

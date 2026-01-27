@@ -4,16 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sidebar GM</title>
+    <title>Sidebar General Manager</title>
+    
+    <!-- Meta tag CSRF untuk keamanan form (sangat penting di Laravel) -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        /* Base transitions */
+        /* Custom styles untuk transisi */
         .sidebar-transition {
             transition: transform 0.3s ease-in-out;
         }
-        
-        /* Hamburger animation */
+
+        /* Animasi hamburger */
         .hamburger-line {
             transition: all 0.3s ease-in-out;
         }
@@ -29,331 +33,408 @@
         .hamburger-active .line3 {
             transform: rotate(-45deg) translate(7px, -6px);
         }
-        
-        /* Nav item styles */
+
+        /* Gaya untuk efek hover yang lebih menonjol */
         .nav-item {
             position: relative;
-            transition: all 0.2s ease;
+            overflow: hidden;
+            white-space: nowrap;
+            /* Mencegah teks wrap */
         }
-        
-        .nav-item.active {
-            background-color: #eff6ff;
-            color: #1d4ed8;
-            font-weight: 600;
-        }
-        
-        .nav-item.active .material-icons {
-            color: #1d4ed8;
-        }
-        
-        /* Active indicator line */
-        .nav-item.active::before {
+
+        /* Gaya untuk indikator aktif/hover */
+        /* Default untuk mobile: di sebelah kanan */
+        .nav-item::before {
             content: '';
             position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 24px;
-            background-color: #1d4ed8;
-            border-radius: 0 2px 2px 0;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background-color: #000;
+            /* Warna indikator hitam */
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
         }
-        
-        /* Hover effect */
-        .nav-item:hover:not(.active) {
-            background-color: #f3f4f6;
-            transform: translateX(4px);
-        }
-        
-        /* Sidebar positioning */
-        .sidebar-fixed {
-            position: fixed;
-            height: 100vh;
-            z-index: 40;
-            overflow-y: auto;
-        }
-        
-        /* Main content adjustment */
+
+        /* Override untuk desktop: di sebelah kiri */
         @media (min-width: 768px) {
-            .main-content {
-                margin-left: 256px;
+            .nav-item::before {
+                right: auto;
+                left: 0;
+                transform: translateX(-100%);
             }
         }
-        
-        /* Custom scrollbar for sidebar */
+
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            transform: translateX(0);
+        }
+
+        /* Gaya untuk item navigasi yang sedang aktif */
+        .nav-item.active {
+            background-color: #e5e7eb;
+            /* Warna latar yang sedikit lebih gelap dari hover */
+            color: #111827 !important;
+            /* Warna teks yang lebih gelap, dengan !important */
+            font-weight: 600 !important;
+            /* Menebalkan teks, dengan !important */
+        }
+
+        /* Gaya untuk navbar karyawan */
+        .employee-navbar {
+            background-color: #000;
+            color: #fff;
+        }
+
+        /* Memastikan sidebar tetap di posisinya saat scroll dengan ukuran tetap */
+        .sidebar-fixed {
+            position: fixed;
+            top: 0;
+            width: 256px !important;
+            /* Lebar tetap, dengan !important */
+            min-width: 256px !important;
+            /* Lebar minimum, dengan !important */
+            max-width: 256px !important;
+            /* Lebar maksimum, dengan !important */
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 40;
+            flex-shrink: 0 !important;
+            /* Mencegah sidebar mengecil, dengan !important */
+        }
+
+        /* Menyesuaikan konten utama agar tidak tertutup sidebar */
+        .main-content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease-in-out;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                margin-left: 256px !important;
+                /* Lebar sidebar yang tetap, dengan !important */
+                width: calc(100% - 256px) !important;
+                /* Lebar konten utama disesuaikan, dengan !important */
+            }
+        }
+
+        /* Scrollbar kustom untuk sidebar */
         .sidebar-fixed::-webkit-scrollbar {
             width: 6px;
         }
-        
+
         .sidebar-fixed::-webkit-scrollbar-track {
             background: #f1f1f1;
         }
-        
+
         .sidebar-fixed::-webkit-scrollbar-thumb {
             background: #888;
             border-radius: 3px;
         }
-        
+
         .sidebar-fixed::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
-        
-        /* Overlay */
-        #overlay {
-            transition: opacity 0.3s ease;
+
+        /* Container untuk memastikan layout tetap */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
         }
-        
-        /* Hamburger button */
-        #hamburger {
-            z-index: 50;
-            transition: transform 0.3s ease;
+
+        /* Memastikan sidebar tidak berubah ukurannya */
+        .sidebar-wrapper {
+            width: 256px !important;
+            /* Lebar tetap, dengan !important */
+            min-width: 256px !important;
+            /* Lebar minimum, dengan !important */
+            max-width: 256px !important;
+            /* Lebar maksimum, dengan !important */
+            flex-shrink: 0 !important;
+            /* Mencegah sidebar mengecil, dengan !important */
         }
-        
-        #hamburger:hover {
-            transform: scale(1.05);
+
+        /* Memastikan teks di sidebar tidak berubah */
+        .sidebar-text {
+            font-size: 0.875rem !important;
+            /* 14px, dengan !important */
+            line-height: 1.25rem !important;
+            /* 20px, dengan !important */
+            font-weight: 500 !important;
+            /* Medium, dengan !important */
+            color: #374151 !important;
+            /* Gray-700, dengan !important */
         }
-        
-        /* Logout button hover */
-        form button {
-            transition: all 0.2s ease;
+
+        .sidebar-title {
+            font-size: 1.5rem !important;
+            /* 24px, dengan !important */
+            line-height: 2rem !important;
+            /* 32px, dengan !important */
+            font-weight: 700 !important;
+            /* Bold, dengan !important */
+            color: #1f2937 !important;
+            /* Gray-800, dengan !important */
         }
-        
-        form button:hover {
-            transform: translateX(4px);
+
+        /* Memastikan ikon tidak berubah ukurannya */
+        .sidebar-icon {
+            font-size: 1.25rem !important;
+            /* 20px, dengan !important */
+            width: 1.25rem !important;
+            /* 20px, dengan !important */
+            height: 1.25rem !important;
+            /* 20px, dengan !important */
+        }
+
+        /* Memastikan padding dan margin tidak berubah */
+        .sidebar-nav-item {
+            padding: 0.625rem 1rem !important;
+            /* 10px 16px, dengan !important */
+        }
+
+        /* Mengurangi tinggi header dari 5rem (80px) menjadi 3rem (48px) */
+        .sidebar-header {
+            height: 4rem !important;
+            /* 48px, sebelumnya 80px */
+            min-height: 4rem !important;
+            /* 48px, sebelumnya 80px */
+            max-height: 5rem !important;
+            /* 48px, sebelumnya 80px */
+            padding: 0.5rem !important;
+            /* Menambahkan padding untuk memberikan ruang di sekitar logo */
+        }
+
+        /* Menyesuaikan ukuran logo agar pas dengan header yang lebih kecil */
+        .sidebar-logo {
+            max-height: 100% !important;
+            /* Maksimal tinggi logo sama dengan tinggi header */
+            width: auto !important;
+            /* Menjaga aspek rasio logo */
+            object-fit: contain !important;
+            /* Memastikan logo terlihat penuh tanpa terpotong */
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem 1rem !important;
+            /* 24px 16px, dengan !important */
         }
     </style>
 </head>
 
 <body class="bg-gray-100">
-    <!-- Hamburger Menu Button (Mobile) -->
-    <button id="hamburger" class="md:hidden fixed top-4 right-4 z-50 p-3 bg-white shadow-lg rounded-lg hover:shadow-xl">
-        <div class="w-6 h-6 flex flex-col justify-center space-y-1.5">
+    <!-- Tombol Hamburger untuk Mobile (sekarang di kanan) -->
+    <button id="hamburger" class="md:hidden fixed top-4 right-4 z-50 p-2 rounded-md bg-white shadow-md">
+        <div class="w-6 h-6 flex flex-col justify-center space-y-1">
             <div class="hamburger-line line1 w-6 h-0.5 bg-gray-800"></div>
             <div class="hamburger-line line2 w-6 h-0.5 bg-gray-800"></div>
             <div class="hamburger-line line3 w-6 h-0.5 bg-gray-800"></div>
         </div>
     </button>
 
-    <!-- Overlay for Mobile -->
+    <!-- Overlay untuk Mobile -->
     <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
 
-    <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar-fixed w-64 bg-white sidebar-transition transform translate-x-full md:translate-x-0 right-0 md:left-0 shadow-2xl">
-        
-        <!-- Sidebar Header -->
-        <div class="h-20 flex items-center justify-center border-b border-gray-200 px-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <span class="material-icons text-blue-600">manage_accounts</span>
-                </div>
-                <h1 class="text-xl font-bold text-gray-800">General Manager</h1>
-            </div>
+    <!-- Container utama aplikasi -->
+
+    <aside id="sidebar"
+        class="sidebar-fixed bg-white flex flex-col sidebar-transition transform translate-x-full md:translate-x-0 right-0 md:left-0 md:right-auto shadow-lg">
+
+        <!-- Mengurangi ukuran header dan menyesuaikan kelas logo -->
+        <div class="sidebar-header flex items-center justify-center border-b border-gray-200 flex-shrink-0">
+            <img src="{{ asset('images/logo_inovindo.jpg') }}" alt="Login Background" class="sidebar-logo">
         </div>
-        
-        <!-- Navigation Menu -->
-        <nav class="flex-1 px-4 py-6 space-y-2">
-            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general-manajer/home">
-                <span class="material-icons">home</span>
-                <span>Beranda</span>
+
+        <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+            <!-- Menu Beranda -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="{{ route('general_manajer.home') }}" data-page="home">
+                <span class="material-icons sidebar-icon">home</span>
+                <span class="sidebar-text">Beranda</span>
             </a>
-            
-            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general-manajer/data-karyawan">
-                <span class="material-icons">group</span>
-                <span>Data Karyawan</span>
+
+            <!-- Menu Data Karyawan -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="{{ route('general_manajer.data_karyawan') }}" data-page="data_karyawan">
+                <span class="material-icons sidebar-icon">group</span>
+                <span class="sidebar-text">Data Karyawan</span>
             </a>
-            
-            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general-manajer/layanan">
-                <span class="material-icons">miscellaneous_services</span>
-                <span>Data Layanan</span>
+
+            <!-- Menu Data Layanan -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="{{ route('general_manajer.layanan') }}" data-page="layanan">
+                <span class="material-icons sidebar-icon">miscellaneous_services</span>
+                <span class="sidebar-text">Data Layanan</span>
             </a>
-            
-            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general-manajer/kelola-order">
-                <span class="material-icons">receipt_long</span>
-                <span>Data Project</span>
+
+            <!-- Menu Data Project -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="{{ route('general_manajer.data_project') }}" data-page="data_project">
+                <span class="material-icons sidebar-icon">dashboard</span>
+                <span class="sidebar-text">Data Project</span>
             </a>
-            
-          
-            
-            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general-manajer/kelola-absen">
-                <span class="material-icons">manage_accounts</span>
-                <span>Kelola Absen</span>
+
+            <!-- Menu Kelola Tugas -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="{{ route('general_manajer.kelola_tugas') }}" data-page="kelola_tugas">
+                <span class="material-icons sidebar-icon">assignment</span>
+                <span class="sidebar-text">Kelola Tugas</span>
+            </a>
+
+            <!-- Menu Tim dan Divisi -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="/general_manajer/tim_dan_divisi" data-page="tim_dan_divisi">
+                <span class="material-icons sidebar-icon">groups</span>
+                <span class="sidebar-text">Tim dan Divisi</span>
+            </a>
+
+            <!-- Menu Kelola Absen -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="{{ route('general_manajer.kelola_absen') }}" data-page="kelola_absen">
+                <span class="material-icons sidebar-icon">manage_accounts</span>
+                <span class="sidebar-text">Kelola Absen</span>
             </a>
         </nav>
-        
-        <!-- Logout Section -->
-        <div class="px-4 py-6 border-t border-gray-200">
-            <!-- Logout Form -->
-            <form method="POST" action="{{ route('logout') }}">
+
+        <div class="sidebar-footer border-t border-gray-200">
+            <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" 
-                        class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200">
-                    <span class="material-icons">logout</span>
-                    <span>Log Out</span>
-                    <span class="ml-auto material-icons text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
+                <button type="submit"
+                    class="nav-item w-full flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                    <span class="material-icons sidebar-icon">logout</span>
+                    <span class="sidebar-text">Log Out</span>
                 </button>
             </form>
-            
-            <!-- User Info (Optional - bisa diisi dengan data user) -->
-            <div class="mt-4 pt-4 border-t border-gray-100">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span class="material-icons text-blue-600 text-sm">person</span>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs font-medium text-gray-700 truncate">GM User</p>
-                        <p class="text-xs text-gray-500 truncate">General Manager</p>
-                    </div>
-                </div>
-            </div>
         </div>
     </aside>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Elements
-            const hamburger = document.getElementById('hamburger');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- ELEMEN DOM ---
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        // --- CEK ELEMEN PENTING ---
+        // Jika salah satu elemen utama tidak ditemukan, hentikan eksekusi
+        if (!hamburger || !sidebar || !overlay) {
+            console.error('Error: Elemen hamburger, sidebar, atau overlay tidak ditemukan.');
+            return;
+        }
+
+        // --- FUNGSI SIDEBAR ---
+        function openSidebar() {
+            sidebar.classList.remove('translate-x-full');
+            overlay.classList.remove('hidden');
+            hamburger.classList.add('hamburger-active');
+            document.body.style.overflow = 'hidden'; // Mencegah scroll background
+        }
+
+        function closeSidebar() {
+            sidebar.classList.add('translate-x-full');
+            overlay.classList.add('hidden');
+            hamburger.classList.remove('hamburger-active');
+            document.body.style.overflow = ''; // Kembalikan scroll
+        }
+
+        // --- EVENT LISTENER UNTUK HAMBURGER ---
+        hamburger.addEventListener('click', () => {
+            // Cek apakah sidebar sedang tersembunyi (memiliki class translate-x-full)
+            if (sidebar.classList.contains('translate-x-full')) {
+                openSidebar();
+            } else {
+                closeSidebar();
+            }
+        });
+
+        // --- EVENT LISTENER UNTUK OVERLAY ---
+        overlay.addEventListener('click', closeSidebar);
+
+        // --- TUTUP SIDEBAR DENGAN TOMBOL ESC ---
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !sidebar.classList.contains('translate-x-full')) {
+                closeSidebar();
+            }
+        });
+
+        // --- FUNGSI UNTUK MENU AKTIF ---
+        function setActiveNavItem() {
             const currentPath = window.location.pathname;
             
-            // Toggle sidebar function
-            function toggleSidebar() {
-                const isHidden = sidebar.classList.contains('translate-x-full');
-                
-                if (isHidden) {
-                    // Open sidebar
-                    sidebar.classList.remove('translate-x-full');
-                    overlay.classList.remove('hidden');
-                    setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-                    hamburger.classList.add('hamburger-active');
-                    
-                    // Disable body scroll on mobile
-                    if (window.innerWidth < 768) {
-                        document.body.style.overflow = 'hidden';
-                    }
-                } else {
-                    // Close sidebar
-                    sidebar.classList.add('translate-x-full');
-                    overlay.classList.add('opacity-0');
-                    setTimeout(() => {
-                        overlay.classList.add('hidden');
-                    }, 300);
-                    hamburger.classList.remove('hamburger-active');
-                    
-                    // Enable body scroll
-                    document.body.style.overflow = '';
-                }
-            }
-            
-            // Set active nav item
+            // Hapus class 'active' dari semua item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Tambahkan class 'active' ke item yang sesuai dengan URL saat ini
             document.querySelectorAll('.nav-item').forEach(item => {
                 const href = item.getAttribute('href');
-                const normalizedHref = href.replace(/\/$/, '');
-                const normalizedPath = currentPath.replace(/\/$/, '');
-                
-                // Exact match or starts with (for nested routes)
-                if (normalizedPath === normalizedHref || 
-                    normalizedPath.startsWith(normalizedHref + '/')) {
+                if (href && currentPath.includes(href.replace(/^\//, '').split('/')[0])) {
                     item.classList.add('active');
                 }
             });
-            
-            // Event Listeners
-            hamburger.addEventListener('click', toggleSidebar);
-            
-            // Close sidebar when clicking overlay
-            overlay.addEventListener('click', toggleSidebar);
-            
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', function(event) {
-                if (window.innerWidth < 768 && 
-                    !sidebar.contains(event.target) && 
-                    !hamburger.contains(event.target) &&
-                    !sidebar.classList.contains('translate-x-full')) {
-                    toggleSidebar();
-                }
+        }
+
+        // --- EVENT LISTENER UNTUK SETIAP ITEM NAVIGASI ---
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                // Tidak perlu menyimpan ke sessionStorage karena kita menggunakan URL untuk menentukan halaman aktif
             });
-            
-            // ESC key to close sidebar
-            document.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape' && window.innerWidth < 768) {
-                    if (!sidebar.classList.contains('translate-x-full')) {
-                        toggleSidebar();
-                    }
+        });
+
+        // --- INISIALISASI ---
+        setActiveNavItem();
+
+        // --- HANDLER LOGOUT YANG LEBIH AMAN ---
+        const logoutForm = document.querySelector('form[action*="logout"]');
+        if (logoutForm) {
+            logoutForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                
+                // Cek keberadaan meta tag CSRF
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (!csrfToken) {
+                    console.error('Meta tag CSRF-Token tidak ditemukan!');
+                    alert('Terjadi kesalahan konfigurasi. Logout tidak dapat diproses.');
+                    return;
                 }
-            });
-            
-            // Handle window resize
-            function handleResize() {
-                if (window.innerWidth >= 768) {
-                    // Desktop: always show sidebar
-                    sidebar.classList.remove('translate-x-full');
-                    overlay.classList.add('hidden');
-                    hamburger.classList.remove('hamburger-active');
-                    document.body.style.overflow = '';
-                } else {
-                    // Mobile: hide sidebar by default
-                    sidebar.classList.add('translate-x-full');
-                }
-            }
-            
-            // Add transition to overlay
-            overlay.classList.add('opacity-0', 'transition-opacity', 'duration-300');
-            
-            // Initialize
-            handleResize();
-            window.addEventListener('resize', handleResize);
-            
-            // Close sidebar when a nav item is clicked on mobile
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    if (window.innerWidth < 768) {
-                        toggleSidebar();
+
+                // Kirim form menggunakan fetch
+                fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this),
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                        'Accept': 'application/json',
                     }
+                })
+                .then(response => {
+                    // Jika response adalah redirect (bukan JSON), arahkan saja
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                        return;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Ini hanya dijalankan jika response adalah JSON
+                    if (data && data.success) {
+                        window.location.href = data.redirect_to || '/login';
+                    } else if (data && data.message) {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Logout Error:', error);
+                    alert('Terjadi kesalahan saat mencoba logout.');
                 });
             });
-            
-            // Prevent body scroll when sidebar is open on mobile
-            function preventBodyScroll(event) {
-                if (window.innerWidth < 768 && !sidebar.classList.contains('translate-x-full')) {
-                    event.preventDefault();
-                }
-            }
-            
-            // Add touch event listeners for better mobile UX
-            let touchStartX = 0;
-            let touchEndX = 0;
-            
-            document.addEventListener('touchstart', function(event) {
-                touchStartX = event.changedTouches[0].screenX;
-            }, false);
-            
-            document.addEventListener('touchend', function(event) {
-                touchEndX = event.changedTouches[0].screenX;
-                handleSwipe();
-            }, false);
-            
-            function handleSwipe() {
-                const swipeThreshold = 50;
-                const swipeDistance = touchEndX - touchStartX;
-                
-                // Swipe left to close (only on mobile)
-                if (window.innerWidth < 768 && 
-                    swipeDistance < -swipeThreshold && 
-                    !sidebar.classList.contains('translate-x-full')) {
-                    toggleSidebar();
-                }
-                
-                // Swipe right to open (only when sidebar is closed)
-                if (window.innerWidth < 768 && 
-                    swipeDistance > swipeThreshold && 
-                    sidebar.classList.contains('translate-x-full') &&
-                    touchStartX < 50) { // Only if swipe starts from edge
-                    toggleSidebar();
-                }
-            }
-        });
+        }
+    });
     </script>
+
 </body>
 
 </html>
