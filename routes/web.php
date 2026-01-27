@@ -396,6 +396,7 @@ Route::middleware(['auth', 'role:owner'])
         Route::get('/home', function () {
             return view('pemilik.home');
         })->name('home');
+    Route::get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap.absensi');
         Route::get('/laporan', function () {
             return view('pemilik.laporan');
         })->name('laporan');
