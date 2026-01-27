@@ -686,6 +686,11 @@
     <div class="flex min-h-screen">
         <!-- Container untuk sidebar yang akan dimuat -->
         @include('finance.templet.sider')
+        @php
+            if (!isset($orders)) {
+                $orders = \App\Models\Order::orderBy('id', 'desc')->paginate(10);
+            }
+        @endphp
         
         <!-- Main Content -->
         <main class="flex-1 flex flex-col main-content">
@@ -694,8 +699,10 @@
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
-                        <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input id="payment-search" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari layanan, klien, atau status..." type="text" />
+                        <form id="searchForm" method="GET" action="{{ route('orders.index') }}">
+                            <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                            <input id="payment-search" name="q" value="{{ request('q') }}" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari layanan, klien, atau status..." type="text" />
+                        </form>
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <div class="relative">
@@ -746,7 +753,7 @@
                             Data Orderan
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">20</span> pembayaran</span>
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">{{ $orders->total() ?? 0 }}</span> pembayaran</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -768,7 +775,41 @@
                                         </tr>
                                     </thead>
                                     <tbody id="payment-table-body">
-                                        <!-- Data akan diisi dengan JavaScript -->
+                                        @foreach($orders as $order)
+                                        @php
+                                            $status = $order->status ?? 'pending';
+                                            $work = $order->work_status ?? 'planning';
+                                            $category = $order->kategori ?? '';
+                                            $format = function($v){ return $v ? 'Rp '.number_format($v,0,',','.') : '-'; };
+                                        @endphp
+                                        <tr>
+                                            <td style="min-width: 60px;">{{ $order->id }}</td>
+                                            <td style="min-width: 200px;">{{ $order->layanan }}</td>
+                                            <td style="min-width: 150px;">@if($category == 'design')<span class="category-badge category-design">Desain</span>@elseif($category=='programming')<span class="category-badge category-programming">Programming</span>@elseif($category=='marketing')<span class="category-badge category-marketing">Digital Marketing</span>@else {{ $category }} @endif</td>
+                                            <td style="min-width: 150px;">{{ $order->price_formatted ?? ($order->price ? 'Rp '.number_format($order->price,0,',','.') : '-') }}</td>
+                                            <td style="min-width: 200px;">{{ $order->klien }}</td>
+                                            <td style="min-width: 150px; text-align: center;">{{ $order->deposit ? 'Rp '.number_format($order->deposit,0,',','.') : '-' }}</td>
+                                            <td style="min-width: 150px;">{{ $order->paid ? 'Rp '.number_format($order->paid,0,',','.') : '-' }}</td>
+                                            <td style="min-width: 120px;">
+                                                @if($status == 'paid')<span class="status-badge status-paid">Lunas</span>@elseif($status=='partial')<span class="status-badge status-partial">Sebagian</span>@elseif($status=='overdue')<span class="status-badge status-overdue">Terlambat</span>@else<span class="status-badge status-pending">Pending</span>@endif
+                                            </td>
+                                            <td style="min-width: 120px;">
+                                                @if($work == 'planning')<span class="work-status-badge work-status-planning">Perencanaan</span>@elseif($work=='progress')<span class="work-status-badge work-status-progress">Sedang Dikerjakan</span>@elseif($work=='review')<span class="work-status-badge work-status-review">Review</span>@elseif($work=='completed')<span class="work-status-badge work-status-completed">Selesai</span>@else<span class="work-status-badge work-status-onhold">Ditunda</span>@endif
+                                            </td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <a href="{{ route('orders.show', $order->id) }}" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Order">
+                                                        <span class="material-icons-outlined">visibility</span>
+                                                    </a>
+                                                    @if($order->invoice_id)
+                                                    <a href="{{ route('invoices.show', $order->invoice_id) }}" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Invoice">
+                                                        <span class="material-icons-outlined">description</span>
+                                                    </a>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
@@ -776,20 +817,75 @@
                         
                         <!-- Mobile Card View -->
                         <div class="mobile-cards space-y-4" id="mobile-cards">
-                            <!-- Card akan diisi dengan JavaScript -->
+                            @foreach($orders as $order)
+                            @php
+                                $status = $order->status ?? 'pending';
+                                $work = $order->work_status ?? 'planning';
+                                $category = $order->kategori ?? '';
+                                $icon = 'miscellaneous_services';
+                                if($category=='programming') $icon='code';
+                                if($category=='design') $icon='palette';
+                                if($category=='marketing') $icon='trending_up';
+                            @endphp
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm payment-card">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <span class="material-icons-outlined text-primary">{{ $icon }}</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-base">{{ $order->layanan }}</h4>
+                                            <p class="text-sm text-text-muted-light">{{ $order->price_formatted ?? ($order->price ? 'Rp '.number_format($order->price,0,',','.') : '-') }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <a href="{{ route('orders.show', $order->id) }}" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Order">
+                                            <span class="material-icons-outlined">visibility</span>
+                                        </a>
+                                        @if($order->invoice_id)
+                                        <a href="{{ route('invoices.show', $order->invoice_id) }}" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Invoice">
+                                            <span class="material-icons-outlined">description</span>
+                                        </a>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>
+                                        <p class="text-text-muted-light">No</p>
+                                        <p class="font-medium">{{ $order->id }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Status</p>
+                                        <p>@if($status == 'paid')<span class="status-badge status-paid">Lunas</span>@elseif($status=='partial')<span class="status-badge status-partial">Sebagian</span>@elseif($status=='overdue')<span class="status-badge status-overdue">Terlambat</span>@else<span class="status-badge status-pending">Pending</span>@endif</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Klien</p>
+                                        <p class="font-medium">{{ $order->klien }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Kategori</p>
+                                        <p>@if($category == 'design')<span class="category-badge category-design">Desain</span>@elseif($category=='programming')<span class="category-badge category-programming">Programming</span>@elseif($category=='marketing')<span class="category-badge category-marketing">Digital Marketing</span>@else {{ $category }} @endif</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Pembayaran Awal</p>
+                                        <p class="font-medium">{{ $order->deposit ? 'Rp '.number_format($order->deposit,0,',','.') : '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Pelunasan</p>
+                                        <p class="font-medium">{{ $order->paid ? 'Rp '.number_format($order->paid,0,',','.') : '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Status Pengerjaan</p>
+                                        <p>@if($work == 'planning')<span class="work-status-badge work-status-planning">Perencanaan</span>@elseif($work=='progress')<span class="work-status-badge work-status-progress">Sedang Dikerjakan</span>@elseif($work=='review')<span class="work-status-badge work-status-review">Review</span>@elseif($work=='completed')<span class="work-status-badge work-status-completed">Selesai</span>@else<span class="work-status-badge work-status-onhold">Ditunda</span>@endif</p>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
                         </div>
                         
                         <!-- Pagination -->
                         <div id="payment-pagination" class="desktop-pagination">
-                            <button id="prevPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="pageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="nextPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
+                            {{ $orders->appends(request()->query())->links() }}
                         </div>
                     </div>
                 </div>
@@ -810,15 +906,13 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form class="space-y-4">
+                <form class="space-y-4" method="POST" action="{{ route('orders.store') }}">
+                    @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">No</label>
-                            <input type="text" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Nomor">
-                        </div>
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Kategori Layanan</label>
-                            <select id="payment-category" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" onchange="updateServiceOptions()">
+                            <select id="payment-category" name="kategori" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" onchange="updateServiceOptions()">
                                 <option value="">Pilih Kategori</option>
                                 <option value="design">Desain</option>
                                 <option value="programming">Programming</option>
@@ -827,36 +921,36 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Layanan</label>
-                            <select id="payment-service" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <select id="payment-service" name="layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih Layanan</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                            <input type="text" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Harga">
+                            <input type="number" name="price" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Harga">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Klien</label>
-                            <select class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <select name="klien" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih Klien</option>
-                                <option value="pt1">PT. Teknologi Maju</option>
-                                <option value="cv1">CV. Digital Solusi</option>
-                                <option value="ud1">UD. Kreatif Indonesia</option>
-                                <option value="pt2">PT. Inovasi Nusantara</option>
-                                <option value="cv2">CV. Kreatif</option>
+                                <option value="PT. Teknologi Maju">PT. Teknologi Maju</option>
+                                <option value="CV. Digital Solusi">CV. Digital Solusi</option>
+                                <option value="UD. Kreatif Indonesia">UD. Kreatif Indonesia</option>
+                                <option value="PT. Inovasi Nusantara">PT. Inovasi Nusantara</option>
+                                <option value="CV. Kreatif">CV. Kreatif</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Pembayaran Awal</label>
-                            <input type="text" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pembayaran Awal">
+                            <input type="number" name="deposit" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pembayaran Awal">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Pelunasan</label>
-                            <input type="text" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pelunasan">
+                            <input type="number" name="paid" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pelunasan">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <select class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <select name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih Status</option>
                                 <option value="paid">Lunas</option>
                                 <option value="partial">Sebagian</option>
@@ -866,7 +960,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status Pengerjaan</label>
-                            <select class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <select name="work_status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih Status Pengerjaan</option>
                                 <option value="planning">Perencanaan</option>
                                 <option value="progress">Sedang Dikerjakan</option>
@@ -1742,14 +1836,17 @@
             document.getElementById('minimalPopup').classList.remove('show');
         });
 
-        // Initialize tables on page load
+        // Initialize minimal interactions on page load (server-side rendering used)
         document.addEventListener('DOMContentLoaded', function() {
-            renderPaymentTable();
-            renderPaymentPagination();
-            initializeFilter();
-            
-            // Add search functionality
-            document.getElementById('payment-search').addEventListener('input', filterPayments);
+            const search = document.getElementById('payment-search');
+            if (search) {
+                search.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        document.getElementById('searchForm')?.submit();
+                    }
+                });
+            }
         });
     </script>
 </body>

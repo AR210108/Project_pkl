@@ -13,6 +13,7 @@ use App\Http\Controllers\CatatanRapatController;
 use App\Http\Controllers\DataProjectController;
 use App\Http\Controllers\KwitansiController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\SuratKerjasamaController;
 use App\Http\Controllers\TaskController;
@@ -89,6 +90,12 @@ Route::middleware('auth')->group(function () {
         request()->session()->regenerateToken();
         return redirect('/');
     })->name('logout.get');
+});
+
+// Orders & invoices routes (simple resource for authenticated users)
+Route::middleware('auth')->group(function () {
+    Route::resource('orders', OrderController::class)->only(['index','show','store','update','destroy']);
+    Route::get('invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
 });
 
 // Pegawai resource routes (using KaryawanController methods for pegawai management)
