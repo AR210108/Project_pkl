@@ -1020,3 +1020,17 @@ Route::middleware(['auth', 'role:owner'])->prefix('api/owner')->name('api.owner.
 Route::middleware(['auth'])->prefix('api/services')->name('api.services.')->group(function () {
     Route::get('/count', [LayananController::class, 'getCount'])->name('count');
 });
+
+
+
+
+
+
+
+Route::get('/admin/templat', function () {
+    return view('admin.templet_surat');
+});
+Route::get('/general_manajer/acc_cuti', function () {
+    return view('/general_manajer/acc_cuti');
+});
+
