@@ -235,7 +235,7 @@
                 </a>
 
                 <!-- KELOLA TUGAS -->
-                <a href="/manager_divisi/pengelola-tugas"
+                <a href="/manager_divisi/pengelola_tugas"
                     class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                     :class="window.location.pathname === '/manager_divisi/pengelola_tugas' ? 'active' : ''">
                     <span class="material-symbols-outlined sidebar-icon">assignment</span>

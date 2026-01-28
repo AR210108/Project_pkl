@@ -90,6 +90,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .panel-title {
@@ -166,6 +168,8 @@
             cursor: pointer;
             position: relative;
             transition: all 0.2s ease;
+            white-space: nowrap;
+            flex: 1; /* Membuat tab membagi ruang secara merata */
         }
 
         .tab-button:hover {
@@ -253,12 +257,86 @@
             margin-right: 8px;
             font-size: 20px;
         }
+
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+
+            .main-content {
+                width: 100%;
+            }
+
+            .panel-header {
+                padding: 0.75rem 1rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .panel-body {
+                padding: 1rem;
+            }
+
+            .panel-title {
+                font-size: 1rem;
+            }
+
+            /* Tab styles untuk mobile - PERUBAHAN DI SINI */
+            .tab-button {
+                padding: 0.5rem 0.25rem; /* Kurangi padding secara signifikan */
+                font-size: 0.75rem; /* Kurangi ukuran font */
+            }
+
+            .minimal-popup {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+                transform: translateY(-100px);
+            }
+
+            .minimal-popup.show {
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .panel-header {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .panel-body {
+                padding: 0.75rem;
+            }
+
+            .panel-title {
+                font-size: 0.9rem;
+            }
+
+            /* Tab styles untuk layar sangat kecil - PERUBAHAN DI SINI */
+            .tab-button {
+                padding: 0.5rem 0.125rem; /* Kurangi padding lebih lanjut */
+                font-size: 0.7rem; /* Kurangi ukuran font lebih lanjut */
+            }
+
+            .minimal-popup {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                padding: 12px 16px;
+            }
+        }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="font-display bg-background-light text-text-light">
-    <div class="flex min-h-screen">
+    <div class="flex min-h-screen app-container">
         @include('admin/templet/sider')
 
         <!-- MAIN -->
@@ -317,10 +395,10 @@
                                     </div>
                                 </div>
 
-                                <div class="flex justify-end gap-2 mt-6">
+                                <div class="flex flex-col sm:flex-row justify-end gap-2 mt-6">
                                     <button type="button" id="cancelContactBtn"
-                                        class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan
+                                        class="px-4 py-2 btn-secondary rounded-lg w-full sm:w-auto">Batal</button>
+                                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg w-full sm:w-auto">Simpan
                                         Perubahan</button>
                                 </div>
                             </form>
@@ -355,10 +433,10 @@
                                     </div>
                                 </div>
 
-                                <div class="flex justify-end gap-2 mt-6">
+                                <div class="flex flex-col sm:flex-row justify-end gap-2 mt-6">
                                     <button type="button" id="cancelAboutBtn"
-                                        class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan
+                                        class="px-4 py-2 btn-secondary rounded-lg w-full sm:w-auto">Batal</button>
+                                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg w-full sm:w-auto">Simpan
                                         Perubahan</button>
                                 </div>
                             </form>
@@ -376,7 +454,8 @@
                             <a href="{{ route('admin.settings.articles') }}"
                                 class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2">
                                 <span class="material-icons-outlined text-sm">settings</span>
-                                Kelola Artikel
+                                <span class="hidden sm:inline">Kelola Artikel</span>
+                                <span class="sm:hidden">Artikel</span>
                             </a>
                         </div>
                         <div class="panel-body">
@@ -399,7 +478,8 @@
                             <a href="{{ route('admin.settings.portfolios') }}"
                                 class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2">
                                 <span class="material-icons-outlined text-sm">settings</span>
-                                Kelola Portofolio
+                                <span class="hidden sm:inline">Kelola Portofolio</span>
+                                <span class="sm:hidden">Portofolio</span>
                             </a>
                         </div>
                         <div class="panel-body">
@@ -572,123 +652,119 @@
             document.getElementById('cancelAboutBtn').addEventListener('click', function () {
                 location.reload();
             });
-        });
-        // Tambahkan fungsi untuk memuat portofolio
-        function loadPortfolios() {
-            console.log("Memuat data portofolio...");
-            fetch('/api/portfolios')
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`Network response was not ok: ${response.statusText}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Data portofolio yang diterima:', data);
 
-                    const portfolioContainer = document.querySelector('.portfolio-container > div');
-                    if (!portfolioContainer) {
-                        console.error("KESALAH KRITIS: Container portofolio tidak ditemukan! Portofolio tidak akan dimuat.");
-                        return;
-                    }
+            // Tambahkan fungsi untuk memuat portofolio
+            function loadPortfolios() {
+                console.log("Memuat data portofolio...");
+                fetch('/api/portfolios')
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error(`Network response was not ok: ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Data portofolio yang diterima:', data);
 
-                    portfolioContainer.innerHTML = '';
+                        const portfolioContainer = document.querySelector('.portfolio-container > div');
+                        if (!portfolioContainer) {
+                            console.error("KESALAH KRITIS: Container portofolio tidak ditemukan! Portofolio tidak akan dimuat.");
+                            return;
+                        }
 
-                    if (data.success && data.data && data.data.length > 0) {
-                        data.data.forEach(portfolio => {
-                            const techArray = portfolio.technologies_used ? portfolio.technologies_used.split(',').map(tech => tech.trim()) : [];
-                            const techString = techArray.join(', ');
+                        portfolioContainer.innerHTML = '';
 
-                            const portfolioHtml = `
-                        <div class="portfolio-card bg-card-light p-6 rounded-2xl flex flex-col w-72 shadow-sm border border-border-light">
-                            <div class="relative flex-grow aspect-[4/5] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4 overflow-hidden">
-                                ${portfolio.image ?
-                                    `<img src="/storage/${portfolio.image}" alt="${portfolio.title}" class="w-full h-full object-cover">` :
-                                    `<div class="flex items-center justify-center h-full text-white"><span class="material-icons-outlined text-4xl">work</span></div>`
-                                }
-                                <button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center text-black hover:bg-white transition-colors">
-                                    <span class="material-icons-outlined text-base">arrow_forward</span>
+                        if (data.success && data.data && data.data.length > 0) {
+                            data.data.forEach(portfolio => {
+                                const techArray = portfolio.technologies_used ? portfolio.technologies_used.split(',').map(tech => tech.trim()) : [];
+                                const techString = techArray.join(', ');
+
+                                const portfolioHtml = `
+                            <div class="portfolio-card bg-card-light p-6 rounded-2xl flex flex-col w-72 shadow-sm border border-border-light">
+                                <div class="relative flex-grow aspect-[4/5] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg mb-4 overflow-hidden">
+                                    ${portfolio.image ?
+                                        `<img src="/storage/${portfolio.image}" alt="${portfolio.title}" class="w-full h-full object-cover">` :
+                                        `<div class="flex items-center justify-center h-full text-white"><span class="material-icons-outlined text-4xl">work</span></div>`
+                                    }
+                                    <button class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center text-black hover:bg-white transition-colors">
+                                        <span class="material-icons-outlined text-base">arrow_forward</span>
+                                    </button>
+                                </div>
+                                <h3 class="font-bold text-white text-lg mb-4">${portfolio.title}</h3>
+                                <button class="w-full btn-primary bg-black text-white text-sm font-medium py-2 px-4 rounded-lg flex justify-between items-center portfolio-btn" data-title="${portfolio.title}" data-description="${portfolio.description}" data-tech="${techString}">
+                                    <span>Lihat Detail</span>
+                                    <span class="material-icons-outlined text-base">chevron_right</span>
                                 </button>
                             </div>
-                            <h3 class="font-bold text-white text-lg mb-4">${portfolio.title}</h3>
-                            <button class="w-full btn-primary bg-black text-white text-sm font-medium py-2 px-4 rounded-lg flex justify-between items-center portfolio-btn" data-title="${portfolio.title}" data-description="${portfolio.description}" data-tech="${techString}">
-                                <span>Lihat Detail</span>
-                                <span class="material-icons-outlined text-base">chevron_right</span>
-                            </button>
+                        `;
+                                portfolioContainer.innerHTML += portfolioHtml;
+                            });
+
+                            // Re-attach event listeners to new portfolio buttons
+                            attachPortfolioEventListeners();
+                        } else {
+                            portfolioContainer.innerHTML = `
+                        <div class="col-span-2 text-center py-12">
+                            <span class="material-icons-outlined text-6xl text-gray-300">work</span>
+                            <h3 class="text-xl font-semibold text-gray-500 mt-4">Belum Ada Portofolio</h3>
+                            <p class="text-gray-400 mt-2">Portofolio akan segera tersedia. Silakan kunjungi kembali nanti.</p>
                         </div>
                     `;
-                            portfolioContainer.innerHTML += portfolioHtml;
-                        });
-
-                        // Re-attach event listeners to new portfolio buttons
-                        attachPortfolioEventListeners();
-                    } else {
-                        portfolioContainer.innerHTML = `
-                    <div class="col-span-2 text-center py-12">
-                        <span class="material-icons-outlined text-6xl text-gray-300">work</span>
-                        <h3 class="text-xl font-semibold text-gray-500 mt-4">Belum Ada Portofolio</h3>
-                        <p class="text-gray-400 mt-2">Portofolio akan segera tersedia. Silakan kunjungi kembali nanti.</p>
-                    </div>
-                `;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching portfolios:', error);
-                    const portfolioContainer = document.querySelector('.portfolio-container > div');
-                    if (portfolioContainer) {
-                        portfolioContainer.innerHTML = `
-                    <div class="col-span-2 text-center py-12">
-                        <span class="material-icons-outlined text-6xl text-red-300">error_outline</span>
-                        <h3 class="text-xl font-semibold text-red-500 mt-4">Gagal Memuat Portofolio</h3>
-                        <p class="text-red-400 mt-2">Terjadi kesalahan, silakan refresh halaman.</p>
-                    </div>
-                `;
-                    }
-                });
-        }
-
-        // Fungsi untuk menambahkan event listener ke tombol portofolio
-        function attachPortfolioEventListeners() {
-            const portfolioBtns = document.querySelectorAll('.portfolio-btn');
-            if (portfolioBtns) {
-                portfolioBtns.forEach(btn => {
-                    btn.addEventListener('click', function () {
-                        const title = this.getAttribute('data-title');
-                        const description = this.getAttribute('data-description');
-                        const tech = this.getAttribute('data-tech').split(', ');
-
-                        if (portfolioModal) {
-                            const modalTitle = document.getElementById('modalTitle');
-                            const modalDescription = document.getElementById('modalDescription');
-                            const modalTech = document.getElementById('modalTech');
-
-                            if (modalTitle) modalTitle.textContent = title;
-                            if (modalDescription) modalDescription.textContent = description;
-
-                            if (modalTech) {
-                                modalTech.innerHTML = '';
-                                tech.forEach(techItem => {
-                                    const techBadge = document.createElement('span');
-                                    techBadge.className = 'bg-gray-700 text-white text-sm px-3 py-1 rounded-full';
-                                    techBadge.textContent = techItem;
-                                    modalTech.appendChild(techBadge);
-                                });
-                            }
-
-                            portfolioModal.style.display = 'block';
-                            document.body.style.overflow = 'hidden';
-                        } else {
-                            console.error("KESALAH KRITIS: Modal portofolio tidak ditemukan.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching portfolios:', error);
+                        const portfolioContainer = document.querySelector('.portfolio-container > div');
+                        if (portfolioContainer) {
+                            portfolioContainer.innerHTML = `
+                        <div class="col-span-2 text-center py-12">
+                            <span class="material-icons-outlined text-6xl text-red-300">error_outline</span>
+                            <h3 class="text-xl font-semibold text-red-500 mt-4">Gagal Memuat Portofolio</h3>
+                            <p class="text-red-400 mt-2">Terjadi kesalahan, silakan refresh halaman.</p>
+                        </div>
+                    `;
                         }
                     });
-                });
             }
-        }
 
-        // Panggil fungsi untuk memuat portofolio di dalam event listener DOMContentLoaded
-        document.addEventListener('DOMContentLoaded', function () {
-            // ... kode yang sudah ada ...
+            // Fungsi untuk menambahkan event listener ke tombol portofolio
+            function attachPortfolioEventListeners() {
+                const portfolioBtns = document.querySelectorAll('.portfolio-btn');
+                if (portfolioBtns) {
+                    portfolioBtns.forEach(btn => {
+                        btn.addEventListener('click', function () {
+                            const title = this.getAttribute('data-title');
+                            const description = this.getAttribute('data-description');
+                            const tech = this.getAttribute('data-tech').split(', ');
+
+                            if (portfolioModal) {
+                                const modalTitle = document.getElementById('modalTitle');
+                                const modalDescription = document.getElementById('modalDescription');
+                                const modalTech = document.getElementById('modalTech');
+
+                                if (modalTitle) modalTitle.textContent = title;
+                                if (modalDescription) modalDescription.textContent = description;
+
+                                if (modalTech) {
+                                    modalTech.innerHTML = '';
+                                    tech.forEach(techItem => {
+                                        const techBadge = document.createElement('span');
+                                        techBadge.className = 'bg-gray-700 text-white text-sm px-3 py-1 rounded-full';
+                                        techBadge.textContent = techItem;
+                                        modalTech.appendChild(techBadge);
+                                    });
+                                }
+
+                                portfolioModal.style.display = 'block';
+                                document.body.style.overflow = 'hidden';
+                            } else {
+                                console.error("KESALAH KRITIS: Modal portofolio tidak ditemukan.");
+                            }
+                        });
+                    });
+                }
+            }
 
             // Panggil fungsi untuk memuat portofolio
             loadPortfolios();

@@ -126,55 +126,79 @@ class AbsensiController extends Controller
      * 
      * @return \Illuminate\View\View
      */
-    public function rekapAbsensi()
+    public function rekapAbsensi(Request $request)
     {
-        // Debug logging
-        \Log::info("Pemilik rekapAbsensi accessed. Date: " . Carbon::now()->format('Y-m-d'));
-        
-        // Mengambil semua data absensi dengan relasi user
-        $absensis = Absensi::with('user')
-            ->whereDate('tanggal', '<=', Carbon::now()->addMonth()) // Batasi data masa depan
-            ->get();
-        
-        // Mengambil data kehadiran (ada jam_masuk)
-        $dataKehadiran = Absensi::with('user')
-            ->whereNotNull('jam_masuk')
-            ->whereDate('tanggal', '<=', Carbon::now()->addMonth())
-            ->orderBy('tanggal', 'desc')
-            ->get();
-            
-        // Mengambil data ketidakhadiran (ada jenis_ketidakhadiran)
-        $dataKetidakhadiran = Absensi::with('user')
-            ->whereNotNull('jenis_ketidakhadiran')
-            ->whereDate('tanggal', '<=', Carbon::now()->addMonth())
-            ->orderBy('tanggal', 'desc')
-            ->get();
-        
-        // Menghitung statistik - REVISI: Tanpa menggunakan kolom 'status'
-        $statistik = [
-            'hadir' => Absensi::whereNotNull('jam_masuk')
-                ->whereDate('tanggal', '<=', Carbon::now()->addMonth())
+        // Ambil input dari form filter
+        $tanggalMulai = $request->get('tanggal_mulai', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $tanggalAkhir = $request->get('tanggal_akhir', Carbon::now()->format('Y-m-d'));
+        $divisiFilter = $request->get('divisi');
+
+        \Log::info("Pemilik rekapAbsensi accessed. Filter: {$tanggalMulai} to {$tanggalAkhir}, Divisi: {$divisiFilter}");
+
+        // Query dasar untuk statistik dan data
+        $baseQuery = Absensi::whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir]);
+
+        // Filter berdasarkan divisi jika dipilih
+        if ($divisiFilter) {
+            $baseQuery->whereHas('user', function ($q) use ($divisiFilter) {
+                $q->where('divisi', $divisiFilter);
+            });
+        }
+
+        // --- 1. Hitung Statistik ---
+        // Sesuaikan dengan key yang diharapkan oleh view
+        $stats = [
+            'total_tepat_waktu' => (clone $baseQuery)->whereNotNull('jam_masuk')
+                ->whereTime('jam_masuk', '<=', self::LIMIT_TIME . ':00')
                 ->count(),
-            'tidak_hadir' => Absensi::whereNull('jam_masuk')
+            'total_terlambat' => (clone $baseQuery)->whereNotNull('jam_masuk')
+                ->whereTime('jam_masuk', '>', self::LIMIT_TIME . ':00')
+                ->count(),
+            'total_tidak_masuk' => (clone $baseQuery)->whereNull('jam_masuk')
                 ->whereNull('jenis_ketidakhadiran')
-                ->whereDate('tanggal', '<=', Carbon::now()->addMonth())
                 ->count(),
-            'cuti' => Absensi::where('jenis_ketidakhadiran', 'cuti')
-                ->whereDate('tanggal', '<=', Carbon::now()->addMonth())
-                ->count(),
-            'sakit' => Absensi::where('jenis_ketidakhadiran', 'sakit')
-                ->whereDate('tanggal', '<=', Carbon::now()->addMonth())
-                ->count(),
-            'izin' => Absensi::where('jenis_ketidakhadiran', 'izin')
-                ->whereDate('tanggal', '<=', Carbon::now()->addMonth())
-                ->count(),
-            'dinas' => Absensi::where('jenis_ketidakhadiran', 'dinas-luar')
-                ->whereDate('tanggal', '<=', Carbon::now()->addMonth())
-                ->count(),
+            'total_izin' => (clone $baseQuery)->where('jenis_ketidakhadiran', 'izin')->count(),
+            'total_cuti' => (clone $baseQuery)->where('jenis_ketidakhadiran', 'cuti')->count(),
+            'total_sakit' => (clone $baseQuery)->where('jenis_ketidakhadiran', 'sakit')->count(),
+            'total_dinas_luar' => (clone $baseQuery)->where('jenis_ketidakhadiran', 'dinas-luar')->count(),
         ];
-        
-        return view('pemilik.rekap_absensi', compact('statistik', 'absensis', 'dataKehadiran', 'dataKetidakhadiran'));
+
+        // --- 2. Ambil Data untuk Tabel ---
+        // Data Kehadiran (ada jam_masuk)
+        $attendances = (clone $baseQuery)
+            ->with('user:id,name,divisi')
+            ->whereNotNull('jam_masuk')
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        // Data Ketidakhadiran (ada jenis_ketidakhadiran)
+        $ketidakhadiran = (clone $baseQuery)
+            ->with('user:id,name,divisi')
+            ->whereNotNull('jenis_ketidakhadiran')
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        // --- 3. Ambil Data untuk Filter Dropdown ---
+        $divisions = User::select('divisi')
+            ->whereNotNull('divisi')
+            ->where('role', 'karyawan')
+            ->distinct()
+            ->pluck('divisi');
+
+        \Log::info("Rekap Data: Attendances=" . $attendances->count() . ", Ketidakhadiran=" . $ketidakhadiran->count());
+
+        // Kirim semua data ke view
+        return view('pemilik.rekap_absensi', compact(
+            'stats',
+            'attendances',
+            'ketidakhadiran',
+            'divisions',
+            'tanggalMulai',
+            'tanggalAkhir',
+            'divisiFilter'
+        ));
     }
+
 
     /**
      * Menampilkan halaman kelola absensi untuk General Manager (versi baru)

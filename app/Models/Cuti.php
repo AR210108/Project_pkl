@@ -11,7 +11,7 @@ class Cuti extends Model
     use HasFactory, SoftDeletes;
 
     /**
-     * The table associated with the model.
+     * The table associated with model.
      *
      * @var string
      */
@@ -23,7 +23,7 @@ class Cuti extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'karyawan_id',
+        'user_id',               // [REVISI] Diganti dari karyawan_id
         'tanggal_mulai',
         'tanggal_selesai',
         'durasi',
@@ -49,9 +49,10 @@ class Cuti extends Model
     /**
      * Relationships
      */
-    public function karyawan()
+    public function user()
     {
-        return $this->belongsTo(Karyawan::class);
+        // [REVISI] Relasi ke User, bukan Karyawan
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function disetujuiOleh()
@@ -92,9 +93,10 @@ class Cuti extends Model
         return $query->whereYear('created_at', now()->year);
     }
 
-    public function scopeUntukKaryawan($query, $karyawanId)
+    // [REVISI] Scope untuk filter user, bukan karyawan
+    public function scopeUntukUser($query, $userId)
     {
-        return $query->where('karyawan_id', $karyawanId);
+        return $query->where('user_id', $userId);
     }
 
     /**
@@ -159,10 +161,11 @@ class Cuti extends Model
 
     /**
      * Check if cuti overlaps with existing cuti
+     * [REVISI] Menggunakan user_id
      */
     public function isOverlapping()
     {
-        return self::where('karyawan_id', $this->karyawan_id)
+        return self::where('user_id', $this->user_id) // [REVISI] user_id
             ->where('id', '!=', $this->id)
             ->where('status', 'disetujui')
             ->where(function ($query) {
