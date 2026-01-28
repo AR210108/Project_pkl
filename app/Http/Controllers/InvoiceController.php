@@ -2,21 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Invoice;
-
-class InvoiceController extends Controller
-{
-    public function show($id)
-    {
-        $invoice = Invoice::with('items')->findOrFail($id);
-        return view('finance.invoice_show', compact('invoice'));
-    }
-}
-<?php
-
-namespace App\Http\Controllers;
-
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
