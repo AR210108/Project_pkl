@@ -10,6 +10,38 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+<!-- Global Routes Object untuk JavaScript -->
+<script>
+    // Pastikan route parameter menggunakan nama yang benar
+    window.appRoutes = {
+        cuti: {
+            index: '{{ route("karyawan.cuti.index") }}',
+            data: '{{ route("karyawan.cuti.data") }}',
+            store: '{{ route("karyawan.cuti.store") }}',
+            stats: '{{ route("karyawan.cuti.stats") }}',
+            checkAvailableDays: '{{ route("karyawan.cuti.check-available-days") }}',
+            calculateDuration: '{{ route("karyawan.cuti.calculate-duration") }}',
+            // Gunakan route dengan parameter yang benar
+            update: (id) => {
+                const url = '{{ route("karyawan.cuti.update", ["cuti" => ":id"]) }}';
+                return url.replace(':id', id);
+            },
+            destroy: (id) => {
+                const url = '{{ route("karyawan.cuti.destroy", ["cuti" => ":id"]) }}';
+                return url.replace(':id', id);
+            },
+            edit: (id) => {
+                const url = '{{ route("karyawan.cuti.edit", ["cuti" => ":id"]) }}';
+                return url.replace(':id', id);
+            },
+            availableDays: '{{ route("karyawan.cuti.available-days") }}',
+            dashboardStats: '{{ route("karyawan.cuti.dashboard-stats") }}',
+        }
+    };
+</script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -723,7 +755,7 @@
                         </div>
                         <div class="stat-content">
                             <div class="stat-label">Total Cuti Diberikan</div>
-                            <div class="stat-value" id="stat-total-cuti">12</div>
+                            <div class="stat-value" id="stat-total-cuti">0</div>
                         </div>
                     </div>
 
@@ -733,7 +765,7 @@
                         </div>
                         <div class="stat-content">
                             <div class="stat-label">Cuti Terpakai</div>
-                            <div class="stat-value" id="stat-cuti-terpakai">3</div>
+                            <div class="stat-value" id="stat-cuti-terpakai">0</div>
                         </div>
                     </div>
 
@@ -743,19 +775,47 @@
                         </div>
                         <div class="stat-content">
                             <div class="stat-label">Cuti Tersisa</div>
-                            <div class="stat-value" id="stat-cuti-tersisa">9</div>
+                            <div class="stat-value" id="stat-cuti-tersisa">0</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Sisa Cuti Alert -->
-                <div class="alert alert-blue">
+                <div class="alert alert-blue" id="sisaCutiAlert" style="display: none;">
                     <span class="material-icons-outlined alert-icon">info</span>
                     <div class="alert-content">
                         <div class="alert-title">Sisa Cuti Tahunan Anda</div>
-                        <div class="alert-message">Anda masih memiliki <span class="font-bold text-blue-600">9 hari</span> cuti tersisa untuk tahun ini</div>
+                        <div class="alert-message">Anda masih memiliki <span class="font-bold text-blue-600" id="sisaCutiText">0 hari</span> cuti tersisa untuk tahun ini</div>
                     </div>
                 </div>
+
+                <!-- Error Message Display -->
+                @if(isset($error))
+                <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Data Tidak Lengkap</h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                <p>{{ $error }}</p>
+                                
+                                @if(isset($showProfileLink) && $showProfileLink)
+                                <div class="mt-4">
+                                    <a href="{{ route('karyawan.profile') }}" 
+                                       class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 active:bg-red-900 focus:outline-none focus:border-red-900 focus:ring ring-red-300 disabled:opacity-25 transition ease-in-out duration-150">
+                                        Lengkapi Profil Sekarang
+                                    </a>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <!-- Data Cuti Panel -->
                 <div class="panel">
@@ -766,7 +826,7 @@
                         </h3>
                         <div class="flex items-center gap-2">
                             <span class="text-sm text-text-muted-light">Total: <span
-                                    class="font-semibold text-text-light" id="cutiCount">4</span> pengajuan</span>
+                                    class="font-semibold text-text-light" id="cutiCount">0</span> pengajuan</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -818,8 +878,14 @@
                             </div>
                         </div>
 
+                        <!-- Loading State -->
+                        <div id="cutiLoading" class="text-center py-8">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                            <p class="mt-2 text-gray-600">Memuat data cuti...</p>
+                        </div>
+
                         <!-- Desktop Table -->
-                        <div class="desktop-table">
+                        <div class="desktop-table" id="cutiDesktopTable" style="display: none;">
                             <div class="scrollable-table-container table-shadow" id="scrollableCutiTable">
                                 <table class="data-table">
                                     <thead>
@@ -840,12 +906,19 @@
                         </div>
 
                         <!-- Mobile Card View -->
-                        <div class="mobile-cards space-y-4" id="cuti-mobile-cards">
+                        <div class="mobile-cards space-y-4" id="cuti-mobile-cards" style="display: none;">
                             <!-- Cards will be populated by JavaScript -->
                         </div>
 
+                        <!-- No Data Message -->
+                        <div id="noCutiData" class="text-center py-8" style="display: none;">
+                            <span class="material-icons-outlined text-gray-400 text-6xl mb-4">event_busy</span>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada pengajuan cuti</h3>
+                            <p class="text-gray-600">Mulai dengan mengajukan cuti baru</p>
+                        </div>
+
                         <!-- Pagination -->
-                        <div id="cutiPaginationContainer" class="desktop-pagination">
+                        <div id="cutiPaginationContainer" class="desktop-pagination" style="display: none;">
                             <button id="cutiPrevPage" class="desktop-nav-btn">
                                 <span class="material-icons-outlined text-sm">chevron_left</span>
                             </button>
@@ -859,9 +932,8 @@
                     </div>
                 </div>
 
-                <footer
-                    class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light mt-8">
-                    Copyright ©2025 by digicity.id
+                <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light mt-8">
+                    Copyright ©{{ date('Y') }} by digicity.id
                 </footer>
             </div>
         </main>
@@ -879,34 +951,51 @@
                     </button>
                 </div>
                 <form id="tambahCutiForm" class="space-y-4">
+                    @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
-                            <input type="date" name="tanggal_mulai" required
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai <span class="text-red-500">*</span></label>
+                            <input type="date" name="tanggal_mulai" required min="{{ date('Y-m-d') }}"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai <span class="text-red-500">*</span></label>
                             <input type="date" name="tanggal_selesai" required
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Durasi (hari)</label>
-                            <input type="number" name="durasi" required
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Durasi (hari) <span class="text-red-500">*</span></label>
+                            <input type="number" name="durasi" required min="1" max="30"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                                 placeholder="Masukkan durasi cuti">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Cuti <span class="text-red-500">*</span></label>
+                            <select name="jenis_cuti" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input">
+                                <option value="">Pilih Jenis Cuti</option>
+                                <option value="tahunan">Cuti Tahunan</option>
+                                <option value="sakit">Cuti Sakit</option>
+                                <option value="penting">Cuti Penting</option>
+                                <option value="melahirkan">Cuti Melahirkan</option>
+                                <option value="lainnya">Cuti Lainnya</option>
+                            </select>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
-                        <textarea name="keterangan" rows="3" required
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan <span class="text-red-500">*</span></label>
+                        <textarea name="keterangan" rows="3" required maxlength="500"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                             placeholder="Jelaskan alasan pengajuan cuti"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">Minimal 10 karakter, maksimal 500 karakter</p>
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" class="cancel-modal px-4 py-2 btn-secondary rounded-lg"
                             data-target="tambahCutiModal">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Kirim Pengajuan</button>
+                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2">
+                            <span class="material-icons-outlined text-sm">send</span>
+                            Kirim Pengajuan
+                        </button>
                     </div>
                 </form>
             </div>
@@ -924,34 +1013,52 @@
             </div>
             <div class="edit-popup-body">
                 <form id="editCutiForm" class="space-y-4">
+                    @csrf
+                    @method('PUT')
                     <input type="hidden" id="editCutiId" name="id">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai <span class="text-red-500">*</span></label>
                             <input type="date" id="editTanggalMulai" name="tanggal_mulai" required
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai <span class="text-red-500">*</span></label>
                             <input type="date" id="editTanggalSelesai" name="tanggal_selesai" required
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Durasi (hari)</label>
-                            <input type="number" id="editDurasi" name="durasi" required
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Durasi (hari) <span class="text-red-500">*</span></label>
+                            <input type="number" id="editDurasi" name="durasi" required min="1" max="30"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Cuti <span class="text-red-500">*</span></label>
+                            <select id="editJenisCuti" name="jenis_cuti" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input">
+                                <option value="">Pilih Jenis Cuti</option>
+                                <option value="tahunan">Cuti Tahunan</option>
+                                <option value="sakit">Cuti Sakit</option>
+                                <option value="penting">Cuti Penting</option>
+                                <option value="melahirkan">Cuti Melahirkan</option>
+                                <option value="lainnya">Cuti Lainnya</option>
+                            </select>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
-                        <textarea id="editKeterangan" name="keterangan" rows="3" required
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan <span class="text-red-500">*</span></label>
+                        <textarea id="editKeterangan" name="keterangan" rows="3" required maxlength="500"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">Minimal 10 karakter, maksimal 500 karakter</p>
                     </div>
                 </form>
             </div>
             <div class="edit-popup-footer">
                 <button type="button" id="cancelEditPopup" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                <button type="button" id="saveEditPopup" class="px-4 py-2 btn-primary rounded-lg">Simpan Perubahan</button>
+                <button type="button" id="saveEditPopup" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2">
+                    <span class="material-icons-outlined text-sm">save</span>
+                    Simpan Perubahan
+                </button>
             </div>
         </div>
     </div>
@@ -968,16 +1075,21 @@
                     </button>
                 </div>
                 <form id="deleteCutiForm">
+                    @csrf
+                    @method('DELETE')
                     <div class="mb-6">
                         <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus data pengajuan cuti ini?</p>
                         <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
-                        <input type="hidden" id="deleteCutiId">
+                        <input type="hidden" id="deleteCutiId" name="id">
                     </div>
                     <div class="flex justify-end gap-2">
                         <button type="button" class="cancel-modal px-4 py-2 btn-secondary rounded-lg"
                             data-target="deleteCutiModal">Batal</button>
                         <button type="submit"
-                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
+                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2">
+                            <span class="material-icons-outlined text-sm">delete</span>
+                            Hapus
+                        </button>
                     </div>
                 </form>
             </div>
@@ -999,326 +1111,769 @@
     </div>
 
     <script>
+        // ==================== GLOBAL CONFIG ====================
+        const CSRF_TOKEN = '{{ csrf_token() }}';
+        
+        // Debug: Cetak semua routes untuk memastikan mereka benar
+        console.log('🔧 Debug - All Routes:');
+        console.log('Data route:', '{{ route("karyawan.cuti.data") }}');
+        console.log('Store route:', '{{ route("karyawan.cuti.store") }}');
+        console.log('Stats route:', '{{ route("karyawan.cuti.stats") }}');
+        console.log('Update route template:', '{{ route("karyawan.cuti.update", ["cuti" => ":id"]) }}');
+        console.log('Destroy route template:', '{{ route("karyawan.cuti.destroy", ["cuti" => ":id"]) }}');
+        console.log('Edit route template:', '{{ route("karyawan.cuti.edit", ["cuti" => ":id"]) }}');
+
+        // Gunakan appRoutes dari window object
+        const API_ROUTES = window.appRoutes?.cuti || {
+            data: '{{ route("karyawan.cuti.data") }}',
+            store: '{{ route("karyawan.cuti.store") }}',
+            stats: '{{ route("karyawan.cuti.stats") }}',
+            checkAvailableDays: '{{ route("karyawan.cuti.check-available-days") }}',
+            calculateDuration: '{{ route("karyawan.cuti.calculate-duration") }}',
+            update: (id) => {
+                const url = '{{ route("karyawan.cuti.update", ["cuti" => ":id"]) }}';
+                return url.replace(':id', id);
+            },
+            destroy: (id) => {
+                const url = '{{ route("karyawan.cuti.destroy", ["cuti" => ":id"]) }}';
+                return url.replace(':id', id);
+            },
+            edit: (id) => {
+                const url = '{{ route("karyawan.cuti.edit", ["cuti" => ":id"]) }}';
+                return url.replace(':id', id);
+            },
+        };
+
+        console.log('🚀 API Routes initialized:', API_ROUTES);
+
+        // ==================== STATE MANAGEMENT ====================
+        let cutiCurrentPage = 1;
+        const itemsPerPage = 10;
+        let cutiActiveFilters = ['all'];
+        let cutiSearchTerm = '';
+        let totalCutiPages = 1;
+
+        // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', function () {
-            // ==================== STATIC DATA ====================
-            let cutiData = [
-                { id: 1, tanggal_mulai: '2024-01-15', tanggal_selesai: '2024-01-16', durasi: 2, keterangan: 'Cuti tahunan untuk liburan keluarga', jenis_cuti: 'tahunan', status: 'disetujui' },
-                { id: 2, tanggal_mulai: '2024-02-28', tanggal_selesai: '2024-02-28', durasi: 1, keterangan: 'Cuti sakit', jenis_cuti: 'sakit', status: 'disetujui' },
-                { id: 3, tanggal_mulai: '2024-03-10', tanggal_selesai: '2024-03-12', durasi: 3, keterangan: 'Urusan keluarga penting', jenis_cuti: 'penting', status: 'menunggu' },
-                { id: 4, tanggal_mulai: '2024-04-05', tanggal_selesai: '2024-04-06', durasi: 2, keterangan: 'Cuti melahirkan', jenis_cuti: 'melahirkan', status: 'ditolak' },
-            ];
-
-            let nextCutiId = 5;
-
-            // ==================== STATE MANAGEMENT ====================
-            let cutiCurrentPage = 1;
-            const itemsPerPage = 5;
-            let cutiActiveFilters = ['all'];
-            let cutiSearchTerm = '';
-
-            // ==================== INITIALIZATION ====================
+            console.log('🎯 Cuti page loaded');
+            
             initializeCuti();
             attachEventListeners();
+        });
 
-            // ==================== CUTI FUNCTIONS ====================
-            function initializeCuti() {
-                renderCutiTable();
-                renderCutiPagination();
-                updateCutiStats();
+        // ==================== CUTI FUNCTIONS ====================
+        async function initializeCuti() {
+            console.log('🚀 Initializing cuti page...');
+            try {
+                await Promise.all([
+                    loadCutiData(),
+                    loadCutiStats()
+                ]);
+            } catch (error) {
+                console.error('❌ Error initializing cuti:', error);
+            }
+        }
+
+        async function loadCutiData() {
+            showLoading();
+            
+            try {
+                const params = new URLSearchParams({
+                    page: cutiCurrentPage,
+                    per_page: itemsPerPage,
+                    search: cutiSearchTerm,
+                    status: cutiActiveFilters.includes('all') ? 'all' : cutiActiveFilters.join(','),
+                    _token: CSRF_TOKEN
+                });
+
+                const url = `${API_ROUTES.data}?${params}`;
+                console.log('📡 Loading cuti data from:', url);
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': CSRF_TOKEN
+                    },
+                    credentials: 'same-origin'
+                });
+
+                console.log('📊 Response status:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error(`Endpoint tidak ditemukan (404). URL: ${url}. Pastikan route 'karyawan.cuti.data' ada di web.php`);
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('✅ Cuti data loaded:', data);
+                
+                if (data.success) {
+                    renderCutiTable(data.data);
+                    renderCutiPagination(data.pagination);
+                    updateCutiCount(data.pagination.total);
+                    hideLoading();
+                    
+                    // Show/hide no data message
+                    if (data.pagination.total === 0) {
+                        showNoDataMessage();
+                    } else {
+                        hideNoDataMessage();
+                    }
+                } else {
+                    throw new Error(data.message || 'Failed to load data');
+                }
+            } catch (error) {
+                console.error('❌ Error loading cuti data:', error);
+                showMinimalPopup('Error', error.message || 'Gagal memuat data cuti', 'error');
+                hideLoading();
+                showNoDataMessage();
+                
+                // Tampilkan error detail di console
+                console.error('Error details:', {
+                    searchTerm: cutiSearchTerm,
+                    filters: cutiActiveFilters,
+                    page: cutiCurrentPage,
+                    routes: API_ROUTES
+                });
+            }
+        }
+
+        async function loadCutiStats() {
+            try {
+                console.log('📡 Loading cuti stats from:', API_ROUTES.stats);
+                
+                const response = await fetch(API_ROUTES.stats, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': CSRF_TOKEN
+                    },
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    console.warn('⚠️ Stats endpoint not available:', response.status);
+                    // Tetap update dengan default values
+                    updateCutiStats({
+                        total_cuti_tahunan: 12,
+                        cuti_terpakai: 0,
+                        sisa_cuti: 12,
+                    });
+                    return;
+                }
+                
+                const data = await response.json();
+                console.log('✅ Cuti stats loaded:', data);
+                
+                if (data.success) {
+                    updateCutiStats(data.data);
+                    updateSisaCutiAlert(data.data);
+                } else {
+                    // Fallback to default values
+                    updateCutiStats({
+                        total_cuti_tahunan: 12,
+                        cuti_terpakai: 0,
+                        sisa_cuti: 12,
+                    });
+                }
+            } catch (error) {
+                console.error('❌ Error loading stats:', error);
+                // Tetap update dengan default values
+                updateCutiStats({
+                    total_cuti_tahunan: 12,
+                    cuti_terpakai: 0,
+                    sisa_cuti: 12,
+                });
+            }
+        }
+
+        function renderCutiTable(cutiData) {
+            const tableBody = document.getElementById('cutiTableBody');
+            const mobileCards = document.getElementById('cuti-mobile-cards');
+
+            if (!tableBody || !mobileCards) {
+                console.error('❌ Table elements not found!');
+                return;
             }
 
-            function renderCutiTable() {
-                const filteredData = getFilteredCutiData();
-                const paginatedData = paginateData(filteredData, cutiCurrentPage);
+            tableBody.innerHTML = '';
+            mobileCards.innerHTML = '';
 
-                const tableBody = document.getElementById('cutiTableBody');
-                const mobileCards = document.getElementById('cuti-mobile-cards');
+            if (!cutiData || cutiData.length === 0) {
+                console.log('📭 No cuti data to render');
+                return;
+            }
 
-                tableBody.innerHTML = '';
-                mobileCards.innerHTML = '';
+            cutiData.forEach((item, index) => {
+                const globalIndex = (cutiCurrentPage - 1) * itemsPerPage + index + 1;
 
-                paginatedData.forEach((item, index) => {
-                    const globalIndex = (cutiCurrentPage - 1) * itemsPerPage + index + 1;
-
-                    // Format tanggal
+                // Format tanggal
+                let formattedDate = '';
+                try {
                     const startDate = new Date(item.tanggal_mulai);
                     const endDate = new Date(item.tanggal_selesai);
-                    const formattedDate = startDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-
-                    // Status badge
-                    let statusBadge = '';
-                    if (item.status === 'disetujui') {
-                        statusBadge = '<span class="status-badge status-disetujui">Disetujui</span>';
-                    } else if (item.status === 'menunggu') {
-                        statusBadge = '<span class="status-badge status-menunggu">Menunggu</span>';
-                    } else if (item.status === 'ditolak') {
-                        statusBadge = '<span class="status-badge status-ditolak">Ditolak</span>';
-                    }
-
-                    // Desktop Table Row
-                    const row = document.createElement('tr');
-                    row.className = 'cuti-row';
-                    row.innerHTML = `
-                        <td style="min-width: 60px;">${globalIndex}</td>
-                        <td style="min-width: 150px;">${formattedDate}</td>
-                        <td style="min-width: 120px;">${item.durasi} hari</td>
-                        <td style="min-width: 300px;">${item.keterangan}</td>
-                        <td style="min-width: 120px;">${statusBadge}</td>
-                        <td style="min-width: 100px; text-align: center;">
-                            <div class="flex justify-center gap-2">
-                                <button class="edit-cuti-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id='${item.id}'>
-                                    <span class="material-icons-outlined">edit</span>
-                                </button>
-                                <button class="delete-cuti-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id='${item.id}'>
-                                    <span class="material-icons-outlined">delete</span>
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-
-                    // Mobile Card
-                    const card = document.createElement('div');
-                    card.className = 'bg-white rounded-lg border border-border-light p-4 shadow-sm';
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <h4 class="font-semibold text-base">${formattedDate}</h4>
-                                <p class="text-sm text-text-muted-light">${item.durasi} hari</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="edit-cuti-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id='${item.id}'>
-                                    <span class="material-icons-outlined">edit</span>
-                                </button>
-                                <button class="delete-cuti-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id='${item.id}'>
-                                    <span class="material-icons-outlined">delete</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <p class="text-sm text-gray-700">${item.keterangan}</p>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-xs text-text-muted-light">No</p>
-                                <p class="font-medium text-sm">${globalIndex}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-text-muted-light">Status</p>
-                                <div>${statusBadge}</div>
-                            </div>
-                        </div>
-                    `;
-                    mobileCards.appendChild(card);
-                });
-
-                document.getElementById('cutiCount').textContent = filteredData.length;
-            }
-
-            function renderCutiPagination() {
-                const filteredData = getFilteredCutiData();
-                const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-                renderPagination('cuti', totalPages, cutiCurrentPage);
-            }
-
-            function getFilteredCutiData() {
-                return cutiData.filter(item => {
-                    const matchesSearch = !cutiSearchTerm ||
-                        item.keterangan.toLowerCase().includes(cutiSearchTerm.toLowerCase()) ||
-                        item.tanggal_mulai.includes(cutiSearchTerm);
-
-                    const matchesFilter = cutiActiveFilters.includes('all') ||
-                        cutiActiveFilters.includes(item.status);
-
-                    return matchesSearch && matchesFilter;
-                });
-            }
-
-            // ==================== GENERAL HELPER FUNCTIONS ====================
-            function paginateData(data, currentPage) {
-                const startIndex = (currentPage - 1) * itemsPerPage;
-                const endIndex = startIndex + itemsPerPage;
-                return data.slice(startIndex, endIndex);
-            }
-
-            function renderPagination(type, totalPages, currentPage) {
-                const pageNumbersContainer = document.getElementById(`${type}PageNumbers`);
-                const prevButton = document.getElementById(`${type}PrevPage`);
-                const nextButton = document.getElementById(`${type}NextPage`);
-
-                pageNumbersContainer.innerHTML = '';
-
-                for (let i = 1; i <= totalPages; i++) {
-                    const pageNumber = document.createElement('button');
-                    pageNumber.textContent = i;
-                    pageNumber.className = `desktop-page-btn ${i === currentPage ? 'active' : ''}`;
-                    pageNumber.addEventListener('click', () => goToPage(type, i));
-                    pageNumbersContainer.appendChild(pageNumber);
-                }
-
-                prevButton.disabled = currentPage === 1;
-                nextButton.disabled = currentPage === totalPages || totalPages === 0;
-
-                prevButton.onclick = () => goToPage(type, currentPage - 1);
-                nextButton.onclick = () => goToPage(type, currentPage + 1);
-            }
-
-            function goToPage(type, page) {
-                if (type === 'cuti') {
-                    cutiCurrentPage = page;
-                    initializeCuti();
-                }
-            }
-
-            function updateCutiStats() {
-                const totalCuti = 12; // Total cuti tahunan
-                const cutiTerpakai = cutiData
-                    .filter(c => c.status === 'disetujui')
-                    .reduce((sum, c) => sum + c.durasi, 0);
-                const cutiTersisa = totalCuti - cutiTerpakai;
-
-                document.getElementById('stat-total-cuti').textContent = totalCuti;
-                document.getElementById('stat-cuti-terpakai').textContent = cutiTerpakai;
-                document.getElementById('stat-cuti-tersisa').textContent = cutiTersisa;
-            }
-
-            // ==================== EVENT LISTENERS ====================
-            function attachEventListeners() {
-                // Modal Controls
-                document.querySelectorAll('.close-modal, .cancel-modal').forEach(button => {
-                    button.addEventListener('click', function () {
-                        const targetId = this.getAttribute('data-target');
-                        closeModal(targetId);
+                    formattedDate = startDate.toLocaleDateString('id-ID', { 
+                        day: 'numeric', 
+                        month: 'long', 
+                        year: 'numeric' 
                     });
+                } catch (e) {
+                    formattedDate = item.tanggal_mulai;
+                }
+
+                // Status badge
+                let statusBadge = '';
+                if (item.status === 'disetujui') {
+                    statusBadge = '<span class="status-badge status-disetujui">Disetujui</span>';
+                } else if (item.status === 'menunggu') {
+                    statusBadge = '<span class="status-badge status-menunggu">Menunggu</span>';
+                } else if (item.status === 'ditolak') {
+                    statusBadge = '<span class="status-badge status-ditolak">Ditolak</span>';
+                }
+
+                // Action buttons (only show edit/delete for pending requests)
+                let actionButtons = '';
+                if (item.status === 'menunggu') {
+                    actionButtons = `
+                        <div class="flex justify-center gap-2">
+                            <button class="edit-cuti-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id='${item.id}' title="Edit">
+                                <span class="material-icons-outlined text-sm">edit</span>
+                            </button>
+                            <button class="delete-cuti-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id='${item.id}' title="Hapus">
+                                <span class="material-icons-outlined text-sm">delete</span>
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    actionButtons = '<span class="text-gray-400 text-sm">Tidak dapat diubah</span>';
+                }
+
+                // Desktop Table Row
+                const row = document.createElement('tr');
+                row.className = 'cuti-row';
+                row.innerHTML = `
+                    <td style="min-width: 60px;">${globalIndex}</td>
+                    <td style="min-width: 150px;">${formattedDate}</td>
+                    <td style="min-width: 120px;">${item.durasi} hari</td>
+                    <td style="min-width: 300px; white-space: normal;">${item.keterangan || '-'}</td>
+                    <td style="min-width: 120px;">${statusBadge}</td>
+                    <td style="min-width: 100px; text-align: center;">${actionButtons}</td>
+                `;
+                tableBody.appendChild(row);
+
+                // Mobile Card
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg border border-border-light p-4 shadow-sm';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h4 class="font-semibold text-base">${formattedDate}</h4>
+                            <p class="text-sm text-text-muted-light">${item.durasi} hari • ${item.jenis_cuti || 'Cuti'}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            ${item.status === 'menunggu' ? `
+                                <button class="edit-cuti-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" data-id='${item.id}' title="Edit">
+                                    <span class="material-icons-outlined text-sm">edit</span>
+                                </button>
+                                <button class="delete-cuti-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id='${item.id}' title="Hapus">
+                                    <span class="material-icons-outlined text-sm">delete</span>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <p class="text-sm text-gray-700">${item.keterangan || 'Tidak ada keterangan'}</p>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-text-muted-light">No</p>
+                            <p class="font-medium text-sm">${globalIndex}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-text-muted-light">Status</p>
+                            <div>${statusBadge}</div>
+                        </div>
+                    </div>
+                `;
+                mobileCards.appendChild(card);
+            });
+        }
+
+        function renderCutiPagination(pagination) {
+            totalCutiPages = pagination.last_page;
+            const pageNumbersContainer = document.getElementById('cutiPageNumbers');
+            const prevButton = document.getElementById('cutiPrevPage');
+            const nextButton = document.getElementById('cutiNextPage');
+
+            if (!pageNumbersContainer || !prevButton || !nextButton) {
+                console.error('❌ Pagination elements not found!');
+                return;
+            }
+
+            pageNumbersContainer.innerHTML = '';
+
+            // Show pagination only if there's more than one page
+            const paginationContainer = document.getElementById('cutiPaginationContainer');
+            if (paginationContainer) {
+                if (totalCutiPages > 1) {
+                    paginationContainer.style.display = 'flex';
+                } else {
+                    paginationContainer.style.display = 'none';
+                }
+            }
+
+            // Calculate visible page range
+            let startPage = Math.max(1, cutiCurrentPage - 2);
+            let endPage = Math.min(totalCutiPages, cutiCurrentPage + 2);
+
+            // Adjust if at the beginning
+            if (cutiCurrentPage <= 3) {
+                endPage = Math.min(5, totalCutiPages);
+            }
+
+            // Adjust if at the end
+            if (cutiCurrentPage >= totalCutiPages - 2) {
+                startPage = Math.max(1, totalCutiPages - 4);
+            }
+
+            // Create page buttons
+            for (let i = startPage; i <= endPage; i++) {
+                const pageNumber = document.createElement('button');
+                pageNumber.textContent = i;
+                pageNumber.className = `desktop-page-btn ${i === cutiCurrentPage ? 'active' : ''}`;
+                pageNumber.addEventListener('click', () => goToPage(i));
+                pageNumbersContainer.appendChild(pageNumber);
+            }
+
+            prevButton.disabled = cutiCurrentPage === 1;
+            prevButton.onclick = () => goToPage(cutiCurrentPage - 1);
+
+            nextButton.disabled = cutiCurrentPage === totalCutiPages || totalCutiPages === 0;
+            nextButton.onclick = () => goToPage(cutiCurrentPage + 1);
+        }
+
+        function goToPage(page) {
+            cutiCurrentPage = page;
+            loadCutiData();
+            // Scroll to top of table
+            const tableContainer = document.getElementById('scrollableCutiTable');
+            if (tableContainer) {
+                tableContainer.scrollTop = 0;
+            }
+        }
+
+        function updateCutiStats(stats) {
+            const totalCutiEl = document.getElementById('stat-total-cuti');
+            const cutiTerpakaiEl = document.getElementById('stat-cuti-terpakai');
+            const cutiTersisaEl = document.getElementById('stat-cuti-tersisa');
+            
+            if (totalCutiEl) totalCutiEl.textContent = stats.total_cuti_tahunan || 12;
+            if (cutiTerpakaiEl) cutiTerpakaiEl.textContent = stats.cuti_terpakai || 0;
+            if (cutiTersisaEl) cutiTersisaEl.textContent = stats.sisa_cuti || 0;
+        }
+
+        function updateCutiCount(count) {
+            const cutiCountEl = document.getElementById('cutiCount');
+            if (cutiCountEl) {
+                cutiCountEl.textContent = count;
+            }
+        }
+
+        function updateSisaCutiAlert(stats) {
+            const sisaCuti = stats.sisa_cuti || 0;
+            const alertElement = document.getElementById('sisaCutiAlert');
+            const sisaCutiText = document.getElementById('sisaCutiText');
+            
+            if (alertElement && sisaCutiText) {
+                if (sisaCuti > 0) {
+                    sisaCutiText.textContent = `${sisaCuti} hari`;
+                    alertElement.style.display = 'flex';
+                } else {
+                    alertElement.style.display = 'none';
+                }
+            }
+        }
+
+        function showLoading() {
+            const loadingEl = document.getElementById('cutiLoading');
+            const desktopTable = document.getElementById('cutiDesktopTable');
+            const mobileCards = document.getElementById('cuti-mobile-cards');
+            const paginationContainer = document.getElementById('cutiPaginationContainer');
+            const noData = document.getElementById('noCutiData');
+            
+            if (loadingEl) loadingEl.style.display = 'block';
+            if (desktopTable) desktopTable.style.display = 'none';
+            if (mobileCards) mobileCards.style.display = 'none';
+            if (paginationContainer) paginationContainer.style.display = 'none';
+            if (noData) noData.style.display = 'none';
+        }
+
+        function hideLoading() {
+            const loadingEl = document.getElementById('cutiLoading');
+            const desktopTable = document.getElementById('cutiDesktopTable');
+            const mobileCards = document.getElementById('cuti-mobile-cards');
+            
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (desktopTable) desktopTable.style.display = 'block';
+            if (mobileCards) mobileCards.style.display = 'block';
+        }
+
+        function showNoDataMessage() {
+            const noData = document.getElementById('noCutiData');
+            const desktopTable = document.getElementById('cutiDesktopTable');
+            const mobileCards = document.getElementById('cuti-mobile-cards');
+            const paginationContainer = document.getElementById('cutiPaginationContainer');
+            
+            if (noData) noData.style.display = 'block';
+            if (desktopTable) desktopTable.style.display = 'none';
+            if (mobileCards) mobileCards.style.display = 'none';
+            if (paginationContainer) paginationContainer.style.display = 'none';
+        }
+
+        function hideNoDataMessage() {
+            const noData = document.getElementById('noCutiData');
+            if (noData) noData.style.display = 'none';
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        function attachEventListeners() {
+            console.log('🔗 Attaching event listeners...');
+            
+            // Modal Controls
+            document.querySelectorAll('.close-modal, .cancel-modal').forEach(button => {
+                button.addEventListener('click', function () {
+                    const targetId = this.getAttribute('data-target');
+                    closeModal(targetId);
                 });
+            });
 
-                // Edit Popup Controls
-                document.getElementById('closeEditPopup').addEventListener('click', closeEditPopup);
-                document.getElementById('cancelEditPopup').addEventListener('click', closeEditPopup);
-                document.getElementById('saveEditPopup').addEventListener('click', saveEditChanges);
+            // Edit Popup Controls
+            const closeEditBtn = document.getElementById('closeEditPopup');
+            const cancelEditBtn = document.getElementById('cancelEditPopup');
+            const saveEditBtn = document.getElementById('saveEditPopup');
+            
+            if (closeEditBtn) closeEditBtn.addEventListener('click', closeEditPopup);
+            if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeEditPopup);
+            if (saveEditBtn) saveEditBtn.addEventListener('click', saveEditChanges);
 
-                // Form Submissions
-                document.getElementById('tambahCutiForm').addEventListener('submit', handleAddCuti);
-                document.getElementById('deleteCutiForm').addEventListener('submit', handleDeleteCuti);
+            // Form Submissions
+            const tambahCutiForm = document.getElementById('tambahCutiForm');
+            const deleteCutiForm = document.getElementById('deleteCutiForm');
+            
+            if (tambahCutiForm) {
+                tambahCutiForm.addEventListener('submit', handleAddCuti);
+            }
+            
+            if (deleteCutiForm) {
+                deleteCutiForm.addEventListener('submit', handleDeleteCuti);
+            }
 
-                // Tombol Tambah & Edit
-                document.getElementById('tambahCutiBtn').addEventListener('click', () => openModal('tambahCutiModal'));
+            // Tombol Tambah
+            const tambahCutiBtn = document.getElementById('tambahCutiBtn');
+            if (tambahCutiBtn) {
+                tambahCutiBtn.addEventListener('click', () => {
+                    openModal('tambahCutiModal');
+                    // Reset form
+                    const form = document.getElementById('tambahCutiForm');
+                    if (form) form.reset();
+                    
+                    // Set min date for end date
+                    const startDateInput = document.querySelector('#tambahCutiForm input[name="tanggal_mulai"]');
+                    const endDateInput = document.querySelector('#tambahCutiForm input[name="tanggal_selesai"]');
+                    
+                    if (startDateInput && endDateInput) {
+                        // Set min untuk tanggal mulai (hari ini)
+                        const today = new Date().toISOString().split('T')[0];
+                        startDateInput.min = today;
+                        
+                        startDateInput.addEventListener('change', function() {
+                            endDateInput.min = this.value;
+                            if (endDateInput.value && endDateInput.value >= this.value) {
+                                calculateDuration(this.value, endDateInput.value, document.querySelector('#tambahCutiForm input[name="durasi"]'));
+                            }
+                        });
+                        
+                        endDateInput.addEventListener('change', function() {
+                            if (startDateInput.value && this.value >= startDateInput.value) {
+                                calculateDuration(startDateInput.value, this.value, document.querySelector('#tambahCutiForm input[name="durasi"]'));
+                            }
+                        });
+                    }
+                });
+            }
 
-                // Search and Filter for Cuti
-                document.getElementById('searchCutiInput').addEventListener('input', debounce(function (e) {
+            // Search and Filter for Cuti
+            const searchInput = document.getElementById('searchCutiInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', debounce(function (e) {
                     cutiSearchTerm = e.target.value.trim();
                     cutiCurrentPage = 1;
-                    initializeCuti();
-                }, 300));
+                    loadCutiData();
+                }, 500));
+            }
 
-                document.getElementById('filterCutiBtn').addEventListener('click', () => toggleDropdown('filterCutiDropdown'));
-                document.getElementById('applyCutiFilter').addEventListener('click', applyCutiFilter);
-                document.getElementById('resetCutiFilter').addEventListener('click', resetCutiFilter);
+            const filterBtn = document.getElementById('filterCutiBtn');
+            if (filterBtn) {
+                filterBtn.addEventListener('click', () => toggleDropdown('filterCutiDropdown'));
+            }
 
-                // Popup Close
-                document.querySelector('.minimal-popup-close').addEventListener('click', () => {
-                    document.getElementById('minimalPopup').classList.remove('show');
+            const applyFilterBtn = document.getElementById('applyCutiFilter');
+            if (applyFilterBtn) {
+                applyFilterBtn.addEventListener('click', applyCutiFilter);
+            }
+
+            const resetFilterBtn = document.getElementById('resetCutiFilter');
+            if (resetFilterBtn) {
+                resetFilterBtn.addEventListener('click', resetCutiFilter);
+            }
+
+            // Popup Close
+            const popupClose = document.querySelector('.minimal-popup-close');
+            if (popupClose) {
+                popupClose.addEventListener('click', () => {
+                    const popup = document.getElementById('minimalPopup');
+                    if (popup) popup.classList.remove('show');
                 });
+            }
 
-                // Close dropdowns when clicking outside
-                document.addEventListener('click', function (e) {
-                    if (!e.target.closest('.relative')) {
-                        document.querySelectorAll('.filter-dropdown').forEach(d => d.classList.remove('show'));
-                    }
-                });
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('.relative')) {
+                    document.querySelectorAll('.filter-dropdown').forEach(d => d.classList.remove('show'));
+                }
+            });
 
-                // Attach listeners to dynamically created buttons
-                document.body.addEventListener('click', function (e) {
-                    if (e.target.closest('.edit-cuti-btn')) {
-                        const id = parseInt(e.target.closest('.edit-cuti-btn').dataset.id);
-                        openEditCutiPopup(id);
-                    }
-                    if (e.target.closest('.delete-cuti-btn')) {
-                        const id = parseInt(e.target.closest('.delete-cuti-btn').dataset.id);
-                        openDeleteModal('cuti', id);
-                    }
-                });
+            // Attach listeners to dynamically created buttons
+            document.body.addEventListener('click', function (e) {
+                if (e.target.closest('.edit-cuti-btn')) {
+                    const btn = e.target.closest('.edit-cuti-btn');
+                    const id = parseInt(btn.dataset.id);
+                    openEditCutiPopup(id);
+                }
+                if (e.target.closest('.delete-cuti-btn')) {
+                    const btn = e.target.closest('.delete-cuti-btn');
+                    const id = parseInt(btn.dataset.id);
+                    openDeleteModal(id);
+                }
+            });
 
-                // Auto-calculate duration based on date selection
-                document.getElementById('tambahCutiForm').querySelectorAll('input[type="date"]').forEach(input => {
-                    input.addEventListener('change', calculateDuration);
-                });
-
-                // Close edit popup when clicking outside
-                document.getElementById('editCutiPopup').addEventListener('click', function(e) {
+            // Close edit popup when clicking outside
+            const editPopup = document.getElementById('editCutiPopup');
+            if (editPopup) {
+                editPopup.addEventListener('click', function(e) {
                     if (e.target === this) {
                         closeEditPopup();
                     }
                 });
             }
+        }
 
-            // ==================== CRUD HANDLERS ====================
-            function handleAddCuti(e) {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                const newCuti = {
-                    id: nextCutiId++,
-                    tanggal_mulai: formData.get('tanggal_mulai'),
-                    tanggal_selesai: formData.get('tanggal_selesai'),
-                    durasi: parseInt(formData.get('durasi')),
-                    keterangan: formData.get('keterangan'),
-                    jenis_cuti: 'cuti', // Default value since we removed the jenis_cuti field
-                    status: 'menunggu'
-                };
-
-                simulateApiCall(() => {
-                    cutiData.push(newCuti);
+        // ==================== CRUD HANDLERS ====================
+        async function handleAddCuti(e) {
+            e.preventDefault();
+            console.log('📝 Submitting cuti form...');
+            
+            const formData = new FormData(e.target);
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Mengirim...';
+            submitBtn.disabled = true;
+            
+            try {
+                // Validate form
+                const tanggalMulai = formData.get('tanggal_mulai');
+                const tanggalSelesai = formData.get('tanggal_selesai');
+                
+                if (!tanggalMulai || !tanggalSelesai) {
+                    throw new Error('Tanggal mulai dan selesai harus diisi');
+                }
+                
+                if (new Date(tanggalMulai) > new Date(tanggalSelesai)) {
+                    throw new Error('Tanggal selesai harus setelah tanggal mulai');
+                }
+                
+                console.log('📤 Sending to:', API_ROUTES.store);
+                
+                const response = await fetch(API_ROUTES.store, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                console.log('📨 Add cuti response:', data);
+                
+                if (data.success) {
                     closeModal('tambahCutiModal');
                     e.target.reset();
                     cutiCurrentPage = 1;
-                    initializeCuti();
+                    await Promise.all([
+                        loadCutiData(),
+                        loadCutiStats()
+                    ]);
                     showMinimalPopup('Berhasil', 'Pengajuan cuti berhasil dikirim', 'success');
-                });
-            }
-
-            function saveEditChanges() {
-                const id = parseInt(document.getElementById('editCutiId').value);
-                const formData = new FormData(document.getElementById('editCutiForm'));
-                const cutiIndex = cutiData.findIndex(c => c.id === id);
-
-                if (cutiIndex !== -1) {
-                    simulateApiCall(() => {
-                        cutiData[cutiIndex] = {
-                            ...cutiData[cutiIndex],
-                            tanggal_mulai: formData.get('tanggal_mulai'),
-                            tanggal_selesai: formData.get('tanggal_selesai'),
-                            durasi: parseInt(formData.get('durasi')),
-                            keterangan: formData.get('keterangan'),
-                            jenis_cuti: cutiData[cutiIndex].jenis_cuti // Keep existing jenis_cuti value
-                        };
-                        closeEditPopup();
-                        initializeCuti();
-                        showMinimalPopup('Berhasil', 'Data cuti berhasil diperbarui', 'success');
-                    });
+                } else {
+                    let errorMessage = data.message || 'Gagal mengirim pengajuan';
+                    if (data.errors) {
+                        errorMessage = Object.values(data.errors).flat().join(', ');
+                    }
+                    showMinimalPopup('Error', errorMessage, 'error');
                 }
+            } catch (error) {
+                console.error('❌ Error adding cuti:', error);
+                showMinimalPopup('Error', error.message || 'Terjadi kesalahan saat mengirim pengajuan', 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             }
+        }
 
-            function handleDeleteCuti(e) {
-                e.preventDefault();
-                const id = parseInt(document.getElementById('deleteCutiId').value);
+        async function saveEditChanges() {
+            const id = document.getElementById('editCutiId').value;
+            if (!id) {
+                showMinimalPopup('Error', 'ID cuti tidak valid', 'error');
+                return;
+            }
+            
+            const formData = new FormData(document.getElementById('editCutiForm'));
+            const submitBtn = document.getElementById('saveEditPopup');
+            const originalText = submitBtn.textContent;
+            
+            submitBtn.textContent = 'Menyimpan...';
+            submitBtn.disabled = true;
+            
+            try {
+                const updateUrl = API_ROUTES.update(id);
+                console.log('✏️ Updating cuti at:', updateUrl);
+                console.log('✏️ With data:', Object.fromEntries(formData));
+                
+                const response = await fetch(updateUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'Accept': 'application/json',
+                        'X-HTTP-Method-Override': 'PUT'
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                console.log('✏️ Update cuti response:', data);
+                
+                if (data.success) {
+                    closeEditPopup();
+                    await Promise.all([
+                        loadCutiData(),
+                        loadCutiStats()
+                    ]);
+                    showMinimalPopup('Berhasil', 'Data cuti berhasil diperbarui', 'success');
+                } else {
+                    let errorMessage = data.message || 'Gagal memperbarui data';
+                    if (data.errors) {
+                        errorMessage = Object.values(data.errors).flat().join(', ');
+                    }
+                    showMinimalPopup('Error', errorMessage, 'error');
+                }
+            } catch (error) {
+                console.error('❌ Error updating cuti:', error);
+                showMinimalPopup('Error', error.message || 'Terjadi kesalahan saat memperbarui data', 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
 
-                simulateApiCall(() => {
-                    cutiData = cutiData.filter(c => c.id !== id);
+        async function handleDeleteCuti(e) {
+            e.preventDefault();
+            const id = document.getElementById('deleteCutiId').value;
+            if (!id) {
+                showMinimalPopup('Error', 'ID cuti tidak valid', 'error');
+                return;
+            }
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            
+            submitBtn.textContent = 'Menghapus...';
+            submitBtn.disabled = true;
+            
+            try {
+                const deleteUrl = API_ROUTES.destroy(id);
+                console.log('🗑️ Deleting cuti at:', deleteUrl);
+                
+                const response = await fetch(deleteUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'Accept': 'application/json',
+                        'X-HTTP-Method-Override': 'DELETE'
+                    }
+                });
+                
+                const data = await response.json();
+                console.log('🗑️ Delete cuti response:', data);
+                
+                if (data.success) {
                     closeModal('deleteCutiModal');
                     cutiCurrentPage = 1;
-                    initializeCuti();
+                    await Promise.all([
+                        loadCutiData(),
+                        loadCutiStats()
+                    ]);
                     showMinimalPopup('Berhasil', 'Data cuti berhasil dihapus', 'success');
-                });
+                } else {
+                    showMinimalPopup('Error', data.message || 'Gagal menghapus data', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Error deleting cuti:', error);
+                showMinimalPopup('Error', error.message || 'Terjadi kesalahan saat menghapus data', 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             }
+        }
 
-            // ==================== UI HELPER FUNCTIONS ====================
-            function openEditCutiPopup(id) {
-                const cuti = cutiData.find(c => c.id === id);
-                if (cuti) {
+        // ==================== UI HELPER FUNCTIONS ====================
+        async function openEditCutiPopup(id) {
+            console.log('📂 Opening edit popup for cuti ID:', id);
+            
+            try {
+                const editUrl = API_ROUTES.edit(id);
+                console.log('📄 Fetching edit data from:', editUrl);
+                
+                const response = await fetch(editUrl, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': CSRF_TOKEN
+                    }
+                });
+                
+                console.log('📄 Edit response status:', response.status);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error(`Data cuti dengan ID ${id} tidak ditemukan`);
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('✅ Edit data loaded:', data);
+                
+                if (data.success) {
+                    const cuti = data.data;
                     document.getElementById('editCutiId').value = cuti.id;
-                    document.getElementById('editTanggalMulai').value = cuti.tanggal_mulai;
-                    document.getElementById('editTanggalSelesai').value = cuti.tanggal_selesai;
+                    document.getElementById('editTanggalMulai').value = cuti.tanggal_mulai.split(' ')[0];
+                    document.getElementById('editTanggalSelesai').value = cuti.tanggal_selesai.split(' ')[0];
                     document.getElementById('editDurasi').value = cuti.durasi;
+                    document.getElementById('editJenisCuti').value = cuti.jenis_cuti;
                     document.getElementById('editKeterangan').value = cuti.keterangan;
                     
                     // Show popup
@@ -1327,128 +1882,155 @@
                     
                     // Prevent body scroll
                     document.body.style.overflow = 'hidden';
-                }
-            }
-
-            function closeEditPopup() {
-                const popup = document.getElementById('editCutiPopup');
-                popup.classList.remove('show');
-                
-                // Restore body scroll
-                document.body.style.overflow = '';
-            }
-
-            function openDeleteModal(type, id) {
-                document.getElementById(`delete${type.charAt(0).toUpperCase() + type.slice(1)}Id`).value = id;
-                openModal(`delete${type.charAt(0).toUpperCase() + type.slice(1)}Modal`);
-            }
-
-            function openModal(modalId) {
-                document.getElementById(modalId).classList.remove('hidden');
-            }
-
-            function closeModal(modalId) {
-                document.getElementById(modalId).classList.add('hidden');
-            }
-
-            function toggleDropdown(dropdownId) {
-                document.getElementById(dropdownId).classList.toggle('show');
-            }
-
-            function applyCutiFilter() {
-                const filterAll = document.getElementById('filterCutiAll').checked;
-                const filterDisetujui = document.getElementById('filterCutiDisetujui').checked;
-                const filterMenunggu = document.getElementById('filterCutiMenunggu').checked;
-                const filterDitolak = document.getElementById('filterCutiDitolak').checked;
-
-                cutiActiveFilters = [];
-                if (filterAll) {
-                    cutiActiveFilters.push('all');
                 } else {
-                    if (filterDisetujui) cutiActiveFilters.push('disetujui');
-                    if (filterMenunggu) cutiActiveFilters.push('menunggu');
-                    if (filterDitolak) cutiActiveFilters.push('ditolak');
+                    throw new Error(data.message || 'Failed to load cuti data');
                 }
-                cutiCurrentPage = 1;
-                initializeCuti();
-                toggleDropdown('filterCutiDropdown');
-                showMinimalPopup('Filter Diterapkan', `Menampilkan ${getFilteredCutiData().length} pengajuan`, 'success');
+            } catch (error) {
+                console.error('❌ Error loading cuti for edit:', error);
+                showMinimalPopup('Error', error.message || 'Gagal memuat data cuti untuk diedit', 'error');
             }
+        }
 
-            function resetCutiFilter() {
-                document.getElementById('filterCutiAll').checked = true;
-                document.getElementById('filterCutiDisetujui').checked = false;
-                document.getElementById('filterCutiMenunggu').checked = false;
-                document.getElementById('filterCutiDitolak').checked = false;
-                cutiActiveFilters = ['all'];
-                cutiCurrentPage = 1;
-                initializeCuti();
-                toggleDropdown('filterCutiDropdown');
-                showMinimalPopup('Filter Direset', 'Menampilkan semua pengajuan', 'success');
+        function closeEditPopup() {
+            const popup = document.getElementById('editCutiPopup');
+            popup.classList.remove('show');
+            
+            // Restore body scroll
+            document.body.style.overflow = '';
+        }
+
+        function openDeleteModal(id) {
+            document.getElementById('deleteCutiId').value = id;
+            openModal('deleteCutiModal');
+        }
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
             }
+        }
 
-            function showMinimalPopup(title, message, type = 'success') {
-                const popup = document.getElementById('minimalPopup');
-                const popupTitle = popup.querySelector('.minimal-popup-title');
-                const popupMessage = popup.querySelector('.minimal-popup-message');
-                const popupIcon = popup.querySelector('.minimal-popup-icon span');
-
-                popupTitle.textContent = title;
-                popupMessage.textContent = message;
-                popup.className = `minimal-popup show ${type}`;
-
-                if (type === 'success') popupIcon.textContent = 'check';
-                else if (type === 'error') popupIcon.textContent = 'error';
-                else if (type === 'warning') popupIcon.textContent = 'warning';
-
-                setTimeout(() => {
-                    popup.classList.remove('show');
-                }, 3000);
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
             }
+        }
 
-            function simulateApiCall(callback, shouldFail = false) {
-                // Show loading state on button
-                const submitBtn = document.activeElement;
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'Memproses...';
-                submitBtn.disabled = true;
-
-                setTimeout(() => {
-                    // Randomly fail for demonstration (10% chance)
-                    if (Math.random() < 0.1 || shouldFail) {
-                        showMinimalPopup('Error', 'Terjadi kesalahan pada server. Silakan coba lagi.', 'error');
-                    } else {
-                        callback();
-                    }
-                    // Reset button state
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
-                }, 800); // Simulate network delay
+        function toggleDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            if (dropdown) {
+                dropdown.classList.toggle('show');
             }
+        }
 
-            function debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
+        function applyCutiFilter() {
+            const filterAll = document.getElementById('filterCutiAll').checked;
+            const filterDisetujui = document.getElementById('filterCutiDisetujui').checked;
+            const filterMenunggu = document.getElementById('filterCutiMenunggu').checked;
+            const filterDitolak = document.getElementById('filterCutiDitolak').checked;
+
+            cutiActiveFilters = [];
+            if (filterAll) {
+                cutiActiveFilters.push('all');
+            } else {
+                if (filterDisetujui) cutiActiveFilters.push('disetujui');
+                if (filterMenunggu) cutiActiveFilters.push('menunggu');
+                if (filterDitolak) cutiActiveFilters.push('ditolak');
+            }
+            
+            cutiCurrentPage = 1;
+            loadCutiData();
+            toggleDropdown('filterCutiDropdown');
+        }
+
+        function resetCutiFilter() {
+            document.getElementById('filterCutiAll').checked = true;
+            document.getElementById('filterCutiDisetujui').checked = false;
+            document.getElementById('filterCutiMenunggu').checked = false;
+            document.getElementById('filterCutiDitolak').checked = false;
+            cutiActiveFilters = ['all'];
+            cutiCurrentPage = 1;
+            loadCutiData();
+            toggleDropdown('filterCutiDropdown');
+        }
+
+        function showMinimalPopup(title, message, type = 'success') {
+            const popup = document.getElementById('minimalPopup');
+            const popupTitle = popup.querySelector('.minimal-popup-title');
+            const popupMessage = popup.querySelector('.minimal-popup-message');
+            const popupIcon = popup.querySelector('.minimal-popup-icon span');
+
+            popupTitle.textContent = title;
+            popupMessage.textContent = message;
+            popup.className = `minimal-popup show ${type}`;
+
+            if (type === 'success') popupIcon.textContent = 'check';
+            else if (type === 'error') popupIcon.textContent = 'error';
+            else if (type === 'warning') popupIcon.textContent = 'warning';
+
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 3000);
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
                     clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
+                    func(...args);
                 };
-            }
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
 
-            function calculateDuration() {
-                const startDate = new Date(document.getElementById('tambahCutiForm').querySelector('input[name="tanggal_mulai"]').value);
-                const endDate = new Date(document.getElementById('tambahCutiForm').querySelector('input[name="tanggal_selesai"]').value);
-
-                if (startDate && endDate && endDate >= startDate) {
-                    const diffTime = Math.abs(endDate - startDate);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                    document.getElementById('tambahCutiForm').querySelector('input[name="durasi"]').value = diffDays;
+        async function calculateDuration(startDate, endDate, durasiInput) {
+            try {
+                if (!API_ROUTES.calculateDuration) {
+                    // Fallback calculation jika endpoint tidak ada
+                    fallbackDurationCalculation(startDate, endDate, durasiInput);
+                    return;
                 }
+                
+                const response = await fetch(API_ROUTES.calculateDuration, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        start_date: startDate,
+                        end_date: endDate
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && durasiInput) {
+                        durasiInput.value = data.duration;
+                    }
+                } else {
+                    fallbackDurationCalculation(startDate, endDate, durasiInput);
+                }
+            } catch (error) {
+                console.error('Error calculating duration:', error);
+                fallbackDurationCalculation(startDate, endDate, durasiInput);
             }
-        });
+        }
+
+        function fallbackDurationCalculation(startDate, endDate, durasiInput) {
+            if (startDate && endDate && durasiInput) {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const timeDiff = Math.abs(end.getTime() - start.getTime());
+                const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+                durasiInput.value = diffDays;
+            }
+        }
     </script>
 </body>
 
