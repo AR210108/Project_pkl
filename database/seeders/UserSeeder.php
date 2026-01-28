@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Divisi;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -10,8 +11,10 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        // mapping: nama_divisi => id
+        $divisiMap = Divisi::pluck('id', 'divisi')->toArray();
+
         $users = [
-            // === OWNER & MANAGEMENT ===
             [
                 'name' => 'Owner',
                 'email' => 'owner@gmail.com',
@@ -24,8 +27,6 @@ class UserSeeder extends Seeder
                 'role' => 'general_manager',
                 'divisi' => null,
             ],
-
-            // === DIVISI PROGRAMMER ===
             [
                 'name' => 'Ahmad Fauzi',
                 'email' => 'ahmad@gmail.com',
@@ -39,33 +40,6 @@ class UserSeeder extends Seeder
                 'divisi' => 'programmer',
             ],
             [
-                'name' => 'Rizki Pratama',
-                'email' => 'rizki@gmail.com',
-                'role' => 'karyawan',
-                'divisi' => 'programmer',
-            ],
-            [
-                'name' => 'Maya Indah',
-                'email' => 'maya@gmail.com',
-                'role' => 'karyawan',
-                'divisi' => 'programmer',
-            ],
-            [
-                'name' => 'Finance',
-                'email' => 'finance@gmail.com',
-                'role' => 'finance',
-                'divisi' => null
-            ],
-
-            [
-                'name' => 'General Manager',
-                'email' => 'general@gmail.com',
-                'role' => 'general_manager',
-                'divisi' => null
-            ],
-
-            // === DIVISI DIGITAL MARKETING ===
-            [
                 'name' => 'Agus Wijaya',
                 'email' => 'agus@gmail.com',
                 'role' => 'manager_divisi',
@@ -77,20 +51,6 @@ class UserSeeder extends Seeder
                 'role' => 'karyawan',
                 'divisi' => 'digital_marketing',
             ],
-            [
-                'name' => 'Rudi Hartono',
-                'email' => 'rudi.hartono@gmail.com',
-                'role' => 'karyawan',
-                'divisi' => 'digital_marketing',
-            ],
-            [
-                'name' => 'Nina Sari',
-                'email' => 'nina@gmail.com',
-                'role' => 'karyawan',
-                'divisi' => 'digital_marketing',
-            ],
-
-            // === DIVISI DESAINER ===
             [
                 'name' => 'Yuni Astuti',
                 'email' => 'yuni@gmail.com',
@@ -104,46 +64,6 @@ class UserSeeder extends Seeder
                 'divisi' => 'desainer',
             ],
             [
-                'name' => 'Ratna Dewi',
-                'email' => 'ratna@gmail.com',
-                'role' => 'karyawan',
-                'divisi' => 'desainer',
-            ],
-            [
-                'name' => 'Hendra Setiawan',
-                'email' => 'hendra@gmail.com',
-                'role' => 'karyawan',
-                'divisi' => 'desainer',
-            ],
-        [
-            'name' => 'Dewi Lestari',
-            'email' => 'dewi@gmail.com',
-            'role' => 'karyawan',
-            'divisi' => 'programmer'
-        ],
-
-            // === KARYAWAN TAMBAHAN ===
-            [
-                'name' => 'Joko Susilo',
-                'email' => 'joko@gmail.com',
-                'role' => 'karyawan',
-                'divisi' => 'programmer',
-            ],
-            [
-                'name' => 'Rina Melati',
-                'email' => 'rina@gmail.com',
-                'role' => 'karyawan',
-                'divisi' => 'digital_marketing',
-            ],
-            [
-                'name' => 'Bambang Surya',
-                'email' => 'bambang@gmail.com',
-                'role' => 'karyawan',
-                'divisi' => 'desainer',
-            ],
-
-            // === ADMIN ===
-            [
                 'name' => 'Admin Utama',
                 'email' => 'admin@gmail.com',
                 'role' => 'admin',
@@ -155,10 +75,12 @@ class UserSeeder extends Seeder
             User::updateOrCreate(
                 ['email' => $user['email']],
                 [
-                    'name' => $user['name'],
-                    'password' => Hash::make('123'),
-                    'role' => $user['role'],
-                    'divisi' => $user['divisi'],
+                    'name'      => $user['name'],
+                    'password'  => Hash::make('123'),
+                    'role'      => $user['role'],
+                    'divisi_id' => $user['divisi']
+                        ? ($divisiMap[$user['divisi']] ?? null)
+                        : null,
                 ]
             );
         }

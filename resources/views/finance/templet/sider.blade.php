@@ -192,77 +192,72 @@
         </div>
 
         <!-- Navigasi Utama -->
-        <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/finance">
-                <span class="material-icons sidebar-icon">home</span>
-                <span class="sidebar-text">Beranda</span>
-            </a>
+<nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
 
-            <!-- Item Pemasukan & Pengeluaran (menggantikan dropdown Keuangan) -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/pemasukan">
-                <span class="material-icons sidebar-icon">swap_vert</span>
-                <span class="sidebar-text">Pemasukan & <br>Pengeluaran</span>
-            </a>
+    <!-- Beranda -->
+    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+        href="{{ route('finance.beranda') }}">
+        <span class="material-icons sidebar-icon">home</span>
+        <span class="sidebar-text">Beranda</span>
+    </a>
 
-            <!-- Dropdown untuk Dokumen -->
-            <div class="relative">
-                <button
-                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors w-full text-left"
-                    onclick="toggleDropdown('dokumen-dropdown')">
-                    <span class="material-icons sidebar-icon">description</span>
-                    <span class="sidebar-text">Dokumen</span>
-                    <span class="material-icons sidebar-icon ml-auto transition-transform duration-200"
-                        id="dokumen-icon">expand_more</span>
-                </button>
+    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+        href="/finance/pemasukan">
+        <span class="material-icons sidebar-icon">home</span>
+        <span class="sidebar-text">Pemasukan</span>
+    </a>
 
-                <div id="dokumen-dropdown" class="pl-6 mt-1 space-y-1 hidden">
-                    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        href="/finance/invoice">
-                        <span class="material-icons sidebar-icon">request_quote</span>
-                        <span class="sidebar-text">Invoice</span>
-                    </a>
+    <!-- Pembayaran (Data Orderan) -->
+    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+        href="{{ route('finance.pembayaran') }}">
+        <span class="material-icons sidebar-icon">receipt_long</span>
+        <span class="sidebar-text">Data Orderan</span>
+    </a>
 
-                    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        href="/kwitansi">
-                        <span class="material-icons sidebar-icon">receipt_long</span>
-                        <span class="sidebar-text">Kwitansi</span>
-                    </a>
-                </div>
-            </div>
+    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+        href="/finance/invoice">
+        <span class="material-icons sidebar-icon">receipt_long</span>
+        <span class="sidebar-text">Invoice</span>
+    </a>
 
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/data">
-                <span class="material-icons sidebar-icon">list_alt</span>
-                <span class="sidebar-text">Data Layanan</span>
-            </a>
+    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+        href="/finance/kwitansi">
+        <span class="material-icons sidebar-icon">receipt_long</span>
+        <span class="sidebar-text">Kwitansi</span>
+    </a>
 
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/data_orderan">
-                <span class="material-icons">receipt_long</span>
-                <span class="sidebar-text">Data Orderan</span>
-            </a>
+    <!-- Data Layanan -->
+    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+        href="/finance/data_layanan">
+        <span class="material-icons sidebar-icon">list_alt</span>
+        <span class="sidebar-text">Data Layanan</span>
+    </a>
 
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/finance/daftar_karyawan">
-                <span class="material-icons sidebar-icon">people</span>
-                <span class="sidebar-text">Data Karyawan</span>
-            </a>
-        </nav>
+
+
+    <!-- Data Karyawan -->
+    <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+        href="{{ route('finance.daftar_karyawan') }}">
+        <span class="material-icons sidebar-icon">people</span>
+        <span class="sidebar-text">Data Karyawan</span>
+    </a>
+
+</nav>
+
 
         <!-- Footer Sidebar -->
         <div class="sidebar-footer border-t border-gray-200 flex-shrink-0">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit"
-                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors w-full">
                     <span class="material-icons sidebar-icon">logout</span>
                     <span class="sidebar-text">Log Out</span>
                 </button>
             </form>
         </div>
     </aside>
+
 
     <script>
         // Fungsi untuk inisialisasi sidebar

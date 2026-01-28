@@ -152,29 +152,33 @@
         
         <!-- Navigation Menu -->
         <nav class="flex-1 px-4 py-6 space-y-2">
-            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general-manajer/home">
+            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general_manajer/home">
                 <span class="material-icons">home</span>
                 <span>Beranda</span>
             </a>
             
-            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general-manajer/data-karyawan">
+            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general_manajer/data-karyawan">
                 <span class="material-icons">group</span>
                 <span>Data Karyawan</span>
             </a>
             
-            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general-manajer/layanan">
+            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general_manajer/layanan">
                 <span class="material-icons">miscellaneous_services</span>
                 <span>Data Layanan</span>
             </a>
             
-            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general-manajer/kelola-order">
+            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general_manajer/kelola-order">
                 <span class="material-icons">receipt_long</span>
                 <span>Data Project</span>
+            </a>
+            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general_manajer/tim_divisi">
+                <span class="material-icons">receipt_long</span>
+                <span>Tim Divisi</span>
             </a>
             
           
             
-            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general-manajer/kelola-absen">
+            <a class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-700 rounded-lg" href="/general_manajer/kelola-absen">
                 <span class="material-icons">manage_accounts</span>
                 <span>Kelola Absen</span>
             </a>

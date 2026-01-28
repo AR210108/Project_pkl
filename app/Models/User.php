@@ -15,8 +15,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'divisi',
-        // ... kolom lainnya
+        'divisi_id'
     ];
 
     protected $hidden = [
@@ -34,7 +33,7 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return in_array($this->role, ['admin','finance']);
+        return in_array($this->role, ['admin', 'finance']);
     }
 
     /**
@@ -86,9 +85,9 @@ class User extends Authenticatable
     }
 
     public function absensis()
-{
-    return $this->hasMany(Absensi::class);
-}
+    {
+        return $this->hasMany(Absensi::class);
+    }
 
     /**
      * Relasi dengan catatan rapat sebagai peserta
@@ -117,10 +116,10 @@ class User extends Authenticatable
     /**
      * Scope untuk user dalam divisi tertentu
      */
-    public function scopeByDivisi($query, $divisi)
-    {
-        return $query->where('divisi', $divisi);
-    }
+public function scopeByDivisiId($query, $divisiId)
+{
+    return $query->where('divisi_id', $divisiId);
+}
 
     /**
      * Accessor untuk nama lengkap dengan role
@@ -137,29 +136,33 @@ class User extends Authenticatable
     {
         $words = explode(' ', $this->name);
         $initials = '';
-        
+
         foreach ($words as $word) {
             $initials .= strtoupper(substr($word, 0, 1));
         }
-        
+
         return $initials;
     }
-public function catatanRapats()
-{
-    return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_penugasan', 'user_id', 'catatan_rapat_id');
-}
+    public function catatanRapats()
+    {
+        return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_penugasan', 'user_id', 'catatan_rapat_id');
+    }
 
-public function catatanRapatPenugasans()
-{
-    return $this->hasMany(CatatanRapatPenugasan::class, 'user_id');
-}
+    public function catatanRapatPenugasans()
+    {
+        return $this->hasMany(CatatanRapatPenugasan::class, 'user_id');
+    }
 
-/**
- * Pengumuman yang ditugaskan ke user ini
- */
-public function pengumumanDiterima()
+    /**
+     * Pengumuman yang ditugaskan ke user ini
+     */
+    public function pengumumanDiterima()
+    {
+        return $this->belongsToMany(Pengumuman::class, 'pengumuman_user', 'user_id', 'pengumuman_id')
+            ->withTimestamps();
+    }
+public function divisi()
 {
-    return $this->belongsToMany(Pengumuman::class, 'pengumuman_user', 'user_id', 'pengumuman_id')
-        ->withTimestamps();
+    return $this->belongsTo(Divisi::class, 'divisi_id');
 }
 }

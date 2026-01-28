@@ -892,22 +892,25 @@
                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div>
                              <label class="block text-sm font-medium text-gray-700 mb-1">Nama Karyawan</label>
-                             <select name="user_id" id="userSelect"
-                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                 required>
-                                 <option value="">Pilih Karyawan</option>
-                                 @foreach ($users as $user)
-                                     <option value="{{ $user->id }}" data-divisi="{{ $user->divisi ?? '' }}"
-                                         data-role="{{ $user->role }}"> <!-- PASTIKAN INI 'role' -->
-                                         {{ $user->name }}
-                                         @if ($user->role || $user->divisi)
-                                             ({{ $user->role }}@if ($user->divisi)
-                                                 - {{ $user->divisi }}
-                                             @endif)
-                                         @endif
-                                     </option>
-                                 @endforeach
-                             </select>
+<select name="user_id" id="userSelect"
+        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+        required>
+    <option value="">Pilih Karyawan</option>
+    @foreach ($users as $user)
+        <option value="{{ $user->id }}" 
+                data-divisi="{{ $user->divisiRelation ? $user->divisiRelation->divisi : '' }}"
+                data-role="{{ $user->role }}">
+            {{ $user->name }}
+            @if ($user->role || ($user->divisiRelation && $user->divisiRelation->divisi))
+                ({{ $user->role }}
+                @if ($user->divisiRelation && $user->divisiRelation->divisi)
+                    - {{ $user->divisiRelation->divisi }}
+                @endif
+                )
+            @endif
+        </option>
+    @endforeach
+</select>
                          </div>
 
                          <div>
@@ -1527,19 +1530,37 @@
              }
          });
 
-         // ========= AUTO-FILL DIVISI DAN JABATAN BERDASARKAN USER ========= //
-         document.getElementById('userSelect').addEventListener('change', function() {
-             const selectedOption = this.options[this.selectedIndex];
-             const divisi = selectedOption.getAttribute('data-divisi');
-             const role = selectedOption.getAttribute('data-role');
-
-             // Isi otomatis field divisi dan jabatan
-             document.getElementById('divisiInput').value = divisi || '';
-             document.getElementById('jabatanInput').value = role || '';
-
-             // Optional: Tampilkan alert atau log
-             console.log('Divisi:', divisi, 'Jabatan:', role);
-         });
+document.getElementById('userSelect').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const divisiData = selectedOption.getAttribute('data-divisi');
+    const role = selectedOption.getAttribute('data-role');
+    
+    let divisiName = '';
+    
+    // Cek jika divisiData adalah JSON string
+    if (divisiData) {
+        try {
+            // Coba parse JSON jika formatnya JSON
+            if (divisiData.startsWith('{') || divisiData.startsWith('[')) {
+                const parsed = JSON.parse(divisiData);
+                // Ambil properti 'divisi' dari objek
+                divisiName = parsed.divisi || parsed.nama || '';
+            } else {
+                // Jika sudah string biasa
+                divisiName = divisiData;
+            }
+        } catch (e) {
+            // Jika bukan JSON, gunakan langsung
+            divisiName = divisiData;
+        }
+    }
+    
+    // Isi otomatis field divisi dan jabatan
+    document.getElementById('divisiInput').value = divisiName;
+    document.getElementById('jabatanInput').value = role || '';
+    
+    console.log('Divisi:', divisiName, 'Jabatan:', role);
+});
          // CREATE (POST)
          // CREATE (POST)
          // CREATE (POST)

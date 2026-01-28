@@ -45,6 +45,39 @@ class InvoiceController extends Controller
         return view('admin.invoice', compact('invoices'));
     }
 
+    public function financeIndex(Request $request)
+    {
+        $query = Invoice::latest();
+
+        // Fitur pencarian
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('nama_perusahaan', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('nomor_order', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('nama_klien', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
+        $invoices = $query->paginate(10);
+
+        // Jika request adalah AJAX, kembalikan JSON
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $invoices->items(),
+                'pagination' => [
+                    'total' => $invoices->total(),
+                    'per_page' => $invoices->perPage(),
+                    'current_page' => $invoices->currentPage(),
+                    'last_page' => $invoices->lastPage(),
+                ]
+            ]);
+        }
+
+        return view('finance.invoice', compact('invoices'));
+    }
+
     /**
      * Show the form for creating a new resource.
      */
