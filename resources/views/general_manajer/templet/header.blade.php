@@ -66,13 +66,14 @@
             }
         }
 
-        .nav-item:hover::before,
-        .nav-item.active::before {
+        /* Hanya tampilkan hover untuk item yang diizinkan */
+        .nav-item.allowed-active:hover::before,
+        .nav-item.allowed-active.active::before {
             transform: translateX(0);
         }
 
         /* Gaya untuk item navigasi yang sedang aktif */
-        .nav-item.active {
+        .nav-item.allowed-active.active {
             background-color: #e5e7eb;
             /* Warna latar yang sedikit lebih gelap dari hover */
             color: #111827 !important;
@@ -249,52 +250,59 @@
 
         <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             <!-- Menu Beranda -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="{{ route('general_manajer.home') }}" data-page="home">
+            <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="{{ route('general_manajer.home') }}" data-page="home" data-path="general_manajer/home">
                 <span class="material-icons sidebar-icon">home</span>
                 <span class="sidebar-text">Beranda</span>
             </a>
 
             <!-- Menu Data Karyawan -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="{{ route('general_manajer.data_karyawan') }}" data-page="data_karyawan">
+            <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="{{ route('general_manajer.data_karyawan') }}" data-page="data_karyawan" data-path="general_manajer/data_karyawan">
                 <span class="material-icons sidebar-icon">group</span>
                 <span class="sidebar-text">Data Karyawan</span>
             </a>
 
             <!-- Menu Data Layanan -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="{{ route('general_manajer.layanan') }}" data-page="layanan">
+            <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="{{ route('general_manajer.layanan') }}" data-page="layanan" data-path="general_manajer/layanan">
                 <span class="material-icons sidebar-icon">miscellaneous_services</span>
                 <span class="sidebar-text">Data Layanan</span>
             </a>
 
             <!-- Menu Data Project -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="{{ route('general_manajer.data_project') }}" data-page="data_project">
+            <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="{{ route('general_manajer.data_project') }}" data-page="data_project" data-path="general_manajer/data_project">
                 <span class="material-icons sidebar-icon">dashboard</span>
                 <span class="sidebar-text">Data Project</span>
             </a>
 
             <!-- Menu Kelola Tugas -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="{{ route('general_manajer.kelola_tugas') }}" data-page="kelola_tugas">
+            <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="{{ route('general_manajer.kelola_tugas') }}" data-page="kelola_tugas" data-path="general_manajer/kelola_tugas">
                 <span class="material-icons sidebar-icon">assignment</span>
                 <span class="sidebar-text">Kelola Tugas</span>
             </a>
 
             <!-- Menu Tim dan Divisi -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/general_manajer/tim_dan_divisi" data-page="tim_dan_divisi">
+            <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="/general_manajer/tim_dan_divisi" data-page="tim_dan_divisi" data-path="general_manajer/tim_dan_divisi">
                 <span class="material-icons sidebar-icon">groups</span>
                 <span class="sidebar-text">Tim dan Divisi</span>
             </a>
 
             <!-- Menu Kelola Absen -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="{{ route('general_manajer.kelola_absen') }}" data-page="kelola_absen">
+            <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="{{ route('general_manajer.kelola_absen') }}" data-page="kelola_absen" data-path="general_manajer/kelola_absen">
                 <span class="material-icons sidebar-icon">manage_accounts</span>
                 <span class="sidebar-text">Kelola Absen</span>
+            </a>
+
+            <!-- Menu Acc Cuti (baru) -->
+            <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="/general_manajer/acc_cuti" data-page="acc_cuti" data-path="general_manajer/acc_cuti">
+                <span class="material-icons sidebar-icon">event_available</span>
+                <span class="sidebar-text">Acc Cuti</span>
             </a>
         </nav>
 
@@ -359,7 +367,7 @@
             }
         });
 
-        // --- FUNGSI UNTUK MENU AKTIF ---
+        // --- FUNGSI UNTUK MENU AKTIF (BERSIH DARI DEBUG) ---
         function setActiveNavItem() {
             const currentPath = window.location.pathname;
             
@@ -369,29 +377,108 @@
             });
 
             // Tambahkan class 'active' ke item yang sesuai dengan URL saat ini
-            document.querySelectorAll('.nav-item').forEach(item => {
+            document.querySelectorAll('.nav-item.allowed-active').forEach(item => {
+                const dataPath = item.getAttribute('data-path');
                 const href = item.getAttribute('href');
-                if (href && currentPath.includes(href.replace(/^\//, '').split('/')[0])) {
+                const pageName = item.getAttribute('data-page');
+                
+                // Normalisasi path untuk perbandingan
+                const normalizedCurrentPath = currentPath.replace(/^\//, '').toLowerCase();
+                
+                let isActive = false;
+                
+                // Cek berdasarkan data-path terlebih dahulu
+                if (dataPath) {
+                    const normalizedDataPath = dataPath.replace(/^\//, '').toLowerCase();
+                    
+                    // Cocokkan eksak atau dengan sub-path
+                    if (normalizedCurrentPath === normalizedDataPath || 
+                        normalizedCurrentPath.startsWith(normalizedDataPath + '/')) {
+                        isActive = true;
+                    }
+                }
+                
+                // Fallback ke href jika data-path tidak cocok
+                if (!isActive && href) {
+                    const normalizedHref = href.replace(/^\//, '').toLowerCase();
+                    
+                    if (normalizedCurrentPath === normalizedHref || 
+                        normalizedCurrentPath.startsWith(normalizedHref + '/')) {
+                        isActive = true;
+                    }
+                }
+                
+                // Pencocokan khusus untuk kasus yang sulit
+                if (!isActive) {
+                    // Khusus untuk kelola_tugas
+                    if (pageName === 'kelola_tugas' && 
+                        (normalizedCurrentPath.includes('kelola_tugas') || 
+                         normalizedCurrentPath.includes('tugas'))) {
+                        isActive = true;
+                    }
+                    
+                    // Khusus untuk kelola_absen
+                    if (pageName === 'kelola_absen' && 
+                        (normalizedCurrentPath.includes('kelola_absen') || 
+                         normalizedCurrentPath.includes('absen'))) {
+                        isActive = true;
+                    }
+                }
+                
+                if (isActive) {
                     item.classList.add('active');
                 }
             });
         }
 
         // --- EVENT LISTENER UNTUK SETIAP ITEM NAVIGASI ---
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                // Tidak perlu menyimpan ke sessionStorage karena kita menggunakan URL untuk menentukan halaman aktif
+        document.querySelectorAll('.nav-item.allowed-active').forEach(item => {
+            item.addEventListener('click', function(e) {
+                // Simpan halaman yang diklik ke sessionStorage
+                const page = this.getAttribute('data-page');
+                const path = this.getAttribute('data-path');
+                
+                if (page) {
+                    sessionStorage.setItem('lastClickedPage', page);
+                    sessionStorage.setItem('lastClickedPath', path);
+                }
+                
+                // Force update active state immediately
+                setTimeout(() => {
+                    setActiveNavItem();
+                }, 10);
+                
+                // Biarkan navigasi default berlanjut
             });
         });
 
         // --- INISIALISASI ---
         setActiveNavItem();
 
+        // --- UPDATE ACTIVE STATE SAAT PAGE DIMUAT ULANG ---
+        // Cek apakah ada halaman yang tersimpan di sessionStorage
+        const lastClickedPage = sessionStorage.getItem('lastClickedPage');
+        const lastClickedPath = sessionStorage.getItem('lastClickedPath');
+        
+        if (lastClickedPath) {
+            // Verifikasi apakah kita masih di halaman yang sama
+            const currentPath = window.location.pathname.replace(/^\//, '');
+            const normalizedStoredPath = lastClickedPath.replace(/^\//, '');
+            
+            if (currentPath === normalizedStoredPath || currentPath.startsWith(normalizedStoredPath + '/')) {
+                setActiveNavItem();
+            }
+        }
+
         // --- HANDLER LOGOUT YANG LEBIH AMAN ---
         const logoutForm = document.querySelector('form[action*="logout"]');
         if (logoutForm) {
             logoutForm.addEventListener('submit', function (e) {
                 e.preventDefault();
+                
+                // Hapus sessionStorage saat logout
+                sessionStorage.removeItem('lastClickedPage');
+                sessionStorage.removeItem('lastClickedPath');
                 
                 // Cek keberadaan meta tag CSRF
                 const csrfToken = document.querySelector('meta[name="csrf-token"]');
@@ -432,6 +519,26 @@
                 });
             });
         }
+
+        // --- MONITOR PERUBAHAN URL (UNTUK SPA) ---
+        // Jika menggunakan Single Page Application, monitor perubahan URL
+        let currentUrl = window.location.href;
+        setInterval(() => {
+            if (window.location.href !== currentUrl) {
+                currentUrl = window.location.href;
+                setTimeout(() => {
+                    setActiveNavItem();
+                }, 100); // Delay kecil untuk memastikan DOM sudah update
+            }
+        }, 500);
+
+        // --- FORCE UPDATE ON PAGE LOAD ---
+        // Pastikan active state diupdate saat halaman selesai dimuat
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                setActiveNavItem();
+            }, 100);
+        });
     });
     </script>
 
