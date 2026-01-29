@@ -496,11 +496,6 @@
                             <button id="filterBtn" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
                                 Filter
                             </button>
-                            <button id="tambahProjectBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
-                                <span class="material-icons-outlined">add</span>
-                                <span class="hidden sm:inline">Tambah Project</span>
-                                <span class="sm:hidden">Tambah</span>
-                            </button>
                         </div>
                     </div>
                     

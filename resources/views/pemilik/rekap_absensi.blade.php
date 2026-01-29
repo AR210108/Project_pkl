@@ -45,6 +45,7 @@
         };
     </script>
     <style>
+        /* ... (semua style CSS kamu tetap sama, tidak perlu diubah) ... */
         body {
             font-family: 'Poppins', sans-serif;
         }
@@ -54,7 +55,6 @@
             vertical-align: middle;
         }
 
-        /* Card hover effects */
         .card {
             transition: all 0.3s ease;
         }
@@ -64,7 +64,6 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
-        /* Table styles */
         .order-table {
             transition: all 0.2s ease;
         }
@@ -73,7 +72,6 @@
             background-color: rgba(59, 130, 246, 0.05);
         }
 
-        /* Button styles */
         .btn-primary {
             background-color: #3b82f6;
             color: white;
@@ -94,7 +92,6 @@
             background-color: #e2e8f0;
         }
 
-        /* Status Badge Styles */
         .status-badge {
             display: inline-block;
             padding: 0.25rem 0.75rem;
@@ -133,12 +130,10 @@
             color: #5b21b6;
         }
 
-        /* Custom styles untuk transisi */
         .sidebar-transition {
             transition: transform 0.3s ease-in-out;
         }
 
-        /* Animasi hamburger */
         .hamburger-line {
             transition: all 0.3s ease-in-out;
         }
@@ -155,14 +150,11 @@
             transform: rotate(-45deg) translate(7px, -6px);
         }
 
-        /* Style untuk efek hover yang lebih menonjol */
         .nav-item {
             position: relative;
             overflow: hidden;
         }
 
-        /* Gaya untuk indikator aktif/hover */
-        /* Default untuk mobile: di sebelah kanan */
         .nav-item::before {
             content: '';
             position: absolute;
@@ -175,7 +167,6 @@
             transition: transform 0.3s ease;
         }
 
-        /* Override untuk desktop: di sebelah kiri */
         @media (min-width: 768px) {
             .nav-item::before {
                 right: auto;
@@ -189,7 +180,6 @@
             transform: translateX(0);
         }
 
-        /* Memastikan sidebar tetap di posisinya saat scroll */
         .sidebar-fixed {
             position: fixed;
             height: 100vh;
@@ -197,8 +187,6 @@
             z-index: 40;
         }
 
-
-        /* Scrollbar kustom untuk sidebar */
         .sidebar-fixed::-webkit-scrollbar {
             width: 6px;
         }
@@ -216,7 +204,6 @@
             background: #555;
         }
 
-        /* Form input styles */
         .form-input {
             border: 1px solid #e2e8f0;
             transition: all 0.2s ease;
@@ -227,7 +214,6 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        /* Pagination styles */
         .page-btn {
             transition: all 0.2s ease;
         }
@@ -241,17 +227,14 @@
             cursor: not-allowed;
         }
 
-        /* Desktop pagination styles */
         .desktop-pagination {
             display: none;
-            /* Hidden by default */
             justify-content: center;
             align-items: center;
             gap: 8px;
             margin-top: 24px;
         }
 
-        /* Show desktop pagination on medium screens and up */
         @media (min-width: 768px) {
             .desktop-pagination {
                 display: flex;
@@ -307,7 +290,6 @@
             cursor: not-allowed;
         }
 
-        /* Panel Styles */
         .panel {
             background: white;
             border-radius: 0.75rem;
@@ -339,7 +321,6 @@
             padding: 1.5rem;
         }
 
-        /* SCROLLABLE TABLE - TANPA INDICATOR */
         .scrollable-table-container {
             width: 100%;
             overflow-x: auto;
@@ -349,7 +330,6 @@
             background: white;
         }
 
-        /* Force scrollbar to be visible */
         .scrollable-table-container {
             scrollbar-width: auto;
             -webkit-overflow-scrolling: touch;
@@ -375,11 +355,9 @@
             background: #94a3b8;
         }
 
-        /* Table with fixed width to ensure scrolling */
         .data-table {
             width: 100%;
             min-width: 1200px;
-            /* Fixed minimum width */
             border-collapse: collapse;
         }
 
@@ -408,12 +386,10 @@
             background: #f3f4f6;
         }
 
-        /* Shadow effect */
         .table-shadow {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        /* Tab Navigation Styles */
         .tab-nav {
             display: flex;
             border-bottom: 2px solid #e2e8f0;
@@ -440,7 +416,6 @@
             border-bottom-color: #3b82f6;
         }
 
-        /* Icon styling - added to match reference */
         .icon-container {
             display: flex;
             align-items: center;
@@ -450,17 +425,14 @@
             border-radius: 0.5rem;
         }
 
-        /* Mobile pagination styles */
         .mobile-pagination {
             display: flex;
-            /* Visible by default */
             justify-content: center;
             align-items: center;
             gap: 8px;
             margin-top: 16px;
         }
 
-        /* Hide mobile pagination on medium screens and up */
         @media (min-width: 768px) {
             .mobile-pagination {
                 display: none;
@@ -519,299 +491,283 @@
 </head>
 
 <body class="font-display bg-background-light text-text-light">
-    @include('pemilik/template/header')
-
-    <!-- Main Content Container -->
-  
-        <main class="flex-1 flex flex-col bg-background-light">
-            <div class="flex-1 p-3 sm:p-8">
-
-                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Rekap Absensi</h2>
-
-                <!-- ... setelah <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Rekap Absensi</h2> ... -->
-
-                
-
-                <!-- ... lanjut ke Stats Cards ... -->
-
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
-                    <!-- Total Kehadiran Card -->
-                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
-                        <div class="flex items-center">
-                            <div class="icon-container bg-green-100 mr-3 md:mr-4">
-                                <span
-                                    class="material-icons-outlined text-green-600 text-lg md:text-xl">check_circle</span>
-                            </div>
-                            <div>
-                                <p class="text-xs md:text-sm text-gray-500">Total Kehadiran</p>
-                                <p class="text-xl md:text-2xl font-bold text-green-600">
-                                    {{ $stats['total_tepat_waktu'] + $stats['total_terlambat'] }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tidak Hadir Card -->
-                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
-                        <div class="flex items-center">
-                            <div class="icon-container bg-red-100 mr-3 md:mr-4">
-                                <span class="material-icons-outlined text-red-600 text-lg md:text-xl">cancel</span>
-                            </div>
-                            <div>
-                                <p class="text-xs md:text-sm text-gray-500">Tidak Hadir</p>
-                                <p class="text-xl md:text-2xl font-bold text-red-600">{{ $stats['total_tidak_masuk'] }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Izin Card -->
-                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
-                        <div class="flex items-center">
-                            <div class="icon-container bg-blue-100 mr-3 md:mr-4">
-                                <span class="material-icons-outlined text-blue-600 text-lg md:text-xl">error</span>
-                            </div>
-                            <div>
-                                <p class="text-xs md:text-sm text-gray-500">Izin</p>
-                                <p class="text-xl md:text-2xl font-bold text-blue-600">{{ $stats['total_izin'] }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Cuti Card -->
-                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
-                        <div class="flex items-center">
-                            <div class="icon-container bg-yellow-100 mr-3 md:mr-4">
-                                <span
-                                    class="material-icons-outlined text-yellow-600 text-lg md:text-xl">event_busy</span>
-                            </div>
-                            <div>
-                                <p class="text-xs md:text-sm text-gray-500">Cuti</p>
-                                <p class="text-xl md:text-2xl font-bold text-yellow-600">{{ $stats['total_cuti'] }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dinas Luar Card -->
-                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
-                        <div class="flex items-center">
-                            <div class="icon-container bg-purple-100 mr-3 md:mr-4">
-                                <span
-                                    class="material-icons-outlined text-purple-600 text-lg md:text-xl">directions_car</span>
-                            </div>
-                            <div>
-                                <p class="text-xs md:text-sm text-gray-500">Dinas Luar</p>
-                                <p class="text-xl md:text-2xl font-bold text-purple-600">
-                                    {{ $stats['total_dinas_luar'] }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sakit Card -->
-                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
-                        <div class="flex items-center">
-                            <div class="icon-container bg-orange-100 mr-3 md:mr-4">
-                                <span class="material-icons-outlined text-orange-600 text-lg md:text-xl">healing</span>
-                            </div>
-                            <div>
-                                <p class="text-xs md:text-sm text-gray-500">Sakit</p>
-                                <p class="text-xl md:text-2xl font-bold text-orange-600">{{ $stats['total_sakit'] }}</p>
-                            </div>
-                        </div>
-                    </div>
+     @include('pemilik/template/header') 
+    <!-- Asumsikan kamu punya file header, kalau tidak, kamu bisa buat sederhana -->
+    <header class="bg-white shadow-sm border-b border-border-light">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-semibold text-text-light">Dashboard Pemilik</h1>
                 </div>
-<!-- Filter Section -->
-                <div class="bg-white p-4 md:p-6 rounded-xl shadow-md mb-6 md:mb-8">
-                    <form method="GET" action="{{ route('owner.rekap.absensi') }}"
-                        class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <!-- Tanggal Mulai -->
+                <!-- ... navigasi user lainnya ... -->
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col bg-background-light">
+        <div class="flex-1 p-3 sm:p-8">
+
+            <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Rekap Absensi</h2>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+                <!-- Total Kehadiran Card -->
+                <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
+                    <div class="flex items-center">
+                        <div class="icon-container bg-green-100 mr-3 md:mr-4">
+                            <span class="material-icons-outlined text-green-600 text-lg md:text-xl">check_circle</span>
+                        </div>
                         <div>
-                            <label for="tanggal_mulai" class="block text-sm font-medium text-gray-700 mb-2">Tanggal
-                                Mulai</label>
-                            <input type="date" id="tanggal_mulai" name="tanggal_mulai"
-                                value="{{ old('tanggal_mulai', $tanggalMulai) }}"
-                                class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                            <p class="text-xs md:text-sm text-gray-500">Total Kehadiran</p>
+                            <p class="text-xl md:text-2xl font-bold text-green-600">
+                                {{ $stats['total_tepat_waktu'] + $stats['total_terlambat'] }}
+                            </p>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Tanggal Akhir -->
+                <!-- Tidak Hadir Card -->
+                <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
+                    <div class="flex items-center">
+                        <div class="icon-container bg-red-100 mr-3 md:mr-4">
+                            <span class="material-icons-outlined text-red-600 text-lg md:text-xl">cancel</span>
+                        </div>
                         <div>
-                            <label for="tanggal_akhir" class="block text-sm font-medium text-gray-700 mb-2">Tanggal
-                                Akhir</label>
-                            <input type="date" id="tanggal_akhir" name="tanggal_akhir"
-                                value="{{ old('tanggal_akhir', $tanggalAkhir) }}"
-                                class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                            <p class="text-xs md:text-sm text-gray-500">Tidak Hadir</p>
+                            <p class="text-xl md:text-2xl font-bold text-red-600">{{ $stats['total_tidak_masuk'] }}</p>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Divisi -->
+                <!-- Izin Card -->
+                <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
+                    <div class="flex items-center">
+                        <div class="icon-container bg-blue-100 mr-3 md:mr-4">
+                            <span class="material-icons-outlined text-blue-600 text-lg md:text-xl">error</span>
+                        </div>
                         <div>
-                            <label for="divisi" class="block text-sm font-medium text-gray-700 mb-2">Divisi</label>
-                            <select id="divisi" name="divisi"
-                                class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-                                <option value="">Semua Divisi</option>
-                                @foreach($divisions as $division)
-                                    <option value="{{ $division }}" {{ old('divisi', $divisiFilter) == $division ? 'selected' : '' }}>
-                                        {{ ucfirst($division) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Tombol Aksi -->
-                        <div class="flex items-end gap-2">
-                            <button type="submit"
-                                class="btn-primary flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600 transition duration-200">
-                                <span class="material-icons-outlined align-middle mr-1 text-sm">filter_list</span>
-                                Filter
-                            </button>
-                            <a href="{{ route('owner.rekap.absensi') }}"
-                                class="btn-secondary flex-1 text-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition duration-200">
-                                <span class="material-icons-outlined align-middle mr-1 text-sm">refresh</span>
-                                Reset
-                            </a>
-                        </div>
-                    </form>
-                </div>
-                <!-- Tab Navigation -->
-                <div class="tab-nav">
-                    <button id="absensiTab" class="tab-button active" onclick="switchTab('absensi')">
-                        <span class="material-icons-outlined align-middle mr-2">fact_check</span>
-                        Data Absensi
-                    </button>
-                    <button id="ketidakhadiranTab" class="tab-button" onclick="switchTab('ketidakhadiran')">
-                        <span class="material-icons-outlined align-middle mr-2">assignment_late</span>
-                        Daftar Ketidakhadiran
-                    </button>
-                </div>
-
-                <!-- Data Absensi Panel -->
-                <div id="absensiPanel" class="panel">
-                    <div class="panel-header">
-                        <h3 class="panel-title">
-                            <span class="material-icons-outlined text-primary">fact_check</span>
-                            Data Absensi
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span
-                                    class="font-semibold text-text-light"
-                                    id="absensiCount">{{ $attendances->count() }}</span> data</span>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <!-- SCROLLABLE TABLE -->
-                        <div class="scrollable-table-container table-shadow" id="scrollableTable">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th style="min-width: 60px;">No</th>
-                                        <th style="min-width: 200px;">Nama</th>
-                                        <th style="min-width: 120px;">Tanggal</th>
-                                        <th style="min-width: 120px;">Jam Masuk</th>
-                                        <th style="min-width: 120px;">Jam Keluar</th>
-                                        <th style="min-width: 120px;">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="absensiTableBody">
-                                    <!-- Data rows will be populated by JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Desktop Pagination -->
-                        <div id="absensiPaginationContainer" class="desktop-pagination">
-                            <button id="absensiPrevPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="absensiPageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="absensiNextPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
-                        </div>
-
-                        <!-- Mobile Pagination -->
-                        <div class="mobile-pagination">
-                            <button id="absensiPrevPageMobile" class="mobile-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="absensiPageNumbersMobile" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="absensiNextPageMobile" class="mobile-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
+                            <p class="text-xs md:text-sm text-gray-500">Izin</p>
+                            <p class="text-xl md:text-2xl font-bold text-blue-600">{{ $stats['total_izin'] }}</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Ketidakhadiran Panel (Initially Hidden) -->
-                <div id="ketidakhadiranPanel" class="panel hidden">
-                    <div class="panel-header">
-                        <h3 class="panel-title">
-                            <span class="material-icons-outlined text-primary">assignment_late</span>
-                            Daftar Ketidakhadiran
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span
-                                    class="font-semibold text-text-light"
-                                    id="ketidakhadiranCount">{{ $ketidakhadiran->count() }}</span> data</span>
+                <!-- Cuti Card -->
+                <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
+                    <div class="flex items-center">
+                        <div class="icon-container bg-yellow-100 mr-3 md:mr-4">
+                            <span class="material-icons-outlined text-yellow-600 text-lg md:text-xl">event_busy</span>
+                        </div>
+                        <div>
+                            <p class="text-xs md:text-sm text-gray-500">Cuti</p>
+                            <p class="text-xl md:text-2xl font-bold text-yellow-600">{{ $stats['total_cuti'] }}</p>
                         </div>
                     </div>
-                    <div class="panel-body">
-                        <!-- SCROLLABLE TABLE -->
-                        <div class="scrollable-table-container table-shadow" id="scrollableTableKetidakhadiran">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th style="min-width: 60px;">No</th>
-                                        <th style="min-width: 200px;">Nama</th>
-                                        <th style="min-width: 120px;">Tanggal Mulai</th>
-                                        <th style="min-width: 120px;">Tanggal Akhir</th>
-                                        <th style="min-width: 200px;">Alasan</th>
-                                        <th style="min-width: 120px;">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="ketidakhadiranTableBody">
-                                    <!-- Data rows will be populated by JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
+                </div>
 
-                        <!-- Desktop Pagination -->
-                        <div id="ketidakhadiranPaginationContainer" class="desktop-pagination">
-                            <button id="ketidakhadiranPrevPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="ketidakhadiranPageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="ketidakhadiranNextPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
+                <!-- Dinas Luar Card -->
+                <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
+                    <div class="flex items-center">
+                        <div class="icon-container bg-purple-100 mr-3 md:mr-4">
+                            <span class="material-icons-outlined text-purple-600 text-lg md:text-xl">directions_car</span>
                         </div>
+                        <div>
+                            <p class="text-xs md:text-sm text-gray-500">Dinas Luar</p>
+                            <p class="text-xl md:text-2xl font-bold text-purple-600">
+                                {{ $stats['total_dinas_luar'] }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-                        <!-- Mobile Pagination -->
-                        <div class="mobile-pagination">
-                            <button id="ketidakhadiranPrevPageMobile" class="mobile-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="ketidakhadiranPageNumbersMobile" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="ketidakhadiranNextPageMobile" class="mobile-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
+                <!-- Sakit Card -->
+                <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
+                    <div class="flex items-center">
+                        <div class="icon-container bg-orange-100 mr-3 md:mr-4">
+                            <span class="material-icons-outlined text-orange-600 text-lg md:text-xl">healing</span>
+                        </div>
+                        <div>
+                            <p class="text-xs md:text-sm text-gray-500">Sakit</p>
+                            <p class="text-xl md:text-2xl font-bold text-orange-600">{{ $stats['total_sakit'] }}</p>
                         </div>
                     </div>
                 </div>
             </div>
-            <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light">
-                Copyright ©2025 by digicity.id
-            </footer>
-        </main>
 
+            <!-- Filter Section -->
+            <div class="bg-white p-4 md:p-6 rounded-xl shadow-md mb-6 md:mb-8">
+                <form method="GET" action="{{ route('owner.rekap_absen') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Tanggal Mulai -->
+                    <div>
+                        <label for="tanggal_mulai" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</label>
+                        <input type="date" id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai', $tanggalMulai) }}" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                    </div>
+
+                    <!-- Tanggal Akhir -->
+                    <div>
+                        <label for="tanggal_akhir" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Akhir</label>
+                        <input type="date" id="tanggal_akhir" name="tanggal_akhir" value="{{ old('tanggal_akhir', $tanggalAkhir) }}" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                    </div>
+
+                    <!-- Divisi -->
+                    <div>
+                        <label for="divisi" class="block text-sm font-medium text-gray-700 mb-2">Divisi</label>
+                        <select id="divisi" name="divisi" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                            <option value="">Semua Divisi</option>
+                            @foreach($divisions as $division)
+                                <option value="{{ $division }}" {{ old('divisi', $divisiFilter) == $division ? 'selected' : '' }}>
+                                    {{ ucfirst($division) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Tombol Aksi -->
+                    <div class="flex items-end gap-2">
+                        <button type="submit" class="btn-primary flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600 transition duration-200">
+                            <span class="material-icons-outlined align-middle mr-1 text-sm">filter_list</span>
+                            Filter
+                        </button>
+                        <a href="{{ route('owner.rekap_absen') }}" class="btn-secondary flex-1 text-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition duration-200">
+                            <span class="material-icons-outlined align-middle mr-1 text-sm">refresh</span>
+                            Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button id="absensiTab" class="tab-button active" onclick="switchTab('absensi')">
+                    <span class="material-icons-outlined align-middle mr-2">fact_check</span>
+                    Data Absensi
+                </button>
+                <button id="ketidakhadiranTab" class="tab-button" onclick="switchTab('ketidakhadiran')">
+                    <span class="material-icons-outlined align-middle mr-2">assignment_late</span>
+                    Daftar Ketidakhadiran
+                </button>
+            </div>
+
+            <!-- Data Absensi Panel -->
+            <div id="absensiPanel" class="panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <span class="material-icons-outlined text-primary">fact_check</span>
+                        Data Absensi
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="absensiCount">{{ $attendances->count() }}</span> data</span>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="scrollable-table-container table-shadow" id="scrollableTable">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 60px;">No</th>
+                                    <th style="min-width: 200px;">Nama</th>
+                                    <th style="min-width: 120px;">Tanggal</th>
+                                    <th style="min-width: 120px;">Jam Masuk</th>
+                                    <th style="min-width: 120px;">Jam Keluar</th>
+                                    <th style="min-width: 120px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="absensiTableBody">
+                                <!-- Data rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Desktop Pagination -->
+                    <div id="absensiPaginationContainer" class="desktop-pagination">
+                        <button id="absensiPrevPage" class="desktop-nav-btn">
+                            <span class="material-icons-outlined text-sm">chevron_left</span>
+                        </button>
+                        <div id="absensiPageNumbers" class="flex gap-1">
+                            <!-- Page numbers will be generated by JavaScript -->
+                        </div>
+                        <button id="absensiNextPage" class="desktop-nav-btn">
+                            <span class="material-icons-outlined text-sm">chevron_right</span>
+                        </button>
+                    </div>
+
+                    <!-- Mobile Pagination -->
+                    <div class="mobile-pagination">
+                        <button id="absensiPrevPageMobile" class="mobile-nav-btn">
+                            <span class="material-icons-outlined text-sm">chevron_left</span>
+                        </button>
+                        <div id="absensiPageNumbersMobile" class="flex gap-1">
+                            <!-- Page numbers will be generated by JavaScript -->
+                        </div>
+                        <button id="absensiNextPageMobile" class="mobile-nav-btn">
+                            <span class="material-icons-outlined text-sm">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ketidakhadiran Panel (Initially Hidden) -->
+            <div id="ketidakhadiranPanel" class="panel hidden">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <span class="material-icons-outlined text-primary">assignment_late</span>
+                        Daftar Ketidakhadiran
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="ketidakhadiranCount">{{ $ketidakhadiran->count() }}</span> data</span>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="scrollable-table-container table-shadow" id="scrollableTableKetidakhadiran">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 60px;">No</th>
+                                    <th style="min-width: 200px;">Nama</th>
+                                    <th style="min-width: 120px;">Tanggal Mulai</th>
+                                    <th style="min-width: 120px;">Tanggal Akhir</th>
+                                    <th style="min-width: 200px;">Alasan</th>
+                                    <th style="min-width: 120px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ketidakhadiranTableBody">
+                                <!-- Data rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Desktop Pagination -->
+                    <div id="ketidakhadiranPaginationContainer" class="desktop-pagination">
+                        <button id="ketidakhadiranPrevPage" class="desktop-nav-btn">
+                            <span class="material-icons-outlined text-sm">chevron_left</span>
+                        </button>
+                        <div id="ketidakhadiranPageNumbers" class="flex gap-1">
+                            <!-- Page numbers will be generated by JavaScript -->
+                        </div>
+                        <button id="ketidakhadiranNextPage" class="desktop-nav-btn">
+                            <span class="material-icons-outlined text-sm">chevron_right</span>
+                        </button>
+                    </div>
+
+                    <!-- Mobile Pagination -->
+                    <div class="mobile-pagination">
+                        <button id="ketidakhadiranPrevPageMobile" class="mobile-nav-btn">
+                            <span class="material-icons-outlined text-sm">chevron_left</span>
+                        </button>
+                        <div id="ketidakhadiranPageNumbersMobile" class="flex gap-1">
+                            <!-- Page numbers will be generated by JavaScript -->
+                        </div>
+                        <button id="ketidakhadiranNextPageMobile" class="mobile-nav-btn">
+                            <span class="material-icons-outlined text-sm">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light">
+            Copyright ©2025 by digicity.id
+        </footer>
+    </main>
 
     <script>
         // Data dari controller
@@ -819,38 +775,32 @@
         const ketidakhadiranData = @json($ketidakhadiran);
 
         // Pagination variables for absensi
-        const absensiItemsPerPage = 10; // Diperbesar untuk menampilkan lebih banyak data
+        const absensiItemsPerPage = 10;
         let absensiCurrentPage = 1;
         const absensiTotalPages = Math.ceil(absensiData.length / absensiItemsPerPage);
 
         // Pagination variables for ketidakhadiran
-        const ketidakhadiranItemsPerPage = 10; // Diperbesar untuk menampilkan lebih banyak data
+        const ketidakhadiranItemsPerPage = 10;
         let ketidakhadiranCurrentPage = 1;
         const ketidakhadiranTotalPages = Math.ceil(ketidakhadiranData.length / ketidakhadiranItemsPerPage);
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize pagination for absensi
             initializeAbsensiPagination();
-
-            // Initialize pagination for ketidakhadiran
             initializeKetidakhadiranPagination();
         });
 
         // Function to switch between tabs
         function switchTab(tabName) {
-            // Get tab buttons and panels
             const absensiTab = document.getElementById('absensiTab');
             const ketidakhadiranTab = document.getElementById('ketidakhadiranTab');
             const absensiPanel = document.getElementById('absensiPanel');
             const ketidakhadiranPanel = document.getElementById('ketidakhadiranPanel');
 
-            // Hide all panels and remove active class from all tabs
             absensiPanel.classList.add('hidden');
             ketidakhadiranPanel.classList.add('hidden');
             absensiTab.classList.remove('active');
             ketidakhadiranTab.classList.remove('active');
 
-            // Show selected panel and add active class to clicked tab
             if (tabName === 'absensi') {
                 absensiPanel.classList.remove('hidden');
                 absensiTab.classList.add('active');
@@ -862,50 +812,36 @@
 
         // Initialize pagination for absensi
         function initializeAbsensiPagination() {
-            // Update total count
             document.getElementById('absensiCount').textContent = absensiData.length;
-
-            // SELALU tampilkan pagination
             initAbsensiDesktopPagination();
             initAbsensiMobilePagination();
-
-            // Render first page
             renderAbsensiTable(1);
         }
 
         // Initialize pagination for ketidakhadiran
         function initializeKetidakhadiranPagination() {
-            // Update total count
             document.getElementById('ketidakhadiranCount').textContent = ketidakhadiranData.length;
-
-            // SELALU tampilkan pagination
             initKetidakhadiranDesktopPagination();
             initKetidakhadiranMobilePagination();
-
-            // Render first page
             renderKetidakhadiranTable(1);
         }
 
-        // Desktop pagination functionality for absensi
+        // ... (semua fungsi JavaScript lainnya tetap sama, tidak perlu diubah) ...
         function initAbsensiDesktopPagination() {
             const pageNumbersContainer = document.getElementById('absensiPageNumbers');
             const prevButton = document.getElementById('absensiPrevPage');
             const nextButton = document.getElementById('absensiNextPage');
 
-            // Clear existing page numbers
             pageNumbersContainer.innerHTML = '';
 
-            // Generate page numbers
             for (let i = 1; i <= absensiTotalPages; i++) {
                 const pageNumber = document.createElement('button');
                 pageNumber.textContent = i;
-                pageNumber.className = `desktop-page-btn ${i === absensiCurrentPage ? 'active' : ''
-                    }`;
+                pageNumber.className = `desktop-page-btn ${i === absensiCurrentPage ? 'active' : ''}`;
                 pageNumber.addEventListener('click', () => goToAbsensiDesktopPage(i));
                 pageNumbersContainer.appendChild(pageNumber);
             }
 
-            // Event listeners for navigation buttons
             prevButton.addEventListener('click', () => {
                 if (absensiCurrentPage > 1) goToAbsensiDesktopPage(absensiCurrentPage - 1);
             });
@@ -915,26 +851,21 @@
             });
         }
 
-        // Mobile pagination functionality for absensi
         function initAbsensiMobilePagination() {
             const pageNumbersContainer = document.getElementById('absensiPageNumbersMobile');
             const prevButton = document.getElementById('absensiPrevPageMobile');
             const nextButton = document.getElementById('absensiNextPageMobile');
 
-            // Clear existing page numbers
             pageNumbersContainer.innerHTML = '';
 
-            // Generate page numbers
             for (let i = 1; i <= absensiTotalPages; i++) {
                 const pageNumber = document.createElement('button');
                 pageNumber.textContent = i;
-                pageNumber.className = `mobile-page-btn ${i === absensiCurrentPage ? 'active' : ''
-                    }`;
+                pageNumber.className = `mobile-page-btn ${i === absensiCurrentPage ? 'active' : ''}`;
                 pageNumber.addEventListener('click', () => goToAbsensiMobilePage(i));
                 pageNumbersContainer.appendChild(pageNumber);
             }
 
-            // Event listeners for navigation buttons
             prevButton.addEventListener('click', () => {
                 if (absensiCurrentPage > 1) goToAbsensiMobilePage(absensiCurrentPage - 1);
             });
@@ -944,26 +875,21 @@
             });
         }
 
-        // Desktop pagination functionality for ketidakhadiran
         function initKetidakhadiranDesktopPagination() {
             const pageNumbersContainer = document.getElementById('ketidakhadiranPageNumbers');
             const prevButton = document.getElementById('ketidakhadiranPrevPage');
             const nextButton = document.getElementById('ketidakhadiranNextPage');
 
-            // Clear existing page numbers
             pageNumbersContainer.innerHTML = '';
 
-            // Generate page numbers
             for (let i = 1; i <= ketidakhadiranTotalPages; i++) {
                 const pageNumber = document.createElement('button');
                 pageNumber.textContent = i;
-                pageNumber.className = `desktop-page-btn ${i === ketidakhadiranCurrentPage ? 'active' : ''
-                    }`;
+                pageNumber.className = `desktop-page-btn ${i === ketidakhadiranCurrentPage ? 'active' : ''}`;
                 pageNumber.addEventListener('click', () => goToKetidakhadiranDesktopPage(i));
                 pageNumbersContainer.appendChild(pageNumber);
             }
 
-            // Event listeners for navigation buttons
             prevButton.addEventListener('click', () => {
                 if (ketidakhadiranCurrentPage > 1) goToKetidakhadiranDesktopPage(ketidakhadiranCurrentPage - 1);
             });
@@ -973,26 +899,21 @@
             });
         }
 
-        // Mobile pagination functionality for ketidakhadiran
         function initKetidakhadiranMobilePagination() {
             const pageNumbersContainer = document.getElementById('ketidakhadiranPageNumbersMobile');
             const prevButton = document.getElementById('ketidakhadiranPrevPageMobile');
             const nextButton = document.getElementById('ketidakhadiranNextPageMobile');
 
-            // Clear existing page numbers
             pageNumbersContainer.innerHTML = '';
 
-            // Generate page numbers
             for (let i = 1; i <= ketidakhadiranTotalPages; i++) {
                 const pageNumber = document.createElement('button');
                 pageNumber.textContent = i;
-                pageNumber.className = `mobile-page-btn ${i === ketidakhadiranCurrentPage ? 'active' : ''
-                    }`;
+                pageNumber.className = `mobile-page-btn ${i === ketidakhadiranCurrentPage ? 'active' : ''}`;
                 pageNumber.addEventListener('click', () => goToKetidakhadiranMobilePage(i));
                 pageNumbersContainer.appendChild(pageNumber);
             }
 
-            // Event listeners for navigation buttons
             prevButton.addEventListener('click', () => {
                 if (ketidakhadiranCurrentPage > 1) goToKetidakhadiranMobilePage(ketidakhadiranCurrentPage - 1);
             });
@@ -1002,7 +923,6 @@
             });
         }
 
-        // Go to specific desktop page for absensi
         function goToAbsensiDesktopPage(page) {
             absensiCurrentPage = page;
             renderAbsensiTable(page);
@@ -1010,7 +930,6 @@
             updateAbsensiMobilePaginationButtons();
         }
 
-        // Go to specific mobile page for absensi
         function goToAbsensiMobilePage(page) {
             absensiCurrentPage = page;
             renderAbsensiTable(page);
@@ -1018,7 +937,6 @@
             updateAbsensiMobilePaginationButtons();
         }
 
-        // Go to specific desktop page for ketidakhadiran
         function goToKetidakhadiranDesktopPage(page) {
             ketidakhadiranCurrentPage = page;
             renderKetidakhadiranTable(page);
@@ -1026,7 +944,6 @@
             updateKetidakhadiranMobilePaginationButtons();
         }
 
-        // Go to specific mobile page for ketidakhadiran
         function goToKetidakhadiranMobilePage(page) {
             ketidakhadiranCurrentPage = page;
             renderKetidakhadiranTable(page);
@@ -1034,7 +951,6 @@
             updateKetidakhadiranMobilePaginationButtons();
         }
 
-        // Render table for absensi (used for both desktop and mobile)
         function renderAbsensiTable(page) {
             const tbody = document.getElementById('absensiTableBody');
             tbody.innerHTML = '';
@@ -1056,34 +972,39 @@
                 const absensi = absensiData[i];
 
                 const nama = absensi.user?.name || absensi.name || '-';
-                const tanggal = absensi.tanggal
-                    ? new Date(absensi.tanggal).toLocaleDateString('id-ID')
-                    : '-';
-
+                const tanggal = absensi.tanggal ? new Date(absensi.tanggal).toLocaleDateString('id-ID') : '-';
                 const jamMasuk = absensi.jam_masuk ? absensi.jam_masuk.substring(0, 5) : '-';
                 const jamKeluar = absensi.jam_pulang ? absensi.jam_pulang.substring(0, 5) : '-';
+                
+                // Tentukan status berdasarkan jam masuk
+                let status = 'Tepat Waktu';
+                if (absensi.jam_masuk) {
+                    const jamMasukTime = new Date(`1970-01-01T${absensi.jam_masuk}`);
+                    const batasTerlambat = new Date(`1970-01-01T09:05:00`);
+                    if (jamMasukTime > batasTerlambat) {
+                        status = 'Terlambat';
+                    }
+                }
 
-                const statusClass = statusClassMap[absensi.status] || 'status-default';
+                const statusClass = statusClassMap[status] || 'status-default';
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-            <td style="min-width: 60px;">${i + 1}</td>
-            <td style="min-width: 200px;">${nama}</td>
-            <td style="min-width: 120px;">${tanggal}</td>
-            <td style="min-width: 120px;">${jamMasuk}</td>
-            <td style="min-width: 120px;">${jamKeluar}</td>
-            <td style="min-width: 120px;">
-                <span class="status-badge ${statusClass}">
-                    ${absensi.status}
-                </span>
-            </td>
-        `;
+                    <td style="min-width: 60px;">${i + 1}</td>
+                    <td style="min-width: 200px;">${nama}</td>
+                    <td style="min-width: 120px;">${tanggal}</td>
+                    <td style="min-width: 120px;">${jamMasuk}</td>
+                    <td style="min-width: 120px;">${jamKeluar}</td>
+                    <td style="min-width: 120px;">
+                        <span class="status-badge ${statusClass}">
+                            ${status}
+                        </span>
+                    </td>
+                `;
                 tbody.appendChild(row);
             }
         }
 
-
-        // Render table for ketidakhadiran (used for both desktop and mobile)
         function renderKetidakhadiranTable(page) {
             const tbody = document.getElementById('ketidakhadiranTableBody');
             tbody.innerHTML = '';
@@ -1095,38 +1016,28 @@
                 const ketidakhadiran = ketidakhadiranData[i];
                 const row = document.createElement('tr');
 
-                // Format tanggal
                 const tanggalMulai = new Date(ketidakhadiran.tanggal).toLocaleDateString('id-ID');
-                const tanggalAkhir = ketidakhadiran.tanggal_akhir
-                    ? new Date(ketidakhadiran.tanggal_akhir).toLocaleDateString('id-ID')
-                    : tanggalMulai;
+                const tanggalAkhir = ketidakhadiran.tanggal_akhir ? new Date(ketidakhadiran.tanggal_akhir).toLocaleDateString('id-ID') : tanggalMulai;
 
-                // Determine alasan
                 let alasan = '-';
-                if (ketidakhadiran.status === 'Cuti') {
-                    alasan = ketidakhadiran.alasan_cuti || ketidakhadiran.jenis_cuti || 'Cuti';
-                } else if (ketidakhadiran.status === 'Sakit') {
+                if (ketidakhadiran.jenis_ketidakhadiran === 'cuti') {
+                    alasan = ketidakhadiran.keterangan || 'Cuti';
+                } else if (ketidakhadiran.jenis_ketidakhadiran === 'sakit') {
                     alasan = 'Sakit';
-                } else if (ketidakhadiran.status === 'Izin') {
-                    alasan = ketidakhadiran.reason || 'Izin';
-                } else if (ketidakhadiran.status === 'Tidak Masuk') {
-                    alasan = 'Tanpa Keterangan';
+                } else if (ketidakhadiran.jenis_ketidakhadiran === 'izin') {
+                    alasan = ketidakhadiran.keterangan || 'Izin';
                 }
 
-                // Determine status class
                 let statusClass = '';
-                if (ketidakhadiran.status === 'Izin') {
+                if (ketidakhadiran.jenis_ketidakhadiran === 'izin') {
                     statusClass = 'status-izin';
-                } else if (ketidakhadiran.status === 'Cuti') {
+                } else if (ketidakhadiran.jenis_ketidakhadiran === 'cuti') {
                     statusClass = 'status-cuti';
-                } else if (ketidakhadiran.status === 'Sakit') {
+                } else if (ketidakhadiran.jenis_ketidakhadiran === 'sakit') {
                     statusClass = 'status-sakit';
-                } else if (ketidakhadiran.status === 'Tidak Masuk') {
-                    statusClass = 'status-tidak-masuk';
                 }
 
-                // Tambahkan badge untuk status persetujuan jika pending
-                let statusBadge = `<span class="status-badge ${statusClass}">${ketidakhadiran.status}</span>`;
+                let statusBadge = `<span class="status-badge ${statusClass}">${ketidakhadiran.jenis_ketidakhadiran}</span>`;
                 if (ketidakhadiran.approval_status === 'pending') {
                     statusBadge += ` <span class="status-badge" style="background-color: rgba(245, 158, 11, 0.15); color: #92400e;">Menunggu Persetujuan</span>`;
                 }
@@ -1143,7 +1054,6 @@
             }
         }
 
-        // Update desktop pagination buttons for absensi
         function updateAbsensiDesktopPaginationButtons() {
             const prevButton = document.getElementById('absensiPrevPage');
             const nextButton = document.getElementById('absensiNextPage');
@@ -1161,7 +1071,6 @@
             });
         }
 
-        // Update mobile pagination buttons for absensi
         function updateAbsensiMobilePaginationButtons() {
             const prevButton = document.getElementById('absensiPrevPageMobile');
             const nextButton = document.getElementById('absensiNextPageMobile');
@@ -1179,7 +1088,6 @@
             });
         }
 
-        // Update desktop pagination buttons for ketidakhadiran
         function updateKetidakhadiranDesktopPaginationButtons() {
             const prevButton = document.getElementById('ketidakhadiranPrevPage');
             const nextButton = document.getElementById('ketidakhadiranNextPage');
@@ -1197,7 +1105,6 @@
             });
         }
 
-        // Update mobile pagination buttons for ketidakhadiran
         function updateKetidakhadiranMobilePaginationButtons() {
             const prevButton = document.getElementById('ketidakhadiranPrevPageMobile');
             const nextButton = document.getElementById('ketidakhadiranNextPageMobile');

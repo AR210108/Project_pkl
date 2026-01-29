@@ -12,5 +12,8 @@ class Layanan extends Model
         'harga',
         'foto',
     ];
-    
+    public function projects()
+{
+    return $this->hasMany(Project::class);
+}
 }

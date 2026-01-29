@@ -14,8 +14,9 @@ class GeneralManagerTaskController extends Controller
     {
         $user = Auth::user();
         
-        // Get semua karyawan
-        $karyawan = User::where('role', 'karyawan')->get();
+        // FIX: Perbaiki syntax error di line ini
+        // $karyawan = User::where('role', operator: 'karyawan')->get(); // SALAH
+        $karyawan = User::where('role', 'karyawan')->get(); // BENAR
         
         // Get semua manager divisi
         $managers = User::where('role', 'manager_divisi')->get();
@@ -43,6 +44,8 @@ class GeneralManagerTaskController extends Controller
             'status' => 'sometimes|in:pending,proses,selesai,dibatalkan',
             'target_type' => 'required|in:karyawan,divisi,manager',
             'catatan' => 'nullable|string',
+            // TAMBAHKAN priority karena field ini ada di database
+            'priority' => 'sometimes|in:low,medium,high',
         ]);
         
         $user = Auth::user();
@@ -52,11 +55,14 @@ class GeneralManagerTaskController extends Controller
         
         // Set default status if not provided
         $validated['status'] = $validated['status'] ?? 'pending';
+        // Set default priority jika tidak disediakan
+        $validated['priority'] = $validated['priority'] ?? 'medium';
         
         // Handle different target types
         if ($request->target_type === 'karyawan' && $request->filled('assigned_to')) {
             $validated['assigned_to'] = $request->assigned_to;
             $validated['target_type'] = 'karyawan';
+            $validated['is_broadcast'] = false;
         } elseif ($request->target_type === 'divisi' && $request->filled('target_divisi')) {
             $validated['target_divisi'] = $request->target_divisi;
             $validated['target_type'] = 'divisi';
@@ -64,6 +70,7 @@ class GeneralManagerTaskController extends Controller
         } elseif ($request->target_type === 'manager' && $request->filled('target_manager_id')) {
             $validated['target_manager_id'] = $request->target_manager_id;
             $validated['target_type'] = 'manager';
+            $validated['is_broadcast'] = false;
         } else {
             return response()->json([
                 'success' => false,
@@ -71,12 +78,28 @@ class GeneralManagerTaskController extends Controller
             ], 422);
         }
         
+        // FIX: Tambahkan logic untuk auto assign ke manager jika target_type = divisi
+        if ($request->target_type === 'divisi' && $request->filled('target_divisi')) {
+            // Cari manager divisi yang sesuai
+            $manager = User::where('role', 'manager_divisi')
+                          ->where('divisi', $request->target_divisi)
+                          ->first();
+            
+            if ($manager) {
+                $validated['target_manager_id'] = $manager->id;
+                // Auto assign ke manager juga
+                if (!isset($validated['assigned_to'])) {
+                    $validated['assigned_to'] = $manager->id;
+                }
+            }
+        }
+        
         // For editing existing task
         if ($request->filled('id')) {
             $task = Task::findOrFail($request->id);
             
             // Check if user is authorized to edit
-            if ($task->created_by != $user->id) {
+            if ($task->created_by != $user->id || $user->role !== 'general_manager') {
                 return response()->json([
                     'success' => false,
                     'message' => 'Anda tidak memiliki izin untuk mengedit tugas ini'
@@ -108,13 +131,15 @@ class GeneralManagerTaskController extends Controller
             'status' => 'required|in:pending,proses,selesai,dibatalkan',
             'target_type' => 'required|in:karyawan,divisi,manager',
             'catatan' => 'nullable|string',
+            // TAMBAHKAN priority
+            'priority' => 'required|in:low,medium,high',
         ]);
         
         $task = Task::findOrFail($id);
         $user = Auth::user();
         
         // Check if user is authorized to edit
-        if ($task->created_by != $user->id) {
+        if ($task->created_by != $user->id || $user->role !== 'general_manager') {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki izin untuk mengedit tugas ini'
@@ -127,12 +152,25 @@ class GeneralManagerTaskController extends Controller
         } elseif ($request->target_type === 'divisi' && $request->filled('target_divisi')) {
             $validated['target_divisi'] = $request->target_divisi;
             $validated['is_broadcast'] = true;
+            
+            // FIX: Auto assign ke manager divisi
+            $manager = User::where('role', 'manager_divisi')
+                          ->where('divisi', $request->target_divisi)
+                          ->first();
+            
+            if ($manager) {
+                $validated['target_manager_id'] = $manager->id;
+                if (!isset($validated['assigned_to'])) {
+                    $validated['assigned_to'] = $manager->id;
+                }
+            }
         } elseif ($request->target_type === 'manager' && $request->filled('target_manager_id')) {
             $validated['target_manager_id'] = $request->target_manager_id;
+            $validated['assigned_to'] = $request->target_manager_id;
         }
         
         // Set completed_at if status is 'selesai'
-        if ($request->status === 'selesai') {
+        if ($request->status === 'selesai' && $task->status !== 'selesai') {
             $validated['completed_at'] = now();
         }
         
@@ -154,7 +192,14 @@ class GeneralManagerTaskController extends Controller
         $task = Task::findOrFail($id);
         $user = Auth::user();
         
-        // General Manager bisa update semua tugas
+        // FIX: Tambahkan authorization check
+        if ($user->role !== 'general_manager') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya General Manager yang dapat mengupdate status semua tugas'
+            ], 403);
+        }
+        
         $task->status = $request->status;
         
         // Add catatan_update if provided
@@ -163,7 +208,7 @@ class GeneralManagerTaskController extends Controller
         }
         
         // Set completed_at if status is 'selesai'
-        if ($request->status === 'selesai') {
+        if ($request->status === 'selesai' && $task->status !== 'selesai') {
             $task->completed_at = now();
         }
         
@@ -176,13 +221,12 @@ class GeneralManagerTaskController extends Controller
     }
     
     public function destroy($id)
-    
     {
         $task = Task::findOrFail($id);
         $user = Auth::user();
         
         // Check if user is authorized to delete
-        if ($task->created_by != $user->id) {
+        if ($task->created_by != $user->id || $user->role !== 'general_manager') {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki izin untuk menghapus tugas ini'
@@ -214,6 +258,14 @@ class GeneralManagerTaskController extends Controller
             ], 422);
         }
         
+        // FIX: Tambahkan authorization check
+        if ($user->role !== 'general_manager' && $task->created_by !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki izin untuk menugaskan tugas ini'
+            ], 403);
+        }
+        
         // Check if karyawan is in the same division
         $karyawan = User::findOrFail($request->karyawan_id);
         if ($karyawan->divisi != $task->target_divisi) {
@@ -228,6 +280,7 @@ class GeneralManagerTaskController extends Controller
             'assigned_by_manager' => $user->id,
             'assigned_at' => now(),
             'is_broadcast' => false, // No longer a broadcast task
+            'target_type' => 'karyawan', // Ubah target type karena sekarang spesifik ke karyawan
         ]);
         
         return response()->json([
@@ -259,13 +312,13 @@ class GeneralManagerTaskController extends Controller
             // Determine assignee text based on target_type
             if ($task->target_type === 'karyawan' && $task->assignedUser) {
                 $task->assignee_text = $task->assignedUser->name;
-                $task->assignee_divisi = $task->assignedUser->divisi;
+                $task->assignee_divisi = $task->assignedUser->divisi ?? '-';
             } elseif ($task->target_type === 'divisi') {
-                $task->assignee_text = $task->target_divisi;
-                $task->assignee_divisi = $task->target_divisi;
+                $task->assignee_text = 'Divisi ' . ($task->target_divisi ?? '-');
+                $task->assignee_divisi = $task->target_divisi ?? '-';
             } elseif ($task->target_type === 'manager' && $task->targetManager) {
-                $task->assignee_text = $task->targetManager->name;
-                $task->assignee_divisi = $task->targetManager->divisi;
+                $task->assignee_text = 'Manager: ' . $task->targetManager->name;
+                $task->assignee_divisi = $task->targetManager->divisi ?? '-';
             } else {
                 $task->assignee_text = '-';
                 $task->assignee_divisi = '-';
@@ -273,6 +326,7 @@ class GeneralManagerTaskController extends Controller
             
             $task->creator_name = $task->creator ? $task->creator->name : '-';
             $task->is_overdue = $task->deadline && now()->gt($task->deadline) && $task->status !== 'selesai';
+            $task->formatted_deadline = $task->deadline ? $task->deadline->format('d M Y H:i') : '-';
             
             return $task;
         });
@@ -291,12 +345,18 @@ class GeneralManagerTaskController extends Controller
         $pending = Task::where('status', 'pending')->count();
         $cancelled = Task::where('status', 'dibatalkan')->count();
         
+        // FIX: Tambahkan statistik overdue
+        $overdue = Task::where('deadline', '<', now())
+                      ->whereNotIn('status', ['selesai', 'dibatalkan'])
+                      ->count();
+        
         return response()->json([
             'total' => $total,
             'completed' => $completed,
             'in_progress' => $inProgress,
             'pending' => $pending,
-            'cancelled' => $cancelled
+            'cancelled' => $cancelled,
+            'overdue' => $overdue
         ]);
     }
     

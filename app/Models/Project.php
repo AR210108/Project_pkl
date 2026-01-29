@@ -13,6 +13,7 @@ class Project extends Model
     protected $table = 'project'; // Beri tahu model untuk menggunakan tabel 'orderan'
     
     protected $fillable = [
+        'layanan_id',
         'nama',
         'deskripsi',
         'harga',
@@ -25,4 +26,8 @@ class Project extends Model
         'deadline' => 'date',
         'progres' => 'integer'
     ];
+    public function layanan()
+{
+    return $this->belongsTo(Layanan::class);
+}
 }

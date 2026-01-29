@@ -13,10 +13,10 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: "#7C3AED",
-                        "background-light": "#FFFFFF",
-                        "background-dark": "#121212",
-                        "surface-light": "#F3F4F6",
+                        primary: "#3b82f6",
+                        "background-light": "#f3f4f6",
+                        "background-dark": "#111827",
+                        "surface-light": "#FFFFFF",
                         "surface-dark": "#1F2937",
                         "text-primary-light": "#111827",
                         "text-primary-dark": "#F9FAFB",
@@ -32,7 +32,16 @@
         };
     </script>
     <style>
-        body { font-family: 'Poppins', sans-serif; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+        }
+        .material-symbols-outlined {
+            font-variation-settings:
+                'FILL' 0,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24
+        }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
@@ -92,6 +101,29 @@
         .dark #commentsContainer::-webkit-scrollbar-thumb:hover {
             background: #718096;
         }
+
+        /* Detail button styling */
+        .detail-btn {
+            background-color: #3b82f6;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .detail-btn:hover {
+            background-color: #2563eb;
+        }
+
+        .detail-btn .material-symbols-outlined {
+            font-size: 18px;
+        }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
@@ -130,7 +162,7 @@
             <!-- Task List & Filter -->
             <div class="lg:col-span-2 space-y-6">
                 <!-- Filter -->
-                <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-sm">
+                <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-sm border border-border-light dark:border-border-dark">
                     <h2 class="font-semibold mb-4">Filter Tugas</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <select id="statusFilter" class="w-full bg-gray-100 dark:bg-gray-800 rounded-lg py-3 px-4 focus:ring-2 focus:ring-primary focus:outline-none">
@@ -151,7 +183,7 @@
                 <div id="taskList" class="space-y-4">
                     @if($tasks->count() > 0)
                         @foreach($tasks as $task)
-                            <div class="task-card bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-sm hover:shadow-md transition cursor-pointer flex justify-between items-center"
+                            <div class="task-card bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-sm hover:shadow-md transition border border-border-light dark:border-border-dark"
                                 data-task-id="{{ $task->id }}"
                                 data-task-status="{{ $task->status }}"
                                 data-task-title="{{ $task->judul }}"
@@ -161,51 +193,60 @@
                                 data-task-assigner="{{ $task->assigned_by_manager ? ($task->assigner->name ?? 'Manager') : ($task->creator->name ?? 'Admin') }}"
                                 data-task-priority="{{ $task->priority ?? 'medium' }}">
 
-                                <div class="flex-1">
-                                    <h3 class="font-bold text-lg">{{ $task->judul ?? 'Untitled Task' }}</h3>
-                                    <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark mt-1">
-                                        {{ Str::limit($task->deskripsi ?? 'Tidak ada deskripsi', 80) }}
-                                    </p>
-                                    <div class="flex items-center gap-2 mt-2">
-                                        @php
-                                            $priority = $task->priority ?? 'medium';
-                                        @endphp
-                                        <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full 
-                                            {{ $priority === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                                               ($priority === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                                               'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200') }}">
-                                            <span class="material-symbols-outlined text-xs">
-                                                {{ $priority === 'high' ? 'priority_high' : 
-                                                   ($priority === 'medium' ? 'low_priority' : 'flag') }}
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-lg">{{ $task->judul ?? 'Untitled Task' }}</h3>
+                                        <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark mt-1">
+                                            {{ Str::limit($task->deskripsi ?? 'Tidak ada deskripsi', 80) }}
+                                        </p>
+                                        <div class="flex items-center gap-2 mt-2">
+                                            @php
+                                                $priority = $task->priority ?? 'medium';
+                                            @endphp
+                                            <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full 
+                                                {{ $priority === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                                                   ($priority === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                                                   'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200') }}">
+                                                <span class="material-symbols-outlined text-xs">
+                                                    {{ $priority === 'high' ? 'priority_high' : 
+                                                       ($priority === 'medium' ? 'low_priority' : 'flag') }}
+                                                </span>
+                                                {{ $priority === 'high' ? 'Tinggi' : ($priority === 'medium' ? 'Sedang' : 'Rendah') }}
                                             </span>
-                                            {{ $priority === 'high' ? 'Tinggi' : ($priority === 'medium' ? 'Sedang' : 'Rendah') }}
+                                        </div>
+                                    </div>
+
+                                    <div class="text-right ml-6">
+                                        <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                                            @if($task->deadline)
+                                                {{ \Carbon\Carbon::parse($task->deadline)->translatedFormat('d M Y') }}
+                                                @if($task->deadline < now() && $task->status !== 'selesai')
+                                                    <span class="block text-xs text-red-600 dark:text-red-400">⏰ Terlambat</span>
+                                                @endif
+                                            @else
+                                                Tidak ada deadline
+                                            @endif
+                                        </p>
+                                        <span class="mt-2 inline-block px-3 py-1 text-xs font-semibold rounded-full
+                                            {{ $task->status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                                               ($task->status === 'proses' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                               ($task->status === 'selesai' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                               'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200')) }}">
+                                            {{ strtoupper($task->status) }}
                                         </span>
                                     </div>
                                 </div>
-
-                                <div class="text-right ml-6">
-                                    <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                                        @if($task->deadline)
-                                            {{ \Carbon\Carbon::parse($task->deadline)->translatedFormat('d M Y') }}
-                                            @if($task->deadline < now() && $task->status !== 'selesai')
-                                                <span class="block text-xs text-red-600 dark:text-red-400">⏰ Terlambat</span>
-                                            @endif
-                                        @else
-                                            Tidak ada deadline
-                                        @endif
-                                    </p>
-                                    <span class="mt-2 inline-block px-3 py-1 text-xs font-semibold rounded-full
-                                        {{ $task->status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                                           ($task->status === 'proses' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                                           ($task->status === 'selesai' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                                           'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200')) }}">
-                                        {{ strtoupper($task->status) }}
-                                    </span>
+                                
+                                <div class="mt-4 flex justify-end">
+                                    <button class="detail-btn" onclick="openTaskDetail({{ $task->id }})">
+                                        <span class="material-symbols-outlined">visibility</span>
+                                        Lihat Detail
+                                    </button>
                                 </div>
                             </div>
                         @endforeach
                     @else
-                        <div class="bg-surface-light dark:bg-surface-dark p-12 rounded-xl text-center">
+                        <div class="bg-surface-light dark:bg-surface-dark p-12 rounded-xl text-center border border-border-light dark:border-border-dark">
                             <span class="material-symbols-outlined text-6xl text-gray-400">assignment_late</span>
                             <p class="mt-6 text-xl font-medium text-text-secondary-light dark:text-text-secondary-dark">
                                 Belum ada tugas
@@ -220,17 +261,17 @@
 
             <!-- Task Detail Sidebar -->
             <div class="lg:col-span-1">
-                <div id="taskDetail" class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl sticky top-8 shadow-sm">
+                <div id="taskDetail" class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl sticky top-8 shadow-sm border border-border-light dark:border-border-dark">
                     <h2 class="text-xl font-bold mb-4">Detail Tugas</h2>
                     <h3 id="taskTitle" class="text-2xl font-bold text-primary">Pilih tugas dari daftar</h3>
                     <p id="taskDescription" class="mt-3 text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                        Klik atau double-click tugas di sebelah kiri untuk melihat detail dan mengunggah hasil.
+                        Klik tombol "Lihat Detail" pada tugas di sebelah kiri untuk melihat detail dan mengunggah hasil.
                     </p>
                     <div class="mt-8 bg-gray-200 dark:bg-gray-700 h-64 rounded-xl flex items-center justify-center">
                         <span class="material-symbols-outlined text-6xl text-gray-400">task_alt</span>
                     </div>
                     <button id="uploadButton" disabled
-                        class="w-full mt-6 bg-primary text-white font-bold py-4 rounded-xl hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="w-full mt-6 bg-primary text-white font-bold py-4 rounded-xl hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
                         UPLOAD HASIL TUGAS
                     </button>
                     
@@ -256,18 +297,18 @@
 
     <!-- Task Detail Modal - DESAIN BARU -->
     <div id="taskDetailModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="bg-surface-light dark:bg-surface-dark rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-border-light dark:border-border-dark">
             <div class="p-6 md:p-8">
                 <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Detail Tugas</h2>
+                    <h2 class="text-2xl md:text-3xl font-bold text-text-primary-light dark:text-text-primary-dark">Detail Tugas</h2>
                     <button id="closeDetailModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
                         <span class="material-symbols-outlined text-3xl">close</span>
                     </button>
                 </div>
                 
-                <div class="bg-gray-50 dark:bg-gray-800 p-6 md:p-8 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 md:p-8 rounded-xl border border-border-light dark:border-border-dark">
                     <!-- Task Title -->
-                    <h3 id="modalTaskTitle" class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4 md:mb-6"></h3>
+                    <h3 id="modalTaskTitle" class="text-xl sm:text-2xl md:text-3xl font-bold text-text-primary-light dark:text-text-primary-dark mb-4 md:mb-6"></h3>
                     
                     <div class="space-y-4 md:space-y-6">
                         <!-- Deskripsi -->
@@ -335,7 +376,7 @@
                                     Batal
                                 </button>
                                 <button id="submitComment" type="button"
-                                    class="bg-primary text-white font-medium py-2 px-4 md:px-5 rounded-lg hover:bg-purple-700 transition-colors text-sm md:text-base">
+                                    class="bg-primary text-white font-medium py-2 px-4 md:px-5 rounded-lg hover:bg-blue-600 transition-colors text-sm md:text-base">
                                     Kirim Komentar
                                 </button>
                             </div>
@@ -349,7 +390,7 @@
                             Tutup
                         </button>
                         <button id="modalUploadButton" 
-                            class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-purple-700 transition text-sm md:text-base w-full sm:w-auto">
+                            class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition text-sm md:text-base w-full sm:w-auto">
                             Upload Hasil Tugas
                         </button>
                     </div>
@@ -360,10 +401,10 @@
 
     <!-- Upload Modal -->
     <div id="uploadModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full shadow-2xl">
+        <div class="bg-surface-light dark:bg-surface-dark rounded-2xl max-w-md w-full shadow-2xl border border-border-light dark:border-border-dark">
             <div class="p-6 md:p-8">
                 <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-2xl font-bold">Upload Hasil Tugas</h2>
+                    <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Upload Hasil Tugas</h2>
                     <button id="closeUploadModal" class="text-gray-500 hover:text-gray-700">
                         <span class="material-symbols-outlined text-3xl">close</span>
                     </button>
@@ -385,7 +426,7 @@
                                 <p class="text-xs text-gray-500">
                                     PDF, DOC, ZIP, RAR, JPG, PNG (max. 10MB)
                                 </p>
-                                <button type="button" id="fileUploadTrigger" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-purple-700">
+                                <button type="button" id="fileUploadTrigger" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600">
                                     Pilih File
                                 </button>
                             </div>
@@ -402,7 +443,7 @@
                     
                     <div class="mt-8 flex justify-end gap-3">
                         <button type="button" id="cancelUpload" class="px-6 py-3 bg-gray-300 dark:bg-gray-700 rounded-lg hover:bg-gray-400">Batal</button>
-                        <button type="submit" class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-purple-700">Upload</button>
+                        <button type="submit" class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-blue-600">Upload</button>
                     </div>
                 </form>
             </div>
@@ -465,15 +506,16 @@
             cancelUpload: document.getElementById('cancelUpload'),
         };
 
-        // Fungsi untuk memilih task
-        function selectTask(card) {
+        // Fungsi untuk membuka detail tugas
+        function openTaskDetail(taskId) {
+            const card = document.querySelector(`[data-task-id="${taskId}"]`);
             if (!card) return;
             
             // Reset active state
             elements.taskCards.forEach(c => c.classList.remove('ring-4', 'ring-primary/50'));
             card.classList.add('ring-4', 'ring-primary/50');
 
-            currentTaskId = parseInt(card.dataset.taskId);
+            currentTaskId = parseInt(taskId);
             elements.taskTitle.textContent = card.dataset.taskTitle;
             elements.taskDescription.textContent = card.dataset.taskFullDescription;
             elements.uploadButton.disabled = false;
@@ -481,6 +523,9 @@
             
             // Update sidebar details
             updateSidebarDetails(card);
+            
+            // Buka modal detail
+            openDetailModal();
         }
 
         // Fungsi untuk update sidebar
@@ -650,24 +695,6 @@
             }, 5000);
         }
 
-        // Event Listeners untuk task cards
-        if (elements.taskCards.length > 0) {
-            elements.taskCards.forEach(card => {
-                card.addEventListener('click', () => selectTask(card));
-                card.addEventListener('dblclick', () => {
-                    selectTask(card);
-                    openDetailModal();
-                });
-            });
-            
-            // Auto-select first task
-            setTimeout(() => {
-                if (elements.taskCards.length > 0) {
-                    selectTask(elements.taskCards[0]);
-                }
-            }, 100);
-        }
-
         // Event Listeners untuk modal detail
         if (elements.closeDetailModal) {
             elements.closeDetailModal.addEventListener('click', () => {
@@ -802,7 +829,7 @@
             elements.taskCards.forEach(card => {
                 const matchesStatus = status === 'all' || card.dataset.taskStatus === status;
                 const matchesSearch = card.dataset.taskTitle.toLowerCase().includes(query);
-                card.style.display = matchesStatus && matchesSearch ? 'flex' : 'none';
+                card.style.display = matchesStatus && matchesSearch ? 'block' : 'none';
                 if (matchesStatus && matchesSearch) visible++;
             });
 

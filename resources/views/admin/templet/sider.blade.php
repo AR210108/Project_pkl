@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sidebar Component</title>
+    
+    <!-- DITAMBAHKAN: Meta tag CSRF untuk keamanan form (sangat penting di Laravel) -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
@@ -30,7 +34,7 @@
             transform: rotate(-45deg) translate(7px, -6px);
         }
 
-        /* Style untuk efek hover yang lebih menonjol */
+        /* Gaya untuk efek hover yang lebih menonjol */
         .nav-item {
             position: relative;
             overflow: hidden;
@@ -191,13 +195,26 @@
             /* 10px 16px, dengan !important */
         }
 
+        /* PERUBAHAN: Mengurangi tinggi header dari 5rem (80px) menjadi 3rem (48px) */
         .sidebar-header {
-            height: 5rem !important;
-            /* 80px, dengan !important */
-            min-height: 5rem !important;
-            /* 80px, dengan !important */
+            height: 4rem !important;
+            /* 48px, sebelumnya 80px */
+            min-height: 4rem !important;
+            /* 48px, sebelumnya 80px */
             max-height: 5rem !important;
-            /* 80px, dengan !important */
+            /* 48px, sebelumnya 80px */
+            padding: 0.5rem !important;
+            /* Menambahkan padding untuk memberikan ruang di sekitar logo */
+        }
+
+        /* PERUBAHAN: Menyesuaikan ukuran logo agar pas dengan header yang lebih kecil */
+        .sidebar-logo {
+            max-height: 100% !important;
+            /* Maksimal tinggi logo sama dengan tinggi header */
+            width: auto !important;
+            /* Menjaga aspek rasio logo */
+            object-fit: contain !important;
+            /* Memastikan logo terlihat penuh tanpa terpotong */
         }
 
         .sidebar-footer {
@@ -225,8 +242,9 @@
     <aside id="sidebar"
         class="sidebar-fixed bg-white flex flex-col sidebar-transition transform translate-x-full md:translate-x-0 right-0 md:left-0 md:right-auto shadow-lg">
 
+        <!-- PERUBAHAN: Mengurangi ukuran header dan menyesuaikan kelas logo -->
         <div class="sidebar-header flex items-center justify-center border-b border-gray-200 flex-shrink-0">
-            <h1 class="sidebar-title">Brand</h1>
+            <img src="{{ asset('images/logo_inovindo.jpg') }}" alt="Login Background" class="sidebar-logo">
         </div>
 
         <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
@@ -251,58 +269,52 @@
                 <span class="sidebar-text">Data Karyawan</span>
             </a>
 
-          <!-- Menu Data Layanan -->
-<a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-    href="/admin/layanan" data-page="layanan">
-    <!-- Ikon telah diubah dari 'miscellaneous_services' menjadi 'handshake' -->
-    <span class="material-icons sidebar-icon">handshake</span>
-    <span class="sidebar-text">Data Layanan</span>
-</a>
-        
+            <!-- Menu Data Layanan -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="/admin/layanan" data-page="layanan">
+                <span class="material-icons sidebar-icon">handshake</span>
+                <span class="sidebar-text">Data Layanan</span>
+            </a>
 
-          
+            <!-- Menu Data Project -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="/admin/data_project" data-page="data_project">
+                <span class="material-icons sidebar-icon">dashboard</span>
+                <span class="sidebar-text">Data Project</span>
+            </a>
 
             <!-- Menu Surat Kerjasama (Dropdown) -->
             <div class="relative">
                 <button
                     class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors w-full text-left"
-                    onclick="toggleDropdown('surat-kerjasama-dropdown')" data-page="surat_kerjasama">
+                    onclick="toggleDropdown('dokumen-dropdown')" data-page="dokumen">
                     <span class="material-icons sidebar-icon">description</span>
-                    <span class="sidebar-text">Surat Kerjasama</span>
+                    <span class="sidebar-text">Dokumen</span>
                     <span class="material-icons sidebar-icon ml-auto transition-transform duration-200"
-                        id="surat-kerjasama-icon">expand_more</span>
+                        id="dokumen-icon">expand_more</span>
                 </button>
 
                 <!-- Dropdown -->
-                <div id="surat-kerjasama-dropdown" class="pl-6 mt-1 space-y-1 hidden">
+                <div id="dokumen-dropdown" class="pl-6 mt-1 space-y-1 hidden">
                     <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        href="/template_surat" data-page="template_surat">
+                        href="/admin/invoice" data-page="template_surat">
                         <span class="material-icons sidebar-icon">article</span>
-                        <span class="sidebar-text">Template Surat</span>
+                        <span class="sidebar-text">Invoice</span>
                     </a>
 
                     <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        href="/admin/surat_kerjasama" data-page="list_surat">
+                        href="/admin/kwitansi" data-page="list_surat">
                         <span class="material-icons sidebar-icon">list_alt</span>
-                        <span class="sidebar-text">List Surat</span>
+                        <span class="sidebar-text">Kwitansi</span>
                     </a>
                 </div>
             </div>
 
-
-
-             
             <!-- Catatan Rapat -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 href="/admin/catatan_rapat" data-page="catatan_rapat">
                 <span class="material-icons sidebar-icon">note</span>
                 <span class="sidebar-text">Catatan Rapat</span>
-            </a>
-            <!-- Catatan Rapat -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/admin/data_project" data-page="data_project">
-                <span class="material-icons sidebar-icon">note</span>
-                <span class="sidebar-text">Data Project</span>
             </a>
 
             <!-- Pengumuman -->
@@ -311,103 +323,177 @@
                 <span class="material-icons sidebar-icon">campaign</span>
                 <span class="sidebar-text">Pengumuman</span>
             </a>
-        </nav>
-<form action="{{ route('logout') }}" method="POST">
-    @csrf
-    <button type="submit"
-        class="nav-item w-full flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-        <span class="material-icons sidebar-icon">logout</span>
-        <span class="sidebar-text">Log Out</span>
-    </button>
-</form>
 
+            <!-- Menu Pengaturan Kontak dan Tentang -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="/admin/settings/contact" data-page="settings_contact">
+                <span class="material-icons sidebar-icon">settings</span>
+                <span class="sidebar-text">Pengaturan Konten</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer border-t border-gray-200">
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit"
+                    class="nav-item w-full flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                    <span class="material-icons sidebar-icon">logout</span>
+                    <span class="sidebar-text">Log Out</span>
+                </button>
+            </form>
+        </div>
     </aside>
 
-
-
-
- <script>
-    function initSidebar() {
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- ELEMEN DOM ---
         const hamburger = document.getElementById('hamburger');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
-        const mainContent = document.querySelector('.main-content');
 
+        // --- CEK ELEMEN PENTING ---
+        // Jika salah satu elemen utama tidak ditemukan, hentikan eksekusi
+        if (!hamburger || !sidebar || !overlay) {
+            console.error('Error: Elemen hamburger, sidebar, atau overlay tidak ditemukan.');
+            return;
+        }
+
+        // --- FUNGSI SIDEBAR ---
         function openSidebar() {
             sidebar.classList.remove('translate-x-full');
             overlay.classList.remove('hidden');
             hamburger.classList.add('hamburger-active');
-            document.body.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden'; // Mencegah scroll background
         }
 
         function closeSidebar() {
             sidebar.classList.add('translate-x-full');
             overlay.classList.add('hidden');
             hamburger.classList.remove('hamburger-active');
-            document.body.style.overflow = '';
+            document.body.style.overflow = ''; // Kembalikan scroll
         }
 
+        // --- EVENT LISTENER UNTUK HAMBURGER ---
         hamburger.addEventListener('click', () => {
-            sidebar.classList.contains('translate-x-full')
-                ? openSidebar()
-                : closeSidebar();
+            // Cek apakah sidebar sedang tersembunyi (memiliki class translate-x-full)
+            if (sidebar.classList.contains('translate-x-full')) {
+                openSidebar();
+            } else {
+                closeSidebar();
+            }
         });
 
+        // --- EVENT LISTENER UNTUK OVERLAY ---
         overlay.addEventListener('click', closeSidebar);
 
-        document.addEventListener('keydown', e => {
+        // --- TUTUP SIDEBAR DENGAN TOMBOL ESC ---
+        document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && !sidebar.classList.contains('translate-x-full')) {
                 closeSidebar();
             }
         });
 
-        // ✅ SIMPAN MENU SAAT DIKLIK
+        // --- FUNGSI UNTUK MENU AKTIF ---
+        function setActiveNavItem() {
+            const activePage = sessionStorage.getItem('activeSidebar');
+            if (!activePage) return;
+
+            // Hapus class 'active' dari semua item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Tambahkan class 'active' ke item yang sesuai
+            const activeItem = document.querySelector(`.nav-item[data-page="${activePage}"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+
+                // Jika item berada di dalam dropdown, buka dropdown tersebut
+                const dropdownParent = activeItem.closest('[id$="-dropdown"]');
+                if (dropdownParent) {
+                    dropdownParent.classList.remove('hidden');
+                    const icon = document.getElementById(dropdownParent.id.replace('-dropdown', '-icon'));
+                    if (icon) {
+                        icon.textContent = 'expand_less';
+                    }
+                }
+            }
+        }
+
+        // --- EVENT LISTENER UNTUK SETIAP ITEM NAVIGASI ---
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
                 const page = item.getAttribute('data-page');
                 if (page) {
                     sessionStorage.setItem('activeSidebar', page);
+                    // Set status aktif sebelum pindah halaman (untuk efek instan)
+                    setActiveNavItem();
                 }
             });
         });
 
-        setActiveNavItem();
-    }
+        // --- FUNGSI UNTUK DROPDOWN ---
+        // Membuat fungsi global agar bisa dipanggil dari onclick di HTML
+        window.toggleDropdown = function(id) {
+            const dropdown = document.getElementById(id);
+            const icon = document.getElementById(id.replace('-dropdown', '-icon'));
 
-    function setActiveNavItem() {
-        const activePage = sessionStorage.getItem('activeSidebar');
-
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('active');
-
-            if (item.getAttribute('data-page') === activePage) {
-                item.classList.add('active');
-
-                // Jika di dropdown → buka dropdown
-                const dropdown = item.closest('[id$="-dropdown"]');
-                if (dropdown) {
-                    dropdown.classList.remove('hidden');
-                    const icon = document.getElementById(
-                        dropdown.id.replace('-dropdown', '-icon')
-                    );
-                    if (icon) icon.textContent = 'expand_less';
-                }
+            if (dropdown && icon) {
+                dropdown.classList.toggle('hidden');
+                icon.textContent = dropdown.classList.contains('hidden') ? 'expand_more' : 'expand_less';
             }
-        });
-    }
+        };
 
-    function toggleDropdown(id) {
-        const dropdown = document.getElementById(id);
-        const icon = document.getElementById(id.replace('-dropdown', '-icon'));
+        // --- INISIALISASI ---
+        setActiveNavItem();
 
-        dropdown.classList.toggle('hidden');
-        icon.textContent = dropdown.classList.contains('hidden')
-            ? 'expand_more'
-            : 'expand_less';
-    }
+        // --- HANDLER LOGOUT YANG LEBIH AMAN ---
+        const logoutForm = document.querySelector('form[action*="logout"]');
+        if (logoutForm) {
+            logoutForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                
+                // Cek keberadaan meta tag CSRF
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (!csrfToken) {
+                    console.error('Meta tag CSRF-Token tidak ditemukan!');
+                    alert('Terjadi kesalahan konfigurasi. Logout tidak dapat diproses.');
+                    return;
+                }
 
-    document.addEventListener('DOMContentLoaded', initSidebar);
-</script>
+                // Kirim form menggunakan fetch
+                fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this),
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => {
+                    // Jika response adalah redirect (bukan JSON), arahkan saja
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                        return;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Ini hanya dijalankan jika response adalah JSON
+                    if (data && data.success) {
+                        window.location.href = data.redirect_to || '/login';
+                    } else if (data && data.message) {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Logout Error:', error);
+                    alert('Terjadi kesalahan saat mencoba logout.');
+                });
+            });
+        }
+    });
+    </script>
 
 </body>
 

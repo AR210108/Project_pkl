@@ -422,14 +422,16 @@
         }
 
         .calendar-notes-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    max-width: 600px;
-    /* Hapus margin: 0 auto; */
-    margin-left: 0; /* Tambahkan ini untuk memastikan rata kiri */
-    margin-right: auto; /* Tambahkan ini untuk menjaga responsivitas */
-}
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            max-width: 600px;
+            /* Hapus margin: 0 auto; */
+            margin-left: 0;
+            /* Tambahkan ini untuk memastikan rata kiri */
+            margin-right: auto;
+            /* Tambahkan ini untuk menjaga responsivitas */
+        }
 
         /* Mobile responsive */
         @media (max-width: 768px) {
@@ -539,7 +541,8 @@
                 max-width: 100% !important;
             }
 
-            .calendar-container, .notes-container {
+            .calendar-container,
+            .notes-container {
                 width: 100% !important;
                 margin-bottom: 0.5rem !important;
             }
@@ -625,6 +628,54 @@
             }
 
         }
+        
+        /* Card-based layout for tables on mobile */
+        .mobile-table-cards {
+            display: none;
+        }
+        
+        .mobile-table-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .mobile-table-card-header {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+        
+        .mobile-table-card-row {
+            display: flex;
+            margin-bottom: 0.5rem;
+        }
+        
+        .mobile-table-card-label {
+            font-weight: 600;
+            width: 40%;
+            color: #64748b;
+        }
+        
+        .mobile-table-card-value {
+            width: 60%;
+            color: #1f2937;
+        }
+        
+        @media (max-width: 768px) {
+            .data-table-container {
+                display: none;
+            }
+            
+            .mobile-table-cards {
+                display: block;
+            }
+        }
     </style>
 </head>
 
@@ -647,7 +698,8 @@
                         <div class="card-content">
                             <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah Karyawan</p>
                             <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">
-                                {{ $jumlahKaryawan }}</p>
+                                {{ $jumlahKaryawan }}
+                            </p>
                         </div>
                     </div>
                     <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card">
@@ -657,7 +709,8 @@
                         <div class="card-content">
                             <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah User</p>
                             <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">
-                                {{ $jumlahUser }}</p>
+                                {{ $jumlahUser }}
+                            </p>
                         </div>
                     </div>
                     <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card">
@@ -667,7 +720,8 @@
                         <div class="card-content">
                             <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah Layanan</p>
                             <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">
-                                {{ $jumlahLayanan }}</p>
+                                {{ $jumlahLayanan }}
+                            </p>
                         </div>
                     </div>
                     <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card">
@@ -675,8 +729,10 @@
                             <span class="material-symbols-rounded text-yellow-600">handshake</span>
                         </div>
                         <div class="card-content">
-                            <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah surat kerjasama</p>
-                            <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">$10.000.000</p>
+                            <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah Data Project</p>
+                            <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">
+                                {{ $jumlahProject ?? 0 }}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -714,9 +770,6 @@
                     <div class="notes-container">
                         <div class="notes-header">
                             <h3>Catatan Meeting</h3>
-                            <button class="calendar-nav-button" onclick="addNote()">
-                                <span class="material-symbols-rounded">add</span>
-                            </button>
                         </div>
                         <div class="notes-body" id="notesContainer">
                             <!-- diisi JS -->
@@ -747,62 +800,112 @@
                         </h3>
                     </div>
                     <div class="panel-body">
-                        <div class="overflow-x-auto">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Tanggal</th>
-                                        <th class="text-center">Peserta</th>
-                                        <th class="text-center">Topik Rapat</th>
-                                        <th class="text-center">Hasil Diskusi</th>
-                                        <th class="text-center">Keputusan</th>
-                                        <th class="text-center">Penugasan</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if ($catatanRapat->count() > 0)
-                                        @foreach ($catatanRapat as $rapat)
-                                            <tr>
-                                                <td class="font-medium">{{ $loop->iteration }}</td>
-
-                                                <td>
-                                                    {{ \Carbon\Carbon::parse($rapat->tanggal)->translatedFormat('d F Y') }}
-                                                </td>
-
-                                                <td class="text-center">
-                                                    @foreach ($rapat->peserta as $user)
-                                                        <span class="block">{{ $user->name }}</span>
-                                                    @endforeach
-                                                </td>
-
-                                                <td class="text-center">{{ $rapat->topik }}</td>
-
-                                                <td class="text-center">
-                                                    {{ Str::limit($rapat->hasil_diskusi, 30) }}
-                                                </td>
-
-                                                <td class="text-center">
-                                                    {{ Str::limit($rapat->keputusan, 30) }}
-                                                </td>
-
-                                                <td class="text-center">
-                                                    @foreach ($rapat->penugasan as $user)
-                                                        <span class="block">{{ $user->name }}</span>
-                                                    @endforeach
-                                                </td>
-
-                                            </tr>
-                                        @endforeach
-                                    @else
+                        <!-- Desktop Table View -->
+                        <div class="data-table-container">
+                            <div class="overflow-x-auto">
+                                <table class="data-table">
+                                    <thead>
                                         <tr>
-                                            <td colspan="7" class="text-center py-6 text-gray-500">
-                                                Belum ada catatan meeting
-                                            </td>
+                                            <th>No</th>
+                                            <th>Tanggal</th>
+                                            <th class="text-center">Peserta</th>
+                                            <th class="text-center">Topik Rapat</th>
+                                            <th class="text-center">Hasil Diskusi</th>
+                                            <th class="text-center">Keputusan</th>
+                                            <th class="text-center">Penugasan</th>
                                         </tr>
-                                    @endif
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @if ($catatanRapat->count() > 0)
+                                            @foreach ($catatanRapat as $rapat)
+                                                <tr>
+                                                    <td class="font-medium">{{ $loop->iteration }}</td>
+
+                                                    <td>
+                                                        {{ \Carbon\Carbon::parse($rapat->tanggal)->translatedFormat('d F Y') }}
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        @foreach ($rapat->peserta as $user)
+                                                            <span class="block">{{ $user->name }}</span>
+                                                        @endforeach
+                                                    </td>
+
+                                                    <td class="text-center">{{ $rapat->topik }}</td>
+
+                                                    <td class="text-center">
+                                                        {{ Str::limit($rapat->hasil_diskusi, 30) }}
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        {{ Str::limit($rapat->keputusan, 30) }}
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        @foreach ($rapat->penugasan as $user)
+                                                            <span class="block">{{ $user->name }}</span>
+                                                        @endforeach
+                                                    </td>
+
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                            <tr>
+                                                <td colspan="7" class="text-center py-6 text-gray-500">
+                                                    Belum ada catatan meeting
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile Card View -->
+                        <div class="mobile-table-cards">
+                            @if ($catatanRapat->count() > 0)
+                                @foreach ($catatanRapat as $rapat)
+                                    <div class="mobile-table-card">
+                                        <div class="mobile-table-card-header">
+                                            #{{ $loop->iteration }} - {{ \Carbon\Carbon::parse($rapat->tanggal)->translatedFormat('d F Y') }}
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Topik:</div>
+                                            <div class="mobile-table-card-value">{{ $rapat->topik }}</div>
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Peserta:</div>
+                                            <div class="mobile-table-card-value">
+                                                @foreach ($rapat->peserta as $user)
+                                                    <span class="block">{{ $user->name }}</span>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Hasil:</div>
+                                            <div class="mobile-table-card-value">{{ Str::limit($rapat->hasil_diskusi, 50) }}</div>
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Keputusan:</div>
+                                            <div class="mobile-table-card-value">{{ Str::limit($rapat->keputusan, 50) }}</div>
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Penugasan:</div>
+                                            <div class="mobile-table-card-value">
+                                                @foreach ($rapat->penugasan as $user)
+                                                    <span class="block">{{ $user->name }}</span>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="mobile-table-card">
+                                    <div class="text-center py-6 text-gray-500">
+                                        Belum ada catatan meeting
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -816,66 +919,119 @@
                         </h3>
                     </div>
                     <div class="panel-body">
-                        <div class="overflow-x-auto min-h-[100px]">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Judul</th>
-                                        <th class="text-center">Isi</th>
-                                        <th class="text-center">Kepada</th>
-                                        <th class="text-center">Lampiran</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if ($pengumumanTerbaru->count() > 0)
-                                        @foreach ($pengumumanTerbaru as $item)
+                        <!-- Desktop Table View -->
+                        <div class="data-table-container">
+                            <div class="overflow-x-auto min-h-[100px]">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Judul</th>
+                                            <th class="text-center">Isi</th>
+                                            <th class="text-center">Kepada</th>
+                                            <th class="text-center">Lampiran</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if ($pengumumanTerbaru->count() > 0)
+                                            @foreach ($pengumumanTerbaru as $item)
+                                                <tr>
+                                                    <td class="font-medium">
+                                                        {{ $loop->iteration }}
+                                                    </td>
+                                                    <td class="font-medium">
+                                                        {{ $item->judul }}
+                                                    </td>
+
+
+                                                    <td>
+                                                        {{ \Illuminate\Support\Str::limit($item->isi_pesan, 50) }}
+                                                    </td>
+                                                    <td>
+                                                        @if ($item->kepada === 'specific')
+                                                            @foreach ($item->users as $user)
+                                                                <span
+                                                                    class="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                                                                    {{ $user->name }}
+                                                                </span>
+                                                            @endforeach
+                                                        @else
+                                                            {{ $item->users->take(2)->pluck('name')->join(', ') }}
+                                                        @endif
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        @if ($item->lampiran)
+                                                            <a href="{{ asset('storage/' . $item->lampiran) }}"
+                                                                class="text-blue-600 hover:underline" target="_blank">
+                                                                Lihat
+                                                            </a>
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @else
                                             <tr>
-                                                <td class="font-medium">
-                                                    {{ $loop->iteration }}
-                                                </td>
-                                                <td class="font-medium">
-                                                    {{ $item->judul }}
-                                                </td>
-
-
-                                                <td>
-                                                    {{ \Illuminate\Support\Str::limit($item->isi_pesan, 50) }}
-                                                </td>
-                                                <td>
-                                                    @if ($item->kepada === 'specific')
-                                                        @foreach ($item->users as $user)
-                                                            <span
-                                                                class="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
-                                                                {{ $user->name }}
-                                                            </span>
-                                                        @endforeach
-                                                    @else
-                                                        {{ $item->users->take(2)->pluck('name')->join(', ') }}
-                                                    @endif
-                                                </td>
-
-                                                <td class="text-center">
-                                                    @if ($item->lampiran)
-                                                        <a href="{{ asset('storage/' . $item->lampiran) }}"
-                                                            class="text-blue-600 hover:underline" target="_blank">
-                                                            Lihat
-                                                        </a>
-                                                    @else
-                                                        -
-                                                    @endif
+                                                <td colspan="5" class="text-center py-8 text-gray-500">
+                                                    Tidak ada pengumuman terbaru
                                                 </td>
                                             </tr>
-                                        @endforeach
-                                    @else
-                                        <tr>
-                                            <td colspan="5" class="text-center py-8 text-gray-500">
-                                                Tidak ada pengumuman terbaru
-                                            </td>
-                                        </tr>
-                                    @endif
-                                </tbody>
-                            </table>
+                                        @endif
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile Card View -->
+                        <div class="mobile-table-cards">
+                            @if ($pengumumanTerbaru->count() > 0)
+                                @foreach ($pengumumanTerbaru as $item)
+                                    <div class="mobile-table-card">
+                                        <div class="mobile-table-card-header">
+                                            #{{ $loop->iteration }} - {{ $item->judul }}
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Isi:</div>
+                                            <div class="mobile-table-card-value">{{ \Illuminate\Support\Str::limit($item->isi_pesan, 100) }}</div>
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Kepada:</div>
+                                            <div class="mobile-table-card-value">
+                                                @if ($item->kepada === 'specific')
+                                                    @foreach ($item->users as $user)
+                                                        <span class="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs mr-1 mb-1">
+                                                            {{ $user->name }}
+                                                        </span>
+                                                    @endforeach
+                                                @else
+                                                    {{ $item->users->take(2)->pluck('name')->join(', ') }}
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="mobile-table-card-row">
+                                            <div class="mobile-table-card-label">Lampiran:</div>
+                                            <div class="mobile-table-card-value">
+                                                @if ($item->lampiran)
+                                                    <a href="{{ asset('storage/' . $item->lampiran) }}"
+                                                        class="text-blue-600 hover:underline" target="_blank">
+                                                        Lihat
+                                                    </a>
+                                                @else
+                                                    -
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="mobile-table-card">
+                                    <div class="text-center py-8 text-gray-500">
+                                        Tidak ada pengumuman terbaru
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -893,7 +1049,7 @@
         }
 
         // Function to switch between tabs
-        window.switchTab = function(tabName) {
+        window.switchTab = function (tabName) {
             // Get tab buttons and panels
             const meetingTab = document.getElementById('meetingTab');
             const announcementTab = document.getElementById('announcementTab');
@@ -922,7 +1078,7 @@
         const calendarTitle = document.getElementById('calendarTitle');
         const calendarDays = document.getElementById('calendarDays');
         const notesContainer = document.getElementById('notesContainer');
-        
+
         let currentMonth = today.getMonth();
         let currentYear = today.getFullYear();
         let selectedDate = null;
@@ -932,92 +1088,92 @@
                 "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
                 "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
             ];
-            
+
             calendarTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
         }
 
         function renderCalendar() {
             updateCalendarTitle();
-            
+
             // Clear previous calendar days
             calendarDays.innerHTML = '';
-            
+
             // Get first day of month and number of days in month
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            
+
             // Add empty cells for days before the first day of the month
             for (let i = 0; i < firstDay; i++) {
                 const emptyDay = document.createElement('div');
                 emptyDay.className = 'calendar-day';
                 calendarDays.appendChild(emptyDay);
             }
-            
+
             // Add days of the month
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day';
                 dayElement.textContent = day;
-                
+
                 // Check if this day is today
                 const currentDate = new Date();
-                if (currentYear === currentDate.getFullYear() && 
-                    currentMonth === currentDate.getMonth() && 
+                if (currentYear === currentDate.getFullYear() &&
+                    currentMonth === currentDate.getMonth() &&
                     day === currentDate.getDate()) {
                     dayElement.classList.add('today');
                 }
-                
+
                 // Check if this day has events
                 const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 if (events[dateStr]) {
                     dayElement.classList.add('has-event');
                 }
-                
+
                 // Add click event to select date
-                dayElement.addEventListener('click', function() {
+                dayElement.addEventListener('click', function () {
                     // Remove selected class from all days
                     document.querySelectorAll('.calendar-day').forEach(el => {
                         el.classList.remove('selected');
                     });
-                    
+
                     // Add selected class to clicked day
                     this.classList.add('selected');
-                    
+
                     // Update selected date
                     selectedDate = new Date(currentYear, currentMonth, day);
-                    
+
                     // Show events for selected date
                     showEvents(dateStr);
                 });
-                
+
                 calendarDays.appendChild(dayElement);
             }
         }
 
         function showEvents(dateStr) {
             notesContainer.innerHTML = '';
-            
+
             if (events[dateStr]) {
                 events[dateStr].forEach(event => {
                     const noteItem = document.createElement('div');
                     noteItem.className = 'note-item';
-                    
+
                     const noteDate = document.createElement('div');
                     noteDate.className = 'note-date';
                     noteDate.textContent = dateStr;
-                    
+
                     const noteTitle = document.createElement('div');
                     noteTitle.className = 'note-title';
                     noteTitle.textContent = event.topik || 'Meeting';
-                    
+
                     const noteContent = document.createElement('div');
                     noteContent.className = 'note-content';
                     noteContent.textContent = event.keputusan || 'Tidak ada keputusan';
-                    
+
                     noteItem.appendChild(noteDate);
                     noteItem.appendChild(noteTitle);
                     noteItem.appendChild(noteContent);
-                    
+
                     notesContainer.appendChild(noteItem);
                 });
             } else {
@@ -1053,10 +1209,11 @@
 
         // Initialize calendar
         renderCalendar();
-        
+
         // Show today's events by default
         const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         showEvents(todayStr);
     </script>
 </body>
+
 </html>

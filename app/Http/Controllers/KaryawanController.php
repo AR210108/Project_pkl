@@ -119,14 +119,29 @@ class KaryawanController extends Controller
 
         $attendanceStatus = 'Belum Absen';
         if ($absenToday) {
-            $attendanceStatus = $absenToday->status;
+            if ($absenToday->jam_masuk) {
+                // Hitung keterlambatan
+                $jamMasuk = Carbon::parse($absenToday->jam_masuk);
+                $jamBatas = Carbon::parse('08:00');
+                $attendanceStatus = $jamMasuk->gt($jamBatas) ? 'Terlambat' : 'Tepat Waktu';
+            } elseif ($absenToday->jenis_ketidakhadiran) {
+                // Gunakan jenis_ketidakhadiran untuk label
+                $attendanceStatus = match($absenToday->jenis_ketidakhadiran) {
+                    'cuti' => 'Cuti',
+                    'sakit' => 'Sakit',
+                    'izin' => 'Izin',
+                    'dinas-luar' => 'Dinas Luar',
+                    'lainnya' => 'Tidak Hadir',
+                    default => 'Tidak Hadir',
+                };
+            }
         }
 
-        // Hitung Jumlah Ketidakhadiran (Sakit, Izin, Cuti yang disetujui)
+        // Hitung Jumlah Ketidakhadiran (Sakit, Izin, Cuti yang disetujui) - PERBAIKAN
         $ketidakhadiranCount = Absensi::where('user_id', $userId)
-            ->where('approval_status', 'approved')
-            ->whereIn('status', ['Cuti', 'Sakit', 'Izin'])
-            ->count();
+                                ->where('approval_status', 'approved')
+                                ->whereIn('jenis_ketidakhadiran', ['cuti', 'sakit', 'izin']) // PERBAIKAN
+                                ->count();
 
         // Hitung Jumlah Tugas dari tabel tasks
         $userDivisi = $user->divisi;
@@ -196,7 +211,36 @@ class KaryawanController extends Controller
                 'role' => $user->role,
                 'timestamp' => now()->toDateTimeString(),
             ]);
-
+            
+            // LOG 1: Cek data user di database
+            $dbUser = User::find($userId);
+            Log::info('Database User Check:', [
+                'db_user_id' => $dbUser->id,
+                'db_user_name' => $dbUser->name,
+                'db_user_divisi' => $dbUser->divisi,
+                'db_user_role' => $dbUser->role,
+                'match_with_auth' => ($dbUser->divisi === $userDivisi) ? 'YES' : 'NO',
+            ]);
+            
+            // LOG 2: Cek total tugas di database
+            $totalTasksInDB = Task::count();
+            Log::info('Total Tasks in Database:', ['count' => $totalTasksInDB]);
+            
+            // LOG 3: Cek tugas untuk Digital Marketing secara spesifik
+            $marketingTasks = Task::where('target_divisi', 'Digital Marketing')->get();
+            Log::info('Marketing Tasks in Database:', [
+                'count' => $marketingTasks->count(),
+                'tasks' => $marketingTasks->map(function($task) {
+                    return [
+                        'id' => $task->id,
+                        'judul' => $task->judul,
+                        'target_type' => $task->target_type,
+                        'target_divisi' => $task->target_divisi,
+                        'status' => $task->status,
+                    ];
+                })->toArray()
+            ]);
+            
             // PERBAIKAN UTAMA: Query yang lebih komprehensif
             $tasks = Task::where(function ($query) use ($userId, $userDivisi) {
                 // 1. Tugas untuk divisi (yang paling penting!)
@@ -281,18 +325,36 @@ class KaryawanController extends Controller
                 'jam_masuk' => null,
                 'jam_pulang' => null,
                 'status' => 'Belum Absen',
-                'status_type' => 'none',
                 'late_minutes' => 0,
                 'approval_status' => 'approved',
             ]);
         }
 
+        // Tentukan status berdasarkan jam_masuk atau jenis_ketidakhadiran
+        $status = 'Belum Absen';
+        $lateMinutes = 0;
+        
+        if ($absen->jam_masuk) {
+            // Hitung keterlambatan
+            $jamMasuk = Carbon::parse($absen->jam_masuk);
+            $jamBatas = Carbon::parse('08:00');
+            $status = $jamMasuk->gt($jamBatas) ? 'Terlambat' : 'Tepat Waktu';
+            $lateMinutes = $jamMasuk->gt($jamBatas) ? $jamMasuk->diffInMinutes($jamBatas) : 0;
+        } elseif ($absen->jenis_ketidakhadiran) {
+            $status = match($absen->jenis_ketidakhadiran) {
+                'cuti' => 'Cuti',
+                'sakit' => 'Sakit',
+                'izin' => 'Izin',
+                'dinas-luar' => 'Dinas Luar',
+                default => 'Tidak Hadir',
+            };
+        }
+
         return response()->json([
             'jam_masuk' => $absen->jam_masuk,
             'jam_pulang' => $absen->jam_pulang,
-            'status' => $absen->status,
-            'status_type' => $absen->status_type,
-            'late_minutes' => $absen->late_minutes,
+            'status' => $status,
+            'late_minutes' => $lateMinutes,
             'approval_status' => $absen->approval_status,
         ]);
     }
@@ -303,27 +365,46 @@ class KaryawanController extends Controller
     public function getHistory()
     {
         $history = Absensi::where('user_id', Auth::id())
-            ->orderBy('tanggal', 'desc')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'date' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
-                    'checkIn' => $item->jam_masuk,
-                    'checkOut' => $item->jam_pulang,
-                    'status' => $item->status,
-                    'statusType' => $item->status_type,
-                    'lateMinutes' => $item->late_minutes,
-                    'isEarlyCheckout' => $item->is_early_checkout,
-                    'earlyCheckoutReason' => $item->early_checkout_reason,
-                    'approvalStatus' => $item->approval_status,
-                    'userName' => $item->name,
-                    'reason' => $item->reason,
-                    'location' => $item->location,
-                    'purpose' => $item->purpose,
-                ];
-            })
-            ->all();
+                          ->orderBy('tanggal', 'desc')
+                          ->get()
+                          ->map(function ($item) {
+                              // Tentukan status berdasarkan kondisi
+                              $status = 'Tidak Hadir';
+                              $lateMinutes = 0;
+                              
+                              if ($item->jam_masuk) {
+                                  $jamMasuk = Carbon::parse($item->jam_masuk);
+                                  $jamBatas = Carbon::parse('08:00');
+                                  $status = $jamMasuk->gt($jamBatas) ? 'Terlambat' : 'Tepat Waktu';
+                                  $lateMinutes = $jamMasuk->gt($jamBatas) ? $jamMasuk->diffInMinutes($jamBatas) : 0;
+                              } elseif ($item->jenis_ketidakhadiran) {
+                                  $status = match($item->jenis_ketidakhadiran) {
+                                      'cuti' => 'Cuti',
+                                      'sakit' => 'Sakit',
+                                      'izin' => 'Izin',
+                                      'dinas-luar' => 'Dinas Luar',
+                                      default => 'Tidak Hadir',
+                                  };
+                              }
+                              
+                              return [
+                                  'id' => $item->id,
+                                  'date' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
+                                  'checkIn' => $item->jam_masuk,
+                                  'checkOut' => $item->jam_pulang,
+                                  'status' => $status,
+                                  'lateMinutes' => $lateMinutes,
+                                  'isEarlyCheckout' => $item->is_early_checkout,
+                                  'earlyCheckoutReason' => $item->early_checkout_reason,
+                                  'approvalStatus' => $item->approval_status,
+                                  'reason' => $item->reason,
+                                  'location' => $item->location,
+                                  'purpose' => $item->purpose,
+                                  'jenis_ketidakhadiran' => $item->jenis_ketidakhadiran,
+                                  'keterangan' => $item->keterangan,
+                              ];
+                          })
+                          ->all();
 
         return response()->json($history);
     }
@@ -342,13 +423,25 @@ class KaryawanController extends Controller
 
         $attendanceStatus = 'Belum Absen';
         if ($absenToday) {
-            $attendanceStatus = $absenToday->status;
+            if ($absenToday->jam_masuk) {
+                $jamMasuk = Carbon::parse($absenToday->jam_masuk);
+                $jamBatas = Carbon::parse('08:00');
+                $attendanceStatus = $jamMasuk->gt($jamBatas) ? 'Terlambat' : 'Tepat Waktu';
+            } elseif ($absenToday->jenis_ketidakhadiran) {
+                $attendanceStatus = match($absenToday->jenis_ketidakhadiran) {
+                    'cuti' => 'Cuti',
+                    'sakit' => 'Sakit',
+                    'izin' => 'Izin',
+                    'dinas-luar' => 'Dinas Luar',
+                    default => 'Tidak Hadir',
+                };
+            }
         }
 
         $ketidakhadiranCount = Absensi::where('user_id', $userId)
-            ->where('approval_status', 'approved')
-            ->whereIn('status', ['Cuti', 'Sakit', 'Izin'])
-            ->count();
+                                ->where('approval_status', 'approved')
+                                ->whereIn('jenis_ketidakhadiran', ['cuti', 'sakit', 'izin'])
+                                ->count();
 
         $userDivisi = Auth::user()->divisi;
         $tugasCount = Task::where(function ($query) use ($userId, $userDivisi) {
@@ -376,33 +469,51 @@ class KaryawanController extends Controller
         $userId = Auth::id();
 
         $pendingSubmissions = Absensi::where('user_id', $userId)
-            ->where('approval_status', 'pending')
-            ->orderBy('tanggal', 'desc')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
-                    'status' => $item->status,
-                    'approval_status' => $item->approval_status,
-                    'reason' => $item->reason,
-                ];
-            });
+                                    ->where('approval_status', 'pending')
+                                    ->whereNotNull('jenis_ketidakhadiran')
+                                    ->orderBy('tanggal', 'desc')
+                                    ->get()
+                                    ->map(function ($item) {
+                                        return [
+                                            'id' => $item->id,
+                                            'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
+                                            'jenis_ketidakhadiran' => $item->jenis_ketidakhadiran,
+                                            'jenis_label' => match($item->jenis_ketidakhadiran) {
+                                                'cuti' => 'Cuti',
+                                                'sakit' => 'Sakit',
+                                                'izin' => 'Izin',
+                                                'dinas-luar' => 'Dinas Luar',
+                                                default => 'Ketidakhadiran',
+                                            },
+                                            'approval_status' => $item->approval_status,
+                                            'reason' => $item->reason,
+                                            'keterangan' => $item->keterangan,
+                                        ];
+                                    });
 
         $recentSubmissions = Absensi::where('user_id', $userId)
-            ->whereIn('approval_status', ['approved', 'rejected'])
-            ->where('tanggal', '>=', now()->subDays(7)->toDateString())
-            ->orderBy('tanggal', 'desc')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
-                    'status' => $item->status,
-                    'approval_status' => $item->approval_status,
-                    'reason' => $item->reason,
-                ];
-            });
+                                    ->whereNotNull('jenis_ketidakhadiran')
+                                    ->whereIn('approval_status', ['approved', 'rejected'])
+                                    ->where('tanggal', '>=', now()->subDays(7)->toDateString())
+                                    ->orderBy('tanggal', 'desc')
+                                    ->get()
+                                    ->map(function ($item) {
+                                        return [
+                                            'id' => $item->id,
+                                            'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
+                                            'jenis_ketidakhadiran' => $item->jenis_ketidakhadiran,
+                                            'jenis_label' => match($item->jenis_ketidakhadiran) {
+                                                'cuti' => 'Cuti',
+                                                'sakit' => 'Sakit',
+                                                'izin' => 'Izin',
+                                                'dinas-luar' => 'Dinas Luar',
+                                                default => 'Ketidakhadiran',
+                                            },
+                                            'approval_status' => $item->approval_status,
+                                            'reason' => $item->reason,
+                                            'keterangan' => $item->keterangan,
+                                        ];
+                                    });
 
         return response()->json([
             'pending' => $pendingSubmissions,
@@ -417,16 +528,25 @@ class KaryawanController extends Controller
     {
         try {
             $today = now()->toDateString();
-
+            
+            // Cek apakah sudah ada pengajuan ketidakhadiran yang disetujui
             $existingAbsence = Absensi::where('user_id', Auth::id())
-                ->where('tanggal', $today)
-                ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Dinas Luar'])
-                ->where('approval_status', 'approved')
-                ->first();
+                                      ->where('tanggal', $today)
+                                      ->whereNotNull('jenis_ketidakhadiran')
+                                      ->where('approval_status', 'approved')
+                                      ->first();
 
             if ($existingAbsence) {
+                $jenisLabel = match($existingAbsence->jenis_ketidakhadiran) {
+                    'cuti' => 'Cuti',
+                    'sakit' => 'Sakit',
+                    'izin' => 'Izin',
+                    'dinas-luar' => 'Dinas Luar',
+                    default => 'Ketidakhadiran',
+                };
+                
                 return response()->json([
-                    'message' => 'Anda tidak dapat melakukan absen masuk karena telah mengajukan "' . $existingAbsence->status . '" pada hari ini.'
+                    'message' => 'Anda tidak dapat melakukan absen masuk karena telah mengajukan "' . $jenisLabel . '" pada hari ini.'
                 ], 403);
             }
 
@@ -442,16 +562,11 @@ class KaryawanController extends Controller
             $lateMinutes = $nowLocal->greaterThan($workStartTime) ? $workStartTime->diffInMinutes($nowLocal) : 0;
 
             $status = $lateMinutes > 0 ? 'Terlambat' : 'Tepat Waktu';
-            $statusType = $lateMinutes > 0 ? 'late' : 'on-time';
 
             Absensi::updateOrCreate(
                 ['user_id' => Auth::id(), 'tanggal' => $today],
                 [
-                    'name' => $userName,
                     'jam_masuk' => $nowLocal,
-                    'status' => $status,
-                    'status_type' => $statusType,
-                    'late_minutes' => $lateMinutes,
                     'approval_status' => 'approved',
                 ]
             );
@@ -502,7 +617,6 @@ class KaryawanController extends Controller
             }
 
             $absen->update([
-                'name' => $userName,
                 'jam_pulang' => $nowLocal,
                 'is_early_checkout' => $isEarlyCheckout,
                 'early_checkout_reason' => $reason,
@@ -531,11 +645,11 @@ class KaryawanController extends Controller
         $request->validate([
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'type' => 'required|string',
+            'type' => 'required|string|in:cuti,sakit,izin',
             'reason' => 'required|string',
         ]);
 
-        $userName = Auth::user()->name;
+        $user = Auth::user();
         $period = CarbonPeriod::create($request->start_date, $request->end_date);
 
         DB::beginTransaction();
@@ -544,21 +658,21 @@ class KaryawanController extends Controller
                 Absensi::updateOrCreate(
                     ['user_id' => Auth::id(), 'tanggal' => $date->toDateString()],
                     [
-                        'name' => $userName,
-                        'status' => $request->type,
-                        'status_type' => 'absent',
+                        'jenis_ketidakhadiran' => $request->type,
                         'reason' => $request->reason,
                         'approval_status' => 'pending',
+                        'tanggal_akhir' => $request->end_date,
+                        'keterangan' => 'Pengajuan ' . $request->type,
                     ]
                 );
             }
             DB::commit();
 
-            return response()->json(['message' => 'Pengajuan izin untuk ' . $period->count() . ' hari berhasil dikirim dan menunggu persetujuan admin.']);
+            return response()->json(['message' => 'Pengajuan ' . $request->type . ' untuk ' . $period->count() . ' hari berhasil dikirim dan menunggu persetujuan admin.']);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Gagal mengajukan izin. Terjadi kesalahan pada server.'], 500);
+            return response()->json(['message' => 'Gagal mengajukan. Terjadi kesalahan pada server.'], 500);
         }
     }
 
@@ -575,7 +689,6 @@ class KaryawanController extends Controller
             'description' => 'required|string',
         ]);
 
-        $userName = Auth::user()->name;
         $period = CarbonPeriod::create($request->start_date, $request->end_date);
 
         DB::beginTransaction();
@@ -584,13 +697,13 @@ class KaryawanController extends Controller
                 Absensi::updateOrCreate(
                     ['user_id' => Auth::id(), 'tanggal' => $date->toDateString()],
                     [
-                        'name' => $userName,
-                        'status' => 'Dinas Luar',
-                        'status_type' => 'absent',
+                        'jenis_ketidakhadiran' => 'dinas-luar',
                         'reason' => $request->description,
                         'location' => $request->location,
                         'purpose' => $request->purpose,
                         'approval_status' => 'pending',
+                        'tanggal_akhir' => $request->end_date,
+                        'keterangan' => 'Pengajuan dinas luar',
                     ]
                 );
             }

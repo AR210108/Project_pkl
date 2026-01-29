@@ -17,26 +17,24 @@ class KwitansiController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function index(Request $request): JsonResponse
-    {
-        $query = Kwitansi::with('invoice')->latest();
+public function index(Request $request)
+{
+    $query = Kwitansi::with('invoice')->latest();
 
-        // Search by nama klien, nomor order, nama perusahaan, or deskripsi
-        if ($request->has('search') && $request->search != '') {
-            $searchTerm = $request->search;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('nama_klien', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('nomor_order', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('nama_perusahaan', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('deskripsi', 'LIKE', "%{$searchTerm}%");
-            });
-        }
-
-        // Paginate results (10 per page)
-        $kwitansis = $query->paginate(10);
-
-        return response()->json($kwitansis);
+    if ($request->has('search') && $request->search != '') {
+        $searchTerm = $request->search;
+        $query->where(function ($q) use ($searchTerm) {
+            $q->where('nama_klien', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('nomor_order', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('nama_perusahaan', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('deskripsi', 'LIKE', "%{$searchTerm}%");
+        });
     }
+
+    $kwitansis = $query->paginate(10);
+
+    return view('admin.kwitansi', compact('kwitansis'));
+}
 
     /**
      * Display the specified resource.
@@ -80,7 +78,7 @@ class KwitansiController extends Controller
             'sub_total' => 'nullable|numeric|min:0',
             'fee_maintenance' => 'nullable|numeric|min:0',
             'total' => 'nullable|numeric|min:0',
-
+            'status' => 'required|in:Pembayawan Awal,Lunas',
         ]);
 
         try {
@@ -132,7 +130,7 @@ class KwitansiController extends Controller
             'sub_total' => 'nullable|numeric|min:0',
             'fee_maintenance' => 'nullable|numeric|min:0',
             'total' => 'nullable|numeric|min:0',
-
+            'status' => 'required|in:Pembayawan Awal,Lunas',
         ]);
 
         try {

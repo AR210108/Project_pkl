@@ -261,11 +261,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex justify-between items-center">
                 <!-- Brand Logo -->
-                <div class="text-xl md:text-2xl font-bold text-black flex items-center">
-                    <span class="bg-primary text-white p-2 rounded-lg mr-3">
-                        <i class='bx bx-buildings text-2xl'></i>
-                    </span>
-                    Brand
+                <div class="flex items-center">
+                    <img src="{{ asset('images/logo_inovindo.jpg') }}" alt="Inovindo Logo"
+                        class="h-10 w-auto object-contain">
                 </div>
 
                 <!-- Desktop Navigation - Centered -->
@@ -278,15 +276,15 @@
                         href="/owner/laporan">Laporan</a>
                 </nav>
 
-<form action="{{ route('logout') }}" method="POST">
-    @csrf
-    <button type="submit"
-        class="hidden md:flex items-center bg-black text-white text-sm font-medium py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors">
-        <i class='bx bx-log-out-circle text-xl mr-2'></i>
-        Log Out
-    </button>
-</form>
-                
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit"
+                        class="hidden md:flex items-center bg-black text-white text-sm font-medium py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors">
+                        <i class='bx bx-log-out-circle text-xl mr-2'></i>
+                        Log Out
+                    </button>
+                </form>
+
                 <!-- Mobile Menu Button -->
                 <button id="mobileMenuBtn"
                     class="md:hidden flex flex-col justify-center items-center w-8 h-8 hamburger mobile-nav-clickable">
@@ -300,7 +298,7 @@
             <div id="mobileNav" class="mobile-nav">
                 <div class="mobile-nav-content">
                     <nav>
-                        <a class="nav-link" data-page="home" href="/pemilik">
+                        <a class="nav-link" data-page="home" href="/owner/home">
                             <i class='bx bx-home-alt text-xl mr-2'></i>
                             Beranda
                         </a>
@@ -308,7 +306,7 @@
                             <i class='bx bx-calendar-check text-xl mr-2'></i>
                             Rekap Absensi
                         </a>
-                        <a class="nav-link" data-page="laporan" href="/laporan">
+                        <a class="nav-link" data-page="laporan" href="/owner/laporan">
                             <i class='bx bx-file text-xl mr-2'></i>
                             Laporan
                         </a>
@@ -316,7 +314,7 @@
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
-                            class="hidden md:flex items-center bg-black text-white text-sm font-medium py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors">
+                            class="flex md:hidden items-center bg-black text-white text-sm font-medium py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors login-btn">
                             <i class='bx bx-log-out-circle text-xl mr-2'></i>
                             Log Out
                         </button>
@@ -337,7 +335,7 @@
         // Sticky Header
         const header = document.getElementById('header');
 
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', function () {
             if (window.scrollY > 50) {
                 header.classList.add('scrolled');
             } else {
@@ -350,7 +348,7 @@
         const mobileNav = document.getElementById('mobileNav');
 
         // Pastikan navigasi mobile tersembunyi saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             mobileNav.classList.remove('active');
             mobileMenuBtn.classList.remove('active');
 
@@ -359,14 +357,14 @@
         });
 
         // Toggle mobile navigation
-        mobileMenuBtn.addEventListener('click', function(e) {
+        mobileMenuBtn.addEventListener('click', function (e) {
             e.stopPropagation(); // Prevent event bubbling
             mobileMenuBtn.classList.toggle('active');
             mobileNav.classList.toggle('active');
         });
 
         // Close mobile nav when clicking outside
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!mobileNav.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
                 mobileMenuBtn.classList.remove('active');
                 mobileNav.classList.remove('active');
@@ -376,7 +374,7 @@
         // Close mobile nav when clicking on a link
         const mobileNavLinks = mobileNav.querySelectorAll('.nav-link');
         mobileNavLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
+            link.addEventListener('click', function (e) {
                 // Allow the default link behavior to proceed (navigation)
                 // Close the menu after a short delay to allow navigation to start
                 setTimeout(() => {
@@ -388,7 +386,7 @@
 
         // Also close when clicking on login button
         const mobileLoginBtn = mobileNav.querySelector('.login-btn');
-        mobileLoginBtn.addEventListener('click', function(e) {
+        mobileLoginBtn.addEventListener('click', function (e) {
             // Allow the default link behavior to proceed (navigation)
             // Close the menu immediately
             mobileMenuBtn.classList.remove('active');
@@ -428,7 +426,7 @@
         }
 
         // Prevent event propagation inside mobile nav
-        mobileNav.addEventListener('click', function(e) {
+        mobileNav.addEventListener('click', function (e) {
             e.stopPropagation();
         });
     </script>

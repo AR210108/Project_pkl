@@ -40,7 +40,7 @@ class LayananController extends Controller
         // 1. Validasi input
         $validator = Validator::make($request->all(), [
             'nama_layanan' => 'required|string|max:255',
-            'harga'        => 'required|numeric|min:0',
+            'harga'        => 'nullable|numeric|min:0',
             'deskripsi'    => 'required|string',
             'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -54,34 +54,35 @@ class LayananController extends Controller
         }
 
         // 2. Proses data dan simpan
-        try {
-            $data = $request->only(['nama_layanan', 'harga', 'deskripsi']);
-            
-            // Handle foto upload
-            if ($request->hasFile('foto')) {
-                $foto = $request->file('foto');
-                $fotoName = time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
-                $foto->storeAs('public/layanan', $fotoName);
-                $data['foto'] = 'layanan/' . $fotoName;
-            }
+try {
+    $data = $request->only(['nama_layanan', 'harga', 'deskripsi']);
 
-            $layanan = Layanan::create($data);
+    // ✅ Tambahkan ini
+    $data['harga'] = $request->harga ?? 0;
 
-            // 3. Kembalikan respons JSON sukses
-            return response()->json([
-                'success' => true,
-                'message' => 'Layanan berhasil ditambahkan!',
-                'data' => $layanan
-            ], 201); // HTTP Status 201: Created
+    // Handle foto upload
+    if ($request->hasFile('foto')) {
+        $foto = $request->file('foto');
+        $fotoName = time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
+        $foto->storeAs('public/layanan', $fotoName);
+        $data['foto'] = 'layanan/' . $fotoName;
+    }
 
-        } catch (\Exception $e) {
-            // 4. Tangkap kesalahan dan kembalikan respons error
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat menyimpan data.',
-                'error' => $e->getMessage()
-            ], 500); // HTTP Status 500: Internal Server Error
-        }
+    $layanan = Layanan::create($data);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Layanan berhasil ditambahkan!',
+        'data' => $layanan
+    ], 201);
+
+} catch (\Exception $e) {
+    return response()->json([
+        'success' => false,
+        'message' => 'Terjadi kesalahan saat menyimpan data.',
+        'error' => $e->getMessage()
+    ], 500);
+}
     }
 
     /**
@@ -95,7 +96,7 @@ class LayananController extends Controller
         // 2. Validasi input
         $validator = Validator::make($request->all(), [
             'nama_layanan' => 'required|string|max:255',
-            'harga'        => 'required|numeric|min:0',
+            'harga'        => 'nullable|numeric|min:0',
             'deskripsi'    => 'required|string',
             'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -195,4 +196,22 @@ class LayananController extends Controller
         $layanans = Layanan::latest()->get(); 
         return view('home', compact('layanans'));
     }
+    public function getCount()
+{
+    try {
+        $count = \App\Models\Layanan::count();
+        
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'count' => $count
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengambil data layanan: ' . $e->getMessage()
+        ], 500);
+    }
+}
 }
