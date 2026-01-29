@@ -583,13 +583,11 @@
                     <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
                             <div class="icon-container bg-green-100 mr-3 md:mr-4">
-                                <span
-                                    class="material-icons-outlined text-green-600 text-lg md:text-xl">check_circle</span>
+                                <span class="material-icons-outlined text-green-600 text-lg md:text-xl">check_circle</span>
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Total Kehadiran</p>
                                 <p class="text-xl font-bold text-green-600">{{ $stats['total_tepat_waktu'] }}</p>
-
                             </div>
                         </div>
                     </div>
@@ -602,8 +600,7 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Tidak Hadir</p>
-                                <p class="text-xl md:text-2xl font-bold text-red-600">{{ $stats['total_tidak_masuk'] }}
-                                </p>
+                                <p class="text-xl md:text-2xl font-bold text-red-600">{{ $stats['total_tidak_masuk'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -625,8 +622,7 @@
                     <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
                             <div class="icon-container bg-yellow-100 mr-3 md:mr-4">
-                                <span
-                                    class="material-icons-outlined text-yellow-600 text-lg md:text-xl">event_busy</span>
+                                <span class="material-icons-outlined text-yellow-600 text-lg md:text-xl">event_busy</span>
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Cuti</p>
@@ -639,13 +635,11 @@
                     <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
                             <div class="icon-container bg-purple-100 mr-3 md:mr-4">
-                                <span
-                                    class="material-icons-outlined text-purple-600 text-lg md:text-xl">directions_car</span>
+                                <span class="material-icons-outlined text-purple-600 text-lg md:text-xl">directions_car</span>
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Dinas Luar</p>
-                                <p class="text-xl md:text-2xl font-bold text-purple-600">
-                                    {{ $stats['total_dinas_luar'] }}</p>
+                                <p class="text-xl md:text-2xl font-bold text-purple-600">{{ $stats['total_dinas_luar'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -679,16 +673,12 @@
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
-                        <span
-                            class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input id="searchInput"
-                            class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input"
-                            placeholder="Cari nama karyawan..." type="text" />
+                        <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama karyawan..." type="text" />
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <div class="relative">
-                            <button id="filterBtn"
-                                class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
+                            <button id="filterBtn" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
                                 <span class="material-icons-outlined text-sm">filter_list</span>
                                 Filter
                             </button>
@@ -732,11 +722,8 @@
                             </div>
                         </div>
                         <div class="date-picker-container">
-                            <span
-                                class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">date_range</span>
-                            <input id="dateFilter"
-                                class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input"
-                                placeholder="Pilih tanggal" type="date" />
+                            <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">date_range</span>
+                            <input id="dateFilter" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Pilih tanggal" type="date" />
                         </div>
                     </div>
                 </div>
@@ -749,8 +736,7 @@
                             Data Absensi
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-gray-500">Total: <span id="totalCount"
-                                    class="font-semibold text-gray-800">50</span> data</span>
+                            <span class="text-sm text-gray-500">Total: <span id="totalCount" class="font-semibold text-gray-800">{{ $attendances->count() }}</span> data</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -770,7 +756,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="absensiTableBody">
-                                        @foreach ($allAbsensis as $i => $absen)
+                                        @foreach ($attendances as $i => $absen)
                                             <tr class="absensi-row" data-id="{{ $absen->id }}">
                                                 <td>{{ $i + 1 }}</td>
                                                 <td>{{ optional($absen->user)->name ?? 'User tidak ditemukan' }}</td>
@@ -778,20 +764,31 @@
                                                 <td>{{ $absen->jam_masuk ?? '-' }}</td>
                                                 <td>{{ $absen->jam_pulang ?? '-' }}</td>
                                                 <td>
-                                                    <span class="status-badge status-{{ $absen->status }}">
-                                                        {{ ucfirst($absen->status) }}
+                                                    @php
+                                                        $status = 'Tepat Waktu';
+                                                        if ($absen->jam_masuk) {
+                                                            $jamMasuk = \Carbon\Carbon::parse($absen->jam_masuk);
+                                                            $jamBatas = \Carbon\Carbon::parse('09:05');
+                                                            if ($jamMasuk->gt($jamBatas)) {
+                                                                $status = 'Terlambat';
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    <span class="status-badge status-{{ $status == 'Tepat Waktu' ? 'hadir' : 'terlambat' }}">
+                                                        {{ $status }}
                                                     </span>
                                                 </td>
                                                 <td class="text-center">
-                                                    <button class="edit-absensi-btn"
-                                                        data-id="{{ $absen->id }}">Edit</button>
-                                                    <button class="delete-absensi-btn"
-                                                        data-id="{{ $absen->id }}">Hapus</button>
+                                                    <button class="edit-absensi-btn text-blue-600 hover:text-blue-800 mr-2" data-id="{{ $absen->id }}">
+                                                        <span class="material-icons-outlined text-sm">edit</span>
+                                                    </button>
+                                                    <button class="delete-absensi-btn text-red-600 hover:text-red-800" data-id="{{ $absen->id }}">
+                                                        <span class="material-icons-outlined text-sm">delete</span>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
-
                                 </table>
                             </div>
 
@@ -801,9 +798,7 @@
                                     <span class="material-icons-outlined text-sm">chevron_left</span>
                                 </button>
                                 <div id="absensiPageNumbers" class="flex gap-1">
-                                    <button class="desktop-page-btn active">1</button>
-                                    <button class="desktop-page-btn">2</button>
-                                    <button class="desktop-page-btn">3</button>
+                                    <!-- Page numbers will be generated by JavaScript -->
                                 </div>
                                 <button id="absensiNextPage" class="desktop-nav-btn">
                                     <span class="material-icons-outlined text-sm">chevron_right</span>
@@ -813,122 +808,54 @@
 
                         <!-- Mobile Card View -->
                         <div class="mobile-cards" id="absensiMobileCards">
-                            <div class="mobile-card absensi-card" data-id="1" data-nama="Ahmad Fauzi"
-                                data-tanggal="2023-06-01" data-jam-masuk="08:00" data-jam-keluar="17:00"
-                                data-status="Tepat Waktu">
-                                <div class="mobile-card-header">
-                                    <div class="mobile-card-title">Ahmad Fauzi</div>
-                                    <div>
-                                        <span class="status-badge status-hadir">Tepat Waktu</span>
+                            @foreach ($attendances as $i => $absen)
+                                <div class="mobile-card absensi-card" data-id="{{ $absen->id }}">
+                                    <div class="mobile-card-header">
+                                        <div class="mobile-card-title">{{ optional($absen->user)->name ?? 'User tidak ditemukan' }}</div>
+                                        <div>
+                                            @php
+                                                $status = 'Tepat Waktu';
+                                                if ($absen->jam_masuk) {
+                                                    $jamMasuk = \Carbon\Carbon::parse($absen->jam_masuk);
+                                                    $jamBatas = \Carbon\Carbon::parse('09:05');
+                                                    if ($jamMasuk->gt($jamBatas)) {
+                                                        $status = 'Terlambat';
+                                                    }
+                                                }
+                                            @endphp
+                                            <span class="status-badge status-{{ $status == 'Tepat Waktu' ? 'hadir' : 'terlambat' }}">
+                                                {{ $status }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="mobile-card-body">
+                                        <div class="mobile-card-item">
+                                            <span class="mobile-card-label">No</span>
+                                            <span class="mobile-card-value">{{ $i + 1 }}</span>
+                                        </div>
+                                        <div class="mobile-card-item">
+                                            <span class="mobile-card-label">Tanggal</span>
+                                            <span class="mobile-card-value">{{ \Carbon\Carbon::parse($absen->tanggal)->format('d/m/Y') }}</span>
+                                        </div>
+                                        <div class="mobile-card-item">
+                                            <span class="mobile-card-label">Jam Masuk</span>
+                                            <span class="mobile-card-value">{{ $absen->jam_masuk ?? '-' }}</span>
+                                        </div>
+                                        <div class="mobile-card-item">
+                                            <span class="mobile-card-label">Jam Keluar</span>
+                                            <span class="mobile-card-value">{{ $absen->jam_pulang ?? '-' }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-end space-x-2 mt-3">
+                                        <button class="edit-absensi-btn text-gray-600 hover:text-gray-800" data-id="{{ $absen->id }}" title="Edit">
+                                            <span class="material-icons-outlined text-sm">edit</span>
+                                        </button>
+                                        <button class="delete-absensi-btn text-gray-600 hover:text-gray-800" data-id="{{ $absen->id }}" title="Hapus">
+                                            <span class="material-icons-outlined text-sm">delete</span>
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="mobile-card-body">
-                                    <div class="mobile-card-item">
-                                        <span class="mobile-card-label">No</span>
-                                        <span class="mobile-card-value">1</span>
-                                    </div>
-                                    <div class="mobile-card-item">
-                                        <span class="mobile-card-label">Tanggal</span>
-                                        <span class="mobile-card-value">01/06/2023</span>
-                                    </div>
-                                    <div class="mobile-card-item">
-                                        <span class="mobile-card-label">Jam Masuk</span>
-                                        <span class="mobile-card-value">08:00</span>
-                                    </div>
-                                    <div class="mobile-card-item">
-                                        <span class="mobile-card-label">Jam Keluar</span>
-                                        <span class="mobile-card-value">17:00</span>
-                                    </div>
-                                </div>
-                                <div class="flex justify-end space-x-2 mt-3">
-                                    <button class="edit-absensi-btn text-gray-600 hover:text-gray-800" data-id="1"
-                                        title="Edit">
-                                        <span class="material-icons-outlined text-sm">edit</span>
-                                    </button>
-                                    <button class="delete-absensi-btn text-gray-600 hover:text-gray-800"
-                                        data-id="1" title="Hapus">
-                                        <span class="material-icons-outlined text-sm">delete</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="mobile-card absensi-card" data-id="2" data-nama="Siti Nurhaliza"
-                                data-tanggal="2023-06-01" data-jam-masuk="08:15" data-jam-keluar="17:15"
-                                data-status="Terlambat">
-                                <div class="mobile-card-header">
-                                    <div class="mobile-card-title">Siti Nurhaliza</div>
-                                    <div>
-                                        <span class="status-badge status-terlambat">Terlambat</span>
-                                    </div>
-                                </div>
-                                <div class="mobile-card-body">
-                                    <div class="mobile-card-item">
-                                        <span class="mobile-card-label">No</span>
-                                        <span class="mobile-card-value">2</span>
-                                    </div>
-                                    <div class="mobile-card-item">
-                                        <span class="mobile-card-label">Tanggal</span>
-                                        <span class="mobile-card-value">01/06/2023</span>
-                                    </div>
-                                    <div class="mobile-card-item">
-                                        <span class="mobile-card-label">Jam Masuk</span>
-                                        <span class="mobile-card-value">08:15</span>
-                                    </div>
-                                    <div class="mobile-card-item">
-                                        <span class="mobile-card-label">Jam Keluar</span>
-                                        <span class="mobile-card-value">17:15</span>
-                                    </div>
-                                </div>
-                                <div class="flex justify-end space-x-2 mt-3">
-                                    <button class="edit-absensi-btn text-gray-600 hover:text-gray-800" data-id="2"
-                                        title="Edit">
-                                        <span class="material-icons-outlined text-sm">edit</span>
-                                    </button>
-                                    <button class="delete-absensi-btn text-gray-600 hover:text-gray-800"
-                                        data-id="2" title="Hapus">
-                                        <span class="material-icons-outlined text-sm">delete</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="mobile-card absensi-card" data-id="3" data-nama="Budi Santoso"
-                                data-tanggal="2023-06-01" data-jam-masuk="08:05" data-jam-keluar="17:10"
-                                data-status="Tepat Waktu">
-                                <div class="mobile-card-header">
-                                    <div class="mobile-card-title">Budi Santoso</div>
-                                    <div>
-                                        <span class="status-badge status-hadir">Tepat Waktu</span>
-                                    </div>
-                                </div>
-                                <div class="mobile-card-body">
-                                    <div class="mobile-card-item">
-                                        <span class="mobile-card-label">No</span>
-                                        <span class="mobile-card-value">3</span>
-                                    </div>
-                                    <div class="mobile-card-item">
-                                        <span class="mobile-card-label">Tanggal</span>
-                                        <span class="mobile-card-value">01/06/2023</span>
-                                    </div>
-                                    <div class="mobile-card-item">
-                                        <span class="mobile-card-label">Jam Masuk</span>
-                                        <span class="mobile-card-value">08:05</span>
-                                    </div>
-                                    <div class="mobile-card-item">
-                                        <span class="mobile-card-label">Jam Keluar</span>
-                                        <span class="mobile-card-value">17:10</span>
-                                    </div>
-                                </div>
-                                <div class="flex justify-end space-x-2 mt-3">
-                                    <button class="edit-absensi-btn text-gray-600 hover:text-gray-800" data-id="3"
-                                        title="Edit">
-                                        <span class="material-icons-outlined text-sm">edit</span>
-                                    </button>
-                                    <button class="delete-absensi-btn text-gray-600 hover:text-gray-800"
-                                        data-id="3" title="Hapus">
-                                        <span class="material-icons-outlined text-sm">delete</span>
-                                    </button>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
 
                         <!-- Mobile Pagination -->
@@ -937,9 +864,7 @@
                                 <span class="material-icons-outlined text-sm">chevron_left</span>
                             </button>
                             <div id="absensiMobilePageNumbers" class="flex gap-1">
-                                <button class="mobile-page-btn active">1</button>
-                                <button class="mobile-page-btn">2</button>
-                                <button class="mobile-page-btn">3</button>
+                                <!-- Page numbers will be generated by JavaScript -->
                             </div>
                             <button id="absensiMobileNextPage" class="mobile-nav-btn">
                                 <span class="material-icons-outlined text-sm">chevron_right</span>
@@ -956,8 +881,7 @@
                             Daftar Ketidakhadiran
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-gray-500">Total: <span id="totalCount2"
-                                    class="font-semibold text-gray-800">5</span> data</span>
+                            <span class="text-sm text-gray-500">Total: <span id="totalCount2" class="font-semibold text-gray-800">{{ $ketidakhadiran->count() }}</span> data</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -982,48 +906,41 @@
                                                 data-nama="{{ $absen->user->name ?? '-' }}"
                                                 data-tanggal="{{ $absen->tanggal }}"
                                                 data-tanggal-akhir="{{ $absen->tanggal_akhir }}"
-                                                data-alasan="{{ $absen->reason ?? $absen->alasan_cuti }}"
+                                                data-alasan="{{ $absen->keterangan ?? '-' }}"
                                                 data-status="{{ $absen->approval_status }}">
 
-                                                <td>{{ $ketidakhadiran->firstItem() + $index }}</td>
-
+                                                <td>{{ $index + 1 }}</td>
                                                 <td>{{ $absen->user->name ?? '-' }}</td>
-
                                                 <td>{{ $absen->tanggal?->format('d/m/Y') }}</td>
-
                                                 <td>
                                                     {{ $absen->tanggal_akhir ? $absen->tanggal_akhir->format('d/m/Y') : '-' }}
                                                 </td>
-
                                                 <td>
-                                                    {{ $absen->reason ?? ($absen->alasan_cuti ?? '-') }}
+                                                    {{ $absen->keterangan ?? '-' }}
                                                 </td>
-
                                                 <td>
-                                                    <span
-                                                        class="status-badge status-{{ Str::slug($absen->approval_status) }}">
+                                                    <span class="status-badge status-{{ Str::slug($absen->approval_status) }}">
                                                         {{ strtoupper($absen->approval_status) }}
                                                     </span>
                                                 </td>
-
                                                 <td>
                                                     <div class="flex justify-center space-x-2">
-                                                        <button class="edit-cuti-btn"
-                                                            data-id="{{ $absen->id }}">✏️</button>
-
+                                                        <button class="edit-cuti-btn text-blue-600 hover:text-blue-800" data-id="{{ $absen->id }}" title="Edit">
+                                                            <span class="material-icons-outlined text-sm">edit</span>
+                                                        </button>
                                                         @if ($absen->approval_status === 'pending')
-                                                            <button class="verify-btn"
-                                                                data-id="{{ $absen->id }}">✅</button>
+                                                            <button class="verify-btn text-green-600 hover:text-green-800" data-id="{{ $absen->id }}" title="Verifikasi">
+                                                                <span class="material-icons-outlined text-sm">check_circle</span>
+                                                            </button>
                                                         @endif
-
-                                                        <button class="delete-cuti-btn"
-                                                            data-id="{{ $absen->id }}">🗑️</button>
+                                                        <button class="delete-cuti-btn text-red-600 hover:text-red-800" data-id="{{ $absen->id }}" title="Hapus">
+                                                            <span class="material-icons-outlined text-sm">delete</span>
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
-
                                 </table>
                             </div>
 
@@ -1033,44 +950,31 @@
                                     <span class="material-icons-outlined text-sm">chevron_left</span>
                                 </button>
                                 <div id="ketidakhadiranPageNumbers" class="flex gap-1">
-                                    <button class="desktop-page-btn active">1</button>
+                                    <!-- Page numbers will be generated by JavaScript -->
                                 </div>
-                                <button id="ketidakhadiranNextPage" class="desktop-nav-btn" disabled>
+                                <button id="ketidakhadiranNextPage" class="desktop-nav-btn">
                                     <span class="material-icons-outlined text-sm">chevron_right</span>
                                 </button>
                             </div>
                         </div>
 
+                        <!-- Mobile Card View -->
                         <div class="mobile-cards" id="ketidakhadiranMobileCards">
                             @foreach ($ketidakhadiran as $index => $absen)
-                                <div class="mobile-card ketidakhadiran-card" data-id="{{ $absen->id }}"
-                                    data-nama="{{ $absen->user->name ?? '-' }}" data-tanggal="{{ $absen->tanggal }}"
-                                    data-tanggal-akhir="{{ $absen->tanggal_akhir }}"
-                                    data-alasan="{{ $absen->reason ?? $absen->alasan_cuti }}"
-                                    data-status="{{ $absen->approval_status }}">
-
-                                    <!-- HEADER -->
+                                <div class="mobile-card ketidakhadiran-card" data-id="{{ $absen->id }}">
                                     <div class="mobile-card-header">
-                                        <div class="mobile-card-title">
-                                            {{ $absen->user->name ?? '-' }}
-                                        </div>
+                                        <div class="mobile-card-title">{{ $absen->user->name ?? '-' }}</div>
                                         <div>
-                                            <span
-                                                class="status-badge status-{{ Str::slug($absen->approval_status) }}">
+                                            <span class="status-badge status-{{ Str::slug($absen->approval_status) }}">
                                                 {{ strtoupper($absen->approval_status) }}
                                             </span>
                                         </div>
                                     </div>
-
-                                    <!-- BODY -->
                                     <div class="mobile-card-body">
                                         <div class="mobile-card-item">
                                             <span class="mobile-card-label">No</span>
-                                            <span class="mobile-card-value">
-                                                {{ $ketidakhadiran->firstItem() + $index }}
-                                            </span>
+                                            <span class="mobile-card-value">{{ $index + 1 }}</span>
                                         </div>
-
                                         <div class="mobile-card-item">
                                             <span class="mobile-card-label">Tanggal</span>
                                             <span class="mobile-card-value">
@@ -1080,38 +984,25 @@
                                                 @endif
                                             </span>
                                         </div>
-
                                         <div class="mobile-card-item">
                                             <span class="mobile-card-label">Alasan</span>
-                                            <span class="mobile-card-value">
-                                                {{ $absen->reason ?? ($absen->alasan_cuti ?? '-') }}
-                                            </span>
+                                            <span class="mobile-card-value">{{ $absen->keterangan ?? '-' }}</span>
                                         </div>
-
                                         <div class="mobile-card-item">
                                             <span class="mobile-card-label">Status</span>
-                                            <span class="mobile-card-value">
-                                                {{ strtoupper($absen->approval_status) }}
-                                            </span>
+                                            <span class="mobile-card-value">{{ strtoupper($absen->approval_status) }}</span>
                                         </div>
                                     </div>
-
-                                    <!-- ACTION -->
                                     <div class="flex justify-end space-x-2 mt-3">
-                                        <button class="edit-cuti-btn text-gray-600 hover:text-gray-800"
-                                            data-id="{{ $absen->id }}" title="Edit">
+                                        <button class="edit-cuti-btn text-gray-600 hover:text-gray-800" data-id="{{ $absen->id }}" title="Edit">
                                             <span class="material-icons-outlined text-sm">edit</span>
                                         </button>
-
                                         @if ($absen->approval_status === 'pending')
-                                            <button class="verify-btn text-gray-600 hover:text-gray-800"
-                                                data-id="{{ $absen->id }}" title="Verifikasi">
+                                            <button class="verify-btn text-gray-600 hover:text-gray-800" data-id="{{ $absen->id }}" title="Verifikasi">
                                                 <span class="material-icons-outlined text-sm">check_circle</span>
                                             </button>
                                         @endif
-
-                                        <button class="delete-cuti-btn text-gray-600 hover:text-gray-800"
-                                            data-id="{{ $absen->id }}" title="Hapus">
+                                        <button class="delete-cuti-btn text-gray-600 hover:text-gray-800" data-id="{{ $absen->id }}" title="Hapus">
                                             <span class="material-icons-outlined text-sm">delete</span>
                                         </button>
                                     </div>
@@ -1119,16 +1010,15 @@
                             @endforeach
                         </div>
 
-
                         <!-- Mobile Pagination -->
                         <div id="ketidakhadiranMobilePagination" class="mobile-pagination">
                             <button id="ketidakhadiranMobilePrevPage" class="mobile-nav-btn">
                                 <span class="material-icons-outlined text-sm">chevron_left</span>
                             </button>
                             <div id="ketidakhadiranMobilePageNumbers" class="flex gap-1">
-                                <button class="mobile-page-btn active">1</button>
+                                <!-- Page numbers will be generated by JavaScript -->
                             </div>
-                            <button id="ketidakhadiranMobileNextPage" class="mobile-nav-btn" disabled>
+                            <button id="ketidakhadiranMobileNextPage" class="mobile-nav-btn">
                                 <span class="material-icons-outlined text-sm">chevron_right</span>
                             </button>
                         </div>
@@ -1142,8 +1032,7 @@
     </div>
 
     <!-- Edit Cuti Modal -->
-    <div id="editCutiModal"
-        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div id="editCutiModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="p-6 border-b border-gray-200">
                 <div class="flex justify-between items-center">
@@ -1158,49 +1047,38 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">Nama Karyawan</label>
-                        <select id="editCutiNamaKaryawan" name="user_id"
-                            class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                        <select id="editCutiNamaKaryawan" name="user_id" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                             <option value="">Pilih karyawan</option>
-                            <option value="1">Ahmad Fauzi</option>
-                            <option value="2">Siti Nurhaliza</option>
-                            <option value="3">Budi Santoso</option>
-                            <option value="4">Dewi Lestari</option>
-                            <option value="5">Rudi Hermawan</option>
+                            @foreach ($users ?? [] as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Jenis Cuti/Izin</label>
-                        <select id="editCutiJenisCuti" name="jenis_cuti"
-                            class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                        <select id="editCutiJenisCuti" name="jenis_cuti" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                             <option value="">Pilih jenis cuti</option>
-                            <option value="Cuti Tahunan">Cuti Tahunan</option>
-                            <option value="Cuti Sakit">Cuti Sakit</option>
-                            <option value="Sakit">Sakit</option>
-                            <option value="Izin">Izin</option>
-                            <option value="Dinas Luar">Dinas Luar</option>
-                            <option value="Tidak Masuk">Tidak Masuk</option>
+                            <option value="cuti">Cuti</option>
+                            <option value="sakit">Sakit</option>
+                            <option value="izin">Izin</option>
+                            <option value="dinas-luar">Dinas Luar</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Tanggal Mulai</label>
-                        <input type="date" id="editCutiTanggalMulai" name="tanggal"
-                            class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                        <input type="date" id="editCutiTanggalMulai" name="tanggal" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Tanggal Akhir</label>
-                        <input type="date" id="editCutiTanggalAkhir" name="tanggal_akhir"
-                            class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                        <input type="date" id="editCutiTanggalAkhir" name="tanggal_akhir" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium mb-2">Alasan</label>
-                        <textarea id="editCutiAlasan" name="alasan_cuti" rows="3"
-                            class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary"
-                            placeholder="Masukkan alasan cuti"></textarea>
+                        <textarea id="editCutiAlasan" name="keterangan" rows="3" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary" placeholder="Masukkan alasan cuti"></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Status Persetujuan</label>
-                        <select id="editCutiStatus" name="approval_status"
-                            class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                        <select id="editCutiStatus" name="approval_status" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                             <option value="pending">Pending</option>
                             <option value="approved">Disetujui</option>
                             <option value="rejected">Ditolak</option>
@@ -1208,8 +1086,7 @@
                     </div>
                     <div id="editRejectionReasonWrapper" class="hidden">
                         <label class="block text-sm font-medium mb-2">Alasan Penolakan</label>
-                        <textarea id="editRejectionReason" name="rejection_reason" rows="3"
-                            class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary"></textarea>
+                        <textarea id="editRejectionReason" name="rejection_reason" rows="3" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary"></textarea>
                     </div>
                 </div>
                 <div class="flex justify-end space-x-3 mt-6">
@@ -1223,8 +1100,7 @@
     </div>
 
     <!-- Verify Modal -->
-    <div id="verifyModal"
-        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div id="verifyModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div class="p-6 border-b border-gray-200">
                 <div class="flex justify-between items-center">
@@ -1240,8 +1116,7 @@
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Status Persetujuan</label>
-                    <select id="verifyStatus" name="approval_status"
-                        class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                    <select id="verifyStatus" name="approval_status" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
                         <option value="approved">Disetujui</option>
                         <option value="rejected">Ditolak</option>
                     </select>
@@ -1249,9 +1124,7 @@
 
                 <div class="mb-6" id="rejectionReasonContainer" style="display: none;">
                     <label class="block text-sm font-medium mb-2">Alasan Penolakan</label>
-                    <textarea id="rejectionReason" name="rejection_reason" rows="3"
-                        class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary"
-                        placeholder="Masukkan alasan penolakan"></textarea>
+                    <textarea id="rejectionReason" name="rejection_reason" rows="3" class="w-full bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary" placeholder="Masukkan alasan penolakan"></textarea>
                 </div>
 
                 <div class="flex justify-end space-x-3">
@@ -1265,8 +1138,7 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div id="deleteModal"
-        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div id="deleteModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div class="p-6 border-b border-gray-200">
                 <div class="flex justify-between items-center">
@@ -1348,8 +1220,7 @@
                         bgColor = 'bg-blue-500';
                 }
 
-                notification.className =
-                    `notification ${bgColor} text-white p-4 rounded-lg shadow-lg mb-3 flex items-center`;
+                notification.className = `notification ${bgColor} text-white p-4 rounded-lg shadow-lg mb-3 flex items-center`;
                 notification.innerHTML = `
                     <span class="material-icons-outlined mr-3">${icon}</span>
                     <span>${message}</span>
@@ -1437,11 +1308,6 @@
                     document.getElementById('rejectionReason').value = '';
                 }
             });
-
-            // Fungsi untuk memuat ulang halaman
-            function reloadPage() {
-                window.location.reload();
-            }
 
             // === PAGINATION ===
             function initializePagination() {
@@ -1598,8 +1464,7 @@
                     // Mobile pagination
                     const mobilePageNumber = document.createElement('button');
                     mobilePageNumber.textContent = i;
-                    mobilePageNumber.className =
-                        `mobile-page-btn ${i === currentPageKetidakhadiran ? 'active' : ''}`;
+                    mobilePageNumber.className = `mobile-page-btn ${i === currentPageKetidakhadiran ? 'active' : ''}`;
                     mobilePageNumber.addEventListener('click', () => {
                         currentPageKetidakhadiran = i;
                         renderPaginationKetidakhadiran();
@@ -1761,8 +1626,7 @@
 
                     applyFilters();
                     filterDropdown.classList.remove('show');
-                    const visibleCount = getFilteredRowsAbsensi().length + getFilteredRowsKetidakhadiran()
-                        .length;
+                    const visibleCount = getFilteredRowsAbsensi().length + getFilteredRowsKetidakhadiran().length;
                     showNotification('Filter Diterapkan', `Menampilkan ${visibleCount} data`, 'success');
                 });
 
@@ -1779,8 +1643,7 @@
                     activeFilters = ['all'];
                     applyFilters();
                     filterDropdown.classList.remove('show');
-                    const visibleCount = getFilteredRowsAbsensi().length + getFilteredRowsKetidakhadiran()
-                        .length;
+                    const visibleCount = getFilteredRowsAbsensi().length + getFilteredRowsKetidakhadiran().length;
                     showNotification('Filter Direset', 'Menampilkan semua data', 'success');
                 });
 
@@ -1800,9 +1663,9 @@
 
                 // Apply filters to absensi rows
                 absensiRows.forEach(row => {
-                    const status = row.getAttribute('data-status').toLowerCase();
-                    const nama = row.getAttribute('data-nama').toLowerCase();
-                    const tanggal = row.getAttribute('data-tanggal');
+                    const status = row.getAttribute('data-status')?.toLowerCase() || '';
+                    const nama = row.getAttribute('data-nama')?.toLowerCase() || '';
+                    const tanggal = row.getAttribute('data-tanggal') || '';
 
                     // Check if status matches filter
                     let statusMatches = false;
@@ -1826,8 +1689,7 @@
                     let searchMatches = true;
                     if (searchTerm) {
                         const searchLower = searchTerm.toLowerCase();
-                        searchMatches = nama.includes(searchLower) ||
-                            status.includes(searchLower);
+                        searchMatches = nama.includes(searchLower) || status.includes(searchLower);
                     }
 
                     if (statusMatches && dateMatches && searchMatches) {
@@ -1839,9 +1701,9 @@
 
                 // Apply same filters to absensi cards
                 absensiCards.forEach(card => {
-                    const status = card.getAttribute('data-status').toLowerCase();
-                    const nama = card.getAttribute('data-nama').toLowerCase();
-                    const tanggal = card.getAttribute('data-tanggal');
+                    const status = card.getAttribute('data-status')?.toLowerCase() || '';
+                    const nama = card.getAttribute('data-nama')?.toLowerCase() || '';
+                    const tanggal = card.getAttribute('data-tanggal') || '';
 
                     // Check if status matches filter
                     let statusMatches = false;
@@ -1865,8 +1727,7 @@
                     let searchMatches = true;
                     if (searchTerm) {
                         const searchLower = searchTerm.toLowerCase();
-                        searchMatches = nama.includes(searchLower) ||
-                            status.includes(searchLower);
+                        searchMatches = nama.includes(searchLower) || status.includes(searchLower);
                     }
 
                     if (statusMatches && dateMatches && searchMatches) {
@@ -1878,10 +1739,10 @@
 
                 // Apply filters to ketidakhadiran rows
                 ketidakhadiranRows.forEach(row => {
-                    const status = row.getAttribute('data-status').toLowerCase();
-                    const nama = row.getAttribute('data-nama').toLowerCase();
-                    const alasan = row.getAttribute('data-alasan').toLowerCase();
-                    const tanggal = row.getAttribute('data-tanggal');
+                    const status = row.getAttribute('data-status')?.toLowerCase() || '';
+                    const nama = row.getAttribute('data-nama')?.toLowerCase() || '';
+                    const alasan = row.getAttribute('data-alasan')?.toLowerCase() || '';
+                    const tanggal = row.getAttribute('data-tanggal') || '';
 
                     // Check if status matches filter
                     let statusMatches = false;
@@ -1889,15 +1750,12 @@
                         statusMatches = true;
                     } else {
                         statusMatches = activeFilters.some(filter => {
-                            if (filter === 'izin' && (status === 'pending' || status ===
-                                    'approved' || status === 'rejected')) return true;
+                            if (filter === 'izin' && (status === 'pending' || status === 'approved' || status === 'rejected')) return true;
                             if (filter === 'sakit' && alasan.includes('sakit')) return true;
                             if (filter === 'cuti' && alasan.includes('cuti')) return true;
                             if (filter === 'dinas luar' && alasan.includes('dinas')) return true;
-                            if (filter === 'tidak hadir' && alasan.includes('tidak masuk'))
-                                return true;
-                            return status.includes(filter.toLowerCase()) || alasan.includes(filter
-                                .toLowerCase());
+                            if (filter === 'tidak hadir' && alasan.includes('tidak masuk')) return true;
+                            return status.includes(filter.toLowerCase()) || alasan.includes(filter.toLowerCase());
                         });
                     }
 
@@ -1911,9 +1769,7 @@
                     let searchMatches = true;
                     if (searchTerm) {
                         const searchLower = searchTerm.toLowerCase();
-                        searchMatches = nama.includes(searchLower) ||
-                            alasan.includes(searchLower) ||
-                            status.includes(searchLower);
+                        searchMatches = nama.includes(searchLower) || alasan.includes(searchLower) || status.includes(searchLower);
                     }
 
                     if (statusMatches && dateMatches && searchMatches) {
@@ -1925,10 +1781,10 @@
 
                 // Apply same filters to ketidakhadiran cards
                 ketidakhadiranCards.forEach(card => {
-                    const status = card.getAttribute('data-status').toLowerCase();
-                    const nama = card.getAttribute('data-nama').toLowerCase();
-                    const alasan = card.getAttribute('data-alasan').toLowerCase();
-                    const tanggal = card.getAttribute('data-tanggal');
+                    const status = card.getAttribute('data-status')?.toLowerCase() || '';
+                    const nama = card.getAttribute('data-nama')?.toLowerCase() || '';
+                    const alasan = card.getAttribute('data-alasan')?.toLowerCase() || '';
+                    const tanggal = card.getAttribute('data-tanggal') || '';
 
                     // Check if status matches filter
                     let statusMatches = false;
@@ -1936,15 +1792,12 @@
                         statusMatches = true;
                     } else {
                         statusMatches = activeFilters.some(filter => {
-                            if (filter === 'izin' && (status === 'pending' || status ===
-                                    'approved' || status === 'rejected')) return true;
+                            if (filter === 'izin' && (status === 'pending' || status === 'approved' || status === 'rejected')) return true;
                             if (filter === 'sakit' && alasan.includes('sakit')) return true;
                             if (filter === 'cuti' && alasan.includes('cuti')) return true;
                             if (filter === 'dinas luar' && alasan.includes('dinas')) return true;
-                            if (filter === 'tidak hadir' && alasan.includes('tidak masuk'))
-                                return true;
-                            return status.includes(filter.toLowerCase()) || alasan.includes(filter
-                                .toLowerCase());
+                            if (filter === 'tidak hadir' && alasan.includes('tidak masuk')) return true;
+                            return status.includes(filter.toLowerCase()) || alasan.includes(filter.toLowerCase());
                         });
                     }
 
@@ -1958,9 +1811,7 @@
                     let searchMatches = true;
                     if (searchTerm) {
                         const searchLower = searchTerm.toLowerCase();
-                        searchMatches = nama.includes(searchLower) ||
-                            alasan.includes(searchLower) ||
-                            status.includes(searchLower);
+                        searchMatches = nama.includes(searchLower) || alasan.includes(searchLower) || status.includes(searchLower);
                     }
 
                     if (statusMatches && dateMatches && searchMatches) {
@@ -1995,41 +1846,39 @@
             document.querySelectorAll('.edit-cuti-btn').forEach(button => {
                 button.addEventListener('click', async function() {
                     const id = this.getAttribute('data-id');
+                    // Fetch data dari server
+                    try {
+                        const response = await fetch(`/api/admin/absensi/cuti/${id}`);
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            const data = result.data;
+                            document.getElementById('editCutiId').value = data.id;
+                            document.getElementById('editCutiNamaKaryawan').value = data.user_id;
+                            document.getElementById('editCutiJenisCuti').value = data.jenis_ketidakhadiran;
+                            document.getElementById('editCutiTanggalMulai').value = data.tanggal;
+                            document.getElementById('editCutiTanggalAkhir').value = data.tanggal_akhir || data.tanggal;
+                            document.getElementById('editCutiAlasan').value = data.keterangan || '';
+                            
+                            const editStatus = document.getElementById('editCutiStatus');
+                            editStatus.value = data.approval_status;
 
-                    // Simulasi data untuk demo
-                    const data = {
-                        id: id,
-                        user_id: id,
-                        jenis_cuti: 'Sakit',
-                        tanggal: '2023-06-01',
-                        tanggal_akhir: '2023-06-01',
-                        alasan_cuti: 'Demam',
-                        approval_status: 'pending',
-                        rejection_reason: ''
-                    };
+                            // Tampilkan atau sembunyikan field alasan penolakan
+                            const editRejectionWrapper = document.getElementById('editRejectionReasonWrapper');
+                            if (data.approval_status === 'rejected') {
+                                editRejectionWrapper.classList.remove('hidden');
+                                document.getElementById('editRejectionReason').value = data.rejection_reason || '';
+                            } else {
+                                editRejectionWrapper.classList.add('hidden');
+                            }
 
-                    document.getElementById('editCutiId').value = data.id;
-                    document.getElementById('editCutiNamaKaryawan').value = data.user_id;
-                    document.getElementById('editCutiJenisCuti').value = data.jenis_cuti;
-                    document.getElementById('editCutiTanggalMulai').value = data.tanggal;
-                    document.getElementById('editCutiTanggalAkhir').value = data.tanggal_akhir;
-                    document.getElementById('editCutiAlasan').value = data.alasan_cuti;
-
-                    const editStatus = document.getElementById('editCutiStatus');
-                    editStatus.value = data.approval_status;
-
-                    // Tampilkan atau sembunyikan field alasan penolakan
-                    const editRejectionWrapper = document.getElementById(
-                        'editRejectionReasonWrapper');
-                    if (data.approval_status === 'rejected') {
-                        editRejectionWrapper.classList.remove('hidden');
-                        document.getElementById('editRejectionReason').value = data
-                            .rejection_reason || '';
-                    } else {
-                        editRejectionWrapper.classList.add('hidden');
+                            openModal('editCutiModal');
+                        } else {
+                            showNotification('Gagal memuat data', 'error');
+                        }
+                    } catch (error) {
+                        showNotification('Terjadi kesalahan', 'error');
                     }
-
-                    openModal('editCutiModal');
                 });
             });
 
@@ -2042,20 +1891,37 @@
                     return;
                 }
 
-                // Simulasi submit untuk demo
-                showNotification('Data berhasil diperbarui', 'success');
-                closeModal('editCutiModal');
-                reloadPage();
+                const formData = new FormData(this);
+                
+                try {
+                    const response = await fetch(`/api/admin/absensi/cuti/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showNotification('Data berhasil diperbarui', 'success');
+                        closeModal('editCutiModal');
+                        location.reload();
+                    } else {
+                        showNotification(result.message || 'Gagal memperbarui data', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Terjadi kesalahan', 'error');
+                }
             });
 
             // Event listeners untuk tombol verifikasi
             document.querySelectorAll('.verify-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const id = this.getAttribute('data-id');
-                    const type = this.getAttribute('data-type');
-
                     document.getElementById('verifyId').value = id;
-                    document.getElementById('verifyType').value = type;
 
                     // Reset form
                     document.getElementById('verifyStatus').value = 'approved';
@@ -2091,10 +1957,28 @@
                     formData.append('rejection_reason', rejectionReason.trim());
                 }
 
-                // Simulasi submit untuk demo
-                showNotification('Data berhasil diverifikasi', 'success');
-                closeModal('verifyModal');
-                reloadPage();
+                try {
+                    const response = await fetch(`/api/admin/absensi/${id}/verify`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showNotification('Data berhasil diverifikasi', 'success');
+                        closeModal('verifyModal');
+                        location.reload();
+                    } else {
+                        showNotification(result.message || 'Gagal memverifikasi data', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Terjadi kesalahan', 'error');
+                }
             });
 
             // Event listeners untuk tombol delete
@@ -2119,61 +2003,27 @@
                     return;
                 }
 
-                // Simulasi submit untuk demo
-                showNotification('Data berhasil dihapus', 'success');
-                closeModal('deleteModal');
-                reloadPage();
-            });
+                try {
+                    const response = await fetch(`/api/admin/absensi/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        }
+                    });
 
-            // Event listeners untuk tombol edit absensi (untuk data yang dipindahkan ke tabel ketidakhadiran)
-            document.querySelectorAll('.edit-absensi-btn').forEach(button => {
-                button.addEventListener('click', async function() {
-                    const id = this.getAttribute('data-id');
-
-                    // Simulasi data untuk demo
-                    const data = {
-                        id: id,
-                        user_id: id,
-                        jenis_cuti: 'Tepat Waktu',
-                        tanggal: '2023-06-01',
-                        tanggal_akhir: '2023-06-01',
-                        alasan_cuti: 'Hadir tepat waktu',
-                        approval_status: 'approved',
-                        rejection_reason: ''
-                    };
-
-                    document.getElementById('editCutiId').value = data.id;
-                    document.getElementById('editCutiNamaKaryawan').value = data.user_id;
-
-                    // Set jenis cuti berdasarkan status
-                    const jenisCuti = document.getElementById('editCutiJenisCuti');
-                    if (data.jenis_cuti === 'Tepat Waktu') {
-                        jenisCuti.value = 'Hadir';
-                    } else if (data.jenis_cuti === 'Terlambat') {
-                        jenisCuti.value = 'Terlambat';
-                    }
-
-                    document.getElementById('editCutiTanggalMulai').value = data.tanggal;
-                    document.getElementById('editCutiTanggalAkhir').value = data.tanggal_akhir;
-                    document.getElementById('editCutiAlasan').value = data.alasan_cuti;
-
-                    // Set status persetujuan
-                    const editStatus = document.getElementById('editCutiStatus');
-                    editStatus.value = data.approval_status || 'pending';
-
-                    // Tampilkan atau sembunyikan field alasan penolakan
-                    const editRejectionWrapper = document.getElementById(
-                        'editRejectionReasonWrapper');
-                    if (data.approval_status === 'rejected') {
-                        editRejectionWrapper.classList.remove('hidden');
-                        document.getElementById('editRejectionReason').value = data
-                            .rejection_reason || '';
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showNotification('Data berhasil dihapus', 'success');
+                        closeModal('deleteModal');
+                        location.reload();
                     } else {
-                        editRejectionWrapper.classList.add('hidden');
+                        showNotification(result.message || 'Gagal menghapus data', 'error');
                     }
-
-                    openModal('editCutiModal');
-                });
+                } catch (error) {
+                    showNotification('Terjadi kesalahan', 'error');
+                }
             });
 
             // Function to switch between tabs
