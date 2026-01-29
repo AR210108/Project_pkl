@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\FinanceTransaction;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -12,6 +13,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             TaskSeeder::class,
             CommentSeeder::class,
+            FinanceTransactionSeeder::class,
         ]);
     }
 }
