@@ -25,6 +25,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\OwnerController;
 use Illuminate\Http\Request;
+use App\Http\Controllers\FinanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -700,9 +701,13 @@ Route::get('/invoices/{invoice}/print', function (\App\Models\Invoice $invoice) 
 Route::get('/data', [LayananController::class, 'financeIndex']);
 Route::get('/data_orderan', function () { return view('finance/data_orderan'); });
 Route::get('/finance', function () { return view('finance/beranda'); });
-Route::get('/pemasukan', function () { return view('finance/pemasukan'); });
+Route::get('/pemasukan', [FinanceController::class, 'index'])->name('finance.pemasukan');
 Route::get('/pengeluaran', function () { return view('finance/pengeluaran'); });
 Route::get('/finance/invoice', function () { return view('finance/invoice'); });
+
+// Route Menyimpan Data (POST)
+// URL bisa sama, bedanya methodnya (POST)
+Route::post('/pemasukan', [FinanceController::class, 'store']);
 
 // General Manager Shortcuts
 Route::get('/general_manajer', function () { return view('general_manajer/home'); });
@@ -739,3 +744,4 @@ Route::fallback(function () {
     }
     return redirect('/login');
 });
+
