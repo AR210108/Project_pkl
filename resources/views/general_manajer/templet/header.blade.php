@@ -285,13 +285,8 @@
             </a>
 
             <!-- Menu Tim dan Divisi -->
-<<<<<<< HEAD
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 href="/general_manajer/tim_divisi" data-page="tim_divisi">
-=======
-            <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/general_manajer/tim_dan_divisi" data-page="tim_dan_divisi" data-path="general_manajer/tim_dan_divisi">
->>>>>>> e0a79ac350ede919391a158f9e73131b9e8ede18
                 <span class="material-icons sidebar-icon">groups</span>
                 <span class="sidebar-text">Tim dan Divisi</span>
             </a>

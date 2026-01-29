@@ -844,8 +844,7 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form action="{{ route('general_manajer.tim.store') }}" method="POST" id="tambahTimForm"
-                    class="space-y-4">
+<form action="{{ url('/general_manajer/tim') }}" method="POST" id="tambahTimForm" class="space-y-4">
                     @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -1236,70 +1235,80 @@
     }
 
     // ==================== CRUD HANDLERS ====================
-    function handleAddTim(e) {
-        e.preventDefault();
-        console.log('handleAddTim called');
+function handleAddTim(e) {
+    e.preventDefault();
+    console.log('handleAddTim called');
 
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData);
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
-        console.log('Data to send:', data);
+    console.log('Data to send:', data);
 
-        // Disable submit button
-        const submitBtn = e.target.querySelector('button[type="submit"]');
-        const originalText = submitBtn?.textContent;
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Menyimpan...';
-        }
-
-        fetch('/general_manajer/tim', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => {
-                console.log('Response status:', response.status);
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        console.error('Response text:', text);
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Success response:', data);
-                if (data.success) {
-                    showMinimalPopup('Berhasil', data.message || 'Tim berhasil ditambahkan', 'success');
-                    e.target.reset();
-                    closeModal('tambahTimModal');
-                    
-                    // Reload page after 1 second
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1000);
-                } else {
-                    showMinimalPopup('Error', data.message || 'Terjadi kesalahan', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Full error details:', error);
-                showMinimalPopup('Error', 'Gagal menambahkan tim. Error: ' + error.message, 'error');
-            })
-            .finally(() => {
-                // Re-enable submit button
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = originalText;
-                }
-            });
+    // Disable submit button
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn?.textContent;
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Menyimpan...';
     }
+
+    // TAMBAHKAN validasi client-side
+    if (!data.tim || !data.divisi || !data.jumlah_anggota) {
+        showMinimalPopup('Error', 'Semua field harus diisi', 'error');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+        return;
+    }
+
+    fetch('/general_manajer/tim', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                // Coba parse sebagai JSON, jika gagal tampilkan text
+                return response.json().catch(() => {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Success response:', data);
+            if (data.success) {
+                showMinimalPopup('Berhasil', data.message || 'Tim berhasil ditambahkan', 'success');
+                e.target.reset();
+                closeModal('tambahTimModal');
+                
+                // Reload page after 1 second
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                showMinimalPopup('Error', data.message || 'Terjadi kesalahan', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Full error details:', error);
+            showMinimalPopup('Error', 'Gagal menambahkan tim. Error: ' + error.message, 'error');
+        })
+        .finally(() => {
+            // Re-enable submit button
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+}
 
     function handleEditTim(e) {
         e.preventDefault();

@@ -15,8 +15,13 @@ class UserController extends Controller
      */
 public function index()
 {
-    $users = User::with('divisi')->get();
-    $divisis = Divisi::all(); // PERBAIKAN: Hapus where('divisi')
+    // TAMPILKAN DATA TERBARU DI ATAS (DESCENDING)
+    $users = User::with('divisi')
+                ->orderBy('created_at', 'desc') // atau 'id', 'desc'
+                ->get();
+    
+    $divisis = Divisi::orderBy('divisi', 'asc')->get();
+    
     return view('admin.user', compact('users', 'divisis'));
 }
 

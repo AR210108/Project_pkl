@@ -16,38 +16,29 @@ class Divisi extends Model
         'jumlah_tim'
     ];
 
-    // Relasi ke tim berdasarkan nama divisi
     public function tims()
     {
         return $this->hasMany(Tim::class, 'divisi', 'divisi');
     }
 
+
     // Accessor untuk jumlah_tim yang dihitung dinamis
-    public function getJumlahTimAttribute()
+    public function getJumlahTimAttribute($value)
     {
+        // Jika ada value, gunakan, jika tidak hitung
+        if ($value !== null) {
+            return $value;
+        }
         return $this->tims()->count();
     }
 
     // Boot method untuk menghitung ulang jumlah_tim saat create/update/delete
-    public static function boot()
-    {
-        parent::boot();
 
-        // Saat divisi dibuat, set jumlah_tim = 0
-        static::creating(function ($model) {
-            $model->jumlah_tim = '0';
-        });
-
-        // Saat tim dibuat/diupdate/dihapus, update jumlah_tim divisi
-        static::saved(function ($model) {
-            $model->updateJumlahTim();
-        });
-    }
 
     // Method untuk update jumlah_tim
-    public function updateJumlahTim()
-    {
-        $count = $this->tims()->count();
-        $this->update(['jumlah_tim' => (string)$count]);
-    }
+public function updateJumlahTim()
+{
+    $count = $this->tims()->count(); // ← Ini memanggil query yang mungkin recursive
+    $this->update(['jumlah_tim' => (string)$count]); // ← Ini trigger saved() event lagi!
+}
 }

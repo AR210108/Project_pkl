@@ -15,12 +15,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-<<<<<<< HEAD
 
             // Relasi ke divisi
             $table->foreignId('divisi_id')->nullable()->constrained('divisi')->onDelete('set null');
 
-=======
             
             // --- TAMBAHAN KOLOM YANG HILANG ---
             
@@ -35,7 +33,6 @@ return new class extends Migration
             
             // ------------------------------------
             
->>>>>>> e0a79ac350ede919391a158f9e73131b9e8ede18
             $table->rememberToken();
             $table->timestamps();
         });

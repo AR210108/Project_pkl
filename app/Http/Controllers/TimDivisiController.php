@@ -7,6 +7,7 @@ use App\Models\Divisi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+
 class TimDivisiController extends Controller
 {
     /**
@@ -42,9 +43,9 @@ class TimDivisiController extends Controller
 public function storeTim(Request $request)
 {
     try {
-        // Debug: Log request data
         \Log::info('Store Tim Request:', $request->all());
         
+        // VALIDASI TANPA exists rule yang berat
         $validated = $request->validate([
             'tim' => 'required|string|max:255',
             'divisi' => 'required|string|max:255',
@@ -53,8 +54,11 @@ public function storeTim(Request $request)
 
         \Log::info('Validated data:', $validated);
 
-        // Cek apakah divisi ada
-        $divisiExists = Divisi::where('divisi', $validated['divisi'])->exists();
+        // Cek divisi dengan query langsung yang ringan
+        $divisiExists = DB::table('divisi')
+            ->where('divisi', $validated['divisi'])
+            ->exists();
+
         if (!$divisiExists) {
             return response()->json([
                 'success' => false,
@@ -62,14 +66,30 @@ public function storeTim(Request $request)
             ], 422);
         }
 
-        $tim = Tim::create($validated);
-        
-        \Log::info('Tim created:', $tim->toArray());
+        // Buat tim dengan query langsung untuk menghindari Eloquent events
+        $timId = DB::table('tim')->insertGetId([
+            'tim' => $validated['tim'],
+            'divisi' => $validated['divisi'],
+            'jumlah_anggota' => $validated['jumlah_anggota'],
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // Update jumlah_tim di divisi (tanpa trigger boot)
+        $timCount = DB::table('tim')
+            ->where('divisi', $validated['divisi'])
+            ->count();
+            
+        DB::table('divisi')
+            ->where('divisi', $validated['divisi'])
+            ->update(['jumlah_tim' => $timCount]);
+
+        \Log::info('Tim created successfully:', ['id' => $timId]);
 
         return response()->json([
             'success' => true,
             'message' => 'Tim berhasil ditambahkan',
-            'data' => $tim
+            'data' => ['id' => $timId]
         ], 201);
         
     } catch (\Illuminate\Validation\ValidationException $e) {
@@ -80,7 +100,7 @@ public function storeTim(Request $request)
             'errors' => $e->errors()
         ], 422);
     } catch (\Exception $e) {
-        \Log::error('Store tim error:', ['error' => $e->getMessage()]);
+        \Log::error('Store tim error:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
         return response()->json([
             'success' => false,
             'message' => 'Terjadi kesalahan: ' . $e->getMessage()

@@ -20,12 +20,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-<<<<<<< HEAD
-        'divisi_id'
-=======
-        'divisi',
+        'divisi_id',
         'sisa_cuti', // Penting untuk perhitungan cuti
->>>>>>> e0a79ac350ede919391a158f9e73131b9e8ede18
     ];
 
     /**
@@ -199,18 +195,15 @@ public function scopeByDivisiId($query, $divisiId)
 
         return $initials;
     }
-<<<<<<< HEAD
     public function catatanRapats()
     {
         return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_penugasan', 'user_id', 'catatan_rapat_id');
     }
 
-=======
 
     /**
      * Relasi ke model catatan rapat penugasan (detail)
      */
->>>>>>> e0a79ac350ede919391a158f9e73131b9e8ede18
     public function catatanRapatPenugasans()
     {
         return $this->hasMany(CatatanRapatPenugasan::class, 'user_id');
@@ -224,18 +217,15 @@ public function scopeByDivisiId($query, $divisiId)
         return $this->belongsToMany(Pengumuman::class, 'pengumuman_user', 'user_id', 'pengumuman_id')
             ->withTimestamps();
     }
-<<<<<<< HEAD
 public function divisi()
 {
     return $this->belongsTo(Divisi::class, 'divisi_id');
 }
 }
-=======
     
     // Opsional: Hapus atau komentari relasi karyawan() jika tidak digunakan lagi
     // public function karyawan()
     // {
     //     return $this->hasOne(Karyawan::class);
     // }
-}
->>>>>>> e0a79ac350ede919391a158f9e73131b9e8ede18
+

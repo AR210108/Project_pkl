@@ -740,32 +740,20 @@
                                             <tr class="user-row" data-id="{{ $u->id }}"
                                                 data-name="{{ $u->name }}" data-divisi-id="{{ $u->divisi_id }}"
                                                 data-email="{{ $u->email }}" data-role="{{ $u->role }}">
-
+                                                <!-- TETAP MENGGUNAKAN $i+1 untuk nomor urut -->
                                                 <td>{{ $i + 1 }}</td>
                                                 <td>{{ $u->name }}</td>
-
-                                                <td>
-                                                    {{ $u->divisi?->divisi ?? '-' }}
-                                                </td>
-
+                                                <td>{{ $u->divisi?->divisi ?? '-' }}</td>
                                                 <td>{{ $u->email }}</td>
-
                                                 <td>
                                                     <span
                                                         class="status-badge {{ $u->role == 'admin' ? 'status-admin' : 'status-karyawan' }}">
                                                         {{ $u->role }}
                                                     </span>
                                                 </td>
-
                                                 <td>
                                                     <button
-                                                        onclick="openModalEdit(
-                {{ $u->id }},
-                '{{ $u->name }}',
-                {{ $u->divisi_id ?? 'null' }},
-                '{{ $u->email }}',
-                '{{ $u->role }}'
-            )">
+                                                        onclick="openModalEdit({{ $u->id }}, '{{ $u->name }}', {{ $u->divisi_id ?? 'null' }}, '{{ $u->email }}', '{{ $u->role }}')">
                                                         edit
                                                     </button>
                                                 </td>
@@ -906,7 +894,7 @@
                             <select name="divisi_id" id="tambahDivisiSelect"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
                                 <option value="">Pilih Divisi</option>
-                               
+
                             </select>
                         </div>
                     </div>
@@ -977,22 +965,21 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
-                            <select id="editDivisiSelect" name="divisi_id"
+                            <select name="divisi_id" id="tambahDivisiSelect"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
                                 <option value="">Pilih Divisi</option>
-                                <!-- Options akan diisi oleh JavaScript -->
+                                <!-- Options akan diisi oleh JavaScript otomatis -->
                             </select>
                         </div>
-                    </div>
 
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button"
-                            class="cancel-modal px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                            data-target="editUserModal">Batal</button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">Update
-                            User</button>
-                    </div>
+                        <div class="flex justify-end gap-2 mt-6">
+                            <button type="button"
+                                class="cancel-modal px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                                data-target="editUserModal">Batal</button>
+                            <button type="submit"
+                                class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">Update
+                                User</button>
+                        </div>
                 </form>
             </div>
         </div>
@@ -1011,7 +998,13 @@
             <span class="material-icons-outlined text-sm">close</span>
         </button>
     </div>
+    <script>
+        // Pass PHP data to JavaScript
+        window.divisisFromPHP = @json($divisis ?? []);
 
+        // Fallback data jika API gagal
+        const fallbackData = @json($divisis ?? []);
+    </script>
     <script>
         // ==================== UTILITY FUNCTIONS ====================
         function getCsrfToken() {
@@ -1065,8 +1058,15 @@
         }
 
         // Fungsi untuk tombol edit yang ada di kode lama
-        window.openModalEdit = function(id, name, divisi, email, role) {
-            console.log('Opening edit modal for user:', id, name, divisi);
+        // Fungsi untuk modal edit
+        window.openModalEdit = function(id, name, divisiId, email, role) {
+            console.log('Opening edit modal for user:', {
+                id,
+                name,
+                divisiId,
+                email,
+                role
+            });
 
             openModal('editUserModal');
             document.getElementById('editUserId').value = id;
@@ -1080,17 +1080,24 @@
             // Load divisi untuk modal edit
             loadDivisis('editDivisiSelect').then(() => {
                 const select = document.getElementById('editDivisiSelect');
-                if (select && divisi && divisi !== '-' && divisi !== '') {
-                    for (let option of select.options) {
-                        if (option.textContent === divisi) {
-                            select.value = option.value;
-                            console.log('Set divisi to:', option.value, option.textContent);
-                            break;
+                if (select && divisiId && divisiId !== 'null') {
+                    // Set nilai divisi berdasarkan ID
+                    select.value = divisiId;
+                    console.log('Set divisi to ID:', divisiId);
+
+                    // Jika tidak ada yang terpilih, coba cari berdasarkan nama
+                    if (!select.value && divisiId && divisiId !== '-') {
+                        for (let option of select.options) {
+                            if (option.textContent === divisiId) {
+                                select.value = option.value;
+                                console.log('Set divisi by name:', option.value);
+                                break;
+                            }
                         }
                     }
                 }
             });
-        }; // ✅ INI YANG KURANG
+        };
 
 
         // ==================== DIVISI FUNCTIONS ====================
@@ -1104,7 +1111,10 @@
                     return [];
                 }
 
-                // Coba fetch dari API
+                // Coba fetch dari API dengan timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 detik timeout
+
                 const csrfToken = getCsrfToken();
                 const headers = {
                     'Accept': 'application/json',
@@ -1115,43 +1125,54 @@
                     headers['X-CSRF-TOKEN'] = csrfToken;
                 }
 
-                const response = await fetch('/admin/divisis/list', {
-                    method: 'GET',
-                    headers: headers,
-                    credentials: 'same-origin'
-                });
+                try {
+                    const response = await fetch('/admin/divisis/list', {
+                        method: 'GET',
+                        headers: headers,
+                        credentials: 'same-origin',
+                        signal: controller.signal
+                    });
 
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.success && result.data && Array.isArray(result.data)) {
-                        populateSelect(selectId, result.data);
-                        return result.data;
+                    clearTimeout(timeoutId);
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success && result.data && Array.isArray(result.data)) {
+                            console.log('Divisi loaded from API:', result.data);
+                            populateSelect(selectId, result.data);
+                            return result.data;
+                        }
                     }
+                } catch (fetchError) {
+                    console.warn('API fetch failed, using fallback data:', fetchError);
                 }
 
-                // Jika fetch gagal, coba gunakan data dari PHP (jika ada)
+                // Gunakan data dari PHP (yang sudah dipass ke JavaScript)
                 const divisisFromPHP = window.divisisFromPHP || [];
                 if (divisisFromPHP.length > 0) {
-                    console.log('Using divisi data from PHP');
+                    console.log('Using divisi data from PHP:', divisisFromPHP);
                     populateSelect(selectId, divisisFromPHP);
                     return divisisFromPHP;
                 }
 
-                // Jika semua gagal, gunakan fallback
-                useFallbackDivisiData(selectId);
+                // Jika semua gagal, tampilkan pesan
+                console.error('No divisi data available');
+                populateSelect(selectId, []);
+                showMinimalPopup('Info', 'Tidak ada data divisi tersedia', 'warning');
                 return [];
 
             } catch (error) {
                 console.error('Error loading divisi:', error);
 
-                // Coba gunakan data dari PHP
+                // Fallback ke data PHP
                 const divisisFromPHP = window.divisisFromPHP || [];
                 if (divisisFromPHP.length > 0) {
                     populateSelect(selectId, divisisFromPHP);
                     return divisisFromPHP;
                 }
 
-                useFallbackDivisiData(selectId);
+                populateSelect(selectId, []);
+                showMinimalPopup('Error', 'Gagal memuat data divisi', 'error');
                 return [];
             }
         }
@@ -1168,15 +1189,32 @@
             select.innerHTML = firstOption ? firstOption.outerHTML : '<option value="">Pilih Divisi</option>';
 
             // Tambah options divisi
-            data.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item.id;
-                // Gunakan properti yang ada di data
-                option.textContent = item.divisi || item.nama_divisi || item.name || 'Unknown';
-                select.appendChild(option);
-            });
+            if (data && Array.isArray(data) && data.length > 0) {
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
 
-            console.log(`Loaded ${data.length} divisi into ${selectId}`);
+                    // Gunakan property yang benar
+                    if (item.divisi) {
+                        option.textContent = item.divisi;
+                    } else if (item.nama_divisi) {
+                        option.textContent = item.nama_divisi;
+                    } else if (item.name) {
+                        option.textContent = item.name;
+                    } else {
+                        option.textContent = 'Unknown';
+                    }
+
+                    select.appendChild(option);
+                });
+                console.log(`Loaded ${data.length} divisi into ${selectId}`);
+            } else {
+                console.warn(`No divisi data to populate in ${selectId}`);
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Tidak ada divisi tersedia';
+                select.appendChild(option);
+            }
         }
 
         function useFallbackDivisiData(selectId) {
@@ -1192,77 +1230,82 @@
         }
 
         // ==================== USER CRUD FUNCTIONS ====================
-        async function handleTambahUser(e) {
-            e.preventDefault();
+async function handleTambahUser(e) {
+    e.preventDefault();
 
-            const form = e.target;
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
 
-            console.log('Tambah user data:', data);
+    console.log('Tambah user data:', data);
 
-            // Validasi
-            if (!data.name || !data.email || !data.password || !data.role) {
-                showMinimalPopup('Error', 'Harap lengkapi semua field yang wajib (*)', 'error');
-                return;
-            }
+    // Validasi
+    if (!data.name || !data.email || !data.password || !data.role) {
+        showMinimalPopup('Error', 'Harap lengkapi semua field yang wajib (*)', 'error');
+        return;
+    }
 
-            if (data.password.length < 5) {
-                showMinimalPopup('Error', 'Password minimal 5 karakter', 'error');
-                return;
-            }
+    if (data.password.length < 5) {
+        showMinimalPopup('Error', 'Password minimal 5 karakter', 'error');
+        return;
+    }
 
-            // Disable submit button
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const originalText = submitBtn?.textContent || 'Simpan';
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="loading-spinner"></span> Menyimpan...';
-            }
+    // Disable submit button
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn?.textContent || 'Simpan';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="loading-spinner"></span> Menyimpan...';
+    }
 
-            try {
-                const response = await fetch('/admin/user/store', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': getCsrfToken(),
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
+    try {
+        const response = await fetch('/admin/user/store', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
 
-                console.log('Store response status:', response.status);
+        console.log('Store response status:', response.status);
 
-                // Parse response
-                let result;
-                try {
-                    result = await response.json();
-                } catch (jsonError) {
-                    console.error('Failed to parse JSON:', jsonError);
-                    throw new Error('Invalid server response');
-                }
-
-                if (response.ok && result.success) {
-                    showMinimalPopup('Berhasil', result.message || 'User berhasil ditambahkan', 'success');
-                    form.reset();
-                    closeModal('tambahUserModal');
-
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    showMinimalPopup('Error', result.message || 'Gagal menambahkan user', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showMinimalPopup('Error', 'Terjadi kesalahan pada server: ' + error.message, 'error');
-            } finally {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = originalText;
-                }
-            }
+        // Parse response
+        let result;
+        try {
+            result = await response.json();
+        } catch (jsonError) {
+            console.error('Failed to parse JSON:', jsonError);
+            throw new Error('Invalid server response');
         }
+
+        if (response.ok && result.success) {
+            showMinimalPopup('Berhasil', result.message || 'User berhasil ditambahkan', 'success');
+            form.reset();
+            closeModal('tambahUserModal');
+
+            // OPTION 1: Reload halaman (sederhana)
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+            
+            // OPTION 2: Tambah row baru di atas tanpa reload (advanced)
+            // addNewUserToTable(result.data);
+            
+        } else {
+            showMinimalPopup('Error', result.message || 'Gagal menambahkan user', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showMinimalPopup('Error', 'Terjadi kesalahan pada server: ' + error.message, 'error');
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    }
+}
 
         async function handleEditUser(e) {
             e.preventDefault();
@@ -1501,10 +1544,21 @@
             initializeUserManagement();
 
             // Load divisi saat modal tambah dibuka
+            // Load divisi saat modal tambah dibuka
             const tambahUserBtn = document.getElementById('tambahUserBtn');
             if (tambahUserBtn) {
                 tambahUserBtn.addEventListener('click', function() {
                     openModal('tambahUserModal');
+
+                    // Clear dan load ulang divisi
+                    const select = document.getElementById('tambahDivisiSelect');
+                    if (select) {
+                        // Simpan option pertama
+                        const firstOption = select.querySelector('option');
+                        select.innerHTML = firstOption ? firstOption.outerHTML :
+                            '<option value="">Pilih Divisi</option>';
+                    }
+
                     loadDivisis('tambahDivisiSelect');
                 });
             }

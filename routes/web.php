@@ -61,7 +61,6 @@ Route::get('/api/portfolios', [SettingController::class, 'getPortfoliosData'])->
 | Guest Routes (Pengunjung Belum Login)
 |--------------------------------------------------------------------------
 */
-Route::get('/users/data', [UserController::class, 'data'])->middleware('auth');
 
 // Landing Page
 Route::get('/', [LandingPageController::class, 'index'])->name('home');
@@ -564,7 +563,8 @@ Route::middleware(['auth', 'role:manager_divisi'])
         Route::get('/kelola-tugas', [ManagerDivisiTaskController::class, 'index'])->name('kelola_tugas');
         Route::get('/data_project', [DataProjectController::class, 'managerDivisi'])->name('data_project');
         Route::put('/data_project/{id}', [DataProjectController::class, 'update'])->name('data_project.update');
-
+        Route::get('/data_project/filter', [DataProjectController::class, 'filterByUser'])->name('data_project.filter');
+        
         Route::prefix('tasks')->name('tasks.')->group(function () {
             Route::post('/', [ManagerDivisiTaskController::class, 'store'])->name('store');
             Route::get('/{id}', [ManagerDivisiTaskController::class, 'show'])->name('show');
@@ -600,7 +600,7 @@ Route::middleware(['auth', 'role:manager_divisi'])
 */
 
 Route::middleware(['auth'])->resource('pengumuman', PengumumanController::class);
-
+Route::get('/divisis/list', [UserController::class, 'getDivisis'])->name('divisis.list');
 Route::middleware(['auth'])->group(function () {
     Route::get('/catatan-rapat', [CatatanRapatController::class, 'index'])->name('catatan_rapat.index');
     Route::post('/catatan-rapat', [CatatanRapatController::class, 'store'])->name('catatan_rapat.store');
@@ -609,6 +609,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/catatan-rapat/{id}', [CatatanRapatController::class, 'show'])->name('catatan_rapat.show');
     Route::get('/catatan-rapat/data', [CatatanRapatController::class, 'getData'])->name('catatan_rapat.data');
     Route::get('/users/data', [UserController::class, 'getData'])->name('users.data');
+    // Dalam file routes/web.php di dalam group admin
+
 });
 
 /*
