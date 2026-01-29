@@ -50,7 +50,7 @@ public function index()
 public function getDivisis(): JsonResponse
 {
     try {
-        $divisis = Divisi::select('id', 'divisi')->get(); // PERBAIKAN: Hapus where('divisi')
+        $divisis = Divisi::select('id', 'divisi')->get();
         
         return response()->json([
             'success' => true,
@@ -124,33 +124,34 @@ public function store(Request $request)
     /**
      * Update user
      */
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'role' => 'required|in:admin,karyawan,general_manager,manager_divisi,finance,owner',
-            'divisi_id' => 'nullable|exists:divisi,id' // UBAH VALIDASI
-        ]);
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email,' . $id,
+        'role' => 'required|in:admin,karyawan,general_manager,manager_divisi,finance,owner',
+        'divisi_id' => 'nullable|exists:divisi,id'
+    ]);
 
-        $user = User::findOrFail($id);
+    $user = User::findOrFail($id);
 
-        $user->divisi_id = $request->divisi_id;
-
-
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->role = $request->role;
-        $user->divisi_id = $request->divisi_id; // Update id divisi
-        
-        if ($request->filled('password')) {
-            $user->password = Hash::make($request->password);
-        }
-        
-        $user->save();
-
-        return redirect()->route('admin.user')->with('success', 'User berhasil diperbarui');
+    $user->name = $request->name;
+    $user->email = $request->email;
+    $user->role = $request->role;
+    $user->divisi_id = $request->divisi_id; // Update divisi_id
+    
+    if ($request->filled('password')) {
+        $user->password = Hash::make($request->password);
     }
+    
+    $user->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User berhasil diperbarui',
+        'data' => $user
+    ]);
+}
 
     /**
      * Hapus user

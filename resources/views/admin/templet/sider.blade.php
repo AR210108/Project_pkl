@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sidebar Component</title>
+    
+    <!-- DITAMBAHKAN: Meta tag CSRF untuk keamanan form (sangat penting di Laravel) -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
@@ -30,7 +34,7 @@
             transform: rotate(-45deg) translate(7px, -6px);
         }
 
-        /* Style untuk efek hover yang lebih menonjol */
+        /* Gaya untuk efek hover yang lebih menonjol */
         .nav-item {
             position: relative;
             overflow: hidden;
@@ -287,7 +291,7 @@
                     <span class="material-icons sidebar-icon">description</span>
                     <span class="sidebar-text">Dokumen</span>
                     <span class="material-icons sidebar-icon ml-auto transition-transform duration-200"
-                        id="surat-kerjasama-icon">expand_more</span>
+                        id="dokumen-icon">expand_more</span>
                 </button>
 
                 <!-- Dropdown -->
@@ -341,115 +345,154 @@
     </aside>
 
     <script>
-        function initSidebar() {
-            const hamburger = document.getElementById('hamburger');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            const mainContent = document.querySelector('.main-content');
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- ELEMEN DOM ---
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
 
-            function openSidebar() {
-                sidebar.classList.remove('translate-x-full');
-                overlay.classList.remove('hidden');
-                hamburger.classList.add('hamburger-active');
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closeSidebar() {
-                sidebar.classList.add('translate-x-full');
-                overlay.classList.add('hidden');
-                hamburger.classList.remove('hamburger-active');
-                document.body.style.overflow = '';
-            }
-
-            hamburger.addEventListener('click', () => {
-                sidebar.classList.contains('translate-x-full')
-                    ? openSidebar()
-                    : closeSidebar();
-            });
-
-            overlay.addEventListener('click', closeSidebar);
-
-            document.addEventListener('keydown', e => {
-                if (e.key === 'Escape' && !sidebar.classList.contains('translate-x-full')) {
-                    closeSidebar();
-                }
-            });
-
-            // ✅ SIMPAN MENU SAAT DIKLIK
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const page = item.getAttribute('data-page');
-                    if (page) {
-                        sessionStorage.setItem('activeSidebar', page);
-                    }
-                });
-            });
-
-            setActiveNavItem();
+        // --- CEK ELEMEN PENTING ---
+        // Jika salah satu elemen utama tidak ditemukan, hentikan eksekusi
+        if (!hamburger || !sidebar || !overlay) {
+            console.error('Error: Elemen hamburger, sidebar, atau overlay tidak ditemukan.');
+            return;
         }
 
-        function setActiveNavItem() {
-            const activePage = sessionStorage.getItem('activeSidebar');
-
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-
-                if (item.getAttribute('data-page') === activePage) {
-                    item.classList.add('active');
-
-                    // Jika di dropdown → buka dropdown
-                    const dropdown = item.closest('[id$="-dropdown"]');
-                    if (dropdown) {
-                        dropdown.classList.remove('hidden');
-                        const icon = document.getElementById(
-                            dropdown.id.replace('-dropdown', '-icon')
-                        );
-                        if (icon) icon.textContent = 'expand_less';
-                    }
-                }
-            });
+        // --- FUNGSI SIDEBAR ---
+        function openSidebar() {
+            sidebar.classList.remove('translate-x-full');
+            overlay.classList.remove('hidden');
+            hamburger.classList.add('hamburger-active');
+            document.body.style.overflow = 'hidden'; // Mencegah scroll background
         }
 
-        function toggleDropdown(id) {
-            const dropdown = document.getElementById(id);
-            const icon = document.getElementById(id.replace('-dropdown', '-icon'));
-
-            dropdown.classList.toggle('hidden');
-            icon.textContent = dropdown.classList.contains('hidden')
-                ? 'expand_more'
-                : 'expand_less';
+        function closeSidebar() {
+            sidebar.classList.add('translate-x-full');
+            overlay.classList.add('hidden');
+            hamburger.classList.remove('hamburger-active');
+            document.body.style.overflow = ''; // Kembalikan scroll
         }
-            const logoutForm = document.querySelector('form[action*="logout"]');
-            if (logoutForm) {
-                logoutForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    // Kirim form logout menggunakan fetch
-                    fetch(this.action, {
-                        method: 'POST',
-                        body: new FormData(this),
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        }
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Redirect ke halaman login
-                                window.location.href = '/login';
-                            } else {
-                                // Tampilkan pesan error
-                                alert('Logout gagal. Silakan coba lagi.');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Terjadi kesalahan. Silakan coba lagi.');
-                        });
-                });
+
+        // --- EVENT LISTENER UNTUK HAMBURGER ---
+        hamburger.addEventListener('click', () => {
+            // Cek apakah sidebar sedang tersembunyi (memiliki class translate-x-full)
+            if (sidebar.classList.contains('translate-x-full')) {
+                openSidebar();
+            } else {
+                closeSidebar();
             }
         });
 
-        document.addEventListener('DOMContentLoaded', initSidebar);
+        // --- EVENT LISTENER UNTUK OVERLAY ---
+        overlay.addEventListener('click', closeSidebar);
+
+        // --- TUTUP SIDEBAR DENGAN TOMBOL ESC ---
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !sidebar.classList.contains('translate-x-full')) {
+                closeSidebar();
+            }
+        });
+
+        // --- FUNGSI UNTUK MENU AKTIF ---
+        function setActiveNavItem() {
+            const activePage = sessionStorage.getItem('activeSidebar');
+            if (!activePage) return;
+
+            // Hapus class 'active' dari semua item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Tambahkan class 'active' ke item yang sesuai
+            const activeItem = document.querySelector(`.nav-item[data-page="${activePage}"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+
+                // Jika item berada di dalam dropdown, buka dropdown tersebut
+                const dropdownParent = activeItem.closest('[id$="-dropdown"]');
+                if (dropdownParent) {
+                    dropdownParent.classList.remove('hidden');
+                    const icon = document.getElementById(dropdownParent.id.replace('-dropdown', '-icon'));
+                    if (icon) {
+                        icon.textContent = 'expand_less';
+                    }
+                }
+            }
+        }
+
+        // --- EVENT LISTENER UNTUK SETIAP ITEM NAVIGASI ---
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const page = item.getAttribute('data-page');
+                if (page) {
+                    sessionStorage.setItem('activeSidebar', page);
+                    // Set status aktif sebelum pindah halaman (untuk efek instan)
+                    setActiveNavItem();
+                }
+            });
+        });
+
+        // --- FUNGSI UNTUK DROPDOWN ---
+        // Membuat fungsi global agar bisa dipanggil dari onclick di HTML
+        window.toggleDropdown = function(id) {
+            const dropdown = document.getElementById(id);
+            const icon = document.getElementById(id.replace('-dropdown', '-icon'));
+
+            if (dropdown && icon) {
+                dropdown.classList.toggle('hidden');
+                icon.textContent = dropdown.classList.contains('hidden') ? 'expand_more' : 'expand_less';
+            }
+        };
+
+        // --- INISIALISASI ---
+        setActiveNavItem();
+
+        // --- HANDLER LOGOUT YANG LEBIH AMAN ---
+        const logoutForm = document.querySelector('form[action*="logout"]');
+        if (logoutForm) {
+            logoutForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                
+                // Cek keberadaan meta tag CSRF
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (!csrfToken) {
+                    console.error('Meta tag CSRF-Token tidak ditemukan!');
+                    alert('Terjadi kesalahan konfigurasi. Logout tidak dapat diproses.');
+                    return;
+                }
+
+                // Kirim form menggunakan fetch
+                fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this),
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => {
+                    // Jika response adalah redirect (bukan JSON), arahkan saja
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                        return;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Ini hanya dijalankan jika response adalah JSON
+                    if (data && data.success) {
+                        window.location.href = data.redirect_to || '/login';
+                    } else if (data && data.message) {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Logout Error:', error);
+                    alert('Terjadi kesalahan saat mencoba logout.');
+                });
+            });
+        }
+    });
     </script>
 
 </body>

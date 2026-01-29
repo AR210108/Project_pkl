@@ -51,7 +51,7 @@
             background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
         }
         
-        /* Button hover effects */
+        /* Button hover effects - DIUBAH */
         .btn-primary {
             transition: all 0.3s ease;
             position: relative;
@@ -59,21 +59,21 @@
             z-index: 1;
         }
         
-        .btn-primary:before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, #000000, #111827);
-            opacity: 0;
-            z-index: -1;
-            transition: opacity 0.3s ease;
+        /* Menghapus efek hover pada tombol OWNERS */
+        .btn-no-hover {
+            transition: none !important;
+            background-color: white !important;
+            color: black !important;
         }
         
-        .btn-primary:hover:before {
-            opacity: 1;
+        .btn-no-hover:hover {
+            background-color: white !important;
+            color: black !important;
+            transform: none !important;
+        }
+        
+        .btn-no-hover:before {
+            display: none !important;
         }
         
         /* Card hover effects */
@@ -135,6 +135,33 @@
             text-decoration: none;
             cursor: pointer;
         }
+        
+        /* Loading animation */
+        .loading-dots {
+            display: inline-block;
+        }
+        
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+        
+        /* Fade in animation for loaded content */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 
@@ -150,49 +177,51 @@
                 <div class="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-5 rounded-full -ml-24 -mb-24"></div>
                 
                 <div class="max-w-4xl mx-auto relative z-10">
-                    <h2 class="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-3 md:mb-4">HALLO, <span id="ownerName">NAMA OWNERS</span>
+                    <h2 class="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-3 md:mb-4">HALLO, <span id="ownerName" class="loading-dots">Memuat</span>
                     </h2>
                     <p class="text-sm md:text-base text-white/90 mb-6 md:mb-8">
                         Bisnis digital agency adalah perusahaan yang membantu bisnis lain memasarkan produk atau
                                 jasanya
                                 secara online melalui berbagai layanan digital.
                     </p>
+                    <!-- TOMBOL OWNERS TANPA EFEK HOVER -->
                     <a href="/karyawan/absensi"
-                        class="btn-primary bg-white text-black px-6 py-2 md:px-8 md:py-3 rounded-lg font-semibold hover:bg-gray-100 transition-transform transform hover:scale-105 shadow-lg inline-block text-sm md:text-base">
+                        class="btn-no-hover bg-white text-black px-6 py-2 md:px-8 md:py-3 rounded-lg font-semibold shadow-lg inline-block text-sm md:text-base cursor-pointer">
                         OWNERS
                     </a>
                 </div>
             </section>
             
             <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-               <!-- Kehadiran Karyawan Card - VERSI FINAL YANG BENAR -->
+               <!-- Kehadiran Karyawan Card -->
 <div id="attendance-card-trigger" class="card-hover bg-card-light p-4 rounded-lg shadow-sm flex items-start space-x-4 cursor-pointer">
     <div class="bg-gray-700 p-3 rounded-md">
         <span class="material-icons text-white">groups</span>
     </div>
     <div>
         <p class="text-xs text-gray-400">Kehadiran Karyawan</p>
-        <!-- PENTING: Elemen ini memiliki ID yang akan diisi oleh JavaScript -->
-        <p id="attendancePercentage" class="text-xl md:text-2xl font-bold text-white">Memuat...</p>
+        <p id="attendancePercentage" class="text-xl md:text-2xl font-bold text-white loading-dots">Memuat</p>
     </div>
 </div>
                 
+                <!-- JUMLAH LAYANAN CARD - DIPERBAIKI -->
                 <div class="card-hover bg-card-light p-4 rounded-lg shadow-sm flex items-start space-x-4">
                     <div class="bg-gray-700 p-3 rounded-md">
                         <span class="material-icons text-white">design_services</span>
                     </div>
                     <div>
                         <p class="text-xs text-gray-400">Jumlah Layanan</p>
-                        <p id="serviceCount" class="text-xl md:text-2xl font-bold text-white">10</p>
+                        <p id="serviceCount" class="text-xl md:text-2xl font-bold text-white loading-dots">Memuat</p>
                     </div>
                 </div>
+                
                 <div class="card-hover bg-card-light p-4 rounded-lg shadow-sm flex items-start space-x-4">
                     <div class="bg-gray-700 p-3 rounded-md">
                         <span class="material-icons text-white">arrow_downward</span>
                     </div>
                     <div>
                         <p class="text-xs text-gray-400">Total Pemasukan</p>
-                        <p id="totalIncome" class="text-lg md:text-xl font-bold text-white">1.000.000</p>
+                        <p id="totalIncome" class="text-lg md:text-xl font-bold text-white loading-dots">Memuat</p>
                     </div>
                 </div>
                 <div class="card-hover bg-card-light p-4 rounded-lg shadow-sm flex items-start space-x-4">
@@ -201,7 +230,7 @@
                     </div>
                     <div>
                         <p class="text-xs text-gray-400">Total Pengeluaran</p>
-                        <p id="totalExpense" class="text-lg md:text-xl font-bold text-white">500.000</p>
+                        <p id="totalExpense" class="text-lg md:text-xl font-bold text-white loading-dots">Memuat</p>
                     </div>
                 </div>
                 <div class="card-hover bg-card-light p-4 rounded-lg shadow-sm flex items-start space-x-4">
@@ -210,7 +239,7 @@
                     </div>
                     <div>
                         <p class="text-xs text-gray-400">Total Keuntungan</p>
-                        <p id="totalProfit" class="text-lg md:text-xl font-bold text-white">500.000</p>
+                        <p id="totalProfit" class="text-lg md:text-xl font-bold text-white loading-dots">Memuat</p>
                     </div>
                 </div>
             </section>
@@ -284,11 +313,81 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Function to fetch owner data
+        async function fetchOwnerData() {
+            try {
+                // Fetch owner data dari API
+                const response = await fetch('/api/owner/data');
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update nama owner di dashboard
+                    const ownerNameElement = document.getElementById('ownerName');
+                    if (ownerNameElement) {
+                        // Hapus class loading-dots dan tambahkan class fade-in
+                        ownerNameElement.classList.remove('loading-dots');
+                        ownerNameElement.classList.add('fade-in');
+                        ownerNameElement.textContent = result.data.name;
+                    }
+                } else {
+                    // Tampilkan pesan error jika API gagal
+                    const ownerNameElement = document.getElementById('ownerName');
+                    if (ownerNameElement) {
+                        ownerNameElement.classList.remove('loading-dots');
+                        ownerNameElement.textContent = 'Owner';
+                    }
+                    console.error('Gagal memuat data owner:', result.message);
+                }
+            } catch (error) {
+                console.error('Terjadi kesalahan saat mengambil data owner:', error);
+                // Fallback jika terjadi error
+                const ownerNameElement = document.getElementById('ownerName');
+                if (ownerNameElement) {
+                    ownerNameElement.classList.remove('loading-dots');
+                    ownerNameElement.textContent = 'Owner';
+                }
+            }
+        }
+        
+        // Function to fetch service count from database
+        async function fetchServiceCount() {
+            try {
+                // Fetch jumlah layanan dari API
+                const response = await fetch('/api/services/count');
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update jumlah layanan di dashboard
+                    const serviceCountElement = document.getElementById('serviceCount');
+                    if (serviceCountElement) {
+                        serviceCountElement.classList.remove('loading-dots');
+                        serviceCountElement.classList.add('fade-in');
+                        serviceCountElement.textContent = result.data.count;
+                    }
+                } else {
+                    // Tampilkan pesan error jika API gagal
+                    const serviceCountElement = document.getElementById('serviceCount');
+                    if (serviceCountElement) {
+                        serviceCountElement.classList.remove('loading-dots');
+                        serviceCountElement.textContent = '0';
+                    }
+                    console.error('Gagal memuat data layanan:', result.message);
+                }
+            } catch (error) {
+                console.error('Terjadi kesalahan saat mengambil data layanan:', error);
+                // Fallback jika terjadi error
+                const serviceCountElement = document.getElementById('serviceCount');
+                if (serviceCountElement) {
+                    serviceCountElement.classList.remove('loading-dots');
+                    serviceCountElement.textContent = '0';
+                }
+            }
+        }
+        
         // Function to fetch dashboard data
         async function fetchDashboardData() {
             try {
                 // Fetch attendance percentage dari API yang sama dengan popup
-                // Ini memastikan data di dashboard dan popup SELALU SINKRON
                 const attendanceResponse = await fetch('/api/kehadiran-per-divisi');
                 const attendanceResult = await attendanceResponse.json();
                 
@@ -297,18 +396,21 @@
                     const percentage = attendanceResult.data.overall_percentage;
                     const percentageElement = document.getElementById('attendancePercentage');
                     if (percentageElement) {
+                        percentageElement.classList.remove('loading-dots');
+                        percentageElement.classList.add('fade-in');
                         percentageElement.textContent = percentage + '%';
                     }
                 } else {
                     // Tampilkan pesan error jika API gagal
                     const percentageElement = document.getElementById('attendancePercentage');
                     if (percentageElement) {
+                        percentageElement.classList.remove('loading-dots');
                         percentageElement.textContent = 'Error';
                     }
                     console.error('Gagal memuat data kehadiran:', attendanceResult.message);
                 }
                 
-                // Fetch data dashboard lainnya (layanan, keuangan, dll)
+                // Fetch data dashboard lainnya (keuangan, dll)
                 updateDashboardStats();
                 initializeChart();
                 
@@ -317,6 +419,7 @@
                 // Fallback jika terjadi error
                 const percentageElement = document.getElementById('attendancePercentage');
                 if (percentageElement) {
+                    percentageElement.classList.remove('loading-dots');
                     percentageElement.textContent = '0%';
                 }
                 updateDashboardStats();
@@ -324,14 +427,8 @@
             }
         }
         
-        // Function to update dashboard stats (using mock data for now)
+        // Function to update dashboard stats
         function updateDashboardStats() {
-            // Update service count
-            const serviceCountElement = document.getElementById('serviceCount');
-            if (serviceCountElement) {
-                serviceCountElement.textContent = '10';
-            }
-            
             // Update financial data
             const income = 1000000;
             const expense = 500000;
@@ -339,16 +436,22 @@
             
             const incomeElement = document.getElementById('totalIncome');
             if (incomeElement) {
+                incomeElement.classList.remove('loading-dots');
+                incomeElement.classList.add('fade-in');
                 incomeElement.textContent = formatCurrency(income);
             }
 
             const expenseElement = document.getElementById('totalExpense');
             if (expenseElement) {
+                expenseElement.classList.remove('loading-dots');
+                expenseElement.classList.add('fade-in');
                 expenseElement.textContent = formatCurrency(expense);
             }
 
             const profitElement = document.getElementById('totalProfit');
             if (profitElement) {
+                profitElement.classList.remove('loading-dots');
+                profitElement.classList.add('fade-in');
                 profitElement.textContent = formatCurrency(profit);
             }
         }
@@ -423,12 +526,6 @@
             }
         }
         
-        // Function to get owner name (you can modify this to get from session or API)
-        function getOwnerName() {
-            // This should be replaced with actual data from your backend
-            return 'Owner Name';
-        }
-        
         // --- Logika untuk Modal Kehadiran Per Divisi ---
 
         const attendanceModal = document.getElementById('attendanceModal');
@@ -470,7 +567,7 @@
         async function fetchAttendancePerDivision() {
             try {
                 // Tampilkan teks sederhana saat memuat
-                modalBodyContent.innerHTML = `<p class="text-center text-gray-500">Memuat data...</p>`;
+                modalBodyContent.innerHTML = `<p class="text-center text-gray-500">Memuat data<span class="loading-dots"></span></p>`;
 
                 const response = await fetch('/api/kehadiran-per-divisi');
                 const result = await response.json();
@@ -487,7 +584,7 @@
         }
 
         /**
-         * Fungsi untuk merender konten modal (DISEDERHANA)
+         * Fungsi untuk merender konten modal
          */
         function renderModalContent(data) {
             const { overall_percentage, divisions } = data;
@@ -518,12 +615,9 @@
         }
         
         // Initialize dashboard
+        fetchOwnerData();
+        fetchServiceCount(); // Tambahkan pemanggilan fungsi untuk jumlah layanan
         fetchDashboardData();
-        
-        const ownerNameElement = document.getElementById('ownerName');
-        if (ownerNameElement) {
-            ownerNameElement.textContent = getOwnerName();
-        }
     });
 </script>
 </body>

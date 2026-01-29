@@ -196,4 +196,22 @@ try {
         $layanans = Layanan::latest()->get(); 
         return view('home', compact('layanans'));
     }
+    public function getCount()
+{
+    try {
+        $count = \App\Models\Layanan::count();
+        
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'count' => $count
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengambil data layanan: ' . $e->getMessage()
+        ], 500);
+    }
+}
 }

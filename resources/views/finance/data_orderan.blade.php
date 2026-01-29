@@ -105,6 +105,26 @@
             background-color: #e2e8f0;
         }
         
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        
+        .btn-warning {
+            background-color: #f59e0b;
+            color: white;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-warning:hover {
+            background-color: #d97706;
+        }
+        
         /* Modal styles */
         .modal {
             transition: opacity 0.25s ease;
@@ -680,12 +700,89 @@
         .hidden-by-filter {
             display: none !important;
         }
+        
+        /* Delete Confirmation Modal */
+        .delete-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .delete-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .delete-modal-content {
+            background-color: white;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .delete-modal.show .delete-modal-content {
+            transform: scale(1);
+        }
+        
+        .delete-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .delete-modal-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: rgba(239, 68, 68, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ef4444;
+        }
+        
+        .delete-modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .delete-modal-body {
+            color: #64748b;
+            margin-bottom: 24px;
+        }
+        
+        .delete-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
     </style>
 </head>
 <body class="font-display bg-background-light text-text-light">
     <div class="flex min-h-screen">
         <!-- Container untuk sidebar yang akan dimuat -->
         @include('finance.templet.sider')
+        @php
+            if (!isset($orders)) {
+                $orders = \App\Models\Order::orderBy('id', 'desc')->paginate(10);
+            }
+        @endphp
         
         <!-- Main Content -->
         <main class="flex-1 flex flex-col main-content">
@@ -694,8 +791,10 @@
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
-                        <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input id="payment-search" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari layanan, klien, atau status..." type="text" />
+                        <form id="searchForm" method="GET" action="{{ route('orders.index') }}">
+                            <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                            <input id="payment-search" name="q" value="{{ request('q') }}" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari layanan, klien, atau status..." type="text" />
+                        </form>
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <div class="relative">
@@ -746,7 +845,7 @@
                             Data Orderan
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">20</span> pembayaran</span>
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">{{ $orders->total() ?? 0 }}</span> pembayaran</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -768,7 +867,47 @@
                                         </tr>
                                     </thead>
                                     <tbody id="payment-table-body">
-                                        <!-- Data akan diisi dengan JavaScript -->
+                                        @foreach($orders as $order)
+                                        @php
+                                            $status = $order->status ?? 'pending';
+                                            $work = $order->work_status ?? 'planning';
+                                            $category = $order->kategori ?? '';
+                                            $format = function($v){ return $v ? 'Rp '.number_format($v,0,',','.') : '-'; };
+                                        @endphp
+                                        <tr>
+                                            <td style="min-width: 60px;">{{ $order->id }}</td>
+                                            <td style="min-width: 200px;">{{ $order->layanan }}</td>
+                                            <td style="min-width: 150px;">@if($category == 'design')<span class="category-badge category-design">Desain</span>@elseif($category=='programming')<span class="category-badge category-programming">Programming</span>@elseif($category=='marketing')<span class="category-badge category-marketing">Digital Marketing</span>@else {{ $category }} @endif</td>
+                                            <td style="min-width: 150px;">{{ $order->price_formatted ?? ($order->price ? 'Rp '.number_format($order->price,0,',','.') : '-') }}</td>
+                                            <td style="min-width: 200px;">{{ $order->klien }}</td>
+                                            <td style="min-width: 150px; text-align: center;">{{ $order->deposit ? 'Rp '.number_format($order->deposit,0,',','.') : '-' }}</td>
+                                            <td style="min-width: 150px;">{{ $order->paid ? 'Rp '.number_format($order->paid,0,',','.') : '-' }}</td>
+                                            <td style="min-width: 120px;">
+                                                @if($status == 'paid')<span class="status-badge status-paid">Lunas</span>@elseif($status=='partial')<span class="status-badge status-partial">Sebagian</span>@elseif($status=='overdue')<span class="status-badge status-overdue">Terlambat</span>@else<span class="status-badge status-pending">Pending</span>@endif
+                                            </td>
+                                            <td style="min-width: 120px;">
+                                                @if($work == 'planning')<span class="work-status-badge work-status-planning">Perencanaan</span>@elseif($work=='progress')<span class="work-status-badge work-status-progress">Sedang Dikerjakan</span>@elseif($work=='review')<span class="work-status-badge work-status-review">Review</span>@elseif($work=='completed')<span class="work-status-badge work-status-completed">Selesai</span>@else<span class="work-status-badge work-status-onhold">Ditunda</span>@endif
+                                            </td>
+                                            <td style="min-width: 100px; text-align: center;">
+                                                <div class="flex justify-center gap-2">
+                                                    <a href="{{ route('orders.show', $order->id) }}" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Order">
+                                                        <span class="material-icons-outlined">visibility</span>
+                                                    </a>
+                                                    <button onclick="openEditModal({{ $order->id }})" class="p-1 rounded-full hover:bg-warning/20 text-warning" title="Edit Order">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button onclick="openDeleteModal({{ $order->id }})" class="p-1 rounded-full hover:bg-danger/20 text-danger" title="Hapus Order">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
+                                                    @if($order->invoice_id)
+                                                    <a href="{{ route('invoices.show', $order->invoice_id) }}" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Invoice">
+                                                        <span class="material-icons-outlined">description</span>
+                                                    </a>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
@@ -776,20 +915,81 @@
                         
                         <!-- Mobile Card View -->
                         <div class="mobile-cards space-y-4" id="mobile-cards">
-                            <!-- Card akan diisi dengan JavaScript -->
+                            @foreach($orders as $order)
+                            @php
+                                $status = $order->status ?? 'pending';
+                                $work = $order->work_status ?? 'planning';
+                                $category = $order->kategori ?? '';
+                                $icon = 'miscellaneous_services';
+                                if($category=='programming') $icon='code';
+                                if($category=='design') $icon='palette';
+                                if($category=='marketing') $icon='trending_up';
+                            @endphp
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm payment-card">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <span class="material-icons-outlined text-primary">{{ $icon }}</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-base">{{ $order->layanan }}</h4>
+                                            <p class="text-sm text-text-muted-light">{{ $order->price_formatted ?? ($order->price ? 'Rp '.number_format($order->price,0,',','.') : '-') }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <a href="{{ route('orders.show', $order->id) }}" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Order">
+                                            <span class="material-icons-outlined">visibility</span>
+                                        </a>
+                                        <button onclick="openEditModal({{ $order->id }})" class="p-1 rounded-full hover:bg-warning/20 text-warning" title="Edit Order">
+                                            <span class="material-icons-outlined">edit</span>
+                                        </button>
+                                        <button onclick="openDeleteModal({{ $order->id }})" class="p-1 rounded-full hover:bg-danger/20 text-danger" title="Hapus Order">
+                                            <span class="material-icons-outlined">delete</span>
+                                        </button>
+                                        @if($order->invoice_id)
+                                        <a href="{{ route('invoices.show', $order->invoice_id) }}" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Invoice">
+                                            <span class="material-icons-outlined">description</span>
+                                        </a>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>
+                                        <p class="text-text-muted-light">No</p>
+                                        <p class="font-medium">{{ $order->id }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Status</p>
+                                        <p>@if($status == 'paid')<span class="status-badge status-paid">Lunas</span>@elseif($status=='partial')<span class="status-badge status-partial">Sebagian</span>@elseif($status=='overdue')<span class="status-badge status-overdue">Terlambat</span>@else<span class="status-badge status-pending">Pending</span>@endif</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Klien</p>
+                                        <p class="font-medium">{{ $order->klien }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Kategori</p>
+                                        <p>@if($category == 'design')<span class="category-badge category-design">Desain</span>@elseif($category=='programming')<span class="category-badge category-programming">Programming</span>@elseif($category=='marketing')<span class="category-badge category-marketing">Digital Marketing</span>@else {{ $category }} @endif</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Pembayaran Awal</p>
+                                        <p class="font-medium">{{ $order->deposit ? 'Rp '.number_format($order->deposit,0,',','.') : '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Pelunasan</p>
+                                        <p class="font-medium">{{ $order->paid ? 'Rp '.number_format($order->paid,0,',','.') : '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Status Pengerjaan</p>
+                                        <p>@if($work == 'planning')<span class="work-status-badge work-status-planning">Perencanaan</span>@elseif($work=='progress')<span class="work-status-badge work-status-progress">Sedang Dikerjakan</span>@elseif($work=='review')<span class="work-status-badge work-status-review">Review</span>@elseif($work=='completed')<span class="work-status-badge work-status-completed">Selesai</span>@else<span class="work-status-badge work-status-onhold">Ditunda</span>@endif</p>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
                         </div>
                         
                         <!-- Pagination -->
                         <div id="payment-pagination" class="desktop-pagination">
-                            <button id="prevPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="pageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="nextPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
+                            {{ $orders->appends(request()->query())->links() }}
                         </div>
                     </div>
                 </div>
@@ -810,15 +1010,13 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form class="space-y-4">
+                <form class="space-y-4" method="POST" action="{{ route('orders.store') }}">
+                    @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">No</label>
-                            <input type="text" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Nomor">
-                        </div>
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Kategori Layanan</label>
-                            <select id="payment-category" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" onchange="updateServiceOptions()">
+                            <select id="payment-category" name="kategori" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" onchange="updateServiceOptions()">
                                 <option value="">Pilih Kategori</option>
                                 <option value="design">Desain</option>
                                 <option value="programming">Programming</option>
@@ -827,36 +1025,36 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Layanan</label>
-                            <select id="payment-service" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <select id="payment-service" name="layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih Layanan</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                            <input type="text" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Harga">
+                            <input type="number" name="price" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Harga">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Klien</label>
-                            <select class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <select name="klien" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih Klien</option>
-                                <option value="pt1">PT. Teknologi Maju</option>
-                                <option value="cv1">CV. Digital Solusi</option>
-                                <option value="ud1">UD. Kreatif Indonesia</option>
-                                <option value="pt2">PT. Inovasi Nusantara</option>
-                                <option value="cv2">CV. Kreatif</option>
+                                <option value="PT. Teknologi Maju">PT. Teknologi Maju</option>
+                                <option value="CV. Digital Solusi">CV. Digital Solusi</option>
+                                <option value="UD. Kreatif Indonesia">UD. Kreatif Indonesia</option>
+                                <option value="PT. Inovasi Nusantara">PT. Inovasi Nusantara</option>
+                                <option value="CV. Kreatif">CV. Kreatif</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Pembayaran Awal</label>
-                            <input type="text" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pembayaran Awal">
+                            <input type="number" name="deposit" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pembayaran Awal">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Pelunasan</label>
-                            <input type="text" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pelunasan">
+                            <input type="number" name="paid" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pelunasan">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <select class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <select name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih Status</option>
                                 <option value="paid">Lunas</option>
                                 <option value="partial">Sebagian</option>
@@ -866,7 +1064,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status Pengerjaan</label>
-                            <select class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <select name="work_status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih Status Pengerjaan</option>
                                 <option value="planning">Perencanaan</option>
                                 <option value="progress">Sedang Dikerjakan</option>
@@ -879,6 +1077,90 @@
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" onclick="closeAddModal()" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
                         <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan Data</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit Data Orderan -->
+    <div id="editModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Edit Data Orderan</h3>
+                    <button onclick="closeEditModal()" class="text-gray-800 hover:text-gray-500">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
+                </div>
+                <form id="editForm" class="space-y-4" method="POST" action="">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" id="editOrderId" name="id">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kategori Layanan</label>
+                            <select id="edit-payment-category" name="kategori" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" onchange="updateEditServiceOptions()">
+                                <option value="">Pilih Kategori</option>
+                                <option value="design">Desain</option>
+                                <option value="programming">Programming</option>
+                                <option value="marketing">Digital Marketing</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Layanan</label>
+                            <select id="edit-payment-service" name="layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">Pilih Layanan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
+                            <input type="number" id="edit-price" name="price" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Harga">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Klien</label>
+                            <select id="edit-klien" name="klien" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">Pilih Klien</option>
+                                <option value="PT. Teknologi Maju">PT. Teknologi Maju</option>
+                                <option value="CV. Digital Solusi">CV. Digital Solusi</option>
+                                <option value="UD. Kreatif Indonesia">UD. Kreatif Indonesia</option>
+                                <option value="PT. Inovasi Nusantara">PT. Inovasi Nusantara</option>
+                                <option value="CV. Kreatif">CV. Kreatif</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pembayaran Awal</label>
+                            <input type="number" id="edit-deposit" name="deposit" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pembayaran Awal">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pelunasan</label>
+                            <input type="number" id="edit-paid" name="paid" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pelunasan">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select id="edit-status" name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">Pilih Status</option>
+                                <option value="paid">Lunas</option>
+                                <option value="partial">Sebagian</option>
+                                <option value="pending">Pending</option>
+                                <option value="overdue">Terlambat</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Pengerjaan</label>
+                            <select id="edit-work-status" name="work_status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">Pilih Status Pengerjaan</option>
+                                <option value="planning">Perencanaan</option>
+                                <option value="progress">Sedang Dikerjakan</option>
+                                <option value="review">Review</option>
+                                <option value="completed">Selesai</option>
+                                <option value="onhold">Ditunda</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" onclick="closeEditModal()" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Data</button>
                     </div>
                 </form>
             </div>
@@ -1007,6 +1289,25 @@
                         <span>Tutup</span>
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="delete-modal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <div class="delete-modal-icon">
+                    <span class="material-icons-outlined">warning</span>
+                </div>
+                <h3 class="delete-modal-title">Konfirmasi Hapus</h3>
+            </div>
+            <div class="delete-modal-body">
+                <p>Apakah Anda yakin ingin menghapus data orderan ini? Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="delete-modal-footer">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                <button onclick="confirmDelete()" class="px-4 py-2 btn-danger rounded-lg">Hapus</button>
             </div>
         </div>
     </div>
@@ -1179,6 +1480,7 @@
         let paymentFilteredData = [...paymentData];
         let activeFilters = ['all'];
         let searchTerm = '';
+        let deleteOrderId = null;
 
         // Inisialisasi filter
         function initializeFilter() {
@@ -1319,6 +1621,26 @@
             }
         }
 
+        // Update service options for edit modal
+        function updateEditServiceOptions() {
+            const categorySelect = document.getElementById('edit-payment-category');
+            const serviceSelect = document.getElementById('edit-payment-service');
+            const selectedCategory = categorySelect.value;
+            
+            // Clear current options
+            serviceSelect.innerHTML = '<option value="">Pilih Layanan</option>';
+            
+            // Add options based on selected category
+            if (selectedCategory && servicesByCategory[selectedCategory]) {
+                servicesByCategory[selectedCategory].forEach(service => {
+                    const option = document.createElement('option');
+                    option.value = service;
+                    option.textContent = service;
+                    serviceSelect.appendChild(option);
+                });
+            }
+        }
+
         // Modal functions
         function openAddModal() {
             document.getElementById('addModal').classList.remove('hidden');
@@ -1328,6 +1650,81 @@
         function closeAddModal() {
             document.getElementById('addModal').classList.add('hidden');
             document.body.style.overflow = '';
+        }
+
+        // Edit modal functions
+        function openEditModal(orderId) {
+            // Find order data
+            const order = paymentData.find(item => item.no === orderId);
+            
+            if (!order) {
+                showMinimalPopup('Error', 'Data order tidak ditemukan', 'error');
+                return;
+            }
+            
+            // Set form action
+            document.getElementById('editForm').action = `/orders/${orderId}`;
+            
+            // Fill form with order data
+            document.getElementById('editOrderId').value = orderId;
+            document.getElementById('edit-payment-category').value = order.kategori;
+            updateEditServiceOptions();
+            
+            // Set service after options are updated
+            setTimeout(() => {
+                document.getElementById('edit-payment-service').value = order.layanan;
+            }, 100);
+            
+            document.getElementById('edit-price').value = order.harga.replace(/\D/g, '');
+            document.getElementById('edit-klien').value = order.klien;
+            document.getElementById('edit-deposit').value = order.awal.replace(/\D/g, '');
+            document.getElementById('edit-paid').value = order.lunas.replace(/\D/g, '');
+            document.getElementById('edit-status').value = order.status;
+            document.getElementById('edit-work-status').value = order.statusPengerjaan;
+            
+            // Show modal
+            document.getElementById('editModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Delete modal functions
+        function openDeleteModal(orderId) {
+            deleteOrderId = orderId;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        function closeDeleteModal() {
+            deleteOrderId = null;
+            document.getElementById('deleteModal').classList.remove('show');
+        }
+
+        function confirmDelete() {
+            if (!deleteOrderId) return;
+            
+            // In a real application, you would send a request to the server to delete the order
+            // For this demo, we'll just remove it from the local data array
+            
+            // Find index of the order to delete
+            const index = paymentData.findIndex(item => item.no === deleteOrderId);
+            
+            if (index !== -1) {
+                // Remove the order from the array
+                paymentData.splice(index, 1);
+                
+                // Apply filters to update the view
+                applyFilters();
+                
+                // Show success message
+                showMinimalPopup('Berhasil', 'Data orderan berhasil dihapus', 'success');
+            }
+            
+            // Close the modal
+            closeDeleteModal();
         }
 
         // Invoice detail modal functions
@@ -1469,10 +1866,18 @@
         // Close modal when clicking outside
         window.onclick = function(event) {
             const addModal = document.getElementById('addModal');
+            const editModal = document.getElementById('editModal');
+            const deleteModal = document.getElementById('deleteModal');
             const invoiceDetailModal = document.getElementById('invoiceDetailModal');
             
             if (event.target == addModal) {
                 closeAddModal();
+            }
+            if (event.target == editModal) {
+                closeEditModal();
+            }
+            if (event.target == deleteModal) {
+                closeDeleteModal();
             }
             if (event.target == invoiceDetailModal) {
                 closeInvoiceDetailModal();
@@ -1483,6 +1888,8 @@
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeAddModal();
+                closeEditModal();
+                closeDeleteModal();
                 closeInvoiceDetailModal();
             }
         });
@@ -1576,6 +1983,12 @@
                             <button onclick="openInvoiceDetailModal(${item.no})" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Invoice">
                                 <span class="material-icons-outlined">description</span>
                             </button>
+                            <button onclick="openEditModal(${item.no})" class="p-1 rounded-full hover:bg-warning/20 text-warning" title="Edit Order">
+                                <span class="material-icons-outlined">edit</span>
+                            </button>
+                            <button onclick="openDeleteModal(${item.no})" class="p-1 rounded-full hover:bg-danger/20 text-danger" title="Hapus Order">
+                                <span class="material-icons-outlined">delete</span>
+                            </button>
                         </div>
                     </td>
                 `;
@@ -1615,6 +2028,12 @@
                         <div class="flex gap-2">
                             <button onclick="openInvoiceDetailModal(${item.no})" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Invoice">
                                 <span class="material-icons-outlined">description</span>
+                            </button>
+                            <button onclick="openEditModal(${item.no})" class="p-1 rounded-full hover:bg-warning/20 text-warning" title="Edit Order">
+                                <span class="material-icons-outlined">edit</span>
+                            </button>
+                            <button onclick="openDeleteModal(${item.no})" class="p-1 rounded-full hover:bg-danger/20 text-danger" title="Hapus Order">
+                                <span class="material-icons-outlined">delete</span>
                             </button>
                         </div>
                     </div>
@@ -1742,14 +2161,17 @@
             document.getElementById('minimalPopup').classList.remove('show');
         });
 
-        // Initialize tables on page load
+        // Initialize minimal interactions on page load (server-side rendering used)
         document.addEventListener('DOMContentLoaded', function() {
-            renderPaymentTable();
-            renderPaymentPagination();
-            initializeFilter();
-            
-            // Add search functionality
-            document.getElementById('payment-search').addEventListener('input', filterPayments);
+            const search = document.getElementById('payment-search');
+            if (search) {
+                search.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        document.getElementById('searchForm')?.submit();
+                    }
+                });
+            }
         });
     </script>
 </body>

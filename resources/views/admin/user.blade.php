@@ -893,7 +893,6 @@
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
                                 <option value="">Pilih Role</option>
                                 <option value="karyawan">Karyawan</option>
-                                <option value="admin">Admin</option>
                                 <option value="finance">Finance</option>
                                 <option value="manager_divisi">Manager Divisi</option>
                                 <option value="general_manager">General Manager</option>
@@ -907,7 +906,7 @@
                             <select name="divisi_id" id="tambahDivisiSelect"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
                                 <option value="">Pilih Divisi</option>
-                                <!-- Options akan diisi oleh JavaScript -->
+                               
                             </select>
                         </div>
                     </div>
@@ -1182,28 +1181,6 @@
 
         function useFallbackDivisiData(selectId) {
             console.warn('Using fallback divisi data for:', selectId);
-
-            const fallbackData = [{
-                    id: 1,
-                    divisi: 'Teknologi Informasi'
-                },
-                {
-                    id: 2,
-                    divisi: 'Sumber Daya Manusia'
-                },
-                {
-                    id: 3,
-                    divisi: 'Pemasaran'
-                },
-                {
-                    id: 4,
-                    divisi: 'Keuangan'
-                },
-                {
-                    id: 5,
-                    divisi: 'Operasional'
-                }
-            ];
 
             populateSelect(selectId, fallbackData);
 

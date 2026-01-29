@@ -28,6 +28,12 @@ class UserSeeder extends Seeder
                 'divisi' => null,
             ],
             [
+                'name' => 'Finance',
+                'email' => 'finance@gmail.com',
+                'role' => 'finance',
+                'divisi' => null,
+            ],
+            [
                 'name' => 'Ahmad Fauzi',
                 'email' => 'ahmad@gmail.com',
                 'role' => 'manager_divisi',

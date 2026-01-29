@@ -272,7 +272,7 @@
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="home"
                         href="/owner/home">Beranda</a>
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="rekap"
-                        href="/owner/rekap_absensi">Rekap
+                        href="/owner/rekap-absensi">Rekap
                         Absensi</a>
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="laporan"
                         href="/owner/laporan">Laporan</a>
@@ -304,7 +304,7 @@
                             <i class='bx bx-home-alt text-xl mr-2'></i>
                             Beranda
                         </a>
-                        <a class="nav-link" data-page="rekap" href="/owner/rekap_absensi">
+                        <a class="nav-link" data-page="rekap" href="/owner/rekap-absensi">
                             <i class='bx bx-calendar-check text-xl mr-2'></i>
                             Rekap Absensi
                         </a>
