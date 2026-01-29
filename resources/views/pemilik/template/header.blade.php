@@ -272,7 +272,7 @@
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="home"
                         href="/owner/home">Beranda</a>
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="rekap"
-                        href="/owner/rekap-absensi">Rekap
+                        href="/owner/rekap_absen">Rekap
                         Absensi</a>
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="laporan"
                         href="/owner/laporan">Laporan</a>

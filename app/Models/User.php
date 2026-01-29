@@ -20,7 +20,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'divisi',
+        'divisi_id',
         'sisa_cuti', // Penting untuk perhitungan cuti
     ];
 
@@ -82,7 +82,7 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return in_array($this->role, ['admin','finance']);
+        return in_array($this->role, ['admin', 'finance']);
     }
 
     /**
@@ -168,10 +168,10 @@ class User extends Authenticatable
     /**
      * Scope untuk user dalam divisi tertentu
      */
-    public function scopeByDivisi($query, $divisi)
-    {
-        return $query->where('divisi', $divisi);
-    }
+public function scopeByDivisiId($query, $divisiId)
+{
+    return $query->where('divisi_id', $divisiId);
+}
 
     /**
      * Accessor untuk nama lengkap dengan role
@@ -188,13 +188,18 @@ class User extends Authenticatable
     {
         $words = explode(' ', $this->name);
         $initials = '';
-        
+
         foreach ($words as $word) {
             $initials .= strtoupper(substr($word, 0, 1));
         }
-        
+
         return $initials;
     }
+    public function catatanRapats()
+    {
+        return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_penugasan', 'user_id', 'catatan_rapat_id');
+    }
+
 
     /**
      * Relasi ke model catatan rapat penugasan (detail)
@@ -212,10 +217,15 @@ class User extends Authenticatable
         return $this->belongsToMany(Pengumuman::class, 'pengumuman_user', 'user_id', 'pengumuman_id')
             ->withTimestamps();
     }
+public function divisi()
+{
+    return $this->belongsTo(Divisi::class, 'divisi_id');
+}
+}
     
     // Opsional: Hapus atau komentari relasi karyawan() jika tidak digunakan lagi
     // public function karyawan()
     // {
     //     return $this->hasOne(Karyawan::class);
     // }
-}
+

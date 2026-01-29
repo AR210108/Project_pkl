@@ -13,6 +13,7 @@ class Invoice extends Model
 
     // Use the actual database column names (Indonesian) used in migrations
     protected $fillable = [
+<<<<<<< HEAD
         'nomor_order',
         'nama_perusahaan',
         'nama_klien',
@@ -20,6 +21,18 @@ class Invoice extends Model
         'deskripsi',
         'harga',
         'qty',
+=======
+        'invoice_no',
+        'invoice_date',
+        'company_name',
+        'company_address',
+        'client_name',
+        'order_number',
+        'payment_method',
+        'description',   // TAMBAH ini
+        'subtotal',
+        'tax',
+>>>>>>> 8868ab7f096791eace6bf7905fd58ffc9f0a7040
         'total',
         'pajak',
         'metode_pembayaran',

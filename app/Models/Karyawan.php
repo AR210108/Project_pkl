@@ -20,7 +20,8 @@ class Karyawan extends Model
         'gaji',
         'alamat',
         'kontak',
-        'foto'
+        'foto',
+        'email'
     ];
 
     /**
@@ -30,6 +31,21 @@ class Karyawan extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+        public function getJabatanFromUserAttribute()
+    {
+        if ($this->user) {
+            return $this->user->role;
+        }
+        return $this->jabatan;
+    }
+    
+        public function getNamaFromUserAttribute()
+    {
+        if ($this->user) {
+            return $this->user->name;
+        }
+        return $this->nama;
     }
 
     /**

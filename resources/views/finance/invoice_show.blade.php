@@ -1,139 +1,123 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold">Invoice {{ $invoice->invoice_no }}</h1>
-            <a href="{{ route('orders.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
-                Kembali
-            </a>
-        </div>
+<div class="container">
 
-        <!-- Invoice Header -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 pb-6 border-b">
-            <div>
-                <h3 class="text-lg font-semibold mb-3">Informasi Invoice</h3>
-                <div class="space-y-2 text-sm">
-                    <p><span class="text-gray-600">No Invoice:</span> <span class="font-medium">{{ $invoice->invoice_no }}</span></p>
-                    <p><span class="text-gray-600">Tanggal:</span> <span class="font-medium">{{ $invoice->invoice_date?->format('d M Y') ?? '-' }}</span></p>
-                    <p><span class="text-gray-600">No Order:</span> <span class="font-medium">{{ $invoice->order_number ?? '-' }}</span></p>
-                </div>
-            </div>
-            <div>
-                <h3 class="text-lg font-semibold mb-3">Informasi Perusahaan</h3>
-                <div class="space-y-2 text-sm">
-                    <p><span class="text-gray-600">Nama:</span> <span class="font-medium">{{ $invoice->company_name ?? '-' }}</span></p>
-                    <p><span class="text-gray-600">Alamat:</span> <span class="font-medium">{{ $invoice->company_address ?? '-' }}</span></p>
-                    <p><span class="text-gray-600">Kontak:</span> <span class="font-medium">{{ $invoice->client_name ?? '-' }}</span></p>
-                </div>
-            </div>
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
         </div>
+    @endif
 
-        <!-- Invoice Items -->
-        @if($invoice->items && $invoice->items->count() > 0)
-        <div class="mb-6">
-            <h3 class="text-lg font-semibold mb-4">Detail Item</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse">
-                    <thead>
-                        <tr class="bg-gray-100 border-b">
-                            <th class="px-4 py-2 text-left text-sm font-semibold">No</th>
-                            <th class="px-4 py-2 text-left text-sm font-semibold">Deskripsi</th>
-                            <th class="px-4 py-2 text-right text-sm font-semibold">Harga</th>
-                            <th class="px-4 py-2 text-center text-sm font-semibold">Qty</th>
-                            <th class="px-4 py-2 text-right text-sm font-semibold">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($invoice->items as $item)
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="px-4 py-2 text-sm">{{ $item->item_no ?? '-' }}</td>
-                            <td class="px-4 py-2 text-sm">{{ $item->description }}</td>
-                            <td class="px-4 py-2 text-sm text-right">{{ $item->price ? 'Rp ' . number_format($item->price, 0, ',', '.') : '-' }}</td>
-                            <td class="px-4 py-2 text-sm text-center">{{ $item->qty ?? 1 }}</td>
-                            <td class="px-4 py-2 text-sm text-right font-medium">{{ $item->total ? 'Rp ' . number_format($item->total, 0, ',', '.') : '-' }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        @endif
+    {{-- FORM CREATE --}}
+    <div class="card mb-4">
+        <div class="card-header">Buat Invoice</div>
+        <div class="card-body">
+            <form action="{{ route('invoices.store') }}" method="POST">
+                @csrf
 
-        <!-- Summary -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-                <h3 class="text-lg font-semibold mb-3">Metode Pembayaran</h3>
-                <div class="bg-gray-50 rounded p-3 text-sm">
-                    {{ $invoice->payment_method ?? '-' }}
-                </div>
-            </div>
-            <div>
-                <h3 class="text-lg font-semibold mb-3">Ringkasan Pembayaran</h3>
-                <div class="bg-gray-50 rounded p-3 space-y-2 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Subtotal:</span>
-                        <span class="font-medium">{{ $invoice->subtotal ? 'Rp ' . number_format($invoice->subtotal, 0, ',', '.') : '-' }}</span>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label>No Invoice</label>
+                        <input type="text" name="invoice_no" class="form-control" required>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Pajak:</span>
-                        <span class="font-medium">{{ $invoice->tax ? 'Rp ' . number_format($invoice->tax, 0, ',', '.') : '-' }}</span>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Tanggal</label>
+                        <input type="date" name="invoice_date" class="form-control" required>
                     </div>
-                    <div class="flex justify-between border-t pt-2 font-semibold text-base">
-                        <span>Total:</span>
-                        <span>{{ $invoice->total ? 'Rp ' . number_format($invoice->total, 0, ',', '.') : '-' }}</span>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Nama Perusahaan</label>
+                        <input type="text" name="company_name" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Alamat Perusahaan</label>
+                        <input type="text" name="company_address" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Nama Klien</label>
+                        <input type="text" name="client_name" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>No Order</label>
+                        <input type="text" name="order_number" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Metode Pembayaran</label>
+                        <input type="text" name="payment_method" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Kategori</label>
+                        <input type="text" name="category" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Status Pekerjaan</label>
+                        <input type="text" name="work_status" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Subtotal</label>
+                        <input type="number" name="subtotal" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Pajak</label>
+                        <input type="number" name="tax" class="form-control" required>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Status Info -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 pb-6 border-b">
-            <div>
-                <h3 class="text-lg font-semibold mb-3">Kategori</h3>
-                <p>
-                    @if($invoice->category == 'design')
-                        <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">Desain</span>
-                    @elseif($invoice->category == 'programming')
-                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">Programming</span>
-                    @elseif($invoice->category == 'marketing')
-                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Digital Marketing</span>
-                    @else
-                        <span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">{{ $invoice->category ?? '-' }}</span>
-                    @endif
-                </p>
-            </div>
-            <div>
-                <h3 class="text-lg font-semibold mb-3">Status Pengerjaan</h3>
-                <p>
-                    @if($invoice->work_status == 'planning')
-                        <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">Perencanaan</span>
-                    @elseif($invoice->work_status == 'progress')
-                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">Sedang Dikerjakan</span>
-                    @elseif($invoice->work_status == 'review')
-                        <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">Review</span>
-                    @elseif($invoice->work_status == 'completed')
-                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Selesai</span>
-                    @else
-                        <span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">{{ $invoice->work_status ?? 'Ditunda' }}</span>
-                    @endif
-                </p>
-            </div>
-        </div>
-
-        <!-- Timestamps -->
-        <div class="text-sm text-gray-500 border-t pt-4">
-            <p>Dibuat: {{ $invoice->created_at?->format('d M Y H:i') ?? '-' }}</p>
-            <p>Diperbarui: {{ $invoice->updated_at?->format('d M Y H:i') ?? '-' }}</p>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="mt-6 flex gap-3">
-            <a href="{{ route('orders.index') }}" class="flex-1 text-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
-                Kembali ke Daftar Order
-            </a>
+                <button class="btn btn-primary">Simpan Invoice</button>
+            </form>
         </div>
     </div>
+
+    {{-- TABLE --}}
+    <div class="card">
+        <div class="card-header">Data Invoice</div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>No Invoice</th>
+                        <th>Tanggal</th>
+                        <th>Perusahaan</th>
+                        <th>Klien</th>
+                        <th>Total</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($invoices as $invoice)
+                        <tr>
+                            <td>{{ $invoice->invoice_no }}</td>
+                            <td>{{ $invoice->invoice_date->format('d-m-Y') }}</td>
+                            <td>{{ $invoice->company_name }}</td>
+                            <td>{{ $invoice->client_name }}</td>
+                            <td>Rp {{ number_format($invoice->total) }}</td>
+                            <td>
+                                <form action="{{ route('invoices.destroy', $invoice->id) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-danger btn-sm">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center">Tidak ada data</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 @endsection

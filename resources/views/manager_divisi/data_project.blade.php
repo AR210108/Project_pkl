@@ -674,78 +674,87 @@
                     </div>
                 </div>
 
-                <!-- Data Table Panel -->
-                <div class="panel">
-                    <div class="panel-header">
-                        <h3 class="panel-title">
-                            <span class="material-icons-outlined text-primary">shopping_cart</span>
-                            Data Project
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount"
-                                    class="font-semibold text-text-light">2</span> project</span>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <!-- SCROLLABLE TABLE -->
-                        <div class="desktop-table">
-                            <div class="scrollable-table-container scroll-indicator table-shadow" id="scrollableTable">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th style="min-width: 60px;">No</th>
-                                            <th style="min-width: 200px;">Nama Project</th>
-                                            <th style="min-width: 250px;">Deskripsi</th>
-                                            <th style="min-width: 150px;">Harga</th>
-                                            <th style="min-width: 150px;">Deadline</th>
-                                            <th style="min-width: 150px;">Progres</th>
-                                            <th style="min-width: 150px;">Status</th>
-                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="desktopTableBody">
-                                        @forelse ($projects as $index => $project)
-                                                                                   <tr class="orderan-row" data-status="{{ $project->status }}"
-                                            data-nama="{{ strtolower($project->nama) }}"
-                                            data-deskripsi="{{ strtolower($project->deskripsi) }}">
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>{{ $project->nama }}</td>
-                                                <td class="truncate max-w-xs">{{ $project->deskripsi }}</td>
-                                                <td>Rp {{ number_format($project->harga, 0, ',', '.') }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($project->deadline)->format('d M Y') }}
-                                                </td>
-                                                <td>
-                                                    {{ $project->progres }}%
-                                                </td>
-                                                <td>
-                                                    <span class="status-badge status-{{ $project->status }}">
-                                                        {{ ucfirst($project->status) }}
-                                                    </span>
-                                                </td>
-                                                <td class="text-center">
-                                                    <button class="edit-btn" data-id="{{ $project->id }}"
-                                                        data-nama="{{ $project->nama }}"
-                                                        data-deskripsi="{{ $project->deskripsi }}"
-                                                        data-harga="{{ $project->harga }}"
-                                                        data-deadline="{{ $project->deadline }}"
-                                                        data-progres="{{ $project->progres }}"
-                                                        data-status="{{ $project->status }}">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="8" class="text-center py-4 text-gray-500">
-                                                    Data project belum tersedia
-                                                </td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+<!-- Data Table Panel -->
+<div class="panel">
+    <div class="panel-header">
+        <h3 class="panel-title">
+            <span class="material-icons-outlined text-primary">assignment</span>
+            Data Project (Milik Saya)
+        </h3>
+        <div class="flex items-center gap-2">
+            <span class="text-sm text-text-muted-light">Total: <span id="totalCount"
+                    class="font-semibold text-text-light">{{ $projects->count() }}</span> project</span>
+        </div>
+    </div>
+    <div class="panel-body">
+        <!-- INFO PANEL UNTUK MANAGER DIVISI -->
+        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex items-start">
+                <span class="material-icons-outlined text-blue-500 mr-3">info</span>
+                <div>
+                    <h4 class="font-semibold text-blue-800 mb-1">Project Anda</h4>
+                    <p class="text-blue-700 text-sm">
+                        Berikut adalah daftar project yang telah ditetapkan kepada Anda sebagai penanggung jawab oleh General Manager.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SCROLLABLE TABLE -->
+        <div class="desktop-table">
+            <div class="scrollable-table-container scroll-indicator table-shadow" id="scrollableTable">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 60px;">No</th>
+                            <th style="min-width: 200px;">Nama Project</th>
+                            <th style="min-width: 250px;">Deskripsi</th>
+                            <th style="min-width: 150px;">Harga</th>
+                            <th style="min-width: 150px;">Deadline</th>
+                            <th style="min-width: 150px;">Progres</th>
+                            <th style="min-width: 150px;">Status</th>
+                            <th style="min-width: 100px; text-align: center;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="desktopTableBody">
+                        @forelse ($projects as $index => $project)
+                            <tr class="orderan-row" data-status="{{ strtolower($project->status) }}"
+                                data-nama="{{ strtolower($project->nama) }}"
+                                data-deskripsi="{{ strtolower($project->deskripsi) }}">
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ $project->nama }}</td>
+                                <td class="truncate max-w-xs">{{ $project->deskripsi }}</td>
+                                <td>Rp {{ number_format($project->harga, 0, ',', '.') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($project->deadline)->format('d M Y') }}</td>
+                                <td>{{ $project->progres }}%</td>
+                                <td>
+                                    <span class="status-badge status-{{ strtolower($project->status) }}">
+                                        {{ ucfirst($project->status) }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <button class="edit-btn" data-id="{{ $project->id }}"
+                                        data-nama="{{ $project->nama }}"
+                                        data-deskripsi="{{ $project->deskripsi }}"
+                                        data-harga="{{ $project->harga }}"
+                                        data-deadline="{{ $project->deadline }}"
+                                        data-progres="{{ $project->progres }}"
+                                        data-status="{{ $project->status }}">
+                                        <span class="material-icons-outlined text-primary hover:text-primary-dark">edit</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-gray-500">
+                                    Anda belum memiliki project. Project akan muncul setelah ditugaskan oleh General Manager.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
                         <!-- Mobile Card View -->
                         <div class="mobile-cards space-y-4">
@@ -931,7 +940,7 @@
             initializeFilter();
             initializeSearch();
             initializeScrollDetection();
-
+            initializeUserFilter();
             // === PAGINATION ===
             function initializePagination() {
                 renderPagination();
@@ -946,7 +955,7 @@
 
                 // Clear existing page numbers
                 if (!pageNumbersContainer) return;
-pageNumbersContainer.innerHTML = '';
+                pageNumbersContainer.innerHTML = '';
 
 
                 // Generate page numbers
@@ -1103,15 +1112,29 @@ pageNumbersContainer.innerHTML = '';
                 });
             }
 
+            function initializeUserFilter() {
+                const filterUser = document.getElementById('filterUser');
+                if (filterUser) {
+                    filterUser.addEventListener('change', function() {
+                        // Reset ke halaman 1 saat filter berubah
+                        currentPage = 1;
+                        applyFilters();
+                    });
+                }
+            }
+
             function applyFilters() {
                 // Reset to first page
                 currentPage = 1;
+
+                const selectedUserId = document.getElementById('filterUser')?.value || '';
 
                 // Apply filters to rows
                 orderanRows.forEach(row => {
                     const status = row.getAttribute('data-status').toLowerCase();
                     const nama = row.getAttribute('data-nama').toLowerCase();
                     const deskripsi = row.getAttribute('data-deskripsi').toLowerCase();
+                    const userId = row.getAttribute('data-user-id') || '';
 
                     // Check if status matches filter
                     let statusMatches = false;
@@ -1119,6 +1142,12 @@ pageNumbersContainer.innerHTML = '';
                         statusMatches = true;
                     } else {
                         statusMatches = activeFilters.some(filter => status.includes(filter.toLowerCase()));
+                    }
+
+                    // Check if user matches filter
+                    let userMatches = true;
+                    if (selectedUserId) {
+                        userMatches = userId === selectedUserId;
                     }
 
                     // Check if search term matches
@@ -1130,40 +1159,10 @@ pageNumbersContainer.innerHTML = '';
                             status.includes(searchLower);
                     }
 
-                    if (statusMatches && searchMatches) {
+                    if (statusMatches && searchMatches && userMatches) {
                         row.classList.remove('hidden-by-filter');
                     } else {
                         row.classList.add('hidden-by-filter');
-                    }
-                });
-
-                // Apply same filters to cards
-                orderanCards.forEach(card => {
-                    const status = card.getAttribute('data-status').toLowerCase();
-                    const nama = card.getAttribute('data-nama').toLowerCase();
-                    const deskripsi = card.getAttribute('data-deskripsi').toLowerCase();
-
-                    // Check if status matches filter
-                    let statusMatches = false;
-                    if (activeFilters.includes('all')) {
-                        statusMatches = true;
-                    } else {
-                        statusMatches = activeFilters.some(filter => status.includes(filter.toLowerCase()));
-                    }
-
-                    // Check if search term matches
-                    let searchMatches = true;
-                    if (searchTerm) {
-                        const searchLower = searchTerm.toLowerCase();
-                        searchMatches = nama.includes(searchLower) ||
-                            deskripsi.includes(searchLower) ||
-                            status.includes(searchLower);
-                    }
-
-                    if (statusMatches && searchMatches) {
-                        card.classList.remove('hidden-by-filter');
-                    } else {
-                        card.classList.add('hidden-by-filter');
                     }
                 });
 
@@ -1172,7 +1171,7 @@ pageNumbersContainer.innerHTML = '';
                 updateVisibleItems();
             }
 
-if (!searchInput) return;
+            if (!searchInput) return;
 
 
             // Initialize scroll detection for table
@@ -1218,12 +1217,12 @@ if (!searchInput) return;
                 }, 3000);
             }
 
-const popupCloseBtn = document.querySelector('.minimal-popup-close');
-if (popupCloseBtn) {
-    popupCloseBtn.addEventListener('click', function() {
-        document.getElementById('minimalPopup')?.classList.remove('show');
-    });
-}
+            const popupCloseBtn = document.querySelector('.minimal-popup-close');
+            if (popupCloseBtn) {
+                popupCloseBtn.addEventListener('click', function() {
+                    document.getElementById('minimalPopup')?.classList.remove('show');
+                });
+            }
 
             // Modal elements
             const tambahOrderanModal = document.getElementById('tambahOrderanModal');
@@ -1261,10 +1260,10 @@ if (popupCloseBtn) {
 
             // Close edit modal
             if (batalEditBtn && editOrderanModal) {
-    batalEditBtn.addEventListener('click', () => {
-        editOrderanModal.classList.add('hidden');
-    });
-}
+                batalEditBtn.addEventListener('click', () => {
+                    editOrderanModal.classList.add('hidden');
+                });
+            }
 
 
             closeEditModalBtn.addEventListener('click', () => {
