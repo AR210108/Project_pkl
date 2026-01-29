@@ -589,6 +589,7 @@ Route::middleware(['auth', 'role:manager_divisi'])
         
         Route::get('/tim-saya', function () {
             $user = Auth::user();
+            
             $tim = \App\Models\User::where('divisi', $user->divisi)->where('role', 'karyawan')->get();
             return view('manager_divisi.tim_saya', compact('tim'));
         })->name('tim_saya');
