@@ -270,22 +270,23 @@
 
         <!-- Desktop Navigation -->
         <nav class="hidden md:flex items-center gap-4 sm:gap-8 font-medium">
-            <a class="nav-link {{ $currentPage === 'karyawan/home' ? 'active' : '' }} px-1 py-2" href="/karyawan/home">
+            <a class="nav-link {{ $currentPage === 'karyawan/home' ? 'active' : '' }} px-1 py-2" href="{{ route('karyawan.home') }}">
                 Beranda
                 <span class="nav-indicator"></span>
             </a>
             <a class="nav-link {{ strpos($currentPage, 'absensi') !== false ? 'active' : '' }} px-1 py-2"
-                href="/absensi">
+                href="{{ route('absensi.redirect') }}">
                 Absensi
                 <span class="nav-indicator"></span>
             </a>
             <a class="nav-link {{ strpos($currentPage, 'karyawan/list') !== false ? 'active' : '' }} px-1 py-2"
-                href="/karyawan/list">
+                href="{{ route('karyawan.list') }}">
                 Manage Tugas
                 <span class="nav-indicator"></span>
             </a>
-            <a class="nav-link {{ strpos($currentPage, 'pengajuan_cuti') !== false ? 'active' : '' }} px-1 py-2"
-                href="/karyawan/pengajuan_cuti">
+            <!-- PERBAIKAN UTAMA: Ganti /karyawan/pengajuan_cuti dengan route yang benar -->
+            <a class="nav-link {{ strpos($currentPage, 'karyawan/cuti') !== false ? 'active' : '' }} px-1 py-2"
+                href="{{ route('karyawan.cuti.index') }}">
                 Manajemen Cuti
                 <span class="nav-indicator"></span>
             </a>
@@ -322,7 +323,7 @@
             </button>
 
             <!-- Logout Button -->
-            <form action="/logout" method="POST">
+            <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="logout-button">
                     Logout
@@ -363,7 +364,7 @@
     <nav id="mobile-menu" class="md:hidden hidden">
         <div class="flex flex-col space-y-3 px-4 pb-4">
             <a class="mobile-nav-link block px-3 py-2 rounded-md transition-all duration-300 {{ $currentPage === 'karyawan/home' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800' }}"
-                href="/karyawan/home">
+                href="{{ route('karyawan.home') }}">
                 <div class="flex items-center">
                     <span
                         class="nav-dot inline-block w-2 h-2 rounded-full mr-2 {{ $currentPage === 'karyawan/home' ? 'bg-white' : 'bg-transparent' }}"></span>
@@ -371,7 +372,7 @@
                 </div>
             </a>
             <a class="mobile-nav-link block px-3 py-2 rounded-md transition-all duration-300 {{ strpos($currentPage, 'absensi') !== false ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800' }}"
-                href="/absensi">
+                href="{{ route('absensi.redirect') }}">
                 <div class="flex items-center">
                     <span
                         class="nav-dot inline-block w-2 h-2 rounded-full mr-2 {{ strpos($currentPage, 'absensi') !== false ? 'bg-white' : 'bg-transparent' }}"></span>
@@ -379,18 +380,19 @@
                 </div>
             </a>
             <a class="mobile-nav-link block px-3 py-2 rounded-md transition-all duration-300 {{ strpos($currentPage, 'karyawan/list') !== false ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800' }}"
-                href="/karyawan/list">
+                href="{{ route('karyawan.list') }}">
                 <div class="flex items-center">
                     <span
                         class="nav-dot inline-block w-2 h-2 rounded-full mr-2 {{ strpos($currentPage, 'karyawan/list') !== false ? 'bg-white' : 'bg-transparent' }}"></span>
                     Manage Tugas
                 </div>
             </a>
-            <a class="mobile-nav-link block px-3 py-2 rounded-md transition-all duration-300 {{ strpos($currentPage, 'pengajuan_cuti') !== false ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800' }}"
-                href="/karyawan/pengajuan_cuti">
+            <!-- PERBAIKAN UTAMA: Ganti /karyawan/pengajuan_cuti dengan route yang benar -->
+            <a class="mobile-nav-link block px-3 py-2 rounded-md transition-all duration-300 {{ strpos($currentPage, 'karyawan/cuti') !== false ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800' }}"
+                href="{{ route('karyawan.cuti.index') }}">
                 <div class="flex items-center">
                     <span
-                        class="nav-dot inline-block w-2 h-2 rounded-full mr-2 {{ strpos($currentPage, 'pengajuan_cuti') !== false ? 'bg-white' : 'bg-transparent' }}"></span>
+                        class="nav-dot inline-block w-2 h-2 rounded-full mr-2 {{ strpos($currentPage, 'karyawan/cuti') !== false ? 'bg-white' : 'bg-transparent' }}"></span>
                     Manajemen Cuti
                 </div>
             </a>
@@ -406,7 +408,7 @@
                 </div>
             </a>
 
-            <form action="/logout" method="POST">
+            <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button type="submit"
                     class="w-full text-left px-3 py-2 rounded-md text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800 transition-all duration-300 flex items-center">

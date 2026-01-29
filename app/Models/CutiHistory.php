@@ -9,6 +9,8 @@ class CutiHistory extends Model
 {
     use HasFactory;
 
+    protected $table = 'cuti_histories'; // Pastikan nama tabel sesuai migrasi
+
     protected $fillable = [
         'cuti_id',
         'action',
