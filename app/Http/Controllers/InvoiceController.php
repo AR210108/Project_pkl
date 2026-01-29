@@ -220,6 +220,26 @@ class InvoiceController extends Controller
     }
     
     /**
+     * Mark invoice as printed (lightweight, returns JSON).
+     */
+    public function markPrinted(Request $request, string $id)
+    {
+        $invoice = Invoice::find($id);
+        if (! $invoice) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invoice not found'
+            ], 404);
+        }
+
+        // Lightweight: don't modify DB schema here. Return success so frontend can proceed.
+        return response()->json([
+            'success' => true,
+            'message' => 'Marked as printed (no DB change)'
+        ]);
+    }
+    
+    /**
      * Get statistics for invoices
      */
     public function statistics(): JsonResponse

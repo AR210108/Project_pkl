@@ -25,6 +25,7 @@ use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\TimDivisiController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\CutiController; // Tambahkan controller ini
+use App\Http\Controllers\FinanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -730,6 +731,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/users/data', [UserController::class, 'getData'])->name('users.data');
 });
 
+// Lightweight API routes for invoices (used by frontend JS)
+Route::middleware('auth')->prefix('api')->group(function () {
+    Route::get('invoices', [InvoiceController::class, 'index']);
+    Route::post('invoices', [InvoiceController::class, 'store']);
+    Route::get('invoices/{id}', [InvoiceController::class, 'show']);
+    Route::post('invoices/{id}/mark-printed', [InvoiceController::class, 'markPrinted']);
+});
+
 /*
 |--------------------------------------------------------------------------
 | Global API Routes (Tanpa prefix role) - UNTUK SEMUA USER YANG LOGIN
@@ -958,9 +967,8 @@ Route::get('/data_orderan', function () {
 Route::get('/finance', function () {
     return view('finance/beranda');
 });
-Route::get('/pemasukan', function () {
-    return view('finance/pemasukan');
-});
+Route::get('/pemasukan', [FinanceController::class, 'index']);
+Route::post('/pemasukan', [FinanceController::class, 'store']);
 Route::get('/pengeluaran', function () {
     return view('finance/pengeluaran');
 });

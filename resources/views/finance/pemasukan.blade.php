@@ -1567,6 +1567,9 @@
 
             // Update info
             document.getElementById('totalCount').textContent = financeFilteredData.length;
+
+            // Refresh stat cards to reflect visible data
+            updateStatCards();
         }
 
         function renderFinancePagination() {
@@ -1679,7 +1682,8 @@
             let incomeCount = 0;
             let expenseCount = 0;
 
-            financeData.forEach(item => {
+            // Use the currently filtered data so stats reflect active filters
+            (financeFilteredData || []).forEach(item => {
                 const amount = extractNumericFromCurrency(item.jumlah);
                 if (item.tipe === 'income') {
                     totalIncome += amount;
@@ -1788,7 +1792,6 @@
             // Render data tanpa perlu fetch karena sudah dari PHP
             renderFinanceTable();
             renderFinancePagination();
-            updateStatCards(); // Update stat cards dengan data dari controller
             initializeFilter();
             initializeToggleButtons();
 

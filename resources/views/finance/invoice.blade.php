@@ -12,36 +12,49 @@
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#3b82f6",
-                        "background-light": "#ffffff",
-                        "background-dark": "#f8fafc",
-                        "sidebar-light": "#f3f4f6",
-                        "sidebar-dark": "#1e293b",
-                        "card-light": "#ffffff",
-                        "card-dark": "#1e293b",
-                        "text-light": "#1e293b",
-                        "text-dark": "#f8fafc",
-                        "text-muted-light": "#64748b",
-                        "text-muted-dark": "#94a3b8",
-                        "border-light": "#e2e8f0",
-                        "border-dark": "#334155",
-                        "success": "#10b981",
-                        "warning": "#f59e0b",
-                        "danger": "#ef4444"
-                    },
-                    fontFamily: {
-                        display: ["Poppins", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "0.75rem",
-                    },
-                    boxShadow: {
-                        card: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-                        "card-hover": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+            fetch(url, {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log("Response status:", response.status);
+
+                // If response not OK, try to read body for more context
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        console.error('Server error response body:', text);
+                        // If server returned an HTML login page (user not authenticated), redirect to login
+                        if (text && text.toLowerCase().includes('<form') && text.toLowerCase().includes('login')) {
+                            showMinimalPopup('Sesi Habis', 'Sesi Anda mungkin telah berakhir. Mengalihkan ke halaman login...', 'warning');
+                            setTimeout(() => { window.location.href = '/login'; }, 800);
+                            throw new Error('Not authenticated - redirecting to login');
+                        }
+                        throw new Error(`Server error: ${response.status} ${response.statusText} - ${text.slice(0,300)}`);
+                    });
+                }
+
+                // Ensure JSON content-type; if not, read text and try to give helpful feedback
+                const contentType = response.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    return response.text().then(text => {
+                        // If HTML page likely indicates redirect to dashboard/login, redirect
+                        if (text && text.toLowerCase().includes('<form') && text.toLowerCase().includes('login')) {
+                            showMinimalPopup('Sesi Habis', 'Sesi Anda mungkin telah berakhir. Mengalihkan ke halaman login...', 'warning');
+                            setTimeout(() => { window.location.href = '/login'; }, 800);
+                            throw new Error('Not authenticated - redirecting to login');
+                        }
+                        console.error('Non-JSON response:', text);
+                        throw new Error('Server did not return JSON: ' + text.slice(0,500));
+                    });
+                }
+
+                return response.json();
+            })
                     },
                 },
             },
