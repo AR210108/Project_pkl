@@ -474,7 +474,7 @@ Route::middleware(['auth', 'role:owner'])
     ->name('owner.')
     ->group(function () {
         Route::get('/home', function () { return view('pemilik.home'); })->name('home');
-        Route::get('/rekap-absen', [AbsensiController::class, 'rekapAbsensi'])->name('rekap_absen');
+        Route::get('/rekap_absen', [AbsensiController::class, 'rekapAbsensi'])->name('rekap_absen');
         Route::get('/laporan', function () { return view('pemilik.laporan'); })->name('laporan');
         
         // Cuti - Gunakan method index() universal
@@ -564,7 +564,7 @@ Route::middleware(['auth', 'role:manager_divisi'])
         Route::get('/data_project', [DataProjectController::class, 'managerDivisi'])->name('data_project');
         Route::put('/data_project/{id}', [DataProjectController::class, 'update'])->name('data_project.update');
         Route::get('/data_project/filter', [DataProjectController::class, 'filterByUser'])->name('data_project.filter');
-        
+
         Route::prefix('tasks')->name('tasks.')->group(function () {
             Route::post('/', [ManagerDivisiTaskController::class, 'store'])->name('store');
             Route::get('/{id}', [ManagerDivisiTaskController::class, 'show'])->name('show');
@@ -584,7 +584,7 @@ Route::middleware(['auth', 'role:manager_divisi'])
         });
 
         Route::get('/pengelola_tugas', function () { return view('manager_divisi.pengelola_tugas'); })->name('pengelola_tugas');
-        Route::get('/absensi-tim', function () { return view('manager_divisi.absensi_tim'); })->name('absensi_tim');
+        Route::get('/kelola_absensi', function () { return view('manager_divisi.kelola_absensi'); })->name('kelola_absensi');
         
         Route::get('/tim-saya', function () {
             $user = Auth::user();
