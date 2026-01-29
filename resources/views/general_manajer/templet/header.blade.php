@@ -302,7 +302,7 @@
             <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 href="/general_manajer/acc_cuti" data-page="acc_cuti" data-path="general_manajer/acc_cuti">
                 <span class="material-icons sidebar-icon">event_available</span>
-                <span class="sidebar-text">Acc Cuti</span>
+                <span class="sidebar-text">Kelola Cuti</span>
             </a>
         </nav>
 

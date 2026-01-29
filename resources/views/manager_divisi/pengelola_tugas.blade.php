@@ -106,7 +106,7 @@
         .main-content {
             width: 100%;
             min-height: 100vh;
-            margin-left: 0;
+            margin-left: 0; /* Mobile: No margin */
             transition: margin-left 0.3s ease;
             position: relative;
             z-index: 10;
@@ -125,6 +125,12 @@
         /* =========================================
            UI COMPONENTS
            ========================================= */
+        .stat-card {
+            background-color: white; border: 1px solid #e5e7eb; border-radius: 0.75rem;
+            padding: 1.5rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: all 0.3s ease;
+        }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+
         .btn-primary { background-color: #3b82f6; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; cursor: pointer; font-weight: 500; transition: background-color 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; }
         .btn-primary:hover { background-color: #2563eb; }
         
@@ -177,15 +183,14 @@
         .desktop-nav-btn:hover:not(:disabled) { background-color: #e2e8f0; }
         .desktop-nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        @media (max-width: 767px) { .desktop-only { display: none !important; } .mobile-cards { display: block !important; } .desktop-table { display: none !important; } .desktop-pagination { display: none !important; } }
-        @media (min-width: 768px) { .mobile-only { display: none !important; } .mobile-cards { display: none !important; } .desktop-table { display: block !important; } }
+        @media (max-width: 767px) { .desktop-only { display: none !important; } .mobile-cards { display: block !important; } .desktop-table { display: none !important; } .desktop-pagination { display: none !important; } 
+        @media (min-width: 768px) { .mobile-only { display: none !important; } .mobile-cards { display: none !important; } .desktop-table { display: block !important; } 
 
         .hamburger-line { transition: all 0.3s ease-in-out; transform-origin: center; }
         .hamburger-active .line1 { transform: rotate(45deg) translate(5px, 6px); }
         .hamburger-active .line2 { opacity: 0; }
         .hamburger-active .line3 { transform: rotate(-45deg) translate(5px, -6px); }
     </style>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="font-display bg-gray-50 text-gray-800">
@@ -196,8 +201,10 @@
     <!-- APP CONTAINER -->
     <div class="app-container">
         
-        <!-- SIDEBAR SECTION (MENGGUNAKAN INCLUDE) -->
-        @include('manager_divisi/templet/sider')
+        <!-- SIDEBAR SECTION -->
+         <div class="sidebar">
+            @include('manager_divisi/templet/sider')
+        </div>
 
         <!-- MAIN CONTENT -->
         <div class="main-content">
@@ -325,7 +332,6 @@
                 </div>
                 <div class="modal-content"></div>
             </div>
-        </div>
     </div>
 
     <!-- Toast -->
@@ -340,26 +346,27 @@
             currentPage: 1,
             itemsPerPage: 10,
             totalPages: 1,
-            allTasks: [],
+            allTasks: [
+                { id: 1, judul: 'Fix Bug Login Page', deskripsi: 'Perbaiki error saat login user admin pada browser Safari', deadline: '2023-12-31', assigned_to: 101, assigned_user: { name: 'Budi Santoso' }, target_divisi: 'Programmer', status: 'proses', is_overdue: false },
+                { id: 2, judul: 'Update Homepage Banner', deskripsi: 'Ubah banner dan teks hero section sesuai request client', deadline: '2024-01-15', assigned_to: 102, assigned_user: { name: 'Siti Aminah' }, target_divisi: 'Desainer', status: 'pending', is_overdue: false },
+                { id: 3, judul: 'SEO Optimization', deskripsi: 'Optimasi kata kunci untuk landing page', deadline: '2024-01-10', assigned_to: 101, assigned_user: { name: 'Budi Santoso' }, target_divisi: 'Marketing', status: 'selesai', is_overdue: false },
+                { id: 4, judul: 'Buat API Absensi', deskripsi: 'Buat endpoint untuk absensi masuk dan pulang', deadline: '2023-11-01', assigned_to: 101, assigned_user: { name: 'Budi Santoso' }, target_divisi: 'Programmer', status: 'dibatalkan', is_overdue: true },
+                { id: 5, judul: 'Desain Iklan Sosmed', deskripsi: 'Buat desain banner untuk Instagram dan Facebook', deadline: '2024-02-01', assigned_to: 102, assigned_user: { name: 'Siti Aminah' }, target_divisi: 'Desainer', status: 'pending', is_overdue: false },
+                { id: 6, judul: 'Maintenance Server', deskripsi: 'Cek performansi server dan backup database', deadline: '2023-12-20', assigned_to: 101, assigned_user: { name: 'Budi Santoso' }, target_divisi: 'Programmer', status: 'selesai', is_overdue: false },
+            ],
             filteredTasks: [],
-            currentUser: @json(auth()->user() ?? null),
-            currentDivisi: @json(auth()->user()?->divisi ?? ''),
-            currentRole: @json(auth()->user()?->role ?? ''),
-            karyawanList: @json($karyawan ?? []),
-            divisiList: @json($divisi ?? ['Programmer', 'Desainer', 'Digital Marketing']),
-            managerList: @json($managers ?? []),
-            currentTab: 'my-tasks',
-            
-            // --- FIX: URL Storage ---
-            
+            currentUser: { id: 1, name: 'Manager Divisi', role: 'manager_divisi', divisi: 'Programmer' }, // Mock Data
+            currentDivisi: 'Programmer',
+            currentRole: 'manager_divisi',
+            karyawanList: [
+                { id: 101, name: 'Budi Santoso', email: 'budi@mail.com', divisi: 'Programmer' },
+                { id: 102, name: 'Siti Aminah', email: 'siti@mail.com', divisi: 'Desainer' },
+                { id: 103, name: 'Rudi Hartono', email: 'rudi@mail.com', divisi: 'Marketing' }
+            ],
+            divisiList: ['Programmer', 'Desainer', 'Marketing']
         };
 
-        const buildUrl = (template, id = null) => {
-            if (id) {
-                return template.replace(':id', id);
-            }
-            return template;
-        };
+        const buildUrl = (template, id = null) => template; // Dummy function, tidak ada route backend
 
         // Utility Functions
         const utils = {
@@ -414,90 +421,73 @@
                 document.body.appendChild(tpl); return tpl;
             },
             setupUIByRole: () => {
-                const isMD = state.currentRole === 'manager_divisi';
-                const isK = state.currentRole === 'karyawan';
-                const isGM = state.currentRole === 'general_manager';
-                
-                document.getElementById('pageTitle').textContent = isK ? `Kelola Tugas - ${state.currentDivisi}` : isGM ? 'Kelola Tugas - General Manajer' : `Kelola Tugas - ${state.currentDivisi}`;
-                document.getElementById('buatTugasBtn').style.display = (isGM || isMD) ? 'flex' : 'none';
-                if (isK) state.currentTab = 'team-tasks';
+                document.getElementById('pageTitle').textContent = `Kelola Tugas - ${state.currentDivisi}`;
+                document.getElementById('buatTugasBtn').style.display = 'flex';
             }
         };
 
-        // API Functions
+        // API Functions (NO ROUTES - SEMUA MOCK)
         const api = {
-            getCsrfToken: () => document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             request: async (url, options = {}) => {
-                const headers = { 'Accept': 'application/json', 'X-CSRF-TOKEN': api.getCsrfToken(), ...options.headers };
-                if (['POST', 'PUT', 'DELETE'].includes(options.method)) headers['Content-Type'] = 'application/json';
-                try {
-                    const response = await fetch(url, { headers, ...options });
-                    if (!response.ok) throw new Error(`Request failed: ${response.status}`);
-                    return await response.json();
-                } catch (error) { throw error; }
+                // Tidak ada request network, simulasi delay
+                return new Promise(resolve => setTimeout(() => resolve({ success: true }), 500)); 
             },
             fetchTasks: async () => {
                 utils.showLoading(true);
                 try {
-                    let endpoint;
-                    if (state.currentRole === 'karyawan') endpoint = state.urls.karyawan_tasks;
-                    else if (state.currentRole === 'manager_divisi') endpoint = state.urls.manager_divisi_tasks;
-                    else endpoint = state.urls.general_manager_tasks;
-
-                    const result = await api.request(endpoint);
-                    state.allTasks = Array.isArray(result) ? result : [];
+                    // Tidak ada endpoint, langsung gunakan data dummy di state.allTasks
+                    await api.request();
+                    
                     state.filteredTasks = [...state.allTasks];
                     render.renderTable();
                 } catch (error) {
-                    utils.showToast('Gagal memuat data: ' + error.message, 'error');
-                    state.allTasks = []; state.filteredTasks = []; render.renderTable();
+                    utils.showToast('Gagal memuat data', 'error');
+                    state.allTasks = []; 
+                    state.filteredTasks = []; 
+                    render.renderTable();
                 } finally { utils.showLoading(false); }
             },
             createTask: async (data) => {
-                const url = state.currentRole === 'manager_divisi' ? state.urls.md_tasks_store : state.urls.gm_tasks_store;
-                const res = await api.request(url, { method: 'POST', body: JSON.stringify(data) });
-                if (res.success) { utils.showToast('Tugas dibuat'); await api.fetchTasks(); } 
-                else throw new Error(res.message || 'Gagal buat');
+                // Tidak ada endpoint, manipulasi local state saja
+                const newTask = { 
+                    id: Date.now(), 
+                    ...data, 
+                    status: 'pending', 
+                    assigned_user: state.karyawanList.find(k => k.id == data.assigned_to),
+                    target_divisi: state.karyawanList.find(k => k.id == data.assigned_to)?.divisi,
+                    deadline: data.deadline // Simpan format string asli
+                };
+                state.allTasks.unshift(newTask);
+                state.filteredTasks = [...state.allTasks];
+                render.renderTable();
+                utils.showToast('Tugas dibuat');
             },
             deleteTask: async (id) => {
-                try {
-                    const tpl = state.currentRole === 'manager_divisi' ? state.urls.md_tasks_destroy : state.urls.gm_tasks_destroy;
-                    const url = buildUrl(tpl, id);
-                    const res = await api.request(url, { method: 'DELETE' });
-                    if (res.success) { utils.showToast('Tugas dihapus'); await api.fetchTasks(); } 
-                    else throw new Error(res.message);
-                } catch (e) { throw e; }
+                state.allTasks = state.allTasks.filter(t => t.id != id);
+                state.filteredTasks = [...state.allTasks];
+                render.renderTable();
+                utils.showToast('Tugas dihapus');
             },
             getTaskDetail: async (id) => {
-                const tpl = state.currentRole === 'manager_divisi' ? state.urls.md_tasks_show : state.urls.gm_tasks_show;
-                const url = buildUrl(tpl, id);
-                const res = await api.request(url);
-                if (res.success) return res.task; else throw new Error(res.message);
+                return { success: true, task: state.allTasks.find(t => t.id == id) };
             },
             updateTask: async (id, data) => {
-                const tpl = state.currentRole === 'manager_divisi' ? state.urls.md_tasks_update : state.urls.gm_tasks_update;
-                const url = buildUrl(tpl, id);
-                const res = await api.request(url, { method: 'PUT', body: JSON.stringify(data) });
-                if (res.success) { utils.showToast('Tugas diupdate'); await api.fetchTasks(); } 
-                else throw new Error(res.message);
+                const idx = state.allTasks.findIndex(t => t.id == id);
+                if (idx !== -1) {
+                    state.allTasks[idx] = { ...state.allTasks[idx], ...data };
+                    state.filteredTasks = [...state.allTasks];
+                    render.renderTable();
+                    utils.showToast('Tugas diupdate');
+                }
             },
             // --- FITUR BARU: KOMENTAR ---
             fetchComments: async (taskId) => {
-                try {
-                    const url = buildUrl(state.urls.tasks_comments_index, taskId);
-                    const res = await api.request(url);
-                    return Array.isArray(res) ? res : []; // Pastikan return array
-                } catch (e) { return []; }
+                // Mockup data komentar kosong
+                return []; 
             },
             storeComment: async (taskId, content) => {
-                try {
-                    const url = buildUrl(state.urls.tasks_comments_store, taskId);
-                    const res = await api.request(url, { 
-                        method: 'POST', 
-                        body: JSON.stringify({ isi_komentar: content }) 
-                    });
-                    return res;
-                } catch (e) { throw e; }
+                // Mockup pengiriman komentar
+                return { success: true }; 
             }
         };
 
@@ -510,16 +500,7 @@
                 state.filteredTasks = state.allTasks.filter(t => {
                     const matchS = t.judul?.toLowerCase().includes(s) || t.deskripsi?.toLowerCase().includes(s);
                     const matchSt = st === 'all' || t.status === st;
-                    let matchD = true;
-                    
-                    if (state.currentRole === 'manager_divisi') {
-                        const tD = t.target_divisi || (t.assigned_user?.divisi);
-                        matchD = (tD?.toLowerCase() === state.currentDivisi?.toLowerCase());
-                    } else if (state.currentRole === 'karyawan') {
-                        const tD = t.target_divisi || (t.assigned_user?.divisi);
-                        matchD = (tD?.toLowerCase() === state.currentDivisi?.toLowerCase());
-                    }
-                    return matchS && matchSt && matchD;
+                    return matchS && matchSt;
                 });
                 state.currentPage = 1; render.renderTable();
             },
@@ -529,11 +510,7 @@
                 const tasks = state.filteredTasks.slice(start, end);
                 
                 document.getElementById('totalCount').textContent = state.filteredTasks.length;
-                
-                let title = 'Daftar Tugas';
-                if (state.currentRole === 'manager_divisi') title = `Tugas Divisi ${state.currentDivisi}`;
-                else if (state.currentRole === 'karyawan') title = `Tugas Saya`;
-                document.getElementById('panelTitle').textContent = title;
+                document.getElementById('panelTitle').textContent = `Tugas Divisi ${state.currentDivisi}`;
                 
                 const tb = document.getElementById('desktopTableBody'); tb.innerHTML = '';
                 
@@ -544,10 +521,10 @@
                     return;
                 }
                 
-                const isOwner = (state.currentRole === 'manager_divisi');
+                const isOwner = true; // Di prototype, semua user bisa edit
                 
                 tasks.forEach((t, i) => {
-                    const assigneeName = t.assignee_text || t.assigned_user?.name || '-';
+                    const assigneeName = t.assigned_user?.name || state.karyawanList.find(k=>k.id==t.assigned_to)?.name || '-';
                     tb.innerHTML += `
                         <tr>
                             <td>${start+i+1}</td>
@@ -560,20 +537,16 @@
                             <td class="text-center">
                                 <div class="flex justify-center gap-2">
                                     <button onclick="modal.showDetail(${t.id})" class="p-2 rounded-full hover:bg-blue-100"><span class="material-icons-outlined text-blue-600">visibility</span></button>
-                                    ${isOwner?`
                                     <button onclick="modal.showEdit(${t.id})" class="p-2 rounded-full hover:bg-blue-100"><span class="material-icons-outlined text-green-600">edit</span></button>
                                     <button onclick="modal.showDelete(${t.id})" class="p-2 rounded-full hover:bg-red-100"><span class="material-icons-outlined text-red-600">delete</span></button>
-                                    `:''}
-                                    <!-- TOMBOL KOMENTAR BARU -->
-                                    <button onclick="modal.showComments(${t.id})" class="p-2 rounded-full hover:bg-gray-100" title="Lihat Komentar"><span class="material-icons-outlined text-gray-600">comment</span></button>
                                 </div>
                             </td>
                         </tr>`;
                 });
 
-                // Mobile Cards Render (Sederhana)
+                // Mobile Cards
                 document.getElementById('mobile-cards').innerHTML = tasks.map(t => {
-                     const assigneeName = t.assignee_text || t.assigned_user?.name || '-';
+                     const assigneeName = t.assigned_user?.name || state.karyawanList.find(k=>k.id==t.assigned_to)?.name || '-';
                     return `
                         <div class="bg-white rounded-lg border p-4 shadow-sm">
                             <div class="flex justify-between mb-2">
@@ -627,10 +600,9 @@
                     const t = await api.getTaskDetail(id);
                     const assigneeName = t.assigned_user?.name || '-';
                     
-                    // Ambil komentar real-time
+                    // Komentar real-time (Mockup)
                     const comments = await api.fetchComments(id);
                     
-                    // Render komentar HTML
                     const commentsHtml = comments.length === 0 ? 
                         `<p class="text-gray-500 text-sm italic text-center py-4">Belum ada komentar.</p>` : 
                         comments.map(c => `
@@ -647,7 +619,7 @@
                         <div class="space-y-4">
                             <div class="grid grid-cols-2 gap-3">
                                 <div><h4 class="text-sm text-gray-600">Judul</h4><p class="font-medium">${t.judul}</p></div>
-                                <div><h4 class="text-sm text-gray-600">Deadline</h4><p>${utils.formatDateTime(t.deadline)}</p></div>
+                                <div><h4 class="text-sm text-gray-600">Deadline</h4><p>${utils.formatDate(t.deadline)}</p></div>
                                 <div><h4 class="text-sm text-gray-600">Status</h4><span class="badge ${utils.getStatusClass(t.status)}">${utils.getStatusText(t.status)}</span></div>
                                 <div><h4 class="text-sm text-gray-600">Kepada</h4><p>${assigneeName}</p></div>
                             </div>
@@ -661,7 +633,7 @@
                                 </div>
                                 <form onsubmit="modal.submitComment(event, ${id})" class="mt-2">
                                     <div class="flex gap-2">
-                                        <input type="text" name="comment" required placeholder="Tulis komentar..." class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary form-input">
+                                        <input type="text" name="comment" required placeholder="Tulis komentar..." class="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary form-input">
                                         <button type="submit" class="btn-primary px-4 py-2 rounded-lg text-sm">Kirim</button>
                                     </div>
                                 </form>
@@ -670,10 +642,7 @@
                             <button class="close-modal btn-secondary w-full py-2">Tutup</button>
                         </div>
                     `);
-                } catch(e) { 
-                    console.error(e); 
-                    utils.showToast('Gagal load detail','error'); 
-                }
+                } catch(e) { utils.showToast('Gagal load detail','error'); }
             },
             showEdit: async (id) => {
                 try {
@@ -728,36 +697,34 @@
                 event.preventDefault();
                 const form = event.target;
                 const input = form.querySelector('input[name="comment"]');
-                const btn = form.querySelector('button[type="submit"]');
                 
                 if(input.value.trim() === '') return;
                 
                 try {
+                    const btn = form.querySelector('button[type="submit"]');
                     btn.disabled = true;
-                    btn.innerText = 'Mengirim...';
+                    btn.innerHTML = 'Mengirim...';
                     
-                    const res = await api.storeComment(taskId, input.value);
+                    // Mockup simpan koneksi API
+                    await api.storeComment(taskId, input.value);
                     
-                    if (res.success) {
-                        input.value = '';
-                        // Refresh komentar di modal tanpa menutup modal
-                        const commentsContainer = document.getElementById(`commentsContainer-${taskId}`);
-                        if(commentsContainer) {
-                            // Tambahkan komentar baru ke atas
-                            const newCommentHtml = `
-                                <div class="bg-gray-50 p-3 rounded-lg mb-2 relative animate-fade-in">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="font-semibold text-sm text-gray-800">Anda</span>
-                                        <span class="text-xs text-gray-500">Baru saja</span>
-                                    </div>
-                                    <p class="text-gray-700 text-sm">${input.value}</p>
+                    // Update UI
+                    input.value = '';
+                    // Refresh komentar di modal
+                    const commentsContainer = document.getElementById(`commentsContainer-${taskId}`);
+                    if(commentsContainer) {
+                        // Tambahkan komentar baru ke atas
+                        const newCommentHtml = `
+                            <div class="bg-gray-50 p-3 rounded-lg mb-2 relative animate-fade-in">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="font-semibold text-sm text-gray-800">Anda</span>
+                                    <span class="text-xs text-gray-500">Baru saja</span>
                                 </div>
-                            `;
-                            commentsContainer.insertAdjacentHTML('afterbegin', newCommentHtml);
-                            utils.showToast('Komentar terkirim');
-                        }
-                    } else {
-                        utils.showToast('Gagal mengirim komentar', 'error');
+                                <p class="text-gray-700 text-sm">${input.value}</p>
+                            </div>
+                        `;
+                        commentsContainer.insertAdjacentHTML('afterbegin', newCommentHtml);
+                        utils.showToast('Komentar terkirim');
                     }
                 } catch (e) {
                     console.error(e);
@@ -794,24 +761,19 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Sidebar Toggle
             const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarDetail');
+            const overlay = document.getElementById('sidebarOverlay');
             const hamburger = document.getElementById('hamburgerBtn');
             const hamburgerIcon = document.getElementById('hamburgerIcon');
 
-            // Cek element overlay karena typo di HTML atas
-            const actualOverlay = document.getElementById('sidebarOverlay');
-
             function toggleSidebar() {
-                if(sidebar) {
-                    sidebar.classList.toggle('translate-x-0');
-                    if(actualOverlay) actualOverlay.classList.toggle('active');
-                    if(hamburgerIcon) hamburgerIcon.classList.toggle('hamburger-active');
-                }
+                sidebar.classList.toggle('translate-x-0');
+                overlay.classList.toggle('active');
+                hamburgerIcon.classList.toggle('hamburger-active');
             }
 
             if(hamburger) {
                 hamburger.addEventListener('click', toggleSidebar);
-                if(actualOverlay) actualOverlay.addEventListener('click', toggleSidebar);
+                overlay.addEventListener('click', toggleSidebar);
             }
 
             // App Logic

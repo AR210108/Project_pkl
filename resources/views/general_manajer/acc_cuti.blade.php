@@ -4,33 +4,26 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Manajemen Cuti - Dashboard</title>
+    <title>Manajemen Cuti - General Manager</title>
+
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+
+    <!-- Konfigurasi Tailwind -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         primary: "#3b82f6",
-                        "background-light": "#ffffff",
-                        "background-dark": "#f8fafc",
-                        "sidebar-light": "#f3f4f6",
-                        "sidebar-dark": "#1e293b",
-                        "card-light": "#ffffff",
-                        "card-dark": "#1e293b",
                         "text-light": "#1e293b",
-                        "text-dark": "#f8fafc",
                         "text-muted-light": "#64748b",
-                        "text-muted-dark": "#94a3b8",
-                        "border-light": "#e2e8f0",
-                        "border-dark": "#334155",
-                        "success": "#10b981",
-                        "warning": "#f59e0b",
-                        "danger": "#ef4444"
                     },
                     fontFamily: {
                         display: ["Poppins", "sans-serif"],
@@ -38,1158 +31,583 @@
                     borderRadius: {
                         DEFAULT: "0.75rem",
                     },
-                    boxShadow: {
-                        card: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-                        "card-hover": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
-                    },
                 },
             },
         };
+
+        // FIXED ROUTES
+        window.appRoutes = {
+            gm_cuti: {
+                index: '/general_manajer/cuti/data', 
+                approve: (id) => `/general_manajer/cuti/${id}/approve`,
+                reject: (id) => `/general_manajer/cuti/${id}/reject`,
+                stats: '/general_manajer/cuti/stats'
+            }
+        };
     </script>
+
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8fafc;
-        }
-
-        .material-icons-outlined {
-            font-size: 24px;
-            vertical-align: middle;
-        }
-
-        /* Card hover effects - removed transition */
-        .stat-card {
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            border-radius: 0.75rem;
-            overflow: hidden;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Button styles - removed transition */
-        .btn-primary {
-            background-color: #3b82f6;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #2563eb;
-        }
-
-        .btn-secondary {
-            background-color: #f1f5f9;
-            color: #64748b;
-        }
-
-        .btn-secondary:hover {
-            background-color: #e2e8f0;
-        }
-
-        /* Status Badge Styles */
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .status-disetujui {
-            background-color: rgba(16, 185, 129, 0.15);
-            color: #065f46;
-        }
-
-        .status-menunggu {
-            background-color: rgba(245, 158, 11, 0.15);
-            color: #92400e;
-        }
-
-        .status-ditolak {
-            background-color: rgba(239, 68, 68, 0.15);
-            color: #991b1b;
-        }
-
-        /* Table mobile adjustments */
-        @media (max-width: 639px) {
-            .desktop-table {
-                display: none;
-            }
-
-            .mobile-cards {
-                display: block;
-            }
-
-            .desktop-pagination {
-                display: none !important;
-            }
-        }
-
-        @media (min-width: 640px) {
-            .desktop-table {
-                display: block;
-            }
-
-            .mobile-cards {
-                display: none;
-            }
-
-            .mobile-pagination {
-                display: none !important;
-            }
-        }
-
-        /* Form input styles - removed transition */
-        .form-input {
-            border: 1px solid #e2e8f0;
-        }
-
-        .form-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        /* Panel Styles */
-        .panel {
-            background: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-        }
-
-        .panel-header {
-            background: #f8fafc;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .panel-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .panel-body {
-            padding: 1.5rem;
-        }
-
-        /* SCROLLABLE TABLE */
-        .scrollable-table-container {
-            width: 100%;
-            overflow-x: auto;
-            overflow-y: hidden;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            background: white;
-        }
-
-        .scrollable-table-container {
-            scrollbar-width: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .scrollable-table-container::-webkit-scrollbar {
-            height: 12px;
-            width: 12px;
-        }
-
-        .scrollable-table-container::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 6px;
-        }
-
-        .scrollable-table-container::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 6px;
-            border: 2px solid #f1f5f9;
-        }
-
-        .scrollable-table-container::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        .data-table {
-            width: 100%;
-            min-width: 800px;
-            border-collapse: collapse;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-            white-space: nowrap;
-        }
-
-        .data-table th {
-            background: #f8fafc;
-            font-weight: 600;
-            color: #374151;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .data-table tbody tr:nth-child(even) {
-            background: #f9fafb;
-        }
-
-        .data-table tbody tr:hover {
-            background: #f3f4f6;
-        }
-
-        .table-shadow {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        /* Minimalist Popup Styles - removed transition */
-        .minimal-popup {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 1000;
-            transform: translateX(400px);
-            max-width: 350px;
-            border-left: 4px solid #10b981;
-        }
-
-        .minimal-popup.show {
-            transform: translateX(0);
-        }
-
-        .minimal-popup.error {
-            border-left-color: #ef4444;
-        }
-
-        .minimal-popup.warning {
-            border-left-color: #f59e0b;
-        }
-
-        .minimal-popup-icon {
-            flex-shrink: 0;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-
-        .minimal-popup.success .minimal-popup-icon {
-            background-color: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-        }
-
-        .minimal-popup.error .minimal-popup-icon {
-            background-color: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-        }
-
-        .minimal-popup.warning .minimal-popup-icon {
-            background-color: rgba(245, 158, 11, 0.1);
-            color: #f59e0b;
-        }
-
-        .minimal-popup-content {
-            flex-grow: 1;
-        }
-
-        .minimal-popup-title {
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 2px;
-        }
-
-        .minimal-popup-message {
-            font-size: 14px;
-            color: #64748b;
-        }
-
-        .minimal-popup-close {
-            flex-shrink: 0;
-            background: none;
-            border: none;
-            color: #94a3b8;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-        }
-
-        .minimal-popup-close:hover {
-            background-color: #f1f5f9;
-            color: #64748b;
-        }
-
-        /* Filter Dropdown Styles - removed transition */
-        .filter-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 8px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            padding: 16px;
-            min-width: 200px;
-            z-index: 100;
-            display: none;
-        }
-
-        .filter-dropdown.show {
-            display: block;
-        }
-
-        .filter-option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 0;
-            cursor: pointer;
-        }
-
-        .filter-option:hover {
-            color: #3b82f6;
-        }
-
-        .filter-option input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .filter-option label {
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .filter-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .filter-actions button {
-            flex: 1;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-        }
-
-        .filter-apply {
-            background-color: #3b82f6;
-            color: white;
-        }
-
-        .filter-apply:hover {
-            background-color: #2563eb;
-        }
-
-        .filter-reset {
-            background-color: #f1f5f9;
-            color: #64748b;
-        }
-
-        .filter-reset:hover {
-            background-color: #e2e8f0;
-        }
-
-        .hidden-by-filter {
-            display: none !important;
-        }
-
-        /* Pagination - removed transition */
-        .desktop-pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin-top: 24px;
-        }
-
-        .desktop-page-btn {
-            min-width: 32px;
-            height: 32px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .desktop-page-btn.active {
-            background-color: #3b82f6;
-            color: white;
-        }
-
-        .desktop-page-btn:not(.active) {
-            background-color: #f1f5f9;
-            color: #64748b;
-        }
-
-        .desktop-page-btn:not(.active):hover {
-            background-color: #e2e8f0;
-        }
-
-        .desktop-nav-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #f1f5f9;
-            color: #64748b;
-            cursor: pointer;
-        }
-
-        .desktop-nav-btn:hover:not(:disabled) {
-            background-color: #e2e8f0;
-        }
-
-        .desktop-nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Modal - removed transition */
-        .modal {
-            opacity: 1;
-        }
-
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-        }
-
-        /* Main Content Layout - removed transition */
-        .main-content {
-            margin-left: 0;
-            width: 100%;
-        }
-
-        /* Header Styles */
-        .page-header {
-            margin-bottom: 1.5rem;
-        }
-
-        .page-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 0.25rem;
-        }
-
-        .page-subtitle {
-            color: #64748b;
-            font-size: 0.875rem;
-        }
-
-        /* Stats Card Styles - COMPACT VERSION */
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 3px;
-            height: 100%;
-        }
-
-        .stat-card.blue::before {
-            background: linear-gradient(180deg, #3b82f6, #2563eb);
-        }
-
-        .stat-card.red::before {
-            background: linear-gradient(180deg, #ef4444, #dc2626);
-        }
-
-        .stat-card.green::before {
-            background: linear-gradient(180deg, #10b981, #059669);
-        }
-
-        .stat-card.yellow::before {
-            background: linear-gradient(180deg, #f59e0b, #d97706);
-        }
-
-        .stat-icon {
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .stat-icon.blue {
-            background-color: rgba(59, 130, 246, 0.1);
-            color: #3b82f6;
-        }
-
-        .stat-icon.red {
-            background-color: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-        }
-
-        .stat-icon.green {
-            background-color: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-        }
-
-        .stat-icon.yellow {
-            background-color: rgba(245, 158, 11, 0.1);
-            color: #f59e0b;
-        }
-
-        .stat-content {
-            flex: 1;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: #64748b;
-            margin-bottom: 0.25rem;
-            font-weight: 500;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1e293b;
-            line-height: 1.2;
-        }
-
-        /* Alert Styles */
-        .alert {
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .alert-blue {
-            background-color: rgba(59, 130, 246, 0.1);
-            border-left: 4px solid #3b82f6;
-        }
-
-        .alert-icon {
-            margin-right: 0.75rem;
-            color: #3b82f6;
-        }
-
-        .alert-content {
-            flex: 1;
-        }
-
-        .alert-title {
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 0.125rem;
-            font-size: 0.875rem;
-        }
-
-        .alert-message {
-            font-size: 0.75rem;
-            color: #64748b;
-        }
-
-        /* Action Button Styles - removed transition */
-        .action-btn {
-            padding: 0.5rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .action-btn.approve {
-            background-color: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-        }
-
-        .action-btn.approve:hover {
-            background-color: rgba(16, 185, 129, 0.2);
-        }
-
-        .action-btn.reject {
-            background-color: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-        }
-
-        .action-btn.reject:hover {
-            background-color: rgba(239, 68, 68, 0.2);
-        }
-
-        .action-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        body { font-family: 'Poppins', sans-serif; background-color: #f1f5f9; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .material-icons-outlined { font-size: 24px; vertical-align: middle; }
+
+        /* Status Badge */
+        .status-badge { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; gap: 4px; }
+        .status-disetujui { background-color: rgba(16, 185, 129, 0.1); color: #047857; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .status-menunggu { background-color: rgba(245, 158, 11, 0.1); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .status-ditolak { background-color: rgba(239, 68, 68, 0.1); color: #b91c1c; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+        /* Stats Cards */
+        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; align-items: center; gap: 1rem; position: relative; overflow: hidden; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px; }
+        .stat-card.blue::before { background: #3b82f6; }
+        .stat-card.green::before { background: #10b981; }
+        .stat-card.red::before { background: #ef4444; }
+        .stat-card.yellow::before { background: #f59e0b; }
+        
+        .stat-icon { width: 3rem; height: 3rem; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .stat-icon.blue { background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .stat-icon.green { background-color: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .stat-icon.red { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .stat-icon.yellow { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        
+        .stat-content { flex: 1; }
+        .stat-label { font-size: 0.75rem; color: #64748b; margin-bottom: 0.25rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: #1e293b; line-height: 1.2; }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 16px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        .data-table th { background: #f8fafc; font-weight: 600; color: #475569; font-size: 0.75rem; text-transform: uppercase; position: sticky; top: 0; z-index: 10; }
+        .data-table tbody tr:hover { background-color: #f8fafc; }
+        .scrollable-table-container { width: 100%; overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 0.75rem; background: white; min-height: 200px; }
+
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(2px); }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-content { background: white; border-radius: 1rem; width: 90%; max-width: 500px; padding: 2rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .modal-overlay.open .modal-content { transform: scale(1); }
+
+        /* Buttons */
+        .action-btn { padding: 0.5rem; border-radius: 0.5rem; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; }
+        .btn-approve { background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .btn-approve:hover:not(:disabled) { background-color: #10b981; color: white; }
+        .btn-reject { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .btn-reject:hover:not(:disabled) { background-color: #ef4444; color: white; }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Toast */
+        .toast { position: fixed; top: 20px; right: 20px; z-index: 100; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-left: 4px solid #10b981; }
+        .toast.error { border-left: 4px solid #ef4444; }
+        .toast.warning { border-left: 4px solid #f59e0b; }
     </style>
 </head>
 
-<body class="font-display bg-gray-50 text-gray-800">
-    <!-- =========== MAIN CONTENT =========== -->
-    <div class="main-content">
-        @include('general_manajer.templet.header')
-        <main class="flex-1 flex flex-col">
-            <div class="flex-1 p-3 sm:p-8">
-                <!-- Header -->
-                <div class="page-header">
-                    <h1 class="page-title">Manajemen Cuti</h1>
-                    <p class="page-subtitle">Kelola pengajuan cuti karyawan dengan mudah</p>
+<body class="font-display text-gray-800 antialiased overflow-hidden">
+    <div class="flex h-screen">
+        
+        <!-- 1. WRAPPER SIDEBAR -->
+        <div class="w-64 flex-shrink-0 bg-white border-r border-gray-200 hidden md:flex flex-col z-20">
+            <!-- Include Template Sidebar GM -->
+            @include('general_manajer.templet.header')
+        </div>
+
+        <!-- 2. MAIN CONTENT WRAPPER -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+            
+            <!-- Topbar -->
+            <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <!-- Tombol Back ke Dashboard (TAMBAHAN) -->
+                   
+                    <h2 class="font-semibold text-lg text-gray-800">Manajemen Pengajuan Cuti</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <!-- Avatar Dinamis -->
+                   
+                      
+                    </div>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
+                
+                <!-- Header Section -->
+                <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                    
+                      
+                    </div>
+                    <div class="flex gap-2">
+                       
+                    </div>
                 </div>
 
                 <!-- Stats Cards -->
                 <div class="stats-container">
                     <div class="stat-card blue">
-                        <div class="stat-icon blue">
-                            <span class="material-icons-outlined text-xl">description</span>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-label">Total Pengajuan</div>
-                            <div class="stat-value" id="stat-total-pengajuan">4</div>
-                        </div>
+                        <div class="stat-icon blue"><span class="material-icons-outlined text-2xl">description</span></div>
+                        <div class="stat-content"><div class="stat-label">Total Pengajuan</div><div class="stat-value" id="stat-total">-</div></div>
                     </div>
-
                     <div class="stat-card green">
-                        <div class="stat-icon green">
-                            <span class="material-icons-outlined text-xl">check_circle</span>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-label">Disetujui</div>
-                            <div class="stat-value" id="stat-disetujui">2</div>
-                        </div>
+                        <div class="stat-icon green"><span class="material-icons-outlined text-2xl">check_circle</span></div>
+                        <div class="stat-content"><div class="stat-label">Disetujui</div><div class="stat-value" id="stat-approved">-</div></div>
                     </div>
-
-                    <div class="stat-card red">
-                        <div class="stat-icon red">
-                            <span class="material-icons-outlined text-xl">cancel</span>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-label">Ditolak</div>
-                            <div class="stat-value" id="stat-ditolak">1</div>
-                        </div>
-                    </div>
-
                     <div class="stat-card yellow">
-                        <div class="stat-icon yellow">
-                            <span class="material-icons-outlined text-xl">hourglass_top</span>
+                        <div class="stat-icon yellow"><span class="material-icons-outlined text-2xl">hourglass_top</span></div>
+                        <div class="stat-content"><div class="stat-label">Menunggu</div><div class="stat-value" id="stat-pending">-</div></div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-icon red"><span class="material-icons-outlined text-2xl">cancel</span></div>
+                        <div class="stat-content"><div class="stat-label">Ditolak</div><div class="stat-value" id="stat-rejected">-</div></div>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
+                        <div class="w-full md:w-1/3">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cari Nama</label>
+                            <div class="relative">
+                                <span class="material-icons-outlined absolute left-3 top-2.5 text-gray-400">search</span>
+                                <input type="text" id="searchInput" 
+                                    class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                    placeholder="Ketik nama karyawan...">
+                            </div>
                         </div>
-                        <div class="stat-content">
-                            <div class="stat-label">Belum Dikonfirmasi</div>
-                            <div class="stat-value" id="stat-menunggu">1</div>
+                        <div class="flex gap-2 w-full md:w-auto">
+                             <select id="statusFilter" class="px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                                <option value="all">Semua Status</option>
+                                <option value="menunggu">Menunggu</option>
+                                <option value="disetujui">Disetujui</option>
+                                <option value="ditolak">Ditolak</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
-                <!-- Data Cuti Panel -->
-                <div class="panel">
-                    <div class="panel-header">
-                        <h3 class="panel-title">
-                            <span class="material-icons-outlined text-primary">event_note</span>
-                            Data Pengajuan Cuti
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span
-                                    class="font-semibold text-text-light" id="cutiCount">4</span> pengajuan</span>
+                <!-- Table Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative">
+                    <!-- Loading State -->
+                    <div id="loadingState" class="hidden absolute inset-0 bg-white/80 z-10 flex items-center justify-center">
+                        <div class="flex flex-col items-center">
+                            <svg class="animate-spin h-8 w-8 text-blue-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span class="text-gray-500 text-sm font-medium">Memuat data...</span>
                         </div>
                     </div>
-                    <div class="panel-body">
-                        <!-- Search and Filter Section -->
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                            <div class="relative w-full md:w-1/3">
-                                <span
-                                    class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                                <input id="searchCutiInput"
-                                    class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input"
-                                    placeholder="Cari keterangan atau tanggal..." type="text" />
-                            </div>
-                            <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                                <div class="relative">
-                                    <button id="filterCutiBtn"
-                                        class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 flex items-center gap-2">
-                                        <span class="material-icons-outlined text-sm">filter_list</span>
-                                        Filter
-                                    </button>
-                                    <div id="filterCutiDropdown" class="filter-dropdown">
-                                        <div class="filter-option">
-                                            <input type="checkbox" id="filterCutiAll" value="all" checked>
-                                            <label for="filterCutiAll">Semua Status</label>
-                                        </div>
-                                        <div class="filter-option">
-                                            <input type="checkbox" id="filterCutiDisetujui" value="disetujui">
-                                            <label for="filterCutiDisetujui">Disetujui</label>
-                                        </div>
-                                        <div class="filter-option">
-                                            <input type="checkbox" id="filterCutiMenunggu" value="menunggu">
-                                            <label for="filterCutiMenunggu">Belum Dikonfirmasi</label>
-                                        </div>
-                                        <div class="filter-option">
-                                            <input type="checkbox" id="filterCutiDitolak" value="ditolak">
-                                            <label for="filterCutiDitolak">Ditolak</label>
-                                        </div>
-                                        <div class="filter-actions">
-                                            <button id="applyCutiFilter" class="filter-apply">Terapkan</button>
-                                            <button id="resetCutiFilter" class="filter-reset">Reset</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Desktop Table -->
-                        <div class="desktop-table">
-                            <div class="scrollable-table-container table-shadow" id="scrollableCutiTable">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th style="min-width: 60px;">No</th>
-                                            <th style="min-width: 150px;">Tanggal Cuti</th>
-                                            <th style="min-width: 120px;">Durasi</th>
-                                            <th style="min-width: 300px;">Keterangan</th>
-                                            <th style="min-width: 120px;">Status</th>
-                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="cutiTableBody">
-                                        <!-- Data will be populated by JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
+                    <!-- Table Container -->
+                    <div class="scrollable-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 60px;">ID</th>
+                                    <th style="min-width: 220px;">Nama Karyawan</th>
+                                    <th style="min-width: 250px;">Keterangan</th>
+                                    <th style="min-width: 180px;">Tanggal</th>
+                                    <th style="min-width: 100px;">Durasi</th>
+                                    <th style="min-width: 140px;">Status</th>
+                                    <th style="min-width: 140px; text-align: center;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cutiTableBody">
+                                <!-- Data Injected by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Empty State (Enhanced) -->
+                    <div id="noCutiData" class="hidden flex-col items-center justify-center py-16">
+                        <div class="bg-blue-50 rounded-full w-20 h-20 flex items-center justify-center mb-4">
+                            <span class="material-icons-outlined text-3xl text-blue-400">inbox</span>
                         </div>
-
-                        <!-- Mobile Card View -->
-                        <div class="mobile-cards space-y-4" id="cuti-mobile-cards">
-                            <!-- Cards will be populated by JavaScript -->
-                        </div>
-
-                        <!-- Pagination -->
-                        <div id="cutiPaginationContainer" class="desktop-pagination">
-                            <button id="cutiPrevPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="cutiPageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="cutiNextPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
-                        </div>
+                        <h3 class="text-lg font-medium text-gray-600">Belum ada data pengajuan ditemukan</h3>
+                        <p class="text-gray-500 text-sm mt-2 text-center max-w-md mx-auto">Belum ada karyawan yang mengajukan cuti saat ini.</p>
                     </div>
                 </div>
 
-                <footer
-                    class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light mt-8">
-                    Copyright ©2025 by digicity.id
+                <footer class="mt-8 text-center text-gray-400 text-sm py-4">
+                    &copy; {{ date('Y') }} digicity.id
                 </footer>
             </div>
-        </main>
+        </div>
     </div>
 
-    <!-- Minimalist Popup -->
-    <div id="minimalPopup" class="minimal-popup">
-        <div class="minimal-popup-icon">
-            <span class="material-icons-outlined">check</span>
+    <!-- Modal Reject -->
+    <div id="rejectModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="flex items-center gap-3 mb-4 text-red-600">
+                <span class="material-icons-outlined text-3xl">warning</span>
+                <h2 class="text-xl font-bold">Tolak Pengajuan Cuti</h2>
+            </div>
+            <div class="mb-6">
+                <p class="text-gray-600 mb-4">Anda yakin ingin menolak pengajuan cuti ini?</p>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Alasan Penolakan <span class="text-red-500">*</span></label>
+                <textarea id="rejectReason" rows="3" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none resize-none" placeholder="Tuliskan alasan..."></textarea>
+                <p id="rejectError" class="text-red-500 text-xs mt-1 hidden">Alasan penolakan wajib diisi.</p>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button onclick="app.closeModal('rejectModal')" class="px-5 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition">Batal</button>
+                <button id="confirmRejectBtn" class="px-5 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 shadow-md transition">Tolak</button>
+            </div>
         </div>
-        <div class="minimal-popup-content">
-            <div class="minimal-popup-title">Berhasil</div>
-            <div class="minimal-popup-message">Operasi berhasil dilakukan</div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast bg-white shadow-xl rounded-lg px-6 py-4 flex items-center gap-3 min-w-[300px]">
+        <span id="toast-icon" class="material-icons-outlined text-2xl">check_circle</span>
+        <div>
+            <h4 id="toast-title" class="font-bold text-gray-800 text-sm">Berhasil</h4>
+            <p id="toast-message" class="text-gray-500 text-xs mt-0.5">Operasi berhasil dilakukan.</p>
         </div>
-        <button class="minimal-popup-close">
-            <span class="material-icons-outlined text-sm">close</span>
-        </button>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // ==================== STATIC DATA ====================
-            let cutiData = [
-                { id: 1, tanggal_mulai: '2024-01-15', tanggal_selesai: '2024-01-16', durasi: 2, keterangan: 'Cuti tahunan untuk liburan keluarga', jenis_cuti: 'tahunan', status: 'disetujui' },
-                { id: 2, tanggal_mulai: '2024-02-28', tanggal_selesai: '2024-02-28', durasi: 1, keterangan: 'Cuti sakit', jenis_cuti: 'sakit', status: 'disetujui' },
-                { id: 3, tanggal_mulai: '2024-03-10', tanggal_selesai: '2024-03-12', durasi: 3, keterangan: 'Urusan keluarga penting', jenis_cuti: 'penting', status: 'menunggu' },
-                { id: 4, tanggal_mulai: '2024-04-05', tanggal_selesai: '2024-04-06', durasi: 2, keterangan: 'Cuti melahirkan', jenis_cuti: 'melahirkan', status: 'ditolak' },
-            ];
+        document.addEventListener('DOMContentLoaded', function() {
+            app.init();
+        });
 
-            let nextCutiId = 5;
+        const CSRF_TOKEN = '{{ csrf_token() }}';
 
-            // ==================== STATE MANAGEMENT ====================
-            let cutiCurrentPage = 1;
-            const itemsPerPage = 5;
-            let cutiActiveFilters = ['all'];
-            let cutiSearchTerm = '';
+        const app = {
+            data: [],
+            currentId: null,
+            
+            init: function() {
+                this.cacheDOM();
+                this.bindEvents();
+                this.refreshData();
+            },
 
-            // ==================== INITIALIZATION ====================
-            initializeCuti();
-            attachEventListeners();
-
-            // ==================== CUTI FUNCTIONS ====================
-            function initializeCuti() {
-                renderCutiTable();
-                renderCutiPagination();
-                updateCutiStats();
-            }
-
-            function renderCutiTable() {
-                const filteredData = getFilteredCutiData();
-                const paginatedData = paginateData(filteredData, cutiCurrentPage);
-
-                const tableBody = document.getElementById('cutiTableBody');
-                const mobileCards = document.getElementById('cuti-mobile-cards');
-
-                tableBody.innerHTML = '';
-                mobileCards.innerHTML = '';
-
-                paginatedData.forEach((item, index) => {
-                    const globalIndex = (cutiCurrentPage - 1) * itemsPerPage + index + 1;
-
-                    // Format tanggal
-                    const startDate = new Date(item.tanggal_mulai);
-                    const endDate = new Date(item.tanggal_selesai);
-                    const formattedDate = startDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-
-                    // Status badge
-                    let statusBadge = '';
-                    if (item.status === 'disetujui') {
-                        statusBadge = '<span class="status-badge status-disetujui">Disetujui</span>';
-                    } else if (item.status === 'menunggu') {
-                        statusBadge = '<span class="status-badge status-menunggu">Belum Dikonfirmasi</span>';
-                    } else if (item.status === 'ditolak') {
-                        statusBadge = '<span class="status-badge status-ditolak">Ditolak</span>';
+            cacheDOM: function() {
+                this.dom = {
+                    tableBody: document.getElementById('cutiTableBody'),
+                    searchInput: document.getElementById('searchInput'),
+                    statusFilter: document.getElementById('statusFilter'),
+                    noData: document.getElementById('noCutiData'),
+                    loading: document.getElementById('loadingState'),
+                    rejectModal: document.getElementById('rejectModal'),
+                    rejectReason: document.getElementById('rejectReason'),
+                    rejectError: document.getElementById('rejectError'),
+                    confirmRejectBtn: document.getElementById('confirmRejectBtn'),
+                    toast: document.getElementById('toast'),
+                    toastIcon: document.getElementById('toast-icon'),
+                    toastTitle: document.getElementById('toast-title'),
+                    toastMessage: document.getElementById('toast-message'),
+                    stats: {
+                        total: document.getElementById('stat-total'),
+                        approved: document.getElementById('stat-approved'),
+                        rejected: document.getElementById('stat-rejected'),
+                        pending: document.getElementById('stat-pending')
                     }
+                };
+            },
 
-                    // Check if action buttons should be disabled
-                    const isDisabled = item.status !== 'menunggu';
+            bindEvents: function() {
+                this.dom.searchInput.addEventListener('input', () => this.renderTable());
+                this.dom.statusFilter.addEventListener('change', () => this.renderTable());
+                this.dom.confirmRejectBtn.addEventListener('click', () => this.processReject());
+            },
 
-                    // Desktop Table Row
-                    const row = document.createElement('tr');
-                    row.className = 'cuti-row';
-                    row.innerHTML = `
-                        <td style="min-width: 60px;">${globalIndex}</td>
-                        <td style="min-width: 150px;">${formattedDate}</td>
-                        <td style="min-width: 120px;">${item.durasi} hari</td>
-                        <td style="min-width: 300px;">${item.keterangan}</td>
-                        <td style="min-width: 120px;">${statusBadge}</td>
-                        <td style="min-width: 100px; text-align: center;">
+            refreshData: function() {
+                this.setLoading(true);
+                
+                // 1. Fetch Stats
+                fetch(window.appRoutes.gm_cuti.stats)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Gagal mengambil stats');
+                        return response.json();
+                    })
+                    .then(res => {
+                        if(res && res.success && res.data) {
+                            this.updateStatsUI(res.data);
+                        } else {
+                            console.warn("Stats response invalid:", res);
+                            this.updateStatsUI({ total: 0, disetujui: 0, ditolak: 0, menunggu: 0 });
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Gagal ambil stats", err);
+                        this.updateStatsUI({ total: 0, disetujui: 0, ditolak: 0, menunggu: 0 });
+                    });
+
+                // 2. Fetch Data List
+                fetch(window.appRoutes.gm_cuti.index)
+                    .then(response => {
+                        const contentType = response.headers.get("content-type");
+                        if (!response.ok || !contentType || !contentType.includes("application/json")) {
+                            return response.text().then(text => { 
+                                console.error("=== SERVER ERROR DITEMUKAN ===");
+                                console.error(text);
+                                throw new Error("Server Error (Bukan JSON): " + text.substring(0, 200)); 
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(res => {
+                        if (res && res.success && Array.isArray(res.data)) {
+                            // FIXED: Gunakan item.nama bukan item.user.name
+                            this.data = res.data.map(item => ({
+                                id: item.id,
+                                karyawan: item.nama || 'Unknown',  // ← FIXED: item.nama bukan item.user.name
+                                keterangan: item.keterangan || '-',
+                                tanggal_mulai: item.tanggal_mulai,
+                                durasi: item.durasi,
+                                status: item.status,
+                                divisi: item.divisi || '-',
+                                periode: item.periode || '-'
+                            }));
+                            this.renderTable();
+                        } else {
+                            console.warn("Response tidak valid:", res);
+                            this.data = [];
+                            this.renderTable();
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Gagal ambil data list", err);
+                        this.showToast('Gagal memuat data tabel. ' + err.message, 'error');
+                        this.dom.tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-red-500 py-4">Gagal memuat data dari server.</td></tr>';
+                    })
+                    .finally(() => {
+                        this.setLoading(false);
+                    });
+            },
+
+            updateStatsUI: function(stats) {
+                this.dom.stats.total.textContent = stats?.total ?? 0;
+                this.dom.stats.approved.textContent = stats?.disetujui ?? 0;
+                this.dom.stats.rejected.textContent = stats?.ditolak ?? 0;
+                this.dom.stats.pending.textContent = stats?.menunggu ?? 0;
+            },
+
+            setLoading: function(isLoading) {
+                if (isLoading) {
+                    this.dom.loading.classList.remove('hidden');
+                    this.dom.loading.classList.add('flex');
+                } else {
+                    this.dom.loading.classList.add('hidden');
+                    this.dom.loading.classList.remove('flex');
+                }
+            },
+
+            renderTable: function() {
+                const term = this.dom.searchInput.value.toLowerCase();
+                const statusFilter = this.dom.statusFilter.value;
+
+                const filteredData = this.data.filter(item => {
+                    const matchSearch = item.karyawan.toLowerCase().includes(term) || 
+                                       item.keterangan.toLowerCase().includes(term) ||
+                                       (item.divisi && item.divisi.toLowerCase().includes(term));
+                    const matchStatus = statusFilter === 'all' || item.status === statusFilter;
+                    return matchSearch && matchStatus;
+                });
+
+                this.dom.tableBody.innerHTML = '';
+                
+                if (filteredData.length === 0) {
+                    this.dom.noData.classList.remove('hidden');
+                    this.dom.noData.classList.add('flex');
+                    return;
+                }
+                
+                this.dom.noData.classList.add('hidden');
+                this.dom.noData.classList.remove('flex');
+
+                filteredData.forEach(cuti => {
+                    const isPending = cuti.status === 'menunggu';
+                    const disabled = isPending ? '' : 'disabled';
+                    const opacity = isPending ? '' : 'opacity: 0.5; cursor: not-allowed;';
+
+                    let badgeClass = 'status-menunggu', badgeText = 'Menunggu', icon = 'schedule';
+                    if (cuti.status === 'disetujui') { badgeClass = 'status-disetujui'; badgeText = 'Disetujui'; icon = 'check_circle'; }
+                    if (cuti.status === 'ditolak') { badgeClass = 'status-ditolak'; badgeText = 'Ditolak'; icon = 'cancel'; }
+
+                    const date = cuti.tanggal_mulai ? new Date(cuti.tanggal_mulai).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="text-xs font-mono text-gray-400">#${cuti.id}</td>
+                        <td>
+                            <div class="font-medium text-gray-800">${cuti.karyawan}</div>
+                            <div class="text-xs text-gray-500 mt-1">${cuti.divisi}</div>
+                        </td>
+                        <td class="text-gray-600 text-sm">${cuti.keterangan}</td>
+                        <td class="text-sm text-gray-600">
+                            <div>${date}</div>
+                            <div class="text-xs text-gray-400">${cuti.periode}</div>
+                        </td>
+                        <td class="text-sm font-medium text-gray-700">${cuti.durasi} Hari</td>
+                        <td><span class="status-badge ${badgeClass}"><span class="material-icons-outlined text-sm">${icon}</span> ${badgeText}</span></td>
+                        <td class="text-center">
                             <div class="flex justify-center gap-2">
-                                <button class="action-btn approve ${isDisabled ? 'disabled' : ''}" data-id='${item.id}' data-action='approve' ${isDisabled ? 'disabled' : ''}>
-                                    <span class="material-icons-outlined">check</span>
+                                <button class="action-btn btn-approve" ${disabled} style="${opacity}" onclick="app.approveCuti(${cuti.id})" title="Setujui">
+                                    <span class="material-icons-outlined text-lg">check</span>
                                 </button>
-                                <button class="action-btn reject ${isDisabled ? 'disabled' : ''}" data-id='${item.id}' data-action='reject' ${isDisabled ? 'disabled' : ''}>
-                                    <span class="material-icons-outlined">close</span>
+                                <button class="action-btn btn-reject" ${disabled} style="${opacity}" onclick="app.openRejectModal(${cuti.id})" title="Tolak">
+                                    <span class="material-icons-outlined text-lg">close</span>
                                 </button>
                             </div>
                         </td>
                     `;
-                    tableBody.appendChild(row);
-
-                    // Mobile Card
-                    const card = document.createElement('div');
-                    card.className = 'bg-white rounded-lg border border-border-light p-4 shadow-sm';
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <h4 class="font-semibold text-base">${formattedDate}</h4>
-                                <p class="text-sm text-text-muted-light">${item.durasi} hari</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="action-btn approve ${isDisabled ? 'disabled' : ''}" data-id='${item.id}' data-action='approve' ${isDisabled ? 'disabled' : ''}>
-                                    <span class="material-icons-outlined">check</span>
-                                </button>
-                                <button class="action-btn reject ${isDisabled ? 'disabled' : ''}" data-id='${item.id}' data-action='reject' ${isDisabled ? 'disabled' : ''}>
-                                    <span class="material-icons-outlined">close</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <p class="text-sm text-gray-700">${item.keterangan}</p>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-xs text-text-muted-light">No</p>
-                                <p class="font-medium text-sm">${globalIndex}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-text-muted-light">Status</p>
-                                <div>${statusBadge}</div>
-                            </div>
-                        </div>
-                    `;
-                    mobileCards.appendChild(card);
+                    this.dom.tableBody.appendChild(tr);
                 });
+            },
 
-                document.getElementById('cutiCount').textContent = filteredData.length;
-            }
+            approveCuti: function(id) {
+                if (!confirm('Setujui pengajuan cuti ini?')) return;
 
-            function renderCutiPagination() {
-                const filteredData = getFilteredCutiData();
-                const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-                renderPagination('cuti', totalPages, cutiCurrentPage);
-            }
+                const btn = document.querySelector(`button[onclick="app.approveCuti(${id})"]`);
+                const originalContent = btn.innerHTML;
+                
+                btn.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span>';
+                btn.disabled = true;
 
-            function getFilteredCutiData() {
-                return cutiData.filter(item => {
-                    const matchesSearch = !cutiSearchTerm ||
-                        item.keterangan.toLowerCase().includes(cutiSearchTerm.toLowerCase()) ||
-                        item.tanggal_mulai.includes(cutiSearchTerm);
-
-                    const matchesFilter = cutiActiveFilters.includes('all') ||
-                        cutiActiveFilters.includes(item.status);
-
-                    return matchesSearch && matchesFilter;
-                });
-            }
-
-            // ==================== GENERAL HELPER FUNCTIONS ====================
-            function paginateData(data, currentPage) {
-                const startIndex = (currentPage - 1) * itemsPerPage;
-                const endIndex = startIndex + itemsPerPage;
-                return data.slice(startIndex, endIndex);
-            }
-
-            function renderPagination(type, totalPages, currentPage) {
-                const pageNumbersContainer = document.getElementById(`${type}PageNumbers`);
-                const prevButton = document.getElementById(`${type}PrevPage`);
-                const nextButton = document.getElementById(`${type}NextPage`);
-
-                pageNumbersContainer.innerHTML = '';
-
-                for (let i = 1; i <= totalPages; i++) {
-                    const pageNumber = document.createElement('button');
-                    pageNumber.textContent = i;
-                    pageNumber.className = `desktop-page-btn ${i === currentPage ? 'active' : ''}`;
-                    pageNumber.addEventListener('click', () => goToPage(type, i));
-                    pageNumbersContainer.appendChild(pageNumber);
-                }
-
-                prevButton.disabled = currentPage === 1;
-                nextButton.disabled = currentPage === totalPages || totalPages === 0;
-
-                prevButton.onclick = () => goToPage(type, currentPage - 1);
-                nextButton.onclick = () => goToPage(type, currentPage + 1);
-            }
-
-            function goToPage(type, page) {
-                if (type === 'cuti') {
-                    cutiCurrentPage = page;
-                    initializeCuti();
-                }
-            }
-
-            function updateCutiStats() {
-                const totalPengajuan = cutiData.length;
-                const disetujui = cutiData.filter(c => c.status === 'disetujui').length;
-                const ditolak = cutiData.filter(c => c.status === 'ditolak').length;
-                const menunggu = cutiData.filter(c => c.status === 'menunggu').length;
-
-                document.getElementById('stat-total-pengajuan').textContent = totalPengajuan;
-                document.getElementById('stat-disetujui').textContent = disetujui;
-                document.getElementById('stat-ditolak').textContent = ditolak;
-                document.getElementById('stat-menunggu').textContent = menunggu;
-            }
-
-            // ==================== EVENT LISTENERS ====================
-            function attachEventListeners() {
-                // Search and Filter for Cuti
-                document.getElementById('searchCutiInput').addEventListener('input', debounce(function (e) {
-                    cutiSearchTerm = e.target.value.trim();
-                    cutiCurrentPage = 1;
-                    initializeCuti();
-                }, 300));
-
-                document.getElementById('filterCutiBtn').addEventListener('click', () => toggleDropdown('filterCutiDropdown'));
-                document.getElementById('applyCutiFilter').addEventListener('click', applyCutiFilter);
-                document.getElementById('resetCutiFilter').addEventListener('click', resetCutiFilter);
-
-                // Popup Close
-                document.querySelector('.minimal-popup-close').addEventListener('click', () => {
-                    document.getElementById('minimalPopup').classList.remove('show');
-                });
-
-                // Close dropdowns when clicking outside
-                document.addEventListener('click', function (e) {
-                    if (!e.target.closest('.relative')) {
-                        document.querySelectorAll('.filter-dropdown').forEach(d => d.classList.remove('show'));
-                    }
-                });
-
-                // Attach listeners to dynamically created buttons
-                document.body.addEventListener('click', function (e) {
-                    if (e.target.closest('.action-btn')) {
-                        const button = e.target.closest('.action-btn');
-                        const id = parseInt(button.dataset.id);
-                        const action = button.dataset.action;
+                fetch(window.appRoutes.gm_cuti.approve(id), {
+                    method: 'POST',
+                    headers: { 
+                        'X-CSRF-TOKEN': CSRF_TOKEN, 
+                        'Accept': 'application/json', 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({ _token: CSRF_TOKEN })
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        const idx = this.data.findIndex(d => d.id === id);
+                        if(idx !== -1) this.data[idx].status = 'disetujui';
                         
-                        if (action === 'approve') {
-                            approveCuti(id);
-                        } else if (action === 'reject') {
-                            rejectCuti(id);
-                        }
+                        this.showToast('Pengajuan disetujui', 'success');
+                        this.renderTable();
+                        this.refreshData();
+                    } else {
+                        this.showToast(data.message || 'Gagal menyetujui', 'error');
                     }
+                })
+                .catch(err => {
+                    console.error(err);
+                    this.showToast('Terjadi kesalahan koneksi', 'error');
+                })
+                .finally(() => {
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
                 });
-            }
+            },
 
-            // ==================== ACTION HANDLERS ====================
-            function approveCuti(id) {
-                const cutiIndex = cutiData.findIndex(c => c.id === id);
+            openRejectModal: function(id) {
+                this.currentId = id;
+                this.dom.rejectReason.value = '';
+                this.dom.rejectError.classList.add('hidden');
+                this.dom.rejectModal.classList.remove('hidden');
+                void this.dom.rejectModal.offsetWidth; 
+                this.dom.rejectModal.classList.add('open');
+            },
+
+            closeModal: function(id) {
+                const modal = document.getElementById(id);
+                modal.classList.remove('open');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            },
+
+            processReject: function() {
+                const reason = this.dom.rejectReason.value.trim();
+                if (!reason) {
+                    this.dom.rejectError.classList.remove('hidden');
+                    return;
+                }
+
+                const btn = this.dom.confirmRejectBtn;
+                const originalText = btn.textContent;
+                btn.textContent = 'Memproses...';
+                btn.disabled = true;
+
+                fetch(window.appRoutes.gm_cuti.reject(this.currentId), {
+                    method: 'POST',
+                    headers: { 
+                        'X-CSRF-TOKEN': CSRF_TOKEN, 
+                        'Accept': 'application/json', 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({ 
+                        alasan_penolakan: reason, 
+                        _token: CSRF_TOKEN 
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    this.closeModal('rejectModal');
+                    this.showToast('Pengajuan ditolak', 'warning');
+                    
+                    const idx = this.data.findIndex(d => d.id === this.currentId);
+                    if(idx !== -1) this.data[idx].status = 'ditolak';
+                    
+                    this.renderTable();
+                    this.refreshData();
+                })
+                .catch(err => {
+                    console.error(err);
+                    this.showToast('Gagal menolak pengajuan', 'error');
+                })
+                .finally(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                });
+            },
+
+            showToast: function(msg, type = 'success') {
+                const toast = this.dom.toast;
                 
-                if (cutiIndex !== -1) {
-                    simulateApiCall(() => {
-                        cutiData[cutiIndex].status = 'disetujui';
-                        initializeCuti();
-                        showMinimalPopup('Berhasil', 'Pengajuan cuti telah disetujui', 'success');
-                    });
-                }
-            }
-
-            function rejectCuti(id) {
-                const cutiIndex = cutiData.findIndex(c => c.id === id);
+                toast.className = 'toast bg-white shadow-xl rounded-lg px-6 py-4 flex items-center gap-3 min-w-[300px]';
                 
-                if (cutiIndex !== -1) {
-                    simulateApiCall(() => {
-                        cutiData[cutiIndex].status = 'ditolak';
-                        initializeCuti();
-                        showMinimalPopup('Berhasil', 'Pengajuan cuti telah ditolak', 'warning');
-                    });
+                if (type === 'success') { 
+                    toast.classList.add('success');
+                    this.dom.toastIcon.textContent = 'check_circle';
+                    this.dom.toastIcon.className = 'material-icons-outlined text-2xl text-green-500';
+                    this.dom.toastTitle.textContent = 'Berhasil';
                 }
-            }
-
-            // ==================== UI HELPER FUNCTIONS ====================
-            function toggleDropdown(dropdownId) {
-                document.getElementById(dropdownId).classList.toggle('show');
-            }
-
-            function applyCutiFilter() {
-                const filterAll = document.getElementById('filterCutiAll').checked;
-                const filterDisetujui = document.getElementById('filterCutiDisetujui').checked;
-                const filterMenunggu = document.getElementById('filterCutiMenunggu').checked;
-                const filterDitolak = document.getElementById('filterCutiDitolak').checked;
-
-                cutiActiveFilters = [];
-                if (filterAll) {
-                    cutiActiveFilters.push('all');
-                } else {
-                    if (filterDisetujui) cutiActiveFilters.push('disetujui');
-                    if (filterMenunggu) cutiActiveFilters.push('menunggu');
-                    if (filterDitolak) cutiActiveFilters.push('ditolak');
+                else if (type === 'warning') { 
+                    toast.classList.add('warning');
+                    this.dom.toastIcon.textContent = 'warning';
+                    this.dom.toastIcon.className = 'material-icons-outlined text-2xl text-amber-500';
+                    this.dom.toastTitle.textContent = 'Perhatian';
                 }
-                cutiCurrentPage = 1;
-                initializeCuti();
-                toggleDropdown('filterCutiDropdown');
-                showMinimalPopup('Filter Diterapkan', `Menampilkan ${getFilteredCutiData().length} pengajuan`, 'success');
-            }
-
-            function resetCutiFilter() {
-                document.getElementById('filterCutiAll').checked = true;
-                document.getElementById('filterCutiDisetujui').checked = false;
-                document.getElementById('filterCutiMenunggu').checked = false;
-                document.getElementById('filterCutiDitolak').checked = false;
-                cutiActiveFilters = ['all'];
-                cutiCurrentPage = 1;
-                initializeCuti();
-                toggleDropdown('filterCutiDropdown');
-                showMinimalPopup('Filter Direset', 'Menampilkan semua pengajuan', 'success');
-            }
-
-            function showMinimalPopup(title, message, type = 'success') {
-                const popup = document.getElementById('minimalPopup');
-                const popupTitle = popup.querySelector('.minimal-popup-title');
-                const popupMessage = popup.querySelector('.minimal-popup-message');
-                const popupIcon = popup.querySelector('.minimal-popup-icon span');
-
-                popupTitle.textContent = title;
-                popupMessage.textContent = message;
-                popup.className = `minimal-popup show ${type}`;
-
-                if (type === 'success') popupIcon.textContent = 'check';
-                else if (type === 'error') popupIcon.textContent = 'error';
-                else if (type === 'warning') popupIcon.textContent = 'warning';
-
+                else { 
+                    toast.classList.add('error');
+                    this.dom.toastIcon.textContent = 'error';
+                    this.dom.toastIcon.className = 'material-icons-outlined text-2xl text-red-500';
+                    this.dom.toastTitle.textContent = 'Gagal';
+                }
+                
+                this.dom.toastMessage.textContent = msg;
+                toast.classList.add('show');
+                
                 setTimeout(() => {
-                    popup.classList.remove('show');
+                    toast.classList.remove('show');
                 }, 3000);
             }
-
-            function simulateApiCall(callback, shouldFail = false) {
-                // Show loading state
-                const buttons = document.querySelectorAll('.action-btn:not(.disabled)');
-                buttons.forEach(btn => {
-                    btn.disabled = true;
-                    btn.style.opacity = '0.5';
-                });
-
-                setTimeout(() => {
-                    // Randomly fail for demonstration (10% chance)
-                    if (Math.random() < 0.1 || shouldFail) {
-                        showMinimalPopup('Error', 'Terjadi kesalahan pada server. Silakan coba lagi.', 'error');
-                    } else {
-                        callback();
-                    }
-                    // Reset button state
-                    buttons.forEach(btn => {
-                        btn.disabled = false;
-                        btn.style.opacity = '';
-                    });
-                }, 800); // Simulate network delay
-            }
-
-            function debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                };
-            }
-        });
+        };
     </script>
 </body>
-
 </html>

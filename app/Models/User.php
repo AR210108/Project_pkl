@@ -10,39 +10,47 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'name',
         'email',
         'password',
         'role',
         'divisi',
-        // ... kolom lainnya
+        'sisa_cuti', // Penting untuk perhitungan cuti
     ];
 
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array<int, string>
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
 
     /**
-     * Relasi ke tabel karyawan (satu user memiliki satu data karyawan)
-     */
-    public function karyawan()
-    {
-        return $this->hasOne(Karyawan::class);
-    }
-
-    /**
-     * Relasi ke tabel cuti melalui karyawan
+     * Relasi langsung ke tabel cuti
+     * [REVISI] Tidak lagi melalui Karyawan, langsung user_id
      */
     public function cuti()
     {
-        return $this->hasManyThrough(Cuti::class, Karyawan::class);
+        return $this->hasMany(Cuti::class, 'user_id');
     }
 
     /**
@@ -204,4 +212,10 @@ class User extends Authenticatable
         return $this->belongsToMany(Pengumuman::class, 'pengumuman_user', 'user_id', 'pengumuman_id')
             ->withTimestamps();
     }
+    
+    // Opsional: Hapus atau komentari relasi karyawan() jika tidak digunakan lagi
+    // public function karyawan()
+    // {
+    //     return $this->hasOne(Karyawan::class);
+    // }
 }
