@@ -4,8 +4,15 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Kelola Tugas</title>
+    
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     
     <!-- Tailwind Configuration -->
@@ -106,7 +113,7 @@
         .main-content {
             width: 100%;
             min-height: 100vh;
-            margin-left: 0; /* Mobile: No margin */
+            margin-left: 0;
             transition: margin-left 0.3s ease;
             position: relative;
             z-index: 10;
@@ -183,13 +190,29 @@
         .desktop-nav-btn:hover:not(:disabled) { background-color: #e2e8f0; }
         .desktop-nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        @media (max-width: 767px) { .desktop-only { display: none !important; } .mobile-cards { display: block !important; } .desktop-table { display: none !important; } .desktop-pagination { display: none !important; } 
-        @media (min-width: 768px) { .mobile-only { display: none !important; } .mobile-cards { display: none !important; } .desktop-table { display: block !important; } 
+        @media (max-width: 767px) { 
+            .desktop-only { display: none !important; } 
+            .mobile-cards { display: block !important; } 
+            .desktop-table { display: none !important; } 
+            .desktop-pagination { display: none !important; } 
+        }
+        @media (min-width: 768px) { 
+            .mobile-only { display: none !important; } 
+            .mobile-cards { display: none !important; } 
+            .desktop-table { display: block !important; } 
+        }
 
         .hamburger-line { transition: all 0.3s ease-in-out; transform-origin: center; }
         .hamburger-active .line1 { transform: rotate(45deg) translate(5px, 6px); }
         .hamburger-active .line2 { opacity: 0; }
         .hamburger-active .line3 { transform: rotate(-45deg) translate(5px, -6px); }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 
@@ -202,9 +225,68 @@
     <div class="app-container">
         
         <!-- SIDEBAR SECTION -->
-         <div class="sidebar">
-            @include('manager_divisi/templet/sider')
-        </div>
+        <aside id="sidebar" class="sidebar-fixed">
+            <!-- Sidebar akan diisi oleh template Laravel -->
+            @if(auth()->check())
+            <div class="sidebar-header">
+                <img src="{{ asset('storage/logo.png') }}" alt="Logo" />
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                    <span class="material-icons-outlined mr-3">dashboard</span>
+                    Dashboard
+                </a>
+                
+                <a href="{{ route('tasks.index') }}" class="nav-item {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
+                    <span class="material-icons-outlined mr-3">task_alt</span>
+                    Kelola Tugas
+                </a>
+                
+                <a href="{{ route('karyawan.index') }}" class="nav-item {{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
+                    <span class="material-icons-outlined mr-3">people</span>
+                    Karyawan
+                </a>
+                
+                <a href="{{ route('absensi.index') }}" class="nav-item {{ request()->routeIs('absensi.*') ? 'active' : '' }}">
+                    <span class="material-icons-outlined mr-3">schedule</span>
+                    Absensi
+                </a>
+                
+                <a href="{{ route('pengumuman.index') }}" class="nav-item {{ request()->routeIs('pengumuman.*') ? 'active' : '' }}">
+                    <span class="material-icons-outlined mr-3">announcement</span>
+                    Pengumuman
+                </a>
+                
+                <div class="mt-auto"></div>
+                
+                <a href="{{ route('profile') }}" class="nav-item {{ request()->routeIs('profile') ? 'active' : '' }}">
+                    <span class="material-icons-outlined mr-3">person</span>
+                    Profile
+                </a>
+                
+                <form method="POST" action="{{ route('logout') }}" id="logout-form">
+                    @csrf
+                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-item text-red-600 hover:bg-red-50">
+                        <span class="material-icons-outlined mr-3">logout</span>
+                        Logout
+                    </a>
+                </form>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span class="material-icons-outlined text-primary">person</span>
+                    </div>
+                    <div>
+                        <p class="font-medium">{{ auth()->user()->name }}</p>
+                        <p class="text-sm text-gray-600">{{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}</p>
+                    </div>
+                </div>
+            </div>
+            @endif
+        </aside>
 
         <!-- MAIN CONTENT -->
         <div class="main-content">
@@ -220,9 +302,87 @@
 
             <main class="flex-1 flex flex-col">
                 <div class="flex-1 p-3 sm:p-8">
-                    <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">
-                        <span id="pageTitle">Kelola Tugas</span>
-                    </h2>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-8 gap-4">
+                        <h2 class="text-xl sm:text-3xl font-bold">
+                            Kelola Tugas
+                            @if(auth()->user()->divisi)
+                            <span class="text-lg text-gray-600">- Divisi {{ auth()->user()->divisi }}</span>
+                            @endif
+                        </h2>
+                        
+                        <div class="flex items-center gap-3">
+                            @if(in_array(auth()->user()->role, ['general_manager', 'manager_divisi']))
+                            <button id="buatTugasBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2">
+                                <span class="material-icons-outlined">add</span>
+                                <span class="hidden sm:inline">Buat Tugas</span>
+                                <span class="sm:hidden">Buat</span>
+                            </button>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="stat-card">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm text-gray-600">Total Tugas</p>
+                                    <p class="text-2xl font-bold text-gray-800" id="totalTasks">0</p>
+                                </div>
+                                <div class="p-2 bg-blue-100 rounded-lg">
+                                    <span class="material-icons-outlined text-blue-600">task_alt</span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <p class="text-xs text-gray-500">Divisi Anda</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm text-gray-600">Dalam Proses</p>
+                                    <p class="text-2xl font-bold text-yellow-600" id="inProgressTasks">0</p>
+                                </div>
+                                <div class="p-2 bg-yellow-100 rounded-lg">
+                                    <span class="material-icons-outlined text-yellow-600">hourglass_empty</span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <p class="text-xs text-gray-500">Belum selesai</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm text-gray-600">Selesai</p>
+                                    <p class="text-2xl font-bold text-green-600" id="completedTasks">0</p>
+                                </div>
+                                <div class="p-2 bg-green-100 rounded-lg">
+                                    <span class="material-icons-outlined text-green-600">check_circle</span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <p class="text-xs text-gray-500">Telah diselesaikan</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm text-gray-600">Terlambat</p>
+                                    <p class="text-2xl font-bold text-red-600" id="overdueTasks">0</p>
+                                </div>
+                                <div class="p-2 bg-red-100 rounded-lg">
+                                    <span class="material-icons-outlined text-red-600">warning</span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <p class="text-xs text-gray-500">Lewat deadline</p>
+                            </div>
+                        </div>
+                    </div>
                     
                     <!-- Filters -->
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -239,21 +399,22 @@
                                 <option value="dibatalkan">Dibatalkan</option>
                             </select>
                             
+                            <select id="priorityFilter" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
+                                <option value="all">Semua Prioritas</option>
+                                <option value="high">Tinggi</option>
+                                <option value="medium">Sedang</option>
+                                <option value="low">Rendah</option>
+                            </select>
+                            
                             <button id="refreshBtn" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none flex items-center gap-2">
                                 <span class="material-icons-outlined">refresh</span>
                                 <span class="hidden sm:inline">Refresh</span>
-                            </button>
-                            
-                            <button id="buatTugasBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
-                                <span class="material-icons-outlined">add</span>
-                                <span class="hidden sm:inline">Buat Tugas</span>
-                                <span class="sm:hidden">Buat</span>
                             </button>
                         </div>
                     </div>
                     
                     <!-- Table Panel -->
-                    <div class="panel">
+                    <div class="panel fade-in">
                         <div class="panel-header">
                             <h3 class="flex items-center gap-2 font-bold text-gray-800">
                                 <span class="material-icons-outlined text-primary">task_alt</span>
@@ -283,6 +444,7 @@
                                                 <th style="min-width: 150px;">Ditugaskan Kepada</th>
                                                 <th style="min-width: 100px;">Divisi</th>
                                                 <th style="min-width: 100px;">Status</th>
+                                                <th style="min-width: 100px;">Prioritas</th>
                                                 <th style="min-width: 180px; text-align: center;">Aksi</th>
                                             </tr>
                                         </thead>
@@ -298,6 +460,12 @@
                             <div id="noDataMessage" class="text-center py-8" style="display: none;">
                                 <span class="material-icons-outlined text-gray-400 text-4xl mb-2">task_alt</span>
                                 <p class="text-gray-600">Tidak ada data tugas</p>
+                                @if(in_array(auth()->user()->role, ['general_manager', 'manager_divisi']))
+                                <button id="buatTugasBtnMobile" class="btn-primary mt-4">
+                                    <span class="material-icons-outlined">add</span>
+                                    Buat Tugas Pertama
+                                </button>
+                                @endif
                             </div>
                             
                             <!-- Pagination -->
@@ -316,7 +484,7 @@
                     </div>
                 </div>
                 <footer class="text-center p-4 bg-gray-100 text-gray-600 text-sm border-t border-gray-300">
-                    Copyright ©2025 oleh digicity.id
+                    Copyright ©{{ date('Y') }} oleh digicity.id
                 </footer>
             </main>
         </div>
@@ -332,6 +500,7 @@
                 </div>
                 <div class="modal-content"></div>
             </div>
+        </div>
     </div>
 
     <!-- Toast -->
@@ -340,56 +509,41 @@
         <button id="closeToast" class="ml-2 text-white hover:text-gray-200"><span class="material-icons-outlined">close</span></button>
     </div>
 
+    <!-- JavaScript -->
     <script>
+        // CSRF Token untuk AJAX
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
         // State Management
         const state = {
             currentPage: 1,
             itemsPerPage: 10,
             totalPages: 1,
-            allTasks: [
-                { id: 1, judul: 'Fix Bug Login Page', deskripsi: 'Perbaiki error saat login user admin pada browser Safari', deadline: '2023-12-31', assigned_to: 101, assigned_user: { name: 'Budi Santoso' }, target_divisi: 'Programmer', status: 'proses', is_overdue: false },
-                { id: 2, judul: 'Update Homepage Banner', deskripsi: 'Ubah banner dan teks hero section sesuai request client', deadline: '2024-01-15', assigned_to: 102, assigned_user: { name: 'Siti Aminah' }, target_divisi: 'Desainer', status: 'pending', is_overdue: false },
-                { id: 3, judul: 'SEO Optimization', deskripsi: 'Optimasi kata kunci untuk landing page', deadline: '2024-01-10', assigned_to: 101, assigned_user: { name: 'Budi Santoso' }, target_divisi: 'Marketing', status: 'selesai', is_overdue: false },
-                { id: 4, judul: 'Buat API Absensi', deskripsi: 'Buat endpoint untuk absensi masuk dan pulang', deadline: '2023-11-01', assigned_to: 101, assigned_user: { name: 'Budi Santoso' }, target_divisi: 'Programmer', status: 'dibatalkan', is_overdue: true },
-                { id: 5, judul: 'Desain Iklan Sosmed', deskripsi: 'Buat desain banner untuk Instagram dan Facebook', deadline: '2024-02-01', assigned_to: 102, assigned_user: { name: 'Siti Aminah' }, target_divisi: 'Desainer', status: 'pending', is_overdue: false },
-                { id: 6, judul: 'Maintenance Server', deskripsi: 'Cek performansi server dan backup database', deadline: '2023-12-20', assigned_to: 101, assigned_user: { name: 'Budi Santoso' }, target_divisi: 'Programmer', status: 'selesai', is_overdue: false },
-            ],
+            allTasks: [],
             filteredTasks: [],
-            currentUser: { id: 1, name: 'Manager Divisi', role: 'manager_divisi', divisi: 'Programmer' }, // Mock Data
-            currentDivisi: 'Programmer',
-            currentRole: 'manager_divisi',
-            karyawanList: [
-                { id: 101, name: 'Budi Santoso', email: 'budi@mail.com', divisi: 'Programmer' },
-                { id: 102, name: 'Siti Aminah', email: 'siti@mail.com', divisi: 'Desainer' },
-                { id: 103, name: 'Rudi Hartono', email: 'rudi@mail.com', divisi: 'Marketing' }
-            ],
-            divisiList: ['Programmer', 'Desainer', 'Marketing']
+            currentUser: {
+                id: {{ auth()->id() }},
+                name: '{{ auth()->user()->name }}',
+                role: '{{ auth()->user()->role }}',
+                divisi: '{{ auth()->user()->divisi }}'
+            },
+            karyawanList: [],
+            isLoading: false
         };
-
-        const buildUrl = (template, id = null) => template; // Dummy function, tidak ada route backend
 
         // Utility Functions
         const utils = {
-            getStatusClass: (status) => `status-${status}`,
-            getStatusText: (status) => ({ 'pending': 'Pending', 'proses': 'Dalam Proses', 'selesai': 'Selesai', 'dibatalkan': 'Dibatalkan' }[status] || status),
-            getDivisiClass: (divisi) => {
-                if (!divisi) return 'badge-programmer';
-                const d = divisi.toLowerCase();
-                if (d.includes('marketing')) return 'badge-marketing';
-                if (d.includes('program')) return 'badge-programmer';
-                if (d.includes('desain')) return 'badge-desainer';
-                return 'badge-programmer';
-            },
-            formatDate: (dateString) => dateString ? new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-',
-            formatDateTime: (dateString) => dateString ? new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-',
             showToast: (message, type = 'success') => {
                 const t = document.getElementById('toast');
                 const m = document.getElementById('toastMessage');
-                t.style.backgroundColor = type === 'error' ? '#ef4444' : '#10b981';
+                t.style.backgroundColor = type === 'error' ? '#ef4444' : 
+                                         type === 'warning' ? '#f59e0b' : 
+                                         type === 'info' ? '#3b82f6' : '#10b981';
                 m.textContent = message;
                 t.classList.remove('translate-y-20', 'opacity-0');
                 setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 3000);
             },
+            
             showLoading: (show) => {
                 const els = { 
                     l: document.getElementById('loadingIndicator'), 
@@ -399,197 +553,420 @@
                     dp: document.getElementById('desktopPaginationContainer'), 
                     mp: document.querySelector('.mobile-pagination') 
                 };
-                if (show) Object.values(els).forEach(e => e.style.display = 'none');
-                else els.l.style.display = 'none';
+                
+                if (show) {
+                    els.l.style.display = 'block';
+                    els.d.style.display = 'none';
+                    els.m.style.display = 'none';
+                    els.n.style.display = 'none';
+                    els.dp.style.display = 'none';
+                    els.mp.style.display = 'none';
+                } else {
+                    els.l.style.display = 'none';
+                }
             },
+            
             createModal: (title, content, onSubmit = null) => {
                 const tpl = document.getElementById('modalTemplate').cloneNode(true);
-                tpl.id = 'activeModal'; tpl.style.display = 'flex';
+                tpl.id = 'activeModal';
+                tpl.style.display = 'flex';
                 tpl.querySelector('.modal-title').textContent = title;
                 tpl.querySelector('.modal-content').innerHTML = content;
+                
                 const closeModal = () => tpl.remove();
                 tpl.querySelectorAll('.close-modal').forEach(b => b.addEventListener('click', closeModal));
                 tpl.addEventListener('click', (e) => e.target === tpl && closeModal());
+                
                 if (onSubmit) {
                     const f = tpl.querySelector('form');
                     f?.addEventListener('submit', async (e) => {
                         e.preventDefault();
-                        const data = Object.fromEntries(new FormData(f).entries());
-                        try { await onSubmit(data); closeModal(); } catch (err) { console.error(err); }
+                        const formData = new FormData(f);
+                        try { 
+                            await onSubmit(formData); 
+                            closeModal(); 
+                        } catch (err) { 
+                            console.error(err);
+                            utils.showToast(err.message || 'Terjadi kesalahan', 'error');
+                        }
                     });
                 }
-                document.body.appendChild(tpl); return tpl;
+                
+                document.body.appendChild(tpl);
+                return tpl;
             },
-            setupUIByRole: () => {
-                document.getElementById('pageTitle').textContent = `Kelola Tugas - ${state.currentDivisi}`;
-                document.getElementById('buatTugasBtn').style.display = 'flex';
+            
+            formatDate: (dateString) => {
+                if (!dateString) return '-';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('id-ID', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            },
+            
+            getStatusClass: (status) => {
+                return `status-${status}`;
+            },
+            
+            getStatusText: (status) => {
+                const statuses = {
+                    'pending': 'Pending',
+                    'proses': 'Dalam Proses',
+                    'selesai': 'Selesai',
+                    'dibatalkan': 'Dibatalkan'
+                };
+                return statuses[status] || status;
+            },
+            
+            getPriorityClass: (priority) => {
+                const colors = {
+                    'high': 'bg-red-100 text-red-800',
+                    'medium': 'bg-yellow-100 text-yellow-800',
+                    'low': 'bg-green-100 text-green-800'
+                };
+                return colors[priority] || 'bg-gray-100 text-gray-800';
+            },
+            
+            getPriorityText: (priority) => {
+                const priorities = {
+                    'high': 'Tinggi',
+                    'medium': 'Sedang',
+                    'low': 'Rendah'
+                };
+                return priorities[priority] || priority;
+            },
+            
+            getDivisiClass: (divisi) => {
+                if (!divisi) return 'badge-programmer';
+                const d = divisi.toLowerCase();
+                if (d.includes('marketing')) return 'badge-marketing';
+                if (d.includes('desain')) return 'badge-desainer';
+                return 'badge-programmer';
             }
         };
 
-        // API Functions (NO ROUTES - SEMUA MOCK)
+        // API Functions
         const api = {
             request: async (url, options = {}) => {
-                // Tidak ada request network, simulasi delay
-                return new Promise(resolve => setTimeout(() => resolve({ success: true }), 500)); 
+                const defaultOptions = {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    credentials: 'same-origin'
+                };
+                
+                const mergedOptions = { ...defaultOptions, ...options };
+                
+                try {
+                    const response = await fetch(url, mergedOptions);
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Terjadi kesalahan');
+                    }
+                    
+                    return data;
+                } catch (error) {
+                    console.error('API Error:', error);
+                    throw error;
+                }
             },
+            
             fetchTasks: async () => {
                 utils.showLoading(true);
                 try {
-                    // Tidak ada endpoint, langsung gunakan data dummy di state.allTasks
-                    await api.request();
-                    
+                    const data = await api.request('{{ route("api.tasks.index") }}');
+                    state.allTasks = data.tasks || [];
                     state.filteredTasks = [...state.allTasks];
                     render.renderTable();
+                    render.updateStats();
                 } catch (error) {
-                    utils.showToast('Gagal memuat data', 'error');
-                    state.allTasks = []; 
-                    state.filteredTasks = []; 
+                    utils.showToast('Gagal memuat data: ' + error.message, 'error');
+                    state.allTasks = [];
+                    state.filteredTasks = [];
                     render.renderTable();
-                } finally { utils.showLoading(false); }
-            },
-            createTask: async (data) => {
-                // Tidak ada endpoint, manipulasi local state saja
-                const newTask = { 
-                    id: Date.now(), 
-                    ...data, 
-                    status: 'pending', 
-                    assigned_user: state.karyawanList.find(k => k.id == data.assigned_to),
-                    target_divisi: state.karyawanList.find(k => k.id == data.assigned_to)?.divisi,
-                    deadline: data.deadline // Simpan format string asli
-                };
-                state.allTasks.unshift(newTask);
-                state.filteredTasks = [...state.allTasks];
-                render.renderTable();
-                utils.showToast('Tugas dibuat');
-            },
-            deleteTask: async (id) => {
-                state.allTasks = state.allTasks.filter(t => t.id != id);
-                state.filteredTasks = [...state.allTasks];
-                render.renderTable();
-                utils.showToast('Tugas dihapus');
-            },
-            getTaskDetail: async (id) => {
-                return { success: true, task: state.allTasks.find(t => t.id == id) };
-            },
-            updateTask: async (id, data) => {
-                const idx = state.allTasks.findIndex(t => t.id == id);
-                if (idx !== -1) {
-                    state.allTasks[idx] = { ...state.allTasks[idx], ...data };
-                    state.filteredTasks = [...state.allTasks];
-                    render.renderTable();
-                    utils.showToast('Tugas diupdate');
+                } finally {
+                    utils.showLoading(false);
                 }
             },
-            // --- FITUR BARU: KOMENTAR ---
-            fetchComments: async (taskId) => {
-                // Mockup data komentar kosong
-                return []; 
+            
+            fetchKaryawan: async () => {
+                try {
+                    const data = await api.request('{{ route("api.users.index") }}?role=karyawan');
+                    state.karyawanList = data.users || [];
+                } catch (error) {
+                    console.error('Failed to fetch karyawan:', error);
+                }
             },
+            
+            createTask: async (formData) => {
+                try {
+                    const response = await api.request('{{ route("api.tasks.store") }}', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    utils.showToast('Tugas berhasil dibuat');
+                    await api.fetchTasks();
+                    return response;
+                } catch (error) {
+                    throw error;
+                }
+            },
+            
+            updateTask: async (id, formData) => {
+                try {
+                    const response = await api.request(`{{ route("api.tasks.update", ":id") }}`.replace(':id', id), {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-HTTP-Method-Override': 'PUT'
+                        }
+                    });
+                    
+                    utils.showToast('Tugas berhasil diperbarui');
+                    await api.fetchTasks();
+                    return response;
+                } catch (error) {
+                    throw error;
+                }
+            },
+            
+            deleteTask: async (id) => {
+                try {
+                    const response = await api.request(`{{ route("api.tasks.destroy", ":id") }}`.replace(':id', id), {
+                        method: 'DELETE'
+                    });
+                    
+                    utils.showToast('Tugas berhasil dihapus');
+                    await api.fetchTasks();
+                    return response;
+                } catch (error) {
+                    throw error;
+                }
+            },
+            
+            getTaskDetail: async (id) => {
+                try {
+                    return await api.request(`{{ route("api.tasks.show", ":id") }}`.replace(':id', id));
+                } catch (error) {
+                    throw error;
+                }
+            },
+            
+            submitTask: async (id, formData) => {
+                try {
+                    const response = await api.request(`{{ route("api.tasks.submit", ":id") }}`.replace(':id', id), {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    utils.showToast('Tugas berhasil disubmit');
+                    await api.fetchTasks();
+                    return response;
+                } catch (error) {
+                    throw error;
+                }
+            },
+            
+            fetchComments: async (taskId) => {
+                try {
+                    const data = await api.request(`{{ route("api.tasks.comments", ":id") }}`.replace(':id', taskId));
+                    return data.comments || [];
+                } catch (error) {
+                    console.error('Failed to fetch comments:', error);
+                    return [];
+                }
+            },
+            
             storeComment: async (taskId, content) => {
-                // Mockup pengiriman komentar
-                return { success: true }; 
+                try {
+                    const response = await api.request(`{{ route("api.tasks.comments.store", ":id") }}`.replace(':id', taskId), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ content })
+                    });
+                    
+                    utils.showToast('Komentar berhasil ditambahkan');
+                    return response;
+                } catch (error) {
+                    throw error;
+                }
             }
         };
 
         // Render Functions
         const render = {
             filterTasks: () => {
-                const s = document.getElementById('searchInput').value.toLowerCase();
-                const st = document.getElementById('statusFilter').value;
+                const search = document.getElementById('searchInput').value.toLowerCase();
+                const status = document.getElementById('statusFilter').value;
+                const priority = document.getElementById('priorityFilter').value;
                 
-                state.filteredTasks = state.allTasks.filter(t => {
-                    const matchS = t.judul?.toLowerCase().includes(s) || t.deskripsi?.toLowerCase().includes(s);
-                    const matchSt = st === 'all' || t.status === st;
-                    return matchS && matchSt;
+                state.filteredTasks = state.allTasks.filter(task => {
+                    const matchSearch = task.judul?.toLowerCase().includes(search) || 
+                                       task.deskripsi?.toLowerCase().includes(search) ||
+                                       task.assignee_name?.toLowerCase().includes(search);
+                    const matchStatus = status === 'all' || task.status === status;
+                    const matchPriority = priority === 'all' || task.priority === priority;
+                    
+                    return matchSearch && matchStatus && matchPriority;
                 });
-                state.currentPage = 1; render.renderTable();
+                
+                state.currentPage = 1;
+                render.renderTable();
             },
+            
             renderTable: () => {
                 const start = (state.currentPage - 1) * state.itemsPerPage;
                 const end = Math.min(start + state.itemsPerPage, state.filteredTasks.length);
                 const tasks = state.filteredTasks.slice(start, end);
                 
                 document.getElementById('totalCount').textContent = state.filteredTasks.length;
-                document.getElementById('panelTitle').textContent = `Tugas Divisi ${state.currentDivisi}`;
+                document.getElementById('panelTitle').textContent = `Tugas ${state.currentUser.divisi}`;
                 
-                const tb = document.getElementById('desktopTableBody'); tb.innerHTML = '';
+                // Render desktop table
+                const tbody = document.getElementById('desktopTableBody');
+                tbody.innerHTML = '';
                 
                 if (tasks.length === 0) {
                     document.getElementById('noDataMessage').style.display = 'block';
-                    ['desktopTable','desktopPaginationContainer'].forEach(id => document.getElementById(id).style.display = 'none');
+                    document.getElementById('desktopTable').style.display = 'none';
+                    document.getElementById('mobile-cards').style.display = 'none';
+                    document.getElementById('desktopPaginationContainer').style.display = 'none';
                     document.querySelector('.mobile-pagination').style.display = 'none';
                     return;
                 }
                 
-                const isOwner = true; // Di prototype, semua user bisa edit
-                
-                tasks.forEach((t, i) => {
-                    const assigneeName = t.assigned_user?.name || state.karyawanList.find(k=>k.id==t.assigned_to)?.name || '-';
-                    tb.innerHTML += `
-                        <tr>
-                            <td>${start+i+1}</td>
-                            <td class="font-medium">${t.judul}</td>
-                            <td class="truncate-text" title="${t.deskripsi}">${t.deskripsi.substring(0,50)}...</td>
-                            <td class="${t.is_overdue?'text-red-600':''}">${utils.formatDate(t.deadline)}</td>
-                            <td>${assigneeName}</td>
-                            <td><span class="badge ${utils.getDivisiClass(t.target_divisi)}">${t.target_divisi||'-'}</span></td>
-                            <td><span class="badge ${utils.getStatusClass(t.status)}">${utils.getStatusText(t.status)}</span></td>
-                            <td class="text-center">
-                                <div class="flex justify-center gap-2">
-                                    <button onclick="modal.showDetail(${t.id})" class="p-2 rounded-full hover:bg-blue-100"><span class="material-icons-outlined text-blue-600">visibility</span></button>
-                                    <button onclick="modal.showEdit(${t.id})" class="p-2 rounded-full hover:bg-blue-100"><span class="material-icons-outlined text-green-600">edit</span></button>
-                                    <button onclick="modal.showDelete(${t.id})" class="p-2 rounded-full hover:bg-red-100"><span class="material-icons-outlined text-red-600">delete</span></button>
-                                </div>
-                            </td>
-                        </tr>`;
-                });
-
-                // Mobile Cards
-                document.getElementById('mobile-cards').innerHTML = tasks.map(t => {
-                     const assigneeName = t.assigned_user?.name || state.karyawanList.find(k=>k.id==t.assigned_to)?.name || '-';
-                    return `
-                        <div class="bg-white rounded-lg border p-4 shadow-sm">
-                            <div class="flex justify-between mb-2">
-                                <h4 class="font-semibold">${t.judul}</h4>
-                                <div class="flex gap-1">
-                                    <button onclick="modal.showDetail(${t.id})"><span class="material-icons-outlined text-blue-600">visibility</span></button>
-                                    ${isOwner?`<button onclick="modal.showEdit(${t.id})"><span class="material-icons-outlined text-green-600">edit</span></button>`:''}
-                                </div>
+                tasks.forEach((task, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${start + index + 1}</td>
+                        <td class="font-medium">${task.judul}</td>
+                        <td class="truncate-text" title="${task.deskripsi}">${task.deskripsi?.substring(0, 50) || ''}...</td>
+                        <td class="${task.is_overdue ? 'text-red-600 font-semibold' : ''}">
+                            ${utils.formatDate(task.deadline)}
+                            ${task.is_overdue ? '<br><span class="text-xs text-red-500">Terlambat</span>' : ''}
+                        </td>
+                        <td>${task.assignee_name || '-'}</td>
+                        <td><span class="badge ${utils.getDivisiClass(task.target_divisi)}">${task.target_divisi || '-'}</span></td>
+                        <td><span class="badge ${utils.getStatusClass(task.status)}">${utils.getStatusText(task.status)}</span></td>
+                        <td><span class="badge ${utils.getPriorityClass(task.priority)}">${utils.getPriorityText(task.priority)}</span></td>
+                        <td class="text-center">
+                            <div class="flex justify-center gap-2">
+                                <button onclick="modal.showDetail(${task.id})" class="p-2 rounded-full hover:bg-blue-100" title="Detail">
+                                    <span class="material-icons-outlined text-blue-600">visibility</span>
+                                </button>
+                                ${state.currentUser.role !== 'karyawan' || task.assigned_to == state.currentUser.id ? `
+                                <button onclick="modal.showEdit(${task.id})" class="p-2 rounded-full hover:bg-green-100" title="Edit">
+                                    <span class="material-icons-outlined text-green-600">edit</span>
+                                </button>
+                                ` : ''}
+                                ${state.currentUser.role === 'general_manager' || 
+                                  (state.currentUser.role === 'manager_divisi' && task.target_divisi === state.currentUser.divisi) ? `
+                                <button onclick="modal.showDelete(${task.id})" class="p-2 rounded-full hover:bg-red-100" title="Hapus">
+                                    <span class="material-icons-outlined text-red-600">delete</span>
+                                </button>
+                                ` : ''}
                             </div>
-                            <div class="flex gap-2 mb-2"><span class="badge ${utils.getStatusClass(t.status)}">${utils.getStatusText(t.status)}</span></div>
-                            <p class="text-sm text-gray-600 truncate">${t.deskripsi}</p>
-                        </div>
+                        </td>
                     `;
-                }).join('');
-
+                    tbody.appendChild(row);
+                });
+                
+                // Render mobile cards
+                const mobileCards = document.getElementById('mobile-cards');
+                mobileCards.innerHTML = tasks.map(task => `
+                    <div class="bg-white rounded-lg border p-4 shadow-sm">
+                        <div class="flex justify-between mb-2">
+                            <h4 class="font-semibold text-gray-800">${task.judul}</h4>
+                            <div class="flex gap-1">
+                                <button onclick="modal.showDetail(${task.id})"><span class="material-icons-outlined text-blue-600">visibility</span></button>
+                                ${state.currentUser.role !== 'karyawan' || task.assigned_to == state.currentUser.id ? `
+                                <button onclick="modal.showEdit(${task.id})"><span class="material-icons-outlined text-green-600">edit</span></button>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <span class="badge ${utils.getStatusClass(task.status)}">${utils.getStatusText(task.status)}</span>
+                            <span class="badge ${utils.getPriorityClass(task.priority)}">${utils.getPriorityText(task.priority)}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2 truncate">${task.deskripsi?.substring(0, 80) || ''}...</p>
+                        <div class="flex justify-between items-center text-sm text-gray-500">
+                            <span>${task.assignee_name || 'Tidak ditugaskan'}</span>
+                            <span class="${task.is_overdue ? 'text-red-600 font-semibold' : ''}">
+                                ${utils.formatDate(task.deadline)}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Show appropriate containers
                 document.getElementById('noDataMessage').style.display = 'none';
                 document.getElementById('desktopTable').style.display = 'block';
-                document.getElementById('mobile-cards').style.display = window.innerWidth < 640 ? 'block' : 'none';
+                document.getElementById('mobile-cards').style.display = window.innerWidth < 768 ? 'block' : 'none';
                 render.updatePagination();
             },
+            
             updatePagination: () => {
                 state.totalPages = Math.ceil(state.filteredTasks.length / state.itemsPerPage);
-                const dp = document.getElementById('desktopPageNumbers'); dp.innerHTML='';
-                for(let i=1;i<=state.totalPages;i++){
-                    const b=document.createElement('button'); b.textContent=i;
-                    b.className=i===state.currentPage?'desktop-page-btn active':'desktop-page-btn';
-                    b.onclick=()=>{state.currentPage=i;render.renderTable();}; dp.appendChild(b);
-                }
-                document.getElementById('desktopPrevPage').disabled=state.currentPage===1;
-                document.getElementById('desktopNextPage').disabled=state.currentPage===state.totalPages;
                 
-                const mp=document.getElementById('pageNumbers'); mp.innerHTML='';
-                for(let i=1;i<=state.totalPages;i++){
-                    const b=document.createElement('button'); b.textContent=i;
-                    b.className=`w-8 h-8 rounded-full flex items-center justify-center text-sm ${i===state.currentPage?'bg-primary text-white':'bg-gray-200 text-gray-600'}`;
-                    b.onclick=()=>{state.currentPage=i;render.renderTable();}; mp.appendChild(b);
-                }
-                document.getElementById('prevPage').disabled=state.currentPage===1;
-                document.getElementById('nextPage').disabled=state.currentPage===state.totalPages;
+                // Desktop pagination
+                const desktopPages = document.getElementById('desktopPageNumbers');
+                desktopPages.innerHTML = '';
                 
-                const show = state.totalPages > 1;
-                document.getElementById('desktopPaginationContainer').style.display = show?'flex':'none';
-                document.querySelector('.mobile-pagination').style.display = (show && window.innerWidth<640)?'flex':'none';
+                for (let i = 1; i <= state.totalPages; i++) {
+                    const button = document.createElement('button');
+                    button.textContent = i;
+                    button.className = `desktop-page-btn ${i === state.currentPage ? 'active' : ''}`;
+                    button.onclick = () => {
+                        state.currentPage = i;
+                        render.renderTable();
+                    };
+                    desktopPages.appendChild(button);
+                }
+                
+                document.getElementById('desktopPrevPage').disabled = state.currentPage === 1;
+                document.getElementById('desktopNextPage').disabled = state.currentPage === state.totalPages;
+                
+                // Mobile pagination
+                const mobilePages = document.getElementById('pageNumbers');
+                mobilePages.innerHTML = '';
+                
+                for (let i = 1; i <= state.totalPages; i++) {
+                    const button = document.createElement('button');
+                    button.textContent = i;
+                    button.className = `w-8 h-8 rounded-full flex items-center justify-center text-sm ${i === state.currentPage ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'}`;
+                    button.onclick = () => {
+                        state.currentPage = i;
+                        render.renderTable();
+                    };
+                    mobilePages.appendChild(button);
+                }
+                
+                document.getElementById('prevPage').disabled = state.currentPage === 1;
+                document.getElementById('nextPage').disabled = state.currentPage === state.totalPages;
+                
+                // Show pagination if needed
+                const showPagination = state.totalPages > 1;
+                document.getElementById('desktopPaginationContainer').style.display = showPagination ? 'flex' : 'none';
+                document.querySelector('.mobile-pagination').style.display = (showPagination && window.innerWidth < 768) ? 'flex' : 'none';
+            },
+            
+            updateStats: () => {
+                const tasks = state.allTasks;
+                
+                document.getElementById('totalTasks').textContent = tasks.length;
+                document.getElementById('inProgressTasks').textContent = tasks.filter(t => t.status === 'proses').length;
+                document.getElementById('completedTasks').textContent = tasks.filter(t => t.status === 'selesai').length;
+                document.getElementById('overdueTasks').textContent = tasks.filter(t => t.is_overdue).length;
             }
         };
 
@@ -597,163 +974,311 @@
         const modal = {
             showDetail: async (id) => {
                 try {
-                    const t = await api.getTaskDetail(id);
-                    const assigneeName = t.assigned_user?.name || '-';
-                    
-                    // Komentar real-time (Mockup)
+                    const task = await api.getTaskDetail(id);
                     const comments = await api.fetchComments(id);
                     
-                    const commentsHtml = comments.length === 0 ? 
-                        `<p class="text-gray-500 text-sm italic text-center py-4">Belum ada komentar.</p>` : 
-                        comments.map(c => `
-                            <div class="bg-gray-50 p-3 rounded-lg mb-2 relative">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="font-semibold text-sm text-gray-800">${c.user?.name || 'User'}</span>
-                                    <span class="text-xs text-gray-500">${c.created_at ? utils.formatDateTime(c.created_at) : ''}</span>
+                    const commentsHtml = comments.length > 0 ? 
+                        comments.map(comment => `
+                            <div class="bg-gray-50 p-3 rounded-lg mb-2">
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-semibold text-sm text-gray-800">${comment.user?.name || 'User'}</span>
+                                        <span class="text-xs text-gray-500">${comment.formatted_created_at || ''}</span>
+                                    </div>
                                 </div>
-                                <p class="text-gray-700 text-sm">${c.isi_komentar}</p>
+                                <p class="text-gray-700 text-sm">${comment.content}</p>
                             </div>
-                        `).join('');
-
-                    utils.createModal('Detail Tugas', `
+                        `).join('') : 
+                        '<p class="text-gray-500 text-sm italic text-center py-4">Belum ada komentar.</p>';
+                    
+                    const modalContent = `
                         <div class="space-y-4">
                             <div class="grid grid-cols-2 gap-3">
-                                <div><h4 class="text-sm text-gray-600">Judul</h4><p class="font-medium">${t.judul}</p></div>
-                                <div><h4 class="text-sm text-gray-600">Deadline</h4><p>${utils.formatDate(t.deadline)}</p></div>
-                                <div><h4 class="text-sm text-gray-600">Status</h4><span class="badge ${utils.getStatusClass(t.status)}">${utils.getStatusText(t.status)}</span></div>
-                                <div><h4 class="text-sm text-gray-600">Kepada</h4><p>${assigneeName}</p></div>
+                                <div><h4 class="text-sm text-gray-600">Judul</h4><p class="font-medium">${task.judul}</p></div>
+                                <div><h4 class="text-sm text-gray-600">Deadline</h4><p class="${task.is_overdue ? 'text-red-600 font-semibold' : ''}">${utils.formatDate(task.deadline)}</p></div>
+                                <div><h4 class="text-sm text-gray-600">Status</h4><span class="badge ${utils.getStatusClass(task.status)}">${utils.getStatusText(task.status)}</span></div>
+                                <div><h4 class="text-sm text-gray-600">Prioritas</h4><span class="badge ${utils.getPriorityClass(task.priority)}">${utils.getPriorityText(task.priority)}</span></div>
+                                <div><h4 class="text-sm text-gray-600">Ditugaskan Kepada</h4><p>${task.assignee_name || '-'}</p></div>
+                                <div><h4 class="text-sm text-gray-600">Divisi</h4><p>${task.target_divisi || '-'}</p></div>
                             </div>
-                            <div><h4 class="text-sm text-gray-600">Deskripsi</h4><p class="mt-1 whitespace-pre-line">${t.deskripsi}</p></div>
                             
-                            <!-- BAGIAN KOMENTAR -->
+                            <div><h4 class="text-sm text-gray-600">Deskripsi</h4><p class="mt-1 whitespace-pre-line text-gray-700">${task.deskripsi}</p></div>
+                            
+                            ${task.catatan ? `
+                            <div><h4 class="text-sm text-gray-600">Catatan</h4><p class="mt-1 whitespace-pre-line text-gray-700">${task.catatan}</p></div>
+                            ` : ''}
+                            
+                            ${task.submission_notes ? `
+                            <div><h4 class="text-sm text-gray-600">Catatan Submission</h4><p class="mt-1 whitespace-pre-line text-gray-700">${task.submission_notes}</p></div>
+                            ` : ''}
+                            
+                            <!-- Komentar -->
                             <div class="border-t pt-4 mt-4">
                                 <h4 class="text-sm font-bold text-gray-800 mb-3">Diskusi Tugas</h4>
                                 <div id="commentsContainer-${id}" class="max-h-60 overflow-y-auto space-y-2 mb-4">
                                     ${commentsHtml}
                                 </div>
+                                
+                                ${state.currentUser.id == task.assigned_to || state.currentUser.role !== 'karyawan' ? `
                                 <form onsubmit="modal.submitComment(event, ${id})" class="mt-2">
                                     <div class="flex gap-2">
                                         <input type="text" name="comment" required placeholder="Tulis komentar..." class="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary form-input">
                                         <button type="submit" class="btn-primary px-4 py-2 rounded-lg text-sm">Kirim</button>
                                     </div>
                                 </form>
+                                ` : ''}
                             </div>
                             
-                            <button class="close-modal btn-secondary w-full py-2">Tutup</button>
+                            ${state.currentUser.id == task.assigned_to && task.status !== 'selesai' && task.status !== 'dibatalkan' ? `
+                            <div class="border-t pt-4 mt-4">
+                                <h4 class="text-sm font-bold text-gray-800 mb-3">Submit Tugas</h4>
+                                <form onsubmit="modal.submitTaskForm(event, ${id})">
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">File Hasil Tugas</label>
+                                            <input type="file" name="submission_file" class="form-input">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">Catatan</label>
+                                            <textarea name="submission_notes" rows="2" placeholder="Tambahkan catatan..." class="form-input"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn-primary w-full py-2">Submit Tugas</button>
+                                    </div>
+                                </form>
+                            </div>
+                            ` : ''}
+                            
+                            <button class="close-modal btn-secondary w-full py-2 mt-4">Tutup</button>
                         </div>
-                    `);
-                } catch(e) { utils.showToast('Gagal load detail','error'); }
+                    `;
+                    
+                    utils.createModal('Detail Tugas', modalContent);
+                } catch (error) {
+                    utils.showToast('Gagal memuat detail tugas', 'error');
+                }
             },
+            
             showEdit: async (id) => {
                 try {
-                    const t = await api.getTaskDetail(id);
-                    const relK = state.karyawanList.filter(k=>k.divisi===state.currentDivisi);
-                    utils.createModal('Edit Tugas', `
-                        <form id="editTaskForm"><input type="hidden" name="id" value="${t.id}">
+                    const task = await api.getTaskDetail(id);
+                    const karyawanOptions = state.karyawanList
+                        .filter(k => k.divisi === state.currentUser.divisi)
+                        .map(k => `<option value="${k.id}" ${task.assigned_to == k.id ? 'selected' : ''}>${k.name}</option>`)
+                        .join('');
+                    
+                    const modalContent = `
+                        <form id="editTaskForm">
                             <div class="space-y-4">
-                                <div><label class="block text-sm font-medium mb-1">Judul</label><input name="judul" value="${t.judul}" class="form-input" required></div>
-                                <div><label class="block text-sm font-medium mb-1">Deskripsi</label><textarea name="deskripsi" rows="3" class="form-input" required>${t.deskripsi}</textarea></div>
-                                <div><label class="block text-sm font-medium mb-1">Deadline</label><input type="datetime-local" name="deadline" value="${t.deadline?t.deadline.substring(0,16):''}" class="form-input" required></div>
-                                <div><label class="block text-sm font-medium mb-1">Karyawan</label>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Judul</label>
+                                    <input name="judul" value="${task.judul}" class="form-input" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Deskripsi</label>
+                                    <textarea name="deskripsi" rows="3" class="form-input" required>${task.deskripsi}</textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Deadline</label>
+                                    <input type="datetime-local" name="deadline" value="${task.deadline ? new Date(task.deadline).toISOString().slice(0, 16) : ''}" class="form-input" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Prioritas</label>
+                                    <select name="priority" class="form-input" required>
+                                        <option value="low" ${task.priority == 'low' ? 'selected' : ''}>Rendah</option>
+                                        <option value="medium" ${task.priority == 'medium' ? 'selected' : ''}>Sedang</option>
+                                        <option value="high" ${task.priority == 'high' ? 'selected' : ''}>Tinggi</option>
+                                    </select>
+                                </div>
+                                ${state.currentUser.role !== 'karyawan' ? `
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Karyawan</label>
                                     <select name="assigned_to" class="form-input" required>
-                                        <option value="">Pilih</option>${relK.map(k=>`<option value="${k.id}" ${t.assigned_to==k.id?'selected':''}>${k.name}</option>`).join('')}
+                                        <option value="">Pilih Karyawan</option>
+                                        ${karyawanOptions}
                                     </select>
                                 </div>
-                                <div><label class="block text-sm font-medium mb-1">Status</label>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Status</label>
                                     <select name="status" class="form-input" required>
-                                        <option value="pending" ${t.status==='pending'?'selected':''}>Pending</option>
-                                        <option value="proses" ${t.status==='proses'?'selected':''}>Proses</option>
-                                        <option value="selesai" ${t.status==='selesai'?'selected':''}>Selesai</option>
-                                        <option value="dibatalkan" ${t.status==='dibatalkan'?'selected':''}>Batal</option>
+                                        <option value="pending" ${task.status == 'pending' ? 'selected' : ''}>Pending</option>
+                                        <option value="proses" ${task.status == 'proses' ? 'selected' : ''}>Dalam Proses</option>
+                                        <option value="selesai" ${task.status == 'selesai' ? 'selected' : ''}>Selesai</option>
+                                        <option value="dibatalkan" ${task.status == 'dibatalkan' ? 'selected' : ''}>Dibatalkan</option>
                                     </select>
                                 </div>
-                                <div class="flex gap-2 pt-2"><button type="button" class="close-modal btn-secondary flex-1 py-2">Batal</button><button type="submit" class="btn-primary flex-1 py-2">Update</button></div>
+                                ` : ''}
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Catatan</label>
+                                    <textarea name="catatan" rows="2" class="form-input">${task.catatan || ''}</textarea>
+                                </div>
+                                <div class="flex gap-2 pt-2">
+                                    <button type="button" class="close-modal btn-secondary flex-1 py-2">Batal</button>
+                                    <button type="submit" class="btn-primary flex-1 py-2">Update</button>
+                                </div>
                             </div>
                         </form>
-                    `, async(d)=>await api.updateTask(id,d));
-                } catch(e) { utils.showToast('Gagal load edit','error'); }
+                    `;
+                    
+                    const modalEl = utils.createModal('Edit Tugas', modalContent, async (formData) => {
+                        await api.updateTask(id, formData);
+                    });
+                    
+                } catch (error) {
+                    utils.showToast('Gagal memuat form edit', 'error');
+                }
             },
+            
             showDelete: async (id) => {
                 try {
-                    const t = await api.getTaskDetail(id);
-                    const el = utils.createModal('Hapus Tugas', `
+                    const task = await api.getTaskDetail(id);
+                    const modalContent = `
                         <div class="text-center">
                             <span class="material-icons-outlined text-red-600 text-5xl mb-4">warning</span>
-                            <h4 class="font-bold mb-2">Hapus "${t.judul}"?</h4>
-                            <div class="flex gap-2 mt-6 justify-center">
+                            <h4 class="font-bold mb-2">Hapus Tugas?</h4>
+                            <p class="text-gray-600 mb-4">"${task.judul}"</p>
+                            <p class="text-sm text-gray-500 mb-6">Tindakan ini tidak dapat dibatalkan.</p>
+                            <div class="flex gap-2 justify-center">
                                 <button type="button" class="close-modal btn-secondary px-6 py-2">Batal</button>
-                                <button id="confirmDel" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700">Hapus</button>
+                                <button id="confirmDelete" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700">Hapus</button>
                             </div>
                         </div>
-                    `);
-                    el.querySelector('#confirmDel').onclick=async()=>{
-                        try{ el.querySelector('#confirmDel').disabled=true; await api.deleteTask(id); el.remove(); }
-                        catch(err){ utils.showToast(err.message,'error'); }
+                    `;
+                    
+                    const modalEl = utils.createModal('Konfirmasi Hapus', modalContent);
+                    
+                    modalEl.querySelector('#confirmDelete').onclick = async () => {
+                        try {
+                            modalEl.querySelector('#confirmDelete').disabled = true;
+                            await api.deleteTask(id);
+                            modalEl.remove();
+                        } catch (err) {
+                            utils.showToast(err.message, 'error');
+                        }
                     };
-                } catch(e) { utils.showToast('Gagal load hapus','error'); }
+                    
+                } catch (error) {
+                    utils.showToast('Gagal memuat konfirmasi hapus', 'error');
+                }
             },
-            // Fungsi Submit Komentar
+            
+            showCreate: () => {
+                const karyawanOptions = state.karyawanList
+                    .filter(k => k.divisi === state.currentUser.divisi)
+                    .map(k => `<option value="${k.id}">${k.name}</option>`)
+                    .join('');
+                
+                const modalContent = `
+                    <form id="createTaskForm">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Judul</label>
+                                <input name="judul" class="form-input" required placeholder="Masukkan judul tugas">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Deskripsi</label>
+                                <textarea name="deskripsi" rows="3" class="form-input" required placeholder="Deskripsi lengkap tugas"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Deadline</label>
+                                <input type="datetime-local" name="deadline" class="form-input" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Prioritas</label>
+                                <select name="priority" class="form-input" required>
+                                    <option value="medium">Sedang</option>
+                                    <option value="high">Tinggi</option>
+                                    <option value="low">Rendah</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Karyawan</label>
+                                <select name="assigned_to" class="form-input" required>
+                                    <option value="">Pilih Karyawan</option>
+                                    ${karyawanOptions}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Catatan</label>
+                                <textarea name="catatan" rows="2" class="form-input" placeholder="Tambahkan catatan (opsional)"></textarea>
+                            </div>
+                            <div class="flex gap-2 pt-2">
+                                <button type="button" class="close-modal btn-secondary flex-1 py-2">Batal</button>
+                                <button type="submit" class="btn-primary flex-1 py-2">Simpan</button>
+                            </div>
+                        </div>
+                    </form>
+                `;
+                
+                utils.createModal('Buat Tugas Baru', modalContent, async (formData) => {
+                    await api.createTask(formData);
+                });
+            },
+            
             submitComment: async (event, taskId) => {
                 event.preventDefault();
                 const form = event.target;
                 const input = form.querySelector('input[name="comment"]');
                 
-                if(input.value.trim() === '') return;
+                if (!input.value.trim()) return;
+                
+                const btn = form.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
                 
                 try {
-                    const btn = form.querySelector('button[type="submit"]');
                     btn.disabled = true;
                     btn.innerHTML = 'Mengirim...';
                     
-                    // Mockup simpan koneksi API
                     await api.storeComment(taskId, input.value);
                     
-                    // Update UI
                     input.value = '';
-                    // Refresh komentar di modal
+                    
+                    // Refresh comments
                     const commentsContainer = document.getElementById(`commentsContainer-${taskId}`);
-                    if(commentsContainer) {
-                        // Tambahkan komentar baru ke atas
-                        const newCommentHtml = `
-                            <div class="bg-gray-50 p-3 rounded-lg mb-2 relative animate-fade-in">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="font-semibold text-sm text-gray-800">Anda</span>
-                                    <span class="text-xs text-gray-500">Baru saja</span>
+                    if (commentsContainer) {
+                        const comments = await api.fetchComments(taskId);
+                        commentsContainer.innerHTML = comments.length > 0 ? 
+                            comments.map(comment => `
+                                <div class="bg-gray-50 p-3 rounded-lg mb-2">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-semibold text-sm text-gray-800">${comment.user?.name || 'User'}</span>
+                                            <span class="text-xs text-gray-500">${comment.formatted_created_at || ''}</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-700 text-sm">${comment.content}</p>
                                 </div>
-                                <p class="text-gray-700 text-sm">${input.value}</p>
-                            </div>
-                        `;
-                        commentsContainer.insertAdjacentHTML('afterbegin', newCommentHtml);
-                        utils.showToast('Komentar terkirim');
+                            `).join('') : 
+                            '<p class="text-gray-500 text-sm italic text-center py-4">Belum ada komentar.</p>';
                     }
-                } catch (e) {
-                    console.error(e);
-                    utils.showToast('Terjadi kesalahan', 'error');
+                    
+                } catch (error) {
+                    utils.showToast('Gagal mengirim komentar', 'error');
                 } finally {
                     btn.disabled = false;
-                    btn.innerText = 'Kirim';
+                    btn.innerHTML = originalText;
                 }
             },
-            showCreate: () => {
-                const relK = state.karyawanList.filter(k=>k.divisi===state.currentDivisi);
-                utils.createModal('Buat Tugas', `
-                    <form id="createTaskForm">
-                        <div class="space-y-4">
-                            <div><label class="block text-sm font-medium mb-1">Judul</label><input name="judul" class="form-input" required></div>
-                            <div><label class="block text-sm font-medium mb-1">Deskripsi</label><textarea name="deskripsi" rows="3" class="form-input" required></textarea></div>
-                            <div><label class="block text-sm font-medium mb-1">Deadline</label><input type="datetime-local" name="deadline" class="form-input" required></div>
-                            <div><label class="block text-sm font-medium mb-1">Karyawan</label>
-                                <select name="assigned_to" class="form-input" required>
-                                    <option value="">Pilih</option>${relK.map(k=>`<option value="${k.id}">${k.name}</option>`).join('')}
-                                </select>
-                            </div>
-                            <div><label class="block text-sm font-medium mb-1">Status</label>
-                                <select name="status" class="form-input" required><option value="pending">Pending</option><option value="proses">Proses</option></select>
-                            </div>
-                            <div class="flex gap-2 pt-2"><button type="button" class="close-modal btn-secondary flex-1 py-2">Batal</button><button type="submit" class="btn-primary flex-1 py-2">Simpan</button></div>
-                        </div>
-                    </form>
-                `, async(d)=>await api.createTask(d));
+            
+            submitTaskForm: async (event, taskId) => {
+                event.preventDefault();
+                const form = event.target;
+                const formData = new FormData(form);
+                
+                const btn = form.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
+                
+                try {
+                    btn.disabled = true;
+                    btn.innerHTML = 'Mengirim...';
+                    
+                    await api.submitTask(taskId, formData);
+                    
+                } catch (error) {
+                    utils.showToast('Gagal submit tugas', 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
             }
         };
 
@@ -771,28 +1296,86 @@
                 hamburgerIcon.classList.toggle('hamburger-active');
             }
 
-            if(hamburger) {
+            if (hamburger) {
                 hamburger.addEventListener('click', toggleSidebar);
                 overlay.addEventListener('click', toggleSidebar);
             }
 
-            // App Logic
-            utils.setupUIByRole();
-            api.fetchTasks();
-            
+            // Event Listeners
             document.getElementById('searchInput').addEventListener('input', render.filterTasks);
             document.getElementById('statusFilter').addEventListener('change', render.filterTasks);
-            document.getElementById('refreshBtn').addEventListener('click', () => { api.fetchTasks(); utils.showToast('Data di-refresh'); });
+            document.getElementById('priorityFilter').addEventListener('change', render.filterTasks);
+            document.getElementById('refreshBtn').addEventListener('click', () => {
+                api.fetchTasks();
+                utils.showToast('Data diperbarui');
+            });
             
+            document.getElementById('closeToast').addEventListener('click', () => {
+                document.getElementById('toast').classList.add('translate-y-20', 'opacity-0');
+            });
+            
+            // Pagination Events
+            document.getElementById('desktopPrevPage').addEventListener('click', () => {
+                if (state.currentPage > 1) {
+                    state.currentPage--;
+                    render.renderTable();
+                }
+            });
+            
+            document.getElementById('desktopNextPage').addEventListener('click', () => {
+                if (state.currentPage < state.totalPages) {
+                    state.currentPage++;
+                    render.renderTable();
+                }
+            });
+            
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (state.currentPage > 1) {
+                    state.currentPage--;
+                    render.renderTable();
+                }
+            });
+            
+            document.getElementById('nextPage').addEventListener('click', () => {
+                if (state.currentPage < state.totalPages) {
+                    state.currentPage++;
+                    render.renderTable();
+                }
+            });
+            
+            // Create Task Button
             const createBtn = document.getElementById('buatTugasBtn');
-            if(createBtn && createBtn.style.display !== 'none') createBtn.addEventListener('click', modal.showCreate);
+            const createBtnMobile = document.getElementById('buatTugasBtnMobile');
             
-            document.getElementById('closeToast').addEventListener('click', () => document.getElementById('toast').classList.add('translate-y-20','opacity-0'));
+            if (createBtn) {
+                createBtn.addEventListener('click', modal.showCreate);
+            }
             
-            ['desktopPrevPage','prevPage'].forEach(id=>document.getElementById(id)?.addEventListener('click',()=>{if(state.currentPage>1){state.currentPage--;render.renderTable();}}));
-            ['desktopNextPage','nextPage'].forEach(id=>document.getElementById(id)?.addEventListener('click',()=>{if(state.currentPage<state.totalPages){state.currentPage++;render.renderTable();}}));
-
-            setInterval(api.fetchTasks, 60000);
+            if (createBtnMobile) {
+                createBtnMobile.addEventListener('click', modal.showCreate);
+            }
+            
+            // Load initial data
+            const init = async () => {
+                await api.fetchKaryawan();
+                await api.fetchTasks();
+            };
+            
+            init();
+            
+            // Auto refresh every 30 seconds
+            setInterval(() => {
+                if (!state.isLoading) {
+                    api.fetchTasks();
+                }
+            }, 30000);
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                if (state.filteredTasks.length > 0) {
+                    render.renderTable();
+                }
+            });
         });
     </script>
 </body>
