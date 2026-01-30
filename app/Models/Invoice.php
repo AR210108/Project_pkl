@@ -13,7 +13,6 @@ class Invoice extends Model
 
     // Use the actual database column names (Indonesian) used in migrations
     protected $fillable = [
-
         'nomor_order',
         'nama_perusahaan',
         'nama_klien',

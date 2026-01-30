@@ -628,9 +628,9 @@
         @include('manager_divisi/templet/sider')
         <div class="flex-1 flex flex-col main-content">
             <div class="flex-1 p-3 sm:p-8">
-                <header class="mb-4 sm:mb-8">
-                    <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">Data Project</h1>
-                </header>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-0">Data Project</h2>
+                </div>
 
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">

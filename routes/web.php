@@ -416,7 +416,6 @@ Route::middleware(['auth', 'role:general_manager'])
             Route::delete('/{id}', [TimDivisiController::class, 'destroyDivisi'])->name('divisi.destroy');
             Route::get('/search', [TimDivisiController::class, 'searchDivisi'])->name('divisi.search');
         });
-
         Route::get('/divisis/list', [TimDivisiController::class, 'getDivisis'])->name('divisis.list');
     });
 
