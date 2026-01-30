@@ -105,6 +105,26 @@
             background-color: #e2e8f0;
         }
         
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        
+        .btn-warning {
+            background-color: #f59e0b;
+            color: white;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-warning:hover {
+            background-color: #d97706;
+        }
+        
         /* Modal styles */
         .modal {
             transition: opacity 0.25s ease;
@@ -680,6 +700,78 @@
         .hidden-by-filter {
             display: none !important;
         }
+        
+        /* Delete Confirmation Modal */
+        .delete-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .delete-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .delete-modal-content {
+            background-color: white;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .delete-modal.show .delete-modal-content {
+            transform: scale(1);
+        }
+        
+        .delete-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .delete-modal-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: rgba(239, 68, 68, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ef4444;
+        }
+        
+        .delete-modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .delete-modal-body {
+            color: #64748b;
+            margin-bottom: 24px;
+        }
+        
+        .delete-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
     </style>
 </head>
 <body class="font-display bg-background-light text-text-light">
@@ -801,6 +893,12 @@
                                                     <a href="{{ route('orders.show', $order->id) }}" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Order">
                                                         <span class="material-icons-outlined">visibility</span>
                                                     </a>
+                                                    <button onclick="openEditModal({{ $order->id }})" class="p-1 rounded-full hover:bg-warning/20 text-warning" title="Edit Order">
+                                                        <span class="material-icons-outlined">edit</span>
+                                                    </button>
+                                                    <button onclick="openDeleteModal({{ $order->id }})" class="p-1 rounded-full hover:bg-danger/20 text-danger" title="Hapus Order">
+                                                        <span class="material-icons-outlined">delete</span>
+                                                    </button>
                                                     @if($order->invoice_id)
                                                     <a href="{{ route('invoices.show', $order->invoice_id) }}" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Invoice">
                                                         <span class="material-icons-outlined">description</span>
@@ -842,6 +940,12 @@
                                         <a href="{{ route('orders.show', $order->id) }}" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Order">
                                             <span class="material-icons-outlined">visibility</span>
                                         </a>
+                                        <button onclick="openEditModal({{ $order->id }})" class="p-1 rounded-full hover:bg-warning/20 text-warning" title="Edit Order">
+                                            <span class="material-icons-outlined">edit</span>
+                                        </button>
+                                        <button onclick="openDeleteModal({{ $order->id }})" class="p-1 rounded-full hover:bg-danger/20 text-danger" title="Hapus Order">
+                                            <span class="material-icons-outlined">delete</span>
+                                        </button>
                                         @if($order->invoice_id)
                                         <a href="{{ route('invoices.show', $order->invoice_id) }}" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Invoice">
                                             <span class="material-icons-outlined">description</span>
@@ -979,6 +1083,90 @@
         </div>
     </div>
 
+    <!-- Modal Edit Data Orderan -->
+    <div id="editModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Edit Data Orderan</h3>
+                    <button onclick="closeEditModal()" class="text-gray-800 hover:text-gray-500">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
+                </div>
+                <form id="editForm" class="space-y-4" method="POST" action="">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" id="editOrderId" name="id">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kategori Layanan</label>
+                            <select id="edit-payment-category" name="kategori" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" onchange="updateEditServiceOptions()">
+                                <option value="">Pilih Kategori</option>
+                                <option value="design">Desain</option>
+                                <option value="programming">Programming</option>
+                                <option value="marketing">Digital Marketing</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Layanan</label>
+                            <select id="edit-payment-service" name="layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">Pilih Layanan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
+                            <input type="number" id="edit-price" name="price" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Harga">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Klien</label>
+                            <select id="edit-klien" name="klien" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">Pilih Klien</option>
+                                <option value="PT. Teknologi Maju">PT. Teknologi Maju</option>
+                                <option value="CV. Digital Solusi">CV. Digital Solusi</option>
+                                <option value="UD. Kreatif Indonesia">UD. Kreatif Indonesia</option>
+                                <option value="PT. Inovasi Nusantara">PT. Inovasi Nusantara</option>
+                                <option value="CV. Kreatif">CV. Kreatif</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pembayaran Awal</label>
+                            <input type="number" id="edit-deposit" name="deposit" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pembayaran Awal">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pelunasan</label>
+                            <input type="number" id="edit-paid" name="paid" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pelunasan">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select id="edit-status" name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">Pilih Status</option>
+                                <option value="paid">Lunas</option>
+                                <option value="partial">Sebagian</option>
+                                <option value="pending">Pending</option>
+                                <option value="overdue">Terlambat</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Pengerjaan</label>
+                            <select id="edit-work-status" name="work_status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">Pilih Status Pengerjaan</option>
+                                <option value="planning">Perencanaan</option>
+                                <option value="progress">Sedang Dikerjakan</option>
+                                <option value="review">Review</option>
+                                <option value="completed">Selesai</option>
+                                <option value="onhold">Ditunda</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" onclick="closeEditModal()" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Data</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Detail Invoice -->
     <div id="invoiceDetailModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-6xl max-h-[90vh] overflow-y-auto">
@@ -1101,6 +1289,25 @@
                         <span>Tutup</span>
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="delete-modal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <div class="delete-modal-icon">
+                    <span class="material-icons-outlined">warning</span>
+                </div>
+                <h3 class="delete-modal-title">Konfirmasi Hapus</h3>
+            </div>
+            <div class="delete-modal-body">
+                <p>Apakah Anda yakin ingin menghapus data orderan ini? Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="delete-modal-footer">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                <button onclick="confirmDelete()" class="px-4 py-2 btn-danger rounded-lg">Hapus</button>
             </div>
         </div>
     </div>
@@ -1273,6 +1480,7 @@
         let paymentFilteredData = [...paymentData];
         let activeFilters = ['all'];
         let searchTerm = '';
+        let deleteOrderId = null;
 
         // Inisialisasi filter
         function initializeFilter() {
@@ -1413,6 +1621,26 @@
             }
         }
 
+        // Update service options for edit modal
+        function updateEditServiceOptions() {
+            const categorySelect = document.getElementById('edit-payment-category');
+            const serviceSelect = document.getElementById('edit-payment-service');
+            const selectedCategory = categorySelect.value;
+            
+            // Clear current options
+            serviceSelect.innerHTML = '<option value="">Pilih Layanan</option>';
+            
+            // Add options based on selected category
+            if (selectedCategory && servicesByCategory[selectedCategory]) {
+                servicesByCategory[selectedCategory].forEach(service => {
+                    const option = document.createElement('option');
+                    option.value = service;
+                    option.textContent = service;
+                    serviceSelect.appendChild(option);
+                });
+            }
+        }
+
         // Modal functions
         function openAddModal() {
             document.getElementById('addModal').classList.remove('hidden');
@@ -1422,6 +1650,81 @@
         function closeAddModal() {
             document.getElementById('addModal').classList.add('hidden');
             document.body.style.overflow = '';
+        }
+
+        // Edit modal functions
+        function openEditModal(orderId) {
+            // Find order data
+            const order = paymentData.find(item => item.no === orderId);
+            
+            if (!order) {
+                showMinimalPopup('Error', 'Data order tidak ditemukan', 'error');
+                return;
+            }
+            
+            // Set form action
+            document.getElementById('editForm').action = `/orders/${orderId}`;
+            
+            // Fill form with order data
+            document.getElementById('editOrderId').value = orderId;
+            document.getElementById('edit-payment-category').value = order.kategori;
+            updateEditServiceOptions();
+            
+            // Set service after options are updated
+            setTimeout(() => {
+                document.getElementById('edit-payment-service').value = order.layanan;
+            }, 100);
+            
+            document.getElementById('edit-price').value = order.harga.replace(/\D/g, '');
+            document.getElementById('edit-klien').value = order.klien;
+            document.getElementById('edit-deposit').value = order.awal.replace(/\D/g, '');
+            document.getElementById('edit-paid').value = order.lunas.replace(/\D/g, '');
+            document.getElementById('edit-status').value = order.status;
+            document.getElementById('edit-work-status').value = order.statusPengerjaan;
+            
+            // Show modal
+            document.getElementById('editModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Delete modal functions
+        function openDeleteModal(orderId) {
+            deleteOrderId = orderId;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        function closeDeleteModal() {
+            deleteOrderId = null;
+            document.getElementById('deleteModal').classList.remove('show');
+        }
+
+        function confirmDelete() {
+            if (!deleteOrderId) return;
+            
+            // In a real application, you would send a request to the server to delete the order
+            // For this demo, we'll just remove it from the local data array
+            
+            // Find index of the order to delete
+            const index = paymentData.findIndex(item => item.no === deleteOrderId);
+            
+            if (index !== -1) {
+                // Remove the order from the array
+                paymentData.splice(index, 1);
+                
+                // Apply filters to update the view
+                applyFilters();
+                
+                // Show success message
+                showMinimalPopup('Berhasil', 'Data orderan berhasil dihapus', 'success');
+            }
+            
+            // Close the modal
+            closeDeleteModal();
         }
 
         // Invoice detail modal functions
@@ -1563,10 +1866,18 @@
         // Close modal when clicking outside
         window.onclick = function(event) {
             const addModal = document.getElementById('addModal');
+            const editModal = document.getElementById('editModal');
+            const deleteModal = document.getElementById('deleteModal');
             const invoiceDetailModal = document.getElementById('invoiceDetailModal');
             
             if (event.target == addModal) {
                 closeAddModal();
+            }
+            if (event.target == editModal) {
+                closeEditModal();
+            }
+            if (event.target == deleteModal) {
+                closeDeleteModal();
             }
             if (event.target == invoiceDetailModal) {
                 closeInvoiceDetailModal();
@@ -1577,6 +1888,8 @@
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeAddModal();
+                closeEditModal();
+                closeDeleteModal();
                 closeInvoiceDetailModal();
             }
         });
@@ -1670,6 +1983,12 @@
                             <button onclick="openInvoiceDetailModal(${item.no})" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Invoice">
                                 <span class="material-icons-outlined">description</span>
                             </button>
+                            <button onclick="openEditModal(${item.no})" class="p-1 rounded-full hover:bg-warning/20 text-warning" title="Edit Order">
+                                <span class="material-icons-outlined">edit</span>
+                            </button>
+                            <button onclick="openDeleteModal(${item.no})" class="p-1 rounded-full hover:bg-danger/20 text-danger" title="Hapus Order">
+                                <span class="material-icons-outlined">delete</span>
+                            </button>
                         </div>
                     </td>
                 `;
@@ -1709,6 +2028,12 @@
                         <div class="flex gap-2">
                             <button onclick="openInvoiceDetailModal(${item.no})" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Invoice">
                                 <span class="material-icons-outlined">description</span>
+                            </button>
+                            <button onclick="openEditModal(${item.no})" class="p-1 rounded-full hover:bg-warning/20 text-warning" title="Edit Order">
+                                <span class="material-icons-outlined">edit</span>
+                            </button>
+                            <button onclick="openDeleteModal(${item.no})" class="p-1 rounded-full hover:bg-danger/20 text-danger" title="Hapus Order">
+                                <span class="material-icons-outlined">delete</span>
                             </button>
                         </div>
                     </div>

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
+
 class AbsensiController extends Controller
 {
     // Konstanta untuk batas waktu
@@ -49,7 +50,7 @@ class AbsensiController extends Controller
             ->get();
             
         $users = User::where('role', 'karyawan')->get();
-        
+
         return view('admin.absensi', compact('stats', 'attendances', 'ketidakhadiran', 'users'));
     }
 
@@ -68,41 +69,41 @@ class AbsensiController extends Controller
                 ->whereNotNull('jam_masuk')
                 ->where('approval_status', 'approved')
                 ->count(),
-            
+
             'total_izin' => Absensi::whereBetween('tanggal', [$startOfMonth, $endOfMonth])
                 ->where('jenis_ketidakhadiran', 'izin')
                 ->where('approval_status', 'approved')
                 ->count(),
-            
+
             'total_cuti' => Absensi::whereBetween('tanggal', [$startOfMonth, $endOfMonth])
                 ->where('jenis_ketidakhadiran', 'cuti')
                 ->where('approval_status', 'approved')
                 ->count(),
-            
+
             'total_dinas_luar' => Absensi::whereBetween('tanggal', [$startOfMonth, $endOfMonth])
                 ->where('jenis_ketidakhadiran', 'dinas-luar')
                 ->where('approval_status', 'approved')
                 ->count(),
-            
+
             'total_sakit' => Absensi::whereBetween('tanggal', [$startOfMonth, $endOfMonth])
                 ->where('jenis_ketidakhadiran', 'sakit')
                 ->where('approval_status', 'approved')
                 ->count(),
-            
+
             'total_tidak_hadir' => Absensi::whereBetween('tanggal', [$startOfMonth, $endOfMonth])
                 ->whereNull('jam_masuk')
                 ->whereNull('jenis_ketidakhadiran')
                 ->where('approval_status', 'approved')
                 ->count(),
-            
+
             'total_karyawan' => $total_karyawan,
             'periode' => Carbon::now()->translatedFormat('F Y'),
         ];
         
         \Log::info('General Manager kelolaAbsen stats:', $stats);
-        
+
         $users = User::where('role', 'karyawan')->get();
-        
+
         return view('general_manajer.kelola_absen', compact('stats', 'users'));
     }
 
@@ -175,20 +176,20 @@ class AbsensiController extends Controller
         
         $startOfMonth = Carbon::now()->startOfMonth()->format('Y-m-d');
         $endOfMonth = Carbon::now()->endOfMonth()->format('Y-m-d');
-        
+
         $statsQuery = Absensi::select(
-                DB::raw('COUNT(CASE WHEN jam_masuk IS NOT NULL AND approval_status = "approved" THEN 1 END) as total_hadir'),
-                DB::raw('COUNT(CASE WHEN jenis_ketidakhadiran = "izin" AND approval_status = "approved" THEN 1 END) as total_izin'),
-                DB::raw('COUNT(CASE WHEN jenis_ketidakhadiran = "cuti" AND approval_status = "approved" THEN 1 END) as total_cuti'),
-                DB::raw('COUNT(CASE WHEN jenis_ketidakhadiran = "dinas-luar" AND approval_status = "approved" THEN 1 END) as total_dinas_luar'),
-                DB::raw('COUNT(CASE WHEN jenis_ketidakhadiran = "sakit" AND approval_status = "approved" THEN 1 END) as total_sakit'),
-                DB::raw('COUNT(CASE WHEN jam_masuk IS NULL AND jenis_ketidakhadiran IS NULL AND approval_status = "approved" THEN 1 END) as total_tidak_hadir')
-            )
+            DB::raw('COUNT(CASE WHEN jam_masuk IS NOT NULL AND approval_status = "approved" THEN 1 END) as total_hadir'),
+            DB::raw('COUNT(CASE WHEN jenis_ketidakhadiran = "izin" AND approval_status = "approved" THEN 1 END) as total_izin'),
+            DB::raw('COUNT(CASE WHEN jenis_ketidakhadiran = "cuti" AND approval_status = "approved" THEN 1 END) as total_cuti'),
+            DB::raw('COUNT(CASE WHEN jenis_ketidakhadiran = "dinas-luar" AND approval_status = "approved" THEN 1 END) as total_dinas_luar'),
+            DB::raw('COUNT(CASE WHEN jenis_ketidakhadiran = "sakit" AND approval_status = "approved" THEN 1 END) as total_sakit'),
+            DB::raw('COUNT(CASE WHEN jam_masuk IS NULL AND jenis_ketidakhadiran IS NULL AND approval_status = "approved" THEN 1 END) as total_tidak_hadir')
+        )
             ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
             ->first();
         
         $total_karyawan = User::where('role', 'karyawan')->count();
-        
+
         $stats = [
             'total_hadir' => $statsQuery->total_hadir ?? 0,
             'total_izin' => $statsQuery->total_izin ?? 0,
@@ -199,7 +200,7 @@ class AbsensiController extends Controller
             'total_karyawan' => $total_karyawan,
             'periode' => Carbon::now()->translatedFormat('F Y'),
         ];
-        
+
         return view('general_manajer.kelola_absensi', compact('stats'));
     }
 
@@ -209,7 +210,7 @@ class AbsensiController extends Controller
             \Log::error("markAbsentEmployees: Tanggal tidak valid - {$date}");
             return;
         }
-        
+
         \Log::info("markAbsentEmployees dimulai untuk tanggal: {$date}");
         
         $allEmployees = User::where('role', 'karyawan')->get();
@@ -226,11 +227,11 @@ class AbsensiController extends Controller
         $createdCount = 0;
         foreach ($absentEmployees as $employee) {
             $alreadyMarkedAbsent = Absensi::where('user_id', $employee->id)
-                                    ->whereDate('tanggal', $date)
-                                    ->whereNull('jam_masuk')
-                                    ->whereNull('jenis_ketidakhadiran')
-                                    ->exists();
-            
+                ->whereDate('tanggal', $date)
+                ->whereNull('jam_masuk')
+                ->whereNull('jenis_ketidakhadiran')
+                ->exists();
+
             if (!$alreadyMarkedAbsent) {
                 Absensi::create([
                     'user_id' => $employee->id,
@@ -246,7 +247,7 @@ class AbsensiController extends Controller
                 $createdCount++;
             }
         }
-        
+
         \Log::info("markAbsentEmployees selesai. {$createdCount} record dibuat.");
     }
     
@@ -257,7 +258,7 @@ class AbsensiController extends Controller
             $now = Carbon::now();
             
             $maxAllowedDate = $now->copy()->addMonth();
-            
+
             if ($dateObj->gt($maxAllowedDate)) {
                 \Log::warning("Tanggal {$date} lebih dari 1 bulan di masa depan");
                 return false;
@@ -268,7 +269,7 @@ class AbsensiController extends Controller
                 \Log::warning("Tanggal {$date} lebih dari 1 tahun di masa lalu");
                 return false;
             }
-            
+
             return true;
         } catch (\Exception $e) {
             \Log::error("Error parsing date {$date}: " . $e->getMessage());
@@ -347,7 +348,7 @@ class AbsensiController extends Controller
             
             $lateMinutes = 0;
             $isTerlambat = false;
-            
+
             if ($attendance && $attendance->jam_masuk) {
                 $jamMasuk = Carbon::parse($attendance->jam_masuk);
                 $jamBatas = Carbon::parse(self::LIMIT_TIME);
@@ -411,7 +412,7 @@ class AbsensiController extends Controller
         try {
             $user = Auth::user();
             $filter = $request->get('filter', 'month');
-            
+
             \Log::info("API History diakses oleh user {$user->id} dengan filter: {$filter}");
             
             $query = Absensi::where('user_id', $user->id)
@@ -419,7 +420,7 @@ class AbsensiController extends Controller
                 ->orderBy('tanggal', 'desc');
             
             $now = Carbon::now();
-            
+
             if ($filter === 'week') {
                 $startOfWeek = $now->copy()->startOfWeek();
                 $query->whereDate('tanggal', '>=', $startOfWeek);
@@ -430,11 +431,11 @@ class AbsensiController extends Controller
                 $startOfYear = $now->copy()->startOfYear();
                 $query->whereDate('tanggal', '>=', $startOfYear);
             }
-            
+
             $attendanceData = $query->get()->map(function ($item) {
                 $lateMinutes = 0;
                 $isTerlambat = false;
-                
+
                 if ($item->jam_masuk) {
                     $jamMasuk = Carbon::parse($item->jam_masuk);
                     $jamBatas = Carbon::parse(self::LIMIT_TIME);
@@ -444,7 +445,7 @@ class AbsensiController extends Controller
                         $lateMinutes = $jamMasuk->diffInMinutes($jamBatas);
                     }
                 }
-                
+
                 return [
                     'id' => $item->id,
                     'tanggal' => $item->tanggal->format('Y-m-d'),
@@ -460,14 +461,14 @@ class AbsensiController extends Controller
                     'early_checkout_reason' => $item->early_checkout_reason,
                 ];
             });
-            
+
             \Log::info("API History: " . count($attendanceData) . " record ditemukan");
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $attendanceData
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error("Error apiHistory: " . $e->getMessage());
             return response()->json([
@@ -482,7 +483,7 @@ class AbsensiController extends Controller
         try {
             $user = Auth::user();
             $today = Carbon::now()->format('Y-m-d');
-            
+
             \Log::info("API AbsenMasuk diakses oleh user {$user->id} untuk tanggal: {$today}");
             
             $leaveStatus = $this->checkLeaveStatus($user->id, $today);
@@ -497,7 +498,7 @@ class AbsensiController extends Controller
             $existing = Absensi::where('user_id', $user->id)
                 ->whereDate('tanggal', $today)
                 ->first();
-            
+
             if ($existing) {
                 if ($existing->jam_masuk) {
                     \Log::warning("User {$user->id} sudah absen masuk hari ini");
@@ -522,7 +523,7 @@ class AbsensiController extends Controller
                 ->whereNotNull('jenis_ketidakhadiran')
                 ->where('approval_status', 'approved')
                 ->first();
-            
+
             if ($approvedAbsence) {
                 \Log::warning("User {$user->id} memiliki pengajuan {$approvedAbsence->jenis_ketidakhadiran} yang disetujui");
                 return response()->json([
@@ -537,7 +538,7 @@ class AbsensiController extends Controller
             
             $lateMinutes = 0;
             $keterangan = null;
-            
+
             if ($currentTime->gt($jamBatas)) {
                 $lateMinutes = $currentTime->diffInMinutes($jamBatas);
                 $keterangan = 'Terlambat ' . $lateMinutes . ' menit';
@@ -553,7 +554,7 @@ class AbsensiController extends Controller
                 $attendance->tanggal = $today;
                 \Log::info("Create new attendance for user {$user->id}");
             }
-            
+
             $attendance->jam_masuk = $jamMasuk;
             if ($keterangan) {
                 $attendance->keterangan = $keterangan;
@@ -562,9 +563,9 @@ class AbsensiController extends Controller
             $attendance->save();
             
             $isTerlambat = $lateMinutes > 0;
-            
+
             \Log::info("AbsenMasuk berhasil untuk user {$user->id}, jam: {$jamMasuk}");
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Absen masuk berhasil' . ($isTerlambat ? ' (Terlambat)' : ''),
@@ -580,7 +581,7 @@ class AbsensiController extends Controller
                     'keterangan' => $keterangan
                 ]
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error("Error apiAbsenMasuk: " . $e->getMessage());
             return response()->json([
@@ -595,13 +596,13 @@ class AbsensiController extends Controller
         try {
             $user = Auth::user();
             $today = Carbon::now()->format('Y-m-d');
-            
+
             \Log::info("API AbsenPulang diakses oleh user {$user->id} untuk tanggal: {$today}");
             
             $validator = Validator::make($request->all(), [
                 'early_checkout_reason' => 'nullable|string|max:500'
             ]);
-            
+
             if ($validator->fails()) {
                 \Log::warning("Validasi gagal untuk user {$user->id}: " . json_encode($validator->errors()));
                 return response()->json([
@@ -614,7 +615,7 @@ class AbsensiController extends Controller
             $attendance = Absensi::where('user_id', $user->id)
                 ->whereDate('tanggal', $today)
                 ->first();
-            
+
             if (!$attendance) {
                 \Log::warning("User {$user->id} belum absen masuk");
                 return response()->json([
@@ -622,7 +623,7 @@ class AbsensiController extends Controller
                     'message' => 'Anda belum melakukan absen masuk hari ini'
                 ], 400);
             }
-            
+
             if ($attendance->jam_pulang) {
                 \Log::warning("User {$user->id} sudah absen pulang");
                 return response()->json([
@@ -641,7 +642,7 @@ class AbsensiController extends Controller
             
             $currentTime = Carbon::now();
             $jamPulang = $currentTime->format('H:i:s');
-            
+
             $attendance->jam_pulang = $jamPulang;
             
             if ($currentTime->hour < 17) {
@@ -653,11 +654,11 @@ class AbsensiController extends Controller
                 }
                 \Log::info("User {$user->id} pulang lebih awal: " . $attendance->early_checkout_reason);
             }
-            
+
             $attendance->save();
-            
+
             \Log::info("AbsenPulang berhasil untuk user {$user->id}, jam: {$jamPulang}");
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Absen pulang berhasil',
@@ -672,7 +673,7 @@ class AbsensiController extends Controller
                     'approval_status' => 'approved'
                 ]
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error("Error apiAbsenPulang: " . $e->getMessage());
             return response()->json([
@@ -686,7 +687,7 @@ class AbsensiController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             \Log::info("API SubmitIzin diakses oleh user {$user->id}");
             
             $validator = Validator::make($request->all(), [
@@ -695,7 +696,7 @@ class AbsensiController extends Controller
                 'keterangan' => 'required|string|max:1000',
                 'jenis' => 'required|in:sakit,izin'
             ]);
-            
+
             if ($validator->fails()) {
                 \Log::warning("Validasi gagal untuk user {$user->id}: " . json_encode($validator->errors()));
                 return response()->json([
@@ -704,7 +705,7 @@ class AbsensiController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
-            
+
             $data = $validator->validated();
             $startDate = $data['tanggal'];
             $endDate = $data['tanggal_akhir'];
@@ -740,7 +741,7 @@ class AbsensiController extends Controller
                 ->whereBetween('tanggal', [$startDate, $endDate])
                 ->whereNotNull('jam_masuk')
                 ->exists();
-            
+
             if ($existingAttendance) {
                 \Log::warning("User {$user->id} sudah absen pada rentang tanggal {$startDate} - {$endDate}");
                 return response()->json([
@@ -761,7 +762,7 @@ class AbsensiController extends Controller
                 ->whereNotNull('jenis_ketidakhadiran')
                 ->whereIn('approval_status', ['pending', 'approved'])
                 ->first();
-            
+
             if ($existingRequest) {
                 \Log::warning("User {$user->id} sudah memiliki pengajuan {$existingRequest->jenis_ketidakhadiran} pada rentang tersebut");
                 return response()->json([
@@ -772,13 +773,13 @@ class AbsensiController extends Controller
             
             $start = Carbon::parse($startDate);
             $end = Carbon::parse($endDate);
-            
+
             $createdRecords = [];
-            
+
             \Log::info("User {$user->id} membuat pengajuan {$jenis} dari {$startDate} sampai {$endDate}");
-            
+
             DB::beginTransaction();
-            
+
             for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
                 $record = Absensi::create([
                     'user_id' => $user->id,
@@ -788,17 +789,17 @@ class AbsensiController extends Controller
                     'keterangan' => $data['keterangan'],
                     'approval_status' => 'pending',
                 ]);
-                
+
                 $createdRecords[] = $record;
             }
-            
+
             DB::commit();
             
             $firstRecord = $createdRecords[0];
             $lateMinutes = 0;
-            
+
             \Log::info("Pengajuan {$jenis} berhasil dibuat untuk user {$user->id}, " . count($createdRecords) . " record");
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Pengajuan ' . $jenis . ' berhasil dikirim',
@@ -815,7 +816,7 @@ class AbsensiController extends Controller
                     'keterangan' => $firstRecord->keterangan
                 ]
             ]);
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error("Error apiSubmitIzin: " . $e->getMessage());
@@ -929,9 +930,9 @@ class AbsensiController extends Controller
             $jenis = $request->get('jenis', '');
             $startDate = $request->get('start_date', '');
             $endDate = $request->get('end_date', '');
-            
+
             \Log::info("API Index absensi diakses dengan parameter: " . json_encode($request->all()));
-            
+
             $query = Absensi::with(['user:id,name,email,jabatan'])
                 ->where('approval_status', 'approved')
                 ->whereNotNull('jam_masuk')
@@ -940,9 +941,9 @@ class AbsensiController extends Controller
                 ->orderBy('jam_masuk', 'desc');
             
             if ($search) {
-                $query->whereHas('user', function($userQuery) use ($search) {
+                $query->whereHas('user', function ($userQuery) use ($search) {
                     $userQuery->where('name', 'like', "%{$search}%")
-                             ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%");
                 });
             }
             
@@ -957,7 +958,7 @@ class AbsensiController extends Controller
             if ($startDate) {
                 $query->whereDate('tanggal', '>=', $startDate);
             }
-            
+
             if ($endDate) {
                 $query->whereDate('tanggal', '<=', $endDate);
             }
@@ -967,7 +968,7 @@ class AbsensiController extends Controller
             $formattedData = $absensi->map(function($item) {
                 $isTerlambat = false;
                 $keterlambatan = 0;
-                
+
                 if ($item->jam_masuk) {
                     $jamMasuk = Carbon::parse($item->jam_masuk);
                     $jamBatas = Carbon::parse(self::LIMIT_TIME);
@@ -977,7 +978,7 @@ class AbsensiController extends Controller
                         $keterlambatan = $jamMasuk->diffInMinutes($jamBatas);
                     }
                 }
-                
+
                 return [
                     'id' => $item->id,
                     'user_id' => $item->user_id,
@@ -997,9 +998,9 @@ class AbsensiController extends Controller
                     'created_at' => $item->created_at->format('Y-m-d H:i:s'),
                 ];
             });
-            
+
             \Log::info("API Index: " . $absensi->total() . " record ditemukan");
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $formattedData,
@@ -1012,7 +1013,7 @@ class AbsensiController extends Controller
                     'to' => $absensi->lastItem(),
                 ]
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error("Error apiIndex: " . $e->getMessage());
             return response()->json([
@@ -1033,22 +1034,22 @@ class AbsensiController extends Controller
             $approvalStatus = $request->get('approval_status', '');
             $startDate = $request->get('start_date', '');
             $endDate = $request->get('end_date', '');
-            
+
             \Log::info("API IndexKetidakhadiran diakses dengan parameter: " . json_encode($request->all()));
-            
+
             $query = Absensi::with(['user:id,name,email,jabatan', 'approver:id,name'])
                 ->whereNotNull('jenis_ketidakhadiran')
                 ->whereDate('tanggal', '<=', Carbon::now()->addMonth())
                 ->orderBy('tanggal', 'desc');
             
             if ($search) {
-                $query->where(function($q) use ($search) {
-                    $q->whereHas('user', function($userQuery) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('user', function ($userQuery) use ($search) {
                         $userQuery->where('name', 'like', "%{$search}%")
-                                 ->orWhere('email', 'like', "%{$search}%");
+                            ->orWhere('email', 'like', "%{$search}%");
                     })
-                    ->orWhere('keterangan', 'like', "%{$search}%")
-                    ->orWhere('reason', 'like', "%{$search}%");
+                        ->orWhere('keterangan', 'like', "%{$search}%")
+                        ->orWhere('reason', 'like', "%{$search}%");
                 });
             }
             
@@ -1063,14 +1064,14 @@ class AbsensiController extends Controller
             if ($startDate) {
                 $query->whereDate('tanggal', '>=', $startDate);
             }
-            
+
             if ($endDate) {
                 $query->whereDate('tanggal', '<=', $endDate);
             }
             
             $ketidakhadiran = $query->paginate($perPage, ['*'], 'page', $page);
-            
-            $formattedData = $ketidakhadiran->map(function($item) {
+
+            $formattedData = $ketidakhadiran->map(function ($item) {
                 return [
                     'id' => $item->id,
                     'user_id' => $item->user_id,
@@ -1095,9 +1096,9 @@ class AbsensiController extends Controller
                     'created_at' => $item->created_at->format('Y-m-d H:i:s'),
                 ];
             });
-            
+
             \Log::info("API IndexKetidakhadiran: " . $ketidakhadiran->total() . " record ditemukan");
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $formattedData,
@@ -1110,7 +1111,7 @@ class AbsensiController extends Controller
                     'to' => $ketidakhadiran->lastItem(),
                 ]
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error("Error apiIndexKetidakhadiran: " . $e->getMessage());
             return response()->json([
@@ -1124,7 +1125,7 @@ class AbsensiController extends Controller
     public function apiStore(Request $request)
     {
         \Log::info("API Store absensi diakses dengan data: " . json_encode($request->all()));
-        
+
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'tanggal' => 'required|date',
@@ -1162,15 +1163,15 @@ class AbsensiController extends Controller
             $existing = Absensi::where('user_id', $data['user_id'])
                 ->whereDate('tanggal', $data['tanggal'])
                 ->exists();
-                
+
             if ($existing) {
                 throw new \Exception('Sudah ada data absensi untuk karyawan ini pada tanggal tersebut.');
             }
-            
+
             $absensi = Absensi::create($data);
-            
+
             DB::commit();
-            
+
             $message = 'Data absensi berhasil ditambahkan';
             if ($data['jenis_ketidakhadiran']) {
                 $jenisLabel = $this->getJenisKetidakhadiranLabel($data['jenis_ketidakhadiran']);
@@ -1180,9 +1181,9 @@ class AbsensiController extends Controller
                     $message = 'Data ' . strtolower($jenisLabel) . ' berhasil ditambahkan';
                 }
             }
-            
+
             \Log::info("Store berhasil: {$message} untuk user {$data['user_id']}");
-            
+
             return response()->json([
                 'success' => true,
                 'message' => $message,
@@ -1191,7 +1192,7 @@ class AbsensiController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error("Error apiStore: " . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menambah data. ' . $e->getMessage()
@@ -1202,7 +1203,7 @@ class AbsensiController extends Controller
     public function apiStoreCuti(Request $request)
     {
         \Log::info("API StoreCuti diakses dengan data: " . json_encode($request->all()));
-        
+
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'tanggal' => 'required|date',
@@ -1237,17 +1238,17 @@ class AbsensiController extends Controller
                 ->whereDate('tanggal', $data['tanggal'])
                 ->where('jenis_ketidakhadiran', 'cuti')
                 ->exists();
-                
+
             if ($existing) {
                 throw new \Exception('Sudah ada data cuti untuk karyawan ini pada tanggal tersebut.');
             }
-            
+
             $cuti = Absensi::create($data);
-            
+
             DB::commit();
-            
+
             \Log::info("StoreCuti berhasil untuk user {$data['user_id']} dari {$data['tanggal']} sampai {$data['tanggal_akhir']}");
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Pengajuan cuti berhasil dibuat dan menunggu persetujuan',
@@ -1256,7 +1257,7 @@ class AbsensiController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error("Error apiStoreCuti: " . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menambah data cuti. ' . $e->getMessage()
@@ -1268,9 +1269,9 @@ class AbsensiController extends Controller
     {
         try {
             $absensi = Absensi::with(['user:id,name,email,jabatan', 'approver:id,name'])->findOrFail($id);
-            
+
             \Log::info("API Show absensi id: {$id}");
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $absensi
@@ -1287,9 +1288,9 @@ class AbsensiController extends Controller
     public function apiUpdate(Request $request, $id)
     {
         \Log::info("API Update absensi id {$id} dengan data: " . json_encode($request->all()));
-        
+
         $absensi = Absensi::findOrFail($id);
-        
+
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'tanggal' => 'required|date',
@@ -1324,13 +1325,13 @@ class AbsensiController extends Controller
             }
             
             $data = $this->prepareAbsensiData($data, $absensi);
-            
+
             $absensi->update($data);
-            
+
             DB::commit();
-            
+
             \Log::info("Update berhasil untuk absensi id: {$id}");
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data absensi berhasil diperbarui',
@@ -1339,7 +1340,7 @@ class AbsensiController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error("Error apiUpdate id {$id}: " . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memperbarui data. ' . $e->getMessage()
@@ -1350,9 +1351,9 @@ class AbsensiController extends Controller
     public function apiUpdateCuti(Request $request, $id)
     {
         \Log::info("API UpdateCuti id {$id} dengan data: " . json_encode($request->all()));
-        
+
         $cuti = Absensi::findOrFail($id);
-        
+
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'tanggal' => 'required|date',
@@ -1385,16 +1386,16 @@ class AbsensiController extends Controller
                 $data['approved_by'] = auth()->user()->id;
                 $data['approved_at'] = now();
             }
-            
+
             $cuti->update($data);
-            
+
             DB::commit();
-            
+
             $statusText = $data['approval_status'] === 'approved' ? 'disetujui' : 'ditolak';
             $message = "Data cuti berhasil {$statusText}.";
-            
+
             \Log::info("UpdateCuti berhasil id {$id}: {$statusText}");
-                
+
             return response()->json([
                 'success' => true,
                 'message' => $message,
@@ -1403,7 +1404,7 @@ class AbsensiController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error("Error apiUpdateCuti id {$id}: " . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memperbarui data cuti. ' . $e->getMessage()
@@ -1414,17 +1415,17 @@ class AbsensiController extends Controller
     public function apiDestroy($id)
     {
         \Log::info("API Destroy absensi id: {$id}");
-        
+
         DB::beginTransaction();
         try {
             $absensi = Absensi::findOrFail($id);
             $recordType = $absensi->jenis_ketidakhadiran ? $this->getJenisKetidakhadiranLabel($absensi->jenis_ketidakhadiran) : 'Kehadiran';
             $absensi->delete();
-            
+
             DB::commit();
-            
+
             \Log::info("Destroy berhasil id {$id}: {$recordType}");
-            
+
             return response()->json([
                 'success' => true,
                 'message' => "Data {$recordType} berhasil dihapus."
@@ -1432,7 +1433,7 @@ class AbsensiController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error("Error apiDestroy id {$id}: " . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menghapus data: ' . $e->getMessage()
@@ -1443,12 +1444,12 @@ class AbsensiController extends Controller
     public function apiVerify(Request $request, $id)
     {
         \Log::info("API Verify id {$id} dengan data: " . json_encode($request->all()));
-        
+
         $validator = Validator::make($request->all(), [
             'approval_status' => 'required|in:approved,rejected',
             'rejection_reason' => 'required_if:approval_status,rejected|string|max:255',
         ]);
-        
+
         if ($validator->fails()) {
             \Log::warning("Validasi gagal Verify id {$id}: " . json_encode($validator->errors()));
             return response()->json([
@@ -1457,7 +1458,7 @@ class AbsensiController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-        
+
         DB::beginTransaction();
         try {
             $absensi = Absensi::findOrFail($id);
@@ -1469,21 +1470,21 @@ class AbsensiController extends Controller
                     'message' => 'Hanya data ketidakhadiran yang dapat diverifikasi.'
                 ], 400);
             }
-            
+
             $data = $validator->validated();
             $data['approved_by'] = auth()->user()->id;
             $data['approved_at'] = now();
-            
+
             $absensi->update($data);
-            
+
             DB::commit();
-            
+
             $jenisLabel = $this->getJenisKetidakhadiranLabel($absensi->jenis_ketidakhadiran);
             $statusText = $data['approval_status'] === 'approved' ? 'disetujui' : 'ditolak';
             $message = "Pengajuan {$jenisLabel} berhasil {$statusText}.";
-            
+
             \Log::info("Verify berhasil id {$id}: {$jenisLabel} {$statusText}");
-            
+
             return response()->json([
                 'success' => true,
                 'message' => $message,
@@ -1492,7 +1493,7 @@ class AbsensiController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error("Error apiVerify id {$id}: " . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memverifikasi data: ' . $e->getMessage()
@@ -1506,8 +1507,8 @@ class AbsensiController extends Controller
             $today = Carbon::now()->format('Y-m-d');
 
             $startDate = $request?->get('tanggal_mulai') ?? $today;
-            $endDate   = $request?->get('tanggal_akhir') ?? $today;
-            $divisi    = $request?->get('divisi');
+            $endDate = $request?->get('tanggal_akhir') ?? $today;
+            $divisi = $request?->get('divisi');
 
             \Log::info("API Statistics: {$startDate} sampai {$endDate}, divisi: {$divisi}");
 
@@ -1522,12 +1523,12 @@ class AbsensiController extends Controller
 
             $stats = [
                 'total_tepat_waktu' => (clone $query)->whereTime('jam_masuk', '<=', self::LIMIT_TIME . ':00')->count(),
-                'total_terlambat'   => (clone $query)->whereTime('jam_masuk', '>', self::LIMIT_TIME . ':00')->count(),
+                'total_terlambat' => (clone $query)->whereTime('jam_masuk', '>', self::LIMIT_TIME . ':00')->count(),
                 'total_tidak_masuk' => (clone $query)->whereNull('jam_masuk')->whereNull('jenis_ketidakhadiran')->count(),
-                'total_cuti'        => (clone $query)->where('jenis_ketidakhadiran', 'cuti')->count(),
-                'total_sakit'       => (clone $query)->where('jenis_ketidakhadiran', 'sakit')->count(),
-                'total_izin'        => (clone $query)->where('jenis_ketidakhadiran', 'izin')->count(),
-                'total_dinas_luar'  => (clone $query)->where('jenis_ketidakhadiran', 'dinas-luar')->count(),
+                'total_cuti' => (clone $query)->where('jenis_ketidakhadiran', 'cuti')->count(),
+                'total_sakit' => (clone $query)->where('jenis_ketidakhadiran', 'sakit')->count(),
+                'total_izin' => (clone $query)->where('jenis_ketidakhadiran', 'izin')->count(),
+                'total_dinas_luar' => (clone $query)->where('jenis_ketidakhadiran', 'dinas-luar')->count(),
             ];
 
             \Log::info("API Statistics result: " . json_encode($stats));
@@ -1549,7 +1550,7 @@ class AbsensiController extends Controller
     {
         try {
             $tanggal = $request->get('tanggal', Carbon::now()->format('Y-m-d'));
-            
+
             \Log::info("API KehadiranPerDivisi untuk tanggal: {$tanggal}");
             
             if (!$this->isValidDate($tanggal)) {
@@ -1561,14 +1562,14 @@ class AbsensiController extends Controller
                 ->where('role', 'karyawan')
                 ->distinct()
                 ->pluck('divisi');
-            
+
             $result = [];
-            
+
             foreach ($divisions as $division) {
                 $totalUsersInDivision = User::where('divisi', $division)
                     ->where('role', 'karyawan')
                     ->count();
-                    
+
                 if ($totalUsersInDivision === 0) {
                     continue;
                 }
@@ -1579,9 +1580,9 @@ class AbsensiController extends Controller
                     ->whereDate('tanggal', $tanggal)
                     ->whereNotNull('jam_masuk')
                     ->count();
-                
+
                 $percentage = round(($presentCount / $totalUsersInDivision) * 100);
-                
+
                 $result[] = [
                     'divisi' => $division,
                     'total_karyawan' => $totalUsersInDivision,
@@ -1628,13 +1629,13 @@ class AbsensiController extends Controller
         if (!isset($data['tanggal_akhir']) || !$data['tanggal_akhir']) {
             $data['tanggal_akhir'] = $data['tanggal'];
         }
-        
+
         return $data;
     }
 
     private function getJenisKetidakhadiranLabel($jenis): string
     {
-        return match($jenis) {
+        return match ($jenis) {
             'cuti' => 'Cuti',
             'sakit' => 'Sakit',
             'izin' => 'Izin',
@@ -1646,7 +1647,7 @@ class AbsensiController extends Controller
 
     private function getApprovalStatusLabel($status): string
     {
-        return match($status) {
+        return match ($status) {
             'pending' => 'Menunggu',
             'approved' => 'Disetujui',
             'rejected' => 'Ditolak',
@@ -1700,9 +1701,9 @@ class AbsensiController extends Controller
         try {
             $maxAllowedDate = Carbon::now()->addMonth()->format('Y-m-d');
             $deletedCount = Absensi::whereDate('tanggal', '>', $maxAllowedDate)->delete();
-            
+
             \Log::warning("Cleanup: {$deletedCount} data dengan tanggal > {$maxAllowedDate} dihapus");
-            
+
             return response()->json([
                 'success' => true,
                 'message' => "{$deletedCount} data dengan tanggal di masa depan dihapus"

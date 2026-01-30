@@ -16,6 +16,7 @@ return new class extends Migration
                   ->onDelete('set null');
             $table->string('nama', 100);
             $table->string('jabatan', 100);
+            $table->string('email', 100);
             $table->string('divisi', 100)->nullable(); // Divisi nullable
             $table->string('gaji', 100)->nullable(); // Divisi nullable
             $table->text('alamat');

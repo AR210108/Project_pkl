@@ -60,6 +60,7 @@ class CutiController extends Controller
                 case 'admin':
                     return $this->indexAdmin($request);
                 case 'owner':
+                case 'finance':
                     return $this->indexOwner($request);
                 default:
                     return response()->json(['success' => false, 'message' => 'Role tidak dikenali: ' . $this->currentRole], 403);
@@ -244,6 +245,62 @@ class CutiController extends Controller
     }
 
     // ============================================
+    // CREATE METHOD
+    // ============================================
+
+    public function create()
+    {
+        try {
+            // Authorization - hanya karyawan yang bisa create cuti untuk diri sendiri
+            if ($this->currentRole !== 'karyawan') {
+                abort(403, 'Akses ditolak');
+            }
+            
+            $user = $this->user;
+            
+            // Get quota info
+            $quotaInfo = [];
+            try {
+                $quotaInfo = CutiQuota::getUserQuota($user->id, date('Y'));
+            } catch (\Exception $e) {
+                Log::warning('Failed to get quota info: ' . $e->getMessage());
+                $quotaInfo = [
+                    'tahun' => date('Y'),
+                    'quota_tahunan' => 12,
+                    'terpakai' => 0,
+                    'sisa' => 12,
+                    'quota_khusus' => 0,
+                    'terpakai_khusus' => 0
+                ];
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'divisi' => $user->divisi,
+                        'sisa_cuti' => (int)$user->sisa_cuti
+                    ],
+                    'quota_info' => $quotaInfo,
+                    'jenis_cuti_options' => [
+                        ['value' => 'tahunan', 'label' => 'Cuti Tahunan'],
+                        ['value' => 'sakit', 'label' => 'Cuti Sakit'],
+                        ['value' => 'penting', 'label' => 'Cuti Penting'],
+                        ['value' => 'melahirkan', 'label' => 'Cuti Melahirkan'],
+                        ['value' => 'lainnya', 'label' => 'Cuti Lainnya']
+                    ],
+                    'min_date' => Carbon::now()->format('Y-m-d')
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in create method: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal memuat form cuti'], 500);
+        }
+    }
+
+    // ============================================
     // GET DATA API
     // ============================================
 
@@ -275,6 +332,7 @@ class CutiController extends Controller
                 case 'general_manager':
                 case 'admin':
                 case 'owner':
+                case 'finance':
                     // Lihat semua
                     break;
                 default:
@@ -292,7 +350,7 @@ class CutiController extends Controller
             }
             
             // 6. Filter Divisi (hanya untuk role tertentu)
-            if (in_array($this->currentRole, ['general_manager', 'admin', 'owner']) && 
+            if (in_array($this->currentRole, ['general_manager', 'admin', 'owner', 'finance']) && 
                 $request->has('divisi') && $request->divisi !== 'all') {
                 $query->whereHas('user', function ($q) use ($request) {
                     $q->where('divisi', $request->divisi);
@@ -387,16 +445,20 @@ class CutiController extends Controller
             if ($item->tanggal_mulai) {
                 try {
                     $tMulai = Carbon::parse($item->tanggal_mulai)->translatedFormat('d F Y');
+                    $tMulaiDate = Carbon::parse($item->tanggal_mulai)->format('Y-m-d');
                 } catch (\Exception $e) {
                     $tMulai = '-';
+                    $tMulaiDate = null;
                 }
             }
             
             if ($item->tanggal_selesai) {
                 try {
                     $tSelesai = Carbon::parse($item->tanggal_selesai)->translatedFormat('d F Y');
+                    $tSelesaiDate = Carbon::parse($item->tanggal_selesai)->format('Y-m-d');
                 } catch (\Exception $e) {
                     $tSelesai = '-';
+                    $tSelesaiDate = null;
                 }
             }
             
@@ -482,8 +544,10 @@ class CutiController extends Controller
             
             // Business logic
             $dapatDisetujui = $item->status === 'menunggu';
-            $dapatDiubah = $item->status === 'menunggu';
-            $dapatDihapus = $item->status === 'menunggu';
+            $dapatDiubah = $item->status === 'menunggu' && 
+                          ($this->currentRole === 'karyawan' ? $item->user_id === $this->user->id : true);
+            $dapatDihapus = $item->status === 'menunggu' && 
+                           ($this->currentRole === 'karyawan' ? $item->user_id === $this->user->id : true);
             $dapatLihat = true;
             $dapatBatalkan = $item->status === 'disetujui' && 
                             ($this->currentRole !== 'karyawan' || $item->user_id === $this->user->id);
@@ -659,6 +723,7 @@ class CutiController extends Controller
                 case 'general_manager':
                 case 'admin':
                 case 'owner':
+                case 'finance':
                     $menunggu = Cuti::where('status', 'menunggu')->count();
                     $disetujui = Cuti::where('status', 'disetujui')->count();
                     $ditolak = Cuti::where('status', 'ditolak')->count();
@@ -912,6 +977,276 @@ class CutiController extends Controller
     }
 
     // ============================================
+    // SHOW METHOD (GET BY ID)
+    // ============================================
+
+    public function show($id) 
+    {
+        try {
+            $cuti = Cuti::with(['user:id,name,divisi,email,sisa_cuti', 'disetujuiOleh:id,name', 'dibatalkanOleh:id,name', 'histories.user:id,name'])->findOrFail($id);
+            
+            // Authorization
+            if ($this->currentRole === 'karyawan' && $cuti->user_id !== $this->user->id) {
+                return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+            }
+            if ($this->currentRole === 'manager_divisi' && (!$cuti->user || $cuti->user->divisi !== $this->currentDivisi)) {
+                return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+            }
+            
+            $histories = $cuti->histories->map(function($history) {
+                return [
+                    'action' => $history->action,
+                    'action_label' => method_exists($history, 'getActionLabelAttribute') ? $history->action_label : ucfirst($history->action),
+                    'note' => $history->note,
+                    'user_name' => $history->user ? $history->user->name : 'System',
+                    'created_at' => $history->created_at->format('d F Y H:i')
+                ];
+            });
+            
+            return response()->json([
+                'success' => true, 
+                'data' => array_merge(
+                    $this->formatCutiData($cuti),
+                    [
+                        'histories' => $histories
+                    ]
+                )
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error showing cuti: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal mengambil data cuti'], 500);
+        }
+    }
+
+    // ============================================
+    // EDIT METHOD (GET EDIT DATA)
+    // ============================================
+
+    public function edit($id) 
+    {
+        try {
+            $cuti = Cuti::with(['user:id,name,divisi,email,sisa_cuti'])->findOrFail($id);
+            
+            // Authorization
+            if ($cuti->user_id !== $this->user->id && !in_array($this->currentRole, ['admin', 'general_manager'])) {
+                return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+            }
+            
+            if ($cuti->status !== 'menunggu') {
+                return response()->json(['success' => false, 'message' => 'Cuti tidak dapat diubah karena sudah diproses'], 400);
+            }
+            
+            // Get quota info
+            $quotaInfo = [];
+            try {
+                $quotaInfo = CutiQuota::getUserQuota($cuti->user_id, date('Y'));
+            } catch (\Exception $e) {
+                Log::warning('Failed to get quota info: ' . $e->getMessage());
+                $quotaInfo = [
+                    'tahun' => date('Y'),
+                    'quota_tahunan' => 12,
+                    'terpakai' => 0,
+                    'sisa' => 12,
+                    'quota_khusus' => 0,
+                    'terpakai_khusus' => 0
+                ];
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'id' => $cuti->id,
+                    'user_id' => $cuti->user_id,
+                    'nama' => $cuti->user->name ?? 'Unknown',
+                    'email' => $cuti->user->email ?? '',
+                    'divisi' => $cuti->user->divisi ?? '',
+                    'keterangan' => $cuti->keterangan,
+                    'jenis_cuti' => $cuti->jenis_cuti,
+                    'jenis_cuti_kode' => $cuti->jenis_cuti,
+                    'tanggal_mulai' => $cuti->tanggal_mulai ? Carbon::parse($cuti->tanggal_mulai)->format('Y-m-d') : '',
+                    'tanggal_selesai' => $cuti->tanggal_selesai ? Carbon::parse($cuti->tanggal_selesai)->format('Y-m-d') : '',
+                    'tanggal_mulai_formatted' => $cuti->tanggal_mulai ? Carbon::parse($cuti->tanggal_mulai)->format('d F Y') : '',
+                    'tanggal_selesai_formatted' => $cuti->tanggal_selesai ? Carbon::parse($cuti->tanggal_selesai)->format('d F Y') : '',
+                    'periode' => $cuti->tanggal_mulai ? Carbon::parse($cuti->tanggal_mulai)->format('d/m/Y') . ' - ' . Carbon::parse($cuti->tanggal_selesai)->format('d/m/Y') : '',
+                    'durasi' => $cuti->durasi,
+                    'status' => $cuti->status,
+                    'status_label' => $this->getStatusLabel($cuti->status),
+                    'status_color' => $this->getStatusColor($cuti->status),
+                    'sisa_cuti_karyawan' => $cuti->user->sisa_cuti ?? 0,
+                    'sisa_cuti_sebelum' => $cuti->sisa_cuti_sebelum ?? null,
+                    'sisa_cuti_sesudah' => $cuti->sisa_cuti_sesudah ?? null,
+                    'disetujui_oleh' => null,
+                    'disetujui_pada' => null,
+                    'dibatalkan_oleh' => null,
+                    'dibatalkan_pada' => null,
+                    'catatan_penolakan' => $cuti->catatan_penolakan ?? null,
+                    'catatan_pembatalan' => $cuti->catatan_pembatalan ?? null,
+                    'created_at' => $cuti->created_at ? Carbon::parse($cuti->created_at)->format('d F Y H:i') : '',
+                    'dapat_disetujui' => false,
+                    'dapat_diubah' => true,
+                    'dapat_dihapus' => true,
+                    'dapat_lihat' => true,
+                    'dapat_batalkan' => false,
+                    'is_overlapping' => false,
+                    'overlap_warning' => null,
+                    'quota_info' => $quotaInfo,
+                    'jenis_cuti_options' => [
+                        ['value' => 'tahunan', 'label' => 'Cuti Tahunan'],
+                        ['value' => 'sakit', 'label' => 'Cuti Sakit'],
+                        ['value' => 'penting', 'label' => 'Cuti Penting'],
+                        ['value' => 'melahirkan', 'label' => 'Cuti Melahirkan'],
+                        ['value' => 'lainnya', 'label' => 'Cuti Lainnya']
+                    ],
+                    'min_date' => Carbon::now()->format('Y-m-d')
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error edit cuti: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal mengambil data edit cuti'], 500);
+        }
+    }
+
+    // ============================================
+    // UPDATE METHOD
+    // ============================================
+
+    public function update(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            $cuti = Cuti::with('user')->findOrFail($id);
+            
+            // Authorization
+            if ($cuti->user_id !== $this->user->id && !in_array($this->currentRole, ['admin', 'general_manager'])) {
+                return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+            }
+            
+            if ($cuti->status !== 'menunggu') {
+                return response()->json(['success' => false, 'message' => 'Cuti tidak dapat diubah karena sudah diproses'], 400);
+            }
+            
+            $validated = $request->validate([
+                'keterangan' => 'required|string|max:255',
+                'jenis_cuti' => 'required|in:tahunan,sakit,penting,melahirkan,lainnya',
+                'tanggal_mulai' => 'required|date',
+                'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+                'durasi' => 'required|integer|min:1'
+            ]);
+            
+            // Hitung selisih hari jika cuti tahunan
+            $selisihHari = 0;
+            $oldDurasi = $cuti->durasi;
+            $newDurasi = $validated['durasi'];
+            
+            if ($cuti->jenis_cuti === 'tahunan' || $validated['jenis_cuti'] === 'tahunan') {
+                if ($cuti->jenis_cuti === 'tahunan' && $validated['jenis_cuti'] === 'tahunan') {
+                    // Keduanya cuti tahunan, hitung selisih
+                    $selisihHari = $newDurasi - $oldDurasi;
+                } else if ($cuti->jenis_cuti !== 'tahunan' && $validated['jenis_cuti'] === 'tahunan') {
+                    // Berubah dari non-tahunan ke tahunan, hitung total baru
+                    $selisihHari = $newDurasi;
+                } else if ($cuti->jenis_cuti === 'tahunan' && $validated['jenis_cuti'] !== 'tahunan') {
+                    // Berubah dari tahunan ke non-tahunan, kurangi semua
+                    $selisihHari = -$oldDurasi;
+                }
+            }
+            
+            // Cek sisa cuti jika selisih positif
+            if ($selisihHari > 0) {
+                $currentYear = date('Y');
+                $quota = CutiQuota::getUserQuota($cuti->user_id, $currentYear);
+                
+                if ($quota->sisa < $selisihHari) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Sisa cuti tidak mencukupi untuk perubahan ini. Sisa: ' . $quota->sisa . ' hari, Dibutuhkan: ' . $selisihHari . ' hari'
+                    ], 400);
+                }
+            }
+            
+            // Cek overlap dengan cuti lain yang sudah disetujui
+            $overlapCuti = Cuti::where('user_id', $cuti->user_id)
+                ->where('status', 'disetujui')
+                ->where('id', '!=', $cuti->id)
+                ->where(function($query) use ($validated) {
+                    $query->whereBetween('tanggal_mulai', [$validated['tanggal_mulai'], $validated['tanggal_selesai']])
+                          ->orWhereBetween('tanggal_selesai', [$validated['tanggal_mulai'], $validated['tanggal_selesai']])
+                          ->orWhere(function($q) use ($validated) {
+                              $q->where('tanggal_mulai', '<=', $validated['tanggal_mulai'])
+                                ->where('tanggal_selesai', '>=', $validated['tanggal_selesai']);
+                          });
+                })
+                ->exists();
+            
+            if ($overlapCuti) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Cuti ini bertabrakan dengan cuti lain yang sudah disetujui'
+                ], 400);
+            }
+            
+            // Simpan data lama untuk history
+            $oldData = $cuti->toArray();
+            
+            // Update quota jika diperlukan
+            if ($selisihHari != 0) {
+                $currentYear = date('Y');
+                $quota = CutiQuota::getUserQuota($cuti->user_id, $currentYear);
+                
+                if ($selisihHari > 0) {
+                    // Tambah terpakai
+                    $quota->addTerpakai($selisihHari);
+                    $cuti->sisa_cuti_sesudah = $quota->sisa;
+                } else {
+                    // Kurangi terpakai (refund)
+                    $quota->reduceTerpakai(abs($selisihHari));
+                    $cuti->sisa_cuti_sesudah = $quota->sisa;
+                }
+            }
+            
+            // Update cuti
+            $cuti->update($validated);
+            
+            // Create history
+            $changes = [];
+            foreach ($validated as $key => $value) {
+                if ($oldData[$key] != $value) {
+                    $changes[$key] = [
+                        'from' => $oldData[$key],
+                        'to' => $value
+                    ];
+                }
+            }
+            
+            if (!empty($changes)) {
+                CutiHistory::create([
+                    'cuti_id' => $cuti->id,
+                    'action' => 'updated',
+                    'user_id' => $this->user->id,
+                    'changes' => json_encode($changes),
+                    'note' => 'Data cuti diperbarui' . ($selisihHari != 0 ? ' (Selisih hari: ' . $selisihHari . ')' : '')
+                ]);
+            }
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true, 
+                'message' => 'Cuti berhasil diperbarui',
+                'data' => $this->formatCutiData($cuti->fresh())
+            ]);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Validasi gagal', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating cuti: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal memperbarui cuti'], 500);
+        }
+    }
+
+    // ============================================
     // APPROVE CUTI
     // ============================================
 
@@ -1071,7 +1406,48 @@ class CutiController extends Controller
     }
 
     // ============================================
-    // CANCEL CUTI (With Refund)
+    // CANCEL CUTI (Karyawan Cancel)
+    // ============================================
+
+    public function cancel(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            $cuti = Cuti::findOrFail($id);
+            
+            if ($cuti->user_id !== $this->user->id) {
+                return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+            }
+            
+            if ($cuti->status !== 'menunggu') {
+                return response()->json(['success' => false, 'message' => 'Cuti tidak dapat dibatalkan karena sudah diproses'], 400);
+            }
+            
+            // Soft delete
+            $cuti->delete();
+            
+            // Create history
+            CutiHistory::create([
+                'cuti_id' => $cuti->id,
+                'action' => 'cancelled',
+                'user_id' => $this->user->id,
+                'changes' => null,
+                'note' => 'Cuti dibatalkan oleh karyawan'
+            ]);
+            
+            DB::commit();
+            
+            return response()->json(['success' => true, 'message' => 'Cuti berhasil dibatalkan']);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error cancelling cuti: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal membatalkan cuti'], 500);
+        }
+    }
+
+    // ============================================
+    // CANCEL CUTI (With Refund) - Admin/Manager
     // ============================================
 
     public function cancelWithRefund(Request $request, $id)
@@ -1088,6 +1464,10 @@ class CutiController extends Controller
             if ($cuti->status !== 'disetujui') {
                 return response()->json(['success' => false, 'message' => 'Hanya cuti yang sudah disetujui yang dapat dibatalkan'], 400);
             }
+            
+            $validated = $request->validate([
+                'catatan_pembatalan' => 'nullable|string|max:255'
+            ]);
             
             // Logika Refund Quota
             $currentYear = date('Y');
@@ -1116,7 +1496,7 @@ class CutiController extends Controller
 
             // Update status cuti
             $cuti->status = 'dibatalkan';
-            $cuti->catatan_pembatalan = $request->catatan_pembatalan ?? 'Dibatalkan';
+            $cuti->catatan_pembatalan = $validated['catatan_pembatalan'] ?? 'Dibatalkan';
             $cuti->dibatalkan_oleh = $this->user->id;
             $cuti->dibatalkan_pada = Carbon::now();
             $cuti->save();
@@ -1152,78 +1532,6 @@ class CutiController extends Controller
     }
 
     // ============================================
-    // UPDATE METHOD
-    // ============================================
-
-    public function update(Request $request, $id)
-    {
-        DB::beginTransaction();
-        try {
-            $cuti = Cuti::findOrFail($id);
-            
-            // Authorization
-            if ($cuti->user_id !== $this->user->id && !in_array($this->currentRole, ['admin', 'general_manager'])) {
-                return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
-            }
-            
-            if ($cuti->status !== 'menunggu') {
-                return response()->json(['success' => false, 'message' => 'Cuti tidak dapat diubah karena sudah diproses'], 400);
-            }
-            
-            $validated = $request->validate([
-                'keterangan' => 'required|string|max:255',
-                'jenis_cuti' => 'required|in:tahunan,sakit,penting,melahirkan,lainnya',
-                'tanggal_mulai' => 'required|date',
-                'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-                'durasi' => 'required|integer|min:1'
-            ]);
-            
-            // Simpan data lama untuk history
-            $oldData = $cuti->toArray();
-            
-            // Update cuti
-            $cuti->update($validated);
-            
-            // Create history
-            $changes = [];
-            foreach ($validated as $key => $value) {
-                if ($oldData[$key] != $value) {
-                    $changes[$key] = [
-                        'from' => $oldData[$key],
-                        'to' => $value
-                    ];
-                }
-            }
-            
-            if (!empty($changes)) {
-                CutiHistory::create([
-                    'cuti_id' => $cuti->id,
-                    'action' => 'updated',
-                    'user_id' => $this->user->id,
-                    'changes' => json_encode($changes),
-                    'note' => 'Data cuti diperbarui'
-                ]);
-            }
-            
-            DB::commit();
-            
-            return response()->json([
-                'success' => true, 
-                'message' => 'Cuti berhasil diperbarui',
-                'data' => $this->formatCutiData($cuti)
-            ]);
-            
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Validasi gagal', 'errors' => $e->errors()], 422);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error updating cuti: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Gagal memperbarui cuti'], 500);
-        }
-    }
-
-    // ============================================
     // DELETE METHOD
     // ============================================
 
@@ -1243,10 +1551,6 @@ class CutiController extends Controller
             }
             
             // Soft delete
-            // PERHATIAN: Jangan akses deleted_by jika tidak ada di database/migration
-            // Hapus baris: $cuti->deleted_by = $this->user->id;
-            // Hapus baris: $cuti->save();
-            
             $cuti->delete();
             
             // Create history
@@ -1266,6 +1570,130 @@ class CutiController extends Controller
             DB::rollBack();
             Log::error('Error deleting cuti: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Gagal menghapus cuti'], 500);
+        }
+    }
+
+    // ============================================
+    // UTILITY METHODS
+    // ============================================
+    
+    public function calculateDuration(Request $request) 
+    {
+        try {
+            $validated = $request->validate([
+                'tanggal_mulai' => 'required|date',
+                'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai'
+            ]);
+            
+            $start = Carbon::parse($validated['tanggal_mulai']);
+            $end = Carbon::parse($validated['tanggal_selesai']);
+            
+            $totalDays = 0;
+            $current = $start->copy();
+            
+            while ($current->lte($end)) {
+                // Exclude weekends
+                if (!$current->isWeekend()) {
+                    $totalDays++;
+                }
+                $current->addDay();
+            }
+            
+            return response()->json([
+                'success' => true, 
+                'data' => [
+                    'jumlah_hari' => $totalDays,
+                    'tanggal_mulai' => $start->format('d F Y'),
+                    'tanggal_selesai' => $end->format('d F Y'),
+                    'hari_kerja' => $totalDays . ' hari kerja'
+                ]
+            ]);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error calculating duration: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal menghitung durasi'], 500);
+        }
+    }
+    
+    public function getKaryawanByDivisi() 
+    {
+        try {
+            if ($this->currentRole !== 'manager_divisi') {
+                return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+            }
+            
+            if (!$this->currentDivisi) {
+                return response()->json(['success' => false, 'message' => 'User tidak memiliki divisi'], 400);
+            }
+            
+            $karyawan = User::where('divisi', $this->currentDivisi)
+                            ->where('role', 'karyawan')
+                            ->select('id', 'name', 'divisi', 'sisa_cuti', 'email')
+                            ->orderBy('name')
+                            ->get()
+                            ->map(function($user) {
+                                $quotaInfo = [];
+                                try {
+                                    $quotaInfo = CutiQuota::getUserQuota($user->id, date('Y'));
+                                } catch (\Exception $e) {
+                                    Log::warning('Failed to get quota for user ' . $user->id . ': ' . $e->getMessage());
+                                }
+                                
+                                return [
+                                    'id' => $user->id,
+                                    'name' => $user->name,
+                                    'divisi' => $user->divisi,
+                                    'sisa_cuti' => (int)$user->sisa_cuti,
+                                    'email' => $user->email,
+                                    'cuti_terpakai' => 12 - (int)$user->sisa_cuti,
+                                    'quota_info' => $quotaInfo
+                                ];
+                            });
+            
+            return response()->json(['success' => true, 'data' => $karyawan]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error getting karyawan by divisi: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal mengambil data karyawan'], 500);
+        }
+    }
+
+    public function getHistory($id)
+    {
+        try {
+            $cuti = Cuti::findOrFail($id);
+            
+            // Authorization
+            if ($cuti->user_id !== $this->user->id && !in_array($this->currentRole, ['admin', 'general_manager', 'manager_divisi'])) {
+                return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+            }
+            
+            $histories = CutiHistory::with('user:id,name')
+                ->where('cuti_id', $id)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function($history) {
+                    return [
+                        'action' => $history->action,
+                        'action_label' => $this->getActionLabel($history->action),
+                        'note' => $history->note,
+                        'user_name' => $history->user ? $history->user->name : 'System',
+                        'created_at' => $history->created_at->format('d F Y H:i'),
+                        'changes' => $history->changes ? json_decode($history->changes, true) : null
+                    ];
+                });
+            
+            return response()->json(['success' => true, 'data' => $histories]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error getting history: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal mengambil history'], 500);
         }
     }
 
@@ -1386,191 +1814,285 @@ class CutiController extends Controller
     }
 
     // ============================================
-    // UTILITY METHODS
+    // EXPORT & REPORT
     // ============================================
-    
-    public function show($id) 
+
+    public function export(Request $request)
     {
         try {
-            $cuti = Cuti::with(['user:id,name,divisi,email,sisa_cuti', 'disetujuiOleh:id,name', 'dibatalkanOleh:id,name', 'histories.user:id,name'])->findOrFail($id);
-            
             // Authorization
-            if ($this->currentRole === 'karyawan' && $cuti->user_id !== $this->user->id) {
-                return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
-            }
-            if ($this->currentRole === 'manager_divisi' && (!$cuti->user || $cuti->user->divisi !== $this->currentDivisi)) {
+            if (!in_array($this->currentRole, ['admin', 'general_manager', 'owner', 'finance'])) {
                 return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
             }
             
-            $histories = $cuti->histories->map(function($history) {
+            $query = Cuti::with(['user:id,name,divisi', 'disetujuiOleh:id,name']);
+            
+            // Filters
+            if ($request->has('year')) {
+                $year = $request->year;
+                $query->whereYear('tanggal_mulai', $year);
+            }
+            
+            if ($request->has('divisi') && $request->divisi !== 'all') {
+                $query->whereHas('user', function($q) use ($request) {
+                    $q->where('divisi', $request->divisi);
+                });
+            }
+            
+            if ($request->has('status') && $request->status !== 'all') {
+                $query->where('status', $request->status);
+            }
+            
+            $cuti = $query->orderBy('tanggal_mulai', 'desc')->get();
+            
+            $data = $cuti->map(function($item) {
                 return [
-                    'action' => $history->action,
-                    'action_label' => method_exists($history, 'getActionLabelAttribute') ? $history->action_label : ucfirst($history->action),
-                    'note' => $history->note,
-                    'user_name' => $history->user ? $history->user->name : 'System',
-                    'created_at' => $history->created_at->format('d F Y H:i')
+                    'ID' => $item->id,
+                    'Nama Karyawan' => $item->user->name ?? 'Unknown',
+                    'Divisi' => $item->user->divisi ?? '-',
+                    'Jenis Cuti' => $this->getJenisCutiLabel($item->jenis_cuti),
+                    'Tanggal Mulai' => $item->tanggal_mulai ? Carbon::parse($item->tanggal_mulai)->format('d/m/Y') : '-',
+                    'Tanggal Selesai' => $item->tanggal_selesai ? Carbon::parse($item->tanggal_selesai)->format('d/m/Y') : '-',
+                    'Durasi (Hari)' => $item->durasi,
+                    'Status' => $this->getStatusLabel($item->status),
+                    'Disetujui Oleh' => $item->disetujuiOleh->name ?? '-',
+                    'Tanggal Disetujui' => $item->disetujui_pada ? Carbon::parse($item->disetujui_pada)->format('d/m/Y H:i') : '-',
+                    'Keterangan' => $item->keterangan ?? '-'
                 ];
             });
             
             return response()->json([
-                'success' => true, 
-                'data' => array_merge(
-                    $this->formatCutiData($cuti),
-                    [
-                        'histories' => $histories
-                    ]
-                )
+                'success' => true,
+                'data' => $data,
+                'total_records' => $cuti->count()
             ]);
+            
         } catch (\Exception $e) {
-            Log::error('Error showing cuti: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Gagal mengambil data cuti'], 500);
+            Log::error('Error exporting cuti: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal mengekspor data'], 500);
         }
     }
 
-    public function edit($id) 
+    public function report(Request $request)
     {
         try {
-            $cuti = Cuti::findOrFail($id);
-            
-            if ($cuti->user_id !== $this->user->id && !in_array($this->currentRole, ['admin', 'general_manager'])) {
-                abort(403, 'Akses ditolak');
-            }
-            
-            if ($cuti->status !== 'menunggu') {
-                abort(400, 'Cuti tidak dapat diedit karena sudah diproses');
-            }
-            
-            return view('karyawan.cuti_edit', compact('cuti'));
-        } catch (\Exception $e) {
-            Log::error('Error edit cuti: ' . $e->getMessage());
-            abort(500, 'Terjadi kesalahan sistem');
-        }
-    }
-
-    public function cancel($id) 
-    {
-        DB::beginTransaction();
-        try {
-            $cuti = Cuti::findOrFail($id);
-            
-            if ($cuti->user_id !== $this->user->id) {
+            // Authorization
+            if (!in_array($this->currentRole, ['admin', 'general_manager', 'owner', 'finance'])) {
                 return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
             }
             
-            if ($cuti->status !== 'menunggu') {
-                return response()->json(['success' => false, 'message' => 'Cuti tidak dapat dibatalkan karena sudah diproses'], 400);
+            $year = $request->get('year', date('Y'));
+            
+            // Stats by month
+            $monthlyStats = [];
+            for ($month = 1; $month <= 12; $month++) {
+                $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+                $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+                
+                $total = Cuti::whereBetween('tanggal_mulai', [$startDate, $endDate])->count();
+                $disetujui = Cuti::whereBetween('tanggal_mulai', [$startDate, $endDate])
+                    ->where('status', 'disetujui')->count();
+                $menunggu = Cuti::whereBetween('tanggal_mulai', [$startDate, $endDate])
+                    ->where('status', 'menunggu')->count();
+                $ditolak = Cuti::whereBetween('tanggal_mulai', [$startDate, $endDate])
+                    ->where('status', 'ditolak')->count();
+                
+                $monthlyStats[] = [
+                    'month' => Carbon::create($year, $month, 1)->translatedFormat('F'),
+                    'total' => $total,
+                    'disetujui' => $disetujui,
+                    'menunggu' => $menunggu,
+                    'ditolak' => $ditolak
+                ];
             }
             
-            // Soft delete
-            // HAPUS BARRIS INI: $cuti->deleted_by = $this->user->id;
-            // HAPUS BARRIS INI: $cuti->save();
-            $cuti->delete();
+            // Stats by jenis cuti
+            $jenisStats = Cuti::whereYear('tanggal_mulai', $year)
+                ->select('jenis_cuti', DB::raw('count(*) as total'), DB::raw('sum(durasi) as total_hari'))
+                ->groupBy('jenis_cuti')
+                ->get()
+                ->map(function($item) {
+                    return [
+                        'jenis_cuti' => $this->getJenisCutiLabel($item->jenis_cuti),
+                        'total' => $item->total,
+                        'total_hari' => $item->total_hari
+                    ];
+                });
             
-            // Create history
-            CutiHistory::create([
-                'cuti_id' => $cuti->id,
-                'action' => 'cancelled',
-                'user_id' => $this->user->id,
-                'changes' => null,
-                'note' => 'Cuti dibatalkan oleh karyawan'
-            ]);
-            
-            DB::commit();
-            
-            return response()->json(['success' => true, 'message' => 'Cuti berhasil dibatalkan']);
-            
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error cancelling cuti: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Gagal membatalkan cuti'], 500);
-        }
-    }
-
-    public function calculateDuration(Request $request) 
-    {
-        try {
-            $validated = $request->validate([
-                'tanggal_mulai' => 'required|date',
-                'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai'
-            ]);
-            
-            $start = Carbon::parse($validated['tanggal_mulai']);
-            $end = Carbon::parse($validated['tanggal_selesai']);
-            
-            $totalDays = 0;
-            $current = $start->copy();
-            
-            while ($current->lte($end)) {
-                // Exclude weekends
-                if (!$current->isWeekend()) {
-                    $totalDays++;
-                }
-                $current->addDay();
-            }
+            // Stats by divisi
+            $divisiStats = Cuti::whereYear('tanggal_mulai', $year)
+                ->join('users', 'cutis.user_id', '=', 'users.id')
+                ->select('users.divisi', DB::raw('count(*) as total'))
+                ->groupBy('users.divisi')
+                ->get();
             
             return response()->json([
-                'success' => true, 
+                'success' => true,
                 'data' => [
-                    'jumlah_hari' => $totalDays,
-                    'tanggal_mulai' => $start->format('d F Y'),
-                    'tanggal_selesai' => $end->format('d F Y'),
-                    'hari_kerja' => $totalDays . ' hari kerja'
+                    'monthly_stats' => $monthlyStats,
+                    'jenis_stats' => $jenisStats,
+                    'divisi_stats' => $divisiStats,
+                    'year' => $year
                 ]
             ]);
             
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $e->errors()
-            ], 422);
         } catch (\Exception $e) {
-            Log::error('Error calculating duration: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Gagal menghitung durasi'], 500);
+            Log::error('Error generating report: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal membuat laporan'], 500);
         }
     }
-    
-    public function getKaryawanByDivisi() 
+
+    public function checkLeaveStatusApi(Request $request)
     {
         try {
-            if ($this->currentRole !== 'manager_divisi') {
+            $userId = $request->get('user_id') ?? $this->user->id;
+            $date = $request->get('date') ?? Carbon::today()->format('Y-m-d');
+            
+            // Authorization
+            if ($this->currentRole === 'karyawan' && $userId !== $this->user->id) {
                 return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
             }
             
-            if (!$this->currentDivisi) {
-                return response()->json(['success' => false, 'message' => 'User tidak memiliki divisi'], 400);
-            }
+            $cuti = Cuti::where('user_id', $userId)
+                ->where('status', 'disetujui')
+                ->whereDate('tanggal_mulai', '<=', $date)
+                ->whereDate('tanggal_selesai', '>=', $date)
+                ->first();
             
-            $karyawan = User::where('divisi', $this->currentDivisi)
-                            ->where('role', 'karyawan')
-                            ->select('id', 'name', 'divisi', 'sisa_cuti', 'email')
-                            ->orderBy('name')
-                            ->get()
-                            ->map(function($user) {
-                                $quotaInfo = [];
-                                try {
-                                    $quotaInfo = CutiQuota::getUserQuota($user->id, date('Y'));
-                                } catch (\Exception $e) {
-                                    Log::warning('Failed to get quota for user ' . $user->id . ': ' . $e->getMessage());
-                                }
-                                
-                                return [
-                                    'id' => $user->id,
-                                    'name' => $user->name,
-                                    'divisi' => $user->divisi,
-                                    'sisa_cuti' => (int)$user->sisa_cuti,
-                                    'email' => $user->email,
-                                    'cuti_terpakai' => 12 - (int)$user->sisa_cuti,
-                                    'quota_info' => $quotaInfo
-                                ];
-                            });
+            $onLeave = $cuti ? true : false;
             
-            return response()->json(['success' => true, 'data' => $karyawan]);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'on_leave' => $onLeave,
+                    'cuti_details' => $onLeave ? [
+                        'id' => $cuti->id,
+                        'jenis_cuti' => $cuti->jenis_cuti,
+                        'jenis_cuti_label' => $this->getJenisCutiLabel($cuti->jenis_cuti),
+                        'keterangan' => $cuti->keterangan,
+                        'tanggal_mulai' => $cuti->tanggal_mulai->format('d F Y'),
+                        'tanggal_selesai' => $cuti->tanggal_selesai->format('d F Y'),
+                        'durasi' => $cuti->durasi
+                    ] : null
+                ]
+            ]);
             
         } catch (\Exception $e) {
-            Log::error('Error getting karyawan by divisi: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Gagal mengambil data karyawan'], 500);
+            Log::error('Error checking leave status: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal memeriksa status cuti'], 500);
         }
+    }
+
+    public function getSummary(Request $request)
+    {
+        try {
+            $year = $request->get('year', date('Y'));
+            
+            // Authorization
+            if (!in_array($this->currentRole, ['admin', 'general_manager', 'owner', 'manager_divisi'])) {
+                return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+            }
+            
+            // Query berdasarkan role
+            $query = Cuti::whereYear('tanggal_mulai', $year);
+            
+            if ($this->currentRole === 'manager_divisi' && $this->currentDivisi) {
+                $query->whereHas('user', function($q) {
+                    $q->where('divisi', $this->currentDivisi);
+                });
+            }
+            
+            // Total stats
+            $total = $query->count();
+            $disetujui = (clone $query)->where('status', 'disetujui')->count();
+            $menunggu = (clone $query)->where('status', 'menunggu')->count();
+            $ditolak = (clone $query)->where('status', 'ditolak')->count();
+            $dibatalkan = (clone $query)->where('status', 'dibatalkan')->count();
+            
+            // Total hari cuti
+            $totalHariCuti = (clone $query)->where('status', 'disetujui')->sum('durasi');
+            
+            // Top 5 karyawan dengan cuti terbanyak
+            $topKaryawan = Cuti::whereYear('tanggal_mulai', $year)
+                ->where('status', 'disetujui')
+                ->join('users', 'cutis.user_id', '=', 'users.id')
+                ->select('users.name', 'users.divisi', DB::raw('sum(cutis.durasi) as total_hari'))
+                ->groupBy('users.id', 'users.name', 'users.divisi')
+                ->orderBy('total_hari', 'desc')
+                ->limit(5)
+                ->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'year' => $year,
+                    'total_pengajuan' => $total,
+                    'disetujui' => $disetujui,
+                    'menunggu' => $menunggu,
+                    'ditolak' => $ditolak,
+                    'dibatalkan' => $dibatalkan,
+                    'total_hari_cuti' => $totalHariCuti,
+                    'top_karyawan' => $topKaryawan,
+                    'persentase_disetujui' => $total > 0 ? round(($disetujui / $total) * 100, 1) : 0,
+                    'persentase_ditolak' => $total > 0 ? round(($ditolak / $total) * 100, 1) : 0
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error getting summary: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal mengambil summary'], 500);
+        }
+    }
+
+    // ============================================
+    // HELPER METHODS
+    // ============================================
+
+    private function getStatusLabel($status)
+    {
+        $labels = [
+            'menunggu' => 'Menunggu Persetujuan',
+            'disetujui' => 'Disetujui',
+            'ditolak' => 'Ditolak',
+            'dibatalkan' => 'Dibatalkan',
+        ];
+        return $labels[$status] ?? ucfirst($status);
+    }
+
+    private function getStatusColor($status)
+    {
+        $colors = [
+            'menunggu' => 'warning',
+            'disetujui' => 'success',
+            'ditolak' => 'danger',
+            'dibatalkan' => 'secondary',
+        ];
+        return $colors[$status] ?? 'secondary';
+    }
+
+    private function getJenisCutiLabel($jenis)
+    {
+        $labels = [
+            'tahunan' => 'Cuti Tahunan',
+            'sakit' => 'Cuti Sakit',
+            'penting' => 'Cuti Penting',
+            'melahirkan' => 'Cuti Melahirkan',
+            'lainnya' => 'Cuti Lainnya',
+        ];
+        return $labels[$jenis] ?? 'Cuti Lainnya';
+    }
+
+    private function getActionLabel($action)
+    {
+        $labels = [
+            'created' => 'Diajukan',
+            'updated' => 'Diperbarui',
+            'approved' => 'Disetujui',
+            'rejected' => 'Ditolak',
+            'cancelled' => 'Dibatalkan',
+            'deleted' => 'Dihapus',
+        ];
+        return $labels[$action] ?? ucfirst($action);
     }
 
     public function checkDatabase()
