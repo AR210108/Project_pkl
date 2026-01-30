@@ -233,10 +233,7 @@
             </div>
             
             <nav class="sidebar-nav">
-                <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <span class="material-icons-outlined mr-3">dashboard</span>
-                    Dashboard
-                </a>
+              
                 
                 <a href="{{ route('tasks.index') }}" class="nav-item {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
                     <span class="material-icons-outlined mr-3">task_alt</span>

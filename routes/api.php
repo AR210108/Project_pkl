@@ -3,22 +3,67 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\InvoiceApiController;
 
-/*
-|--------------------------------------------------------------------------
-| API ROUTES
-|--------------------------------------------------------------------------
-| Semua route di sini otomatis punya prefix /api
-| Contoh: POST /api/invoices
-*/
+// Dalam routes/api.php, semua route OTOMATIS mendapat prefix 'api'
+// Jadi jangan tambahkan 'api/' di depan route
 
-Route::middleware('auth:sanctum')->group(function () {
+// Route untuk testing API access (tanpa auth untuk debug)
+Route::get('/test', function() {
+    return response()->json([
+        'success' => true,
+        'message' => 'API is accessible',
+        'time' => now()->toDateTimeString()
+    ]);
+});
 
+// API routes dengan middleware
+Route::middleware(['auth:sanctum'])->group(function () {
+    
+    // Route untuk invoices - TIDAK PERLU 'api/' DI SINI
     Route::prefix('invoices')->group(function () {
-        Route::get('/', [InvoiceApiController::class, 'index']);       // GET  /api/invoices
-        Route::post('/', [InvoiceApiController::class, 'store']);      // POST /api/invoices
-        Route::get('/{id}', [InvoiceApiController::class, 'show']);    // GET  /api/invoices/{id}
-        Route::put('/{id}', [InvoiceApiController::class, 'update']);  // PUT  /api/invoices/{id}
-        Route::delete('/{id}', [InvoiceApiController::class, 'destroy']); // DELETE /api/invoices/{id}
+        // GET /api/invoices
+        Route::get('/', [InvoiceApiController::class, 'index'])->name('api.invoices.index');
+        
+        // POST /api/invoices
+        Route::post('/', [InvoiceApiController::class, 'store'])->name('api.invoices.store');
+        
+        // GET /api/invoices/{id}
+        Route::get('/{id}', [InvoiceApiController::class, 'show'])->name('api.invoices.show');
+        
+        // GET /api/invoices/{id}/edit
+        Route::get('/{id}/edit', [InvoiceApiController::class, 'edit'])->name('api.invoices.edit');
+        
+        // PUT /api/invoices/{id}
+        Route::put('/{id}', [InvoiceApiController::class, 'update'])->name('api.invoices.update');
+        
+        // DELETE /api/invoices/{id}
+        Route::delete('/{id}', [InvoiceApiController::class, 'destroy'])->name('api.invoices.destroy');
     });
+    
+    // Route untuk testing auth
+    Route::get('/auth-test', function() {
+        return response()->json([
+            'success' => true,
+            'user' => auth()->user()->only(['id', 'name', 'email', 'role']),
+            'message' => 'Authenticated API access'
+        ]);
+    });
+    
+});
 
+// Debug route untuk melihat semua routes
+Route::get('/debug-all-routes', function() {
+    $routes = [];
+    foreach (Route::getRoutes() as $route) {
+        $routes[] = [
+            'uri' => $route->uri,
+            'methods' => $route->methods,
+            'name' => $route->getName(),
+            'action' => $route->getActionName()
+        ];
+    }
+    
+    return response()->json([
+        'total_routes' => count($routes),
+        'routes' => $routes
+    ]);
 });
