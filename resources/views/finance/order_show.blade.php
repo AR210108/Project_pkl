@@ -3,145 +3,216 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="bg-white rounded-lg shadow-md p-6">
+
+        <!-- HEADER -->
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold">Detail Order #{{ $order->id }}</h1>
-            <a href="{{ route('orders.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+            <h1 class="text-3xl font-bold">
+                Detail Order #{{ $order->order_no ?? $order->id }}
+            </h1>
+
+            <a href="{{ route('orders.index') }}"
+               class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
                 Kembali
             </a>
         </div>
 
+        <!-- INFO ORDER -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <!-- Order Info -->
+
+            <!-- INFORMASI ORDER -->
             <div class="bg-gray-50 rounded-lg p-4">
                 <h3 class="text-lg font-semibold mb-4">Informasi Order</h3>
-                <div class="space-y-3">
+
+                <div class="space-y-3 text-sm">
                     <div>
-                        <p class="text-sm text-gray-600">Nomor Order</p>
-                        <p class="font-medium">{{ $order->order_no ?? $order->id }}</p>
+                        <span class="text-gray-600">Nomor Order</span>
+                        <p class="font-medium">{{ $order->order_no ?? '-' }}</p>
                     </div>
+
                     <div>
-                        <p class="text-sm text-gray-600">Layanan</p>
-                        <p class="font-medium">{{ $order->layanan }}</p>
+                        <span class="text-gray-600">Layanan</span>
+                        <p class="font-medium">{{ $order->layanan ?? '-' }}</p>
                     </div>
+
                     <div>
-                        <p class="text-sm text-gray-600">Kategori</p>
-                        <p class="font-medium">
-                            @if($order->kategori == 'design')
-                                <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">Desain</span>
-                            @elseif($order->kategori == 'programming')
-                                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Programming</span>
-                            @elseif($order->kategori == 'marketing')
-                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">Digital Marketing</span>
-                            @endif
-                        </p>
+                        <span class="text-gray-600">Kategori</span>
+                        <div class="mt-1">
+                            @switch($order->kategori)
+                                @case('design')
+                                    <span class="px-3 py-1 text-xs rounded-full bg-purple-100 text-purple-800">
+                                        Desain
+                                    </span>
+                                    @break
+                                @case('programming')
+                                    <span class="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                                        Programming
+                                    </span>
+                                    @break
+                                @case('marketing')
+                                    <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                        Digital Marketing
+                                    </span>
+                                    @break
+                                @default
+                                    <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
+                                        -
+                                    </span>
+                            @endswitch
+                        </div>
                     </div>
+
                     <div>
-                        <p class="text-sm text-gray-600">Klien</p>
-                        <p class="font-medium">{{ $order->klien }}</p>
+                        <span class="text-gray-600">Klien</span>
+                        <p class="font-medium">{{ $order->klien ?? '-' }}</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Pricing Info -->
+            <!-- STATUS -->
             <div class="bg-gray-50 rounded-lg p-4">
-                <h3 class="text-lg font-semibold mb-4">Informasi Harga</h3>
-                <div class="space-y-3">
+                <h3 class="text-lg font-semibold mb-4">Status</h3>
+
+                <div class="space-y-4 text-sm">
                     <div>
-                        <p class="text-sm text-gray-600">Harga Total</p>
-                        <p class="font-medium text-lg">{{ $order->price_formatted ?? ($order->price ? 'Rp ' . number_format($order->price, 0, ',', '.') : '-') }}</p>
+                        <span class="text-gray-600">Pembayaran</span>
+                        <div class="mt-1">
+                            @switch($order->status)
+                                @case('paid')
+                                    <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                        Lunas
+                                    </span>
+                                    @break
+                                @case('partial')
+                                    <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                                        Sebagian
+                                    </span>
+                                    @break
+                                @case('overdue')
+                                    <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                                        Terlambat
+                                    </span>
+                                    @break
+                                @default
+                                    <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
+                                        Pending
+                                    </span>
+                            @endswitch
+                        </div>
                     </div>
+
                     <div>
-                        <p class="text-sm text-gray-600">Pembayaran Awal</p>
-                        <p class="font-medium">{{ $order->deposit ? 'Rp ' . number_format($order->deposit, 0, ',', '.') : '-' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-600">Pelunasan</p>
-                        <p class="font-medium">{{ $order->paid ? 'Rp ' . number_format($order->paid, 0, ',', '.') : '-' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-600">Sisa Pembayaran</p>
-                        <p class="font-medium">
-                            @php
-                                $sisa = ($order->price ?? 0) - ($order->paid ?? 0);
-                            @endphp
-                            {{ $sisa > 0 ? 'Rp ' . number_format($sisa, 0, ',', '.') : 'Lunas' }}
-                        </p>
+                        <span class="text-gray-600">Pengerjaan</span>
+                        <div class="mt-1">
+                            @switch($order->work_status)
+                                @case('planning')
+                                    <span class="px-3 py-1 text-xs rounded-full bg-purple-100 text-purple-800">
+                                        Perencanaan
+                                    </span>
+                                    @break
+                                @case('progress')
+                                    <span class="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                                        Dikerjakan
+                                    </span>
+                                    @break
+                                @case('review')
+                                    <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                                        Review
+                                    </span>
+                                    @break
+                                @case('completed')
+                                    <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                        Selesai
+                                    </span>
+                                    @break
+                                @default
+                                    <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
+                                        Ditunda
+                                    </span>
+                            @endswitch
+                        </div>
                     </div>
                 </div>
+            </div>
+
+        </div>
+
+        <!-- INFORMASI PEMBAYARAN -->
+        @php
+            $price = $order->price ?? 0;
+            $deposit = $order->deposit ?? 0;
+            $paid = $order->paid ?? 0;
+            $totalBayar = $deposit + $paid;
+            $sisa = max($price - $totalBayar, 0);
+        @endphp
+
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+            <h3 class="text-lg font-semibold mb-4">Informasi Pembayaran</h3>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full border border-gray-200 text-sm">
+                    <tbody>
+                        <tr class="border-b">
+                            <td class="px-4 py-2 text-gray-600">Harga Total</td>
+                            <td class="px-4 py-2 font-medium">
+                                Rp {{ number_format($price, 0, ',', '.') }}
+                            </td>
+                        </tr>
+
+                        <tr class="border-b">
+                            <td class="px-4 py-2 text-gray-600">DP</td>
+                            <td class="px-4 py-2 font-medium">
+                                Rp {{ number_format($deposit, 0, ',', '.') }}
+                            </td>
+                        </tr>
+
+                        <tr class="border-b">
+                            <td class="px-4 py-2 text-gray-600">Pelunasan</td>
+                            <td class="px-4 py-2 font-medium">
+                                Rp {{ number_format($paid, 0, ',', '.') }}
+                            </td>
+                        </tr>
+
+                        <tr class="bg-gray-100">
+                            <td class="px-4 py-2 font-semibold">Sisa Pembayaran</td>
+                            <td class="px-4 py-2 font-semibold">
+                                {{ $sisa > 0 ? 'Rp ' . number_format($sisa, 0, ',', '.') : 'LUNAS' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Status Info -->
-            <div class="bg-gray-50 rounded-lg p-4">
-                <h3 class="text-lg font-semibold mb-4">Status Pembayaran</h3>
-                <div class="space-y-3">
-                    <div>
-                        <p class="text-sm text-gray-600">Status</p>
-                        <p>
-                            @if($order->status == 'paid')
-                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Lunas</span>
-                            @elseif($order->status == 'partial')
-                                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">Sebagian</span>
-                            @elseif($order->status == 'overdue')
-                                <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">Terlambat</span>
-                            @else
-                                <span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">Pending</span>
-                            @endif
-                        </p>
-                    </div>
-                </div>
-            </div>
+        <!-- INVOICE -->
+        @if ($order->invoice_id)
+        <div class="bg-blue-50 rounded-lg p-4 mb-6">
+            <h3 class="text-lg font-semibold mb-2">Invoice Terkait</h3>
 
-            <!-- Work Status Info -->
-            <div class="bg-gray-50 rounded-lg p-4">
-                <h3 class="text-lg font-semibold mb-4">Status Pengerjaan</h3>
-                <div class="space-y-3">
-                    <div>
-                        <p class="text-sm text-gray-600">Progress</p>
-                        <p>
-                            @if($order->work_status == 'planning')
-                                <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">Perencanaan</span>
-                            @elseif($order->work_status == 'progress')
-                                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">Sedang Dikerjakan</span>
-                            @elseif($order->work_status == 'review')
-                                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">Review</span>
-                            @elseif($order->work_status == 'completed')
-                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Selesai</span>
-                            @else
-                                <span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">Ditunda</span>
-                            @endif
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Invoice Info -->
-        @if($order->invoice_id)
-        <div class="mt-6 bg-blue-50 rounded-lg p-4">
-            <h3 class="text-lg font-semibold mb-4">Invoice Terkait</h3>
             <div class="flex justify-between items-center">
                 <p>Invoice #{{ $order->invoice_id }}</p>
-                <a href="{{ route('invoices.show', $order->invoice_id) }}" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+
+                <a href="{{ route('invoices.show', $order->invoice_id) }}"
+                   class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
                     Lihat Invoice
                 </a>
             </div>
         </div>
         @endif
 
-        <!-- Timestamps -->
-        <div class="mt-6 text-sm text-gray-500 border-t pt-4">
+        <!-- TIMESTAMP -->
+        <div class="text-sm text-gray-500 border-t pt-4">
             <p>Dibuat: {{ $order->created_at?->format('d M Y H:i') ?? '-' }}</p>
             <p>Diperbarui: {{ $order->updated_at?->format('d M Y H:i') ?? '-' }}</p>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="mt-6 flex gap-3">
-            <a href="{{ route('orders.index') }}" class="flex-1 text-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
-                Kembali ke Daftar
+        <!-- ACTION -->
+        <div class="mt-6">
+            <a href="{{ route('orders.index') }}"
+               class="block text-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                Kembali ke Daftar Order
             </a>
         </div>
+
     </div>
 </div>
 @endsection

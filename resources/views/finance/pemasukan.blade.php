@@ -1567,6 +1567,9 @@
 
             // Update info
             document.getElementById('totalCount').textContent = financeFilteredData.length;
+
+            // Refresh stat cards to reflect visible data
+            updateStatCards();
         }
 
         function renderFinancePagination() {
@@ -1612,6 +1615,136 @@
             const scrollableTable = document.getElementById('scrollableTable');
             if (scrollableTable) {
                 scrollableTable.scrollLeft = 0;
+            }
+        }
+
+        /**
+         * Helper: Extract numeric value from formatted currency string
+         * Input: "Rp 45.750.000" or similar
+         * Output: 45750000
+         */
+        function extractNumericFromCurrency(currencyStr) {
+            if (typeof currencyStr === 'number') return currencyStr;
+            // Remove 'Rp', spaces, and dots used as thousand separators
+            const cleaned = String(currencyStr).replace(/[^\d]/g, '');
+            return parseInt(cleaned, 10) || 0;
+        }
+
+        /**
+         * Format number as Indonesian Rupiah
+         * Input: 45750000
+         * Output: "Rp 45.750.000"
+         */
+        function formatCurrency(num) {
+            return 'Rp ' + num.toLocaleString('id-ID');
+        }
+
+        /**
+         * Calculate percentage change and direction
+         * Returns: { percentage: number, direction: 'positive'|'negative', text: string }
+         */
+        function calculatePercentageChange(current, previous) {
+            if (previous === 0) {
+                return {
+                    percentage: current > 0 ? 100 : 0,
+                    direction: current > 0 ? 'positive' : 'negative',
+                    text: current > 0 ? '+100% dari sebelumnya' : 'Tidak ada perubahan'
+                };
+            }
+            const change = ((current - previous) / previous) * 100;
+            return {
+                percentage: Math.abs(change),
+                direction: change >= 0 ? 'positive' : 'negative',
+                text: `${change >= 0 ? '+' : ''}${change.toFixed(1)}% dari sebelumnya`
+            };
+        }
+
+        /**
+         * Calculate average amount per transaction for a type
+         */
+        function calculateAveragePerType(type) {
+            const items = financeData.filter(item => item.tipe === type);
+            if (items.length === 0) return 0;
+            
+            let total = 0;
+            items.forEach(item => {
+                total += extractNumericFromCurrency(item.jumlah);
+            });
+            return total / items.length;
+        }
+
+        /**
+         * Update stat cards with dynamic totals from financeData
+         */
+        function updateStatCards() {
+            let totalIncome = 0;
+            let totalExpense = 0;
+            let incomeCount = 0;
+            let expenseCount = 0;
+
+            // Use the currently filtered data so stats reflect active filters
+            (financeFilteredData || []).forEach(item => {
+                const amount = extractNumericFromCurrency(item.jumlah);
+                if (item.tipe === 'income') {
+                    totalIncome += amount;
+                    incomeCount++;
+                } else if (item.tipe === 'expense') {
+                    totalExpense += amount;
+                    expenseCount++;
+                }
+            });
+
+            const netBalance = totalIncome - totalExpense;
+
+            // Update stat cards values
+            const statCards = document.querySelectorAll('.stat-card-value');
+            if (statCards.length >= 3) {
+                statCards[0].textContent = formatCurrency(totalIncome);    // Total Pemasukan
+                statCards[1].textContent = formatCurrency(totalExpense);   // Total Pengeluaran
+                statCards[2].textContent = formatCurrency(netBalance);     // Saldo Bersih
+            }
+
+            // Calculate and update percentage changes
+            const avgIncome = calculateAveragePerType('income');
+            const avgExpense = calculateAveragePerType('expense');
+
+            // Income percentage change (compare current total vs average * count)
+            const incomePercentageChange = calculatePercentageChange(totalIncome, avgIncome * incomeCount);
+            
+            // Expense percentage change (compare current total vs average * count)
+            const expensePercentageChange = calculatePercentageChange(totalExpense, avgExpense * expenseCount);
+            
+            // Net balance percentage (profit margin)
+            const balancePercentage = totalIncome > 0 ? (netBalance / totalIncome) * 100 : 0;
+            const balanceChange = {
+                percentage: Math.abs(balancePercentage),
+                direction: balancePercentage >= 0 ? 'positive' : 'negative',
+                text: `${balancePercentage >= 0 ? '+' : ''}${balancePercentage.toFixed(1)}% margin keuntungan`
+            };
+
+            // Update percentage change displays
+            const statChanges = document.querySelectorAll('.stat-card-change');
+            if (statChanges.length >= 3) {
+                // Income change
+                statChanges[0].className = `stat-card-change ${incomePercentageChange.direction}`;
+                statChanges[0].innerHTML = `
+                    <span class="material-icons-outlined text-sm">${incomePercentageChange.direction === 'positive' ? 'arrow_upward' : 'arrow_downward'}</span>
+                    <span>${incomePercentageChange.text}</span>
+                `;
+
+                // Expense change
+                statChanges[1].className = `stat-card-change ${expensePercentageChange.direction === 'positive' ? 'negative' : 'positive'}`;
+                statChanges[1].innerHTML = `
+                    <span class="material-icons-outlined text-sm">${expensePercentageChange.direction === 'positive' ? 'arrow_upward' : 'arrow_downward'}</span>
+                    <span>${expensePercentageChange.direction === 'positive' ? 'Pengeluaran naik ' : 'Pengeluaran turun '}${expensePercentageChange.percentage.toFixed(1)}%</span>
+                `;
+
+                // Net balance change
+                statChanges[2].className = `stat-card-change ${balanceChange.direction}`;
+                statChanges[2].innerHTML = `
+                    <span class="material-icons-outlined text-sm">${balanceChange.direction === 'positive' ? 'arrow_upward' : 'arrow_downward'}</span>
+                    <span>${balanceChange.text}</span>
+                `;
             }
         }
 

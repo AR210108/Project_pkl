@@ -6,30 +6,29 @@ use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // =========================
+    // INDEX (ADMIN)
+    // =========================
     public function index(Request $request)
     {
         $query = Invoice::latest();
 
-        // Fitur pencarian
-        if ($request->has('search') && $request->search != '') {
-            $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('nama_perusahaan', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('nomor_order', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('nama_klien', 'LIKE', "%{$searchTerm}%");
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('company_name', 'like', "%$search%")
+                  ->orWhere('client_name', 'like', "%$search%")
+                  ->orWhere('invoice_no', 'like', "%$search%");
             });
         }
 
         $invoices = $query->paginate(10);
 
-        // Jika request adalah AJAX, kembalikan JSON
-        if ($request->ajax() || $request->wantsJson()) {
+        if ($request->ajax()) {
             return response()->json([
                 'success' => true,
                 'data' => $invoices->items(),
@@ -45,165 +44,56 @@ class InvoiceController extends Controller
         return view('admin.invoice', compact('invoices'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // =========================
+    // CREATE
+    // =========================
     public function create()
     {
-        return view('invoices.create');
+        return view('admin.invoice_create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // =========================
+    // STORE
+    // =========================
     public function store(Request $request)
-    {
-        // Validasi input
-        $validator = Validator::make($request->all(), [
-            'nomor_order' => 'required|string|unique:invoices,nomor_order',
-            'nama_perusahaan' => 'required|string|max:255',
-            'nama_klien' => 'required|string|max:255',
-            'alamat' => 'required|string',
-            'deskripsi' => 'required|string',
-            'harga' => 'required|numeric|min:0',
-            'qty' => 'required|integer|min:1',
-            'pajak' => 'required|numeric|min:0|max:100',
-            'metode_pembayaran' => 'required|string|in:Bank Transfer,E-Wallet,Credit Card,Cash',
-            'tanggal' => 'required|date',
-        ]);
+{
+    $validator = Validator::make($request->all(), [
+        'invoice_no'      => 'required|string|unique:invoices,invoice_no',
+        'invoice_date'    => 'required|date',
+        'company_name'    => 'required|string|max:255',
+        'company_address' => 'required|string',
+        'client_name'     => 'required|string|max:255',
+        'order_number'    => 'nullable|string|max:255',
+        'payment_method'  => 'required|string',
+        'description'     => 'nullable|string', // TAMBAH ini
+        'subtotal'        => 'required|integer|min:0',
+        'tax'             => 'required|integer|min:0',
+        'total'           => 'required|integer|min:0',
+    ]);
 
-        // Jika validasi gagal
         if ($validator->fails()) {
-            // Jika request adalah AJAX, kembalikan error JSON
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation error',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-            
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        // Siapkan data
-        $validated = $validator->validated();
-        
-        // Hitung total (harga * qty + pajak)
-        $subtotal = $validated['harga'] * $validated['qty'];
-        $validated['total'] = $subtotal + ($subtotal * $validated['pajak'] / 100);
-
-        // Buat invoice
-        $invoice = Invoice::create($validated);
-
-        // Jika request adalah AJAX, kembalikan sukses JSON
-        if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
-                'success' => true,
-                'message' => 'Invoice berhasil dibuat!',
-                'data' => $invoice
-            ], 201);
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-        return redirect()->route('invoices.show', $invoice->id)
-            ->with('success', 'Invoice berhasil dibuat!');
-    }
+        $invoice = Invoice::create($validator->validated());
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Request $request, string $id)
-    {
-        $invoice = Invoice::with('kwitansis')->findOrFail($id);
-        
-        // Jika request adalah AJAX, kembalikan JSON
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'data' => $invoice
-            ]);
-        }
-        
-        return view('invoices.show', compact('invoice'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $invoice = Invoice::findOrFail($id);
-        
-        return view('invoices.edit', compact('invoice'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $invoice = Invoice::findOrFail($id);
-
-        // Validasi input
-        $validator = Validator::make($request->all(), [
-            'nomor_order' => 'required|string|unique:invoices,nomor_order,' . $id,
-            'nama_perusahaan' => 'required|string|max:255',
-            'nama_klien' => 'required|string|max:255',
-            'alamat' => 'required|string',
-            'deskripsi' => 'required|string',
-            'harga' => 'required|numeric|min:0',
-            'qty' => 'required|integer|min:1',
-            'pajak' => 'required|numeric|min:0|max:100',
-            'metode_pembayaran' => 'required|string|in:Bank Transfer,E-Wallet,Credit Card,Cash',
-            'tanggal' => 'required|date',
+        return response()->json([
+            'success' => true,
+            'message' => 'Invoice berhasil dibuat',
+            'data' => $invoice
         ]);
-
-        // Jika validasi gagal
-        if ($validator->fails()) {
-            // Jika request adalah AJAX, kembalikan error JSON
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation error',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-            
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        // Siapkan data
-        $validated = $validator->validated();
-        
-        // Hitung total
-        $subtotal = $validated['harga'] * $validated['qty'];
-        $validated['total'] = $subtotal + ($subtotal * $validated['pajak'] / 100);
-
-        // Update invoice
-        $invoice->update($validated);
-
-        // Jika request adalah AJAX, kembalikan sukses JSON
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Invoice berhasil diperbarui!',
-                'data' => $invoice
-            ]);
-        }
-
-        return redirect()->route('invoices.show', $invoice->id)
-            ->with('success', 'Invoice berhasil diperbarui!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Request $request, string $id)
-    {
+    // =========================
+    // SHOW
+    // =========================
+    // InvoiceController.php
+public function show($id)
+{
+    try {
         $invoice = Invoice::findOrFail($id);
         $invoice->delete();
 
@@ -217,6 +107,26 @@ class InvoiceController extends Controller
 
         return redirect()->route('invoices.index')
             ->with('success', 'Invoice berhasil dihapus!');
+    }
+    
+    /**
+     * Mark invoice as printed (lightweight, returns JSON).
+     */
+    public function markPrinted(Request $request, string $id)
+    {
+        $invoice = Invoice::find($id);
+        if (! $invoice) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invoice not found'
+            ], 404);
+        }
+
+        // Lightweight: don't modify DB schema here. Return success so frontend can proceed.
+        return response()->json([
+            'success' => true,
+            'message' => 'Marked as printed (no DB change)'
+        ]);
     }
     
     /**
@@ -238,11 +148,110 @@ class InvoiceController extends Controller
         
         return response()->json([
             'success' => true,
+            'data' => $invoice
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invoice tidak ditemukan'
+        ], 404);
+    }
+}
+
+    // =========================
+    // EDIT
+    // =========================
+   // =========================
+// EDIT
+// =========================
+public function edit($id)
+{
+    try {
+        $invoice = Invoice::findOrFail($id);
+        
+        return response()->json([
+            'success' => true,
+            'invoice' => $invoice
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invoice tidak ditemukan',
+            'error' => $e->getMessage()
+        ], 404);
+    }
+}
+
+    // =========================
+    // UPDATE
+    // =========================
+  // InvoiceController.php - method update()
+public function update(Request $request, $id)
+{
+    $invoice = Invoice::findOrFail($id);
+
+    $validator = Validator::make($request->all(), [
+        'invoice_no'      => 'required|string|unique:invoices,invoice_no,' . $id,
+        'invoice_date'    => 'required|date',
+        'company_name'    => 'required|string|max:255',
+        'company_address' => 'required|string',
+        'client_name'     => 'required|string|max:255',
+        'payment_method'  => 'required|string',
+        'description'     => 'nullable|string',
+        'subtotal'        => 'required|integer|min:0',
+        'tax'             => 'required|integer|min:0',
+        'total'           => 'required|integer|min:0',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    $invoice->update($validator->validated());
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Invoice berhasil diperbarui',
+        'data' => $invoice
+    ]);
+}       
+
+    // =========================
+    // DELETE
+    // =========================
+    public function destroy($id)
+    {
+        Invoice::findOrFail($id)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Invoice berhasil dihapus'
+        ]);
+    }
+
+    // =========================
+    // STATISTICS
+    // =========================
+    public function statistics(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
             'data' => [
-                'total_invoices' => $totalInvoices,
-                'total_revenue' => $totalRevenue,
-                'average_invoice' => $averageInvoice,
-                'payment_methods' => $paymentMethods,
+                'total_invoices' => Invoice::count(),
+                'total_revenue' => Invoice::sum('total'),
+                'average_invoice' => Invoice::avg('total'),
+                'payment_methods' => Invoice::select(
+                        'payment_method',
+                        DB::raw('count(*) as count'),
+                        DB::raw('sum(total) as total')
+                    )
+                    ->groupBy('payment_method')
+                    ->get()
             ]
         ]);
     }
