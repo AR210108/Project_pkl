@@ -161,19 +161,48 @@ public function update(Request $request, $id)
     /**
      * Hapus user
      */
-    public function destroy($id)
-    {
+/**
+ * Hapus user
+ */
+public function destroy($id)
+{
+    try {
         $user = User::findOrFail($id);
         
         // Cek jika user sedang login
         if ($user->id === auth()->id()) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak dapat menghapus user yang sedang login'
+                ], 400);
+            }
             return redirect()->route('admin.user')->with('error', 'Tidak dapat menghapus user yang sedang login');
         }
         
+        $userName = $user->name;
         $user->delete();
         
-        return redirect()->route('admin.user')->with('success', 'User berhasil dihapus');
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "User '{$userName}' berhasil dihapus"
+            ]);
+        }
+        
+        return redirect()->route('admin.user')->with('success', "User '{$userName}' berhasil dihapus");
+        
+    } catch (\Exception $e) {
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus user: ' . $e->getMessage()
+            ], 500);
+        }
+        
+        return redirect()->route('admin.user')->with('error', 'Gagal menghapus user: ' . $e->getMessage());
     }
+}
 
     /**
      * Get user untuk edit modal

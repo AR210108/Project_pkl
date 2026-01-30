@@ -674,93 +674,110 @@
                     </div>
                 </div>
 
-<!-- Data Table Panel -->
-<div class="panel">
-    <div class="panel-header">
-        <h3 class="panel-title">
-            <span class="material-icons-outlined text-primary">assignment</span>
-            Data Project (Milik Saya)
-        </h3>
-        <div class="flex items-center gap-2">
-            <span class="text-sm text-text-muted-light">Total: <span id="totalCount"
-                    class="font-semibold text-text-light">{{ $projects->count() }}</span> project</span>
-        </div>
-    </div>
-    <div class="panel-body">
-        <!-- INFO PANEL UNTUK MANAGER DIVISI -->
-        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div class="flex items-start">
-                <span class="material-icons-outlined text-blue-500 mr-3">info</span>
-                <div>
-                    <h4 class="font-semibold text-blue-800 mb-1">Project Anda</h4>
-                    <p class="text-blue-700 text-sm">
-                        Berikut adalah daftar project yang telah ditetapkan kepada Anda sebagai penanggung jawab oleh General Manager.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- SCROLLABLE TABLE -->
-        <div class="desktop-table">
-            <div class="scrollable-table-container scroll-indicator table-shadow" id="scrollableTable">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th style="min-width: 60px;">No</th>
-                            <th style="min-width: 200px;">Nama Project</th>
-                            <th style="min-width: 250px;">Deskripsi</th>
-                            <th style="min-width: 150px;">Harga</th>
-                            <th style="min-width: 150px;">Deadline</th>
-                            <th style="min-width: 150px;">Progres</th>
-                            <th style="min-width: 150px;">Status</th>
-                            <th style="min-width: 100px; text-align: center;">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="desktopTableBody">
-                        @forelse ($projects as $index => $project)
-                            <tr class="orderan-row" data-status="{{ strtolower($project->status) }}"
-                                data-nama="{{ strtolower($project->nama) }}"
-                                data-deskripsi="{{ strtolower($project->deskripsi) }}">
-                                <td>{{ $index + 1 }}</td>
-                                <td>{{ $project->nama }}</td>
-                                <td class="truncate max-w-xs">{{ $project->deskripsi }}</td>
-                                <td>Rp {{ number_format($project->harga, 0, ',', '.') }}</td>
-                                <td>{{ \Carbon\Carbon::parse($project->deadline)->format('d M Y') }}</td>
-                                <td>{{ $project->progres }}%</td>
-                                <td>
-                                    <span class="status-badge status-{{ strtolower($project->status) }}">
-                                        {{ ucfirst($project->status) }}
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <button class="edit-btn" data-id="{{ $project->id }}"
-                                        data-nama="{{ $project->nama }}"
-                                        data-deskripsi="{{ $project->deskripsi }}"
-                                        data-harga="{{ $project->harga }}"
-                                        data-deadline="{{ $project->deadline }}"
-                                        data-progres="{{ $project->progres }}"
-                                        data-status="{{ $project->status }}">
-                                        <span class="material-icons-outlined text-primary hover:text-primary-dark">edit</span>
-                                    </button>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="text-center py-4 text-gray-500">
-                                    Anda belum memiliki project. Project akan muncul setelah ditugaskan oleh General Manager.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                <!-- Data Table Panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <span class="material-icons-outlined text-primary">assignment</span>
+                            Data Project (Milik Saya)
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount"
+                                    class="font-semibold text-text-light">{{ $projects->count() }}</span> project</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <!-- INFO PANEL UNTUK MANAGER DIVISI -->
+                        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div class="flex items-start">
+                                <span class="material-icons-outlined text-blue-500 mr-3">info</span>
+                                <div>
+                                    <h4 class="font-semibold text-blue-800 mb-1">Project Anda</h4>
+                                    <p class="text-blue-700 text-sm">
+                                        Berikut adalah daftar project yang telah ditetapkan kepada Anda sebagai
+                                        penanggung jawab oleh General Manager.
+                                        Anda hanya dapat mengupdate <strong>progres</strong> dan <strong>status</strong>
+                                        project.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SCROLLABLE TABLE -->
+                        <div class="desktop-table">
+                            <div class="scrollable-table-container scroll-indicator table-shadow" id="scrollableTable">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="min-width: 60px;">No</th>
+                                            <th style="min-width: 200px;">Nama Project</th>
+                                            <th style="min-width: 250px;">Deskripsi</th>
+                                            <th style="min-width: 150px;">Harga</th>
+                                            <th style="min-width: 150px;">Deadline</th>
+                                            <th style="min-width: 150px;">Progres</th>
+                                            <th style="min-width: 150px;">Status</th>
+                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="desktopTableBody">
+                                        @forelse ($projects as $index => $project)
+                                            <tr class="orderan-row" data-status="{{ strtolower($project->status) }}"
+                                                data-nama="{{ strtolower($project->nama) }}"
+                                                data-deskripsi="{{ strtolower($project->deskripsi) }}">
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>{{ $project->nama }}</td>
+                                                <td class="truncate max-w-xs">{{ $project->deskripsi }}</td>
+                                                <td>Rp {{ number_format($project->harga, 0, ',', '.') }}</td>
+                                                <td>{{ \Carbon\Carbon::parse($project->deadline)->format('d M Y') }}
+                                                </td>
+                                                <td>
+                                                    <div class="flex items-center gap-2">
+                                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                                            <div class="bg-primary h-2 rounded-full"
+                                                                style="width: {{ $project->progres }}%"></div>
+                                                        </div>
+                                                        <span
+                                                            class="text-sm font-medium whitespace-nowrap">{{ $project->progres }}%</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        class="status-badge status-{{ strtolower($project->status) }}">
+                                                        {{ ucfirst($project->status) }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <button
+                                                        class="edit-btn p-2 rounded-full hover:bg-primary/10 transition-colors"
+                                                        data-id="{{ $project->id }}"
+                                                        data-nama="{{ $project->nama }}"
+                                                        data-harga="{{ $project->harga }}"
+                                                        data-deadline="{{ $project->deadline }}"
+                                                        data-progres="{{ $project->progres }}"
+                                                        data-status="{{ strtolower($project->status) }}"
+                                                        title="Update Progres & Status">
+                                                        <span
+                                                            class="material-icons-outlined text-primary text-lg">trending_up</span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="8" class="text-center py-4 text-gray-500">
+                                                    Anda belum memiliki project. Project akan muncul setelah ditugaskan
+                                                    oleh General Manager.
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
                         <!-- Mobile Card View -->
                         <div class="mobile-cards space-y-4">
                             @foreach ($projects as $index => $project)
                                 <div class="bg-white rounded-lg border p-4 shadow-sm orderan-card">
-
                                     <div class="flex justify-between items-start mb-3">
                                         <div>
                                             <h4 class="font-semibold">{{ $project->nama }}</h4>
@@ -779,32 +796,67 @@
                                         Deadline: {{ \Carbon\Carbon::parse($project->deadline)->format('d M Y') }}
                                     </div>
 
-                                    <div class="w-full bg-gray-300 rounded-full h-2">
-                                        <div class="bg-primary h-2 rounded-full"
-                                            style="width: {{ $project->progres }}%">
+                                    <div class="mb-3">
+                                        <div class="flex justify-between text-sm mb-1">
+                                            <span>Progres</span>
+                                            <span class="font-medium">{{ $project->progres }}%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-300 rounded-full h-2">
+                                            <div class="bg-primary h-2 rounded-full"
+                                                style="width: {{ $project->progres }}%">
+                                            </div>
                                         </div>
                                     </div>
-                                    <button class="edit-btn" data-id="{{ $project->id }}"
-                                        data-nama="{{ $project->nama }}" data-deskripsi="{{ $project->deskripsi }}"
-                                        data-harga="{{ $project->harga }}" data-deadline="{{ $project->deadline }}"
-                                        data-progres="{{ $project->progres }}" data-status="{{ $project->status }}">
 
+                                    <div class="text-center">
+                                        <button
+                                            class="edit-btn w-full py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                                            data-id="{{ $project->id }}" data-nama="{{ $project->nama }}"
+                                            data-harga="{{ $project->harga }}"
+                                            data-deadline="{{ $project->deadline }}"
+                                            data-progres="{{ $project->progres }}"
+                                            data-status="{{ strtolower($project->status) }}">
+                                            <span class="material-icons-outlined mr-2 align-middle">edit</span>
+                                            Update Progres
+                                        </button>
+                                    </div>
                                 </div>
                             @endforeach
                         </div>
 
                         <!-- Pagination -->
-                        <div id="paginationContainer" class="desktop-pagination">
-                            <button id="prevPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="pageNumbers" class="flex gap-1">
-                                <button class="desktop-page-btn active">1</button>
+                        @if ($projects->hasPages())
+                            <div id="paginationContainer" class="desktop-pagination">
+                                @if ($projects->onFirstPage())
+                                    <button class="desktop-nav-btn" disabled>
+                                        <span class="material-icons-outlined text-sm">chevron_left</span>
+                                    </button>
+                                @else
+                                    <a href="{{ $projects->previousPageUrl() }}" class="desktop-nav-btn">
+                                        <span class="material-icons-outlined text-sm">chevron_left</span>
+                                    </a>
+                                @endif
+
+                                <div id="pageNumbers" class="flex gap-1">
+                                    @for ($i = 1; $i <= $projects->lastPage(); $i++)
+                                        <a href="{{ $projects->url($i) }}"
+                                            class="desktop-page-btn {{ $i == $projects->currentPage() ? 'active' : '' }}">
+                                            {{ $i }}
+                                        </a>
+                                    @endfor
+                                </div>
+
+                                @if ($projects->hasMorePages())
+                                    <a href="{{ $projects->nextPageUrl() }}" class="desktop-nav-btn">
+                                        <span class="material-icons-outlined text-sm">chevron_right</span>
+                                    </a>
+                                @else
+                                    <button class="desktop-nav-btn" disabled>
+                                        <span class="material-icons-outlined text-sm">chevron_right</span>
+                                    </button>
+                                @endif
                             </div>
-                            <button id="nextPage" class="desktop-nav-btn" disabled>
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
-                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -814,95 +866,96 @@
         </div>
     </div>
 
-    <!-- Modal Edit Orderan -->
+    <!-- Modal Edit untuk Manager Divisi (HANYA PROGRES & STATUS) -->
     <div id="editOrderanModal"
         class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Project</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Update Progres Project</h3>
                     <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form method="POST" id="editOrderanForm"
-                    data-base-action="{{ route('manager_divisi.data_project.update', '__id__') }}">
 
+                <!-- INFO PROJECT (READONLY) -->
+                <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <div class="grid grid-cols-1 gap-2">
+                        <div>
+                            <span class="text-sm font-medium text-gray-500">Nama Project:</span>
+                            <span id="editNamaDisplay" class="text-sm font-semibold text-gray-700 ml-2"></span>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-500">Deadline:</span>
+                            <span id="editDeadlineDisplay" class="text-sm font-semibold text-gray-700 ml-2"></span>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-500">Harga:</span>
+                            <span id="editHargaDisplay" class="text-sm font-semibold text-gray-700 ml-2"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GANTI MENJADI METHOD POST BIASA -->
+                <form method="POST" id="editOrderanForm"
+                    action="{{ route('manager_divisi.data_project.update', ['id' => '__ID__']) }}">
+                    @csrf
                     <input type="hidden" id="editId" name="id">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
-                            <input type="text" id="editNamaOrderan" name="nama_orderan"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="Masukkan nama Project" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                            <input type="text" id="editHarga" name="harga"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="Masukkan harga" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                            <input type="text" id="editDeadline" name="deadline"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="Masukkan deadline" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <select id="editStatus" name="status"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih status</option>
-                                <option value="pending">Pending</option>
-                                <option value="proses">Proses</option>
-                                <option value="selesai">Selesai</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="editDeskripsi" name="deskripsi" rows="3"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                            placeholder="Masukkan deskripsi Project" required></textarea>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
+
+                    <!-- Field untuk progres -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%) *</label>
                         <input type="number" id="editProgres" name="progres" min="0" max="100"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                             placeholder="Masukkan progres (0-100)" required>
+                        <div class="mt-1">
+                            <input type="range" id="progresSlider" min="0" max="100" value="0"
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>0%</span>
+                            <span id="progresValue">0%</span>
+                            <span>100%</span>
+                        </div>
                     </div>
+
+                    <!-- Field untuk status -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+                        <select id="editStatus" name="status"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                            required>
+                            <option value="">Pilih Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="proses">Proses</option>
+                            <option value="selesai">Selesai</option>
+                        </select>
+                        <div class="mt-2 flex gap-2">
+                            <button type="button"
+                                class="status-quick-btn px-3 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                                data-status="pending">Pending</button>
+                            <button type="button"
+                                class="status-quick-btn px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                                data-status="proses">Proses</button>
+                            <button type="button"
+                                class="status-quick-btn px-3 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors"
+                                data-status="selesai">Selesai</button>
+                        </div>
+                    </div>
+
+                    <!-- Keterangan tambahan -->
+                    <div class="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p class="text-sm text-blue-700">
+                            <span class="material-icons-outlined text-sm align-middle mr-1">info</span>
+                            Sebagai Manager Divisi, Anda hanya dapat mengupdate <strong>progres</strong> dan
+                            <strong>status</strong> project.
+                        </p>
+                    </div>
+
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" id="batalEditBtn"
                             class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Data</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Delete Konfirmasi -->
-    <div id="deleteModal"
-        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h3>
-                    <button id="closeDeleteModalBtn" class="text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form id="deleteForm" method="POST" action="#">
-                    <div class="mb-6">
-                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus project ini?</p>
-                        <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
-                        <input type="hidden" id="deleteId" name="id">
-                    </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" id="batalDeleteBtn"
-                            class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
+                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Progres</button>
                     </div>
                 </form>
             </div>
@@ -910,134 +963,255 @@
     </div>
 
     <!-- Minimalist Popup -->
-    <div id="minimalPopup" class="minimal-popup">
+    <div id="minimalPopup" class="minimal-popup hidden">
         <div class="minimal-popup-icon">
             <span class="material-icons-outlined">check</span>
         </div>
         <div class="minimal-popup-content">
-            <div class="minimal-popup-title">Berhasil</div>
-            <div class="minimal-popup-message">Operasi berhasil dilakukan</div>
+            <div id="popupTitle" class="minimal-popup-title">Berhasil</div>
+            <div id="popupMessage" class="minimal-popup-message">Operasi berhasil dilakukan</div>
         </div>
-        <button class="minimal-popup-close">
+        <button id="popupCloseBtn" class="minimal-popup-close">
             <span class="material-icons-outlined text-sm">close</span>
         </button>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Inisialisasi variabel untuk pagination, filter, dan search
-            let currentPage = 1;
-            const itemsPerPage = 5;
-            let activeFilters = ['all'];
-            let searchTerm = '';
+    <!-- CSRF Token Meta Tag -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-            // Dapatkan semua elemen orderan
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // === MODAL FUNCTIONS ===
+            const editOrderanModal = document.getElementById('editOrderanModal');
+            const editOrderanForm = document.getElementById('editOrderanForm');
+            const batalEditBtn = document.getElementById('batalEditBtn');
+            const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+            const progresSlider = document.getElementById('progresSlider');
+            const progresInput = document.getElementById('editProgres');
+            const progresValue = document.getElementById('progresValue');
+
+            // Handle edit button clicks
+ // Di JavaScript
+// Handle edit button clicks
+document.querySelectorAll('.edit-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        // Ambil semua data attribute
+        const id = this.getAttribute('data-id');
+        const nama = this.getAttribute('data-nama');
+        const harga = this.getAttribute('data-harga');
+        const deadline = this.getAttribute('data-deadline');
+        const progres = this.getAttribute('data-progres');
+        const status = this.getAttribute('data-status');
+        
+        // DEBUG: Log semua data
+        console.log('Button clicked with data:', {
+            id, nama, harga, deadline, progres, status
+        });
+        
+        // VALIDASI: Pastikan ID ada
+        if (!id) {
+            console.error('No ID found on button!');
+            showMinimalPopup('Error', 'Data project tidak valid.', 'error');
+            return;
+        }
+        
+        // Set values for modal
+        document.getElementById('editId').value = id;
+        
+        // Display project info (readonly)
+        document.getElementById('editNamaDisplay').textContent = nama || 'Tidak ada data';
+        
+        if (harga) {
+            document.getElementById('editHargaDisplay').textContent = 'Rp ' + 
+                parseInt(harga).toLocaleString('id-ID');
+        } else {
+            document.getElementById('editHargaDisplay').textContent = 'Rp 0';
+        }
+        
+        // Format deadline
+        if (deadline) {
+            try {
+                const deadlineDate = new Date(deadline);
+                if (!isNaN(deadlineDate.getTime())) {
+                    const formattedDeadline = deadlineDate.toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    });
+                    document.getElementById('editDeadlineDisplay').textContent = formattedDeadline;
+                } else {
+                    document.getElementById('editDeadlineDisplay').textContent = deadline;
+                }
+            } catch (e) {
+                document.getElementById('editDeadlineDisplay').textContent = deadline || 'Tidak ada deadline';
+            }
+        }
+        
+        // Set editable fields dengan validasi
+        const progresValue = progres || '0';
+        document.getElementById('editProgres').value = progresValue;
+        
+        const slider = document.getElementById('progresSlider');
+        const valueDisplay = document.getElementById('progresValue');
+        if (slider) slider.value = progresValue;
+        if (valueDisplay) valueDisplay.textContent = progresValue + '%';
+        
+        document.getElementById('editStatus').value = status || 'pending';
+
+        // Show modal
+        editOrderanModal.classList.remove('hidden');
+    });
+});
+
+            // Close edit modal
+            batalEditBtn.addEventListener('click', function() {
+                editOrderanModal.classList.add('hidden');
+            });
+
+            closeEditModalBtn.addEventListener('click', function() {
+                editOrderanModal.classList.add('hidden');
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === editOrderanModal) {
+                    editOrderanModal.classList.add('hidden');
+                }
+            });
+
+            // Handle progres slider
+            if (progresSlider && progresInput && progresValue) {
+                // Update slider saat input berubah
+                progresInput.addEventListener('input', function() {
+                    let value = parseInt(this.value);
+                    if (isNaN(value)) value = 0;
+                    if (value < 0) value = 0;
+                    if (value > 100) value = 100;
+
+                    this.value = value;
+                    progresSlider.value = value;
+                    progresValue.textContent = value + '%';
+                });
+
+                // Update input saat slider digeser
+                progresSlider.addEventListener('input', function() {
+                    progresInput.value = this.value;
+                    progresValue.textContent = this.value + '%';
+                });
+            }
+
+            // Handle quick status buttons
+            document.querySelectorAll('.status-quick-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const status = this.getAttribute('data-status');
+                    document.getElementById('editStatus').value = status;
+
+                    // Auto-set progres berdasarkan status
+                    if (progresInput && progresSlider && progresValue) {
+                        if (status === 'pending') {
+                            progresInput.value = 0;
+                            progresSlider.value = 0;
+                            progresValue.textContent = '0%';
+                        } else if (status === 'proses') {
+                            // Jika kurang dari 50%, set ke 50%
+                            if (parseInt(progresInput.value) < 50) {
+                                progresInput.value = 50;
+                                progresSlider.value = 50;
+                                progresValue.textContent = '50%';
+                            }
+                        } else if (status === 'selesai') {
+                            progresInput.value = 100;
+                            progresSlider.value = 100;
+                            progresValue.textContent = '100%';
+                        }
+                    }
+                });
+            });
+
+            // Handle form submission
+// Handle form submission
+editOrderanForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const id = document.getElementById('editId').value;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    // VALIDASI: Pastikan ID tidak kosong
+    if (!id) {
+        console.error('ID is empty!');
+        showMinimalPopup('Error', 'ID project tidak ditemukan. Silakan refresh halaman.', 'error');
+        return;
+    }
+    
+    // Debug data yang akan dikirim
+    console.log('Data to send:', {
+        id: id,
+        progres: formData.get('progres'),
+        status: formData.get('status'),
+        _token: csrfToken
+    });
+    
+    // GUNAKAN URL YANG BENAR
+    const url = `/manager_divisi/data_project/${id}/update`;
+    console.log('Request URL:', url);
+    
+    fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response URL:', response.url);
+        
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('Server error response:', text);
+                let errorData;
+                try {
+                    errorData = JSON.parse(text);
+                } catch {
+                    errorData = { message: text || 'Unknown error' };
+                }
+                throw new Error(errorData.message || 'Server error: ' + response.status);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success data:', data);
+        if (data.success) {
+            showMinimalPopup('Berhasil', data.message, 'success');
+            editOrderanModal.classList.add('hidden');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showMinimalPopup('Error', data.message || 'Terjadi kesalahan', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Fetch Error:', error);
+        showMinimalPopup('Error', error.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
+    });
+});
+
+            // === FILTER FUNCTIONS ===
+            const filterBtn = document.getElementById('filterBtn');
+            const filterDropdown = document.getElementById('filterDropdown');
+            const applyFilterBtn = document.getElementById('applyFilter');
+            const resetFilterBtn = document.getElementById('resetFilter');
+            const filterAll = document.getElementById('filterAll');
+            const searchInput = document.getElementById('searchInput');
             const orderanRows = document.querySelectorAll('.orderan-row');
             const orderanCards = document.querySelectorAll('.orderan-card');
+            const totalCount = document.getElementById('totalCount');
 
-            // Inisialisasi pagination, filter, dan search
-            initializePagination();
-            initializeFilter();
-            initializeSearch();
-            initializeScrollDetection();
-            initializeUserFilter();
-            // === PAGINATION ===
-            function initializePagination() {
-                renderPagination();
-                updateVisibleItems();
-            }
-
-            function renderPagination() {
-                const visibleRows = getFilteredRows();
-                const totalPages = Math.ceil(visibleRows.length / itemsPerPage);
-                const prevButton = document.getElementById('prevPage');
-                const nextButton = document.getElementById('nextPage');
-
-                // Clear existing page numbers
-                if (!pageNumbersContainer) return;
-                pageNumbersContainer.innerHTML = '';
-
-
-                // Generate page numbers
-                for (let i = 1; i <= totalPages; i++) {
-                    const pageNumber = document.createElement('button');
-                    pageNumber.textContent = i;
-                    pageNumber.className = `desktop-page-btn ${i === currentPage ? 'active' : ''}`;
-                    pageNumber.addEventListener('click', () => goToPage(i));
-                    pageNumbersContainer.appendChild(pageNumber);
-                }
-
-                // Update navigation buttons
-                prevButton.disabled = currentPage === 1;
-                nextButton.disabled = currentPage === totalPages || totalPages === 0;
-
-                // Add event listeners for navigation buttons
-                prevButton.onclick = () => {
-                    if (currentPage > 1) goToPage(currentPage - 1);
-                };
-
-                nextButton.onclick = () => {
-                    if (currentPage < totalPages) goToPage(currentPage + 1);
-                };
-            }
-
-            function goToPage(page) {
-                currentPage = page;
-                renderPagination();
-                updateVisibleItems();
-
-                // Reset scroll position when changing pages
-                const scrollableTable = document.getElementById('scrollableTable');
-                if (scrollableTable) {
-                    scrollableTable.scrollLeft = 0;
-                }
-            }
-
-            function getFilteredRows() {
-                return Array.from(orderanRows).filter(row => !row.classList.contains('hidden-by-filter'));
-            }
-
-            function getFilteredCards() {
-                return Array.from(orderanCards).filter(card => !card.classList.contains('hidden-by-filter'));
-            }
-
-            function updateVisibleItems() {
-                const visibleRows = getFilteredRows();
-                const visibleCards = getFilteredCards();
-
-                const startIndex = (currentPage - 1) * itemsPerPage;
-                const endIndex = startIndex + itemsPerPage;
-
-                // Hide all rows and cards first
-                orderanRows.forEach(row => row.style.display = 'none');
-                orderanCards.forEach(card => card.style.display = 'none');
-
-                // Show only the rows for current page
-                visibleRows.forEach((row, index) => {
-                    if (index >= startIndex && index < endIndex) {
-                        row.style.display = '';
-                    }
-                });
-
-                // Show only the cards for current page
-                visibleCards.forEach((card, index) => {
-                    if (index >= startIndex && index < endIndex) {
-                        card.style.display = '';
-                    }
-                });
-
-                // Update total count
-                document.getElementById('totalCount').textContent = visibleRows.length;
-            }
-
-            // === FILTER ===
-            function initializeFilter() {
-                const filterBtn = document.getElementById('filterBtn');
-                const filterDropdown = document.getElementById('filterDropdown');
-                const applyFilterBtn = document.getElementById('applyFilter');
-                const resetFilterBtn = document.getElementById('resetFilter');
-                const filterAll = document.getElementById('filterAll');
-
+            if (filterBtn && filterDropdown) {
                 // Toggle filter dropdown
                 filterBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -1055,21 +1229,23 @@
                 });
 
                 // Handle "All" checkbox
-                filterAll.addEventListener('change', function() {
-                    if (this.checked) {
-                        // Uncheck all other checkboxes
-                        document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)')
-                            .forEach(
-                                cb => {
+                if (filterAll) {
+                    filterAll.addEventListener('change', function() {
+                        if (this.checked) {
+                            // Uncheck all other checkboxes
+                            document.querySelectorAll(
+                                    '.filter-option input[type="checkbox"]:not(#filterAll)')
+                                .forEach(cb => {
                                     cb.checked = false;
                                 });
-                    }
-                });
+                        }
+                    });
+                }
 
                 // Handle other checkboxes
                 document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
                     cb.addEventListener('change', function() {
-                        if (this.checked) {
+                        if (this.checked && filterAll) {
                             // Uncheck "All" checkbox
                             filterAll.checked = false;
                         }
@@ -1077,257 +1253,147 @@
                 });
 
                 // Apply filter
-                applyFilterBtn.addEventListener('click', function() {
-                    const filterAll = document.getElementById('filterAll');
-                    const filterPending = document.getElementById('filterPending');
-                    const filterProses = document.getElementById('filterProses');
-                    const filterSelesai = document.getElementById('filterSelesai');
+                if (applyFilterBtn) {
+                    applyFilterBtn.addEventListener('click', function() {
+                        const filterAll = document.getElementById('filterAll');
+                        const filterPending = document.getElementById('filterPending');
+                        const filterProses = document.getElementById('filterProses');
+                        const filterSelesai = document.getElementById('filterSelesai');
 
-                    activeFilters = [];
-                    if (filterAll.checked) {
-                        activeFilters.push('all');
-                    } else {
-                        if (filterPending.checked) activeFilters.push('pending');
-                        if (filterProses.checked) activeFilters.push('proses');
-                        if (filterSelesai.checked) activeFilters.push('selesai');
-                    }
+                        let activeFilters = [];
+                        if (filterAll && filterAll.checked) {
+                            activeFilters.push('all');
+                        } else {
+                            if (filterPending && filterPending.checked) activeFilters.push('pending');
+                            if (filterProses && filterProses.checked) activeFilters.push('proses');
+                            if (filterSelesai && filterSelesai.checked) activeFilters.push('selesai');
+                        }
 
-                    applyFilters();
-                    filterDropdown.classList.remove('show');
-                    const visibleCount = getFilteredRows().length;
-                    showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} orderan`, 'success');
-                });
+                        applyFilters(activeFilters);
+                        filterDropdown.classList.remove('show');
+                        showMinimalPopup('Filter Diterapkan',
+                            `Menampilkan ${totalCount.textContent} project`, 'success');
+                    });
+                }
 
                 // Reset filter
-                resetFilterBtn.addEventListener('click', function() {
-                    document.getElementById('filterAll').checked = true;
-                    document.getElementById('filterPending').checked = false;
-                    document.getElementById('filterProses').checked = false;
-                    document.getElementById('filterSelesai').checked = false;
-                    activeFilters = ['all'];
-                    applyFilters();
-                    filterDropdown.classList.remove('show');
-                    const visibleCount = getFilteredRows().length;
-                    showMinimalPopup('Filter Direset', 'Menampilkan semua orderan', 'success');
-                });
-            }
+                if (resetFilterBtn) {
+                    resetFilterBtn.addEventListener('click', function() {
+                        if (filterAll) filterAll.checked = true;
+                        const filterPending = document.getElementById('filterPending');
+                        const filterProses = document.getElementById('filterProses');
+                        const filterSelesai = document.getElementById('filterSelesai');
 
-            function initializeUserFilter() {
-                const filterUser = document.getElementById('filterUser');
-                if (filterUser) {
-                    filterUser.addEventListener('change', function() {
-                        // Reset ke halaman 1 saat filter berubah
-                        currentPage = 1;
-                        applyFilters();
+                        if (filterPending) filterPending.checked = false;
+                        if (filterProses) filterProses.checked = false;
+                        if (filterSelesai) filterSelesai.checked = false;
+
+                        applyFilters(['all']);
+                        filterDropdown.classList.remove('show');
+                        showMinimalPopup('Filter Direset', 'Menampilkan semua project', 'success');
                     });
                 }
             }
 
-            function applyFilters() {
-                // Reset to first page
-                currentPage = 1;
+            // Search functionality
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.trim().toLowerCase();
+                    applyFilters(null, searchTerm);
+                });
+            }
 
-                const selectedUserId = document.getElementById('filterUser')?.value || '';
+            function applyFilters(activeFilters = ['all'], searchTerm = '') {
+                let visibleCount = 0;
 
                 // Apply filters to rows
                 orderanRows.forEach(row => {
                     const status = row.getAttribute('data-status').toLowerCase();
                     const nama = row.getAttribute('data-nama').toLowerCase();
                     const deskripsi = row.getAttribute('data-deskripsi').toLowerCase();
-                    const userId = row.getAttribute('data-user-id') || '';
 
                     // Check if status matches filter
                     let statusMatches = false;
-                    if (activeFilters.includes('all')) {
+                    if (activeFilters && activeFilters.includes('all')) {
                         statusMatches = true;
-                    } else {
+                    } else if (activeFilters) {
                         statusMatches = activeFilters.some(filter => status.includes(filter.toLowerCase()));
-                    }
-
-                    // Check if user matches filter
-                    let userMatches = true;
-                    if (selectedUserId) {
-                        userMatches = userId === selectedUserId;
+                    } else {
+                        statusMatches = true;
                     }
 
                     // Check if search term matches
                     let searchMatches = true;
                     if (searchTerm) {
-                        const searchLower = searchTerm.toLowerCase();
-                        searchMatches = nama.includes(searchLower) ||
-                            deskripsi.includes(searchLower) ||
-                            status.includes(searchLower);
+                        searchMatches = nama.includes(searchTerm) ||
+                            deskripsi.includes(searchTerm) ||
+                            status.includes(searchTerm);
                     }
 
-                    if (statusMatches && searchMatches && userMatches) {
+                    if (statusMatches && searchMatches) {
                         row.classList.remove('hidden-by-filter');
+                        visibleCount++;
                     } else {
                         row.classList.add('hidden-by-filter');
                     }
                 });
 
-                // Update pagination and visible items
-                renderPagination();
-                updateVisibleItems();
-            }
+                // Apply filters to cards
+                orderanCards.forEach(card => {
+                    const cardText = card.textContent.toLowerCase();
 
-            if (!searchInput) return;
+                    // For cards, we'll just use search
+                    if (searchTerm && !cardText.includes(searchTerm)) {
+                        card.classList.add('hidden-by-filter');
+                    } else {
+                        card.classList.remove('hidden-by-filter');
+                    }
+                });
 
-
-            // Initialize scroll detection for table
-            function initializeScrollDetection() {
-                const scrollableTable = document.getElementById('scrollableTable');
-
-                if (scrollableTable) {
-                    // Add scroll event listener
-                    scrollableTable.addEventListener('scroll', function() {
-                        const scrollLeft = scrollableTable.scrollLeft;
-                        const maxScroll = scrollableTable.scrollWidth - scrollableTable.clientWidth;
-                    });
+                // Update total count
+                if (totalCount) {
+                    totalCount.textContent = visibleCount;
                 }
             }
 
-            // Minimalist Popup
+            // === MINIMAL POPUP ===
             function showMinimalPopup(title, message, type = 'success') {
                 const popup = document.getElementById('minimalPopup');
-                if (!popup) return;
-
-                const popupMessage = popup.querySelector('.minimal-popup-message');
+                const popupTitle = document.getElementById('popupTitle');
+                const popupMessage = document.getElementById('popupMessage');
                 const popupIcon = popup.querySelector('.minimal-popup-icon span');
+                const popupCloseBtn = document.getElementById('popupCloseBtn');
+
+                if (!popup) return;
 
                 // Set content
                 popupTitle.textContent = title;
                 popupMessage.textContent = message;
 
                 // Set type
-                popup.className = 'minimal-popup show ' + type;
-
-                // Set icon
-                if (type === 'success') {
-                    popupIcon.textContent = 'check';
-                } else if (type === 'error') {
+                popup.className = 'minimal-popup show';
+                if (type === 'error') {
+                    popup.classList.add('error');
                     popupIcon.textContent = 'error';
                 } else if (type === 'warning') {
+                    popup.classList.add('warning');
                     popupIcon.textContent = 'warning';
+                } else {
+                    popup.classList.add('success');
+                    popupIcon.textContent = 'check';
                 }
 
                 // Auto hide after 3 seconds
-                setTimeout(() => {
+                const autoHide = setTimeout(() => {
                     popup.classList.remove('show');
                 }, 3000);
+
+                // Manual close
+                popupCloseBtn.onclick = () => {
+                    clearTimeout(autoHide);
+                    popup.classList.remove('show');
+                };
             }
-
-            const popupCloseBtn = document.querySelector('.minimal-popup-close');
-            if (popupCloseBtn) {
-                popupCloseBtn.addEventListener('click', function() {
-                    document.getElementById('minimalPopup')?.classList.remove('show');
-                });
-            }
-
-            // Modal elements
-            const tambahOrderanModal = document.getElementById('tambahOrderanModal');
-            const editOrderanModal = document.getElementById('editOrderanModal');
-            const deleteModal = document.getElementById('deleteModal');
-
-            // Buttons
-            const tambahOrderanBtn = document.getElementById('tambahOrderanBtn');
-            const batalTambahBtn = document.getElementById('batalTambahBtn');
-            const batalEditBtn = document.getElementById('batalEditBtn');
-            const batalDeleteBtn = document.getElementById('batalDeleteBtn');
-            const closeModalBtn = document.getElementById('closeModalBtn');
-            const closeEditModalBtn = document.getElementById('closeEditModalBtn');
-            const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
-
-            // Forms
-            const tambahOrderanForm = document.getElementById('tambahOrderanForm');
-            const editOrderanForm = document.getElementById('editOrderanForm');
-
-            // Open tambah modal
-            tambahOrderanBtn.addEventListener('click', () => {
-                tambahOrderanModal.classList.remove('hidden');
-            });
-
-            // Close tambah modal
-            batalTambahBtn.addEventListener('click', () => {
-                tambahOrderanModal.classList.add('hidden');
-                tambahOrderanForm.reset();
-            });
-
-            closeModalBtn.addEventListener('click', () => {
-                tambahOrderanModal.classList.add('hidden');
-                tambahOrderanForm.reset();
-            });
-
-            // Close edit modal
-            if (batalEditBtn && editOrderanModal) {
-                batalEditBtn.addEventListener('click', () => {
-                    editOrderanModal.classList.add('hidden');
-                });
-            }
-
-
-            closeEditModalBtn.addEventListener('click', () => {
-                editOrderanModal.classList.add('hidden');
-            });
-
-            // ============================
-            // HANDLE EDIT BUTTON
-            // ============================
-            document.querySelectorAll('.edit-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    // SET VALUE
-                    document.getElementById('editId').value = button.dataset.id;
-                    document.getElementById('editNamaOrderan').value = button.dataset.nama;
-                    document.getElementById('editDeskripsi').value = button.dataset.deskripsi;
-                    document.getElementById('editHarga').value = button.dataset.harga;
-                    document.getElementById('editDeadline').value = button.dataset.deadline;
-                    document.getElementById('editProgres').value = button.dataset.progres;
-                    document.getElementById('editStatus').value = button.dataset.status;
-
-                    const baseAction = editOrderanForm.dataset.baseAction;
-                    editOrderanForm.action = baseAction.replace('__id__', button.dataset.id);
-
-
-                    editOrderanModal.classList.remove('hidden');
-                });
-            });
-
-            // ============================
-            // HANDLE DELETE BUTTON
-            // ============================
-            document.querySelectorAll('.delete-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    const id = button.dataset.id;
-
-                    // Set action form delete
-                    document.getElementById('deleteForm').action = `/orderan/${id}`;
-                    document.getElementById('deleteId').value = id;
-
-                    // Tampilkan modal
-                    deleteModal.classList.remove('hidden');
-                });
-            });
-
-            // ============================
-            // SUBMIT FORM EDIT
-            // ============================
-            editOrderanForm.addEventListener('submit', (e) => {
-                editOrderanModal.classList.add('hidden');
-            });
-
-            // ============================
-            // SUBMIT FORM DELETE
-            // ============================
-            document.getElementById('deleteForm').addEventListener('submit', (e) => {
-                deleteModal.classList.add('hidden');
-            });
-
-            // ============================
-            // SUBMIT FORM TAMBAH
-            // ============================
-            tambahOrderanForm.addEventListener('submit', (e) => {
-                tambahOrderanModal.classList.add('hidden');
-            });
         });
     </script>
 </body>

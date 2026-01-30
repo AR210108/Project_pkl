@@ -19,7 +19,7 @@ class Invoice extends Model
         'client_name',
         'order_number',
         'payment_method',
-        'description',   // TAMBAH ini
+        'description',
         'subtotal',
         'tax',
         'total',

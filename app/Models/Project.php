@@ -14,27 +14,35 @@ class Project extends Model
     
     protected $fillable = [
         'layanan_id',
-        'penanggung_jawab_id', // tambahkan ini
         'nama',
         'deskripsi',
         'harga',
         'deadline',
         'progres',
-        'status'
+        'status',
+        'penanggung_jawab_id',
     ];
-    
+
+    // TAMBAHKAN CASTING
     protected $casts = [
-        'deadline' => 'date',
-        'progres' => 'integer'
+        'progres' => 'integer',
+        'status' => 'string', // Cast sebagai string
+        'deadline' => 'datetime',
+        'harga' => 'integer',
     ];
-    
-    public function layanan()
+
+    // Atau gunakan mutator untuk status
+    public function setStatusAttribute($value)
     {
-        return $this->belongsTo(Layanan::class);
+        // Normalisasi status
+        $statusMap = [
+            'pending' => 'Pending',
+            'proses' => 'Proses',
+            'selesai' => 'Selesai',
+        ];
+        
+        $lowerValue = strtolower($value);
+        $this->attributes['status'] = $statusMap[$lowerValue] ?? ucfirst($value);
     }
-    
-    public function penanggungJawab()
-    {
-        return $this->belongsTo(User::class, 'penanggung_jawab_id');
-    }
+
 }

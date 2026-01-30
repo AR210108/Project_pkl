@@ -333,27 +333,50 @@ public function update(Request $request, $id)
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
-    {
-        $karyawan = Karyawan::find($id);
-
-        if (!$karyawan) {
-            return redirect()
-                ->route('finance.daftar_karyawan')
-                ->with('error', 'Data karyawan sudah tidak tersedia');
-        }
+/**
+ * Remove the specified resource from storage.
+ */
+public function destroy($id)
+{
+    try {
+        $karyawan = Karyawan::findOrFail($id);
 
         // hapus foto
         if ($karyawan->foto && file_exists(public_path('karyawan/' . $karyawan->foto))) {
             unlink(public_path('karyawan/' . $karyawan->foto));
         }
 
+        $karyawanName = $karyawan->nama;
         $karyawan->delete();
 
+        // Support AJAX request
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Data karyawan '{$karyawanName}' berhasil dihapus"
+            ]);
+        }
+
+        // Support form submission
         return redirect()
-            ->route('finance.daftar_karyawan')
-            ->with('success', 'Data karyawan berhasil dihapus');
+            ->route('admin.karyawan')
+            ->with('success', "Data karyawan '{$karyawanName}' berhasil dihapus");
+
+    } catch (\Exception $e) {
+        \Log::error('Delete karyawan error:', ['error' => $e->getMessage(), 'id' => $id]);
+        
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus data karyawan: ' . $e->getMessage()
+            ], 500);
+        }
+
+        return redirect()
+            ->route('admin.karyawan')
+            ->with('error', 'Gagal menghapus data karyawan: ' . $e->getMessage());
     }
+}
 
     /**
      * Method untuk mendapatkan nama divisi dari user
