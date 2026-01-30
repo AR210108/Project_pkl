@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class InvoiceController extends Controller
 {
@@ -16,9 +17,13 @@ class InvoiceController extends Controller
      */
     public function index(Request $request)
     {
+        // PAKAI Auth:: BUKAN auth()->
+        $userId = Auth::id();
+        $user = Auth::user();
+        
         Log::info('Invoice Index accessed', [
-            'user_id' => auth()->id(),
-            'user_role' => auth()->user()->role ?? 'guest',
+            'user_id' => $userId,
+            'user_role' => $user ? $user->role : 'guest',  // CEK DULU USER ADA ATAU TIDAK
             'request_type' => $request->ajax() ? 'AJAX' : 'WEB',
             'url' => $request->fullUrl()
         ]);
@@ -64,14 +69,14 @@ class InvoiceController extends Controller
         }
 
         // Untuk web requests - kembalikan view
-        $userRole = auth()->user()->role;
+        $user = Auth::user();  // HAPUS DUPLIKAT INI
         
-        if ($userRole == 'finance') {
+        if ($user && $user->role == 'finance') {
             $viewName = 'finance.invoice';
-        } else if ($userRole == 'admin') {
+        } else if ($user && $user->role == 'admin') {
             $viewName = 'admin.invoice';
         } else {
-            $viewName = 'admin.invoice';
+            $viewName = 'admin.invoice';  // Default
         }
 
         return view($viewName);
@@ -82,9 +87,9 @@ class InvoiceController extends Controller
      */
     public function create()
     {
-        $userRole = auth()->user()->role;
+        $user = Auth::user();  // GANTI auth()->user() dengan Auth::user()
         
-        if ($userRole == 'finance') {
+        if ($user && $user->role == 'finance') {
             $viewName = 'finance.invoice_create';
         } else {
             $viewName = 'admin.invoice_create';
@@ -148,7 +153,8 @@ class InvoiceController extends Controller
             }
             
             // Untuk web form request
-            return redirect()->route(auth()->user()->role . '.invoice.index')
+            $user = Auth::user();  // TAMBAH INI
+            return redirect()->route($user->role . '.invoice.index')
                 ->with('success', 'Invoice berhasil dibuat');
 
         } catch (\Exception $e) {
@@ -275,7 +281,8 @@ class InvoiceController extends Controller
                 ]);
             }
             
-            return redirect()->route(auth()->user()->role . '.invoice.index')
+            $user = Auth::user();  // TAMBAH INI
+            return redirect()->route($user->role . '.invoice.index')
                 ->with('success', 'Invoice berhasil diperbarui');
 
         } catch (\Exception $e) {
@@ -308,6 +315,8 @@ class InvoiceController extends Controller
             $invoice->delete();
             Log::info('Invoice deleted successfully:', ['id' => $id]);
 
+            $user = Auth::user();  // TAMBAH INI
+            
             if (request()->ajax() || request()->wantsJson() || request()->is('api/*')) {
                 return response()->json([
                     'success' => true,
@@ -315,7 +324,7 @@ class InvoiceController extends Controller
                 ]);
             }
             
-            return redirect()->route(auth()->user()->role . '.invoice.index')
+            return redirect()->route($user->role . '.invoice.index')
                 ->with('success', 'Invoice berhasil dihapus');
             
         } catch (\Exception $e) {
@@ -346,6 +355,35 @@ class InvoiceController extends Controller
         } catch (\Exception $e) {
             Log::error('Error printing invoice: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Invoice tidak ditemukan');
+        }
+    }
+
+    /**
+     * Mark invoice as printed
+     */
+    public function markPrinted(Request $request, string $id)
+    {
+        try {
+            $invoice = Invoice::find($id);
+            if (!$invoice) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invoice tidak ditemukan'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice ditandai sebagai tercetak'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error marking invoice as printed: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menandai invoice',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
