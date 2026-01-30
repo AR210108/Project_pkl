@@ -788,6 +788,47 @@
         <main class="flex-1 flex flex-col main-content">
             <div class="flex-1 p-3 sm:p-8">
                 <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Data Orderan</h2>
+                
+                <!-- Stat Cards Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                    <div class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
+                        <div class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-blue-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
+                            <span class="material-icons-outlined text-primary">people</span>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Total Lead</p>
+                            <p class="value-text text-base sm:text-xl font-bold truncate" id="total-lead-value">245</p>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
+                        <div class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-green-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
+                            <span class="material-icons-outlined text-green-500">trending_up</span>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Conversion Rate</p>
+                            <p class="value-text text-base sm:text-xl font-bold truncate" id="conversion-rate-value">68%</p>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
+                        <div class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-purple-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
+                            <span class="material-icons-outlined text-purple-500">person</span>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Customer</p>
+                            <p class="value-text text-base sm:text-xl font-bold truncate" id="customer-value">167</p>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
+                        <div class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-orange-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
+                            <span class="material-icons-outlined text-orange-500">receipt_long</span>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Total Order</p>
+                            <p class="value-text text-base sm:text-xl font-bold truncate" id="total-order-value">{{ $orders->total() ?? 0 }}</p>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
@@ -2172,6 +2213,9 @@
                     }
                 });
             }
+            
+            // Initialize filter
+            initializeFilter();
         });
     </script>
 </body>

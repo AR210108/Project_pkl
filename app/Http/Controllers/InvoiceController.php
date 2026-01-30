@@ -93,25 +93,15 @@ class InvoiceController extends Controller
     // InvoiceController.php
 public function show($id)
 {
-    try {
-        $invoice = Invoice::findOrFail($id);
-        $invoice->delete();
+    $invoice = Invoice::findOrFail($id);
 
-        // Jika request adalah AJAX, kembalikan sukses JSON
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Invoice berhasil dihapus!'
-            ]);
-        }
+    return response()->json([
+        'success' => true,
+        'data' => $invoice
+    ]);
+}
 
-        return redirect()->route('invoices.index')
-            ->with('success', 'Invoice berhasil dihapus!');
-    }
-    
-    /**
-     * Mark invoice as printed (lightweight, returns JSON).
-     */
+
     public function markPrinted(Request $request, string $id)
     {
         $invoice = Invoice::find($id);
@@ -132,32 +122,8 @@ public function show($id)
     /**
      * Get statistics for invoices
      */
-    public function statistics(): JsonResponse
-    {
-        $totalInvoices = Invoice::count();
-        
-        $totalRevenue = Invoice::sum('total');
-        $averageInvoice = Invoice::avg('total');
-        
-        // Group by payment method
-        $paymentMethods = Invoice::select('metode_pembayaran', 
-                                \DB::raw('count(*) as count'), 
-                                \DB::raw('sum(total) as total'))
-                            ->groupBy('metode_pembayaran')
-                            ->get();
-        
-        return response()->json([
-            'success' => true,
-            'data' => $invoice
-        ]);
-        
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invoice tidak ditemukan'
-        ], 404);
-    }
-}
+
+
 
     // =========================
     // EDIT

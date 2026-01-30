@@ -619,6 +619,44 @@
         .hidden-by-filter {
             display: none !important;
         }
+
+        /* Empty state styles */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1rem;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #f1f5f9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state-icon .material-icons-outlined {
+            font-size: 40px;
+            color: #94a3b8;
+        }
+
+        .empty-state-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state-description {
+            color: #64748b;
+            max-width: 400px;
+        }
     </style>
     <!-- Add CSRF token meta tag -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -630,9 +668,9 @@
         @include('manager_divisi/templet/sider')
         <div class="flex-1 flex flex-col main-content">
             <div class="flex-1 p-3 sm:p-8">
-                <header class="mb-4 sm:mb-8">
-                    <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">Daftar Karyawan</h1>
-                </header>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-0">Data Karyawan</h2>
+                </div>
 
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -645,11 +683,6 @@
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <div class="relative">
-                            <button id="filterBtn"
-                                class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
-                                <span class="material-icons-outlined text-sm">filter_list</span>
-                                Filter
-                            </button>
                             <div id="filterDropdown" class="filter-dropdown">
                                 <div class="filter-option">
                                     <input type="checkbox" id="filterAll" value="all" checked>
@@ -685,272 +718,148 @@
                         </h3>
                         <div class="flex items-center gap-2">
                             <span class="text-sm text-text-muted-light">Total: <span id="totalCount"
-                                    class="font-semibold text-text-light">4</span> karyawan</span>
+                                    class="font-semibold text-text-light">{{ count($karyawan) }}</span> karyawan</span>
                         </div>
                     </div>
                     <div class="panel-body">
-                        <!-- SCROLLABLE TABLE -->
-                        <div class="desktop-table">
-                            <div class="scrollable-table-container scroll-indicator table-shadow" id="scrollableTable">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th style="min-width: 60px;">No</th>
-                                            <th style="min-width: 200px;">Nama</th>
-                                            <th style="min-width: 150px;">Jabatan</th>
-                                            <th style="min-width: 150px;">Divisi</th>
-                                            <th style="min-width: 250px;">Alamat</th>
-                                            <th style="min-width: 150px;">Kontak</th>
-                                            <th style="min-width: 100px;">Foto</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="desktopTableBody">
-                                        @foreach ($karyawan as $index => $k)
-                                            <tr class="karyawan-row" data-id="{{ $k->id }}"
-                                                data-nama="{{ $k->nama }}" data-jabatan="{{ $k->jabatan }}"
-                                                data-divisi="{{ $k->divisi }}" data-alamat="{{ $k->alamat }}"
-                                                data-kontak="{{ $k->kontak }}" data-status="{{ $k->status }}">
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>{{ $k->nama }}</td>
-                                                <td>{{ $k->jabatan }}</td>
-                                                <td>{{ $k->divisi }}</td>
-                                                <td>{{ $k->alamat }}</td>
-                                                <td>{{ $k->kontak }}</td>
-<td>
-    @if ($k->foto)
-        <img src="{{ asset('storage/karyawan/' . $k->foto) }}"
-             alt="Foto" 
-             class="w-10 h-10 rounded-full object-cover"
-             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($k->nama) }}';">
-    @else
-        <img src="https://ui-avatars.com/api/?name={{ urlencode($k->nama) }}"
-             alt="Foto" 
-             class="w-10 h-10 rounded-full object-cover">
-    @endif
-</td>
-                                        
+                        @if(count($karyawan) > 0)
+                            <!-- SCROLLABLE TABLE -->
+                            <div class="desktop-table">
+                                <div class="scrollable-table-container scroll-indicator table-shadow" id="scrollableTable">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="min-width: 60px;">No</th>
+                                                <th style="min-width: 200px;">Nama</th>
+                                                <th style="min-width: 150px;">Jabatan</th>
+                                                <th style="min-width: 150px;">Divisi</th>
+                                                <th style="min-width: 250px;">Alamat</th>
+                                                <th style="min-width: 150px;">Kontak</th>
+                                                <th style="min-width: 100px;">Foto</th>
                                             </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Mobile Card View -->
-                        <div class="mobile-cards space-y-4" id="mobile-cards">
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card"
-                                data-id="1" data-nama="Ahmad Fauzi" data-jabatan="Senior Developer"
-                                data-divisi="IT" data-alamat="Jl. Merdeka No. 123, Jakarta" data-kontak="08123456789"
-                                data-status="aktif">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full overflow-hidden">
-                                            <img src="https://picsum.photos/seed/employee1/100/100.jpg" alt="Foto"
-                                                class="w-full h-full object-cover">
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-base">Ahmad Fauzi</h4>
-                                            <p class="text-sm text-text-muted-light">Senior Developer - IT</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                            data-id="1" data-nama="Ahmad Fauzi" data-jabatan="Senior Developer"
-                                            data-divisi="IT" data-alamat="Jl. Merdeka No. 123, Jakarta"
-                                            data-kontak="08123456789" data-status="aktif">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                            data-id="1">
-                                            <span class="material-icons-outlined">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <p class="text-text-muted-light">No</p>
-                                        <p class="font-medium">1</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Status</p>
-                                        <p>
-                                            <span class="status-badge status-aktif">Aktif</span>
-                                        </p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Alamat</p>
-                                        <p class="font-medium">Jl. Merdeka No. 123, Jakarta</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Kontak</p>
-                                        <p class="font-medium">08123456789</p>
-                                    </div>
+                                        </thead>
+                                        <tbody id="desktopTableBody">
+                                            @foreach ($karyawan as $index => $k)
+                                                <tr class="karyawan-row" data-id="{{ $k->id }}"
+                                                    data-nama="{{ $k->nama }}" data-jabatan="{{ $k->jabatan }}"
+                                                    data-divisi="{{ $k->divisi }}" data-alamat="{{ $k->alamat }}"
+                                                    data-kontak="{{ $k->kontak }}" data-status="{{ $k->status }}">
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td>{{ $k->nama }}</td>
+                                                    <td>{{ $k->jabatan }}</td>
+                                                    <td>{{ $k->divisi }}</td>
+                                                    <td>{{ $k->alamat }}</td>
+                                                    <td>{{ $k->kontak }}</td>
+                                                    <td>
+                                                        @if ($k->foto)
+                                                            <img src="{{ asset('storage/karyawan/' . $k->foto) }}"
+                                                                 alt="Foto" 
+                                                                 class="w-10 h-10 rounded-full object-cover"
+                                                                 onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($k->nama) }}';">
+                                                        @else
+                                                            <img src="https://ui-avatars.com/api/?name={{ urlencode($k->nama) }}"
+                                                                 alt="Foto" 
+                                                                 class="w-10 h-10 rounded-full object-cover">
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
 
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card"
-                                data-id="2" data-nama="Siti Nurhaliza" data-jabatan="HR Manager" data-divisi="HR"
-                                data-alamat="Jl. Sudirman No. 456, Bandung" data-kontak="08234567890"
-                                data-status="cuti">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full overflow-hidden">
-                                            <img src="https://picsum.photos/seed/employee2/100/100.jpg" alt="Foto"
-                                                class="w-full h-full object-cover">
+                            <!-- Mobile Card View -->
+                            <div class="mobile-cards space-y-4" id="mobile-cards">
+                                @foreach ($karyawan as $index => $k)
+                                    <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card"
+                                        data-id="{{ $k->id }}" data-nama="{{ $k->nama }}" data-jabatan="{{ $k->jabatan }}"
+                                        data-divisi="{{ $k->divisi }}" data-alamat="{{ $k->alamat }}"
+                                        data-kontak="{{ $k->kontak }}" data-status="{{ $k->status }}">
+                                        <div class="flex justify-between items-start mb-3">
+                                            <div class="flex items-center gap-3">
+                                                <div class="h-12 w-12 rounded-full overflow-hidden">
+                                                    @if ($k->foto)
+                                                        <img src="{{ asset('storage/karyawan/' . $k->foto) }}"
+                                                             alt="Foto"
+                                                             class="w-full h-full object-cover"
+                                                             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($k->nama) }}';">
+                                                    @else
+                                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($k->nama) }}"
+                                                             alt="Foto"
+                                                             class="w-full h-full object-cover">
+                                                    @endif
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-semibold text-base">{{ $k->nama }}</h4>
+                                                    <p class="text-sm text-text-muted-light">{{ $k->jabatan }} - {{ $k->divisi }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                    data-id="{{ $k->id }}" data-nama="{{ $k->nama }}" data-jabatan="{{ $k->jabatan }}"
+                                                    data-divisi="{{ $k->divisi }}" data-alamat="{{ $k->alamat }}"
+                                                    data-kontak="{{ $k->kontak }}" data-status="{{ $k->status }}">
+                                                    <span class="material-icons-outlined">edit</span>
+                                                </button>
+                                                <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
+                                                    data-id="{{ $k->id }}">
+                                                    <span class="material-icons-outlined">delete</span>
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 class="font-semibold text-base">Siti Nurhaliza</h4>
-                                            <p class="text-sm text-text-muted-light">HR Manager - HR</p>
+                                        <div class="grid grid-cols-2 gap-2 text-sm">
+                                            <div>
+                                                <p class="text-text-muted-light">No</p>
+                                                <p class="font-medium">{{ $index + 1 }}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-text-muted-light">Status</p>
+                                                <p>
+                                                    @if($k->status == 'aktif')
+                                                        <span class="status-badge status-aktif">Aktif</span>
+                                                    @elseif($k->status == 'cuti')
+                                                        <span class="status-badge status-cuti">Cuti</span>
+                                                    @else
+                                                        <span class="status-badge status-tidak-aktif">Tidak Aktif</span>
+                                                    @endif
+                                                </p>
+                                            </div>
+                                            <div class="col-span-2">
+                                                <p class="text-text-muted-light">Alamat</p>
+                                                <p class="font-medium">{{ $k->alamat }}</p>
+                                            </div>
+                                            <div class="col-span-2">
+                                                <p class="text-text-muted-light">Kontak</p>
+                                                <p class="font-medium">{{ $k->kontak }}</p>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                            data-id="2" data-nama="Siti Nurhaliza" data-jabatan="HR Manager"
-                                            data-divisi="HR" data-alamat="Jl. Sudirman No. 456, Bandung"
-                                            data-kontak="08234567890" data-status="cuti">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                            data-id="2">
-                                            <span class="material-icons-outlined">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <p class="text-text-muted-light">No</p>
-                                        <p class="font-medium">2</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Status</p>
-                                        <p>
-                                            <span class="status-badge status-cuti">Cuti</span>
-                                        </p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Alamat</p>
-                                        <p class="font-medium">Jl. Sudirman No. 456, Bandung</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Kontak</p>
-                                        <p class="font-medium">08234567890</p>
-                                    </div>
-                                </div>
+                                @endforeach
                             </div>
 
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card"
-                                data-id="3" data-nama="Budi Santoso" data-jabatan="Marketing Manager"
-                                data-divisi="Marketing" data-alamat="Jl. Gatot Subroto No. 789, Surabaya"
-                                data-kontak="08345678901" data-status="aktif">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full overflow-hidden">
-                                            <img src="https://picsum.photos/seed/employee3/100/100.jpg" alt="Foto"
-                                                class="w-full h-full object-cover">
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-base">Budi Santoso</h4>
-                                            <p class="text-sm text-text-muted-light">Marketing Manager - Marketing</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                            data-id="3" data-nama="Budi Santoso" data-jabatan="Marketing Manager"
-                                            data-divisi="Marketing" data-alamat="Jl. Gatot Subroto No. 789, Surabaya"
-                                            data-kontak="08345678901" data-status="aktif">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                            data-id="3">
-                                            <span class="material-icons-outlined">delete</span>
-                                        </button>
-                                    </div>
+                            <!-- Pagination -->
+                            <div id="paginationContainer" class="desktop-pagination">
+                                <button id="prevPage" class="desktop-nav-btn">
+                                    <span class="material-icons-outlined text-sm">chevron_left</span>
+                                </button>
+                                <div id="pageNumbers" class="flex gap-1">
+                                    <button class="desktop-page-btn active">1</button>
                                 </div>
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <p class="text-text-muted-light">No</p>
-                                        <p class="font-medium">3</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Status</p>
-                                        <p>
-                                            <span class="status-badge status-aktif">Aktif</span>
-                                        </p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Alamat</p>
-                                        <p class="font-medium">Jl. Gatot Subroto No. 789, Surabaya</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Kontak</p>
-                                        <p class="font-medium">08345678901</p>
-                                    </div>
-                                </div>
+                                <button id="nextPage" class="desktop-nav-btn" disabled>
+                                    <span class="material-icons-outlined text-sm">chevron_right</span>
+                                </button>
                             </div>
-
-                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card"
-                                data-id="4" data-nama="Dewi Lestari" data-jabatan="Finance Manager"
-                                data-divisi="Finance" data-alamat="Jl. Thamrin No. 321, Medan"
-                                data-kontak="08456789012" data-status="tidak aktif">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-12 w-12 rounded-full overflow-hidden">
-                                            <img src="https://picsum.photos/seed/employee4/100/100.jpg" alt="Foto"
-                                                class="w-full h-full object-cover">
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-base">Dewi Lestari</h4>
-                                            <p class="text-sm text-text-muted-light">Finance Manager - Finance</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                            data-id="4" data-nama="Dewi Lestari" data-jabatan="Finance Manager"
-                                            data-divisi="Finance" data-alamat="Jl. Thamrin No. 321, Medan"
-                                            data-kontak="08456789012" data-status="tidak aktif">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                            data-id="4">
-                                            <span class="material-icons-outlined">delete</span>
-                                        </button>
-                                    </div>
+                        @else
+                            <!-- Empty State -->
+                            <div class="empty-state">
+                                <div class="empty-state-icon">
+                                    <span class="material-icons-outlined">people</span>
                                 </div>
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <p class="text-text-muted-light">No</p>
-                                        <p class="font-medium">4</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-text-muted-light">Status</p>
-                                        <p>
-                                            <span class="status-badge status-tidak-aktif">Tidak Aktif</span>
-                                        </p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Alamat</p>
-                                        <p class="font-medium">Jl. Thamrin No. 321, Medan</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-text-muted-light">Kontak</p>
-                                        <p class="font-medium">08456789012</p>
-                                    </div>
-                                </div>
+                                <h3 class="empty-state-title">Belum ada data karyawan</h3>
+                                <p class="empty-state-description">Belum ada data karyawan yang tersedia. Silakan tambahkan data karyawan terlebih dahulu.</p>
                             </div>
-                        </div>
-
-                        <!-- Pagination -->
-                        <div id="paginationContainer" class="desktop-pagination">
-                            <button id="prevPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="pageNumbers" class="flex gap-1">
-                                <button class="desktop-page-btn active">1</button>
-                            </div>
-                            <button id="nextPage" class="desktop-nav-btn" disabled>
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
-                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
