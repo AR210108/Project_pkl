@@ -84,7 +84,7 @@ Route::middleware('auth')->group(function () {
         request()->session()->regenerateToken();
         return redirect('/');
     })->name('logout');
-    
+
     Route::get('/logout-get', function () {
         Auth::logout();
         request()->session()->invalidate();
@@ -95,7 +95,7 @@ Route::middleware('auth')->group(function () {
 
 // Orders & invoices routes (simple resource for authenticated users)
 Route::middleware('auth')->group(function () {
-    Route::resource('orders', OrderController::class)->only(['index','show','store','update','destroy']);
+    Route::resource('orders', OrderController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
     Route::get('invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
 });
 
@@ -124,6 +124,10 @@ Route::middleware(['auth', 'role:admin'])
         // Route untuk sidebar: /admin/home → redirect ke /admin/beranda
         Route::get('/home', function () {
             return redirect()->route('admin.beranda');
+        });
+
+        Route::get('/seting_jam&libur', function () {
+            return view('admin.settings.jam_libur');
         });
 
         // ========== API ROUTES FOR DATA ==========
@@ -173,13 +177,13 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/{id}/edit', [TaskController::class, 'edit'])->name('edit');
             Route::put('/{id}', [TaskController::class, 'update'])->name('update');
             Route::delete('/{id}', [TaskController::class, 'destroy'])->name('destroy');
-            
+
             // Upload & File Admin
             Route::post('/{id}/upload-file', [TaskController::class, 'uploadFileAdmin'])->name('upload.file');
             Route::get('/{id}/files', [TaskController::class, 'getTaskFiles'])->name('files');
             Route::get('/files/{file}/download', [TaskController::class, 'downloadFile'])->name('files.download');
             Route::delete('/files/{file}', [TaskController::class, 'deleteFile'])->name('files.delete');
-            
+
             // Comments
             Route::get('/{id}/comments', [TaskController::class, 'getComments'])->name('comments');
             Route::post('/{id}/comments', [TaskController::class, 'storeComment'])->name('comments.store');
@@ -524,18 +528,18 @@ Route::middleware(['auth', 'role:general_manager'])
             Route::get('/karyawan-by-divisi/{divisi}', [GeneralManagerTaskController::class, 'getKaryawanByDivisi'])
                 ->name('karyawan.by_divisi');
         });
-        
+
         // Absensi Management - MODIFIED
         Route::get('/kelola-absen', [AbsensiController::class, 'kelolaAbsen'])->name('kelola_absen');
         Route::get('/kelola-absensi', [AbsensiController::class, 'kelolaAbsensi'])->name('kelola_absensi');
-        
+
         Route::get('/tim_dan_divisi', function () {
             return view('general_manajer/tim_dan_divisi');
         });
-        
+
         // Halaman utama
         Route::get('/tim_divisi', [TimDivisiController::class, 'index'])->name('tim_divisi');
-        
+
         // Tim routes
         Route::prefix('tim')->group(function () {
             Route::post('/', [TimDivisiController::class, 'storeTim'])->name('tim.store');
@@ -543,7 +547,7 @@ Route::middleware(['auth', 'role:general_manager'])
             Route::delete('/{id}', [TimDivisiController::class, 'destroyTim'])->name('tim.destroy');
             Route::get('/search', [TimDivisiController::class, 'searchTim'])->name('tim.search');
         });
-        
+
         // Divisi routes
         Route::prefix('divisi')->group(function () {
             Route::post('/', [TimDivisiController::class, 'storeDivisi'])->name('divisi.store');
@@ -551,7 +555,7 @@ Route::middleware(['auth', 'role:general_manager'])
             Route::delete('/{id}', [TimDivisiController::class, 'destroyDivisi'])->name('divisi.destroy');
             Route::get('/search', [TimDivisiController::class, 'searchDivisi'])->name('divisi.search');
         });
-        
+
         // Utility route
         Route::get('/divisis/list', [TimDivisiController::class, 'getDivisis'])->name('divisis.list');
     });
@@ -573,7 +577,7 @@ Route::middleware(['auth', 'role:owner'])
             return view('pemilik.laporan');
         })->name('laporan');
         Route::get('/rekap-absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap_absen'); // MODIFIED
-        
+    
         // CUTI MANAGEMENT (OWNER)
         Route::prefix('cuti')->name('cuti.')->group(function () {
             Route::get('/', [CutiController::class, 'index'])->name('index');
@@ -633,7 +637,7 @@ Route::middleware(['auth', 'role:manager_divisi'])
             return view('manager_divisi.home');
         })->name('home');
 
-        
+
         Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsensiManagerDivisi'])->name('kelola_absensi');
 
         // CUTI MANAGEMENT (MANAGER DIVISI)
@@ -698,9 +702,11 @@ Route::middleware(['auth', 'role:manager_divisi'])
         Route::get('/pengelola_tugas', function () {
             return view('manager_divisi.pengelola_tugas');
         })->name('pengelola_tugas');
-        
-        Route::get('/absensi-tim', function () { return view('manager_divisi.absensi_tim'); })->name('absensi_tim'); // MODIFIED
-        
+
+        Route::get('/absensi-tim', function () {
+            return view('manager_divisi.absensi_tim');
+        })->name('absensi_tim'); // MODIFIED
+    
         Route::get('/tim-saya', function () {
             $user = Auth::user();
             $tim = \App\Models\User::where('divisi', $user->divisi)->where('role', 'karyawan')->get();
@@ -758,7 +764,7 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
 
     // Untuk karyawan tasks
     Route::get('/karyawan/tasks', [KaryawanController::class, 'getTasksApi'])->name('api.karyawan.tasks');
-    
+
     /* =====================================================
      |  API ABSENSI UNTUK KARYAWAN
      ===================================================== */
@@ -767,13 +773,13 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
         Route::get('/dashboard-data', [AbsensiController::class, 'apiTodayStatus'])->name('dashboard-data');
         Route::get('/today-status', [AbsensiController::class, 'apiTodayStatus'])->name('today-status');
         Route::get('/history', [AbsensiController::class, 'apiHistory'])->name('history');
-        
+
         // Actions
         Route::post('/absen-masuk', [AbsensiController::class, 'apiAbsenMasuk'])->name('absen-masuk');
         Route::post('/absen-pulang', [AbsensiController::class, 'apiAbsenPulang'])->name('absen-pulang');
         Route::post('/submit-izin', [AbsensiController::class, 'apiSubmitIzin'])->name('submit-izin');
     });
-    
+
     /* =====================================================
      |  API TASKS UNTUK SEMUA ROLE
      ===================================================== */
@@ -781,31 +787,31 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
         // Detail & Specific Actions
         Route::get('/{id}', [TaskController::class, 'show'])->name('show');
         Route::get('/{id}/detail', [TaskController::class, 'getTaskDetailApi'])->name('detail');
-        
+
         // File Upload (Global)
         Route::post('/{id}/upload-file', [TaskController::class, 'uploadTaskFile'])->name('upload.file');
-        
+
         // Status & Completion
         Route::post('/{id}/complete', [TaskController::class, 'markAsComplete'])->name('complete');
         Route::post('/{id}/status', [TaskController::class, 'updateTaskStatus'])->name('status');
-        
+
         // Comments
         Route::get('/{id}/comments', [TaskController::class, 'getComments'])->name('comments');
         Route::post('/{id}/comments', [TaskController::class, 'storeComment'])->name('comments.store');
-        
+
         // Files
         Route::get('/{id}/files', [TaskController::class, 'getTaskFiles'])->name('files');
         Route::get('/files/{file}/download', [TaskController::class, 'downloadFile'])->name('files.download');
         Route::delete('/files/{file}', [TaskController::class, 'deleteFile'])->name('files.delete');
-        
+
         // Submission Download
         Route::get('/{id}/download', [TaskController::class, 'downloadSubmission'])->name('download.submission');
-        
+
         // Statistics
         Route::get('/statistics', [TaskController::class, 'getStatistics'])->name('statistics');
         Route::get('/karyawan/statistics', [TaskController::class, 'getKaryawanStatistics'])->name('karyawan.statistics');
     });
-    
+
     /* =====================================================
      |  API TASKS UNTUK KARYAWAN (Tugas yang ditugaskan ke karyawan)
      ===================================================== */
@@ -813,7 +819,7 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
         Route::get('/', [TaskController::class, 'getKaryawanTasks'])->name('index');
         Route::get('/{id}/detail', [TaskController::class, 'getTaskDetailForKaryawan'])->name('detail');
     });
-    
+
     /* =====================================================
      |  API UNTUK ADMIN/GENERAL MANAGER (Data Management)
      ===================================================== */
@@ -823,21 +829,21 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
         Route::get('/absensi/ketidakhadiran', [AbsensiController::class, 'apiIndexKetidakhadiran'])->name('ketidakhadiran');
         Route::get('/absensi/stats', [AbsensiController::class, 'apiStatistics'])->name('stats');
         Route::get('/kehadiran-per-divisi', [AbsensiController::class, 'apiKehadiranPerDivisi'])->name('kehadiran.divisi');
-        
+
         // Absensi CRUD
         Route::post('/absensi', [AbsensiController::class, 'apiStore'])->name('absensi.store');
         Route::get('/absensi/{id}', [AbsensiController::class, 'apiShow'])->name('absensi.show');
         Route::put('/absensi/{id}', [AbsensiController::class, 'apiUpdate'])->name('absensi.update');
         Route::delete('/absensi/{id}', [AbsensiController::class, 'apiDestroy'])->name('absensi.destroy');
-        
+
         // Cuti Management
         Route::post('/absensi/cuti', [AbsensiController::class, 'apiStoreCuti'])->name('absensi.cuti.store');
         Route::put('/absensi/cuti/{id}', [AbsensiController::class, 'apiUpdateCuti'])->name('absensi.cuti.update');
-        
+
         // Approval
         Route::post('/absensi/{id}/verify', [AbsensiController::class, 'apiVerify'])->name('absensi.verify');
     });
-    
+
     /* =====================================================
      |  API UNTUK GENERAL MANAGER TASKS
      ===================================================== */
@@ -846,7 +852,7 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
         Route::get('/tasks/statistics', [GeneralManagerTaskController::class, 'getStatistics'])->name('tasks.statistics');
         Route::get('/karyawan-by-divisi/{divisi}', [GeneralManagerTaskController::class, 'getKaryawanByDivisi'])->name('karyawan.by_divisi');
     });
-    
+
     /* =====================================================
      |  API UNTUK MANAGER DIVISI TASKS
      ===================================================== */
@@ -855,7 +861,7 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
         Route::get('/tasks/statistics', [ManagerDivisiTaskController::class, 'getStatistics'])->name('tasks.statistics');
         Route::get('/karyawan-by-divisi/{divisi}', [ManagerDivisiTaskController::class, 'getKaryawanByDivisi'])->name('karyawan.by_divisi');
     });
-    
+
     /* =====================================================
      |  API DASHBOARD DATA UNTUK KARYAWAN
      ===================================================== */
@@ -1021,7 +1027,7 @@ if (config('app.debug')) {
             'api.karyawan.absen-masuk' => route('api.karyawan.absen-masuk'),
             'api.karyawan.absen-pulang' => route('api.karyawan.absen-pulang'),
             'api.karyawan.submit-izin' => route('api.karyawan.submit-izin'),
-            
+
             // Task Routes
             'api.tasks.upload.file' => route('api.tasks.upload.file', ['id' => 1]),
             'api.tasks.complete' => route('api.tasks.complete', ['id' => 1]),
@@ -1031,7 +1037,7 @@ if (config('app.debug')) {
             'api.tasks.files' => route('api.tasks.files', ['id' => 1]),
             'api.tasks.files.download' => route('api.tasks.files.download', ['file' => 1]),
             'api.tasks.download.submission' => route('api.tasks.download.submission', ['id' => 1]),
-            
+
             // Admin Routes
             'admin.tasks.upload.file' => route('admin.tasks.upload.file', ['id' => 1]),
             'api.admin.absensi' => route('api.admin.absensi'),
@@ -1048,7 +1054,7 @@ if (config('app.debug')) {
             ]
         ]);
     });
-    
+
     Route::get('/debug/check-task/{id}', function ($id) {
         $task = \App\Models\Task::find($id);
         if (!$task) {
@@ -1064,14 +1070,14 @@ if (config('app.debug')) {
             ]
         ]);
     });
-    
+
     Route::get('/debug/check-absensi-routes', function () {
         $user = auth::user();
         $today = \Carbon\Carbon::today()->format('Y-m-d');
         $attendance = \App\Models\Absensi::where('user_id', $user->id)
             ->whereDate('tanggal', $today)
             ->first();
-            
+
         return response()->json([
             'user' => [
                 'id' => $user->id,

@@ -157,6 +157,7 @@
             display: flex;
             border-bottom: 1px solid #e2e8f0;
             margin-bottom: 1.5rem;
+            overflow-x: auto;
         }
 
         .tab-button {
@@ -258,6 +259,155 @@
             font-size: 20px;
         }
 
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .close-modal {
+            color: #64748b;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .close-modal:hover {
+            color: #1e293b;
+        }
+
+        .holiday-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .holiday-item:last-child {
+            border-bottom: none;
+        }
+
+        .holiday-date {
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        .holiday-name {
+            color: #64748b;
+            margin-left: 10px;
+        }
+
+        .holiday-type {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .holiday-type.auto {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .holiday-type.manual {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #3b82f6;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Style for disabled delete button */
+        .delete-disabled {
+            color: #d1d5db !important;
+            cursor: not-allowed !important;
+            opacity: 0.5;
+        }
+
+        .delete-disabled:hover {
+            color: #d1d5db !important;
+        }
+
         /* Mobile responsive styles */
         @media (max-width: 768px) {
             .app-container {
@@ -302,6 +452,11 @@
 
             .minimal-popup.show {
                 transform: translateY(0);
+            }
+
+            .modal-content {
+                margin: 20% auto;
+                width: 95%;
             }
         }
 
@@ -348,9 +503,11 @@
                 <div class="tab-container">
                     <button class="tab-button active" data-tab="contact">Kontak</button>
                     <button class="tab-button" data-tab="about">Tentang</button>
+                    <button class="tab-button" data-tab="operational">Jam Operasional</button>
                     <button class="tab-button" data-tab="articles">Artikel</button>
                     <button class="tab-button" data-tab="portfolios">Portofolio</button>
                 </div>
+
                 <!-- Tab Content -->
                 <div class="tab-content active" id="contact-tab">
                     <div class="panel">
@@ -444,6 +601,133 @@
                     </div>
                 </div>
 
+                <!-- Tab Jam Operasional -->
+                <div class="tab-content" id="operational-tab">
+                    <div class="panel mb-6">
+                        <div class="panel-header">
+                            <h3 class="panel-title">
+                                <span class="material-icons-outlined text-primary">schedule</span>
+                                Pengaturan Jam Operasional
+                            </h3>
+                        </div>
+                        <div class="panel-body">
+                            <form id="operationalForm" class="space-y-4">
+                                @csrf
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Jam Masuk</label>
+                                        <input type="time" name="start_time" id="startTimeInput"
+                                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                            value="08:00" required>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Jam Pulang</label>
+                                        <input type="time" name="end_time" id="endTimeInput"
+                                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                            value="17:00" required>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row justify-end gap-2 mt-6">
+                                    <button type="button" id="cancelOperationalBtn"
+                                        class="px-4 py-2 btn-secondary rounded-lg w-full sm:w-auto">Batal</button>
+                                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg w-full sm:w-auto">Simpan
+                                        Perubahan</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">
+                                <span class="material-icons-outlined text-primary">event</span>
+                                Jadwal Libur
+                            </h3>
+                            <button id="addHolidayBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2">
+                                <span class="material-icons-outlined text-sm">add</span>
+                                <span>Tambah Libur</span>
+                            </button>
+                        </div>
+                        <div class="panel-body">
+                            <div class="mb-4 flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <span class="text-sm font-medium text-gray-700 mr-2">Libur Otomatis:</span>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="autoHolidayToggle" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <span class="text-xs text-gray-500">Libur otomatis akan diambil dari kalender nasional</span>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="border-b border-gray-200">
+                                            <th class="text-left py-2 px-2 text-sm font-medium text-gray-700">Tanggal</th>
+                                            <th class="text-left py-2 px-2 text-sm font-medium text-gray-700">Nama Libur</th>
+                                            <th class="text-left py-2 px-2 text-sm font-medium text-gray-700">Tipe</th>
+                                            <th class="text-left py-2 px-2 text-sm font-medium text-gray-700">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="holidayList">
+                                        <tr class="border-b border-gray-100 holiday-auto">
+                                            <td class="py-2 px-2 text-sm">01 Januari 2024</td>
+                                            <td class="py-2 px-2 text-sm">Tahun Baru Masehi</td>
+                                            <td class="py-2 px-2">
+                                                <span class="holiday-type auto">Otomatis</span>
+                                            </td>
+                                            <td class="py-2 px-2">
+                                                <button class="delete-disabled" title="Libur otomatis tidak dapat dihapus">
+                                                    <span class="material-icons-outlined text-sm">delete</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100 holiday-auto">
+                                            <td class="py-2 px-2 text-sm">17 Agustus 2024</td>
+                                            <td class="py-2 px-2 text-sm">Hari Kemerdekaan</td>
+                                            <td class="py-2 px-2">
+                                                <span class="holiday-type auto">Otomatis</span>
+                                            </td>
+                                            <td class="py-2 px-2">
+                                                <button class="delete-disabled" title="Libur otomatis tidak dapat dihapus">
+                                                    <span class="material-icons-outlined text-sm">delete</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100 holiday-auto">
+                                            <td class="py-2 px-2 text-sm">25 Desember 2024</td>
+                                            <td class="py-2 px-2 text-sm">Hari Raya Natal</td>
+                                            <td class="py-2 px-2">
+                                                <span class="holiday-type auto">Otomatis</span>
+                                            </td>
+                                            <td class="py-2 px-2">
+                                                <button class="delete-disabled" title="Libur otomatis tidak dapat dihapus">
+                                                    <span class="material-icons-outlined text-sm">delete</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100 holiday-manual">
+                                            <td class="py-2 px-2 text-sm">15 Juni 2024</td>
+                                            <td class="py-2 px-2 text-sm">Libur Khusus</td>
+                                            <td class="py-2 px-2">
+                                                <span class="holiday-type manual">Manual</span>
+                                            </td>
+                                            <td class="py-2 px-2">
+                                                <button class="text-red-500 hover:text-red-700 delete-holiday">
+                                                    <span class="material-icons-outlined text-sm">delete</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="tab-content" id="articles-tab">
                     <div class="panel">
                         <div class="panel-header">
@@ -511,6 +795,45 @@
         <button class="minimal-popup-close">
             <span class="material-icons-outlined text-sm">close</span>
         </button>
+    </div>
+
+    <!-- Modal Tambah Libur -->
+    <div id="holidayModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Tambah Jadwal Libur</h4>
+                <button class="close-modal" id="closeHolidayModal">&times;</button>
+            </div>
+            <form id="holidayForm" class="space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Libur</label>
+                    <input type="date" name="holiday_date" id="holidayDateInput"
+                        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                        required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Libur</label>
+                    <input type="text" name="holiday_name" id="holidayNameInput"
+                        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                        placeholder="Contoh: Libur Khusus" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan (Opsional)</label>
+                    <textarea name="holiday_description" id="holidayDescriptionInput"
+                        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                        rows="3" placeholder="Tambahkan keterangan jika diperlukan"></textarea>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-end gap-2 mt-6">
+                    <button type="button" id="cancelHolidayBtn"
+                        class="px-4 py-2 btn-secondary rounded-lg w-full sm:w-auto">Batal</button>
+                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg w-full sm:w-auto">Tambah Libur</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -644,12 +967,170 @@
                 }
             });
 
+            // Operational Form
+            document.getElementById('operationalForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Menyimpan...';
+                submitBtn.disabled = true;
+
+                const formData = new FormData(this);
+
+                try {
+                    // Simulasi API call
+                    setTimeout(() => {
+                        showMinimalPopup('Berhasil', 'Jam operasional berhasil diperbarui', 'success');
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                    }, 1000);
+                } catch (error) {
+                    console.error(error);
+                    showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
+
+            // Holiday Modal
+            const holidayModal = document.getElementById('holidayModal');
+            const addHolidayBtn = document.getElementById('addHolidayBtn');
+            const closeHolidayModal = document.getElementById('closeHolidayModal');
+            const cancelHolidayBtn = document.getElementById('cancelHolidayBtn');
+
+            // Open modal
+            addHolidayBtn.addEventListener('click', function () {
+                holidayModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            });
+
+            // Close modal
+            closeHolidayModal.addEventListener('click', function () {
+                holidayModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+
+            cancelHolidayBtn.addEventListener('click', function () {
+                holidayModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function (event) {
+                if (event.target === holidayModal) {
+                    holidayModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+
+            // Holiday Form
+            document.getElementById('holidayForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Menambahkan...';
+                submitBtn.disabled = true;
+
+                const formData = new FormData(this);
+                const holidayDate = formData.get('holiday_date');
+                const holidayName = formData.get('holiday_name');
+                const holidayDescription = formData.get('holiday_description');
+
+                try {
+                    // Simulasi API call
+                    setTimeout(() => {
+                        // Add new holiday to the table
+                        const holidayList = document.getElementById('holidayList');
+                        const newHolidayRow = document.createElement('tr');
+                        newHolidayRow.className = 'border-b border-gray-100 holiday-manual';
+                        
+                        // Format date
+                        const date = new Date(holidayDate);
+                        const formattedDate = date.toLocaleDateString('id-ID', { 
+                            day: 'numeric', 
+                            month: 'long', 
+                            year: 'numeric' 
+                        });
+                        
+                        newHolidayRow.innerHTML = `
+                            <td class="py-2 px-2 text-sm">${formattedDate}</td>
+                            <td class="py-2 px-2 text-sm">${holidayName}</td>
+                            <td class="py-2 px-2">
+                                <span class="holiday-type manual">Manual</span>
+                            </td>
+                            <td class="py-2 px-2">
+                                <button class="text-red-500 hover:text-red-700 delete-holiday">
+                                    <span class="material-icons-outlined text-sm">delete</span>
+                                </button>
+                            </td>
+                        `;
+                        
+                        holidayList.appendChild(newHolidayRow);
+                        
+                        // Add event listener to delete button
+                        newHolidayRow.querySelector('.delete-holiday').addEventListener('click', function() {
+                            if (confirm('Apakah Anda yakin ingin menghapus jadwal libur ini?')) {
+                                newHolidayRow.remove();
+                                showMinimalPopup('Berhasil', 'Jadwal libur berhasil dihapus', 'success');
+                            }
+                        });
+                        
+                        // Close modal and reset form
+                        holidayModal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                        this.reset();
+                        
+                        showMinimalPopup('Berhasil', 'Jadwal libur berhasil ditambahkan', 'success');
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                    }, 1000);
+                } catch (error) {
+                    console.error(error);
+                    showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
+
+            // Delete holiday buttons for manual holidays only
+            document.querySelectorAll('.delete-holiday').forEach(button => {
+                button.addEventListener('click', function () {
+                    if (confirm('Apakah Anda yakin ingin menghapus jadwal libur ini?')) {
+                        this.closest('tr').remove();
+                        showMinimalPopup('Berhasil', 'Jadwal libur berhasil dihapus', 'success');
+                    }
+                });
+            });
+
+            // Show tooltip for disabled delete buttons
+            document.querySelectorAll('.delete-disabled').forEach(button => {
+                button.addEventListener('click', function () {
+                    showMinimalPopup('Info', 'Libur otomatis dari kalender tidak dapat dihapus', 'warning');
+                });
+            });
+
+            // Auto holiday toggle
+            document.getElementById('autoHolidayToggle').addEventListener('change', function () {
+                const isChecked = this.checked;
+                const message = isChecked ? 
+                    'Libur otomatis diaktifkan. Libur akan diambil dari kalender nasional.' : 
+                    'Libur otomatis dinonaktifkan. Hanya libur manual yang akan ditampilkan.';
+                
+                showMinimalPopup('Info', message, 'success');
+            });
+
             // Cancel buttons
             document.getElementById('cancelContactBtn').addEventListener('click', function () {
                 location.reload();
             });
 
             document.getElementById('cancelAboutBtn').addEventListener('click', function () {
+                location.reload();
+            });
+
+            document.getElementById('cancelOperationalBtn').addEventListener('click', function () {
                 location.reload();
             });
 

@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -999,6 +997,18 @@
         .add-button-container {
             flex-shrink: 0;
         }
+        
+        /* Read-only input style */
+        .read-only-input {
+            background-color: #f8fafc;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+        
+        .read-only-label {
+            color: #64748b;
+            font-weight: 500;
+        }
     </style>
     <!-- Add CSRF token meta tag -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -1228,6 +1238,10 @@
                         <textarea name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi layanan" required></textarea>
                     </div>
                     <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
+                        <input type="number" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan harga layanan" required>
+                    </div>
+                    <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
                         <div class="image-upload-container" id="tambahFotoContainer">
                             <img src="" alt="Preview" class="image-preview" id="tambahFotoPreview">
@@ -1274,6 +1288,10 @@
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                         <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi layanan" required></textarea>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1 read-only-label">Harga</label>
+                        <input type="text" id="editHarga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary read-only-input" readonly required>
                     </div>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
@@ -2016,5 +2034,4 @@ document.getElementById('deleteForm').addEventListener('submit', function(e) {
 });
     </script>
 </body>
-
 </html>
