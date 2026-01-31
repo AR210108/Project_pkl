@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\InvoiceApiController;
+use App\Http\Controllers\KwitansiController;
 
 // Dalam routes/api.php, semua route OTOMATIS mendapat prefix 'api'
 // Jadi jangan tambahkan 'api/' di depan route
@@ -15,10 +16,10 @@ Route::get('/test', function() {
     ]);
 });
 
-// API routes dengan middleware
-Route::middleware(['auth:sanctum'])->group(function () {
+// API routes untuk invoices - WITH SESSION AUTH
+// User harus login (session based)
+Route::middleware(['web', 'auth'])->group(function () {
     
-    // Route untuk invoices - TIDAK PERLU 'api/' DI SINI
     Route::prefix('invoices')->group(function () {
         // GET /api/invoices
         Route::get('/', [InvoiceApiController::class, 'index'])->name('api.invoices.index');
@@ -38,8 +39,28 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // DELETE /api/invoices/{id}
         Route::delete('/{id}', [InvoiceApiController::class, 'destroy'])->name('api.invoices.destroy');
     });
+});
+
+// API routes untuk kwitansi - WITHOUT AUTH (Debug)
+Route::prefix('kwitansi')->group(function () {
+    // GET /api/kwitansi
+    Route::get('/', [KwitansiController::class, 'index'])->name('api.kwitansi.index');
     
-    // Route untuk testing auth
+    // POST /api/kwitansi
+    Route::post('/', [KwitansiController::class, 'store'])->name('api.kwitansi.store');
+    
+    // GET /api/kwitansi/{id}
+    Route::get('/{id}', [KwitansiController::class, 'show'])->name('api.kwitansi.show');
+    
+    // PUT /api/kwitansi/{id}
+    Route::put('/{id}', [KwitansiController::class, 'update'])->name('api.kwitansi.update');
+    
+    // DELETE /api/kwitansi/{id}
+    Route::delete('/{id}', [KwitansiController::class, 'destroy'])->name('api.kwitansi.destroy');
+});
+
+// Route untuk testing auth
+Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/auth-test', function() {
         return response()->json([
             'success' => true,
@@ -47,7 +68,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
             'message' => 'Authenticated API access'
         ]);
     });
-    
 });
 
 // Debug route untuk melihat semua routes
