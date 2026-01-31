@@ -823,6 +823,16 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
         Route::post('/submit-izin', [AbsensiController::class, 'apiSubmitIzin'])->name('submit-izin');
     });
 
+    /* =====================================================
+     |  API MEETING NOTES & ANNOUNCEMENTS - PERBAIKAN
+     ===================================================== */
+    Route::get('/karyawan/meeting-notes', [KaryawanController::class, 'getMeetingNotes']);
+    Route::get('/karyawan/meeting-notes-dates', [KaryawanController::class, 'getMeetingNotesDates']);
+    Route::get('/karyawan/announcements', [KaryawanController::class, 'getAnnouncements']);
+    Route::get('/karyawan/announcements-by-date', [KaryawanController::class, 'getAnnouncementsByDate']);
+    Route::get('/karyawan/announcements-dates', [KaryawanController::class, 'getAnnouncementsDates']);
+    Route::get('/karyawan/calendar-dates', [KaryawanController::class, 'getCalendarDates']);
+
     /* TASKS API */
     Route::prefix('tasks')->name('tasks.')->group(function () {
         Route::get('/{id}', [TaskController::class, 'show'])->name('show');
@@ -1265,4 +1275,16 @@ Route::fallback(function () {
     }
 
     return redirect('/login');
+});
+
+// Di routes/web.php
+
+Route::prefix('general_manager/api')->middleware(['auth'])->group(function () {
+    // Route untuk Catatan Rapat
+    Route::get('/meeting-notes-dates', [CatatanRapatController::class, 'getMeetingNotesDatesForGM']);
+    Route::get('/meeting-notes', [CatatanRapatController::class, 'getMeetingNotesByDateForGM']);
+
+    // Route untuk Pengumuman
+    Route::get('/announcements-dates', [PengumumanController::class, 'getAnnouncementDatesForGM']);
+    Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsForGM']);
 });
