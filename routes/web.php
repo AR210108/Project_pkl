@@ -27,6 +27,7 @@ use App\Http\Controllers\OwnerController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\CutiController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,16 +48,6 @@ if (!function_exists('redirectToRolePage')) {
 
 /*
 |--------------------------------------------------------------------------
-| Public API Routes (Tanpa Auth)
-|--------------------------------------------------------------------------
-*/
-Route::get('/api/contact', [SettingController::class, 'getContactData'])->name('api.contact');
-Route::get('/api/about', [SettingController::class, 'getAboutData'])->name('api.about');
-Route::get('/api/articles', [SettingController::class, 'getArticlesData'])->name('api.articles');
-Route::get('/api/portfolios', [SettingController::class, 'getPortfoliosData'])->name('api.portfolios');
-
-/*
-|--------------------------------------------------------------------------
 | Public Routes (Tidak Perlu Login)
 |--------------------------------------------------------------------------
 */
@@ -64,56 +55,26 @@ Route::get('/api/portfolios', [SettingController::class, 'getPortfoliosData'])->
 // Landing Page
 Route::get('/', [LandingPageController::class, 'index'])->name('home');
 
-// API endpoints public
-Route::prefix('api')->name('api.')->group(function () {
+// Public API endpoints
+Route::prefix('api')->name('api.public.')->group(function () {
     Route::get('/contact', [SettingController::class, 'getContactData'])->name('contact');
     Route::get('/about', [SettingController::class, 'getAboutData'])->name('about');
     Route::get('/articles', [SettingController::class, 'getArticlesData'])->name('articles');
     Route::get('/portfolios', [SettingController::class, 'getPortfoliosData'])->name('portfolios');
-    Route::get('/layanan', [LayananController::class, 'index'])->name('layanan.public');
+    Route::get('/layanan', [LayananController::class, 'index'])->name('layanan');
 });
 
 // Auth routes
-Route::get('/', [LandingPageController::class, 'index'])->name('home');
 Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login-process', [LoginController::class, 'login'])->name('login.process');
 
-/*
-|--------------------------------------------------------------------------
-| Invoice API Routes
-|--------------------------------------------------------------------------
-*/
+// API Test routes (public)
 Route::prefix('api')->group(function() {
-    // Test route tanpa auth
     Route::get('/test', function() {
         return response()->json([
             'success' => true,
             'message' => 'API Works!',
-            'timestamp' => now()->toDateTimeString(),
-            'route_file' => 'web.php'
-        ]);
-    });
-    
-    // Test route dengan auth
-    Route::middleware(['auth'])->get('/auth-test', function() {
-        $user = Auth::user();
-        
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not authenticated'
-            ], 401);
-        }
-        
-        return response()->json([
-            'success' => true,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role
-            ],
-            'message' => 'Authenticated API access'
+            'timestamp' => now()->toDateTimeString()
         ]);
     });
 });
@@ -138,6 +99,20 @@ Route::middleware('auth')->group(function () {
         request()->session()->regenerateToken();
         return redirect('/');
     })->name('logout.get');
+
+    // Profile Redirect
+    Route::get('/profile', function () {
+        $user = Auth::user();
+        return match ($user->role) {
+            'admin' => redirect()->route('admin.settings.index'),
+            'karyawan' => redirect()->route('karyawan.profile'),
+            'manager_divisi' => redirect()->route('manager_divisi.home'),
+            'general_manager' => redirect()->route('general_manajer.home'),
+            'owner' => redirect()->route('owner.home'),
+            'finance' => redirect()->route('finance.beranda'),
+            default => abort(404)
+        };
+    })->name('profile');
 
     // Orders & Invoices
     Route::resource('orders', OrderController::class)->only(['index','show','store','update','destroy']);
@@ -164,7 +139,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', [CatatanRapatController::class, 'getData'])->name('data');
     });
 
-    // Global API Routes
+    // =========== GLOBAL API ROUTES ===========
     Route::prefix('api')->group(function () {
         // Users
         Route::get('/users/data', [UserController::class, 'getData'])->name('users.data');
@@ -177,7 +152,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/calculate-duration', [CutiController::class, 'calculateDuration'])->name('calculate-duration');
         });
 
-        // Tasks API
+        // Tasks API - Global
         Route::prefix('tasks')->name('tasks.')->group(function () {
             Route::get('/{id}', [TaskController::class, 'show'])->name('show');
             Route::get('/{id}/detail', [TaskController::class, 'getTaskDetailApi'])->name('detail');
@@ -187,30 +162,22 @@ Route::middleware('auth')->group(function () {
             Route::get('/{id}/comments', [TaskController::class, 'getComments'])->name('comments');
             Route::post('/{id}/comments', [TaskController::class, 'storeComment'])->name('comments.store');
             Route::get('/{id}/files', [TaskController::class, 'getTaskFiles'])->name('files');
-            Route::get('/files/{file}/download', [TaskController::class, 'downloadFile'])->name('files.download');
+            Route::get('/files/{file}/download', [TaskController::class, 'downloadFileById'])->name('files.download');
             Route::delete('/files/{file}', [TaskController::class, 'deleteFile'])->name('files.delete');
             Route::get('/{id}/download', [TaskController::class, 'downloadSubmission'])->name('download.submission');
             Route::get('/statistics', [TaskController::class, 'getStatistics'])->name('statistics');
+            Route::get('/karyawan/statistics', [TaskController::class, 'getKaryawanStatistics'])->name('karyawan.statistics');
         });
 
-        // Admin/GM Absensi API
-        Route::prefix('admin')->middleware(['role:admin,general_manager'])->name('admin.')->group(function () {
-            Route::get('/absensi', [AbsensiController::class, 'apiIndex'])->name('absensi');
-            Route::get('/absensi/ketidakhadiran', [AbsensiController::class, 'apiIndexKetidakhadiran'])->name('ketidakhadiran');
-            Route::get('/absensi/stats', [AbsensiController::class, 'apiStatistics'])->name('stats');
-            Route::get('/kehadiran-per-divisi', [AbsensiController::class, 'apiKehadiranPerDivisi'])->name('kehadiran.divisi');
-            Route::post('/absensi', [AbsensiController::class, 'apiStore'])->name('absensi.store');
-            Route::get('/absensi/{id}', [AbsensiController::class, 'apiShow'])->name('absensi.show');
-            Route::put('/absensi/{id}', [AbsensiController::class, 'apiUpdate'])->name('absensi.update');
-            Route::delete('/absensi/{id}', [AbsensiController::class, 'apiDestroy'])->name('absensi.destroy');
-            Route::post('/absensi/cuti', [AbsensiController::class, 'apiStoreCuti'])->name('absensi.cuti.store');
-            Route::put('/absensi/cuti/{id}', [AbsensiController::class, 'apiUpdateCuti'])->name('absensi.cuti.update');
-            Route::post('/absensi/{id}/verify', [AbsensiController::class, 'apiVerify'])->name('absensi.verify');
-        });
-        
-        // Owner API
-        Route::prefix('owner')->middleware(['role:owner'])->name('owner.')->group(function () {
-            Route::get('/data', [OwnerController::class, 'getData'])->name('data');
+        // INVOICE API ROUTES
+        Route::prefix('invoices')->name('api.invoices.')->group(function() {
+            Route::get('/', [InvoiceController::class, 'index'])->name('index');
+            Route::post('/', [InvoiceController::class, 'store'])->name('store');
+            Route::get('/{id}', [InvoiceController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [InvoiceController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [InvoiceController::class, 'update'])->name('update');
+            Route::delete('/{id}', [InvoiceController::class, 'destroy'])->name('destroy');
+            Route::post('/{id}/mark-printed', [InvoiceController::class, 'markPrinted'])->name('mark.printed');
         });
     });
 });
@@ -229,6 +196,11 @@ Route::middleware(['auth', 'role:admin'])
             return redirect()->route('admin.beranda');
         });
 
+        // Profile
+        Route::get('/profile', function () {
+            return view('admin.profile');
+        })->name('profile');
+
         // API untuk data
         Route::get('/catatan_rapat/data', [CatatanRapatController::class, 'getData'])->name('catatan_rapat.data');
         Route::get('/users/data', [UserController::class, 'getData'])->name('users.data');
@@ -238,9 +210,6 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
         Route::post('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
         Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
-        Route::get('/data_user', function () {
-            return redirect()->route('admin.user');
-        });
 
         // KARYAWAN MANAGEMENT
         Route::get('/data_karyawan', [AdminKaryawanController::class, 'index'])->name('admin.karyawan');
@@ -272,12 +241,16 @@ Route::middleware(['auth', 'role:admin'])
 
             // Upload & File Admin
             Route::post('/{id}/upload-file', [TaskController::class, 'uploadFileAdmin'])->name('upload.file');
-            Route::get('/files/{file}/download', [TaskController::class, 'downloadFile'])->name('files.download');
+            Route::get('/files/{file}/download', [TaskController::class, 'downloadFileById'])->name('files.download');
             Route::delete('/files/{file}', [TaskController::class, 'deleteFile'])->name('files.delete');
 
             // Comments
             Route::get('/{id}/comments', [TaskController::class, 'getComments'])->name('comments');
             Route::post('/{id}/comments', [TaskController::class, 'storeComment'])->name('comments.store');
+
+            // Status updates
+            Route::post('/{id}/status', [TaskController::class, 'updateTaskStatus'])->name('update.status');
+            Route::post('/{id}/complete', [TaskController::class, 'markAsComplete'])->name('complete');
         });
 
         // Layanan
@@ -305,10 +278,6 @@ Route::middleware(['auth', 'role:admin'])
         Route::put('/project/{id}', [DataProjectController::class, 'update'])->name('project.update');
         Route::delete('/project/{id}', [DataProjectController::class, 'destroy'])->name('project.destroy');
 
-        Route::get('/surat_kerjasama', function () {
-            return redirect()->route('admin.surat_kerjasama.index');
-        });
-
         Route::get('/template_surat', function () {
             return view('admin.template_surat');
         })->name('template_surat');
@@ -331,7 +300,7 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/{id}/cetak', [KwitansiController::class, 'cetak'])->name('cetak');
         });
 
-        // CUTI MANAGEMENT WITH QUOTA - PERBAIKAN ROUTE
+        // CUTI MANAGEMENT
         Route::prefix('cuti')->name('cuti.')->group(function () {
             Route::get('/', [CutiController::class, 'index'])->name('index');
             Route::get('/data', [CutiController::class, 'getData'])->name('data');
@@ -385,18 +354,25 @@ Route::middleware(['auth', 'role:admin'])
             Route::delete('/portfolios/{id}', [SettingController::class, 'deletePortfolio'])->name('portfolios.delete');
         });
 
-        Route::get('/catatan_rapat', function () {
-            return redirect()->route('catatan_rapat.index');
-        });
-
-        Route::get('/pengumuman', function () {
-            return redirect()->route('pengumuman.index');
+        /* API UNTUK ADMIN/GENERAL MANAGER */
+        Route::prefix('api')->name('api.')->group(function () {
+            Route::get('/absensi', [AbsensiController::class, 'apiIndex'])->name('absensi');
+            Route::get('/absensi/ketidakhadiran', [AbsensiController::class, 'apiIndexKetidakhadiran'])->name('ketidakhadiran');
+            Route::get('/absensi/stats', [AbsensiController::class, 'apiStatistics'])->name('stats');
+            Route::get('/kehadiran-per-divisi', [AbsensiController::class, 'apiKehadiranPerDivisi'])->name('kehadiran.divisi');
+            Route::post('/absensi', [AbsensiController::class, 'apiStore'])->name('absensi.store');
+            Route::get('/absensi/{id}', [AbsensiController::class, 'apiShow'])->name('absensi.show');
+            Route::put('/absensi/{id}', [AbsensiController::class, 'apiUpdate'])->name('absensi.update');
+            Route::delete('/absensi/{id}', [AbsensiController::class, 'apiDestroy'])->name('absensi.destroy');
+            Route::post('/absensi/cuti', [AbsensiController::class, 'apiStoreCuti'])->name('absensi.cuti.store');
+            Route::put('/absensi/cuti/{id}', [AbsensiController::class, 'apiUpdateCuti'])->name('absensi.cuti.update');
+            Route::post('/absensi/{id}/verify', [AbsensiController::class, 'apiVerify'])->name('absensi.verify');
         });
     });
 
 /*
 |--------------------------------------------------------------------------
-| Role: KARYAWAN Routes - PERBAIKAN COMPLETE
+| Role: KARYAWAN Routes
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:karyawan'])
@@ -406,7 +382,11 @@ Route::middleware(['auth', 'role:karyawan'])
         // Dashboard
         Route::get('/home', [KaryawanController::class, 'home'])->name('home');
 
-        // CUTI WITH QUOTA - PERBAIKAN ROUTE URUTAN
+        // Profile
+        Route::get('/profile', [KaryawanProfileController::class, 'index'])->name('profile');
+        Route::post('/profile/update', [KaryawanProfileController::class, 'update'])->name('profile.update');
+
+        // CUTI
         Route::prefix('cuti')->name('cuti.')->group(function () {
             Route::get('/', [CutiController::class, 'index'])->name('index');
             Route::get('/data', [CutiController::class, 'getData'])->name('data');
@@ -426,33 +406,29 @@ Route::middleware(['auth', 'role:karyawan'])
             Route::get('/{cuti}/history', [CutiController::class, 'getHistory'])->name('history');
         });
 
-        // Profile
-        Route::get('/profile', [KaryawanProfileController::class, 'index'])->name('profile');
-        Route::post('/profile/update', [KaryawanProfileController::class, 'update'])->name('profile.update');
-
-        // ABSENSI - FIXED
+        // ABSENSI
         Route::get('/absensi', [KaryawanController::class, 'absensiPage'])->name('absensi.page');
         Route::get('/absensi/list', [KaryawanController::class, 'absensiListPage'])->name('absensi.list');
         Route::get('/detail/{id}', [KaryawanController::class, 'detailPage'])->name('detail');
 
-        Route::get('/list', [KaryawanController::class, 'listPage'])->name('list');
-        Route::get('/tugas', [KaryawanController::class, 'listPage'])->name('tugas');
-
-        // TUGAS DETAIL
+        // TUGAS
         Route::prefix('tugas')->name('tugas.')->group(function () {
-            Route::get('/', [KaryawanController::class, 'listPage'])->name('index');
-            Route::get('/list', [KaryawanController::class, 'listPage'])->name('list');
+            Route::get('/', [TaskController::class, 'karyawanTasks'])->name('index');
+            Route::get('/list', [TaskController::class, 'karyawanTasks'])->name('list');
             Route::get('/{id}', [TaskController::class, 'karyawanShow'])->name('show');
-            Route::put('/{id}/status', [TaskController::class, 'updateStatus'])->name('update.status');
-            Route::post('/{id}/upload', [TaskController::class, 'uploadFile'])->name('upload');
+            Route::post('/{id}/upload-file', [TaskController::class, 'uploadTaskFile'])->name('upload.file');
+            Route::post('/{id}/complete', [TaskController::class, 'markAsComplete'])->name('complete');
+            Route::post('/{id}/status', [TaskController::class, 'updateTaskStatus'])->name('update.status');
             Route::get('/{id}/comments', [TaskController::class, 'getComments'])->name('comments');
             Route::post('/{id}/comments', [TaskController::class, 'storeComment'])->name('comments.store');
+            Route::get('/{id}/files', [TaskController::class, 'getTaskFiles'])->name('files');
+            Route::get('/files/{file}/download', [TaskController::class, 'downloadFileById'])->name('files.download');
         });
 
         // LIST PAGE
         Route::get('/list', [KaryawanController::class, 'listPage'])->name('list');
 
-        // API khusus karyawan
+        // =========== API KHUSUS KARYAWAN ===========
         Route::prefix('api')->name('api.')->group(function () {
             // DASHBOARD DATA
             Route::get('/dashboard-data', [KaryawanController::class, 'getDashboardDataApi'])->name('dashboard.data');
@@ -465,30 +441,30 @@ Route::middleware(['auth', 'role:karyawan'])
             Route::get('/announcements-dates', [PengumumanController::class, 'getAnnouncementDatesApi'])->name('announcements.dates');
             Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsApi'])->name('announcements.get');
             
-            // Existing API routes...
-            Route::get('/dashboard', [KaryawanController::class, 'getDashboardData'])->name('dashboard');
-            Route::get('/dashboard-data', [KaryawanController::class, 'getDashboardData'])->name('dashboard.data'); // Alias untuk kompatibilitas
-    
-            // Absensi - Status Hari Ini
-            Route::get('/today-status', [KaryawanController::class, 'getTodayStatus'])->name('today.status');
-
-            // History absensi
-            Route::get('/history', [KaryawanController::class, 'getHistory'])->name('history');
+            // =========== ABSENSI API ROUTES YANG DIPERBAIKI ===========
+            // Status Hari Ini (API baru)
+            Route::get('/today-status', [KaryawanController::class, 'getTodayStatusApi'])->name('today.status');
             
-            // API Absensi
+            // Riwayat Absensi (API baru dengan filter)
+            Route::get('/history', [KaryawanController::class, 'getHistoryApi'])->name('history');
+            
+            // API Absensi Actions
             Route::post('/absen-masuk', [KaryawanController::class, 'absenMasukApi'])->name('absen.masuk');
             Route::post('/absen-pulang', [KaryawanController::class, 'absenPulangApi'])->name('absen.pulang');
             Route::post('/submit-izin', [KaryawanController::class, 'submitIzinApi'])->name('submit.izin');
             Route::post('/submit-dinas', [KaryawanController::class, 'submitDinasApi'])->name('submit.dinas');
             
-            Route::get('/tasks/statistics', [TaskController::class, 'getStatistics'])->name('tasks.statistics');
-
-            // Task list for karyawan
-            Route::get('/tasks', [KaryawanController::class, 'getTasksApi'])->name('tasks');
-        });
-        
-        Route::get('/pengajuan_cuti', function () {
-            return redirect()->route('karyawan.cuti.index');
+            // Status Pengajuan
+            Route::get('/pengajuan-status', [KaryawanController::class, 'getPengajuanStatus'])->name('pengajuan-status');
+            
+            // Task statistics
+            Route::get('/tasks/statistics', [TaskController::class, 'getKaryawanStatistics'])->name('tasks.statistics');
+            Route::get('/tasks', [TaskController::class, 'getKaryawanTasks'])->name('tasks');
+            
+            // API lama untuk kompatibilitas (akan dihapus bertahap)
+            Route::get('/dashboard-data-old', [KaryawanController::class, 'getDashboardData'])->name('dashboard.data.old');
+            Route::get('/today-status-old', [KaryawanController::class, 'getTodayStatus'])->name('today.status.old');
+            Route::get('/history-old', [KaryawanController::class, 'getHistory'])->name('history.old');
         });
     });
 
@@ -503,6 +479,11 @@ Route::middleware(['auth', 'role:general_manager'])
     ->group(function () {
         // Dashboard
         Route::get('/home', function () { return view('general_manajer.home'); })->name('home');
+
+        // Profile
+        Route::get('/profile', function () {
+            return view('general_manajer.profile');
+        })->name('profile');
 
         Route::get('/data_karyawan', [AdminKaryawanController::class, 'karyawanGeneral'])->name('data_karyawan');
         Route::get('/layanan', [LayananController::class, 'Generalindex'])->name('layanan');
@@ -548,11 +529,9 @@ Route::middleware(['auth', 'role:general_manager'])
         Route::prefix('api')->name('api.')->group(function () {
             Route::get('/tasks', [GeneralManagerTaskController::class, 'getTasksApi'])
                 ->name('tasks');
-
             Route::get('/tasks/statistics', [GeneralManagerTaskController::class, 'getStatistics'])
                 ->name('tasks.statistics');
-
-            Route::get('/karyawan-by-divisi/{divisi}', [GeneralManagerTaskController::class, 'getKaryawanByDivisi'])
+            Route::get('/karyawan-by-divisi/{parameter}', [GeneralManagerTaskController::class, 'getKaryawanByDivisi'])
                 ->name('karyawan.by_divisi');
         });
         
@@ -568,15 +547,7 @@ Route::middleware(['auth', 'role:general_manager'])
         // Halaman utama
         Route::get('/tim_divisi', [TimDivisiController::class, 'index'])->name('tim_divisi');
 
-        // Absensi Management
-        Route::get('/kelola-absen', [AbsensiController::class, 'kelolaAbsen'])->name('kelola_absen');
-        Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsensi'])->name('kelola_absensi');
-
-        // Tim & Divisi Management
-        Route::get('/tim_dan_divisi', function () {
-            return view('general_manajer.tim_dan_divisi');
-        });
-
+        // Tim routes
         Route::prefix('tim')->group(function () {
             Route::post('/', [TimDivisiController::class, 'storeTim'])->name('tim.store');
             Route::put('/{id}', [TimDivisiController::class, 'updateTim'])->name('tim.update');
@@ -608,6 +579,12 @@ Route::middleware(['auth', 'role:owner'])
         Route::get('/home', function () {
             return view('pemilik.home');
         })->name('home');
+        
+        // Profile
+        Route::get('/profile', function () {
+            return view('pemilik.profile');
+        })->name('profile');
+        
         Route::get('/rekap_absen', [AbsensiController::class, 'rekapAbsensi'])->name('rekap_absen');
         Route::get('/laporan', function () {
             return view('pemilik.laporan');
@@ -627,11 +604,16 @@ Route::middleware(['auth', 'role:owner'])
             Route::get('/summary', [CutiController::class, 'getSummary'])->name('summary');
             Route::get('/export', [CutiController::class, 'export'])->name('export');
         });
+
+        /* API UNTUK OWNER */
+        Route::prefix('api')->name('api.')->group(function () {
+            Route::get('/data', [OwnerController::class, 'getData'])->name('data');
+        });
     });
 
 /*
 |--------------------------------------------------------------------------
-| Role: FINANCE Routes - PERBAIKAN: TAMBAHKAN KURUNG PENUTUP
+| Role: FINANCE Routes
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:finance'])
@@ -641,6 +623,12 @@ Route::middleware(['auth', 'role:finance'])
         Route::get('/beranda', function () {
             return view('finance.beranda');
         })->name('beranda');
+        
+        // Profile
+        Route::get('/profile', function () {
+            return view('finance.profile');
+        })->name('profile');
+        
         Route::get('/data-layanan', function () {
             return view('finance.data_layanan');
         })->name('data_layanan');
@@ -656,7 +644,7 @@ Route::middleware(['auth', 'role:finance'])
         Route::put('/karyawan/{karyawan}', [AdminKaryawanController::class, 'update'])->name('karyawan.update');
         Route::delete('/karyawan/{karyawan}', [AdminKaryawanController::class, 'destroy'])->name('karyawan.destroy');
         
-        // CUTI VIEW ONLY untuk finance
+        // CUTI VIEW ONLY
         Route::prefix('cuti')->name('cuti.')->group(function () {
             Route::get('/', [CutiController::class, 'index'])->name('index');
             Route::get('/data', [CutiController::class, 'getData'])->name('data');
@@ -681,7 +669,7 @@ Route::middleware(['auth', 'role:finance'])
 
 /*
 |--------------------------------------------------------------------------
-| Role: MANAGER DIVISI Routes - PERBAIKAN
+| Role: MANAGER DIVISI Routes
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:manager_divisi'])
@@ -689,8 +677,115 @@ Route::middleware(['auth', 'role:manager_divisi'])
     ->name('manager_divisi.')
     ->group(function () {
         // Dashboard
-        Route::get('/home', function () { return view('manager_divisi.home'); })->name('home');
+        Route::get('/home', function () { 
+            return view('manager_divisi.home'); 
+        })->name('home');
 
+        // Profile
+        Route::get('/profile', function () {
+            return view('manager_divisi.profile');
+        })->name('profile');
+
+        // =========== ROUTES UNTUK MANAGER DIVISI TASK CONTROLLER ===========
+        
+        // Halaman Kelola Tugas
+        Route::get('/kelola-tugas', [ManagerDivisiTaskController::class, 'index'])
+            ->name('kelola-tugas');
+        
+        // CRUD Tugas
+        Route::post('/tasks', [ManagerDivisiTaskController::class, 'store'])
+            ->name('tasks.store');
+        
+        Route::put('/tasks/status/{id}', [ManagerDivisiTaskController::class, 'updateStatus'])
+            ->name('tasks.update-status');
+        
+        Route::post('/tasks/assign/{id}', [ManagerDivisiTaskController::class, 'assignToKaryawan'])
+            ->name('tasks.assign');
+        
+        // Data Karyawan
+        Route::get('/data-karyawan', [ManagerDivisiTaskController::class, 'dataKaryawan'])
+            ->name('data-karyawan');
+        
+        Route::get('/tambah-karyawan', [ManagerDivisiTaskController::class, 'createKaryawan'])
+            ->name('tambah-karyawan');
+        
+        Route::post('/store-karyawan', [ManagerDivisiTaskController::class, 'storeKaryawan'])
+            ->name('store-karyawan');
+        
+        Route::get('/edit-karyawan/{id}', [ManagerDivisiTaskController::class, 'editKaryawan'])
+            ->name('edit-karyawan');
+        
+        Route::put('/update-karyawan/{id}', [ManagerDivisiTaskController::class, 'updateKaryawan'])
+            ->name('update-karyawan');
+        
+        Route::delete('/delete-karyawan/{id}', [ManagerDivisiTaskController::class, 'destroyKaryawan'])
+            ->name('delete-karyawan');
+        
+        // API Routes untuk Manager Divisi Task Controller
+        Route::prefix('api')->name('api.')->group(function () {
+            // Karyawan dropdown
+            Route::get('/karyawan-dropdown', [ManagerDivisiTaskController::class, 'getKaryawanDropdown'])
+                ->name('karyawan.dropdown');
+            
+            Route::get('/karyawan-divisi', [ManagerDivisiTaskController::class, 'getKaryawanDivisiApi'])
+                ->name('karyawan.divisi');
+            
+            Route::get('/karyawan-by-divisi/{parameter}', [ManagerDivisiTaskController::class, 'getKaryawanByDivisi'])
+                ->name('karyawan.by_divisi');
+            
+            // Tasks API
+            Route::get('/tasks', [ManagerDivisiTaskController::class, 'getTasksApi'])
+                ->name('tasks');
+            
+            Route::get('/tasks/statistics', [ManagerDivisiTaskController::class, 'getStatistics'])
+                ->name('tasks.statistics');
+            
+            Route::get('/tasks/{id}', [ManagerDivisiTaskController::class, 'show'])
+                ->name('tasks.show');
+            
+            Route::get('/tasks-from-gm', [ManagerDivisiTaskController::class, 'getTasksFromGeneralManager'])
+                ->name('tasks.from-gm');
+            
+            Route::post('/create-subtask/{parentTaskId}', [ManagerDivisiTaskController::class, 'createSubtaskFromGmTask'])
+                ->name('create-subtask');
+        });
+        
+        // =========== ROUTES DARI TASKCONTROLLER UNTUK KOMPATIBILITAS ===========
+        
+        // TUGAS MANAGEMENT
+        Route::prefix('tasks')->name('tasks.')->group(function () {
+            Route::get('/', [TaskController::class, 'managerTasks'])->name('index');
+            Route::post('/', [TaskController::class, 'store'])->name('store');
+            Route::get('/create', [TaskController::class, 'create'])->name('create');
+            Route::get('/{id}', [TaskController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [TaskController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [TaskController::class, 'update'])->name('update');
+            Route::delete('/{id}', [TaskController::class, 'destroy'])->name('destroy');
+            
+            // Comments dan Files
+            Route::get('/{id}/comments', [TaskController::class, 'getComments'])->name('comments');
+            Route::post('/{id}/comments', [TaskController::class, 'storeComment'])->name('comments.store');
+            Route::get('/{id}/files', [TaskController::class, 'getTaskFiles'])->name('files');
+            Route::get('/files/{file}/download', [TaskController::class, 'downloadFileById'])->name('files.download');
+            Route::delete('/files/{file}', [TaskController::class, 'deleteFile'])->name('files.delete');
+            Route::post('/{id}/upload-file', [TaskController::class, 'uploadFileAdmin'])->name('upload.file');
+            
+            // Status update
+            Route::put('/{id}/status', [TaskController::class, 'updateTaskStatus'])->name('update.status');
+            Route::post('/{id}/complete', [TaskController::class, 'markAsComplete'])->name('complete');
+        });
+
+        // Halaman view untuk pengelolaan tugas
+        Route::get('/pengelola_tugas', [TaskController::class, 'managerTasks'])->name('pengelola_tugas');
+        
+        // API untuk manager divisi (TaskController)
+        Route::prefix('api/task-controller')->name('api.taskcontroller.')->group(function () {
+            Route::get('/tasks', [TaskController::class, 'apiGetManagerTasks'])->name('tasks');
+            Route::get('/tasks/statistics', [TaskController::class, 'apiGetStatistics'])->name('tasks.statistics');
+            Route::get('/karyawan-by-divisi-id/{divisiId}', [TaskController::class, 'getKaryawanByDivisi'])->name('karyawan.by_divisi_id');
+        });
+
+        // ABSENSI
         Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsensiManagerDivisi'])->name('kelola_absensi');
 
         // CUTI MANAGEMENT
@@ -714,36 +809,6 @@ Route::middleware(['auth', 'role:manager_divisi'])
         Route::post('/data_project/{id}/update', [DataProjectController::class, 'updateManager'])->name('data_project.update');
         Route::get('/data_project/filter', [DataProjectController::class, 'filterByUser'])->name('data_project.filter');
 
-        // API untuk manager divisi
-        Route::prefix('api')->name('api.')->group(function () {
-            Route::get('/tasks', [ManagerDivisiTaskController::class, 'getTasksApi'])
-                ->name('tasks');
-
-            Route::get('/tasks/statistics', [ManagerDivisiTaskController::class, 'getStatistics'])
-                ->name('tasks.statistics');
-
-            Route::get('/karyawan-by-divisi/{divisi}', [ManagerDivisiTaskController::class, 'getKaryawanByDivisi'])
-                ->name('karyawan.by_divisi');
-            Route::get('/daftar_karyawan/{divisi}', [AdminKaryawanController::class, 'karyawanDivisi'])
-                ->name('karyawan.divisi');
-        });
-
-        // Task management
-        Route::prefix('tasks')->name('tasks.')->group(function () {
-            Route::post('/', [ManagerDivisiTaskController::class, 'store'])->name('store');
-            Route::get('/{id}', [ManagerDivisiTaskController::class, 'show'])->name('show');
-            Route::put('/{id}', [ManagerDivisiTaskController::class, 'update'])->name('update');
-            Route::put('/{id}/status', [ManagerDivisiTaskController::class, 'updateStatus'])->name('update.status');
-            Route::post('/{id}/assign', [ManagerDivisiTaskController::class, 'assignToKaryawan'])->name('assign');
-            Route::delete('/{id}', [ManagerDivisiTaskController::class, 'destroy'])->name('destroy');
-        });
-
-        Route::get('/pengelola_tugas', function () { 
-            return view('manager_divisi.pengelola_tugas'); 
-        })->name('pengelola_tugas');
-        
-        Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsensiManagerDivisi'])->name('kelola_absensi');
-        
         // Tim Saya
         Route::get('/tim-saya', function () {
             $user = Auth::user();
@@ -752,140 +817,20 @@ Route::middleware(['auth', 'role:manager_divisi'])
                                   ->get();
             return view('manager_divisi.tim_saya', compact('tim'));
         })->name('tim_saya');
+
+        /* API UNTUK MANAGER DIVISI TASKS */
+        Route::prefix('api')->middleware(['role:manager_divisi'])->name('api.manager.divisi.')->group(function () {
+            // Tasks API dari TaskController
+            Route::get('/tasks', [TaskController::class, 'apiGetManagerTasks'])->name('tasks');
+            Route::get('/tasks/statistics', [TaskController::class, 'apiGetStatistics'])->name('tasks.statistics');
+            Route::get('/projects/managed', [TaskController::class, 'getManagedProjects']);
+            Route::get('/karyawan-by-divisi-id/{divisiId}', [TaskController::class, 'getKaryawanByDivisi'])->name('karyawan.by_divisi_id');
+        });
     });
 
 /*
 |--------------------------------------------------------------------------
 | Shortcuts & Redirects
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth'])->group(function () {
-    // Catatan Rapat
-    Route::get('/catatan-rapat', [CatatanRapatController::class, 'index'])->name('catatan_rapat.index');
-    Route::post('/catatan-rapat', [CatatanRapatController::class, 'store'])->name('catatan_rapat.store');
-    Route::put('/catatan-rapat/{id}', [CatatanRapatController::class, 'update'])->name('catatan_rapat.update');
-    Route::delete('/catatan-rapat/{id}', [CatatanRapatController::class, 'destroy'])->name('catatan_rapat.destroy');
-    Route::get('/catatan-rapat/{id}', [CatatanRapatController::class, 'show'])->name('catatan_rapat.show');
-
-    // Pengumuman
-    Route::resource('pengumuman', PengumumanController::class);
-
-    // API endpoints
-    Route::get('/catatan_rapat/data', [CatatanRapatController::class, 'getData'])->name('catatan_rapat.data');
-    Route::get('/users/data', [UserController::class, 'getData'])->name('users.data');
-    Route::get('/divisis/list', [UserController::class, 'getDivisis'])->name('divisis.list');
-});
-
-/*
-|--------------------------------------------------------------------------
-| GLOBAL API ROUTES
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth'])->prefix('api')->group(function () {
-    // INVOICE API ROUTES
-    Route::prefix('invoices')->name('api.invoices.')->group(function() {
-        Route::get('/', [InvoiceController::class, 'index'])->name('index');
-        Route::post('/', [InvoiceController::class, 'store'])->name('store');
-        Route::get('/{id}', [InvoiceController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [InvoiceController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [InvoiceController::class, 'update'])->name('update');
-        Route::delete('/{id}', [InvoiceController::class, 'destroy'])->name('destroy');
-        Route::post('/{id}/mark-printed', [InvoiceController::class, 'markPrinted'])->name('mark.printed');
-    });
-
-    // Karyawan API
-    Route::get('/karyawan/history', [KaryawanController::class, 'getHistory'])->name('api.karyawan.history');
-    Route::get('/karyawan/dashboard-data', [KaryawanController::class, 'getDashboardData'])->name('api.karyawan.dashboard-data');
-    Route::get('/karyawan/today-status', [KaryawanController::class, 'getTodayStatus'])->name('api.karyawan.today-status');
-    
-    // Absensi actions
-    Route::post('/karyawan/absen-masuk', [KaryawanController::class, 'absenMasukApi'])->name('api.karyawan.absen-masuk');
-    Route::post('/karyawan/absen-pulang', [KaryawanController::class, 'absenPulangApi'])->name('api.karyawan.absen-pulang');
-    Route::post('/karyawan/submit-izin', [KaryawanController::class, 'submitIzinApi'])->name('api.karyawan.submit-izin');
-    Route::post('/karyawan/submit-dinas', [KaryawanController::class, 'submitDinasApi'])->name('api.karyawan.submit-dinas');
-    
-    // Pengajuan status
-    Route::get('/karyawan/pengajuan-status', [KaryawanController::class, 'getPengajuanStatus'])->name('api.karyawan.pengajuan-status');
-    
-    // Task related APIs
-    Route::get('/tasks/{id}', [TaskController::class, 'getTaskApi'])->name('api.tasks.show');
-    Route::get('/tasks/{id}/comments', [TaskController::class, 'getComments'])->name('api.tasks.comments');
-    Route::get('/tasks/statistics', [TaskController::class, 'getStatistics'])->name('api.tasks.statistics');
-    Route::get('/karyawan/tasks', [KaryawanController::class, 'getTasksApi'])->name('api.karyawan.tasks');
-
-    /* ABSENSI API */
-    Route::prefix('karyawan')->name('karyawan.')->group(function () {
-        Route::get('/dashboard-data', [AbsensiController::class, 'apiTodayStatus'])->name('dashboard-data');
-        Route::get('/today-status', [AbsensiController::class, 'apiTodayStatus'])->name('today-status');
-        Route::get('/history', [AbsensiController::class, 'apiHistory'])->name('history');
-        Route::post('/absen-masuk', [AbsensiController::class, 'apiAbsenMasuk'])->name('absen-masuk');
-        Route::post('/absen-pulang', [AbsensiController::class, 'apiAbsenPulang'])->name('absen-pulang');
-        Route::post('/submit-izin', [AbsensiController::class, 'apiSubmitIzin'])->name('submit-izin');
-    });
-
-    /* TASKS API */
-    Route::prefix('tasks')->name('tasks.')->group(function () {
-        Route::get('/{id}', [TaskController::class, 'show'])->name('show');
-        Route::get('/{id}/detail', [TaskController::class, 'getTaskDetailApi'])->name('detail');
-        Route::post('/{id}/upload-file', [TaskController::class, 'uploadTaskFile'])->name('upload.file');
-        Route::post('/{id}/complete', [TaskController::class, 'markAsComplete'])->name('complete');
-        Route::post('/{id}/status', [TaskController::class, 'updateTaskStatus'])->name('status');
-        Route::get('/{id}/comments', [TaskController::class, 'getComments'])->name('comments');
-        Route::post('/{id}/comments', [TaskController::class, 'storeComment'])->name('comments.store');
-        Route::get('/{id}/files', [TaskController::class, 'getTaskFiles'])->name('files');
-        Route::get('/files/{file}/download', [TaskController::class, 'downloadFile'])->name('files.download');
-        Route::delete('/files/{file}', [TaskController::class, 'deleteFile'])->name('files.delete');
-        Route::get('/{id}/download', [TaskController::class, 'downloadSubmission'])->name('download.submission');
-        Route::get('/statistics', [TaskController::class, 'getStatistics'])->name('statistics');
-        Route::get('/karyawan/statistics', [TaskController::class, 'getKaryawanStatistics'])->name('karyawan.statistics');
-    });
-
-    /* TASKS UNTUK KARYAWAN */
-    Route::prefix('karyawan-tasks')->name('karyawan.tasks.')->group(function () {
-        Route::get('/', [TaskController::class, 'getKaryawanTasks'])->name('index');
-        Route::get('/{id}/detail', [TaskController::class, 'getTaskDetailForKaryawan'])->name('detail');
-    });
-
-    /* API UNTUK ADMIN/GENERAL MANAGER */
-    Route::prefix('admin')->middleware(['role:admin,general_manager'])->name('admin.')->group(function () {
-        Route::get('/absensi', [AbsensiController::class, 'apiIndex'])->name('absensi');
-        Route::get('/absensi/ketidakhadiran', [AbsensiController::class, 'apiIndexKetidakhadiran'])->name('ketidakhadiran');
-        Route::get('/absensi/stats', [AbsensiController::class, 'apiStatistics'])->name('stats');
-        Route::get('/kehadiran-per-divisi', [AbsensiController::class, 'apiKehadiranPerDivisi'])->name('kehadiran.divisi');
-        Route::post('/absensi', [AbsensiController::class, 'apiStore'])->name('absensi.store');
-        Route::get('/absensi/{id}', [AbsensiController::class, 'apiShow'])->name('absensi.show');
-        Route::put('/absensi/{id}', [AbsensiController::class, 'apiUpdate'])->name('absensi.update');
-        Route::delete('/absensi/{id}', [AbsensiController::class, 'apiDestroy'])->name('absensi.destroy');
-        Route::post('/absensi/cuti', [AbsensiController::class, 'apiStoreCuti'])->name('absensi.cuti.store');
-        Route::put('/absensi/cuti/{id}', [AbsensiController::class, 'apiUpdateCuti'])->name('absensi.cuti.update');
-        Route::post('/absensi/{id}/verify', [AbsensiController::class, 'apiVerify'])->name('absensi.verify');
-    });
-
-    /* API UNTUK GENERAL MANAGER TASKS */
-    Route::prefix('general-manager')->middleware(['role:general_manager'])->name('general.manager.')->group(function () {
-        Route::get('/tasks', [GeneralManagerTaskController::class, 'getTasksApi'])->name('tasks');
-        Route::get('/tasks/statistics', [GeneralManagerTaskController::class, 'getStatistics'])->name('tasks.statistics');
-        Route::get('/karyawan-by-divisi/{divisi}', [GeneralManagerTaskController::class, 'getKaryawanByDivisi'])->name('karyawan.by_divisi');
-    });
-
-    /* API UNTUK MANAGER DIVISI TASKS */
-    Route::prefix('manager-divisi')->middleware(['role:manager_divisi'])->name('manager.divisi.')->group(function () {
-        Route::get('/tasks', [ManagerDivisiTaskController::class, 'getTasksApi'])->name('tasks');
-        Route::get('/tasks/statistics', [ManagerDivisiTaskController::class, 'getStatistics'])->name('tasks.statistics');
-        Route::get('/karyawan-by-divisi/{divisi}', [ManagerDivisiTaskController::class, 'getKaryawanByDivisi'])->name('karyawan.by_divisi');
-    });
-
-    /* API DASHBOARD DATA */
-    Route::prefix('dashboard')->name('dashboard.')->group(function () {
-        Route::get('/karyawan', [KaryawanController::class, 'getDashboardData'])->name('karyawan');
-        Route::get('/pengajuan-status', [KaryawanController::class, 'getPengajuanStatus'])->name('pengajuan.status');
-        Route::post('/submit-dinas', [KaryawanController::class, 'submitDinasApi'])->name('submit.dinas');
-    });
-});
-
-/*
-|--------------------------------------------------------------------------
-| Pintasan Routes (Shortcut)
 |--------------------------------------------------------------------------
 */
 Route::get('/redirect-login', function () {
@@ -901,12 +846,11 @@ Route::get('/tugas', function () {
         'karyawan' => redirect()->route('karyawan.tugas.index'),
         'admin' => redirect()->route('admin.tasks.index'),
         'general_manager' => redirect()->route('general_manajer.kelola_tugas'),
-        'manager_divisi' => redirect()->route('manager_divisi.kelola_tugas'),
+        'manager_divisi' => redirect()->route('manager_divisi.kelola-tugas'),
         default => redirect('/login')
     };
 })->name('tugas.redirect');
 
-// PERBAIKAN: Redirect /absensi yang lebih aman
 Route::get('/absensi', function () {
     if (!Auth::check()) {
         return redirect('/login');
@@ -925,7 +869,6 @@ Route::get('/absensi', function () {
             default => redirect('/login')
         };
     } catch (\Exception $e) {
-        // Fallback ke home jika ada error
         return redirect('/redirect-login');
     }
 })->name('absensi.redirect');
@@ -956,206 +899,6 @@ Route::get('/quota', function () {
         default => redirect('/login')
     };
 })->name('quota.redirect');
-
-/*
-|--------------------------------------------------------------------------
-| Debug & Test Routes (Development Only)
-|--------------------------------------------------------------------------
-*/
-
-if (env('APP_DEBUG', false)) {
-    Route::middleware(['auth'])->group(function() {
-        // Debug Route untuk Cuti
-        Route::get('/debug/cuti-fix', function() {
-            try {
-                $controller = new \App\Http\Controllers\CutiController();
-                $request = new \Illuminate\Http\Request();
-                
-                // Test getData method
-                $response = $controller->getData($request);
-                $data = json_decode($response->getContent(), true);
-                
-                echo "<h1>Debug Cuti Controller</h1>";
-                echo "Status: " . ($data['success'] ? 'SUCCESS' : 'FAILED') . "<br>";
-                echo "Message: " . ($data['message'] ?? 'No message') . "<br>";
-                
-                if ($data['success'] && isset($data['data'])) {
-                    echo "Jumlah Data: " . count($data['data']) . "<br>";
-                    if (count($data['data']) > 0) {
-                        $first = $data['data'][0];
-                        echo "<h3>Data Pertama:</h3>";
-                        echo "ID: " . $first['id'] . "<br>";
-                        echo "Nama: " . ($first['nama'] ?? 'NULL') . "<br>";
-                        echo "Divisi: " . ($first['divisi'] ?? 'NULL') . "<br>";
-                        echo "Status: " . ($first['status'] ?? 'NULL') . "<br>";
-                    }
-                }
-                
-                echo "<hr>";
-                
-                // Test stats method
-                $statsResponse = $controller->stats();
-                $statsData = json_decode($statsResponse->getContent(), true);
-                
-                echo "<h2>Stats Test:</h2>";
-                echo "Status: " . ($statsData['success'] ? 'SUCCESS' : 'FAILED') . "<br>";
-                if ($statsData['success']) {
-                    echo "<pre>" . print_r($statsData['data'], true) . "</pre>";
-                }
-                
-                // Test quota info
-                $quotaResponse = $controller->getQuotaInfo($request);
-                $quotaData = json_decode($quotaResponse->getContent(), true);
-                
-                echo "<h2>Quota Info Test:</h2>";
-                echo "Status: " . ($quotaData['success'] ? 'SUCCESS' : 'FAILED') . "<br>";
-                if ($quotaData['success']) {
-                    echo "<pre>" . print_r($quotaData['data'], true) . "</pre>";
-                }
-                
-            } catch (\Exception $e) {
-                echo "<h1>ERROR: " . $e->getMessage() . "</h1>";
-                echo "<pre>" . $e->getTraceAsString() . "</pre>";
-            }
-        });
-        
-        // Test route untuk memastikan routing bekerja
-        Route::get('/test/cuti-routes', function() {
-            $user = auth()->user();
-            
-            return response()->json([
-                'user_role' => $user->role,
-                'routes' => [
-                    'karyawan_cuti_index' => route('karyawan.cuti.index'),
-                    'karyawan_cuti_data' => route('karyawan.cuti.data'),
-                    'karyawan_cuti_edit' => route('karyawan.cuti.edit', ['cuti' => 1]),
-                    'karyawan_cuti_update' => route('karyawan.cuti.update', ['cuti' => 1]),
-                    'karyawan_quota_info' => route('karyawan.cuti.quota.info'),
-                    'general_manager_cuti_index' => route('general_manajer.cuti.index'),
-                    'general_manager_cuti_data' => route('general_manajer.cuti.data'),
-                    'admin_reset_quota' => route('admin.cuti.reset.quota'),
-                ],
-                'current_url' => url()->current()
-            ]);
-        });
-        
-        // Database check
-        Route::get('/check-db', [CutiController::class, 'checkDatabase'])->name('check.db');
-        
-        // Route list debug
-        Route::get('/debug/routes', function() {
-            $routes = Route::getRoutes();
-            
-            echo "<h1>All Routes</h1>";
-            echo "<table border='1' cellpadding='5'>";
-            echo "<tr><th>Method</th><th>URI</th><th>Name</th><th>Action</th></tr>";
-            
-            foreach ($routes as $route) {
-                echo "<tr>";
-                echo "<td>" . implode('|', $route->methods()) . "</td>";
-                echo "<td>" . $route->uri() . "</td>";
-                echo "<td>" . ($route->getName() ?? '-') . "</td>";
-                echo "<td>" . ($route->getActionName() ?? '-') . "</td>";
-                echo "</tr>";
-            }
-            
-            echo "</table>";
-            
-            // Cek khusus karyawan routes
-            echo "<h2>Karyawan Routes:</h2>";
-            echo "<ul>";
-            $karyawanRoutes = collect($routes)->filter(function($route) {
-                return strpos($route->getName() ?? '', 'karyawan.') === 0;
-            });
-            
-            foreach ($karyawanRoutes as $route) {
-                echo "<li>" . ($route->getName() ?? $route->uri()) . "</li>";
-            }
-            echo "</ul>";
-            
-            // Cek khusus cuti routes
-            echo "<h2>Cuti Routes:</h2>";
-            echo "<ul>";
-            $cutiRoutes = collect($routes)->filter(function($route) {
-                return strpos($route->getName() ?? '', 'cuti.') !== false;
-            });
-            
-            foreach ($cutiRoutes as $route) {
-                echo "<li>" . ($route->getName() ?? $route->uri()) . " - " . implode('|', $route->methods()) . "</li>";
-            }
-            echo "</ul>";
-        });
-        
-        // Test specific route
-        Route::get('/test/route/{name}', function($name) {
-            try {
-                $url = route($name);
-                return response()->json([
-                    'success' => true,
-                    'name' => $name,
-                    'url' => $url,
-                    'exists' => true
-                ]);
-            } catch (\Exception $e) {
-                return response()->json([
-                    'success' => false,
-                    'name' => $name,
-                    'error' => $e->getMessage(),
-                    'exists' => false
-                ]);
-            }
-        });
-        
-        // Test cuti status for current user
-        Route::get('/test/my-cuti-status', function() {
-            $user = Auth::user();
-            $today = now()->format('Y-m-d');
-            
-            $cutiAktif = \App\Models\Cuti::where('user_id', $user->id)
-                ->where('status', 'disetujui')
-                ->whereDate('tanggal_mulai', '<=', $today)
-                ->whereDate('tanggal_selesai', '>=', $today)
-                ->get();
-            
-            return response()->json([
-                'user_id' => $user->id,
-                'user_role' => $user->role,
-                'today' => $today,
-                'on_leave' => $cutiAktif->count() > 0,
-                'cuti_details' => $cutiAktif,
-                'absensi_route' => route('karyawan.absensi.page'),
-                'home_route' => route('karyawan.home')
-            ]);
-        });
-        
-        // Test edit cuti
-        Route::get('/test/edit-cuti/{id}', function($id) {
-            try {
-                $cuti = \App\Models\Cuti::find($id);
-                
-                if (!$cuti) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Cuti tidak ditemukan'
-                    ]);
-                }
-                
-                return response()->json([
-                    'success' => true,
-                    'cuti' => $cuti,
-                    'edit_route' => route('karyawan.cuti.edit', $cuti->id),
-                    'update_route' => route('karyawan.cuti.update', $cuti->id),
-                    'can_edit' => $cuti->status === 'menunggu'
-                ]);
-            } catch (\Exception $e) {
-                return response()->json([
-                    'success' => false,
-                    'error' => $e->getMessage()
-                ]);
-            }
-        });
-    });
-}
 
 /*
 |--------------------------------------------------------------------------
@@ -1192,11 +935,7 @@ Route::get('/invoices/{invoice}/print', function (\App\Models\Invoice $invoice) 
     return view('invoices.print', compact('invoice'));
 })->name('invoices.print');
 
-/*
-|--------------------------------------------------------------------------
-| Additional Routes
-|--------------------------------------------------------------------------
-*/
+// Additional routes
 Route::get('/data', [LayananController::class, 'financeIndex']);
 Route::get('/data_orderan', function () {
     return view('finance/data_orderan');
@@ -1220,11 +959,6 @@ Route::get('/general_manajer', function () {
 Route::get('/kelola_tugas', [TaskController::class, 'index'])->name('tugas.page');
 Route::get('/kelola_absen', function () {
     return view('general_manajer/kelola_absen');
-});
-
-// API untuk data owner
-Route::middleware(['auth', 'role:owner'])->prefix('api/owner')->name('api.owner.')->group(function () {
-    Route::get('/data', [OwnerController::class, 'getData'])->name('data');
 });
 
 // API untuk jumlah layanan

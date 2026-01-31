@@ -23,9 +23,8 @@ class Task extends Model
         'created_by',
         'assigned_by_manager',
         'target_type',
-        'target_divisi',
-        'target_divisi_id', // Ditambahkan untuk foreign key
-        'target_manager_id', // Ditambahkan untuk referensi manager target
+        'target_divisi_id', // HANYA target_divisi_id
+        'target_manager_id',
         'is_broadcast',
         'catatan',
         'catatan_update',
@@ -34,9 +33,10 @@ class Task extends Model
         'submitted_at',
         'assigned_at',
         'completed_at',
-        'progress_percentage', // Ditambahkan untuk tracking progress
-        'kategori', // Ditambahkan untuk kategori tugas
-        'parent_task_id', // Ditambahkan untuk subtask
+        'progress_percentage',
+        'kategori',
+        'parent_task_id',
+        'project_id',
     ];
 
     protected $casts = [
@@ -55,7 +55,7 @@ class Task extends Model
         'is_broadcast' => false,
     ];
 
-    // RELATIONSHIPS
+    // ========== RELATIONSHIPS ==========
     public function assignee()
     {
         return $this->belongsTo(User::class, 'assigned_to')
@@ -92,7 +92,7 @@ class Task extends Model
                     ]);
     }
 
-    public function targetDivisiRecord()
+    public function targetDivisi()
     {
         return $this->belongsTo(Divisi::class, 'target_divisi_id')
                     ->withDefault([
@@ -120,7 +120,28 @@ class Task extends Model
         return $this->hasMany(Task::class, 'parent_task_id');
     }
 
-    // ACCESSORS
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'project_id')
+                    ->withDefault([
+                        'nama' => 'Tidak terkait proyek',
+                        'layanan_id' => null
+                    ]);
+    }
+
+    public function projectLayanan()
+    {
+        return $this->hasOneThrough(
+            Layanan::class,
+            Project::class,
+            'id',
+            'id',
+            'project_id',
+            'layanan_id'
+        );
+    }
+
+    // ========== ACCESSORS ==========
     public function getIsOverdueAttribute()
     {
         return $this->deadline && 
@@ -187,7 +208,9 @@ class Task extends Model
         if ($this->target_type === 'karyawan' && $this->assignee) {
             return $this->assignee->name;
         } elseif ($this->target_type === 'divisi') {
-            return 'Seluruh Divisi ' . ($this->target_divisi ?? '-');
+            // PERBAIKAN: Gunakan relasi targetDivisi
+            $divisiName = $this->targetDivisi ? $this->targetDivisi->divisi : '-';
+            return 'Seluruh Divisi ' . $divisiName;
         } elseif ($this->target_type === 'manager' && $this->targetManager) {
             return 'Manager: ' . $this->targetManager->name;
         } elseif ($this->assigned_to && $this->assignee) {
@@ -200,11 +223,14 @@ class Task extends Model
     public function getAssigneeDetailAttribute()
     {
         if ($this->target_type === 'karyawan' && $this->assignee) {
-            return $this->assignee->name . ' (' . ($this->assignee->divisi->divisi ?? '-') . ')';
+            $divisiName = $this->assignee->divisi ? $this->assignee->divisi->divisi : '-';
+            return $this->assignee->name . ' (' . $divisiName . ')';
         } elseif ($this->target_type === 'divisi') {
-            return 'Divisi: ' . ($this->target_divisi ?? '-');
+            $divisiName = $this->targetDivisi ? $this->targetDivisi->divisi : '-';
+            return 'Divisi: ' . $divisiName;
         } elseif ($this->target_type === 'manager' && $this->targetManager) {
-            return 'Manager: ' . $this->targetManager->name . ' (' . ($this->targetManager->divisi->divisi ?? '-') . ')';
+            $divisiName = $this->targetManager->divisi ? $this->targetManager->divisi->divisi : '-';
+            return 'Manager: ' . $this->targetManager->name . ' (' . $divisiName . ')';
         }
         
         return '-';
@@ -252,6 +278,43 @@ class Task extends Model
         return 'Belum Dimulai';
     }
 
+    // Accessor untuk backward compatibility (jika ada kode masih panggil target_divisi)
+    public function getTargetDivisiAttribute()
+    {
+        return $this->targetDivisi ? $this->targetDivisi->divisi : null;
+    }
+
+    // ========== ACCESSOR BARU: PROJECT ==========
+    public function getProjectNameAttribute()
+    {
+        return $this->project ? $this->project->nama : 'Tidak terkait proyek';
+    }
+
+    public function getProjectLayananAttribute()
+    {
+        return $this->project && $this->project->layanan 
+            ? $this->project->layanan->nama 
+            : '-';
+    }
+
+    public function getProjectDeadlineAttribute()
+    {
+        return $this->project && $this->project->deadline
+            ? $this->project->deadline->format('d M Y')
+            : '-';
+    }
+
+    public function getProjectProgressAttribute()
+    {
+        return $this->project ? $this->project->progres : 0;
+    }
+
+    public function getIsRelatedToProjectAttribute()
+    {
+        return !is_null($this->project_id);
+    }
+
+    // ========== ACCESSOR LAINNYA ==========
     public function getIsAssignedToMeAttribute()
     {
         if (!auth()->check()) {
@@ -288,22 +351,18 @@ class Task extends Model
         $userId = auth()->id();
         $userRole = auth()->user()->role;
         
-        // Admin dan GM bisa edit semua
         if (in_array($userRole, ['admin', 'general_manager'])) {
             return true;
         }
         
-        // Yang membuat tugas bisa edit
         if ($this->created_by == $userId) {
             return true;
         }
         
-        // Manager yang assign tugas bisa edit
         if ($this->assigned_by_manager == $userId) {
             return true;
         }
         
-        // Manager divisi bisa edit tugas di divisinya
         if ($userRole === 'manager_divisi' && 
             auth()->user()->divisi_id == $this->target_divisi_id) {
             return true;
@@ -321,7 +380,6 @@ class Task extends Model
         $userId = auth()->id();
         $userRole = auth()->user()->role;
         
-        // Hanya admin, GM, dan pembuat tugas yang belum di-assign bisa hapus
         if (in_array($userRole, ['admin', 'general_manager'])) {
             return true;
         }
@@ -335,7 +393,7 @@ class Task extends Model
         return false;
     }
 
-    // SCOPES
+    // ========== SCOPES ==========
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
@@ -376,6 +434,7 @@ class Task extends Model
 
     public function scopeForDivisi($query, $divisiId)
     {
+        // PERBAIKAN: Gunakan target_divisi_id
         return $query->where('target_divisi_id', $divisiId)
                     ->orWhereHas('assignee', function($q) use ($divisiId) {
                         $q->where('divisi_id', $divisiId);
@@ -387,7 +446,7 @@ class Task extends Model
         return $query->where('assigned_to', $userId)
                     ->orWhere(function($q) use ($userId) {
                         $q->where('target_type', 'divisi')
-                          ->whereHas('targetDivisiRecord.users', function($q) use ($userId) {
+                          ->whereHas('targetDivisi.users', function($q) use ($userId) {
                               $q->where('users.id', $userId);
                           });
                     })
@@ -397,9 +456,12 @@ class Task extends Model
 
     public function scopeForManager($query, $managerId)
     {
-        return $query->where('created_by', $managerId)
-                    ->orWhere('assigned_by_manager', $managerId)
-                    ->orWhere('target_manager_id', $managerId);
+        // PERBAIKAN: Gunakan target_divisi_id bukan target_divisi
+        return $query->where(function($q) use ($managerId) {
+            $q->where('created_by', $managerId)
+              ->orWhere('assigned_by_manager', $managerId)
+              ->orWhere('target_manager_id', $managerId);
+        });
     }
 
     public function scopeBroadcast($query)
@@ -414,8 +476,37 @@ class Task extends Model
 
     public function scopeHighPriority($query)
     {
-        return $query->where('priority', 'high')
-                    ->orWhere('priority', 'urgent');
+        return $query->whereIn('priority', ['high', 'urgent']);
+    }
+
+    // ========== SCOPE BARU: FILTER BERDASARKAN PROJECT ==========
+    public function scopeForProject($query, $projectId)
+    {
+        return $query->where('project_id', $projectId);
+    }
+
+    public function scopeWithProject($query)
+    {
+        return $query->whereNotNull('project_id');
+    }
+
+    public function scopeWithoutProject($query)
+    {
+        return $query->whereNull('project_id');
+    }
+
+    public function scopeForLayanan($query, $layananId)
+    {
+        return $query->whereHas('project', function($q) use ($layananId) {
+            $q->where('layanan_id', $layananId);
+        });
+    }
+
+    public function scopeForProjectStatus($query, $status)
+    {
+        return $query->whereHas('project', function($q) use ($status) {
+            $q->where('status', $status);
+        });
     }
 
     public function scopeSearch($query, $search)
@@ -434,6 +525,9 @@ class Task extends Model
               })
               ->orWhereHas('creator', function($q) use ($search) {
                   $q->where('name', 'like', "%{$search}%");
+              })
+              ->orWhereHas('project', function($q) use ($search) {
+                  $q->where('nama', 'like', "%{$search}%");
               });
         });
     }
@@ -465,6 +559,15 @@ class Task extends Model
         return $query->where('kategori', $kategori);
     }
 
+    public function scopeFilterByProject($query, $projectId)
+    {
+        if (empty($projectId) || $projectId === 'all') {
+            return $query;
+        }
+        
+        return $query->where('project_id', $projectId);
+    }
+
     public function scopeOrderByDeadline($query, $direction = 'asc')
     {
         return $query->orderBy('deadline', $direction);
@@ -484,7 +587,7 @@ class Task extends Model
         );
     }
 
-    // METHODS
+    // ========== METHODS ==========
     public function markAsProses()
     {
         return $this->update([
@@ -547,11 +650,11 @@ class Task extends Model
         ]);
     }
 
-    public function broadcastToDivisi($divisiId, $divisiName)
+    public function broadcastToDivisi($divisiId)
     {
+        // PERBAIKAN: Hanya set target_divisi_id, tidak perlu target_divisi
         return $this->update([
             'target_divisi_id' => $divisiId,
-            'target_divisi' => $divisiName,
             'target_type' => 'divisi',
             'is_broadcast' => true,
             'assigned_to' => null,
@@ -581,13 +684,74 @@ class Task extends Model
             'parent_task_id' => $this->id,
             'created_by' => auth()->id(),
             'target_divisi_id' => $this->target_divisi_id,
-            'target_divisi' => $this->target_divisi,
+            'project_id' => $this->project_id,
         ]);
         
         return Task::create($subtaskData);
     }
 
-    // Boot method untuk event handling
+    // ========== METHOD BARU: PROJECT RELATED ==========
+    public function linkToProject($projectId)
+    {
+        $project = Project::find($projectId);
+        
+        if (!$project) {
+            return false;
+        }
+        
+        $this->update([
+            'project_id' => $projectId,
+            'kategori' => $project->layanan ? $project->layanan->nama : $this->kategori,
+        ]);
+        
+        $this->updateProjectProgress();
+        
+        return true;
+    }
+
+    public function unlinkFromProject()
+    {
+        $this->update([
+            'project_id' => null,
+        ]);
+        
+        return true;
+    }
+
+    public function updateProjectProgress()
+    {
+        if (!$this->project_id) {
+            return false;
+        }
+        
+        $project = Project::find($this->project_id);
+        
+        if (!$project) {
+            return false;
+        }
+        
+        $averageProgress = Task::where('project_id', $this->project_id)
+            ->avg('progress_percentage');
+        
+        $project->update([
+            'progres' => round($averageProgress)
+        ]);
+        
+        return true;
+    }
+
+    public function getProjectTasks()
+    {
+        if (!$this->project_id) {
+            return collect();
+        }
+        
+        return Task::where('project_id', $this->project_id)
+            ->where('id', '!=', $this->id)
+            ->get();
+    }
+
+    // ========== Boot method untuk event handling ==========
     protected static function boot()
     {
         parent::boot();
@@ -604,10 +768,16 @@ class Task extends Model
             if (empty($task->progress_percentage)) {
                 $task->progress_percentage = 0;
             }
+            
+            if ($task->project_id && empty($task->kategori)) {
+                $project = Project::find($task->project_id);
+                if ($project && $project->layanan) {
+                    $task->kategori = $project->layanan->nama;
+                }
+            }
         });
 
         static::updated(function ($task) {
-            // Update parent task progress jika ini subtask
             if ($task->parent_task_id) {
                 $parentTask = Task::find($task->parent_task_id);
                 if ($parentTask) {
@@ -618,10 +788,20 @@ class Task extends Model
                     }
                 }
             }
+            
+            if ($task->isDirty('progress_percentage') || $task->isDirty('status')) {
+                $task->updateProjectProgress();
+            }
+        });
+
+        static::deleted(function ($task) {
+            if ($task->project_id) {
+                $task->updateProjectProgress();
+            }
         });
     }
 
-    // Appended attributes for API
+    // ========== Appended attributes for API ==========
     protected $appends = [
         'is_overdue',
         'days_remaining',
@@ -636,5 +816,11 @@ class Task extends Model
         'is_assigned_to_me',
         'can_edit',
         'can_delete',
+        'project_name',
+        'project_layanan',
+        'project_deadline',
+        'project_progress',
+        'is_related_to_project',
+        'target_divisi', // Untuk backward compatibility
     ];
 }

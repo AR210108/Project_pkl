@@ -144,7 +144,7 @@ class KaryawanController extends Controller
                                 ->whereIn('jenis_ketidakhadiran', ['cuti', 'sakit', 'izin']) // PERBAIKAN
                                 ->count();
 
-        // Hitung Jumlah Tugas dari tabel tasks
+        // Hitung Jumlah Tugas dari tabel tasks - SOLUSI UNTUK KOLOM target_divisi
         $userDivisi = $user->divisi;
         $tugasCount = Task::where(function ($query) use ($userId, $userDivisi) {
             // Tugas yang ditugaskan langsung ke user
@@ -152,7 +152,17 @@ class KaryawanController extends Controller
                 // ATAU tugas yang ditugaskan ke divisi user
                 ->orWhere(function ($q) use ($userDivisi) {
                     $q->where('target_type', 'divisi')
-                        ->where('target_divisi', $userDivisi);
+                        // PERBAIKAN: Gunakan kolom yang tersedia di database
+                        ->where(function($subQuery) use ($userDivisi) {
+                            // Coba beberapa kemungkinan nama kolom
+                            if (Schema::hasColumn('tasks', 'target_divisi')) {
+                                $subQuery->where('target_divisi', $userDivisi);
+                            } elseif (Schema::hasColumn('tasks', 'divisi')) {
+                                $subQuery->where('divisi', $userDivisi);
+                            } elseif (Schema::hasColumn('tasks', 'target_id')) {
+                                $subQuery->where('target_id', $userDivisi);
+                            }
+                        });
                 });
         })
             ->whereNotIn('status', ['selesai', 'dibatalkan'])
@@ -188,77 +198,74 @@ class KaryawanController extends Controller
     /**
      * Menampilkan halaman absensi karyawan.
      */
-   // Di KaryawanController.php - Line 234 dan seterusnya
-public function absensiPage(Request $request)
-{
-    $user = Auth::user();
-    $today = Carbon::today();
+    public function absensiPage(Request $request)
+    {
+        $user = Auth::user();
+        $today = Carbon::today();
+        
+        // Cek absensi hari ini
+        $absensiHariIni = Absensi::where('user_id', $user->id)
+            ->whereDate('tanggal', $today)
+            ->first();
+        
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+        
+        $riwayatAbsensi = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+            ->orderBy('tanggal', 'desc')
+            ->get();
+        
+        // Hitung statistik - SESUAIKAN DENGAN STRUKTUR TABEL
+        
+        // 1. Total Hadir = ada jam_masuk DAN approval_status = approved
+        $totalHadir = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+            ->whereNotNull('jam_masuk') // ADA CHECK-IN
+            ->where('approval_status', 'approved') // DISETUJUI
+            ->count();
     
-    // Cek absensi hari ini
-    $absensiHariIni = Absensi::where('user_id', $user->id)
-        ->whereDate('tanggal', $today)
-        ->first();
+        // 2. Total Izin = jenis_ketidakhadiran = 'izin' DAN approval_status = approved
+        $totalIzin = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+            ->where('jenis_ketidakhadiran', 'izin')
+            ->where('approval_status', 'approved')
+            ->count();
     
-    $startOfMonth = Carbon::now()->startOfMonth();
-    $endOfMonth = Carbon::now()->endOfMonth();
+        // 3. Total Sakit
+        $totalSakit = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+            ->where('jenis_ketidakhadiran', 'sakit')
+            ->where('approval_status', 'approved')
+            ->count();
     
-    $riwayatAbsensi = Absensi::where('user_id', $user->id)
-        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
-        ->orderBy('tanggal', 'desc')
-        ->get();
+        // 4. Total Cuti
+        $totalCuti = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+            ->where('jenis_ketidakhadiran', 'cuti')
+            ->where('approval_status', 'approved')
+            ->count();
     
-    // Hitung statistik - SESUAIKAN DENGAN STRUKTUR TABEL
+        // 5. Total Dinas Luar
+        $totalDinasLuar = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+            ->where('jenis_ketidakhadiran', 'dinas-luar')
+            ->where('approval_status', 'approved')
+            ->count();
     
-    // 1. Total Hadir = ada jam_masuk DAN approval_status = approved
-    $totalHadir = Absensi::where('user_id', $user->id)
-        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
-        ->whereNotNull('jam_masuk') // ADA CHECK-IN
-        ->where('approval_status', 'approved') // DISETUJUI
-        ->count();
-    
-    // 2. Total Izin = jenis_ketidakhadiran = 'izin' DAN approval_status = approved
-    $totalIzin = Absensi::where('user_id', $user->id)
-        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
-        ->where('jenis_ketidakhadiran', 'izin')
-        ->where('approval_status', 'approved')
-        ->count();
-    
-    // 3. Total Sakit
-    $totalSakit = Absensi::where('user_id', $user->id)
-        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
-        ->where('jenis_ketidakhadiran', 'sakit')
-        ->where('approval_status', 'approved')
-        ->count();
-    
-    // 4. Total Cuti
-    $totalCuti = Absensi::where('user_id', $user->id)
-        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
-        ->where('jenis_ketidakhadiran', 'cuti')
-        ->where('approval_status', 'approved')
-        ->count();
-    
-    // 5. Total Dinas Luar
-    $totalDinasLuar = Absensi::where('user_id', $user->id)
-        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
-        ->where('jenis_ketidakhadiran', 'dinas-luar')
-        ->where('approval_status', 'approved')
-        ->count();
-    
-    // 6. Total Alpha = tidak ada data absensi sama sekali untuk hari kerja
-    // (Perlu logika khusus)
-    
-    return view('karyawan.absen', [
-        'on_leave' => false,
-        'cuti_details' => null,
-        'absensiHariIni' => $absensiHariIni,
-        'riwayatAbsensi' => $riwayatAbsensi,
-        'totalHadir' => $totalHadir,
-        'totalIzin' => $totalIzin,
-        'totalSakit' => $totalSakit,
-        'totalCuti' => $totalCuti,
-        'totalDinasLuar' => $totalDinasLuar,
-    ]);
-}
+        return view('karyawan.absen', [
+            'on_leave' => false,
+            'cuti_details' => null,
+            'absensiHariIni' => $absensiHariIni,
+            'riwayatAbsensi' => $riwayatAbsensi,
+            'totalHadir' => $totalHadir,
+            'totalIzin' => $totalIzin,
+            'totalSakit' => $totalSakit,
+            'totalCuti' => $totalCuti,
+            'totalDinasLuar' => $totalDinasLuar,
+        ]);
+    }
+
     /**
      * Menampilkan halaman daftar TUGAS karyawan.
      */
@@ -289,30 +296,47 @@ public function absensiPage(Request $request)
                 'match_with_auth' => ($dbUser->divisi === $userDivisi) ? 'YES' : 'NO',
             ]);
             
-            // LOG 2: Cek total tugas di database
+            // LOG 2: Cek struktur tabel tasks
+            $tableColumns = Schema::getColumnListing('tasks');
+            Log::info('Tasks Table Columns:', $tableColumns);
+            
+            // LOG 3: Cek total tugas di database
             $totalTasksInDB = Task::count();
             Log::info('Total Tasks in Database:', ['count' => $totalTasksInDB]);
             
-            // LOG 3: Cek tugas untuk Digital Marketing secara spesifik
-            $marketingTasks = Task::where('target_divisi', 'Digital Marketing')->get();
-            Log::info('Marketing Tasks in Database:', [
-                'count' => $marketingTasks->count(),
-                'tasks' => $marketingTasks->map(function($task) {
+            // LOG 4: Cek tugas untuk divisi secara spesifik
+            $divisiTasks = Task::where('target_type', 'divisi')->get();
+            Log::info('Divisi Tasks in Database:', [
+                'count' => $divisiTasks->count(),
+                'tasks' => $divisiTasks->map(function($task) {
                     return [
                         'id' => $task->id,
                         'judul' => $task->judul,
                         'target_type' => $task->target_type,
-                        'target_divisi' => $task->target_divisi,
+                        'target_divisi' => $task->target_divisi ?? null,
+                        'divisi' => $task->divisi ?? null,
+                        'target_id' => $task->target_id ?? null,
                         'status' => $task->status,
                     ];
                 })->toArray()
             ]);
             
-            // PERBAIKAN UTAMA: Query yang lebih komprehensif
-            $tasks = Task::where(function ($query) use ($userId, $userDivisi) {
-                // 1. Tugas untuk divisi (yang paling penting!)
-                $query->where('target_type', 'divisi')
-                    ->where('target_divisi', $userDivisi);
+            // PERBAIKAN UTAMA: Query yang fleksibel berdasarkan kolom yang ada
+            $tasks = Task::where(function ($query) use ($userId, $userDivisi, $tableColumns) {
+                // 1. Tugas untuk divisi (berdasarkan kolom yang tersedia)
+                if (in_array('target_divisi', $tableColumns)) {
+                    // Jika kolom target_divisi ada
+                    $query->where('target_type', 'divisi')
+                        ->where('target_divisi', $userDivisi);
+                } elseif (in_array('divisi', $tableColumns)) {
+                    // Jika kolom divisi ada
+                    $query->where('target_type', 'divisi')
+                        ->where('divisi', $userDivisi);
+                } elseif (in_array('target_id', $tableColumns)) {
+                    // Jika kolom target_id ada (dan berisi nama divisi)
+                    $query->where('target_type', 'divisi')
+                        ->where('target_id', $userDivisi);
+                }
             })
                 ->orWhere(function ($query) use ($userId) {
                     // 2. Tugas yang ditugaskan langsung ke user
@@ -321,8 +345,10 @@ public function absensiPage(Request $request)
                 })
                 ->orWhere(function ($query) use ($userId) {
                     // 3. Tugas untuk manajer (jika user adalah manajer)
-                    $query->where('target_manager_id', $userId)
-                        ->where('target_type', 'manager');
+                    if (Schema::hasColumn('tasks', 'target_manager_id')) {
+                        $query->where('target_manager_id', $userId)
+                            ->where('target_type', 'manager');
+                    }
                 })
                 ->with([
                     'creator:id,name',
@@ -331,6 +357,11 @@ public function absensiPage(Request $request)
                 ])
                 ->orderBy('deadline', 'asc')
                 ->get();
+
+            Log::info('Final Query Results:', [
+                'total_tasks_found' => $tasks->count(),
+                'tasks_for_user' => $tasks->count()
+            ]);
 
             return view('karyawan.list', compact('tasks'));
 
@@ -400,7 +431,559 @@ public function absensiPage(Request $request)
     }
 
     // =================================================================
-    // METHOD UNTUK API (DIPANGGIL OLEH JAVASCRIPT)
+    // API UNTUK HALAMAN ABSENSI (FRONTEND JAVASCRIPT)
+    // =================================================================
+
+    /**
+     * API: Status hari ini dengan data lengkap (untuk frontend)
+     */
+    public function getTodayStatusApi()
+    {
+        try {
+            $userId = Auth::id();
+            $today = now()->toDateString();
+            
+            $absen = Absensi::where('user_id', $userId)
+                ->where('tanggal', $today)
+                ->first();
+
+            if (!$absen) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'jam_masuk' => null,
+                        'jam_pulang' => null,
+                        'status' => 'Belum Absen',
+                        'late_minutes' => 0,
+                        'is_late' => false,
+                        'approval_status' => 'approved',
+                        'jenis_ketidakhadiran' => null,
+                        'jenis_ketidakhadiran_label' => null,
+                        'tanggal' => $today,
+                    ]
+                ]);
+            }
+
+            // Tentukan status
+            $status = 'Belum Absen';
+            $lateMinutes = 0;
+            $isLate = false;
+            
+            if ($absen->jam_masuk) {
+                // Hitung keterlambatan
+                $jamMasuk = Carbon::parse($absen->jam_masuk);
+                $jamBatas = Carbon::parse('08:00');
+                $lateMinutes = $jamMasuk->gt($jamBatas) ? $jamMasuk->diffInMinutes($jamBatas) : 0;
+                $isLate = $lateMinutes > 0;
+                $status = $isLate ? 'Terlambat' : 'Tepat Waktu';
+            } elseif ($absen->jenis_ketidakhadiran) {
+                $status = match($absen->jenis_ketidakhadiran) {
+                    'cuti' => 'Cuti',
+                    'sakit' => 'Sakit',
+                    'izin' => 'Izin',
+                    'dinas-luar' => 'Dinas Luar',
+                    default => 'Tidak Hadir',
+                };
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'jam_masuk' => $absen->jam_masuk,
+                    'jam_pulang' => $absen->jam_pulang,
+                    'status' => $status,
+                    'late_minutes' => $lateMinutes,
+                    'is_late' => $isLate,
+                    'approval_status' => $absen->approval_status,
+                    'jenis_ketidakhadiran' => $absen->jenis_ketidakhadiran,
+                    'jenis_ketidakhadiran_label' => match($absen->jenis_ketidakhadiran) {
+                        'cuti' => 'Cuti',
+                        'sakit' => 'Sakit',
+                        'izin' => 'Izin',
+                        'dinas-luar' => 'Dinas Luar',
+                        default => null,
+                    },
+                    'reason' => $absen->reason,
+                    'keterangan' => $absen->keterangan,
+                    'tanggal' => $absen->tanggal,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Today Status API Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load today status',
+                'error' => env('APP_DEBUG') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Mengambil riwayat absensi (untuk frontend)
+     */
+    public function getHistoryApi(Request $request)
+    {
+        try {
+            $userId = Auth::id();
+            
+            // Default: bulan ini
+            $filter = $request->query('filter', 'month');
+            $month = $request->query('month', date('m'));
+            $year = $request->query('year', date('Y'));
+            
+            $query = Absensi::where('user_id', $userId);
+            
+            // Terapkan filter
+            if ($filter === 'custom' && $month && $year) {
+                // Filter bulan dan tahun spesifik
+                $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+                $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+                $query->whereBetween('tanggal', [$startDate, $endDate]);
+            } elseif ($filter === 'week') {
+                // Minggu ini
+                $startDate = Carbon::now()->startOfWeek();
+                $endDate = Carbon::now()->endOfWeek();
+                $query->whereBetween('tanggal', [$startDate, $endDate]);
+            } elseif ($filter === 'month') {
+                // Bulan ini (default)
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                $query->whereBetween('tanggal', [$startDate, $endDate]);
+            } elseif ($filter === 'year') {
+                // Tahun ini
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now()->endOfYear();
+                $query->whereBetween('tanggal', [$startDate, $endDate]);
+            }
+            
+            // Get data
+            $history = $query->orderBy('tanggal', 'desc')
+                            ->get()
+                            ->map(function ($item) {
+                                // Tentukan status
+                                $status = 'Tidak Hadir';
+                                $lateMinutes = 0;
+                                $isLate = false;
+                                
+                                if ($item->jam_masuk) {
+                                    $jamMasuk = Carbon::parse($item->jam_masuk);
+                                    $jamBatas = Carbon::parse('08:00');
+                                    $lateMinutes = $jamMasuk->gt($jamBatas) ? $jamMasuk->diffInMinutes($jamBatas) : 0;
+                                    $isLate = $lateMinutes > 0;
+                                    $status = $isLate ? 'Terlambat' : 'Tepat Waktu';
+                                } elseif ($item->jenis_ketidakhadiran) {
+                                    $status = match($item->jenis_ketidakhadiran) {
+                                        'cuti' => 'Cuti',
+                                        'sakit' => 'Sakit',
+                                        'izin' => 'Izin',
+                                        'dinas-luar' => 'Dinas Luar',
+                                        default => 'Tidak Hadir',
+                                    };
+                                }
+                                
+                                // Format untuk frontend
+                                return [
+                                    'id' => $item->id,
+                                    'tanggal' => $item->tanggal,
+                                    'jam_masuk' => $item->jam_masuk,
+                                    'jam_pulang' => $item->jam_pulang,
+                                    'status' => $status,
+                                    'late_minutes' => $lateMinutes,
+                                    'is_late' => $isLate,
+                                    'jenis_ketidakhadiran' => $item->jenis_ketidakhadiran,
+                                    'jenis_ketidakhadiran_label' => match($item->jenis_ketidakhadiran) {
+                                        'cuti' => 'Cuti',
+                                        'sakit' => 'Sakit',
+                                        'izin' => 'Izin',
+                                        'dinas-luar' => 'Dinas Luar',
+                                        default => null,
+                                    },
+                                    'approval_status' => $item->approval_status,
+                                    'reason' => $item->reason,
+                                    'keterangan' => $item->keterangan,
+                                ];
+                            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $history,
+                'filter' => $filter,
+                'count' => $history->count()
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('History API Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load attendance history',
+                'error' => env('APP_DEBUG') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Proses absen masuk via AJAX
+     */
+    public function absenMasukApi(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            $today = now()->toDateString();
+            
+            // 1. Cek apakah user sedang cuti hari ini
+            $cutiCheck = $this->checkIfOnLeaveToday($user->id);
+            if ($cutiCheck['on_leave']) {
+                $cuti = $cutiCheck['details'];
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda sedang cuti dari ' . 
+                        Carbon::parse($cuti->tanggal_mulai)->format('d/m/Y') . 
+                        ' sampai ' . 
+                        Carbon::parse($cuti->tanggal_selesai)->format('d/m/Y') . 
+                        '. Tidak dapat melakukan absensi.',
+                    'cuti_details' => [
+                        'tanggal_mulai' => $cuti->tanggal_mulai,
+                        'tanggal_selesai' => $cuti->tanggal_selesai,
+                        'tipe_cuti' => $cuti->tipe_cuti,
+                        'alasan' => $cuti->alasan
+                    ]
+                ], 403);
+            }
+            
+            // 2. Cek apakah sudah ada pengajuan ketidakhadiran yang disetujui
+            $existingAbsence = Absensi::where('user_id', $user->id)
+                                      ->where('tanggal', $today)
+                                      ->whereNotNull('jenis_ketidakhadiran')
+                                      ->where('approval_status', 'approved')
+                                      ->first();
+
+            if ($existingAbsence) {
+                $jenisLabel = match($existingAbsence->jenis_ketidakhadiran) {
+                    'cuti' => 'Cuti',
+                    'sakit' => 'Sakit',
+                    'izin' => 'Izin',
+                    'dinas-luar' => 'Dinas Luar',
+                    default => 'Ketidakhadiran',
+                };
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak dapat melakukan absen masuk karena telah mengajukan "' . $jenisLabel . '" pada hari ini.'
+                ], 403);
+            }
+
+            $nowLocal = now();
+            $userName = $user->name;
+
+            $cek = Absensi::where('user_id', $user->id)
+                ->where('tanggal', $today)
+                ->first();
+                
+            if ($cek && $cek->jam_masuk) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kamu sudah absen masuk hari ini'
+                ], 409);
+            }
+
+            $workStartTime = $nowLocal->copy()->setTime(9, 5, 0);
+            $lateMinutes = $nowLocal->greaterThan($workStartTime) ? $workStartTime->diffInMinutes($nowLocal) : 0;
+
+            $status = $lateMinutes > 0 ? 'Terlambat' : 'Tepat Waktu';
+
+            $absen = Absensi::updateOrCreate(
+                ['user_id' => $user->id, 'tanggal' => $today],
+                [
+                    'jam_masuk' => $nowLocal,
+                    'approval_status' => 'approved',
+                    'status' => 'hadir'
+                ]
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Absen masuk berhasil!',
+                'data' => [
+                    'id' => $absen->id,
+                    'jam_masuk' => $absen->jam_masuk,
+                    'jam_pulang' => $absen->jam_pulang,
+                    'status' => $status,
+                    'late_minutes' => $lateMinutes,
+                    'is_late' => $lateMinutes > 0,
+                    'tanggal' => $absen->tanggal,
+                    'approval_status' => $absen->approval_status,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Absen Masuk Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server. Silakan coba lagi.'
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Proses absen pulang via AJAX
+     */
+    public function absenPulangApi(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            $today = now()->toDateString();
+            
+            // 1. Cek apakah user sedang cuti hari ini
+            $cutiCheck = $this->checkIfOnLeaveToday($user->id);
+            if ($cutiCheck['on_leave']) {
+                $cuti = $cutiCheck['details'];
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda sedang cuti dari ' . 
+                        Carbon::parse($cuti->tanggal_mulai)->format('d/m/Y') . 
+                        ' sampai ' . 
+                        Carbon::parse($cuti->tanggal_selesai)->format('d/m/Y') . 
+                        '. Tidak dapat melakukan absensi.',
+                    'cuti_details' => [
+                        'tanggal_mulai' => $cuti->tanggal_mulai,
+                        'tanggal_selesai' => $cuti->tanggal_selesai,
+                        'tipe_cuti' => $cuti->tipe_cuti,
+                        'alasan' => $cuti->alasan
+                    ]
+                ], 403);
+            }
+
+            $nowLocal = now();
+            $userName = $user->name;
+
+            $absen = Absensi::where('user_id', $user->id)
+                ->where('tanggal', $today)
+                ->first();
+
+            if (!$absen || !$absen->jam_masuk) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda belum melakukan absen masuk hari ini.'
+                ], 400);
+            }
+
+            if ($absen->jam_pulang) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda sudah absen pulang hari ini.'
+                ], 409);
+            }
+
+            $workEndTime = $nowLocal->copy()->setTime(17, 0, 0);
+            $isEarlyCheckout = $nowLocal->lessThan($workEndTime);
+
+            $reason = null;
+            if ($isEarlyCheckout) {
+                $request->validate([
+                    'reason' => 'required|string|max:255',
+                ]);
+                $reason = $request->input('reason');
+            }
+
+            $absen->update([
+                'jam_pulang' => $nowLocal,
+                'is_early_checkout' => $isEarlyCheckout,
+                'early_checkout_reason' => $reason,
+                'approval_status' => 'approved',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Absen pulang berhasil!',
+                'data' => [
+                    'id' => $absen->id,
+                    'jam_masuk' => $absen->jam_masuk,
+                    'jam_pulang' => $absen->jam_pulang,
+                    'status' => 'Selesai',
+                    'tanggal' => $absen->tanggal,
+                    'approval_status' => $absen->approval_status,
+                    'is_early_checkout' => $isEarlyCheckout,
+                    'early_checkout_reason' => $reason,
+                ]
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->validator->errors()->first()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Absen Pulang Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server. Silakan coba lagi.'
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Proses pengajuan izin (bisa multi-hari)
+     */
+    public function submitIzinApi(Request $request)
+    {
+        $request->validate([
+            'tanggal' => 'required|date|after_or_equal:today',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal',
+            'keterangan' => 'required|string',
+            'jenis' => 'required|string|in:sakit,izin',
+        ]);
+
+        $user = Auth::user();
+        $period = CarbonPeriod::create($request->tanggal, $request->tanggal_akhir);
+
+        // Validasi: Cek apakah ada tanggal dalam periode yang sudah termasuk cuti
+        foreach ($period as $date) {
+            $dateStr = $date->toDateString();
+            
+            // Cek apakah sudah ada cuti yang disetujui di tanggal ini
+            $existingCuti = Cuti::where('user_id', $user->id)
+                ->where('status', 'disetujui')
+                ->whereDate('tanggal_mulai', '<=', $dateStr)
+                ->whereDate('tanggal_selesai', '>=', $dateStr)
+                ->exists();
+            
+            if ($existingCuti) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda sudah memiliki cuti yang disetujui pada tanggal ' . 
+                        Carbon::parse($dateStr)->format('d/m/Y') . 
+                        '. Tidak dapat mengajukan izin.'
+                ], 400);
+            }
+        }
+
+        DB::beginTransaction();
+        try {
+            foreach ($period as $date) {
+                Absensi::updateOrCreate(
+                    ['user_id' => Auth::id(), 'tanggal' => $date->toDateString()],
+                    [
+                        'jenis_ketidakhadiran' => $request->jenis,
+                        'reason' => $request->keterangan,
+                        'approval_status' => 'pending',
+                        'tanggal_akhir' => $request->tanggal_akhir,
+                        'keterangan' => 'Pengajuan ' . $request->jenis,
+                        'status' => 'tidak_hadir'
+                    ]
+                );
+            }
+            DB::commit();
+
+            // Ambil data terbaru untuk hari ini
+            $today = now()->toDateString();
+            $latestAbsen = Absensi::where('user_id', Auth::id())
+                ->where('tanggal', $today)
+                ->first();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengajuan ' . $request->jenis . ' untuk ' . $period->count() . ' hari berhasil dikirim dan menunggu persetujuan admin.',
+                'data' => $latestAbsen ? [
+                    'id' => $latestAbsen->id,
+                    'tanggal' => $latestAbsen->tanggal,
+                    'jam_masuk' => $latestAbsen->jam_masuk,
+                    'jam_pulang' => $latestAbsen->jam_pulang,
+                    'jenis_ketidakhadiran' => $latestAbsen->jenis_ketidakhadiran,
+                    'jenis_ketidakhadiran_label' => match($latestAbsen->jenis_ketidakhadiran) {
+                        'sakit' => 'Sakit',
+                        'izin' => 'Izin',
+                        default => null,
+                    },
+                    'approval_status' => $latestAbsen->approval_status,
+                    'reason' => $latestAbsen->reason,
+                    'keterangan' => $latestAbsen->keterangan,
+                ] : null
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Submit Izin Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengajukan. Terjadi kesalahan pada server.'
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Proses pengajuan dinas luar (bisa multi-hari)
+     */
+    public function submitDinasApi(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'location' => 'required|string',
+            'purpose' => 'required|string',
+            'description' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+        $period = CarbonPeriod::create($request->start_date, $request->end_date);
+
+        // Validasi: Cek apakah ada tanggal dalam periode yang sudah termasuk cuti
+        foreach ($period as $date) {
+            $dateStr = $date->toDateString();
+            
+            // Cek apakah sudah ada cuti yang disetujui di tanggal ini
+            $existingCuti = Cuti::where('user_id', $user->id)
+                ->where('status', 'disetujui')
+                ->whereDate('tanggal_mulai', '<=', $dateStr)
+                ->whereDate('tanggal_selesai', '>=', $dateStr)
+                ->exists();
+            
+            if ($existingCuti) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda sudah memiliki cuti yang disetujui pada tanggal ' . 
+                        Carbon::parse($dateStr)->format('d/m/Y') . 
+                        '. Tidak dapat mengajukan dinas luar.'
+                ], 400);
+            }
+        }
+
+        DB::beginTransaction();
+        try {
+            foreach ($period as $date) {
+                Absensi::updateOrCreate(
+                    ['user_id' => Auth::id(), 'tanggal' => $date->toDateString()],
+                    [
+                        'jenis_ketidakhadiran' => 'dinas-luar',
+                        'reason' => $request->description,
+                        'location' => $request->location,
+                        'purpose' => $request->purpose,
+                        'approval_status' => 'pending',
+                        'tanggal_akhir' => $request->end_date,
+                        'keterangan' => 'Pengajuan dinas luar',
+                        'status' => 'tidak_hadir'
+                    ]
+                );
+            }
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengajuan dinas luar untuk ' . $period->count() . ' hari berhasil dikirim dan menunggu persetujuan admin.'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Submit Dinas Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengajukan dinas luar. Terjadi kesalahan pada server.'
+            ], 500);
+        }
+    }
+
+    // =================================================================
+    // METHOD UNTUK API (DIPANGGIL OLEH JAVASCRIPT) - LAMA
     // =================================================================
 
     /**
@@ -536,12 +1119,22 @@ public function absensiPage(Request $request)
                                 ->whereIn('jenis_ketidakhadiran', ['cuti', 'sakit', 'izin'])
                                 ->count();
 
+        // PERBAIKAN: Query tugas yang aman untuk kolom target_divisi
         $userDivisi = Auth::user()->divisi;
         $tugasCount = Task::where(function ($query) use ($userId, $userDivisi) {
             $query->where('assigned_to', $userId)
                 ->orWhere(function ($q) use ($userDivisi) {
                     $q->where('target_type', 'divisi')
-                        ->where('target_divisi', $userDivisi);
+                        ->where(function($subQuery) use ($userDivisi) {
+                            // Cek kolom yang tersedia
+                            if (Schema::hasColumn('tasks', 'target_divisi')) {
+                                $subQuery->where('target_divisi', $userDivisi);
+                            } elseif (Schema::hasColumn('tasks', 'divisi')) {
+                                $subQuery->where('divisi', $userDivisi);
+                            } elseif (Schema::hasColumn('tasks', 'target_id')) {
+                                $subQuery->where('target_id', $userDivisi);
+                            }
+                        });
                 });
         })
             ->whereNotIn('status', ['selesai', 'dibatalkan'])
@@ -697,333 +1290,6 @@ public function absensiPage(Request $request)
     }
 
     /**
-     * Proses absen masuk via AJAX dengan validasi cuti.
-     */
-    public function absenMasukApi(Request $request)
-    {
-        try {
-            $user = Auth::user();
-            $today = now()->toDateString();
-            
-            // 1. Cek apakah user sedang cuti hari ini
-            $cutiCheck = $this->checkIfOnLeaveToday($user->id);
-            if ($cutiCheck['on_leave']) {
-                $cuti = $cutiCheck['details'];
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sedang cuti dari ' . 
-                        Carbon::parse($cuti->tanggal_mulai)->format('d/m/Y') . 
-                        ' sampai ' . 
-                        Carbon::parse($cuti->tanggal_selesai)->format('d/m/Y') . 
-                        '. Tidak dapat melakukan absensi.',
-                    'cuti_details' => [
-                        'tanggal_mulai' => $cuti->tanggal_mulai,
-                        'tanggal_selesai' => $cuti->tanggal_selesai,
-                        'tipe_cuti' => $cuti->tipe_cuti,
-                        'alasan' => $cuti->alasan
-                    ]
-                ], 403);
-            }
-            
-            // 2. Cek apakah sudah ada pengajuan ketidakhadiran yang disetujui
-            $existingAbsence = Absensi::where('user_id', $user->id)
-                                      ->where('tanggal', $today)
-                                      ->whereNotNull('jenis_ketidakhadiran')
-                                      ->where('approval_status', 'approved')
-                                      ->first();
-
-            if ($existingAbsence) {
-                $jenisLabel = match($existingAbsence->jenis_ketidakhadiran) {
-                    'cuti' => 'Cuti',
-                    'sakit' => 'Sakit',
-                    'izin' => 'Izin',
-                    'dinas-luar' => 'Dinas Luar',
-                    default => 'Ketidakhadiran',
-                };
-                
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda tidak dapat melakukan absen masuk karena telah mengajukan "' . $jenisLabel . '" pada hari ini.'
-                ], 403);
-            }
-
-            $nowLocal = now();
-            $userName = $user->name;
-
-            $cek = Absensi::where('user_id', $user->id)
-                ->where('tanggal', $today)
-                ->first();
-                
-            if ($cek && $cek->jam_masuk) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Kamu sudah absen masuk hari ini'
-                ], 409);
-            }
-
-            $workStartTime = $nowLocal->copy()->setTime(9, 5, 0);
-            $lateMinutes = $nowLocal->greaterThan($workStartTime) ? $workStartTime->diffInMinutes($nowLocal) : 0;
-
-            $status = $lateMinutes > 0 ? 'Terlambat' : 'Tepat Waktu';
-
-            Absensi::updateOrCreate(
-                ['user_id' => $user->id, 'tanggal' => $today],
-                [
-                    'jam_masuk' => $nowLocal,
-                    'approval_status' => 'approved',
-                    'status' => 'hadir'
-                ]
-            );
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Absen masuk berhasil!',
-                'data' => [
-                    'time' => $nowLocal->toDateTimeString(),
-                    'status' => $status,
-                    'late_minutes' => $lateMinutes,
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Absen Masuk Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan server. Silakan coba lagi.'
-            ], 500);
-        }
-    }
-
-    /**
-     * Proses absen pulang via AJAX dengan validasi cuti.
-     */
-    public function absenPulangApi(Request $request)
-    {
-        try {
-            $user = Auth::user();
-            $today = now()->toDateString();
-            
-            // 1. Cek apakah user sedang cuti hari ini
-            $cutiCheck = $this->checkIfOnLeaveToday($user->id);
-            if ($cutiCheck['on_leave']) {
-                $cuti = $cutiCheck['details'];
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sedang cuti dari ' . 
-                        Carbon::parse($cuti->tanggal_mulai)->format('d/m/Y') . 
-                        ' sampai ' . 
-                        Carbon::parse($cuti->tanggal_selesai)->format('d/m/Y') . 
-                        '. Tidak dapat melakukan absensi.',
-                    'cuti_details' => [
-                        'tanggal_mulai' => $cuti->tanggal_mulai,
-                        'tanggal_selesai' => $cuti->tanggal_selesai,
-                        'tipe_cuti' => $cuti->tipe_cuti,
-                        'alasan' => $cuti->alasan
-                    ]
-                ], 403);
-            }
-
-            $nowLocal = now();
-            $userName = $user->name;
-
-            $absen = Absensi::where('user_id', $user->id)
-                ->where('tanggal', $today)
-                ->first();
-
-            if (!$absen || !$absen->jam_masuk) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda belum melakukan absen masuk hari ini.'
-                ], 400);
-            }
-
-            if ($absen->jam_pulang) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sudah absen pulang hari ini.'
-                ], 409);
-            }
-
-            $workEndTime = $nowLocal->copy()->setTime(17, 0, 0);
-            $isEarlyCheckout = $nowLocal->lessThan($workEndTime);
-
-            $reason = null;
-            if ($isEarlyCheckout) {
-                $request->validate([
-                    'reason' => 'required|string|max:255',
-                ]);
-                $reason = $request->input('reason');
-            }
-
-            $absen->update([
-                'jam_pulang' => $nowLocal,
-                'is_early_checkout' => $isEarlyCheckout,
-                'early_checkout_reason' => $reason,
-                'approval_status' => 'approved',
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Absen pulang berhasil!',
-                'data' => [
-                    'time' => $nowLocal->toDateTimeString(),
-                ]
-            ]);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->validator->errors()->first()
-            ], 422);
-        } catch (\Exception $e) {
-            Log::error('Absen Pulang Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan server. Silakan coba lagi.'
-            ], 500);
-        }
-    }
-
-    /**
-     * Proses pengajuan izin (bisa multi-hari) dengan validasi cuti.
-     */
-    public function submitIzinApi(Request $request)
-    {
-        $request->validate([
-            'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'type' => 'required|string|in:cuti,sakit,izin',
-            'reason' => 'required|string',
-        ]);
-
-        $user = Auth::user();
-        $period = CarbonPeriod::create($request->start_date, $request->end_date);
-
-        // Validasi: Cek apakah ada tanggal dalam periode yang sudah termasuk cuti
-        foreach ($period as $date) {
-            $dateStr = $date->toDateString();
-            
-            // Cek apakah sudah ada cuti yang disetujui di tanggal ini
-            $existingCuti = Cuti::where('user_id', $user->id)
-                ->where('status', 'disetujui')
-                ->whereDate('tanggal_mulai', '<=', $dateStr)
-                ->whereDate('tanggal_selesai', '>=', $dateStr)
-                ->exists();
-            
-            if ($existingCuti) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sudah memiliki cuti yang disetujui pada tanggal ' . 
-                        Carbon::parse($dateStr)->format('d/m/Y') . 
-                        '. Tidak dapat mengajukan izin.'
-                ], 400);
-            }
-        }
-
-        DB::beginTransaction();
-        try {
-            foreach ($period as $date) {
-                Absensi::updateOrCreate(
-                    ['user_id' => Auth::id(), 'tanggal' => $date->toDateString()],
-                    [
-                        'jenis_ketidakhadiran' => $request->type,
-                        'reason' => $request->reason,
-                        'approval_status' => 'pending',
-                        'tanggal_akhir' => $request->end_date,
-                        'keterangan' => 'Pengajuan ' . $request->type,
-                        'status' => 'tidak_hadir'
-                    ]
-                );
-            }
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengajuan ' . $request->type . ' untuk ' . $period->count() . ' hari berhasil dikirim dan menunggu persetujuan admin.'
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Submit Izin Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengajukan. Terjadi kesalahan pada server.'
-            ], 500);
-        }
-    }
-
-    /**
-     * Proses pengajuan dinas luar (bisa multi-hari) dengan validasi cuti.
-     */
-    public function submitDinasApi(Request $request)
-    {
-        $request->validate([
-            'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'location' => 'required|string',
-            'purpose' => 'required|string',
-            'description' => 'required|string',
-        ]);
-
-        $user = Auth::user();
-        $period = CarbonPeriod::create($request->start_date, $request->end_date);
-
-        // Validasi: Cek apakah ada tanggal dalam periode yang sudah termasuk cuti
-        foreach ($period as $date) {
-            $dateStr = $date->toDateString();
-            
-            // Cek apakah sudah ada cuti yang disetujui di tanggal ini
-            $existingCuti = Cuti::where('user_id', $user->id)
-                ->where('status', 'disetujui')
-                ->whereDate('tanggal_mulai', '<=', $dateStr)
-                ->whereDate('tanggal_selesai', '>=', $dateStr)
-                ->exists();
-            
-            if ($existingCuti) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sudah memiliki cuti yang disetujui pada tanggal ' . 
-                        Carbon::parse($dateStr)->format('d/m/Y') . 
-                        '. Tidak dapat mengajukan dinas luar.'
-                ], 400);
-            }
-        }
-
-        DB::beginTransaction();
-        try {
-            foreach ($period as $date) {
-                Absensi::updateOrCreate(
-                    ['user_id' => Auth::id(), 'tanggal' => $date->toDateString()],
-                    [
-                        'jenis_ketidakhadiran' => 'dinas-luar',
-                        'reason' => $request->description,
-                        'location' => $request->location,
-                        'purpose' => $request->purpose,
-                        'approval_status' => 'pending',
-                        'tanggal_akhir' => $request->end_date,
-                        'keterangan' => 'Pengajuan dinas luar',
-                        'status' => 'tidak_hadir'
-                    ]
-                );
-            }
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengajuan dinas luar untuk ' . $period->count() . ' hari berhasil dikirim dan menunggu persetujuan admin.'
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Submit Dinas Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengajukan dinas luar. Terjadi kesalahan pada server.'
-            ], 500);
-        }
-    }
-
-    /**
      * API untuk mendapatkan tugas karyawan (digunakan oleh frontend)
      */
     public function apiGetTasks()
@@ -1033,17 +1299,29 @@ public function absensiPage(Request $request)
             $user = Auth::user();
             $userDivisi = $user->divisi;
 
+            // PERBAIKAN: Cek kolom yang tersedia
             $tasks = Task::where(function ($query) use ($userId, $userDivisi) {
-                $query->where('target_type', 'divisi')
-                    ->where('target_divisi', $userDivisi);
+                // Tugas untuk divisi (berdasarkan kolom yang ada)
+                if (Schema::hasColumn('tasks', 'target_divisi')) {
+                    $query->where('target_type', 'divisi')
+                        ->where('target_divisi', $userDivisi);
+                } elseif (Schema::hasColumn('tasks', 'divisi')) {
+                    $query->where('target_type', 'divisi')
+                        ->where('divisi', $userDivisi);
+                } elseif (Schema::hasColumn('tasks', 'target_id')) {
+                    $query->where('target_type', 'divisi')
+                        ->where('target_id', $userDivisi);
+                }
             })
                 ->orWhere(function ($query) use ($userId) {
                     $query->where('assigned_to', $userId)
                         ->where('target_type', 'karyawan');
                 })
                 ->orWhere(function ($query) use ($userId) {
-                    $query->where('target_manager_id', $userId)
-                        ->where('target_type', 'manager');
+                    if (Schema::hasColumn('tasks', 'target_manager_id')) {
+                        $query->where('target_manager_id', $userId)
+                            ->where('target_type', 'manager');
+                    }
                 })
                 ->with([
                     'creator:id,name',
@@ -1062,8 +1340,10 @@ public function absensiPage(Request $request)
                     $assigneeText = $task->assignedUser->name;
                     $assigneeDivisi = $task->assignedUser->divisi ?? '-';
                 } elseif ($task->target_type === 'divisi') {
-                    $assigneeText = 'Divisi ' . $task->target_divisi;
-                    $assigneeDivisi = $task->target_divisi ?? '-';
+                    // Tentukan nilai divisi berdasarkan kolom yang ada
+                    $divisiValue = $task->target_divisi ?? $task->divisi ?? $task->target_id ?? '-';
+                    $assigneeText = 'Divisi ' . $divisiValue;
+                    $assigneeDivisi = $divisiValue;
                 } elseif ($task->target_type === 'manager' && $task->targetManager) {
                     $assigneeText = 'Manajer: ' . $task->targetManager->name;
                     $assigneeDivisi = $task->targetManager->divisi ?? '-';
@@ -1075,7 +1355,9 @@ public function absensiPage(Request $request)
 
                 $isForMe = false;
                 if ($task->target_type === 'divisi') {
-                    $isForMe = strtolower($task->target_divisi) === strtolower($userDivisi);
+                    // Bandingkan dengan nilai divisi yang sesuai
+                    $divisiValue = strtolower($task->target_divisi ?? $task->divisi ?? $task->target_id ?? '');
+                    $isForMe = $divisiValue === strtolower($userDivisi);
                 } elseif ($task->target_type === 'manager' && $task->target_manager_id === $userId) {
                     $isForMe = true;
                 } elseif ($task->target_type === 'karyawan' && $task->assigned_to === $userId) {
@@ -1089,7 +1371,7 @@ public function absensiPage(Request $request)
                     'deadline' => $task->deadline ? $task->deadline->format('Y-m-d H:i:s') : null,
                     'status' => $task->status,
                     'target_type' => $task->target_type,
-                    'target_divisi' => $task->target_divisi,
+                    'target_divisi' => $task->target_divisi ?? $task->divisi ?? $task->target_id ?? null,
                     'assignee_text' => $assigneeText,
                     'assignee_divisi' => $assigneeDivisi,
                     'creator_name' => $task->creator->name ?? '-',
@@ -1711,6 +1993,34 @@ public function absensiPage(Request $request)
                 'success' => false,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    }
+
+    /**
+     * Method untuk menambahkan kolom target_divisi jika belum ada (optional)
+     */
+    public function addTargetDivisiColumn()
+    {
+        try {
+            if (!Schema::hasColumn('tasks', 'target_divisi')) {
+                // Jalankan migration untuk menambahkan kolom
+                DB::statement('ALTER TABLE tasks ADD COLUMN target_divisi VARCHAR(255) NULL AFTER target_type');
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Kolom target_divisi berhasil ditambahkan ke tabel tasks'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kolom target_divisi sudah ada di tabel tasks'
+                ]);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menambahkan kolom: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Kelola Tugas</title>
+    <title>Kelola Tugas - Manager Divisi</title>
     
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -154,8 +154,9 @@
         .badge-programmer { background-color: #dbeafe; color: #1e40af; }
         .badge-desainer { background-color: #ede9fe; color: #5b21b6; }
         .badge-marketing { background-color: #d1fae5; color: #065f46; }
+        .badge-default { background-color: #f3f4f6; color: #4b5563; }
 
-        .form-input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background-color: white; transition: border-color 0.2s, box-shadow 0.2s; }
+        .form-input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background-color: white; transition: border-color 0.2s, box-shadow 0.2s; font-size: 0.875rem; }
         .form-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
 
         /* =========================================
@@ -171,7 +172,7 @@
         .scrollable-table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .scrollable-table-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        .data-table { width: 100%; min-width: 1000px; border-collapse: collapse; }
+        .data-table { width: 100%; min-width: 1100px; border-collapse: collapse; }
         .data-table th, .data-table td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
         .data-table th { background-color: #f9fafb; font-weight: 600; color: #374151; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
         .data-table tbody tr:nth-child(even) { background-color: #f9fafb; }
@@ -213,6 +214,20 @@
         
         .slide-up { animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        /* Loading */
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 
@@ -225,65 +240,7 @@
     <div class="app-container">
         
         <!-- SIDEBAR SECTION -->
-        <aside id="sidebar" class="sidebar-fixed">
-            <!-- Sidebar akan diisi oleh template Laravel -->
-            @if(auth()->check())
-            <div class="sidebar-header">
-                <img src="{{ asset('storage/logo.png') }}" alt="Logo" />
-            </div>
-            
-            <nav class="sidebar-nav">
-              
-                
-                <a href="{{ route('tasks.index') }}" class="nav-item {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
-                    <span class="material-icons-outlined mr-3">task_alt</span>
-                    Kelola Tugas
-                </a>
-                
-                <a href="{{ route('karyawan.index') }}" class="nav-item {{ request()->routeIs('karyawan.*') ? 'active' : '' }}">
-                    <span class="material-icons-outlined mr-3">people</span>
-                    Karyawan
-                </a>
-                
-                <a href="{{ route('absensi.index') }}" class="nav-item {{ request()->routeIs('absensi.*') ? 'active' : '' }}">
-                    <span class="material-icons-outlined mr-3">schedule</span>
-                    Absensi
-                </a>
-                
-                <a href="{{ route('pengumuman.index') }}" class="nav-item {{ request()->routeIs('pengumuman.*') ? 'active' : '' }}">
-                    <span class="material-icons-outlined mr-3">announcement</span>
-                    Pengumuman
-                </a>
-                
-                <div class="mt-auto"></div>
-                
-                <a href="{{ route('profile') }}" class="nav-item {{ request()->routeIs('profile') ? 'active' : '' }}">
-                    <span class="material-icons-outlined mr-3">person</span>
-                    Profile
-                </a>
-                
-                <form method="POST" action="{{ route('logout') }}" id="logout-form">
-                    @csrf
-                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-item text-red-600 hover:bg-red-50">
-                        <span class="material-icons-outlined mr-3">logout</span>
-                        Logout
-                    </a>
-                </form>
-            </nav>
-            
-            <div class="sidebar-footer">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span class="material-icons-outlined text-primary">person</span>
-                    </div>
-                    <div>
-                        <p class="font-medium">{{ auth()->user()->name }}</p>
-                        <p class="text-sm text-gray-600">{{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}</p>
-                    </div>
-                </div>
-            </div>
-            @endif
-        </aside>
+        @include('manager_divisi.templet.sider')
 
         <!-- MAIN CONTENT -->
         <div class="main-content">
@@ -300,17 +257,19 @@
             <main class="flex-1 flex flex-col">
                 <div class="flex-1 p-3 sm:p-8">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-8 gap-4">
-                        <h2 class="text-xl sm:text-3xl font-bold">
-                            Kelola Tugas
+                        <div>
+                            <h2 class="text-xl sm:text-3xl font-bold text-gray-900">
+                                Kelola Tugas
+                            </h2>
                             @if(auth()->user()->divisi)
-                            <span class="text-lg text-gray-600">- Divisi {{ auth()->user()->divisi }}</span>
+                            <p class="text-sm text-gray-600 mt-1">Divisi {{ auth()->user()->divisi }}</p>
                             @endif
-                        </h2>
+                        </div>
                         
                         <div class="flex items-center gap-3">
-                            @if(in_array(auth()->user()->role, ['general_manager', 'manager_divisi']))
+                            @if(in_array(auth()->user()->role, ['general_manager', 'manager_divisi', 'admin']))
                             <button id="buatTugasBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2">
-                                <span class="material-icons-outlined">add</span>
+                                <span class="material-icons-outlined text-lg">add</span>
                                 <span class="hidden sm:inline">Buat Tugas</span>
                                 <span class="sm:hidden">Buat</span>
                             </button>
@@ -396,13 +355,6 @@
                                 <option value="dibatalkan">Dibatalkan</option>
                             </select>
                             
-                            <select id="priorityFilter" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
-                                <option value="all">Semua Prioritas</option>
-                                <option value="high">Tinggi</option>
-                                <option value="medium">Sedang</option>
-                                <option value="low">Rendah</option>
-                            </select>
-                            
                             <button id="refreshBtn" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none flex items-center gap-2">
                                 <span class="material-icons-outlined">refresh</span>
                                 <span class="hidden sm:inline">Refresh</span>
@@ -424,7 +376,7 @@
                         <div class="panel-body">
                             <!-- Loading -->
                             <div id="loadingIndicator" class="text-center py-8">
-                                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                <div class="loading-spinner mx-auto"></div>
                                 <p class="mt-2 text-gray-600">Memuat data...</p>
                             </div>
 
@@ -437,11 +389,11 @@
                                                 <th style="min-width: 60px;">No</th>
                                                 <th style="min-width: 200px;">Judul</th>
                                                 <th style="min-width: 250px;">Deskripsi</th>
-                                                <th style="min-width: 120px;">Deadline</th>
+                                                <th style="min-width: 150px;">Deadline</th>
+                                                <th style="min-width: 150px;">Project</th>
                                                 <th style="min-width: 150px;">Ditugaskan Kepada</th>
                                                 <th style="min-width: 100px;">Divisi</th>
                                                 <th style="min-width: 100px;">Status</th>
-                                                <th style="min-width: 100px;">Prioritas</th>
                                                 <th style="min-width: 180px; text-align: center;">Aksi</th>
                                             </tr>
                                         </thead>
@@ -457,7 +409,7 @@
                             <div id="noDataMessage" class="text-center py-8" style="display: none;">
                                 <span class="material-icons-outlined text-gray-400 text-4xl mb-2">task_alt</span>
                                 <p class="text-gray-600">Tidak ada data tugas</p>
-                                @if(in_array(auth()->user()->role, ['general_manager', 'manager_divisi']))
+                                @if(in_array(auth()->user()->role, ['general_manager', 'manager_divisi', 'admin']))
                                 <button id="buatTugasBtnMobile" class="btn-primary mt-4">
                                     <span class="material-icons-outlined">add</span>
                                     Buat Tugas Pertama
@@ -472,7 +424,7 @@
                                 <button id="desktopNextPage" class="desktop-nav-btn"><span class="material-icons-outlined text-sm">chevron_right</span></button>
                             </div>
                             
-                            <div class="mobile-pagination md:hidden flex justify-center items-center gap-2 mt-4" style="display: none;">
+                            <div id="mobilePaginationContainer" class="mobile-pagination md:hidden flex justify-center items-center gap-2 mt-4" style="display: none;">
                                 <button id="prevPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"><span class="material-icons-outlined text-sm">chevron_left</span></button>
                                 <div id="pageNumbers" class="flex gap-1"></div>
                                 <button id="nextPage" class="page-btn w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"><span class="material-icons-outlined text-sm">chevron_right</span></button>
@@ -509,7 +461,15 @@
     <!-- JavaScript -->
     <script>
         // CSRF Token untuk AJAX
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        let csrfToken = '';
+        try {
+            const metaTag = document.querySelector('meta[name="csrf-token"]');
+            if (metaTag) {
+                csrfToken = metaTag.getAttribute('content');
+            }
+        } catch (e) {
+            console.error('Failed to get CSRF token:', e);
+        }
         
         // State Management
         const state = {
@@ -522,87 +482,140 @@
                 id: {{ auth()->id() }},
                 name: '{{ auth()->user()->name }}',
                 role: '{{ auth()->user()->role }}',
-                divisi: '{{ auth()->user()->divisi }}'
+                divisi: '{{ auth()->user()->divisi ?? "" }}',
+                divisi_id: {{ auth()->user()->divisi_id ? auth()->user()->divisi_id : 'null' }}
             },
             karyawanList: [],
-            isLoading: false
+            projectList: [], // Menampung data project
+            isLoading: false,
+            sortField: 'created_at',
+            sortDirection: 'desc'
         };
 
         // Utility Functions
         const utils = {
             showToast: (message, type = 'success') => {
-                const t = document.getElementById('toast');
-                const m = document.getElementById('toastMessage');
-                t.style.backgroundColor = type === 'error' ? '#ef4444' : 
-                                         type === 'warning' ? '#f59e0b' : 
-                                         type === 'info' ? '#3b82f6' : '#10b981';
-                m.textContent = message;
-                t.classList.remove('translate-y-20', 'opacity-0');
-                setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 3000);
+                const toast = document.getElementById('toast');
+                const toastMessage = document.getElementById('toastMessage');
+                
+                const colors = {
+                    success: '#10b981',
+                    error: '#ef4444',
+                    warning: '#f59e0b',
+                    info: '#3b82f6'
+                };
+                
+                toast.style.backgroundColor = colors[type] || colors.success;
+                toastMessage.textContent = message;
+                
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+                
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
             },
             
             showLoading: (show) => {
-                const els = { 
-                    l: document.getElementById('loadingIndicator'), 
-                    d: document.getElementById('desktopTable'), 
-                    m: document.getElementById('mobile-cards'), 
-                    n: document.getElementById('noDataMessage'), 
-                    dp: document.getElementById('desktopPaginationContainer'), 
-                    mp: document.querySelector('.mobile-pagination') 
-                };
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                const desktopTable = document.getElementById('desktopTable');
+                const mobileCards = document.getElementById('mobile-cards');
+                const noDataMessage = document.getElementById('noDataMessage');
+                const desktopPagination = document.getElementById('desktopPaginationContainer');
+                const mobilePagination = document.getElementById('mobilePaginationContainer');
                 
                 if (show) {
-                    els.l.style.display = 'block';
-                    els.d.style.display = 'none';
-                    els.m.style.display = 'none';
-                    els.n.style.display = 'none';
-                    els.dp.style.display = 'none';
-                    els.mp.style.display = 'none';
+                    loadingIndicator.style.display = 'block';
+                    desktopTable.style.display = 'none';
+                    mobileCards.style.display = 'none';
+                    noDataMessage.style.display = 'none';
+                    desktopPagination.style.display = 'none';
+                    mobilePagination.style.display = 'none';
                 } else {
-                    els.l.style.display = 'none';
+                    loadingIndicator.style.display = 'none';
                 }
             },
             
             createModal: (title, content, onSubmit = null) => {
-                const tpl = document.getElementById('modalTemplate').cloneNode(true);
-                tpl.id = 'activeModal';
-                tpl.style.display = 'flex';
-                tpl.querySelector('.modal-title').textContent = title;
-                tpl.querySelector('.modal-content').innerHTML = content;
+                const modalTemplate = document.getElementById('modalTemplate');
+                const modalClone = modalTemplate.cloneNode(true);
+                modalClone.id = 'activeModal';
+                modalClone.classList.remove('hidden');
+                modalClone.querySelector('.modal-title').textContent = title;
+                modalClone.querySelector('.modal-content').innerHTML = content;
                 
-                const closeModal = () => tpl.remove();
-                tpl.querySelectorAll('.close-modal').forEach(b => b.addEventListener('click', closeModal));
-                tpl.addEventListener('click', (e) => e.target === tpl && closeModal());
+                const closeModal = () => {
+                    document.body.removeChild(modalClone);
+                };
+                
+                modalClone.querySelectorAll('.close-modal').forEach(button => {
+                    button.addEventListener('click', closeModal);
+                });
+                
+                modalClone.addEventListener('click', (e) => {
+                    if (e.target === modalClone) {
+                        closeModal();
+                    }
+                });
                 
                 if (onSubmit) {
-                    const f = tpl.querySelector('form');
-                    f?.addEventListener('submit', async (e) => {
-                        e.preventDefault();
-                        const formData = new FormData(f);
-                        try { 
-                            await onSubmit(formData); 
-                            closeModal(); 
-                        } catch (err) { 
-                            console.error(err);
-                            utils.showToast(err.message || 'Terjadi kesalahan', 'error');
-                        }
-                    });
+                    const form = modalClone.querySelector('form');
+                    if (form) {
+                        form.addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            const formData = new FormData(form);
+                            
+                            try {
+                                await onSubmit(formData);
+                                closeModal();
+                            } catch (error) {
+                                console.error('Modal submit error:', error);
+                                utils.showToast(error.message || 'Terjadi kesalahan', 'error');
+                            }
+                        });
+                    }
                 }
                 
-                document.body.appendChild(tpl);
-                return tpl;
+                document.body.appendChild(modalClone);
+                
+                const firstInput = modalClone.querySelector('input, textarea, select');
+                if (firstInput) firstInput.focus();
+                
+                return modalClone;
             },
             
             formatDate: (dateString) => {
                 if (!dateString) return '-';
-                const date = new Date(dateString);
-                return date.toLocaleDateString('id-ID', { 
-                    day: 'numeric', 
-                    month: 'short', 
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+                
+                try {
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) return '-';
+                    
+                    return date.toLocaleDateString('id-ID', { 
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                } catch (e) {
+                    return '-';
+                }
+            },
+            
+            // Helper untuk format datetime-local input
+            formatDateTimeLocal: (dateString) => {
+                if (!dateString) return '';
+                try {
+                    const date = new Date(dateString);
+                    // Handle timezone offset agar sesuai waktu lokal
+                    const offset = date.getTimezoneOffset() * 60000;
+                    const localISOTime = (new Date(date - offset)).toISOString().slice(0, 16);
+                    return localISOTime;
+                } catch (e) {
+                    return '';
+                }
             },
             
             getStatusClass: (status) => {
@@ -610,65 +623,151 @@
             },
             
             getStatusText: (status) => {
-                const statuses = {
+                const statusMap = {
                     'pending': 'Pending',
                     'proses': 'Dalam Proses',
                     'selesai': 'Selesai',
                     'dibatalkan': 'Dibatalkan'
                 };
-                return statuses[status] || status;
-            },
-            
-            getPriorityClass: (priority) => {
-                const colors = {
-                    'high': 'bg-red-100 text-red-800',
-                    'medium': 'bg-yellow-100 text-yellow-800',
-                    'low': 'bg-green-100 text-green-800'
-                };
-                return colors[priority] || 'bg-gray-100 text-gray-800';
-            },
-            
-            getPriorityText: (priority) => {
-                const priorities = {
-                    'high': 'Tinggi',
-                    'medium': 'Sedang',
-                    'low': 'Rendah'
-                };
-                return priorities[priority] || priority;
+                return statusMap[status] || status;
             },
             
             getDivisiClass: (divisi) => {
                 if (!divisi) return 'badge-programmer';
-                const d = divisi.toLowerCase();
-                if (d.includes('marketing')) return 'badge-marketing';
-                if (d.includes('desain')) return 'badge-desainer';
+                const divisiLower = divisi.toLowerCase();
+                if (divisiLower.includes('marketing')) return 'badge-marketing';
+                if (divisiLower.includes('desain')) return 'badge-desainer';
                 return 'badge-programmer';
+            },
+            
+            escapeHtml: (text) => {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            },
+            
+            truncateText: (text, length = 50) => !text ? '' : text.length > length ? text.substring(0, length) + '...' : text,
+            
+            checkOverdue: (deadline, status) => {
+                if (!deadline || status === 'selesai' || status === 'dibatalkan') return false;
+                
+                const now = new Date();
+                const deadlineDate = new Date(deadline);
+                return deadlineDate < now;
             }
         };
 
         // API Functions
         const api = {
+            getApiEndpoint: () => {
+                const userRole = state.currentUser.role;
+                
+                if (userRole === 'manager_divisi') {
+                    return '/manager_divisi/api/tasks-api'; 
+                } else if (userRole === 'admin') {
+                    return '/admin/api/tasks';
+                } else if (userRole === 'general_manager') {
+                    return '/api/general-manager/tasks';
+                } else {
+                    console.warn('Role tidak valid untuk tasks:', userRole);
+                    return null;
+                }
+            },
+            
+            getStatisticsEndpoint: () => {
+                const userRole = state.currentUser.role;
+                
+                if (userRole === 'manager_divisi') {
+                    return '/manager_divisi/api/tasks/statistics';
+                } else if (userRole === 'admin') {
+                    return '/admin/api/tasks/statistics';
+                } else if (userRole === 'general_manager') {
+                    return '/api/general-manager/tasks/statistics';
+                } else {
+                    return '/api/tasks/statistics';
+                }
+            },
+            
+            getCreateTaskEndpoint: () => {
+                const userRole = state.currentUser.role;
+                
+                if (userRole === 'manager_divisi') {
+                    return '/manager_divisi/tasks';
+                } else if (userRole === 'admin') {
+                    return '/admin/tasks';
+                } else if (userRole === 'general_manager') {
+                    return '/general_manager/tasks';
+                } else {
+                    return null;
+                }
+            },
+
+            // Fetch Projects
+            fetchProjects: async () => {
+                try {
+                    const endpoint = '/manager_divisi/api/projects-dropdown';
+                    
+                    const response = await fetch(endpoint, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Gagal mengambil data project');
+                    }
+
+                    const data = await response.json();
+                    
+                    if (data.success && Array.isArray(data.data)) {
+                        state.projectList = data.data;
+                    } else {
+                        state.projectList = []; 
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch projects:', error);
+                    state.projectList = [];
+                }
+            },
+
             request: async (url, options = {}) => {
                 const defaultOptions = {
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     credentials: 'same-origin'
                 };
                 
                 const mergedOptions = { ...defaultOptions, ...options };
                 
+                if (options.body instanceof FormData) {
+                    delete mergedOptions.headers['Content-Type'];
+                } else if (typeof options.body === 'object' && options.body !== null) {
+                    mergedOptions.body = JSON.stringify(options.body);
+                }
+                
                 try {
                     const response = await fetch(url, mergedOptions);
-                    const data = await response.json();
                     
                     if (!response.ok) {
-                        throw new Error(data.message || 'Terjadi kesalahan');
+                        const errorText = await response.text();
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
                     
-                    return data;
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await response.json();
+                        return data;
+                    }
+                    
+                    const text = await response.text();
+                    return text;
                 } catch (error) {
                     console.error('API Error:', error);
                     throw error;
@@ -676,41 +775,173 @@
             },
             
             fetchTasks: async () => {
+                state.isLoading = true;
                 utils.showLoading(true);
+                
                 try {
-                    const data = await api.request('{{ route("api.tasks.index") }}');
-                    state.allTasks = data.tasks || [];
+                    const endpoint = api.getApiEndpoint();
+                    
+                    if (!endpoint) {
+                        throw new Error('Endpoint tidak tersedia untuk role Anda');
+                    }
+                    
+                    const data = await api.request(endpoint);
+                    
+                    if (Array.isArray(data)) {
+                        state.allTasks = data;
+                    } else if (data.success === true && data.data) {
+                        state.allTasks = data.data;
+                    } else if (data.tasks && Array.isArray(data.tasks)) {
+                        state.allTasks = data.tasks;
+                    } else {
+                        state.allTasks = [];
+                    }
+                    
+                    state.allTasks.forEach(task => {
+                        task.is_overdue = utils.checkOverdue(task.deadline, task.status);
+                    });
+                    
                     state.filteredTasks = [...state.allTasks];
                     render.renderTable();
-                    render.updateStats();
+                    await api.fetchStatistics();
+                    
                 } catch (error) {
-                    utils.showToast('Gagal memuat data: ' + error.message, 'error');
+                    console.error('Error fetching tasks:', error);
+                    utils.showToast('Gagal memuat data tugas', 'error');
                     state.allTasks = [];
                     state.filteredTasks = [];
                     render.renderTable();
                 } finally {
+                    state.isLoading = false;
                     utils.showLoading(false);
                 }
             },
             
+            fetchStatistics: async () => {
+                try {
+                    const endpoint = api.getStatisticsEndpoint();
+                    
+                    if (!endpoint) {
+                        api.calculateStatsFromTasks();
+                        return;
+                    }
+                    
+                    const data = await api.request(endpoint);
+                    
+                    if (data.success !== false) {
+                        const stats = data.data || data;
+                        document.getElementById('totalTasks').textContent = stats.total || 0;
+                        document.getElementById('inProgressTasks').textContent = stats.in_progress || stats.proses || 0;
+                        document.getElementById('completedTasks').textContent = stats.completed || stats.selesai || 0;
+                        document.getElementById('overdueTasks').textContent = stats.overdue || 0;
+                    } else {
+                        api.calculateStatsFromTasks();
+                    }
+                } catch (error) {
+                    api.calculateStatsFromTasks();
+                }
+            },
+            
+            calculateStatsFromTasks: () => {
+                const now = new Date();
+                
+                const stats = {
+                    total: state.allTasks.length,
+                    in_progress: state.allTasks.filter(task => 
+                        task.status === 'proses' || task.status === 'pending'
+                    ).length,
+                    completed: state.allTasks.filter(task => 
+                        task.status === 'selesai'
+                    ).length,
+                    overdue: state.allTasks.filter(task => 
+                        utils.checkOverdue(task.deadline, task.status)
+                    ).length
+                };
+                
+                document.getElementById('totalTasks').textContent = stats.total;
+                document.getElementById('inProgressTasks').textContent = stats.in_progress;
+                document.getElementById('completedTasks').textContent = stats.completed;
+                document.getElementById('overdueTasks').textContent = stats.overdue;
+            },
+            
             fetchKaryawan: async () => {
                 try {
-                    const data = await api.request('{{ route("api.users.index") }}?role=karyawan');
-                    state.karyawanList = data.users || [];
+                    const userRole = state.currentUser.role;
+                    const divisi = state.currentUser.divisi;
+                    const divisiId = state.currentUser.divisi_id;
+                    
+                    let endpoint;
+                    
+                    if (userRole === 'manager_divisi') {
+                        endpoint = '/manager_divisi/api/karyawan-dropdown';
+                    } else {
+                        endpoint = '/api/users/data?role=karyawan';
+                    }
+                    
+                    const data = await api.request(endpoint);
+                    
+                    if (data.success === true && data.data && Array.isArray(data.data)) {
+                        state.karyawanList = data.data;
+                    } else if (Array.isArray(data)) {
+                        state.karyawanList = data;
+                    } else if (data.success === true && Array.isArray(data.karyawan)) {
+                        state.karyawanList = data.karyawan;
+                    } else if (data.data && Array.isArray(data.data)) {
+                        state.karyawanList = data.data;
+                    } else {
+                        state.karyawanList = [];
+                    }
+                    
+                    // Filter Logic
+                    if (state.karyawanList.length > 0) {
+                        state.karyawanList = state.karyawanList.filter(k => {
+                            let karyawanDivisiId = null;
+                            
+                            if (k.divisi_id) {
+                                karyawanDivisiId = k.divisi_id;
+                            } else if (k.user && k.user.divisi_id) {
+                                karyawanDivisiId = k.user.divisi_id;
+                            }
+                            
+                            if (divisiId && karyawanDivisiId) {
+                                if (parseInt(karyawanDivisiId) === parseInt(divisiId)) return true;
+                            }
+                            
+                            if (divisi && divisi.trim() !== "") {
+                                let karyawanDivisi = null;
+                                if (k.divisi) karyawanDivisi = k.divisi;
+                                else if (k.user && k.user.divisi) karyawanDivisi = k.user.divisi;
+
+                                if (karyawanDivisi && karyawanDivisi.toLowerCase() === divisi.toLowerCase()) return true;
+                            }
+                            
+                            return false;
+                        });
+                    }
+                    
                 } catch (error) {
                     console.error('Failed to fetch karyawan:', error);
+                    utils.showToast('Gagal memuat daftar karyawan', 'error');
+                    state.karyawanList = [];
                 }
             },
             
             createTask: async (formData) => {
                 try {
-                    const response = await api.request('{{ route("api.tasks.store") }}', {
+                    const endpoint = api.getCreateTaskEndpoint();
+                    
+                    if (!endpoint) {
+                        throw new Error('Anda tidak memiliki izin untuk membuat tugas');
+                    }
+                    
+                    const response = await api.request(endpoint, {
                         method: 'POST',
                         body: formData
                     });
                     
-                    utils.showToast('Tugas berhasil dibuat');
+                    utils.showToast('Tugas berhasil dibuat', 'success');
                     await api.fetchTasks();
+                    
                     return response;
                 } catch (error) {
                     throw error;
@@ -719,16 +950,32 @@
             
             updateTask: async (id, formData) => {
                 try {
-                    const response = await api.request(`{{ route("api.tasks.update", ":id") }}`.replace(':id', id), {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-HTTP-Method-Override': 'PUT'
-                        }
+                    const userRole = state.currentUser.role;
+                    let endpoint;
+                    
+                    if (userRole === 'manager_divisi') {
+                        endpoint = `/manager_divisi/tasks/${id}`;
+                    } else if (userRole === 'admin') {
+                        endpoint = `/admin/tasks/${id}`;
+                    } else if (userRole === 'general_manager') {
+                        endpoint = `/general_manager/tasks/${id}`;
+                    } else {
+                        throw new Error('Anda tidak memiliki izin untuk mengedit tugas');
+                    }
+                    
+                    const data = {};
+                    for (let [key, value] of formData.entries()) {
+                        data[key] = value;
+                    }
+                    
+                    const response = await api.request(endpoint, {
+                        method: 'PUT',
+                        body: data
                     });
                     
-                    utils.showToast('Tugas berhasil diperbarui');
+                    utils.showToast('Tugas berhasil diperbarui', 'success');
                     await api.fetchTasks();
+                    
                     return response;
                 } catch (error) {
                     throw error;
@@ -737,12 +984,26 @@
             
             deleteTask: async (id) => {
                 try {
-                    const response = await api.request(`{{ route("api.tasks.destroy", ":id") }}`.replace(':id', id), {
+                    const userRole = state.currentUser.role;
+                    let endpoint;
+                    
+                    if (userRole === 'manager_divisi') {
+                        endpoint = `/manager_divisi/tasks/${id}`;
+                    } else if (userRole === 'admin') {
+                        endpoint = `/admin/tasks/${id}`;
+                    } else if (userRole === 'general_manager') {
+                        endpoint = `/general_manager/tasks/${id}`;
+                    } else {
+                        throw new Error('Anda tidak memiliki izin untuk menghapus tugas');
+                    }
+                    
+                    const response = await api.request(endpoint, {
                         method: 'DELETE'
                     });
                     
-                    utils.showToast('Tugas berhasil dihapus');
+                    utils.showToast('Tugas berhasil dihapus', 'success');
                     await api.fetchTasks();
+                    
                     return response;
                 } catch (error) {
                     throw error;
@@ -751,49 +1012,21 @@
             
             getTaskDetail: async (id) => {
                 try {
-                    return await api.request(`{{ route("api.tasks.show", ":id") }}`.replace(':id', id));
-                } catch (error) {
-                    throw error;
-                }
-            },
-            
-            submitTask: async (id, formData) => {
-                try {
-                    const response = await api.request(`{{ route("api.tasks.submit", ":id") }}`.replace(':id', id), {
-                        method: 'POST',
-                        body: formData
-                    });
+                    const userRole = state.currentUser.role;
+                    let endpoint;
                     
-                    utils.showToast('Tugas berhasil disubmit');
-                    await api.fetchTasks();
-                    return response;
-                } catch (error) {
-                    throw error;
-                }
-            },
-            
-            fetchComments: async (taskId) => {
-                try {
-                    const data = await api.request(`{{ route("api.tasks.comments", ":id") }}`.replace(':id', taskId));
-                    return data.comments || [];
-                } catch (error) {
-                    console.error('Failed to fetch comments:', error);
-                    return [];
-                }
-            },
-            
-            storeComment: async (taskId, content) => {
-                try {
-                    const response = await api.request(`{{ route("api.tasks.comments.store", ":id") }}`.replace(':id', taskId), {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ content })
-                    });
+                    if (userRole === 'manager_divisi') {
+                        endpoint = `/manager_divisi/api/tasks/${id}`; 
+                    } else if (userRole === 'admin') {
+                        endpoint = `/admin/tasks/${id}`;
+                    } else if (userRole === 'general_manager') {
+                        endpoint = `/general_manager/tasks/${id}`;
+                    } else {
+                        endpoint = `/api/tasks/${id}`;
+                    }
                     
-                    utils.showToast('Komentar berhasil ditambahkan');
-                    return response;
+                    const data = await api.request(endpoint);
+                    return data.data || data.task || data;
                 } catch (error) {
                     throw error;
                 }
@@ -803,18 +1036,19 @@
         // Render Functions
         const render = {
             filterTasks: () => {
-                const search = document.getElementById('searchInput').value.toLowerCase();
-                const status = document.getElementById('statusFilter').value;
-                const priority = document.getElementById('priorityFilter').value;
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const statusFilter = document.getElementById('statusFilter').value;
                 
                 state.filteredTasks = state.allTasks.filter(task => {
-                    const matchSearch = task.judul?.toLowerCase().includes(search) || 
-                                       task.deskripsi?.toLowerCase().includes(search) ||
-                                       task.assignee_name?.toLowerCase().includes(search);
-                    const matchStatus = status === 'all' || task.status === status;
-                    const matchPriority = priority === 'all' || task.priority === priority;
+                    const searchMatch = !searchTerm || 
+                        (task.judul && task.judul.toLowerCase().includes(searchTerm)) ||
+                        (task.deskripsi && task.deskripsi.toLowerCase().includes(searchTerm)) ||
+                        (task.assignee_name && task.assignee_name.toLowerCase().includes(searchTerm)) ||
+                        (task.assigned_to_name && task.assigned_to_name.toLowerCase().includes(searchTerm));
                     
-                    return matchSearch && matchStatus && matchPriority;
+                    const statusMatch = statusFilter === 'all' || task.status === statusFilter;
+                    
+                    return searchMatch && statusMatch;
                 });
                 
                 state.currentPage = 1;
@@ -822,235 +1056,249 @@
             },
             
             renderTable: () => {
-                const start = (state.currentPage - 1) * state.itemsPerPage;
-                const end = Math.min(start + state.itemsPerPage, state.filteredTasks.length);
-                const tasks = state.filteredTasks.slice(start, end);
+                const startIndex = (state.currentPage - 1) * state.itemsPerPage;
+                const endIndex = Math.min(startIndex + state.itemsPerPage, state.filteredTasks.length);
+                const currentTasks = state.filteredTasks.slice(startIndex, endIndex);
                 
+                // Update counts
                 document.getElementById('totalCount').textContent = state.filteredTasks.length;
-                document.getElementById('panelTitle').textContent = `Tugas ${state.currentUser.divisi}`;
+                document.getElementById('panelTitle').textContent = `Daftar Tugas (${state.filteredTasks.length})`;
                 
-                // Render desktop table
-                const tbody = document.getElementById('desktopTableBody');
-                tbody.innerHTML = '';
-                
-                if (tasks.length === 0) {
+                // Check if no data
+                if (state.filteredTasks.length === 0) {
                     document.getElementById('noDataMessage').style.display = 'block';
                     document.getElementById('desktopTable').style.display = 'none';
                     document.getElementById('mobile-cards').style.display = 'none';
                     document.getElementById('desktopPaginationContainer').style.display = 'none';
-                    document.querySelector('.mobile-pagination').style.display = 'none';
+                    document.getElementById('mobilePaginationContainer').style.display = 'none';
                     return;
                 }
                 
-                tasks.forEach((task, index) => {
+                // Render desktop table
+                const desktopTableBody = document.getElementById('desktopTableBody');
+                desktopTableBody.innerHTML = '';
+                
+                currentTasks.forEach((task, index) => {
+                    const rowNumber = startIndex + index + 1;
                     const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50';
+                    
                     row.innerHTML = `
-                        <td>${start + index + 1}</td>
-                        <td class="font-medium">${task.judul}</td>
-                        <td class="truncate-text" title="${task.deskripsi}">${task.deskripsi?.substring(0, 50) || ''}...</td>
-                        <td class="${task.is_overdue ? 'text-red-600 font-semibold' : ''}">
+                        <td class="text-center">${rowNumber}</td>
+                        <td class="font-medium text-gray-900">${utils.escapeHtml(task.judul || '')}</td>
+                        <td title="${utils.escapeHtml(task.deskripsi || '')}">
+                            <div class="truncate-text">${utils.truncateText(task.deskripsi || '', 50)}</div>
+                        </td>
+                        <td class="${task.is_overdue ? 'text-red-600 font-semibold' : 'text-gray-700'}">
                             ${utils.formatDate(task.deadline)}
                             ${task.is_overdue ? '<br><span class="text-xs text-red-500">Terlambat</span>' : ''}
                         </td>
-                        <td>${task.assignee_name || '-'}</td>
-                        <td><span class="badge ${utils.getDivisiClass(task.target_divisi)}">${task.target_divisi || '-'}</span></td>
-                        <td><span class="badge ${utils.getStatusClass(task.status)}">${utils.getStatusText(task.status)}</span></td>
-                        <td><span class="badge ${utils.getPriorityClass(task.priority)}">${utils.getPriorityText(task.priority)}</span></td>
+                        <td>
+                            <span class="badge badge-default">
+                                ${utils.escapeHtml(task.project_name || '-')}
+                            </span>
+                        </td>
+                        <td>${utils.escapeHtml(task.assignee_name || task.assigned_to_name || '-')}</td>
+                        <td>
+                            <span class="badge ${utils.getDivisiClass(task.target_divisi || task.divisi)}">
+                                ${utils.escapeHtml(task.target_divisi || task.divisi || '-')}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge ${utils.getStatusClass(task.status)}">
+                                ${utils.getStatusText(task.status)}
+                            </span>
+                        </td>
                         <td class="text-center">
                             <div class="flex justify-center gap-2">
-                                <button onclick="modal.showDetail(${task.id})" class="p-2 rounded-full hover:bg-blue-100" title="Detail">
-                                    <span class="material-icons-outlined text-blue-600">visibility</span>
+                                <button onclick="modal.showDetail(${task.id})" class="p-2 rounded-full hover:bg-blue-50 transition-colors" title="Detail">
+                                    <span class="material-icons-outlined text-blue-600 text-lg">visibility</span>
                                 </button>
+                                
                                 ${state.currentUser.role !== 'karyawan' || task.assigned_to == state.currentUser.id ? `
-                                <button onclick="modal.showEdit(${task.id})" class="p-2 rounded-full hover:bg-green-100" title="Edit">
-                                    <span class="material-icons-outlined text-green-600">edit</span>
+                                <button onclick="modal.showEdit(${task.id})" class="p-2 rounded-full hover:bg-green-50 transition-colors" title="Edit">
+                                    <span class="material-icons-outlined text-green-600 text-lg">edit</span>
                                 </button>
                                 ` : ''}
-                                ${state.currentUser.role === 'general_manager' || 
+                                
+                                ${['admin', 'general_manager'].includes(state.currentUser.role) || 
                                   (state.currentUser.role === 'manager_divisi' && task.target_divisi === state.currentUser.divisi) ? `
-                                <button onclick="modal.showDelete(${task.id})" class="p-2 rounded-full hover:bg-red-100" title="Hapus">
-                                    <span class="material-icons-outlined text-red-600">delete</span>
+                                <button onclick="modal.showDelete(${task.id})" class="p-2 rounded-full hover:bg-red-50 transition-colors" title="Hapus">
+                                    <span class="material-icons-outlined text-red-600 text-lg">delete</span>
                                 </button>
                                 ` : ''}
                             </div>
                         </td>
                     `;
-                    tbody.appendChild(row);
+                    
+                    desktopTableBody.appendChild(row);
                 });
                 
                 // Render mobile cards
                 const mobileCards = document.getElementById('mobile-cards');
-                mobileCards.innerHTML = tasks.map(task => `
-                    <div class="bg-white rounded-lg border p-4 shadow-sm">
-                        <div class="flex justify-between mb-2">
-                            <h4 class="font-semibold text-gray-800">${task.judul}</h4>
+                mobileCards.innerHTML = currentTasks.map((task, index) => `
+                    <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-1">${utils.escapeHtml(task.judul || '')}</h4>
+                                <div class="flex items-center gap-2">
+                                    <span class="badge ${utils.getStatusClass(task.status)}">
+                                        ${utils.getStatusText(task.status)}
+                                    </span>
+                                    <span class="text-xs text-gray-500">
+                                        ${utils.formatDate(task.deadline)}
+                                    </span>
+                                </div>
+                            </div>
                             <div class="flex gap-1">
-                                <button onclick="modal.showDetail(${task.id})"><span class="material-icons-outlined text-blue-600">visibility</span></button>
+                                <button onclick="modal.showDetail(${task.id})" class="p-1 hover:bg-blue-50 rounded">
+                                    <span class="material-icons-outlined text-blue-600">visibility</span>
+                                </button>
                                 ${state.currentUser.role !== 'karyawan' || task.assigned_to == state.currentUser.id ? `
-                                <button onclick="modal.showEdit(${task.id})"><span class="material-icons-outlined text-green-600">edit</span></button>
+                                <button onclick="modal.showEdit(${task.id})" class="p-1 hover:bg-green-50 rounded">
+                                    <span class="material-icons-outlined text-green-600">edit</span>
+                                </button>
                                 ` : ''}
                             </div>
                         </div>
-                        <div class="flex flex-wrap gap-2 mb-2">
-                            <span class="badge ${utils.getStatusClass(task.status)}">${utils.getStatusText(task.status)}</span>
-                            <span class="badge ${utils.getPriorityClass(task.priority)}">${utils.getPriorityText(task.priority)}</span>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-2 truncate">${task.deskripsi?.substring(0, 80) || ''}...</p>
-                        <div class="flex justify-between items-center text-sm text-gray-500">
-                            <span>${task.assignee_name || 'Tidak ditugaskan'}</span>
-                            <span class="${task.is_overdue ? 'text-red-600 font-semibold' : ''}">
-                                ${utils.formatDate(task.deadline)}
-                            </span>
+                        
+                        <p class="text-sm text-gray-600 mb-3">${utils.truncateText(task.deskripsi || '', 80)}</p>
+                        
+                        <div class="flex justify-between items-center text-sm">
+                            <div>
+                                <span class="text-gray-700 font-medium">${utils.escapeHtml(task.assignee_name || task.assigned_to_name || 'Tidak ditugaskan')}</span>
+                                <span class="badge ${utils.getDivisiClass(task.target_divisi || task.divisi)} ml-2">
+                                    ${utils.escapeHtml(task.target_divisi || task.divisi || '-')}
+                                </span>
+                            </div>
+                            <div class="mt-1">
+                                <span class="badge badge-default">
+                                    ${utils.escapeHtml(task.project_name || 'Tidak ada Project')}
+                                </span>
+                            </div>
+                            ${task.is_overdue ? '<span class="text-red-600 text-xs font-semibold">Terlambat</span>' : ''}
                         </div>
                     </div>
                 `).join('');
                 
-                // Show appropriate containers
                 document.getElementById('noDataMessage').style.display = 'none';
                 document.getElementById('desktopTable').style.display = 'block';
                 document.getElementById('mobile-cards').style.display = window.innerWidth < 768 ? 'block' : 'none';
+                
                 render.updatePagination();
             },
             
             updatePagination: () => {
                 state.totalPages = Math.ceil(state.filteredTasks.length / state.itemsPerPage);
                 
-                // Desktop pagination
-                const desktopPages = document.getElementById('desktopPageNumbers');
-                desktopPages.innerHTML = '';
+                const desktopPageNumbers = document.getElementById('desktopPageNumbers');
+                desktopPageNumbers.innerHTML = '';
                 
                 for (let i = 1; i <= state.totalPages; i++) {
-                    const button = document.createElement('button');
-                    button.textContent = i;
-                    button.className = `desktop-page-btn ${i === state.currentPage ? 'active' : ''}`;
-                    button.onclick = () => {
+                    const pageButton = document.createElement('button');
+                    pageButton.className = `desktop-page-btn ${i === state.currentPage ? 'active' : ''}`;
+                    pageButton.textContent = i;
+                    pageButton.addEventListener('click', () => {
                         state.currentPage = i;
                         render.renderTable();
-                    };
-                    desktopPages.appendChild(button);
+                    });
+                    desktopPageNumbers.appendChild(pageButton);
                 }
                 
                 document.getElementById('desktopPrevPage').disabled = state.currentPage === 1;
                 document.getElementById('desktopNextPage').disabled = state.currentPage === state.totalPages;
                 
-                // Mobile pagination
-                const mobilePages = document.getElementById('pageNumbers');
-                mobilePages.innerHTML = '';
+                const mobilePageNumbers = document.getElementById('pageNumbers');
+                mobilePageNumbers.innerHTML = '';
                 
                 for (let i = 1; i <= state.totalPages; i++) {
-                    const button = document.createElement('button');
-                    button.textContent = i;
-                    button.className = `w-8 h-8 rounded-full flex items-center justify-center text-sm ${i === state.currentPage ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'}`;
-                    button.onclick = () => {
+                    const pageButton = document.createElement('button');
+                    pageButton.className = `w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${i === state.currentPage ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`;
+                    pageButton.textContent = i;
+                    pageButton.addEventListener('click', () => {
                         state.currentPage = i;
                         render.renderTable();
-                    };
-                    mobilePages.appendChild(button);
+                    });
+                    mobilePageNumbers.appendChild(pageButton);
                 }
                 
                 document.getElementById('prevPage').disabled = state.currentPage === 1;
                 document.getElementById('nextPage').disabled = state.currentPage === state.totalPages;
                 
-                // Show pagination if needed
                 const showPagination = state.totalPages > 1;
                 document.getElementById('desktopPaginationContainer').style.display = showPagination ? 'flex' : 'none';
-                document.querySelector('.mobile-pagination').style.display = (showPagination && window.innerWidth < 768) ? 'flex' : 'none';
-            },
-            
-            updateStats: () => {
-                const tasks = state.allTasks;
-                
-                document.getElementById('totalTasks').textContent = tasks.length;
-                document.getElementById('inProgressTasks').textContent = tasks.filter(t => t.status === 'proses').length;
-                document.getElementById('completedTasks').textContent = tasks.filter(t => t.status === 'selesai').length;
-                document.getElementById('overdueTasks').textContent = tasks.filter(t => t.is_overdue).length;
+                document.getElementById('mobilePaginationContainer').style.display = (showPagination && window.innerWidth < 768) ? 'flex' : 'none';
             }
         };
 
-        // Modal Logic
+        // Modal Functions
         const modal = {
             showDetail: async (id) => {
                 try {
                     const task = await api.getTaskDetail(id);
-                    const comments = await api.fetchComments(id);
-                    
-                    const commentsHtml = comments.length > 0 ? 
-                        comments.map(comment => `
-                            <div class="bg-gray-50 p-3 rounded-lg mb-2">
-                                <div class="flex items-center justify-between mb-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-semibold text-sm text-gray-800">${comment.user?.name || 'User'}</span>
-                                        <span class="text-xs text-gray-500">${comment.formatted_created_at || ''}</span>
-                                    </div>
-                                </div>
-                                <p class="text-gray-700 text-sm">${comment.content}</p>
-                            </div>
-                        `).join('') : 
-                        '<p class="text-gray-500 text-sm italic text-center py-4">Belum ada komentar.</p>';
                     
                     const modalContent = `
                         <div class="space-y-4">
-                            <div class="grid grid-cols-2 gap-3">
-                                <div><h4 class="text-sm text-gray-600">Judul</h4><p class="font-medium">${task.judul}</p></div>
-                                <div><h4 class="text-sm text-gray-600">Deadline</h4><p class="${task.is_overdue ? 'text-red-600 font-semibold' : ''}">${utils.formatDate(task.deadline)}</p></div>
-                                <div><h4 class="text-sm text-gray-600">Status</h4><span class="badge ${utils.getStatusClass(task.status)}">${utils.getStatusText(task.status)}</span></div>
-                                <div><h4 class="text-sm text-gray-600">Prioritas</h4><span class="badge ${utils.getPriorityClass(task.priority)}">${utils.getPriorityText(task.priority)}</span></div>
-                                <div><h4 class="text-sm text-gray-600">Ditugaskan Kepada</h4><p>${task.assignee_name || '-'}</p></div>
-                                <div><h4 class="text-sm text-gray-600">Divisi</h4><p>${task.target_divisi || '-'}</p></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Judul</h4>
+                                    <p class="font-medium text-gray-900">${utils.escapeHtml(task.judul || '')}</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Deadline</h4>
+                                    <p class="${task.is_overdue ? 'text-red-600 font-semibold' : 'text-gray-900'}">
+                                        ${utils.formatDate(task.deadline)}
+                                        ${task.is_overdue ? '<br><span class="text-xs text-red-500">Terlambat</span>' : ''}
+                                    </p>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</h4>
+                                    <span class="badge ${utils.getStatusClass(task.status)}">
+                                        ${utils.getStatusText(task.status)}
+                                    </span>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Ditugaskan Kepada</h4>
+                                    <p class="text-gray-900">${utils.escapeHtml(task.assignee_name || task.assigned_to_name || '-')}</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Divisi</h4>
+                                    <span class="badge ${utils.getDivisiClass(task.target_divisi || task.divisi)}">
+                                        ${utils.escapeHtml(task.target_divisi || task.divisi || '-')}
+                                    </span>
+                                </div>
                             </div>
                             
-                            <div><h4 class="text-sm text-gray-600">Deskripsi</h4><p class="mt-1 whitespace-pre-line text-gray-700">${task.deskripsi}</p></div>
+                            <div>
+                                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Project</h4>
+                                <p class="text-gray-900">${utils.escapeHtml(task.project_name || 'Tidak ada Project')}</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Deskripsi</h4>
+                                <div class="bg-gray-50 p-3 rounded-lg mt-1">
+                                    <p class="text-gray-700 whitespace-pre-line">${utils.escapeHtml(task.deskripsi || 'Tidak ada deskripsi')}</p>
+                                </div>
+                            </div>
                             
                             ${task.catatan ? `
-                            <div><h4 class="text-sm text-gray-600">Catatan</h4><p class="mt-1 whitespace-pre-line text-gray-700">${task.catatan}</p></div>
-                            ` : ''}
-                            
-                            ${task.submission_notes ? `
-                            <div><h4 class="text-sm text-gray-600">Catatan Submission</h4><p class="mt-1 whitespace-pre-line text-gray-700">${task.submission_notes}</p></div>
-                            ` : ''}
-                            
-                            <!-- Komentar -->
-                            <div class="border-t pt-4 mt-4">
-                                <h4 class="text-sm font-bold text-gray-800 mb-3">Diskusi Tugas</h4>
-                                <div id="commentsContainer-${id}" class="max-h-60 overflow-y-auto space-y-2 mb-4">
-                                    ${commentsHtml}
+                            <div>
+                                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Catatan</h4>
+                                <div class="bg-gray-50 p-3 rounded-lg mt-1">
+                                    <p class="text-gray-700 whitespace-pre-line">${utils.escapeHtml(task.catatan)}</p>
                                 </div>
-                                
-                                ${state.currentUser.id == task.assigned_to || state.currentUser.role !== 'karyawan' ? `
-                                <form onsubmit="modal.submitComment(event, ${id})" class="mt-2">
-                                    <div class="flex gap-2">
-                                        <input type="text" name="comment" required placeholder="Tulis komentar..." class="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary form-input">
-                                        <button type="submit" class="btn-primary px-4 py-2 rounded-lg text-sm">Kirim</button>
-                                    </div>
-                                </form>
-                                ` : ''}
-                            </div>
-                            
-                            ${state.currentUser.id == task.assigned_to && task.status !== 'selesai' && task.status !== 'dibatalkan' ? `
-                            <div class="border-t pt-4 mt-4">
-                                <h4 class="text-sm font-bold text-gray-800 mb-3">Submit Tugas</h4>
-                                <form onsubmit="modal.submitTaskForm(event, ${id})">
-                                    <div class="space-y-3">
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">File Hasil Tugas</label>
-                                            <input type="file" name="submission_file" class="form-input">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Catatan</label>
-                                            <textarea name="submission_notes" rows="2" placeholder="Tambahkan catatan..." class="form-input"></textarea>
-                                        </div>
-                                        <button type="submit" class="btn-primary w-full py-2">Submit Tugas</button>
-                                    </div>
-                                </form>
-                            </div>
                             ` : ''}
                             
-                            <button class="close-modal btn-secondary w-full py-2 mt-4">Tutup</button>
+                            <div class="pt-4 border-t">
+                                <button class="close-modal btn-secondary w-full py-2">Tutup</button>
+                            </div>
                         </div>
                     `;
                     
                     utils.createModal('Detail Tugas', modalContent);
+                    
                 } catch (error) {
+                    console.error('Error showing detail:', error);
                     utils.showToast('Gagal memuat detail tugas', 'error');
                 }
             },
@@ -1058,69 +1306,126 @@
             showEdit: async (id) => {
                 try {
                     const task = await api.getTaskDetail(id);
-                    const karyawanOptions = state.karyawanList
-                        .filter(k => k.divisi === state.currentUser.divisi)
-                        .map(k => `<option value="${k.id}" ${task.assigned_to == k.id ? 'selected' : ''}>${k.name}</option>`)
-                        .join('');
+                    
+                    let karyawanOptions = '';
+                    let hasKaryawanInDivisi = false;
+                    
+                    if (state.karyawanList.length > 0) {
+                        state.karyawanList.forEach((k) => {
+                            const karyawanName = k.name || k.nama || 'Tanpa Nama';
+                            const karyawanId = k.id || k.user_id;
+                            const isSelected = task.assigned_to == karyawanId ? 'selected' : '';
+                            
+                            karyawanOptions += `
+                                <option value="${karyawanId}" ${isSelected}>
+                                    ${utils.escapeHtml(karyawanName)}
+                                </option>
+                            `;
+                            
+                            hasKaryawanInDivisi = true;
+                        });
+                    }
+                    
+                    let karyawanSelectHtml = '';
+                    if (hasKaryawanInDivisi) {
+                        karyawanSelectHtml = `
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Ditugaskan Kepada <span class="text-red-500">*</span>
+                                </label>
+                                <select name="assigned_to" class="form-input w-full" required>
+                                    <option value="">-- Pilih Karyawan --</option>
+                                    ${karyawanOptions}
+                                </select>
+                            </div>
+                        `;
+                    } else {
+                        karyawanSelectHtml = `
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <span class="material-icons-outlined text-yellow-600">warning</span>
+                                    </div>
+                                    <div class="ml-3">
+                                        <h3 class="text-sm font-medium text-yellow-800">Tidak Ada Karyawan</h3>
+                                        <div class="mt-2 text-sm text-yellow-700">
+                                            <p>Tidak ditemukan karyawan dalam divisi ini.</p>
+                                        </div>
+                                    </div>
+                                <input type="hidden" name="assigned_to" value="">
+                            </div>
+                        `;
+                    }
+                    
+                    let projectOptions = '';
+                    if (state.projectList.length > 0) {
+                        state.projectList.forEach(p => {
+                            const isSelected = task.project_id == p.id ? 'selected' : '';
+                            projectOptions += `<option value="${p.id}" ${isSelected}>${utils.escapeHtml(p.name)}</option>`;
+                        });
+                    }
                     
                     const modalContent = `
                         <form id="editTaskForm">
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Judul</label>
-                                    <input name="judul" value="${task.judul}" class="form-input" required>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Judul <span class="text-red-500">*</span></label>
+                                    <input type="text" name="judul" value="${utils.escapeHtml(task.judul || '')}" 
+                                           class="form-input" required>
                                 </div>
+                                
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Deskripsi</label>
-                                    <textarea name="deskripsi" rows="3" class="form-input" required>${task.deskripsi}</textarea>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi <span class="text-red-500">*</span></label>
+                                    <textarea name="deskripsi" rows="3" class="form-input" required>${utils.escapeHtml(task.deskripsi || '')}</textarea>
                                 </div>
+                                
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Deadline</label>
-                                    <input type="datetime-local" name="deadline" value="${task.deadline ? new Date(task.deadline).toISOString().slice(0, 16) : ''}" class="form-input" required>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Prioritas</label>
-                                    <select name="priority" class="form-input" required>
-                                        <option value="low" ${task.priority == 'low' ? 'selected' : ''}>Rendah</option>
-                                        <option value="medium" ${task.priority == 'medium' ? 'selected' : ''}>Sedang</option>
-                                        <option value="high" ${task.priority == 'high' ? 'selected' : ''}>Tinggi</option>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Project</label>
+                                    <select name="project_id" class="form-input w-full">
+                                        <option value="">-- Tidak Ada Project --</option>
+                                        ${projectOptions}
                                     </select>
+                                    <p class="text-xs text-gray-500 mt-1">Pilih project terkait (Opsional)</p>
                                 </div>
-                                ${state.currentUser.role !== 'karyawan' ? `
+                                
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Karyawan</label>
-                                    <select name="assigned_to" class="form-input" required>
-                                        <option value="">Pilih Karyawan</option>
-                                        ${karyawanOptions}
-                                    </select>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Deadline <span class="text-red-500">*</span></label>
+                                    <input type="datetime-local" name="deadline" 
+                                           value="${utils.formatDateTimeLocal(task.deadline)}" 
+                                           class="form-input" required>
                                 </div>
+                                
+                                ${karyawanSelectHtml}
+                                
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Status</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
                                     <select name="status" class="form-input" required>
-                                        <option value="pending" ${task.status == 'pending' ? 'selected' : ''}>Pending</option>
-                                        <option value="proses" ${task.status == 'proses' ? 'selected' : ''}>Dalam Proses</option>
-                                        <option value="selesai" ${task.status == 'selesai' ? 'selected' : ''}>Selesai</option>
-                                        <option value="dibatalkan" ${task.status == 'dibatalkan' ? 'selected' : ''}>Dibatalkan</option>
+                                        <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                        <option value="proses" ${task.status === 'proses' ? 'selected' : ''}>Dalam Proses</option>
+                                        <option value="selesai" ${task.status === 'selesai' ? 'selected' : ''}>Selesai</option>
+                                        <option value="dibatalkan" ${task.status === 'dibatalkan' ? 'selected' : ''}>Dibatalkan</option>
                                     </select>
                                 </div>
-                                ` : ''}
+                                
                                 <div>
-                                    <label class="block text-sm font-medium mb-1">Catatan</label>
-                                    <textarea name="catatan" rows="2" class="form-input">${task.catatan || ''}</textarea>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
+                                    <textarea name="catatan" rows="2" class="form-input">${utils.escapeHtml(task.catatan || '')}</textarea>
                                 </div>
-                                <div class="flex gap-2 pt-2">
+                                
+                                <div class="flex gap-2 pt-4">
                                     <button type="button" class="close-modal btn-secondary flex-1 py-2">Batal</button>
-                                    <button type="submit" class="btn-primary flex-1 py-2">Update</button>
+                                    <button type="submit" class="btn-primary flex-1 py-2">Simpan Perubahan</button>
                                 </div>
                             </div>
                         </form>
                     `;
                     
-                    const modalEl = utils.createModal('Edit Tugas', modalContent, async (formData) => {
+                    const modalElement = utils.createModal('Edit Tugas', modalContent, async (formData) => {
                         await api.updateTask(id, formData);
                     });
                     
                 } catch (error) {
+                    console.error('Error showing edit form:', error);
                     utils.showToast('Gagal memuat form edit', 'error');
                 }
             },
@@ -1128,252 +1433,304 @@
             showDelete: async (id) => {
                 try {
                     const task = await api.getTaskDetail(id);
+                    
                     const modalContent = `
                         <div class="text-center">
-                            <span class="material-icons-outlined text-red-600 text-5xl mb-4">warning</span>
-                            <h4 class="font-bold mb-2">Hapus Tugas?</h4>
-                            <p class="text-gray-600 mb-4">"${task.judul}"</p>
-                            <p class="text-sm text-gray-500 mb-6">Tindakan ini tidak dapat dibatalkan.</p>
-                            <div class="flex gap-2 justify-center">
+                            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                                <span class="material-icons-outlined text-red-600 text-2xl">warning</span>
+                            </div>
+                            
+                            <h4 class="text-lg font-semibold text-gray-900 mb-2">Hapus Tugas?</h4>
+                            <p class="text-gray-600 mb-4">
+                                Tugas "<span class="font-medium">${utils.escapeHtml(task.judul || '')}</span>" akan dihapus permanen.
+                            </p>
+                            <p class="text-sm text-gray-500 mb-6">
+                                Tindakan ini tidak dapat dibatalkan.
+                            </p>
+                            
+                            <div class="flex gap-3 justify-center">
                                 <button type="button" class="close-modal btn-secondary px-6 py-2">Batal</button>
-                                <button id="confirmDelete" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700">Hapus</button>
+                                <button id="confirmDeleteBtn" 
+                                        class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                                    Hapus
+                                </button>
                             </div>
                         </div>
                     `;
                     
-                    const modalEl = utils.createModal('Konfirmasi Hapus', modalContent);
+                    const modalElement = utils.createModal('Konfirmasi Hapus', modalContent);
                     
-                    modalEl.querySelector('#confirmDelete').onclick = async () => {
+                    const confirmDeleteBtn = modalElement.querySelector('#confirmDeleteBtn');
+                    confirmDeleteBtn.addEventListener('click', async () => {
                         try {
-                            modalEl.querySelector('#confirmDelete').disabled = true;
+                            confirmDeleteBtn.disabled = true;
+                            confirmDeleteBtn.textContent = 'Menghapus...';
+                            
                             await api.deleteTask(id);
-                            modalEl.remove();
-                        } catch (err) {
-                            utils.showToast(err.message, 'error');
+                        } catch (error) {
+                            console.error('Error deleting task:', error);
+                            utils.showToast('Gagal menghapus tugas', 'error');
+                            modalElement.querySelector('.close-modal').click();
                         }
-                    };
+                    });
                     
                 } catch (error) {
+                    console.error('Error showing delete confirmation:', error);
                     utils.showToast('Gagal memuat konfirmasi hapus', 'error');
                 }
             },
             
             showCreate: () => {
-                const karyawanOptions = state.karyawanList
-                    .filter(k => k.divisi === state.currentUser.divisi)
-                    .map(k => `<option value="${k.id}">${k.name}</option>`)
-                    .join('');
-                
-                const modalContent = `
-                    <form id="createTaskForm">
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Judul</label>
-                                <input name="judul" class="form-input" required placeholder="Masukkan judul tugas">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Deskripsi</label>
-                                <textarea name="deskripsi" rows="3" class="form-input" required placeholder="Deskripsi lengkap tugas"></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Deadline</label>
-                                <input type="datetime-local" name="deadline" class="form-input" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Prioritas</label>
-                                <select name="priority" class="form-input" required>
-                                    <option value="medium">Sedang</option>
-                                    <option value="high">Tinggi</option>
-                                    <option value="low">Rendah</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Karyawan</label>
-                                <select name="assigned_to" class="form-input" required>
-                                    <option value="">Pilih Karyawan</option>
-                                    ${karyawanOptions}
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Catatan</label>
-                                <textarea name="catatan" rows="2" class="form-input" placeholder="Tambahkan catatan (opsional)"></textarea>
-                            </div>
-                            <div class="flex gap-2 pt-2">
-                                <button type="button" class="close-modal btn-secondary flex-1 py-2">Batal</button>
-                                <button type="submit" class="btn-primary flex-1 py-2">Simpan</button>
-                            </div>
-                        </div>
-                    </form>
-                `;
-                
-                utils.createModal('Buat Tugas Baru', modalContent, async (formData) => {
-                    await api.createTask(formData);
-                });
-            },
-            
-            submitComment: async (event, taskId) => {
-                event.preventDefault();
-                const form = event.target;
-                const input = form.querySelector('input[name="comment"]');
-                
-                if (!input.value.trim()) return;
-                
-                const btn = form.querySelector('button[type="submit"]');
-                const originalText = btn.innerHTML;
-                
                 try {
-                    btn.disabled = true;
-                    btn.innerHTML = 'Mengirim...';
+                    let karyawanOptions = '';
+                    let hasKaryawanInDivisi = false;
                     
-                    await api.storeComment(taskId, input.value);
-                    
-                    input.value = '';
-                    
-                    // Refresh comments
-                    const commentsContainer = document.getElementById(`commentsContainer-${taskId}`);
-                    if (commentsContainer) {
-                        const comments = await api.fetchComments(taskId);
-                        commentsContainer.innerHTML = comments.length > 0 ? 
-                            comments.map(comment => `
-                                <div class="bg-gray-50 p-3 rounded-lg mb-2">
-                                    <div class="flex items-center justify-between mb-1">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-semibold text-sm text-gray-800">${comment.user?.name || 'User'}</span>
-                                            <span class="text-xs text-gray-500">${comment.formatted_created_at || ''}</span>
-                                        </div>
-                                    </div>
-                                    <p class="text-gray-700 text-sm">${comment.content}</p>
-                                </div>
-                            `).join('') : 
-                            '<p class="text-gray-500 text-sm italic text-center py-4">Belum ada komentar.</p>';
+                    if (state.karyawanList.length > 0) {
+                        state.karyawanList.forEach((k) => {
+                            const karyawanName = k.name || k.nama || 'Tanpa Nama';
+                            const karyawanId = k.id || k.user_id;
+                            
+                            karyawanOptions += `
+                                <option value="${karyawanId}">
+                                    ${utils.escapeHtml(karyawanName)}
+                                </option>
+                            `;
+                            
+                            hasKaryawanInDivisi = true;
+                        });
                     }
                     
-                } catch (error) {
-                    utils.showToast('Gagal mengirim komentar', 'error');
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                }
-            },
-            
-            submitTaskForm: async (event, taskId) => {
-                event.preventDefault();
-                const form = event.target;
-                const formData = new FormData(form);
-                
-                const btn = form.querySelector('button[type="submit"]');
-                const originalText = btn.innerHTML;
-                
-                try {
-                    btn.disabled = true;
-                    btn.innerHTML = 'Mengirim...';
+                    let projectOptions = '';
+                    if (state.projectList.length > 0) {
+                        state.projectList.forEach(p => {
+                            const projectName = p.name || 'Tidak Ada Project';
+                            const projectId = p.id;
+                            
+                            projectOptions += `<option value="${projectId}">${utils.escapeHtml(projectName)}</option>`;
+                        });
+                    }
                     
-                    await api.submitTask(taskId, formData);
+                    let karyawanSelectHtml = '';
+                    if (hasKaryawanInDivisi) {
+                        karyawanSelectHtml = `
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Ditugaskan Kepada <span class="text-red-500">*</span>
+                                </label>
+                                <select name="assigned_to" class="form-input w-full" required>
+                                    <option value="">-- Pilih Karyawan --</option>
+                                    ${karyawanOptions}
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <span class="font-medium">${state.karyawanList.length} karyawan</span> tersedia di divisi ${state.currentUser.divisi}
+                                </p>
+                            </div>
+                        `;
+                    } else {
+                        karyawanSelectHtml = `
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <span class="material-icons-outlined text-yellow-600">warning</span>
+                                    </div>
+                                    <div class="ml-3">
+                                        <h3 class="text-sm font-medium text-yellow-800">Tidak Ada Karyawan</h3>
+                                        <div class="mt-2 text-sm text-yellow-700">
+                                            <p>Tidak ditemukan karyawan di divisi ini.</p>
+                                            <p class="mt-1">Hubungi administrator untuk menambahkan karyawan ke divisi Anda.</p>
+                                        </div>
+                                    </div>
+                                <input type="hidden" name="assigned_to" value="">
+                            </div>
+                        `;
+                    }
                     
+                    let projectSelectHtml = `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Project</label>
+                            <select id="create_project_id" name="project_id" class="form-input w-full">
+                                <option value="">-- Pilih Project --</option>
+                                ${projectOptions}
+                            </select>
+                        </div>
+                    `;
+                    
+                    const modalContent = `
+                        <form id="createTaskForm">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Judul <span class="text-red-500">*</span></label>
+                                    <input type="text" name="judul" class="form-input" required 
+                                           placeholder="Masukkan judul tugas">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi <span class="text-red-500">*</span></label>
+                                    <textarea name="deskripsi" rows="3" class="form-input" required 
+                                              placeholder="Deskripsi lengkap tugas"></textarea>
+                                </div>
+                                
+                                ${projectSelectHtml}
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Deadline <span class="text-red-500">*</span></label>
+                                    <input type="datetime-local" name="deadline" class="form-input" required>
+                                </div>
+                                
+                                ${karyawanSelectHtml}
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
+                                    <select name="status" class="form-input" required>
+                                        <option value="pending">Pending</option>
+                                        <option value="proses">Dalam Proses</option>
+                                        <option value="selesai">Selesai</option>
+                                        <option value="dibatalkan">Dibatalkan</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
+                                    <textarea name="catatan" rows="2" class="form-input" 
+                                              placeholder="Tambahkan catatan (opsional)"></textarea>
+                                </div>
+                                
+                                <div>
+                                    <input type="hidden" name="target_divisi" value="${state.currentUser.divisi}">
+                                    <input type="hidden" name="target_divisi_id" value="${state.currentUser.divisi_id}">
+                                </div>
+                                
+                                <div class="flex gap-2 pt-4">
+                                    <button type="button" class="close-modal btn-secondary flex-1 py-2">Batal</button>
+                                    <button type="submit" class="btn-primary flex-1 py-2">Buat Tugas</button>
+                                </div>
+                            </div>
+                        </form>
+                    `;
+                    
+                    utils.createModal('Buat Tugas Baru', modalContent, async (formData) => {
+                        if (!formData.has('target_divisi') && state.currentUser.divisi) {
+                            formData.append('target_divisi', state.currentUser.divisi);
+                        }
+                        await api.createTask(formData);
+                    });
                 } catch (error) {
-                    utils.showToast('Gagal submit tugas', 'error');
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
+                    console.error('Error showing create form:', error);
+                    utils.showToast('Gagal memuat form buat tugas', 'error');
                 }
             }
         };
 
         // Initialization
         document.addEventListener('DOMContentLoaded', () => {
-            // Sidebar Toggle
+            
+            const safeAddEventListener = (elementId, eventType, handler) => {
+                const element = document.getElementById(elementId);
+                if (element && element.addEventListener) {
+                    element.addEventListener(eventType, handler);
+                } else {
+                    console.warn(`Element #${elementId} not found`);
+                }
+            };
+
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
             const hamburger = document.getElementById('hamburgerBtn');
             const hamburgerIcon = document.getElementById('hamburgerIcon');
 
-            function toggleSidebar() {
-                sidebar.classList.toggle('translate-x-0');
-                overlay.classList.toggle('active');
-                hamburgerIcon.classList.toggle('hamburger-active');
-            }
-
-            if (hamburger) {
+            if (sidebar && overlay && hamburger && hamburgerIcon) {
+                function toggleSidebar() {
+                    sidebar.classList.toggle('translate-x-0');
+                    overlay.classList.toggle('active');
+                    hamburgerIcon.classList.toggle('hamburger-active');
+                }
                 hamburger.addEventListener('click', toggleSidebar);
                 overlay.addEventListener('click', toggleSidebar);
             }
 
-            // Event Listeners
-            document.getElementById('searchInput').addEventListener('input', render.filterTasks);
-            document.getElementById('statusFilter').addEventListener('change', render.filterTasks);
-            document.getElementById('priorityFilter').addEventListener('change', render.filterTasks);
-            document.getElementById('refreshBtn').addEventListener('click', () => {
+            safeAddEventListener('searchInput', 'input', () => {
+                render.filterTasks();
+            });
+            
+            safeAddEventListener('statusFilter', 'change', () => {
+                render.filterTasks();
+            });
+            
+            safeAddEventListener('refreshBtn', 'click', () => {
                 api.fetchTasks();
-                utils.showToast('Data diperbarui');
+                utils.showToast('Data tugas diperbarui', 'success');
             });
             
-            document.getElementById('closeToast').addEventListener('click', () => {
-                document.getElementById('toast').classList.add('translate-y-20', 'opacity-0');
+            safeAddEventListener('closeToast', 'click', () => {
+                const toast = document.getElementById('toast');
+                if (toast) {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }
             });
             
-            // Pagination Events
-            document.getElementById('desktopPrevPage').addEventListener('click', () => {
+            safeAddEventListener('desktopPrevPage', 'click', () => {
                 if (state.currentPage > 1) {
                     state.currentPage--;
                     render.renderTable();
                 }
             });
             
-            document.getElementById('desktopNextPage').addEventListener('click', () => {
+            safeAddEventListener('desktopNextPage', 'click', () => {
                 if (state.currentPage < state.totalPages) {
                     state.currentPage++;
                     render.renderTable();
                 }
             });
             
-            document.getElementById('prevPage').addEventListener('click', () => {
+            safeAddEventListener('prevPage', 'click', () => {
                 if (state.currentPage > 1) {
                     state.currentPage--;
                     render.renderTable();
                 }
             });
             
-            document.getElementById('nextPage').addEventListener('click', () => {
+            safeAddEventListener('nextPage', 'click', () => {
                 if (state.currentPage < state.totalPages) {
                     state.currentPage++;
                     render.renderTable();
                 }
             });
             
-            // Create Task Button
-            const createBtn = document.getElementById('buatTugasBtn');
-            const createBtnMobile = document.getElementById('buatTugasBtnMobile');
+            safeAddEventListener('buatTugasBtn', 'click', modal.showCreate);
+            safeAddEventListener('buatTugasBtnMobile', 'click', modal.showCreate);
             
-            if (createBtn) {
-                createBtn.addEventListener('click', modal.showCreate);
-            }
-            
-            if (createBtnMobile) {
-                createBtnMobile.addEventListener('click', modal.showCreate);
-            }
-            
-            // Load initial data
-            const init = async () => {
-                await api.fetchKaryawan();
-                await api.fetchTasks();
-            };
-            
-            init();
-            
-            // Auto refresh every 30 seconds
-            setInterval(() => {
-                if (!state.isLoading) {
-                    api.fetchTasks();
-                }
-            }, 30000);
-            
-            // Handle window resize
             window.addEventListener('resize', () => {
                 if (state.filteredTasks.length > 0) {
                     render.renderTable();
                 }
             });
+            
+            const init = async () => {
+                try {
+                    // 1. Load Projects
+                    await api.fetchProjects();
+                    
+                    // 2. Load Karyawan
+                    await api.fetchKaryawan();
+                    
+                    // 3. Load Tasks
+                    await api.fetchTasks();
+                    
+                    if (state.karyawanList.length === 0) {
+                        utils.showToast(`Tidak ada karyawan yang tersedia.`, 'warning');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error in initialization:', error);
+                    utils.showToast('Gagal memuat data awal', 'error');
+                }
+            };
+            
+            init();
         });
+
+        window.modal = modal;
     </script>
 </body>
 </html>
