@@ -689,6 +689,15 @@ Route::middleware(['auth', 'role:finance'])
             Route::post('/', [CashflowController::class, 'store'])->name('store');
         });
 
+        // KWITANSI MANAGEMENT - FINANCE
+        Route::prefix('kwitansi')->name('kwitansi.')->group(function () {
+            Route::get('/', [KwitansiController::class, 'financeIndex'])->name('index');
+            Route::post('/', [KwitansiController::class, 'store'])->name('store');
+            Route::put('/{id}', [KwitansiController::class, 'update'])->name('update');
+            Route::delete('/{id}', [KwitansiController::class, 'destroy'])->name('destroy');
+            Route::get('/{id}/cetak', [KwitansiController::class, 'cetak'])->name('cetak');
+        });
+
         // Route API untuk kategori (dipanggil oleh JavaScript)
         // Diletakkan di luar prefix agar URL-nya bersih /api/kategori/...
         Route::get('/api/kategori/{tipe}', [CashflowController::class, 'getKategoriByType']);

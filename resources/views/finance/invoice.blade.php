@@ -780,6 +780,7 @@
                             <select id="editPaymentMethod" name="payment_method"
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                                 required>
+                                <option value="">Pilih Metode Pembayaran</option>
                                 <option value="Bank Transfer">Bank Transfer</option>
                                 <option value="E-Wallet">E-Wallet</option>
                                 <option value="Credit Card">Credit Card</option>
@@ -1249,55 +1250,73 @@
         function viewPrintInvoice(id) {
             const invoice = allInvoices.find(inv => inv.id == id);
             if (invoice) {
+                const namaPerusahaan = invoice.company_name || '';
+                const nomorOrder = invoice.invoice_no || '';
+                const tanggal = invoice.invoice_date || '';
+                const namaKlien = invoice.client_name || '';
+                const alamat = invoice.company_address || '';
+                const deskripsi = invoice.description || '';
+                const metodePembayaran = invoice.payment_method || '';
+                const subtotal = invoice.subtotal || 0;
+                const taxAmount = invoice.tax || 0;
+                const total = invoice.total || 0;
+                const taxPercentage = invoice.tax || (taxAmount > 0 ? (taxAmount / subtotal * 100) : 0);
+
                 document.getElementById('printInvoiceContent').innerHTML = `
-                    <div style="padding: 30px; background: white; max-width: 800px; margin: 0 auto; font-family: 'Poppins', sans-serif;">
-                        <div style="border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px;">
-                            <h2 style="font-size: 28px; font-weight: bold; margin: 0 0 10px 0;">${invoice.company_name || ''}</h2>
-                            <p style="margin: 5px 0; color: #666;">Invoice #${invoice.invoice_no || ''}</p>
-                            <p style="margin: 5px 0; color: #666;">Tanggal: ${invoice.invoice_date || ''}</p>
+                <div style="padding: 30px; background: white; max-width: 800px; margin: 0 auto; font-family: 'Poppins', sans-serif;">
+                    <div style="border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px;">
+                        <h2 style="font-size: 28px; font-weight: bold; margin: 0 0 10px 0;">${namaPerusahaan}</h2>
+                        <p style="margin: 5px 0; color: #666;">Invoice #${nomorOrder}</p>
+                        <p style="margin: 5px 0; color: #666;">Tanggal: ${tanggal}</p>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px;">
+                        <div>
+                            <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Bill To:</h3>
+                            <p style="margin: 5px 0;"><strong>Nama Klien:</strong> ${namaKlien}</p>
+                            <p style="margin: 5px 0;"><strong>Alamat:</strong> ${alamat}</p>
                         </div>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px;">
-                            <div>
-                                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Bill To:</h3>
-                                <p style="margin: 5px 0;"><strong>Nama Klien:</strong> ${invoice.client_name || ''}</p>
-                                <p style="margin: 5px 0;"><strong>Alamat:</strong> ${invoice.company_address || ''}</p>
-                            </div>
-                            <div>
-                                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Payment Details:</h3>
-                                <p style="margin: 5px 0;"><strong>Metode Pembayaran:</strong> ${invoice.payment_method || ''}</p>
-                            </div>
-                        </div>
-                        
-                        <table style="width: 100%; border-collapse: collapse; margin: 30px 0;">
-                            <thead>
-                                <tr style="background-color: #f2f2f2;">
-                                    <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Deskripsi</th>
-                                    <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Subtotal</th>
-                                    <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Pajak</th>
-                                    <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="border: 1px solid #ddd; padding: 12px;">${invoice.description || ''}</td>
-                                    <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(invoice.subtotal || 0)}</td>
-                                    <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(invoice.tax || 0)}</td>
-                                    <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(invoice.total || 0)}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        
-                        <div style="text-align: right; margin-top: 30px;">
-                            <table style="width: 300px; margin-left: auto; border-collapse: collapse;">
-                                <tr style="font-size: 18px; font-weight: bold;">
-                                    <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;"><strong>Total:</strong></td>
-                                    <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;">Rp ${formatNumber(invoice.total || 0)}</td>
-                                </tr>
-                            </table>
+                        <div>
+                            <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Payment Details:</h3>
+                            <p style="margin: 5px 0;"><strong>Metode Pembayaran:</strong> ${metodePembayaran}</p>
                         </div>
                     </div>
-                `;
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                        <thead>
+                            <tr style="background-color: #f2f2f2;">
+                                <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Deskripsi</th>
+                                <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Subtotal</th>
+                                <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Pajak</th>
+                                <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 12px;">${deskripsi}</td>
+                                <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(subtotal)}</td>
+                                <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(taxAmount)}</td>
+                                <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(total)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div style="text-align: right; margin-top: 30px;">
+                        <table style="width: 300px; margin-left: auto; border-collapse: collapse;">
+                            <tr style="font-size: 18px; font-weight: bold;">
+                                <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;"><strong>Total:</strong></td>
+                                <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;">Rp ${formatNumber(total)}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div style="border-top: 2px solid #333; padding-top: 20px; margin-top: 40px;">
+                        <p style="margin: 10px 0;"><strong>Catatan:</strong></p>
+                        <p style="margin: 5px 0; color: #666;">Silakan transfer ke rekening yang tertera atau bayar sesuai metode pembayaran di atas.</p>
+                        <p style="margin: 30px 0 10px 0; font-style: italic;">Terima kasih atas kerjasamanya.</p>
+                    </div>
+                </div>
+            `;
 
                 showModal(document.getElementById('printInvoiceModal'));
             } else {
