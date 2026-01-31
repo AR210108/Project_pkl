@@ -822,86 +822,86 @@ class PengumumanController extends Controller
     }
 
     /**
- * API: Mendapatkan tanggal-tanggal pengumuman yang relevan untuk General Manager.
- * Hanya menampilkan pengumuman yang dibuat oleh atau ditugaskan ke GM.
- */
-public function getAnnouncementDatesForGM(): JsonResponse
-{
-    try {
-        $user = Auth::user();
-        if ($user->role !== 'general_manager') {
-            return response()->json(['message' => 'Access denied'], 403);
-        }
+     * API: Mendapatkan tanggal-tanggal pengumuman yang relevan untuk General Manager.
+     * Hanya menampilkan pengumuman yang dibuat oleh atau ditugaskan ke GM.
+     */
+    public function getAnnouncementDatesForGM(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            if ($user->role !== 'general_manager') {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
 
-        // Ambil pengumuman yang dibuat oleh GM atau ditugaskan ke GM
-        $dates = Pengumuman::where(function($query) use ($user) {
+            // Ambil pengumuman yang dibuat oleh GM atau ditugaskan ke GM
+            $dates = Pengumuman::where(function ($query) use ($user) {
                 $query->where('user_id', $user->id) // Yang dibuat olehnya
-                      ->orWhereHas('users', function($q) use ($user) { // Yang ditugaskan kepadanya
-                          $q->where('users.id', $user->id);
-                      });
+                    ->orWhereHas('users', function ($q) use ($user) { // Yang ditugaskan kepadanya
+                        $q->where('users.id', $user->id);
+                    });
             })
-            ->select('created_at') // Gunakan created_at karena kolom 'tanggal' tidak ada
-            ->distinct()
-            ->orderBy('created_at', 'asc')
-            ->get()
-            ->pluck('created_at');
+                ->select('created_at') // Gunakan created_at karena kolom 'tanggal' tidak ada
+                ->distinct()
+                ->orderBy('created_at', 'asc')
+                ->get()
+                ->pluck('created_at');
 
-        // Format tanggal ke Y-m-d
-        return response()->json($dates->map(function($date) {
-            return $date->format('Y-m-d');
-        })->toArray());
+            // Format tanggal ke Y-m-d
+            return response()->json($dates->map(function ($date) {
+                return $date->format('Y-m-d');
+            })->toArray());
 
-    } catch (\Exception $e) {
-        return response()->json(['message' => 'Server Error'], 500);
-    }
-}
-
-/**
- * API: Mendapatkan daftar pengumuman yang relevan untuk General Manager.
- * Hanya menampilkan pengumuman yang dibuat oleh atau ditugaskan ke GM.
- */
-public function getAnnouncementsForGM(): JsonResponse
-{
-    try {
-        $user = Auth::user();
-        if ($user->role !== 'general_manager') {
-            return response()->json(['message' => 'Access denied'], 403);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server Error'], 500);
         }
-
-        // Ambil pengumuman yang dibuat oleh GM atau ditugaskan ke GM
-        $announcements = Pengumuman::where(function($query) use ($user) {
-                $query->where('user_id', $user->id)
-                      ->orWhereHas('users', function($q) use ($user) {
-                          $q->where('users.id', $user->id);
-                      });
-            })
-            ->with(['creator:id,name'])
-            ->orderBy('created_at', 'desc')
-            ->limit(20)
-            ->get();
-
-        // Format data untuk response
-        $formattedData = $announcements->map(function ($announcement) {
-            return [
-                'id' => $announcement->id,
-                'judul' => $announcement->judul,
-                'isi_pesan' => $announcement->isi_pesan,
-                'ringkasan' => substr(strip_tags($announcement->isi_pesan), 0, 100) . '...',
-                'tanggal_indo' => $announcement->created_at->translatedFormat('d F Y'), // Gunakan created_at
-                'lampiran_url' => $announcement->lampiran ? asset('storage/' . $announcement->lampiran) : null,
-                'creator' => $announcement->creator ? $announcement->creator->name : 'System',
-            ];
-        });
-
-        return response()->json([
-            'success' => true,
-            'data' => $formattedData
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json(['message' => 'Server Error'], 500);
     }
-}
+
+    /**
+     * API: Mendapatkan daftar pengumuman yang relevan untuk General Manager.
+     * Hanya menampilkan pengumuman yang dibuat oleh atau ditugaskan ke GM.
+     */
+    public function getAnnouncementsForGM(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            if ($user->role !== 'general_manager') {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
+
+            // Ambil pengumuman yang dibuat oleh GM atau ditugaskan ke GM
+            $announcements = Pengumuman::where(function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->orWhereHas('users', function ($q) use ($user) {
+                        $q->where('users.id', $user->id);
+                    });
+            })
+                ->with(['creator:id,name'])
+                ->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->get();
+
+            // Format data untuk response
+            $formattedData = $announcements->map(function ($announcement) {
+                return [
+                    'id' => $announcement->id,
+                    'judul' => $announcement->judul,
+                    'isi_pesan' => $announcement->isi_pesan,
+                    'ringkasan' => substr(strip_tags($announcement->isi_pesan), 0, 100) . '...',
+                    'tanggal_indo' => $announcement->created_at->translatedFormat('d F Y'), // Gunakan created_at
+                    'lampiran_url' => $announcement->lampiran ? asset('storage/' . $announcement->lampiran) : null,
+                    'creator' => $announcement->creator ? $announcement->creator->name : 'System',
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $formattedData
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server Error'], 500);
+        }
+    }
 
     /**
      * API: Debug endpoint untuk testing API pengumuman untuk GM
@@ -973,6 +973,130 @@ public function getAnnouncementsForGM(): JsonResponse
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ], 500);
+        }
+    }
+
+    /**
+     * API: Mendapatkan tanggal-tanggal pengumuman untuk Owner.
+     * Owner melihat semua pengumuman.
+     */
+    public function getAnnouncementDatesForOwner(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            if ($user->role !== 'owner') {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
+
+            $dates = Pengumuman::select('created_at')->distinct()->orderBy('created_at', 'asc')->pluck('created_at');
+            return response()->json($dates->map(fn($date) => $date->format('Y-m-d'))->toArray());
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server Error'], 500);
+        }
+    }
+
+    /**
+     * API: Mendapatkan daftar pengumuman untuk Owner.
+     */
+    public function getAnnouncementsForOwner(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            if ($user->role !== 'owner') {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
+
+            $announcements = Pengumuman::with(['creator:id,name'])
+                ->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->get();
+
+            $formattedData = $announcements->map(function ($announcement) {
+                return [
+                    'id' => $announcement->id,
+                    'judul' => $announcement->judul,
+                    'isi_pesan' => $announcement->isi_pesan,
+                    'ringkasan' => substr(strip_tags($announcement->isi_pesan), 0, 100) . '...',
+                    'tanggal_indo' => $announcement->created_at->translatedFormat('d F Y'),
+                    'lampiran_url' => $announcement->lampiran ? asset('storage/' . $announcement->lampiran) : null,
+                    'creator' => $announcement->creator ? $announcement->creator->name : 'System',
+                ];
+            });
+
+            return response()->json(['success' => true, 'data' => $formattedData]);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server Error'], 500);
+        }
+    }
+
+    /**
+     * API: Mendapatkan tanggal-tanggal pengumuman untuk Manager Divisi.
+     * Hanya menampilkan pengumuman yang ditujukan langsung ke manager.
+     */
+    public function getAnnouncementDatesForManager(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            if ($user->role !== 'manager_divisi') {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
+
+            // Query yang lebih aman: Hanya pengumuman yang ditujukan ke user ini
+            $dates = Pengumuman::whereHas('users', function ($query) use ($user) {
+                $query->where('users.id', $user->id);
+            })
+                ->select('created_at') // Gunakan created_at
+                ->distinct()
+                ->orderBy('created_at', 'asc')
+                ->get()
+                ->pluck('created_at');
+
+            return response()->json($dates->map(fn($date) => $date->format('Y-m-d'))->toArray());
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server Error'], 500);
+        }
+    }
+
+    /**
+     * API: Mendapatkan daftar pengumuman untuk Manager Divisi.
+     * Hanya menampilkan pengumuman yang ditujukan langsung ke manager.
+     */
+    public function getAnnouncementsForManager(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            if ($user->role !== 'manager_divisi') {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
+
+            // Query yang lebih aman: Hanya pengumuman yang ditujukan ke user ini
+            $announcements = Pengumuman::whereHas('users', function ($query) use ($user) {
+                $query->where('users.id', $user->id);
+            })
+                ->with(['creator:id,name'])
+                ->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->get();
+
+            $formattedData = $announcements->map(function ($announcement) {
+                return [
+                    'id' => $announcement->id,
+                    'judul' => $announcement->judul,
+                    'isi_pesan' => $announcement->isi_pesan,
+                    'ringkasan' => substr(strip_tags($announcement->isi_pesan), 0, 100) . '...',
+                    'tanggal_indo' => $announcement->created_at->translatedFormat('d F Y'),
+                    'lampiran_url' => $announcement->lampiran ? asset('storage/' . $announcement->lampiran) : null,
+                    'creator' => $announcement->creator ? $announcement->creator->name : 'System',
+                ];
+            });
+
+            return response()->json(['success' => true, 'data' => $formattedData]);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server Error'], 500);
         }
     }
 }

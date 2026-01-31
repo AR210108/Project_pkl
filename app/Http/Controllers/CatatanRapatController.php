@@ -872,4 +872,145 @@ class CatatanRapatController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * API: Mendapatkan tanggal-tanggal catatan rapat untuk Owner.
+     * Owner melihat semua catatan rapat di seluruh perusahaan.
+     */
+    public function getMeetingNotesDatesForOwner(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            if ($user->role !== 'owner') {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
+
+            $dates = CatatanRapat::select('tanggal')->distinct()->orderBy('tanggal', 'asc')->pluck('tanggal');
+            return response()->json($dates->map(fn($date) => Carbon::parse($date)->format('Y-m-d'))->toArray());
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server Error'], 500);
+        }
+    }
+
+    /**
+     * API: Mendapatkan catatan rapat berdasarkan tanggal untuk Owner.
+     */
+    public function getMeetingNotesByDateForOwner(Request $request): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            if ($user->role !== 'owner') {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
+
+            $request->validate(['date' => 'required|date_format:Y-m-d']);
+
+            $meetingNotes = CatatanRapat::whereDate('tanggal', $request->date)
+                ->with(['user:id,name', 'peserta:id,name', 'penugasan:id,name'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            $formattedNotes = $meetingNotes->map(function ($note) {
+                return [
+                    'id' => $note->id,
+                    'topik' => $note->topik,
+                    'hasil_diskusi' => $note->hasil_diskusi,
+                    'keputusan' => $note->keputusan,
+                    'tanggal' => $note->tanggal,
+                    'formatted_tanggal' => Carbon::parse($note->tanggal)->translatedFormat('d F Y'),
+                    'creator_name' => $note->user ? $note->user->name : 'System',
+                    'peserta' => $note->peserta->pluck('name')->join(', '),
+                    'penugasan' => $note->penugasan->pluck('name')->join(', '),
+                ];
+            });
+
+            return response()->json(['success' => true, 'data' => $formattedNotes]);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server Error'], 500);
+        }
+    }
+
+    /**
+     * API: Mendapatkan tanggal-tanggal catatan rapat untuk Manager Divisi.
+     * Hanya menampilkan meeting yang relevan untuk manager (dibuat, diikuti, atau ditugaskan).
+     */
+    public function getMeetingNotesDatesForManager(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            if ($user->role !== 'manager_divisi') {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
+
+            $dates = CatatanRapat::where(function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->orWhereHas('peserta', function ($q) use ($user) {
+                        $q->where('users.id', $user->id);
+                    })
+                    ->orWhereHas('penugasan', function ($q) use ($user) {
+                        $q->where('users.id', $user->id);
+                    });
+            })
+                ->select('tanggal')
+                ->distinct()
+                ->orderBy('tanggal', 'asc')
+                ->get()
+                ->pluck('tanggal');
+
+            return response()->json($dates->map(fn($date) => Carbon::parse($date)->format('Y-m-d'))->toArray());
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server Error'], 500);
+        }
+    }
+
+    /**
+     * API: Mendapatkan catatan rapat berdasarkan tanggal untuk Manager Divisi.
+     */
+    public function getMeetingNotesByDateForManager(Request $request): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            if ($user->role !== 'manager_divisi') {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
+
+            $request->validate(['date' => 'required|date_format:Y-m-d']);
+
+            $meetingNotes = CatatanRapat::where(function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->orWhereHas('peserta', function ($q) use ($user) {
+                        $q->where('users.id', $user->id);
+                    })
+                    ->orWhereHas('penugasan', function ($q) use ($user) {
+                        $q->where('users.id', $user->id);
+                    });
+            })
+                ->whereDate('tanggal', $request->date)
+                ->with(['user:id,name', 'peserta:id,name', 'penugasan:id,name'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            $formattedNotes = $meetingNotes->map(function ($note) {
+                return [
+                    'id' => $note->id,
+                    'topik' => $note->topik,
+                    'hasil_diskusi' => $note->hasil_diskusi,
+                    'keputusan' => $note->keputusan,
+                    'tanggal' => $note->tanggal,
+                    'formatted_tanggal' => Carbon::parse($note->tanggal)->translatedFormat('d F Y'),
+                    'creator_name' => $note->user ? $note->user->name : 'System',
+                    'peserta' => $note->peserta->pluck('name')->join(', '),
+                    'penugasan' => $note->penugasan->pluck('name')->join(', '),
+                ];
+            });
+
+            return response()->json(['success' => true, 'data' => $formattedNotes]);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server Error'], 500);
+        }
+    }
 }
