@@ -1120,52 +1120,57 @@
     </div>
 
     <!-- Popup Modal untuk Edit Karyawan -->
-    <div id="editKaryawanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Karyawan</h3>
-                    <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form id="editKaryawanForm" class="space-y-4" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" id="editId" name="id">
+<!-- Popup Modal untuk Edit Karyawan -->
+<div id="editKaryawanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Edit Karyawan</h3>
+                <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <form id="editKaryawanForm" class="space-y-4" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <input type="hidden" id="editId" name="id">
+                <input type="hidden" id="editUserId" name="user_id">
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Nama -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
-                            <input type="text" id="editNama" name="nama" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan nama karyawan">
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Nama -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
+                        <input type="text" id="editNama" name="nama" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            placeholder="Masukkan nama karyawan">
+                    </div>
 
-                        <!-- Email -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                            <input type="email" id="editEmail" name="email" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan email">
-                        </div>
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                        <input type="email" id="editEmail" name="email" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            placeholder="Masukkan email">
+                    </div>
 
-                        <!-- Jabatan -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan *</label>
-                            <input type="text" id="editJabatan" name="jabatan" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan jabatan">
-                        </div>
+                    <!-- Jabatan (DISABLED - dari role user) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan *</label>
+                        <input type="text" id="editJabatan" name="jabatan" required readonly
+                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 cursor-not-allowed"
+                            placeholder="Diambil dari role user">
+                        <p class="text-xs text-gray-500 mt-1">Jabatan diambil dari role user</p>
+                    </div>
 
-                        <!-- Divisi -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
-                            <input type="text" id="editDivisi" name="divisi"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan divisi">
-                        </div>
+                    <!-- Divisi (Dropdown dari tabel divisi) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
+                        <select name="divisi" id="editDivisiSelect"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                            <option value="">Pilih Divisi</option>
+                            <!-- Options akan diisi oleh JavaScript -->
+                        </select>
+                    </div>
 
                         <!-- Gaji -->
 <div>
@@ -1184,45 +1189,53 @@
                                 placeholder="Masukkan nomor telepon">
                         </div>
 
-                        <!-- Alamat -->
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
-                            <textarea id="editAlamat" name="alamat" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                rows="3" placeholder="Masukkan alamat lengkap"></textarea>
-                        </div>
+                    <!-- Kontak -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kontak *</label>
+                        <input type="text" id="editKontak" name="kontak" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            placeholder="Masukkan nomor telepon">
+                    </div>
 
-                        <!-- Foto -->
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
-                            <div class="flex items-center space-x-4">
-                                <div id="editFotoPreview"
-                                    class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-gray-500 text-2xl">person</span>
-                                </div>
-                                <div>
-                                    <input type="file" name="foto" id="editFotoInput" class="hidden"
-                                        accept="image/*">
-                                    <button type="button" id="pilihEditFotoBtn"
-                                        class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                                        Pilih Foto
-                                    </button>
-                                    <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG maks. 2MB</p>
-                                </div>
+                    <!-- Alamat -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
+                        <textarea id="editAlamat" name="alamat" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            rows="3" placeholder="Masukkan alamat lengkap"></textarea>
+                    </div>
+
+                    <!-- Foto -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
+                        <div class="flex items-center space-x-4">
+                            <div id="editFotoPreview"
+                                class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
+                                <span class="material-icons-outlined text-gray-500 text-2xl">person</span>
+                            </div>
+                            <div>
+                                <input type="file" name="foto" id="editFotoInput" class="hidden"
+                                    accept="image/*">
+                                <button type="button" id="pilihEditFotoBtn"
+                                    class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                    Pilih Foto
+                                </button>
+                                <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG maks. 2MB</p>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" id="cancelEditBtn"
-                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">Update Data</button>
-                    </div>
-                </form>
-            </div>
+                <div class="flex justify-end gap-2 mt-6">
+                    <button type="button" id="cancelEditBtn"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">Update Data</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
     <!-- Popup Modal untuk Konfirmasi Hapus -->
     <div id="deleteKaryawanModal"

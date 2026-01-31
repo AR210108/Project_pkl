@@ -395,15 +395,35 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         @media print {
-            body * { visibility: hidden; }
-            .print-container, .print-container * { visibility: visible; }
-            .print-container { position: absolute; left: 0; top: 0; width: 100%; }
-            .no-print { display: none !important; }
+            body * {
+                visibility: hidden;
+            }
+
+            .print-container,
+            .print-container * {
+                visibility: visible;
+            }
+
+            .print-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+
+            .no-print {
+                display: none !important;
+            }
         }
 
         .error-input {
@@ -431,12 +451,16 @@
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
-                        <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama perusahaan, nomor invoice, atau klien..." type="text" />
+                        <span
+                            class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                        <input id="searchInput"
+                            class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input"
+                            placeholder="Cari nama perusahaan, nomor invoice, atau klien..." type="text" />
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <div class="relative">
-                            <button id="filterBtn" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
+                            <button id="filterBtn"
+                                class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
                                 <span class="material-icons-outlined text-sm">filter_list</span>
                                 Filter
                             </button>
@@ -463,7 +487,8 @@
                                 </div>
                             </div>
                         </div>
-                        <button id="buatInvoiceBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
+                        <button id="buatInvoiceBtn"
+                            class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
                             <span class="material-icons-outlined">add</span>
                             <span class="hidden sm:inline">Buat Invoice</span>
                             <span class="sm:hidden">Buat</span>
@@ -479,7 +504,8 @@
                             Daftar Invoice
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">0</span> invoice</span>
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount"
+                                    class="font-semibold text-text-light">0</span> invoice</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -497,7 +523,8 @@
                                             <th style="min-width: 200px;">Alamat</th>
                                             <th style="min-width: 200px;">Deskripsi</th>
                                             <th style="min-width: 120px;">Subtotal</th>
-                                            <th style="min-width: 120px;">Pajak</th>
+                                            <th style="min-width: 100px;">Pajak (%)</th>
+                                            <th style="min-width: 120px;">Jumlah Pajak</th>
                                             <th style="min-width: 120px;">Total</th>
                                             <th style="min-width: 150px;">Metode Pembayaran</th>
                                             <th style="min-width: 100px; text-align: center;">Aksi</th>
@@ -547,7 +574,8 @@
     </div>
 
     <!-- Modal Buat Invoice -->
-    <div id="buatInvoiceModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div id="buatInvoiceModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
@@ -561,58 +589,78 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Perusahaan *</label>
-                            <input type="text" id="company_name" name="company_name" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                            <input type="text" id="company_name" name="company_name"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
                             <span class="error-message" id="company_name_error"></span>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Invoice *</label>
-                            <input type="date" id="invoice_date" name="invoice_date" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                            <input type="date" id="invoice_date" name="invoice_date"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
                             <span class="error-message" id="invoice_date_error"></span>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Invoice *</label>
-                            <input type="text" id="invoice_no" name="invoice_no" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                            <input type="text" id="invoice_no" name="invoice_no"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
                             <span class="error-message" id="invoice_no_error"></span>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Klien *</label>
-                            <input type="text" id="client_name" name="client_name" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                            <input type="text" id="client_name" name="client_name"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
                             <span class="error-message" id="client_name_error"></span>
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Perusahaan *</label>
-                        <input type="text" id="company_address" name="company_address" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                        <input type="text" id="company_address" name="company_address"
+                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                            required>
                         <span class="error-message" id="company_address_error"></span>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="description" name="description" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"></textarea>
+                        <textarea id="description" name="description" rows="3"
+                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"></textarea>
                         <span class="error-message" id="description_error"></span>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Subtotal (Rp) *</label>
-                            <input type="number" id="subtotal" name="subtotal" min="0" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                            <input type="number" id="subtotal" name="subtotal" min="0" step="1"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
                             <span class="error-message" id="subtotal_error"></span>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pajak (Rp) *</label>
-                            <input type="number" id="tax" name="tax" min="0" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
-                            <span class="error-message" id="tax_error"></span>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pajak (%) *</label>
+                            <input type="number" id="tax_percentage" name="tax_percentage" min="0"
+                                max="100" step="0.01"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
+                            <span class="error-message" id="tax_percentage_error"></span>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp) *</label>
-                            <input type="number" id="total" name="total" min="0" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                            <input type="number" id="total" name="total" min="0" step="1"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                readonly required>
                             <span class="error-message" id="total_error"></span>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran *</label>
-                            <select id="payment_method" name="payment_method" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                            <select id="payment_method" name="payment_method"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
                                 <option value="">Pilih Metode Pembayaran</option>
                                 <option value="Bank Transfer">Bank Transfer</option>
                                 <option value="E-Wallet">E-Wallet</option>
@@ -623,7 +671,8 @@
                         </div>
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" id="cancelBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="button" id="cancelBtn"
+                            class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
                         <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Buat Invoice</button>
                     </div>
                 </form>
@@ -632,7 +681,8 @@
     </div>
 
     <!-- Modal Edit Invoice -->
-    <div id="editInvoiceModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div id="editInvoiceModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
@@ -648,58 +698,78 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Perusahaan *</label>
-                            <input type="text" id="editCompanyName" name="company_name" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                            <input type="text" id="editCompanyName" name="company_name"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
                             <span class="error-message" id="edit_company_name_error"></span>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Invoice *</label>
-                            <input type="date" id="editInvoiceDate" name="invoice_date" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                            <input type="date" id="editInvoiceDate" name="invoice_date"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
                             <span class="error-message" id="edit_invoice_date_error"></span>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Invoice *</label>
-                            <input type="text" id="editInvoiceNo" name="invoice_no" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                            <input type="text" id="editInvoiceNo" name="invoice_no"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
                             <span class="error-message" id="edit_invoice_no_error"></span>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Klien *</label>
-                            <input type="text" id="editClientName" name="client_name" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                            <input type="text" id="editClientName" name="client_name"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
                             <span class="error-message" id="edit_client_name_error"></span>
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Perusahaan *</label>
-                        <input type="text" id="editCompanyAddress" name="company_address" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                        <input type="text" id="editCompanyAddress" name="company_address"
+                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                            required>
                         <span class="error-message" id="edit_company_address_error"></span>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="editDescription" name="description" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"></textarea>
+                        <textarea id="editDescription" name="description" rows="3"
+                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"></textarea>
                         <span class="error-message" id="edit_description_error"></span>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Subtotal (Rp) *</label>
-                            <input type="number" id="editSubtotal" name="subtotal" min="0" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                            <input type="number" id="editSubtotal" name="subtotal" min="0" step="1"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
                             <span class="error-message" id="edit_subtotal_error"></span>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pajak (Rp) *</label>
-                            <input type="number" id="editTax" name="tax" min="0" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
-                            <span class="error-message" id="edit_tax_error"></span>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pajak (%) *</label>
+                            <input type="number" id="editTaxPercentage" name="tax_percentage" min="0"
+                                max="100" step="0.01"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
+                            <span class="error-message" id="edit_tax_percentage_error"></span>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp) *</label>
-                            <input type="number" id="editTotal" name="total" min="0" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                            <input type="number" id="editTotal" name="total" min="0" step="1"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                readonly required>
                             <span class="error-message" id="edit_total_error"></span>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran *</label>
-                            <select id="editPaymentMethod" name="payment_method" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input" required>
+                            <select id="editPaymentMethod" name="payment_method"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
                                 <option value="Bank Transfer">Bank Transfer</option>
                                 <option value="E-Wallet">E-Wallet</option>
                                 <option value="Credit Card">Credit Card</option>
@@ -707,10 +777,11 @@
                             </select>
                             <span class="error-message" id="edit_payment_method_error"></span>
                         </div>
-        
+
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" id="cancelEditBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="button" id="cancelEditBtn"
+                            class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
                         <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Invoice</button>
                     </div>
                 </form>
@@ -719,7 +790,8 @@
     </div>
 
     <!-- Modal Hapus Invoice -->
-    <div id="deleteInvoiceModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div id="deleteInvoiceModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
@@ -730,13 +802,17 @@
                 </div>
                 <form id="deleteInvoiceForm" class="space-y-4">
                     <div class="mb-6">
-                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus invoice untuk <span id="deleteInvoiceNama" class="font-semibold"></span> dengan nomor invoice <span id="deleteInvoiceNomor" class="font-semibold"></span>?</p>
+                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus invoice untuk <span
+                                id="deleteInvoiceNama" class="font-semibold"></span> dengan nomor invoice <span
+                                id="deleteInvoiceNomor" class="font-semibold"></span>?</p>
                         <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
                         <input type="hidden" id="deleteInvoiceId" name="id">
                     </div>
                     <div class="flex justify-end gap-2">
-                        <button type="button" id="cancelDeleteBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
+                        <button type="button" id="cancelDeleteBtn"
+                            class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
                     </div>
                 </form>
             </div>
@@ -744,14 +820,17 @@
     </div>
 
     <!-- Modal Print Invoice -->
-    <div id="printInvoiceModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+    <div id="printInvoiceModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div
+            class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                 <div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white">Print Invoice</h3>
                     <p class="text-gray-600 dark:text-gray-400">Preview invoice sebelum mencetak</p>
                 </div>
-                <button onclick="closePrintInvoiceModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <button onclick="closePrintInvoiceModal()"
+                    class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                     <span class="material-icons">close</span>
                 </button>
             </div>
@@ -759,8 +838,10 @@
                 <div id="printInvoiceContent" class="print-container"></div>
             </div>
             <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
-                <button onclick="closePrintInvoiceModal()" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Tutup</button>
-                <button onclick="printInvoice()" class="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                <button onclick="closePrintInvoiceModal()"
+                    class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Tutup</button>
+                <button onclick="printInvoice()"
+                    class="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
                     <span class="material-icons mr-2">print</span>Cetak
                 </button>
             </div>
@@ -782,6 +863,48 @@
     </div>
 
     <script>
+        // ==================== CALCULATION FUNCTIONS ====================
+        function calculateTotal() {
+            const subtotal = parseFloat(document.getElementById('subtotal').value) || 0;
+            const taxPercentage = parseFloat(document.getElementById('tax_percentage').value) || 0;
+
+            const taxAmount = subtotal * (taxPercentage / 100);
+            const total = subtotal + taxAmount;
+
+            document.getElementById('total').value = Math.round(total);
+        }
+
+        function calculateTotalEdit() {
+            const subtotal = parseFloat(document.getElementById('editSubtotal').value) || 0;
+            const taxPercentage = parseFloat(document.getElementById('editTaxPercentage').value) || 0;
+
+            const taxAmount = subtotal * (taxPercentage / 100);
+            const total = subtotal + taxAmount;
+
+            document.getElementById('editTotal').value = Math.round(total);
+        }
+
+        // ==================== UPDATE EVENT LISTENERS ====================
+        // Tambahkan event listeners untuk perhitungan otomatis
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... kode yang ada sebelumnya ...
+
+            // Event listeners untuk perhitungan otomatis
+            // Event untuk perhitungan otomatis
+            const subtotalInput = document.getElementById('subtotal');
+            const taxPercentageInput = document.getElementById('tax_percentage');
+            const editSubtotalInput = document.getElementById('editSubtotal');
+            const editTaxPercentageInput = document.getElementById('editTaxPercentage');
+            if (subtotalInput && taxPercentageInput) {
+                subtotalInput.addEventListener('input', calculateTotal);
+                taxPercentageInput.addEventListener('input', calculateTotal);
+            }
+
+            if (editSubtotalInput && editTaxPercentageInput) {
+                editSubtotalInput.addEventListener('input', calculateTotalEdit);
+                editTaxPercentageInput.addEventListener('input', calculateTotalEdit);
+            }
+        });
         // ==================== GLOBAL VARIABLES ====================
         let allInvoices = [];
         let filteredInvoices = [];
@@ -946,6 +1069,11 @@
             clearValidationErrors('create');
 
             // Collect form data
+            const subtotal = parseFloat(document.getElementById('subtotal').value) || 0;
+            const taxPercentage = parseFloat(document.getElementById('tax_percentage').value) || 0;
+            const taxAmount = Math.round(subtotal * (taxPercentage / 100));
+            const total = subtotal + taxAmount;
+
             const formData = {
                 invoice_no: document.getElementById('invoice_no').value.trim(),
                 invoice_date: document.getElementById('invoice_date').value,
@@ -954,9 +1082,10 @@
                 client_name: document.getElementById('client_name').value.trim(),
                 payment_method: document.getElementById('payment_method').value,
                 description: document.getElementById('description').value.trim(),
-                subtotal: Math.round(parseFloat(document.getElementById('subtotal').value) || 0),
-                tax: Math.round(parseFloat(document.getElementById('tax').value) || 0),
-                total: Math.round(parseFloat(document.getElementById('total').value) || 0)
+                subtotal: Math.round(subtotal),
+                tax: taxAmount,
+                tax_percentage: taxPercentage,
+                total: Math.round(total)
             };
 
             console.log('Data yang akan dikirim:', formData);
@@ -1003,8 +1132,13 @@
 
         function handleUpdateInvoice(e) {
             e.preventDefault();
-            
+
             const id = document.getElementById('editInvoiceId').value;
+            const subtotal = parseFloat(document.getElementById('editSubtotal').value) || 0;
+            const taxPercentage = parseFloat(document.getElementById('editTaxPercentage').value) || 0;
+            const taxAmount = Math.round(subtotal * (taxPercentage / 100));
+            const total = subtotal + taxAmount;
+
             const formData = {
                 invoice_no: document.getElementById('editInvoiceNo').value.trim(),
                 invoice_date: document.getElementById('editInvoiceDate').value,
@@ -1013,54 +1147,54 @@
                 client_name: document.getElementById('editClientName').value.trim(),
                 payment_method: document.getElementById('editPaymentMethod').value,
                 description: document.getElementById('editDescription').value.trim(),
-                subtotal: Math.round(parseFloat(document.getElementById('editSubtotal').value) || 0),
-                tax: Math.round(parseFloat(document.getElementById('editTax').value) || 0),
-                total: Math.round(parseFloat(document.getElementById('editTotal').value) || 0)
+                subtotal: Math.round(subtotal),
+                tax: taxAmount,
+                tax_percentage: taxPercentage,
+                total: Math.round(total)
             };
-            
+
             console.log('Updating invoice:', id, formData);
-            
+
             fetch(`/admin/invoice/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(async response => {
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    if (response.status === 422 && data.errors) {
-                        showValidationErrorsFromServer(data.errors, 'edit');
-                        throw new Error('Validasi gagal');
-                    } else {
-                        throw new Error(data.message || 'Gagal mengupdate invoice');
+                    method: 'PUT',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(async response => {
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        if (response.status === 422 && data.errors) {
+                            showValidationErrorsFromServer(data.errors, 'edit');
+                            throw new Error('Validasi gagal');
+                        } else {
+                            throw new Error(data.message || 'Gagal mengupdate invoice');
+                        }
                     }
-                }
-                
-                return data;
-            })
-            .then(data => {
-                showPopup('success', 'Berhasil', 'Invoice berhasil diperbarui');
-                hideModal(document.getElementById('editInvoiceModal'));
-                loadInvoices();
-            })
-            .catch(error => {
-                console.error('Error updating invoice:', error);
-                if (error.message !== 'Validasi gagal') {
-                    showPopup('error', 'Gagal', error.message || 'Gagal mengupdate invoice');
-                }
-            });
+
+                    return data;
+                })
+                .then(data => {
+                    showPopup('success', 'Berhasil', 'Invoice berhasil diperbarui');
+                    hideModal(document.getElementById('editInvoiceModal'));
+                    loadInvoices();
+                })
+                .catch(error => {
+                    console.error('Error updating invoice:', error);
+                    if (error.message !== 'Validasi gagal') {
+                        showPopup('error', 'Gagal', error.message || 'Gagal mengupdate invoice');
+                    }
+                });
         }
 
         function editInvoice(id) {
             console.log('Edit invoice:', id);
 
-            // Fetch invoice data - GANTI ENDPOINT JIKA PERLU
-            // Coba endpoint yang berbeda karena mungkin ada masalah route
+            // Fetch invoice data
             fetch(`/admin/invoice/${id}?edit=true`, {
                     method: 'GET',
                     headers: {
@@ -1089,7 +1223,7 @@
                 })
                 .then(data => {
                     console.log('Invoice data received:', data);
-                    
+
                     let invoice;
                     if (data.success) {
                         invoice = data.data || data.invoice;
@@ -1098,53 +1232,74 @@
                     } else {
                         invoice = data;
                     }
-                    
+
                     if (!invoice) {
                         throw new Error('Data invoice tidak ditemukan');
                     }
 
                     console.log('Invoice data to edit:', invoice);
 
+                    // Calculate tax percentage from tax amount
+                    const subtotal = invoice.subtotal || 0;
+                    const taxAmount = invoice.tax || 0;
+                    const taxPercentage = subtotal > 0 ? (taxAmount / subtotal * 100) : 0;
+
                     // Map backend fields to frontend form fields
                     document.getElementById('editInvoiceId').value = invoice.id;
-                    document.getElementById('editCompanyName').value = invoice.company_name || invoice.nama_perusahaan || '';
-                    document.getElementById('editInvoiceDate').value = invoice.invoice_date ? 
-                        (invoice.invoice_date.includes('T') ? invoice.invoice_date.split('T')[0] : invoice.invoice_date) : '';
+                    document.getElementById('editCompanyName').value = invoice.company_name || invoice
+                        .nama_perusahaan || '';
+                    document.getElementById('editInvoiceDate').value = invoice.invoice_date ?
+                        (invoice.invoice_date.includes('T') ? invoice.invoice_date.split('T')[0] : invoice
+                            .invoice_date) : '';
                     document.getElementById('editInvoiceNo').value = invoice.invoice_no || invoice.nomor_order || '';
                     document.getElementById('editClientName').value = invoice.client_name || invoice.nama_klien || '';
-                    document.getElementById('editCompanyAddress').value = invoice.company_address || invoice.alamat || '';
+                    document.getElementById('editCompanyAddress').value = invoice.company_address || invoice.alamat ||
+                        '';
                     document.getElementById('editDescription').value = invoice.description || invoice.deskripsi || '';
-                    document.getElementById('editSubtotal').value = invoice.subtotal || 0;
-                    document.getElementById('editTax').value = invoice.tax || 0;
+                    document.getElementById('editSubtotal').value = subtotal;
+                    document.getElementById('editTaxPercentage').value = taxPercentage.toFixed(2);
                     document.getElementById('editTotal').value = invoice.total || 0;
-                    document.getElementById('editPaymentMethod').value = invoice.payment_method || invoice.metode_pembayaran || 'Bank Transfer';
-                
+                    document.getElementById('editPaymentMethod').value = invoice.payment_method || invoice
+                        .metode_pembayaran || 'Bank Transfer';
 
                     // Show edit modal
                     showModal(document.getElementById('editInvoiceModal'));
                 })
                 .catch(error => {
                     console.error('Error loading invoice:', error);
-                    
+
                     // Fallback: Coba ambil dari data yang sudah dimuat
                     const invoice = allInvoices.find(inv => inv.id == id);
                     if (invoice) {
                         console.log('Using cached invoice data:', invoice);
-                        
+
+                        // Calculate tax percentage from tax amount
+                        const subtotal = invoice.subtotal || 0;
+                        const taxAmount = invoice.tax || 0;
+                        const taxPercentage = subtotal > 0 ? (taxAmount / subtotal * 100) : 0;
+
                         // Map backend fields to frontend form fields
                         document.getElementById('editInvoiceId').value = invoice.id;
-                        document.getElementById('editCompanyName').value = invoice.company_name || invoice.nama_perusahaan || '';
-                        document.getElementById('editInvoiceDate').value = invoice.invoice_date ? 
-                            (invoice.invoice_date.includes('T') ? invoice.invoice_date.split('T')[0] : invoice.invoice_date) : '';
-                        document.getElementById('editInvoiceNo').value = invoice.invoice_no || invoice.nomor_order || '';
-                        document.getElementById('editClientName').value = invoice.client_name || invoice.nama_klien || '';
-                        document.getElementById('editCompanyAddress').value = invoice.company_address || invoice.alamat || '';
-                        document.getElementById('editDescription').value = invoice.description || invoice.deskripsi || '';
-                        document.getElementById('editSubtotal').value = invoice.subtotal || 0;
-                        document.getElementById('editTax').value = invoice.tax || 0;
+                        document.getElementById('editCompanyName').value = invoice.company_name || invoice
+                            .nama_perusahaan || '';
+                        document.getElementById('editInvoiceDate').value = invoice.invoice_date ?
+                            (invoice.invoice_date.includes('T') ? invoice.invoice_date.split('T')[0] : invoice
+                                .invoice_date) : '';
+                        document.getElementById('editInvoiceNo').value = invoice.invoice_no || invoice.nomor_order ||
+                            '';
+                        document.getElementById('editClientName').value = invoice.client_name || invoice.nama_klien ||
+                            '';
+                        document.getElementById('editCompanyAddress').value = invoice.company_address || invoice
+                            .alamat || '';
+                        document.getElementById('editDescription').value = invoice.description || invoice.deskripsi ||
+                            '';
+                        document.getElementById('editSubtotal').value = subtotal;
+                        document.getElementById('editTaxPercentage').value = taxPercentage.toFixed(
+                            2); // PERBAIKAN DI SINI
                         document.getElementById('editTotal').value = invoice.total || 0;
-                        document.getElementById('editPaymentMethod').value = invoice.payment_method || invoice.metode_pembayaran || 'Bank Transfer';
-                      
+                        document.getElementById('editPaymentMethod').value = invoice.payment_method || invoice
+                            .metode_pembayaran || 'Bank Transfer';
+
                         // Show edit modal
                         showModal(document.getElementById('editInvoiceModal'));
                     } else {
@@ -1160,7 +1315,8 @@
 
             // Set data in delete modal
             document.getElementById('deleteInvoiceId').value = id;
-            document.getElementById('deleteInvoiceNama').textContent = invoice.company_name || invoice.nama_perusahaan || '';
+            document.getElementById('deleteInvoiceNama').textContent = invoice.company_name || invoice.nama_perusahaan ||
+                '';
             document.getElementById('deleteInvoiceNomor').textContent = invoice.invoice_no || invoice.nomor_order || '';
 
             // Show delete modal
@@ -1176,28 +1332,28 @@
                 deleteInvoiceForm.addEventListener('submit', function(e) {
                     e.preventDefault();
                     const id = document.getElementById('deleteInvoiceId').value;
-                    
+
                     fetch(`/admin/invoice/${id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showPopup('success', 'Berhasil', 'Invoice berhasil dihapus');
-                            hideModal(document.getElementById('deleteInvoiceModal'));
-                            loadInvoices();
-                        } else {
-                            showPopup('error', 'Gagal', data.message || 'Gagal menghapus invoice');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error deleting invoice:', error);
-                        showPopup('error', 'Gagal', 'Gagal menghapus invoice');
-                    });
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': csrfToken,
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                showPopup('success', 'Berhasil', 'Invoice berhasil dihapus');
+                                hideModal(document.getElementById('deleteInvoiceModal'));
+                                loadInvoices();
+                            } else {
+                                showPopup('error', 'Gagal', data.message || 'Gagal menghapus invoice');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error deleting invoice:', error);
+                            showPopup('error', 'Gagal', 'Gagal menghapus invoice');
+                        });
                 });
             }
 
@@ -1230,7 +1386,8 @@
                 const subtotal = invoice.subtotal || 0;
                 const taxAmount = invoice.tax || 0;
                 const total = invoice.total || 0;
-                const taxPercentage = invoice.tax_percentage || invoice.pajak || (taxAmount > 0 ? (taxAmount / subtotal * 100) : 0);
+                const taxPercentage = invoice.tax_percentage || invoice.pajak || (taxAmount > 0 ? (taxAmount / subtotal *
+                    100) : 0);
 
                 document.getElementById('printInvoiceContent').innerHTML = `
                 <div style="padding: 30px; background: white; max-width: 800px; margin: 0 auto; font-family: 'Poppins', sans-serif;">
@@ -1333,25 +1490,29 @@
                 const taxAmount = invoice.tax || 0;
                 const total = invoice.total || 0;
 
+                // PERBAIKAN DI SINI: Hitung persentase pajak
+                const taxPercentage = subtotal > 0 ? ((taxAmount / subtotal) * 100) : 0;
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${rowNumber}</td>
-                    <td>${tanggal}</td>
-                    <td>${namaPerusahaan}</td>
-                    <td>${nomorOrder}</td>
-                    <td>${namaKlien}</td>
-                    <td>${alamat}</td>
-                    <td>${deskripsi}</td>
-                    <td>Rp ${formatNumber(subtotal)}</td>
-                    <td>Rp ${formatNumber(taxAmount)}</td>
-                    <td>Rp ${formatNumber(total)}</td>
-                    <td>${metodePembayaran}</td>
-                    <td class="text-center">
-                        <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700 mx-1">Edit</button>
-                        <button onclick="deleteInvoice(${invoice.id})" class="text-red-500 hover:text-red-700 mx-1">Hapus</button>
-                        <button onclick="printInvoiceModal(${invoice.id})" class="text-green-500 hover:text-green-700 mx-1">Print</button>
-                    </td>
-                `;
+            <td>${rowNumber}</td>
+            <td>${tanggal}</td>
+            <td>${namaPerusahaan}</td>
+            <td>${nomorOrder}</td>
+            <td>${namaKlien}</td>
+            <td>${alamat}</td>
+            <td>${deskripsi}</td>
+            <td>Rp ${formatNumber(subtotal)}</td>
+            <td>${taxPercentage.toFixed(2)}%</td>
+            <td>Rp ${formatNumber(taxAmount)}</td> 
+            <td>Rp ${formatNumber(total)}</td>
+            <td>${metodePembayaran}</td>
+            <td class="text-center">
+                <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700 mx-1">Edit</button>
+                <button onclick="deleteInvoice(${invoice.id})" class="text-red-500 hover:text-red-700 mx-1">Hapus</button>
+                <button onclick="printInvoiceModal(${invoice.id})" class="text-green-500 hover:text-green-700 mx-1">Print</button>
+            </td>
+        `;
                 desktopTableBody.appendChild(row);
             });
 
@@ -1533,13 +1694,13 @@
         function clearValidationErrors(formType = 'create') {
             const prefix = formType === 'create' ? '' : 'edit_';
             const form = formType === 'create' ? buatInvoiceForm : editInvoiceForm;
-            
+
             // Clear error styling
             const inputs = form.querySelectorAll('.form-input');
             inputs.forEach(input => {
                 input.classList.remove('error-input');
             });
-            
+
             // Clear error messages
             const errorElements = form.querySelectorAll('.error-message');
             errorElements.forEach(element => {
@@ -1549,15 +1710,15 @@
 
         function showValidationErrorsFromServer(errors, formType = 'create') {
             const prefix = formType === 'create' ? '' : 'edit_';
-            
+
             for (const field in errors) {
                 const input = document.getElementById(`${prefix}${field}`);
                 const errorElement = document.getElementById(`${prefix}${field}_error`);
-                
+
                 if (input) {
                     input.classList.add('error-input');
                 }
-                
+
                 if (errorElement) {
                     errorElement.textContent = errors[field][0];
                 }
@@ -1565,4 +1726,5 @@
         }
     </script>
 </body>
+
 </html>

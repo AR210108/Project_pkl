@@ -584,7 +584,7 @@
                                                             </button>
                                                             <button
                                                                 class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                                onclick="openEditModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
+                                                                onclick="openEditModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
                                                                 title="Edit">
                                                                 <span class="material-icons-outlined">edit</span>
                                                             </button>
@@ -622,7 +622,7 @@
                                                 </button>
                                                 <button
                                                     class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                    onclick="openEditModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
+                                                    onclick="openEditModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
                                                     title="Edit">
                                                     <span class="material-icons-outlined">edit</span>
                                                 </button>
@@ -635,10 +635,6 @@
                                             </div>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2 text-sm">
-                                            <div>
-                                                <p class="text-text-muted-light">Harga</p>
-                                                <p class="font-medium">{{ $item->harga }}</p>
-                                            </div>
                                             <div>
                                                 <p class="text-text-muted-light">Status</p>
                                                 <p>
@@ -904,13 +900,6 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                        <input type="text" name="harga" id="editHarga"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                            required> <!-- ID: editHarga -->
-                    </div>
-
-                    <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
                         <input type="date" name="deadline" id="editDeadline"
                             class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
@@ -1082,7 +1071,6 @@
         const editId = document.getElementById('editId');
         const editNama = document.getElementById('editNama');
         const editDeskripsi = document.getElementById('editDeskripsi');
-        const editHarga = document.getElementById('editHarga');
         const editDeadline = document.getElementById('editDeadline');
         const editForm = document.getElementById('editForm');
         const editModal = document.getElementById('editModal');
@@ -1091,17 +1079,15 @@
             editId: !!editId,
             editNama: !!editNama,
             editDeskripsi: !!editDeskripsi,
-            editHarga: !!editHarga,
             editDeadline: !!editDeadline,
             editForm: !!editForm,
             editModal: !!editModal
         });
         
-        if (editId && editNama && editDeskripsi && editHarga && editDeadline && editForm && editModal) {
+        if (editId && editNama && editDeskripsi && editDeadline && editForm && editModal) {
             editId.value = id;
             editNama.value = nama;
             editDeskripsi.value = deskripsi;
-            editHarga.value = harga;
             editDeadline.value = deadline;
             
             // Update form action dengan route yang benar

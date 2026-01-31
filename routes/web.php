@@ -302,6 +302,8 @@ Route::delete('/karyawan/delete/{id}', [AdminKaryawanController::class, 'destroy
         Route::post('/project', [DataProjectController::class, 'store'])->name('project.store');
         Route::put('/project/{id}', [DataProjectController::class, 'update'])->name('project.update');
         Route::delete('/project/{id}', [DataProjectController::class, 'destroy'])->name('project.destroy');
+        Route::post('/admin/project/sync/{layananId}', [DataProjectController::class, 'syncFromLayanan'])
+    ->name('admin.project.sync');
 
         Route::get('/surat_kerjasama', function () {
             return redirect()->route('admin.surat_kerjasama.index');
@@ -754,6 +756,7 @@ Route::middleware(['auth', 'role:manager_divisi'])
         Route::get('/pengelola_tugas', function () {
             return view('manager_divisi.pengelola_tugas');
         })->name('pengelola_tugas');
+            Route::get('/daftar_karyawan', [AdminKaryawanController::class, 'karyawanDivisi'])->name('daftar_karyawan');
 
         Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsensiManagerDivisi'])->name('kelola_absensi');
 

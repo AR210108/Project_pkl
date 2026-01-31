@@ -1,5 +1,4 @@
 <?php
-// app/Models/Project.php
 
 namespace App\Models;
 
@@ -25,7 +24,6 @@ class Project extends Model
         'penanggung_jawab_id',
     ];
 
-    // TAMBAHKAN CASTING
     protected $casts = [
         'progres' => 'integer',
         'status' => 'string',
@@ -48,15 +46,32 @@ class Project extends Model
     // Atau gunakan mutator untuk status
     public function setStatusAttribute($value)
     {
-        // Normalisasi status
-        $statusMap = [
-            'pending' => 'Pending',
-            'proses' => 'Proses',
-            'selesai' => 'Selesai',
-        ];
+        return $this->belongsTo(Layanan::class, 'layanan_id');
+    }
+    
+    public function penanggungJawab()
+    {
+        return $this->belongsTo(User::class, 'penanggung_jawab_id');
+    }
+    
+    /**
+     * Event ketika project dibuat
+     */
+    protected static function boot()
+    {
+        parent::boot();
         
-        $lowerValue = strtolower($value);
-        $this->attributes['status'] = $statusMap[$lowerValue] ?? ucfirst($value);
+        // Ketika project dibuat, ambil data dari layanan
+        static::creating(function ($project) {
+            if ($project->layanan_id && !$project->nama) {
+                $layanan = Layanan::find($project->layanan_id);
+                if ($layanan) {
+                    $project->nama = $layanan->nama_layanan;
+                    $project->deskripsi = $layanan->deskripsi;
+                    $project->harga = $layanan->harga;
+                }
+            }
+        });
     }
 
     // **TAMBAHKAN ACCESSOR UNTUK STATUS YANG AMAN**
