@@ -17,24 +17,36 @@ class KwitansiController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-public function index(Request $request)
-{
-    $query = Kwitansi::with('invoice')->latest();
+    public function index(Request $request)
+    {
+        try {
+            $query = Kwitansi::with('invoice')->latest();
 
-    if ($request->has('search') && $request->search != '') {
-        $searchTerm = $request->search;
-        $query->where(function ($q) use ($searchTerm) {
-            $q->where('nama_klien', 'LIKE', "%{$searchTerm}%")
-                ->orWhere('nomor_order', 'LIKE', "%{$searchTerm}%")
-                ->orWhere('nama_perusahaan', 'LIKE', "%{$searchTerm}%")
-                ->orWhere('deskripsi', 'LIKE', "%{$searchTerm}%");
-        });
+            if ($request->has('search') && $request->search != '') {
+                $searchTerm = $request->search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('nama_klien', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('nomor_order', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('nama_perusahaan', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('deskripsi', 'LIKE', "%{$searchTerm}%");
+                });
+            }
+
+            $kwitansis = $query->get();
+
+            // Always return JSON for API routes
+            return response()->json([
+                'success' => true,
+                'message' => 'Data kwitansi berhasil diambil',
+                'data' => $kwitansis
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data: ' . $e->getMessage()
+            ], 500);
+        }
     }
-
-    $kwitansis = $query->paginate(10);
-
-    return view('admin.kwitansi', compact('kwitansis'));
-}
 
 
 public function financeIndex(Request $request)
@@ -86,22 +98,22 @@ public function financeIndex(Request $request)
      */
     public function store(Request $request): JsonResponse
     {
-        // Validate the request
-        $validated = $request->validate([
-            'invoice_id' => 'nullable|exists:invoices,id',
-            'nama_perusahaan' => 'required|string|max:255',
-            'nomor_order' => 'required|string|unique:kwitansis,nomor_order',
-            'tanggal' => 'required|date',
-            'nama_klien' => 'required|string|max:255',
-            'deskripsi' => 'required|string',
-            'harga' => 'required|numeric|min:0',
-            'sub_total' => 'nullable|numeric|min:0',
-            'fee_maintenance' => 'nullable|numeric|min:0',
-            'total' => 'nullable|numeric|min:0',
-            'status' => 'required|in:Pembayawan Awal,Lunas',
-        ]);
-
         try {
+            // Validate the request
+            $validated = $request->validate([
+                'invoice_id' => 'nullable|exists:invoices,id',
+                'nama_perusahaan' => 'required|string|max:255',
+                'nomor_order' => 'required|string|unique:kwitansis,nomor_order',
+                'tanggal' => 'required|date',
+                'nama_klien' => 'required|string|max:255',
+                'deskripsi' => 'required|string',
+                'harga' => 'required|numeric|min:0',
+                'sub_total' => 'nullable|numeric|min:0',
+                'fee_maintenance' => 'nullable|numeric|min:0',
+                'total' => 'nullable|numeric|min:0',
+                'status' => 'required|in:Pembayawan Awal,Lunas',
+            ]);
+
             // Create new kwitansi
             $kwitansi = Kwitansi::create($validated);
 
@@ -110,12 +122,25 @@ public function financeIndex(Request $request)
                 'message' => 'Kwitansi berhasil dibuat!',
                 'data' => $kwitansi
             ], 201); // 201 Created
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Handle validation errors
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors()
+            ], 422);
         } catch (QueryException $e) {
             // Handle database errors (constraint violations, etc.)
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan pada database. Silakan coba lagi.',
                 'error' => $e->getMessage()
+            ], 500);
+        } catch (\Exception $e) {
+            // Handle general exceptions
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -138,22 +163,22 @@ public function financeIndex(Request $request)
             ], 404);
         }
 
-        // Validate the request
-        $validated = $request->validate([
-            'invoice_id' => 'nullable|exists:invoices,id',
-            'nama_perusahaan' => 'required|string|max:255',
-            'nomor_order' => 'required|string|unique:kwitansis,nomor_order,' . $id,
-            'tanggal' => 'required|date',
-            'nama_klien' => 'required|string|max:255',
-            'deskripsi' => 'required|string',
-            'harga' => 'required|numeric|min:0',
-            'sub_total' => 'nullable|numeric|min:0',
-            'fee_maintenance' => 'nullable|numeric|min:0',
-            'total' => 'nullable|numeric|min:0',
-            'status' => 'required|in:Pembayawan Awal,Lunas',
-        ]);
-
         try {
+            // Validate the request
+            $validated = $request->validate([
+                'invoice_id' => 'nullable|exists:invoices,id',
+                'nama_perusahaan' => 'required|string|max:255',
+                'nomor_order' => 'required|string|unique:kwitansis,nomor_order,' . $id,
+                'tanggal' => 'required|date',
+                'nama_klien' => 'required|string|max:255',
+                'deskripsi' => 'required|string',
+                'harga' => 'required|numeric|min:0',
+                'sub_total' => 'nullable|numeric|min:0',
+                'fee_maintenance' => 'nullable|numeric|min:0',
+                'total' => 'nullable|numeric|min:0',
+                'status' => 'required|in:Pembayawan Awal,Lunas',
+            ]);
+
             // Update kwitansi
             $kwitansi->update($validated);
 
@@ -162,12 +187,25 @@ public function financeIndex(Request $request)
                 'message' => 'Kwitansi berhasil diperbarui!',
                 'data' => $kwitansi
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Handle validation errors
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors()
+            ], 422);
         } catch (QueryException $e) {
             // Handle database errors
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan pada database. Silakan coba lagi.',
                 'error' => $e->getMessage()
+            ], 500);
+        } catch (\Exception $e) {
+            // Handle general exceptions
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
     }

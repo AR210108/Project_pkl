@@ -119,6 +119,7 @@ class AdminKaryawanController extends Controller
             return [
                 'id' => $k->id,
                 'nama' => $k->nama,
+                'email' => $k->email,
                 'jabatan' => $k->jabatan,
                 'divisi' => $k->divisi,
                 'gaji' => $k->gaji,
@@ -286,11 +287,9 @@ class AdminKaryawanController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    // Di method update(), ganti \DB:: dengan DB::
-    // Di method update(), perbaiki sinkronisasi divisi
+/**
+ * Update the specified resource in storage.
+ */
 public function update(Request $request, $id)
 {
     try {
@@ -302,12 +301,13 @@ public function update(Request $request, $id)
             'email' => 'required|email|max:255',
             'jabatan' => 'required|string|max:255',
             'divisi' => 'nullable|string|max:255',
-            'gaji' => 'nullable|string|max:255',
+            'gaji' => 'nullable|string|max:100',
             'alamat' => 'required|string',
             'kontak' => 'required|string|max:255',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
+        \Log::info('Validation passed', ['validated' => $validated]);
         DB::beginTransaction();
 
         // Update data karyawan
@@ -315,12 +315,27 @@ public function update(Request $request, $id)
         $karyawan->email = $validated['email'];
         $karyawan->jabatan = $validated['jabatan'];
         $karyawan->divisi = $validated['divisi'] ?? null;
-        $karyawan->gaji = $validated['gaji'] ?? null;
         $karyawan->alamat = $validated['alamat'];
         $karyawan->kontak = $validated['kontak'];
+        
+        // PERBAIKAN DI SINI: Hanya update gaji jika user adalah finance
+        $user = auth()->user();
+        
+        if ($user && $user->role === 'finance') {
+            // Hanya finance yang bisa update gaji
+            if (isset($validated['gaji']) && $validated['gaji'] !== 'Belum diatur') {
+                $karyawan->gaji = $validated['gaji'];
+            }
+        } else {
+            // Untuk non-finance (admin), jangan update gaji
+            // Tetap gunakan nilai gaji yang sudah ada
+            \Log::info('Non-finance user attempted to update gaji, keeping existing value');
+        }
 
         // Jika ada upload foto baru
         if ($request->hasFile('foto')) {
+            \Log::info('Foto uploaded', ['filename' => $request->file('foto')->getClientOriginalName()]);
+            
             // Hapus foto lama dari folder public/karyawan
             if ($karyawan->foto && file_exists(public_path('karyawan/' . $karyawan->foto))) {
                 unlink(public_path('karyawan/' . $karyawan->foto));
@@ -396,7 +411,18 @@ public function update(Request $request, $id)
             'message' => 'Data Karyawan dan User Berhasil Diupdate!',
             'data' => $karyawan->load('user')
         ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Validation error in update:', ['errors' => $e->errors()]);
+        return response()->json([
+            'success' => false, 
+            'message' => 'Validasi gagal',
+            'errors' => $e->errors()
+        ], 422);
     } catch (\Exception $e) {
+        \Log::error('Update karyawan error:', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
         DB::rollBack();
         \Log::error('Update karyawan error:', ['error' => $e->getMessage()]);
         return response()->json([

@@ -748,6 +748,7 @@
                             <select id="editPaymentMethod" name="payment_method"
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                                 required>
+                                <option value="">Pilih Metode Pembayaran</option>
                                 <option value="Bank Transfer">Bank Transfer</option>
                                 <option value="E-Wallet">E-Wallet</option>
                                 <option value="Credit Card">Credit Card</option>

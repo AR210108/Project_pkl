@@ -62,19 +62,55 @@
                     </div>
 
                     <div>
-                        <span class="text-gray-600">Klien</span>
-                        <p class="font-medium">{{ $order->klien ?? '-' }}</p>
+                        <span class="text-gray-600">Tanggal Order</span>
+                        <p class="font-medium">{{ $order->order_date ? \Carbon\Carbon::parse($order->order_date)->format('d/m/Y') : '-' }}</p>
+                    </div>
+
+                    <div>
+                        <span class="text-gray-600">Nomer Invoice</span>
+                        <p class="font-medium">{{ $order->invoice_no ?? '-' }}</p>
                     </div>
                 </div>
             </div>
 
-            <!-- STATUS -->
+            <!-- INFORMASI KLIEN -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <h3 class="text-lg font-semibold mb-4">Informasi Klien</h3>
+
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <span class="text-gray-600">Nama Klien</span>
+                        <p class="font-medium">{{ $order->klien ?? '-' }}</p>
+                    </div>
+
+                    <div>
+                        <span class="text-gray-600">Nama Perusahaan</span>
+                        <p class="font-medium">{{ $order->company_name ?? '-' }}</p>
+                    </div>
+
+                    <div>
+                        <span class="text-gray-600">Alamat Perusahaan</span>
+                        <p class="font-medium text-justify">{{ $order->company_address ?? '-' }}</p>
+                    </div>
+
+                    <div>
+                        <span class="text-gray-600">Deskripsi</span>
+                        <p class="font-medium text-justify">{{ $order->description ?? '-' }}</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- STATUS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
             <div class="bg-gray-50 rounded-lg p-4">
                 <h3 class="text-lg font-semibold mb-4">Status</h3>
 
                 <div class="space-y-4 text-sm">
                     <div>
-                        <span class="text-gray-600">Pembayaran</span>
+                        <span class="text-gray-600">Status Pembayaran</span>
                         <div class="mt-1">
                             @switch($order->status)
                                 @case('paid')
@@ -101,7 +137,7 @@
                     </div>
 
                     <div>
-                        <span class="text-gray-600">Pengerjaan</span>
+                        <span class="text-gray-600">Status Pengerjaan</span>
                         <div class="mt-1">
                             @switch($order->work_status)
                                 @case('planning')
@@ -131,56 +167,52 @@
                             @endswitch
                         </div>
                     </div>
+
+                    <div>
+                        <span class="text-gray-600">Metode Pembayaran</span>
+                        <p class="font-medium mt-1">
+                            @switch($order->payment_method)
+                                @case('transfer_bank')
+                                    Transfer Bank
+                                    @break
+                                @case('cash')
+                                    Tunai
+                                    @break
+                                @case('check')
+                                    Cek
+                                    @break
+                                @case('e_wallet')
+                                    E-Wallet
+                                    @break
+                                @default
+                                    {{ $order->payment_method ?? '-' }}
+                            @endswitch
+                        </p>
+                    </div>
                 </div>
             </div>
 
-        </div>
+            <div class="bg-gray-50 rounded-lg p-4">
+                <h3 class="text-lg font-semibold mb-4">Rincian Biaya</h3>
 
-        <!-- INFORMASI PEMBAYARAN -->
-        @php
-            $price = $order->price ?? 0;
-            $deposit = $order->deposit ?? 0;
-            $paid = $order->paid ?? 0;
-            $totalBayar = $deposit + $paid;
-            $sisa = max($price - $totalBayar, 0);
-        @endphp
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Subtotal</span>
+                        <p class="font-medium">{{ $order->subtotal ? 'Rp ' . number_format($order->subtotal, 0, ',', '.') : '-' }}</p>
+                    </div>
 
-        <div class="bg-gray-50 rounded-lg p-4 mb-6">
-            <h3 class="text-lg font-semibold mb-4">Informasi Pembayaran</h3>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Pajak</span>
+                        <p class="font-medium">{{ $order->tax ? $order->tax . '%' : '-' }}</p>
+                    </div>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full border border-gray-200 text-sm">
-                    <tbody>
-                        <tr class="border-b">
-                            <td class="px-4 py-2 text-gray-600">Harga Total</td>
-                            <td class="px-4 py-2 font-medium">
-                                Rp {{ number_format($price, 0, ',', '.') }}
-                            </td>
-                        </tr>
-
-                        <tr class="border-b">
-                            <td class="px-4 py-2 text-gray-600">DP</td>
-                            <td class="px-4 py-2 font-medium">
-                                Rp {{ number_format($deposit, 0, ',', '.') }}
-                            </td>
-                        </tr>
-
-                        <tr class="border-b">
-                            <td class="px-4 py-2 text-gray-600">Pelunasan</td>
-                            <td class="px-4 py-2 font-medium">
-                                Rp {{ number_format($paid, 0, ',', '.') }}
-                            </td>
-                        </tr>
-
-                        <tr class="bg-gray-100">
-                            <td class="px-4 py-2 font-semibold">Sisa Pembayaran</td>
-                            <td class="px-4 py-2 font-semibold">
-                                {{ $sisa > 0 ? 'Rp ' . number_format($sisa, 0, ',', '.') : 'LUNAS' }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                    <div class="flex justify-between border-t pt-2">
+                        <span class="text-gray-600 font-semibold">Total</span>
+                        <p class="font-semibold">{{ $order->total ? 'Rp ' . number_format($order->total, 0, ',', '.') : '-' }}</p>
+                    </div>
+                </div>
             </div>
+
         </div>
 
         <!-- INVOICE -->

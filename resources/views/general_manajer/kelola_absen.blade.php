@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Kelola Absensi - Dashboard</title>
+    <title>Rekap Absensi - General Manager</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
@@ -54,7 +53,7 @@
             vertical-align: middle;
         }
 
-        /* Card hover effects - updated to match reference */
+        /* Card hover effects */
         .card {
             transition: all 0.3s ease;
         }
@@ -62,15 +61,6 @@
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Table styles */
-        .order-table {
-            transition: all 0.2s ease;
-        }
-
-        .order-table tr:hover {
-            background-color: rgba(59, 130, 246, 0.05);
         }
 
         /* Button styles */
@@ -102,25 +92,17 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
-
         .status-hadir {
             background-color: rgba(16, 185, 129, 0.15);
             color: #065f46;
         }
-
         .status-terlambat {
             background-color: rgba(245, 158, 11, 0.15);
             color: #92400e;
         }
-
         .status-izin {
             background-color: rgba(59, 130, 246, 0.15);
             color: #1e40af;
-        }
-
-        .status-cuti {
-            background-color: rgba(239, 68, 68, 0.15);
-            color: #991b1b;
         }
 
         .status-sakit {
@@ -128,195 +110,21 @@
             color: #9a3412;
         }
 
-        .status-tidak-masuk {
+        .status-pending {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #92400e;
+        }
+        .status-approved {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #065f46;
+        }
+        .status-rejected {
             background-color: rgba(239, 68, 68, 0.15);
             color: #991b1b;
         }
-
-        /* Custom styles untuk transisi */
-        .sidebar-transition {
-            transition: transform 0.3s ease-in-out;
-        }
-
-        /* Animasi hamburger */
-        .hamburger-line {
-            transition: all 0.3s ease-in-out;
-        }
-
-        .hamburger-active .line1 {
-            transform: rotate(45deg) translate(5px, 5px);
-        }
-
-        .hamburger-active .line2 {
-            opacity: 0;
-        }
-
-        .hamburger-active .line3 {
-            transform: rotate(-45deg) translate(7px, -6px);
-        }
-
-        /* Style untuk efek hover yang lebih menonjol */
-        .nav-item {
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Gaya untuk indikator aktif/hover */
-        /* Default untuk mobile: di sebelah kanan */
-        .nav-item::before {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 0;
-            height: 100%;
-            width: 3px;
-            background-color: #3b82f6;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-        }
-
-        /* Override untuk desktop: di sebelah kiri */
-        @media (min-width: 768px) {
-            .nav-item::before {
-                right: auto;
-                left: 0;
-                transform: translateX(-100%);
-            }
-        }
-
-        .nav-item:hover::before,
-        .nav-item.active::before {
-            transform: translateX(0);
-        }
-
-        /* Memastikan sidebar tetap di posisinya saat scroll */
-        .sidebar-fixed {
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 40;
-        }
-
-        /* Menyesuaikan konten utama agar tidak tertutup sidebar */
-        .main-content {
-            margin-left: 0;
-            transition: margin-left 0.3s ease-in-out;
-        }
-
-        @media (min-width: 768px) {
-            .main-content {
-                margin-left: 256px;
-                /* Lebar sidebar */
-            }
-        }
-
-        /* Scrollbar kustom untuk sidebar */
-        .sidebar-fixed::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .sidebar-fixed::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        .sidebar-fixed::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
-        }
-
-        .sidebar-fixed::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        /* Form input styles */
-        .form-input {
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s ease;
-        }
-
-        .form-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        /* Pagination styles */
-        .page-btn {
-            transition: all 0.2s ease;
-        }
-
-        .page-btn:hover:not(:disabled) {
-            transform: scale(1.1);
-        }
-
-        .page-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Desktop pagination styles */
-        .desktop-pagination {
-            display: none;
-            /* Hidden by default */
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin-top: 24px;
-        }
-
-        /* Show desktop pagination on medium screens and up */
-        @media (min-width: 768px) {
-            .desktop-pagination {
-                display: flex;
-            }
-        }
-
-        .desktop-page-btn {
-            min-width: 32px;
-            height: 32px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .desktop-page-btn.active {
-            background-color: #3b82f6;
-            color: white;
-        }
-
-        .desktop-page-btn:not(.active) {
-            background-color: #f1f5f9;
-            color: #64748b;
-        }
-
-        .desktop-page-btn:not(.active):hover {
-            background-color: #e2e8f0;
-        }
-
-        .desktop-nav-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #f1f5f9;
-            color: #64748b;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .desktop-nav-btn:hover:not(:disabled) {
-            background-color: #e2e8f0;
-        }
-
-        .desktop-nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .status-tidak-hadir {
+            background-color: rgba(107, 114, 128, 0.15);
+            color: #374151;
         }
 
         /* Panel Styles */
@@ -351,7 +159,7 @@
             padding: 1.5rem;
         }
 
-        /* SCROLLABLE TABLE - TANPA INDICATOR */
+        /* SCROLLABLE TABLE */
         .scrollable-table-container {
             width: 100%;
             overflow-x: auto;
@@ -361,7 +169,6 @@
             background: white;
         }
 
-        /* Force scrollbar to be visible */
         .scrollable-table-container {
             scrollbar-width: auto;
             -webkit-overflow-scrolling: touch;
@@ -390,8 +197,7 @@
         /* Table with fixed width to ensure scrolling */
         .data-table {
             width: 100%;
-            min-width: 1200px;
-            /* Fixed minimum width */
+            min-width: 800px;
             border-collapse: collapse;
         }
 
@@ -452,7 +258,7 @@
             border-bottom-color: #3b82f6;
         }
 
-        /* Icon styling - added to match reference */
+        /* Icon styling */
         .icon-container {
             display: flex;
             align-items: center;
@@ -462,110 +268,175 @@
             border-radius: 0.5rem;
         }
 
-        /* Mobile pagination styles */
-        .mobile-pagination {
+        /* Filter styles */
+        .filter-container {
             display: flex;
-            /* Visible by default */
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin-top: 16px;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
-        /* Hide mobile pagination on medium screens and up */
-        @media (min-width: 768px) {
-            .mobile-pagination {
-                display: none;
-            }
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
         }
 
-        .mobile-page-btn {
-            min-width: 32px;
-            height: 32px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            font-size: 14px;
+        .filter-label {
+            font-size: 0.875rem;
             font-weight: 500;
-            transition: all 0.2s ease;
-            cursor: pointer;
+            color: #374151;
         }
 
-        .mobile-page-btn.active {
+        /* Form input styles */
+        .form-input {
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            background-color: white;
+        }
+
+        .form-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            width: 250px;
+            background-color: #1e293b;
+            color: white;
+            transition: all 0.3s ease;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #334155;
+        }
+
+        .sidebar-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-item:hover {
+            background-color: #334155;
+            color: white;
+        }
+
+        .sidebar-item.active {
             background-color: #3b82f6;
             color: white;
         }
 
-        .mobile-page-btn:not(.active) {
-            background-color: #f1f5f9;
-            color: #64748b;
+        .sidebar-item .material-icons-outlined {
+            margin-right: 0.75rem;
         }
 
-        .mobile-page-btn:not(.active):hover {
-            background-color: #e2e8f0;
-        }
-
-        .mobile-nav-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #f1f5f9;
-            color: #64748b;
-            transition: all 0.2s ease;
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 101;
+            background-color: #1e293b;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
             cursor: pointer;
         }
 
-        .mobile-nav-btn:hover:not(:disabled) {
-            background-color: #e2e8f0;
+        /* Main content with sidebar */
+        .main-content {
+            margin-left: 250px;
+            transition: all 0.3s ease;
         }
 
-        .mobile-nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
         }
     </style>
 </head>
-
 <body class="font-display bg-background-light text-text-light">
+    <!-- Sidebar -->
     @include('general_manajer/templet/header')
-
-    <!-- Initialize $stats variable -->
-    @php
-        // Initialize stats with default values if not provided
-        $stats = $stats ?? [
-            'total_tepat_waktu' => 0,
-            'total_tidak_masuk' => 0,
-            'total_izin' => 0,
-            'total_cuti' => 0,
-            'total_dinas_luar' => 0,
-            'total_sakit' => 0,
-        ];
-    @endphp
+    
+    <!-- Sidebar Toggle Button (Mobile) -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <span class="material-icons-outlined">menu</span>
+    </button>
 
     <!-- Main Content Container -->
     <div class="main-content">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b border-border-light">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <h1 class="text-xl font-semibold text-text-light">General Manager Dashboard</h1>
+                    </div>
+                </div>
+            </div>
+        </header>
+
         <main class="flex-1 flex flex-col bg-background-light">
             <div class="flex-1 p-3 sm:p-8">
+                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Rekap Absensi</h2>
 
-                <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Kelola Absensi</h2>
-
-                <!-- Stats Cards - Menggunakan data dari controller -->
+                <!-- Stats Cards -->
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
                     <!-- Total Kehadiran Card -->
                     <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
                             <div class="icon-container bg-green-100 mr-3 md:mr-4">
-                                <span
-                                    class="material-icons-outlined text-green-600 text-lg md:text-xl">check_circle</span>
+                                <span class="material-icons-outlined text-green-600 text-lg md:text-xl">check_circle</span>
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Total Kehadiran</p>
                                 <p class="text-xl md:text-2xl font-bold text-green-600">
-                                    {{ $stats['total_tepat_waktu'] ?? 0 }}</p>
+                                    {{ ($stats['total_tepat_waktu'] ?? 0) + ($stats['total_terlambat'] ?? 0) }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -578,7 +449,8 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Tidak Hadir</p>
-                                <p class="text-xl md:text-2xl font-bold text-red-600">{{ $stats['total_tidak_masuk'] ?? 0 }}
+                                <p class="text-xl md:text-2xl font-bold text-red-600">
+                                    {{ $stats['total_tidak_masuk'] ?? 0 }}
                                 </p>
                             </div>
                         </div>
@@ -592,36 +464,9 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Izin</p>
-                                <p class="text-xl md:text-2xl font-bold text-blue-600">{{ $stats['total_izin'] ?? 0 }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Cuti Card -->
-                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
-                        <div class="flex items-center">
-                            <div class="icon-container bg-yellow-100 mr-3 md:mr-4">
-                                <span
-                                    class="material-icons-outlined text-yellow-600 text-lg md:text-xl">event_busy</span>
-                            </div>
-                            <div>
-                                <p class="text-xs md:text-sm text-gray-500">Cuti</p>
-                                <p class="text-xl md:text-2xl font-bold text-yellow-600">{{ $stats['total_cuti'] ?? 0 }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dinas Luar Card -->
-                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
-                        <div class="flex items-center">
-                            <div class="icon-container bg-purple-100 mr-3 md:mr-4">
-                                <span
-                                    class="material-icons-outlined text-purple-600 text-lg md:text-xl">directions_car</span>
-                            </div>
-                            <div>
-                                <p class="text-xs md:text-sm text-gray-500">Dinas Luar</p>
-                                <p class="text-xl md:text-2xl font-bold text-purple-600">
-                                    {{ $stats['total_dinas_luar'] ?? 0 }}</p>
+                                <p class="text-xl md:text-2xl font-bold text-blue-600">
+                                    {{ $stats['total_izin'] ?? 0 }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -634,571 +479,358 @@
                             </div>
                             <div>
                                 <p class="text-xs md:text-sm text-gray-500">Sakit</p>
-                                <p class="text-xl md:text-2xl font-bold text-orange-600">{{ $stats['total_sakit'] ?? 0 }}</p>
+                                <p class="text-xl md:text-2xl font-bold text-orange-600">
+                                    {{ $stats['total_sakit'] ?? 0 }}
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Filter Section -->
+                <div class="panel mb-6 md:mb-8">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <span class="material-icons-outlined text-primary">filter_list</span>
+                            Filter Data
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <form method="GET" action="{{ route('general_manajer.kelola_absen') }}" class="filter-container">
+                            <!-- Tanggal Mulai -->
+                            <div class="filter-item">
+                                <label class="filter-label" for="start_date">Tanggal Mulai</label>
+                                <input type="date" id="start_date" name="start_date" 
+                                       value="{{ $startDate ?? date('Y-m-01') }}" 
+                                       class="form-input">
+                            </div>
+
+                            <!-- Tanggal Akhir -->
+                            <div class="filter-item">
+                                <label class="filter-label" for="end_date">Tanggal Akhir</label>
+                                <input type="date" id="end_date" name="end_date" 
+                                       value="{{ $endDate ?? date('Y-m-d') }}" 
+                                       class="form-input">
+                            </div>
+
+                            <!-- Divisi -->
+                            <div class="filter-item">
+                                <label class="filter-label" for="division">Divisi</label>
+                                <select id="division" name="division" class="form-input">
+                                    <option value="semua">Semua Divisi</option>
+                                    @foreach($divisions as $division)
+                                        @if($division)
+                                            <option value="{{ $division }}" {{ $selectedDivision == $division ? 'selected' : '' }}>
+                                                {{ ucwords(str_replace('_', ' ', $division)) }}
+                                            </option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="filter-item">
+                                <label class="filter-label" for="status">Status</label>
+                                <select id="status" name="status" class="form-input">
+                                    <option value="semua" {{ $statusFilter == 'semua' ? 'selected' : '' }}>Semua Status</option>
+                                    <option value="hadir" {{ $statusFilter == 'hadir' ? 'selected' : '' }}>Hadir</option>
+                                    <option value="terlambat" {{ $statusFilter == 'terlambat' ? 'selected' : '' }}>Terlambat</option>
+                                    <option value="izin" {{ $statusFilter == 'izin' ? 'selected' : '' }}>Izin</option>
+                                    <option value="sakit" {{ $statusFilter == 'sakit' ? 'selected' : '' }}>Sakit</option>
+                                    <option value="pending" {{ $statusFilter == 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="approved" {{ $statusFilter == 'approved' ? 'selected' : '' }}>Approved</option>
+                                    <option value="rejected" {{ $statusFilter == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                </select>
+                            </div>
+
+                            <!-- Tombol Aksi -->
+                            <div class="filter-item flex-end">
+                                <label class="filter-label">&nbsp;</label>
+                                <div class="flex gap-2">
+                                    <button type="submit" class="btn-primary px-4 py-2 rounded-md text-white">
+                                        <span class="material-icons-outlined text-sm align-middle mr-1">filter_list</span>
+                                        Filter
+                                    </button>
+                                    <a href="{{ route('general_manajer.kelola_absen') }}" 
+                                       class="btn-secondary px-4 py-2 rounded-md text-gray-700 inline-block text-center">
+                                        <span class="material-icons-outlined text-sm align-middle mr-1">refresh</span>
+                                        Reset
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <!-- Tab Navigation -->
                 <div class="tab-nav">
-                    <button id="absensiTab" class="tab-button active" onclick="switchTab('absensi')">
+                    <button id="attendanceTab" class="tab-button active" onclick="switchTab('attendance')">
                         <span class="material-icons-outlined align-middle mr-2">fact_check</span>
                         Data Absensi
                     </button>
-                    <button id="ketidakhadiranTab" class="tab-button" onclick="switchTab('ketidakhadiran')">
+                    <button id="absenceTab" class="tab-button" onclick="switchTab('absence')">
                         <span class="material-icons-outlined align-middle mr-2">assignment_late</span>
                         Daftar Ketidakhadiran
                     </button>
                 </div>
 
                 <!-- Data Absensi Panel -->
-                <div id="absensiPanel" class="panel">
+                <div id="attendancePanel" class="panel">
                     <div class="panel-header">
                         <h3 class="panel-title">
                             <span class="material-icons-outlined text-primary">fact_check</span>
                             Data Absensi
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span
-                                    class="font-semibold text-text-light" id="absensiCount">0</span> data</span>
+                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light">{{ $formattedAbsensi->count() }}</span> data</span>
                         </div>
                     </div>
                     <div class="panel-body">
                         <!-- SCROLLABLE TABLE -->
-                        <div class="scrollable-table-container table-shadow" id="scrollableTable">
+                        <div class="scrollable-table-container table-shadow">
                             <table class="data-table">
                                 <thead>
                                     <tr>
                                         <th style="min-width: 60px;">No</th>
-                                        <th style="min-width: 200px;">Nama</th>
+                                        <th style="min-width: 200px;">Nama Karyawan</th>
+                                        <th style="min-width: 120px;">Divisi</th>
                                         <th style="min-width: 120px;">Tanggal</th>
                                         <th style="min-width: 120px;">Jam Masuk</th>
-                                        <th style="min-width: 120px;">Jam Keluar</th>
+                                        <th style="min-width: 120px;">Jam Pulang</th>
                                         <th style="min-width: 120px;">Status</th>
+                                        <th style="min-width: 120px;">Approval</th>
                                     </tr>
                                 </thead>
-                                <tbody id="absensiTableBody">
-                                    <!-- Data rows will be populated by JavaScript -->
+                                <tbody>
+<!-- Di view, pastikan menggunakan $formattedAbsensi bukan $attendances -->
+@forelse($formattedAbsensi as $index => $absen)
+    <tr>
+        <td>{{ $index + 1 }}</td>
+        <td>{{ $absen['user_name'] }}</td>
+        <td>{{ $absen['divisi'] }}</td>
+        <td>{{ \Carbon\Carbon::parse($absen['tanggal'])->format('d/m/Y') }}</td>
+        <td>{{ $absen['jam_masuk'] }}</td>
+        <td>{{ $absen['jam_pulang'] }}</td>
+        <td>
+            <span class="status-badge {{ $absen['status_class'] }}">
+                {{ $absen['status_kehadiran'] }}
+            </span>
+        </td>
+        <td>
+            @if($absen['type'] == 'ketidakhadiran' && $absen['approval_status'] == 'pending')
+                <!-- Tombol approve/reject -->
+            @endif
+        </td>
+    </tr>
+@empty
+    <tr>
+        <td colspan="8" class="text-center py-8">Tidak ada data ditemukan</td>
+    </tr>
+@endforelse
                                 </tbody>
                             </table>
-                        </div>
-
-                        <!-- Desktop Pagination -->
-                        <div id="absensiPaginationContainer" class="desktop-pagination">
-                            <button id="absensiPrevPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="absensiPageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="absensiNextPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
-                        </div>
-
-                        <!-- Mobile Pagination -->
-                        <div class="mobile-pagination">
-                            <button id="absensiPrevPageMobile" class="mobile-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="absensiPageNumbersMobile" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="absensiNextPageMobile" class="mobile-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Ketidakhadiran Panel (Initially Hidden) -->
-                <div id="ketidakhadiranPanel" class="panel hidden">
+                <!-- Daftar Ketidakhadiran Panel (Initially Hidden) -->
+                <div id="absencePanel" class="panel hidden">
                     <div class="panel-header">
                         <h3 class="panel-title">
                             <span class="material-icons-outlined text-primary">assignment_late</span>
                             Daftar Ketidakhadiran
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span
-                                    class="font-semibold text-text-light" id="ketidakhadiranCount">0</span> data</span>
+                            <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light" id="absenceCount">0</span> data</span>
                         </div>
                     </div>
                     <div class="panel-body">
                         <!-- SCROLLABLE TABLE -->
-                        <div class="scrollable-table-container table-shadow" id="scrollableTableKetidakhadiran">
+                        <div class="scrollable-table-container table-shadow">
                             <table class="data-table">
                                 <thead>
                                     <tr>
                                         <th style="min-width: 60px;">No</th>
-                                        <th style="min-width: 200px;">Nama</th>
+                                        <th style="min-width: 200px;">Nama Karyawan</th>
+                                        <th style="min-width: 120px;">Divisi</th>
                                         <th style="min-width: 120px;">Tanggal Mulai</th>
                                         <th style="min-width: 120px;">Tanggal Akhir</th>
                                         <th style="min-width: 200px;">Alasan</th>
                                         <th style="min-width: 120px;">Status</th>
+                                        <th style="min-width: 120px;">Approval</th>
                                     </tr>
                                 </thead>
-                                <tbody id="ketidakhadiranTableBody">
+                                <tbody id="absenceTableBody">
                                     <!-- Data rows will be populated by JavaScript -->
+@forelse($formattedAbsensi->where('type', 'ketidakhadiran') as $index => $absen)
+<tr class="hover:bg-gray-50">
+    <td style="min-width: 60px;">{{ $index + 1 }}</td>
+    <td style="min-width: 200px;">{{ $absen['user_name'] }}</td>
+    <td style="min-width: 120px;">{{ $absen['divisi'] }}</td>
+    <td style="min-width: 120px;">{{ \Carbon\Carbon::parse($absen['tanggal'])->format('d/m/Y') }}</td>
+    <td style="min-width: 120px;">{{ $absen['tanggal_akhir'] ? \Carbon\Carbon::parse($absen['tanggal_akhir'])->format('d/m/Y') : '-' }}</td>
+    <td style="min-width: 200px;">{{ $absen['alasan'] ?? '-' }}</td>
+    <td style="min-width: 120px;">
+        @if($absen['jenis_ketidakhadiran'] == 'izin')
+            <span class="status-badge status-izin">Izin</span>
+        @elseif($absen['jenis_ketidakhadiran'] == 'sakit')
+            <span class="status-badge status-sakit">Sakit</span>
+        @endif
+    </td>
+    <td style="min-width: 120px;">
+        @if($absen['approval_status'] == 'pending')
+            <span class="status-badge status-pending">
+                Pending
+            </span>
+            <div class="mt-1 flex space-x-2">
+                <form action="{{ route('general_manajer.absensi.approve', $absen['id']) }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="text-green-600 hover:text-green-900 text-sm">
+                        Approve
+                    </button>
+                </form>
+                <form action="{{ route('general_manajer.absensi.reject', $absen['id']) }}" method="POST" class="inline">
+                    @csrf
+                    <button type="button" onclick="showRejectModal('{{ $absen['id'] }}', '{{ $absen['user_name'] }}')" 
+                            class="text-red-600 hover:text-red-900 text-sm">
+                        Reject
+                    </button>
+                </form>
+            </div>
+        @elseif($absen['approval_status'] == 'approved')
+            <span class="status-badge status-approved">
+                Approved
+            </span>
+        @elseif($absen['approval_status'] == 'rejected')
+            <span class="status-badge status-rejected">
+                Rejected
+            </span>
+        @else
+            <span class="text-sm text-gray-500">-</span>
+        @endif
+    </td>
+</tr>
+@empty
+<tr>
+    <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+        <div class="flex flex-col items-center">
+            <span class="material-icons-outlined text-4xl text-gray-300 mb-2">search_off</span>
+            <p class="text-lg">Tidak ada data ditemukan</p>
+            <p class="text-sm mt-1">Coba ubah filter pencarian Anda</p>
+        </div>
+    </td>
+</tr>
+@endforelse
                                 </tbody>
                             </table>
-                        </div>
-
-                        <!-- Desktop Pagination -->
-                        <div id="ketidakhadiranPaginationContainer" class="desktop-pagination">
-                            <button id="ketidakhadiranPrevPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="ketidakhadiranPageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="ketidakhadiranNextPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
-                        </div>
-
-                        <!-- Mobile Pagination -->
-                        <div class="mobile-pagination">
-                            <button id="ketidakhadiranPrevPageMobile" class="mobile-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="ketidakhadiranPageNumbersMobile" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="ketidakhadiranNextPageMobile" class="mobile-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
+            
             <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light">
-                Copyright ©2025 by digicity.id
+                Copyright ©{{ date('Y') }} by digicity.id
             </footer>
         </main>
     </div>
 
+    <!-- Modal untuk Reject -->
+    <div id="rejectModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Tolak Permohonan</h3>
+                <p class="text-sm text-gray-500 mb-4" id="employeeName"></p>
+                <form id="rejectForm" method="POST">
+                    @csrf
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Penolakan</label>
+                        <textarea name="rejection_reason" rows="4" 
+                                  class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                  placeholder="Masukkan alasan penolakan..." required></textarea>
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" onclick="hideRejectModal()" 
+                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                            Batal
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                            Tolak
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Data akan diambil dari API
-        let absensiData = [];
-        let ketidakhadiranData = [];
-
-        // Pagination variables for absensi
-        const absensiItemsPerPage = 10;
-        let absensiCurrentPage = 1;
-        let absensiTotalPages = 1;
-
-        // Pagination variables for ketidakhadiran
-        const ketidakhadiranItemsPerPage = 10;
-        let ketidakhadiranCurrentPage = 1;
-        let ketidakhadiranTotalPages = 1;
-
-        document.addEventListener('DOMContentLoaded', function () {
-            // Ambil data dari API saat halaman dimuat
-            fetchAbsensiData();
-            fetchKetidakhadiranData();
-        });
-
-        // Fungsi untuk mengambil data absensi dari API
-        function fetchAbsensiData() {
-            fetch('/api/absensi')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        absensiData = data.data;
-                        document.getElementById('absensiCount').textContent = absensiData.length;
-                        absensiTotalPages = Math.ceil(absensiData.length / absensiItemsPerPage);
-
-                        // Initialize pagination
-                        initializeAbsensiPagination();
-
-                        // Render first page
-                        renderAbsensiTable(1);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching absensi data:', error);
-                });
-        }
-
-        // Fungsi untuk mengambil data ketidakhadiran dari API
-        function fetchKetidakhadiranData() {
-            fetch('/api/absensi/ketidakhadiran')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        ketidakhadiranData = data.data;
-                        document.getElementById('ketidakhadiranCount').textContent = ketidakhadiranData.length;
-                        ketidakhadiranTotalPages = Math.ceil(ketidakhadiranData.length / ketidakhadiranItemsPerPage);
-
-                        // Initialize pagination
-                        initializeKetidakhadiranPagination();
-
-                        // Render first page
-                        renderKetidakhadiranTable(1);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching ketidakhadiran data:', error);
-                });
-        }
-
         // Function to switch between tabs
         function switchTab(tabName) {
             // Get tab buttons and panels
-            const absensiTab = document.getElementById('absensiTab');
-            const ketidakhadiranTab = document.getElementById('ketidakhadiranTab');
-            const absensiPanel = document.getElementById('absensiPanel');
-            const ketidakhadiranPanel = document.getElementById('ketidakhadiranPanel');
+            const attendanceTab = document.getElementById('attendanceTab');
+            const absenceTab = document.getElementById('absenceTab');
+            const attendancePanel = document.getElementById('attendancePanel');
+            const absencePanel = document.getElementById('absencePanel');
 
             // Hide all panels and remove active class from all tabs
-            absensiPanel.classList.add('hidden');
-            ketidakhadiranPanel.classList.add('hidden');
-            absensiTab.classList.remove('active');
-            ketidakhadiranTab.classList.remove('active');
+            attendancePanel.classList.add('hidden');
+            absencePanel.classList.add('hidden');
+            attendanceTab.classList.remove('active');
+            absenceTab.classList.remove('active');
 
             // Show selected panel and add active class to clicked tab
-            if (tabName === 'absensi') {
-                absensiPanel.classList.remove('hidden');
-                absensiTab.classList.add('active');
-            } else if (tabName === 'ketidakhadiran') {
-                ketidakhadiranPanel.classList.remove('hidden');
-                ketidakhadiranTab.classList.add('active');
+            if (tabName === 'attendance') {
+                attendancePanel.classList.remove('hidden');
+                attendanceTab.classList.add('active');
+            } else if (tabName === 'absence') {
+                absencePanel.classList.remove('hidden');
+                absenceTab.classList.add('active');
             }
         }
 
-        // Initialize pagination for absensi
-        function initializeAbsensiPagination() {
-            // SELALU tampilkan pagination
-            initAbsensiDesktopPagination();
-            initAbsensiMobilePagination();
+        // Sidebar toggle for mobile
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('active');
+        });
+
+        function showRejectModal(absensiId, employeeName) {
+            document.getElementById('employeeName').textContent = 'Karyawan: ' + employeeName;
+            document.getElementById('rejectForm').action = '/general-manajer/absensi/' + absensiId + '/reject';
+            document.getElementById('rejectModal').classList.remove('hidden');
         }
-
-        // Initialize pagination for ketidakhadiran
-        function initializeKetidakhadiranPagination() {
-            // SELALU tampilkan pagination
-            initKetidakhadiranDesktopPagination();
-            initKetidakhadiranMobilePagination();
+        
+        function hideRejectModal() {
+            document.getElementById('rejectModal').classList.add('hidden');
+            document.getElementById('rejectForm').reset();
         }
-
-        // Desktop pagination functionality for absensi
-        function initAbsensiDesktopPagination() {
-            const pageNumbersContainer = document.getElementById('absensiPageNumbers');
-            const prevButton = document.getElementById('absensiPrevPage');
-            const nextButton = document.getElementById('absensiNextPage');
-
-            // Clear existing page numbers
-            pageNumbersContainer.innerHTML = '';
-
-            // Generate page numbers
-            for (let i = 1; i <= absensiTotalPages; i++) {
-                const pageNumber = document.createElement('button');
-                pageNumber.textContent = i;
-                pageNumber.className = `desktop-page-btn ${i === absensiCurrentPage ? 'active' : ''
-                    }`;
-                pageNumber.addEventListener('click', () => goToAbsensiDesktopPage(i));
-                pageNumbersContainer.appendChild(pageNumber);
+        
+        document.getElementById('rejectModal').addEventListener('click', function(e) {
+            if (e.target.id === 'rejectModal') {
+                hideRejectModal();
             }
-
-            // Event listeners for navigation buttons
-            prevButton.addEventListener('click', () => {
-                if (absensiCurrentPage > 1) goToAbsensiDesktopPage(absensiCurrentPage - 1);
-            });
-
-            nextButton.addEventListener('click', () => {
-                if (absensiCurrentPage < absensiTotalPages) goToAbsensiDesktopPage(absensiCurrentPage + 1);
-            });
-        }
-
-        // Mobile pagination functionality for absensi
-        function initAbsensiMobilePagination() {
-            const pageNumbersContainer = document.getElementById('absensiPageNumbersMobile');
-            const prevButton = document.getElementById('absensiPrevPageMobile');
-            const nextButton = document.getElementById('absensiNextPageMobile');
-
-            // Clear existing page numbers
-            pageNumbersContainer.innerHTML = '';
-
-            // Generate page numbers
-            for (let i = 1; i <= absensiTotalPages; i++) {
-                const pageNumber = document.createElement('button');
-                pageNumber.textContent = i;
-                pageNumber.className = `mobile-page-btn ${i === absensiCurrentPage ? 'active' : ''
-                    }`;
-                pageNumber.addEventListener('click', () => goToAbsensiMobilePage(i));
-                pageNumbersContainer.appendChild(pageNumber);
+        });
+        
+        // Auto-set end date jika start date lebih baru
+        document.querySelector('input[name="start_date"]')?.addEventListener('change', function() {
+            const startDate = this.value;
+            const endDateInput = document.querySelector('input[name="end_date"]');
+            
+            if (startDate && endDateInput && startDate > endDateInput.value) {
+                endDateInput.value = startDate;
             }
-
-            // Event listeners for navigation buttons
-            prevButton.addEventListener('click', () => {
-                if (absensiCurrentPage > 1) goToAbsensiMobilePage(absensiCurrentPage - 1);
-            });
-
-            nextButton.addEventListener('click', () => {
-                if (absensiCurrentPage < absensiTotalPages) goToAbsensiMobilePage(absensiCurrentPage + 1);
-            });
-        }
-
-        // Desktop pagination functionality for ketidakhadiran
-        function initKetidakhadiranDesktopPagination() {
-            const pageNumbersContainer = document.getElementById('ketidakhadiranPageNumbers');
-            const prevButton = document.getElementById('ketidakhadiranPrevPage');
-            const nextButton = document.getElementById('ketidakhadiranNextPage');
-
-            // Clear existing page numbers
-            pageNumbersContainer.innerHTML = '';
-
-            // Generate page numbers
-            for (let i = 1; i <= ketidakhadiranTotalPages; i++) {
-                const pageNumber = document.createElement('button');
-                pageNumber.textContent = i;
-                pageNumber.className = `desktop-page-btn ${i === ketidakhadiranCurrentPage ? 'active' : ''
-                    }`;
-                pageNumber.addEventListener('click', () => goToKetidakhadiranDesktopPage(i));
-                pageNumbersContainer.appendChild(pageNumber);
+        });
+        
+        // Validasi form filter
+        document.querySelector('form')?.addEventListener('submit', function(e) {
+            const startDate = this.querySelector('input[name="start_date"]')?.value;
+            const endDate = this.querySelector('input[name="end_date"]')?.value;
+            
+            if (startDate && endDate && startDate > endDate) {
+                alert('Tanggal mulai tidak boleh lebih besar dari tanggal akhir');
+                e.preventDefault();
             }
-
-            // Event listeners for navigation buttons
-            prevButton.addEventListener('click', () => {
-                if (ketidakhadiranCurrentPage > 1) goToKetidakhadiranDesktopPage(ketidakhadiranCurrentPage - 1);
-            });
-
-            nextButton.addEventListener('click', () => {
-                if (ketidakhadiranCurrentPage < ketidakhadiranTotalPages) goToKetidakhadiranDesktopPage(ketidakhadiranCurrentPage + 1);
-            });
-        }
-
-        // Mobile pagination functionality for ketidakhadiran
-        function initKetidakhadiranMobilePagination() {
-            const pageNumbersContainer = document.getElementById('ketidakhadiranPageNumbersMobile');
-            const prevButton = document.getElementById('ketidakhadiranPrevPageMobile');
-            const nextButton = document.getElementById('ketidakhadiranNextPageMobile');
-
-            // Clear existing page numbers
-            pageNumbersContainer.innerHTML = '';
-
-            // Generate page numbers
-            for (let i = 1; i <= ketidakhadiranTotalPages; i++) {
-                const pageNumber = document.createElement('button');
-                pageNumber.textContent = i;
-                pageNumber.className = `mobile-page-btn ${i === ketidakhadiranCurrentPage ? 'active' : ''
-                    }`;
-                pageNumber.addEventListener('click', () => goToKetidakhadiranMobilePage(i));
-                pageNumbersContainer.appendChild(pageNumber);
-            }
-
-            // Event listeners for navigation buttons
-            prevButton.addEventListener('click', () => {
-                if (ketidakhadiranCurrentPage > 1) goToKetidakhadiranMobilePage(ketidakhadiranCurrentPage - 1);
-            });
-
-            nextButton.addEventListener('click', () => {
-                if (ketidakhadiranCurrentPage < ketidakhadiranTotalPages) goToKetidakhadiranMobilePage(ketidakhadiranCurrentPage + 1);
-            });
-        }
-
-        // Go to specific desktop page for absensi
-        function goToAbsensiDesktopPage(page) {
-            absensiCurrentPage = page;
-            renderAbsensiTable(page);
-            updateAbsensiDesktopPaginationButtons();
-            updateAbsensiMobilePaginationButtons();
-        }
-
-        // Go to specific mobile page for absensi
-        function goToAbsensiMobilePage(page) {
-            absensiCurrentPage = page;
-            renderAbsensiTable(page);
-            updateAbsensiDesktopPaginationButtons();
-            updateAbsensiMobilePaginationButtons();
-        }
-
-        // Go to specific desktop page for ketidakhadiran
-        function goToKetidakhadiranDesktopPage(page) {
-            ketidakhadiranCurrentPage = page;
-            renderKetidakhadiranTable(page);
-            updateKetidakhadiranDesktopPaginationButtons();
-            updateKetidakhadiranMobilePaginationButtons();
-        }
-
-        // Go to specific mobile page for ketidakhadiran
-        function goToKetidakhadiranMobilePage(page) {
-            ketidakhadiranCurrentPage = page;
-            renderKetidakhadiranTable(page);
-            updateKetidakhadiranDesktopPaginationButtons();
-            updateKetidakhadiranMobilePaginationButtons();
-        }
-
-        // Render table for absensi (used for both desktop and mobile)
-        function renderAbsensiTable(page) {
-            const tbody = document.getElementById('absensiTableBody');
-            tbody.innerHTML = '';
-
-            const startIndex = (page - 1) * absensiItemsPerPage;
-            const endIndex = Math.min(startIndex + absensiItemsPerPage, absensiData.length);
-
-            for (let i = startIndex; i < endIndex; i++) {
-                const absensi = absensiData[i];
-                const row = document.createElement('tr');
-
-                // Format tanggal
-                const tanggal = new Date(absensi.tanggal).toLocaleDateString('id-ID');
-
-                // Format jam
-                const jamMasuk = absensi.jam_masuk ? absensi.jam_masuk.substring(0, 5) : '-';
-                const jamKeluar = absensi.jam_pulang ? absensi.jam_pulang.substring(0, 5) : '-';
-
-                // Determine status class
-                let statusClass = '';
-                if (absensi.status === 'Tepat Waktu') {
-                    statusClass = 'status-hadir';
-                } else if (absensi.status === 'Terlambat') {
-                    statusClass = 'status-terlambat';
-                }
-
-                row.innerHTML = `
-                    <td style="min-width: 60px;">${i + 1}</td>
-                    <td style="min-width: 200px;">${absensi.user ? absensi.user.name : absensi.name}</td>
-                    <td style="min-width: 120px;">${tanggal}</td>
-                    <td style="min-width: 120px;">${jamMasuk}</td>
-                    <td style="min-width: 120px;">${jamKeluar}</td>
-                    <td style="min-width: 120px;"><span class="status-badge ${statusClass}">${absensi.status}</span></td>
-                `;
-                tbody.appendChild(row);
-            }
-        }
-
-        // Render table for ketidakhadiran (used for both desktop and mobile)
-        function renderKetidakhadiranTable(page) {
-            const tbody = document.getElementById('ketidakhadiranTableBody');
-            tbody.innerHTML = '';
-
-            const startIndex = (page - 1) * ketidakhadiranItemsPerPage;
-            const endIndex = Math.min(startIndex + ketidakhadiranItemsPerPage, ketidakhadiranData.length);
-
-            for (let i = startIndex; i < endIndex; i++) {
-                const ketidakhadiran = ketidakhadiranData[i];
-                const row = document.createElement('tr');
-
-                // Format tanggal
-                const tanggalMulai = new Date(ketidakhadiran.tanggal).toLocaleDateString('id-ID');
-                const tanggalAkhir = ketidakhadiran.tanggal_akhir
-                    ? new Date(ketidakhadiran.tanggal_akhir).toLocaleDateString('id-ID')
-                    : tanggalMulai;
-
-                // Determine alasan
-                let alasan = '-';
-                if (ketidakhadiran.status === 'Cuti') {
-                    alasan = ketidakhadiran.alasan_cuti || ketidakhadiran.jenis_cuti || 'Cuti';
-                } else if (ketidakhadiran.status === 'Sakit') {
-                    alasan = 'Sakit';
-                } else if (ketidakhadiran.status === 'Izin') {
-                    alasan = ketidakhadiran.reason || 'Izin';
-                } else if (ketidakhadiran.status === 'Tidak Masuk') {
-                    alasan = 'Tanpa Keterangan';
-                }
-
-                // Determine status class
-                let statusClass = '';
-                if (ketidakhadiran.status === 'Izin') {
-                    statusClass = 'status-izin';
-                } else if (ketidakhadiran.status === 'Cuti') {
-                    statusClass = 'status-cuti';
-                } else if (ketidakhadiran.status === 'Sakit') {
-                    statusClass = 'status-sakit';
-                } else if (ketidakhadiran.status === 'Tidak Masuk') {
-                    statusClass = 'status-tidak-masuk';
-                }
-
-                // Tambahkan badge untuk status persetujuan jika pending
-                let statusBadge = `<span class="status-badge ${statusClass}">${ketidakhadiran.status}</span>`;
-                if (ketidakhadiran.approval_status === 'pending') {
-                    statusBadge += ` <span class="status-badge" style="background-color: rgba(245, 158, 11, 0.15); color: #92400e;">Menunggu Persetujuan</span>`;
-                }
-
-                row.innerHTML = `
-                    <td style="min-width: 60px;">${i + 1}</td>
-                    <td style="min-width: 200px;">${ketidakhadiran.user ? ketidakhadiran.user.name : ketidakhadiran.name}</td>
-                    <td style="min-width: 120px;">${tanggalMulai}</td>
-                    <td style="min-width: 120px;">${tanggalAkhir}</td>
-                    <td style="min-width: 200px;">${alasan}</td>
-                    <td style="min-width: 120px;">${statusBadge}</td>
-                `;
-                tbody.appendChild(row);
-            }
-        }
-
-        // Update desktop pagination buttons for absensi
-        function updateAbsensiDesktopPaginationButtons() {
-            const prevButton = document.getElementById('absensiPrevPage');
-            const nextButton = document.getElementById('absensiNextPage');
-            const pageButtons = document.querySelectorAll('#absensiPageNumbers button');
-
-            prevButton.disabled = absensiCurrentPage === 1;
-            nextButton.disabled = absensiCurrentPage === absensiTotalPages;
-
-            pageButtons.forEach((btn, index) => {
-                if (index + 1 === absensiCurrentPage) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        }
-
-        // Update mobile pagination buttons for absensi
-        function updateAbsensiMobilePaginationButtons() {
-            const prevButton = document.getElementById('absensiPrevPageMobile');
-            const nextButton = document.getElementById('absensiNextPageMobile');
-            const pageButtons = document.querySelectorAll('#absensiPageNumbersMobile button');
-
-            prevButton.disabled = absensiCurrentPage === 1;
-            nextButton.disabled = absensiCurrentPage === absensiTotalPages;
-
-            pageButtons.forEach((btn, index) => {
-                if (index + 1 === absensiCurrentPage) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        }
-
-        // Update desktop pagination buttons for ketidakhadiran
-        function updateKetidakhadiranDesktopPaginationButtons() {
-            const prevButton = document.getElementById('ketidakhadiranPrevPage');
-            const nextButton = document.getElementById('ketidakhadiranNextPage');
-            const pageButtons = document.querySelectorAll('#ketidakhadiranPageNumbers button');
-
-            prevButton.disabled = ketidakhadiranCurrentPage === 1;
-            nextButton.disabled = ketidakhadiranCurrentPage === ketidakhadiranTotalPages;
-
-            pageButtons.forEach((btn, index) => {
-                if (index + 1 === ketidakhadiranCurrentPage) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        }
-
-        // Update mobile pagination buttons for ketidakhadiran
-        function updateKetidakhadiranMobilePaginationButtons() {
-            const prevButton = document.getElementById('ketidakhadiranPrevPageMobile');
-            const nextButton = document.getElementById('ketidakhadiranNextPageMobile');
-            const pageButtons = document.querySelectorAll('#ketidakhadiranPageNumbersMobile button');
-
-            prevButton.disabled = ketidakhadiranCurrentPage === 1;
-            nextButton.disabled = ketidakhadiranCurrentPage === ketidakhadiranTotalPages;
-
-            pageButtons.forEach((btn, index) => {
-                if (index + 1 === ketidakhadiranCurrentPage) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        }
+        });
     </script>
 </body>
 </html>

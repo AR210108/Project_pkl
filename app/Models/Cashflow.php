@@ -73,7 +73,7 @@ class Cashflow extends Model
         $date = date('Ymd');
 
         // Cari transaksi terakhir pada hari ini yang dimulai dengan format yang sama
-        $lastTransaction = self::where('nomor_transaksi', 'like', "TRX-{$date}-%")
+        $lastTransaction = self::where('nomor_transaksi', 'like', "INV-{$date}-%")
             ->orderBy('nomor_transaksi', 'desc')
             ->first();
 
@@ -90,6 +90,6 @@ class Cashflow extends Model
         $formattedSequence = str_pad($newSequence, 4, '0', STR_PAD_LEFT);
 
         // Gabungkan semua bagian menjadi nomor transaksi final
-        return "TRX-{$date}-{$formattedSequence}";
+        return "INV-{$date}-{$formattedSequence}";
     }
 }

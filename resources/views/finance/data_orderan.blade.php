@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Data Orderan</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -797,7 +798,7 @@
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Total Lead</p>
-                            <p class="value-text text-base sm:text-xl font-bold truncate" id="total-lead-value">245</p>
+                            <p class="value-text text-base sm:text-xl font-bold truncate" id="total-lead-value">{{ $totalLead ?? 0 }}</p>
                         </div>
                     </div>
                     <div class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
@@ -806,7 +807,7 @@
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Conversion Rate</p>
-                            <p class="value-text text-base sm:text-xl font-bold truncate" id="conversion-rate-value">68%</p>
+                            <p class="value-text text-base sm:text-xl font-bold truncate" id="conversion-rate-value">{{ $conversionRate ?? 0 }}%</p>
                         </div>
                     </div>
                     <div class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
@@ -815,7 +816,7 @@
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Customer</p>
-                            <p class="value-text text-base sm:text-xl font-bold truncate" id="customer-value">167</p>
+                            <p class="value-text text-base sm:text-xl font-bold truncate" id="customer-value">{{ $uniqueCustomers ?? 0 }}</p>
                         </div>
                     </div>
                     <div class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
@@ -824,7 +825,7 @@
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Total Order</p>
-                            <p class="value-text text-base sm:text-xl font-bold truncate" id="total-order-value">{{ $orders->total() ?? 0 }}</p>
+                            <p class="value-text text-base sm:text-xl font-bold truncate" id="total-order-value">{{ $totalOrders ?? 0 }}</p>
                         </div>
                     </div>
                 </div>
@@ -897,13 +898,18 @@
                                     <thead>
                                         <tr>
                                             <th style="min-width: 60px;">No</th>
-                                            <th style="min-width: 200px;">Layanan</th>
+                                            <th style="min-width: 150px;">Nama Layanan</th>
+                                            <th style="min-width: 150px;">Nama Perusahaan</th>
+                                            <th style="min-width: 120px;">Tanggal</th>
+                                            <th style="min-width: 120px;">Nomer Invoice</th>
+                                            <th style="min-width: 150px;">Nama Klien</th>
+                                            <th style="min-width: 200px;">Alamat Perusahaan</th>
                                             <th style="min-width: 150px;">Deskripsi</th>
-                                            <th style="min-width: 150px;">Harga</th>
-                                            <th style="min-width: 150px; text-align: center;">Pembayaran Awal</th>
-                                            <th style="min-width: 150px;">Pelunasan</th>
-                                            <th style="min-width: 120px;">Status</th>
-                                            <th style="min-width: 120px;">Status Pengerjaan</th>
+                                            <th style="min-width: 120px;">Subtotal</th>
+                                            <th style="min-width: 100px;">Pajak</th>
+                                            <th style="min-width: 120px;">Total</th>
+                                            <th style="min-width: 150px;">Metode Pembayaran</th>
+                                            <th style="min-width: 120px;">Status Pembayaran</th>
                                             <th style="min-width: 100px; text-align: center;">Aksi</th>
                                         </tr>
                                     </thead>
@@ -917,17 +923,25 @@
                                         @endphp
                                         <tr>
                                             <td style="min-width: 60px;">{{ $order->id }}</td>
-                                            <td style="min-width: 200px;">{{ $order->layanan }}</td>
-                                            <td style="min-width: 150px;">@if($category == 'design')<span class="category-badge category-design">Desain</span>@elseif($category=='programming')<span class="category-badge category-programming">Programming</span>@elseif($category=='marketing')<span class="category-badge category-marketing">Digital Marketing</span>@else {{ $category }} @endif</td>
-                                            <td style="min-width: 150px;">{{ $order->price_formatted ?? ($order->price ? 'Rp '.number_format($order->price,0,',','.') : '-') }}</td>
-                                            <td style="min-width: 200px;">{{ $order->klien }}</td>
-                                            <td style="min-width: 150px; text-align: center;">{{ $order->deposit ? 'Rp '.number_format($order->deposit,0,',','.') : '-' }}</td>
-                                            <td style="min-width: 150px;">{{ $order->paid ? 'Rp '.number_format($order->paid,0,',','.') : '-' }}</td>
-                                            <td style="min-width: 120px;">
-                                                @if($status == 'paid')<span class="status-badge status-paid">Lunas</span>@elseif($status=='partial')<span class="status-badge status-partial">Sebagian</span>@elseif($status=='overdue')<span class="status-badge status-overdue">Terlambat</span>@else<span class="status-badge status-pending">Pending</span>@endif
+                                            <td style="min-width: 150px;">{{ $order->layanan }}</td>
+                                            <td style="min-width: 150px;">{{ $order->company_name ?? '-' }}</td>
+                                            <td style="min-width: 120px;">{{ $order->order_date ? \Carbon\Carbon::parse($order->order_date)->format('d/m/Y') : '-' }}</td>
+                                            <td style="min-width: 120px;">{{ $order->invoice_no ?? '-' }}</td>
+                                            <td style="min-width: 150px;">{{ $order->klien }}</td>
+                                            <td style="min-width: 200px;">{{ $order->company_address ?? '-' }}</td>
+                                            <td style="min-width: 150px;">{{ $order->description ?? '-' }}</td>
+                                            <td style="min-width: 120px;">{{ $order->subtotal ? 'Rp '.number_format($order->subtotal,0,',','.') : '-' }}</td>
+                                            <td style="min-width: 100px;">{{ $order->tax ?? '-' }}%</td>
+                                            <td style="min-width: 120px;">{{ $order->total ? 'Rp '.number_format($order->total,0,',','.') : '-' }}</td>
+                                            <td style="min-width: 150px;">
+                                                @if($order->payment_method == 'transfer_bank')Transfer Bank
+                                                @elseif($order->payment_method == 'cash')Tunai
+                                                @elseif($order->payment_method == 'check')Cek
+                                                @elseif($order->payment_method == 'e_wallet')E-Wallet
+                                                @else{{ $order->payment_method ?? '-' }}@endif
                                             </td>
                                             <td style="min-width: 120px;">
-                                                @if($work == 'planning')<span class="work-status-badge work-status-planning">Perencanaan</span>@elseif($work=='progress')<span class="work-status-badge work-status-progress">Sedang Dikerjakan</span>@elseif($work=='review')<span class="work-status-badge work-status-review">Review</span>@elseif($work=='completed')<span class="work-status-badge work-status-completed">Selesai</span>@else<span class="work-status-badge work-status-onhold">Ditunda</span>@endif
+                                                @if($order->status == 'paid')<span class="status-badge status-paid">Lunas</span>@elseif($order->status=='partial')<span class="status-badge status-partial">Sebagian</span>@elseif($order->status=='overdue')<span class="status-badge status-overdue">Terlambat</span>@else<span class="status-badge status-pending">Pending</span>@endif
                                             </td>
                                             <td style="min-width: 100px; text-align: center;">
                                                 <div class="flex justify-center gap-2">
@@ -1071,11 +1085,19 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                            <input type="number" name="price" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Harga">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Perusahaan</label>
+                            <input type="text" name="company_name" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Nama Perusahaan">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Klien</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                            <input type="date" name="order_date" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nomer Invoice</label>
+                            <input type="text" name="invoice_no" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Nomer Invoice">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Klien</label>
                             <select name="klien" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih Klien</option>
                                 <option value="PT. Teknologi Maju">PT. Teknologi Maju</option>
@@ -1085,33 +1107,44 @@
                                 <option value="CV. Kreatif">CV. Kreatif</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pembayaran Awal</label>
-                            <input type="number" name="deposit" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pembayaran Awal">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Perusahaan</label>
+                            <textarea name="company_address" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Alamat Perusahaan" rows="2"></textarea>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                            <textarea name="description" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Deskripsi" rows="2"></textarea>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pelunasan</label>
-                            <input type="number" name="paid" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pelunasan">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Subtotal</label>
+                            <input type="number" name="subtotal" step="0.01" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Subtotal">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pajak (%)</label>
+                            <input type="number" name="tax" step="0.01" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Pajak">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Total</label>
+                            <input type="number" name="total" step="0.01" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Total">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran</label>
+                            <select name="payment_method" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">Pilih Metode Pembayaran</option>
+                                <option value="transfer_bank">Transfer Bank</option>
+                                <option value="cash">Tunai</option>
+                                <option value="check">Cek</option>
+                                <option value="e_wallet">E-Wallet</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Pembayaran</label>
                             <select name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih Status</option>
                                 <option value="paid">Lunas</option>
                                 <option value="partial">Sebagian</option>
                                 <option value="pending">Pending</option>
                                 <option value="overdue">Terlambat</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Pengerjaan</label>
-                            <select name="work_status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih Status Pengerjaan</option>
-                                <option value="planning">Perencanaan</option>
-                                <option value="progress">Sedang Dikerjakan</option>
-                                <option value="review">Review</option>
-                                <option value="completed">Selesai</option>
-                                <option value="onhold">Ditunda</option>
                             </select>
                         </div>
                     </div>
@@ -1155,11 +1188,19 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                            <input type="number" id="edit-price" name="price" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Harga">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Perusahaan</label>
+                            <input type="text" id="edit-company-name" name="company_name" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Nama Perusahaan">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Klien</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                            <input type="date" id="edit-order-date" name="order_date" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nomer Invoice</label>
+                            <input type="text" id="edit-invoice-no" name="invoice_no" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Nomer Invoice">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Klien</label>
                             <select id="edit-klien" name="klien" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih Klien</option>
                                 <option value="PT. Teknologi Maju">PT. Teknologi Maju</option>
@@ -1169,33 +1210,44 @@
                                 <option value="CV. Kreatif">CV. Kreatif</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pembayaran Awal</label>
-                            <input type="number" id="edit-deposit" name="deposit" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pembayaran Awal">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Perusahaan</label>
+                            <textarea id="edit-company-address" name="company_address" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Alamat Perusahaan" rows="2"></textarea>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                            <textarea id="edit-description" name="description" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Deskripsi" rows="2"></textarea>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pelunasan</label>
-                            <input type="number" id="edit-paid" name="paid" step="1" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jumlah Pelunasan">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Subtotal</label>
+                            <input type="number" id="edit-subtotal" name="subtotal" step="0.01" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Subtotal">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pajak (%)</label>
+                            <input type="number" id="edit-tax" name="tax" step="0.01" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Pajak">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Total</label>
+                            <input type="number" id="edit-total" name="total" step="0.01" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Total">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran</label>
+                            <select id="edit-payment-method" name="payment_method" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">Pilih Metode Pembayaran</option>
+                                <option value="transfer_bank">Transfer Bank</option>
+                                <option value="cash">Tunai</option>
+                                <option value="check">Cek</option>
+                                <option value="e_wallet">E-Wallet</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Pembayaran</label>
                             <select id="edit-status" name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih Status</option>
                                 <option value="paid">Lunas</option>
                                 <option value="partial">Sebagian</option>
                                 <option value="pending">Pending</option>
                                 <option value="overdue">Terlambat</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Pengerjaan</label>
-                            <select id="edit-work-status" name="work_status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih Status Pengerjaan</option>
-                                <option value="planning">Perencanaan</option>
-                                <option value="progress">Sedang Dikerjakan</option>
-                                <option value="review">Review</option>
-                                <option value="completed">Selesai</option>
-                                <option value="onhold">Ditunda</option>
                             </select>
                         </div>
                     </div>
@@ -1695,37 +1747,50 @@
 
         // Edit modal functions
         function openEditModal(orderId) {
-            // Find order data
-            const order = paymentData.find(item => item.no === orderId);
-            
-            if (!order) {
-                showMinimalPopup('Error', 'Data order tidak ditemukan', 'error');
-                return;
-            }
-            
-            // Set form action
-            document.getElementById('editForm').action = `/orders/${orderId}`;
-            
-            // Fill form with order data
-            document.getElementById('editOrderId').value = orderId;
-            document.getElementById('edit-payment-category').value = order.kategori;
-            updateEditServiceOptions();
-            
-            // Set service after options are updated
-            setTimeout(() => {
-                document.getElementById('edit-payment-service').value = order.layanan;
-            }, 100);
-            
-            document.getElementById('edit-price').value = order.harga.replace(/\D/g, '');
-            document.getElementById('edit-klien').value = order.klien;
-            document.getElementById('edit-deposit').value = order.awal.replace(/\D/g, '');
-            document.getElementById('edit-paid').value = order.lunas.replace(/\D/g, '');
-            document.getElementById('edit-status').value = order.status;
-            document.getElementById('edit-work-status').value = order.statusPengerjaan;
-            
-            // Show modal
-            document.getElementById('editModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+            // Fetch order data via AJAX
+            fetch(`{{ route('orders.show', '') }}/${orderId}`, {
+                headers: {
+                    'Accept': 'application/json',
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch order');
+                return response.json();
+            })
+            .then(order => {
+                // Set form action
+                document.getElementById('editForm').action = `{{ route('orders.update', '') }}/${orderId}`;
+                
+                // Fill form with order data
+                document.getElementById('editOrderId').value = order.id;
+                document.getElementById('edit-payment-category').value = order.kategori || '';
+                updateEditServiceOptions();
+                
+                // Set service after options are updated
+                setTimeout(() => {
+                    document.getElementById('edit-payment-service').value = order.layanan || '';
+                }, 100);
+                
+                document.getElementById('edit-company-name').value = order.company_name || '';
+                document.getElementById('edit-order-date').value = order.order_date || '';
+                document.getElementById('edit-invoice-no').value = order.invoice_no || '';
+                document.getElementById('edit-klien').value = order.klien || '';
+                document.getElementById('edit-company-address').value = order.company_address || '';
+                document.getElementById('edit-description').value = order.description || '';
+                document.getElementById('edit-subtotal').value = order.subtotal || '';
+                document.getElementById('edit-tax').value = order.tax || '';
+                document.getElementById('edit-total').value = order.total || '';
+                document.getElementById('edit-payment-method').value = order.payment_method || '';
+                document.getElementById('edit-status').value = order.status || '';
+                
+                // Show modal
+                document.getElementById('editModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMinimalPopup('Error', 'Gagal memuat data order', 'error');
+            });
         }
 
         function closeEditModal() {
@@ -1747,25 +1812,39 @@
         function confirmDelete() {
             if (!deleteOrderId) return;
             
-            // In a real application, you would send a request to the server to delete the order
-            // For this demo, we'll just remove it from the local data array
+            // Show loading state
+            const confirmBtn = document.querySelector('[onclick="confirmDelete()"]');
+            if (confirmBtn) confirmBtn.disabled = true;
             
-            // Find index of the order to delete
-            const index = paymentData.findIndex(item => item.no === deleteOrderId);
-            
-            if (index !== -1) {
-                // Remove the order from the array
-                paymentData.splice(index, 1);
-                
-                // Apply filters to update the view
-                applyFilters();
-                
-                // Show success message
+            // Send DELETE request to server
+            fetch(`{{ route('orders.destroy', '') }}/${deleteOrderId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to delete order');
+                return response.json();
+            })
+            .then(data => {
                 showMinimalPopup('Berhasil', 'Data orderan berhasil dihapus', 'success');
-            }
-            
-            // Close the modal
-            closeDeleteModal();
+                
+                // Reload the page to refresh the data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMinimalPopup('Error', 'Gagal menghapus data orderan', 'error');
+            })
+            .finally(() => {
+                if (confirmBtn) confirmBtn.disabled = false;
+                closeDeleteModal();
+            });
         }
 
         // Invoice detail modal functions
@@ -2216,6 +2295,77 @@
             
             // Initialize filter
             initializeFilter();
+            
+            // Handle edit form submission
+            const editForm = document.getElementById('editForm');
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const orderId = document.getElementById('editOrderId').value;
+                    const formData = new FormData(this);
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                    
+                    fetch(`{{ route('orders.update', '') }}/${orderId}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                        },
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Failed to update order');
+                        return response.json();
+                    })
+                    .then(data => {
+                        showMinimalPopup('Berhasil', 'Data orderan berhasil diupdate', 'success');
+                        
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showMinimalPopup('Error', 'Gagal mengupdate data orderan', 'error');
+                    });
+                });
+            }
+            
+            // Handle add form submission
+            const addForm = document.querySelector('form[action="{{ route("orders.store") }}"]');
+            if (addForm) {
+                addForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                    
+                    fetch(this.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                        },
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Failed to create order');
+                        return response.json();
+                    })
+                    .then(data => {
+                        showMinimalPopup('Berhasil', 'Data orderan berhasil ditambahkan', 'success');
+                        
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showMinimalPopup('Error', 'Gagal menambahkan data orderan', 'error');
+                    });
+                });
+            }
         });
     </script>
 </body>
