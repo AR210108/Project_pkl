@@ -11,6 +11,7 @@ use App\Models\Karyawan;
 use App\Models\CatatanRapat;
 use App\Models\Pengumuman;
 use App\Models\PengumumanUser;
+use App\Models\Cuti;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -187,11 +188,77 @@ class KaryawanController extends Controller
     /**
      * Menampilkan halaman absensi karyawan.
      */
-    public function absensiPage()
-    {
-        return view('karyawan.absen');
-    }
-
+   // Di KaryawanController.php - Line 234 dan seterusnya
+public function absensiPage(Request $request)
+{
+    $user = Auth::user();
+    $today = Carbon::today();
+    
+    // Cek absensi hari ini
+    $absensiHariIni = Absensi::where('user_id', $user->id)
+        ->whereDate('tanggal', $today)
+        ->first();
+    
+    $startOfMonth = Carbon::now()->startOfMonth();
+    $endOfMonth = Carbon::now()->endOfMonth();
+    
+    $riwayatAbsensi = Absensi::where('user_id', $user->id)
+        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+        ->orderBy('tanggal', 'desc')
+        ->get();
+    
+    // Hitung statistik - SESUAIKAN DENGAN STRUKTUR TABEL
+    
+    // 1. Total Hadir = ada jam_masuk DAN approval_status = approved
+    $totalHadir = Absensi::where('user_id', $user->id)
+        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+        ->whereNotNull('jam_masuk') // ADA CHECK-IN
+        ->where('approval_status', 'approved') // DISETUJUI
+        ->count();
+    
+    // 2. Total Izin = jenis_ketidakhadiran = 'izin' DAN approval_status = approved
+    $totalIzin = Absensi::where('user_id', $user->id)
+        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+        ->where('jenis_ketidakhadiran', 'izin')
+        ->where('approval_status', 'approved')
+        ->count();
+    
+    // 3. Total Sakit
+    $totalSakit = Absensi::where('user_id', $user->id)
+        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+        ->where('jenis_ketidakhadiran', 'sakit')
+        ->where('approval_status', 'approved')
+        ->count();
+    
+    // 4. Total Cuti
+    $totalCuti = Absensi::where('user_id', $user->id)
+        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+        ->where('jenis_ketidakhadiran', 'cuti')
+        ->where('approval_status', 'approved')
+        ->count();
+    
+    // 5. Total Dinas Luar
+    $totalDinasLuar = Absensi::where('user_id', $user->id)
+        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+        ->where('jenis_ketidakhadiran', 'dinas-luar')
+        ->where('approval_status', 'approved')
+        ->count();
+    
+    // 6. Total Alpha = tidak ada data absensi sama sekali untuk hari kerja
+    // (Perlu logika khusus)
+    
+    return view('karyawan.absen', [
+        'on_leave' => false,
+        'cuti_details' => null,
+        'absensiHariIni' => $absensiHariIni,
+        'riwayatAbsensi' => $riwayatAbsensi,
+        'totalHadir' => $totalHadir,
+        'totalIzin' => $totalIzin,
+        'totalSakit' => $totalSakit,
+        'totalCuti' => $totalCuti,
+        'totalDinasLuar' => $totalDinasLuar,
+    ]);
+}
     /**
      * Menampilkan halaman daftar TUGAS karyawan.
      */
@@ -304,6 +371,32 @@ class KaryawanController extends Controller
         }
 
         return view('karyawan.detail', compact('absensi'));
+    }
+
+    /**
+     * Helper method untuk cek apakah user sedang cuti hari ini
+     */
+    private function checkIfOnLeaveToday($userId)
+    {
+        $today = Carbon::today()->format('Y-m-d');
+        
+        $cuti = Cuti::where('user_id', $userId)
+            ->where('status', 'disetujui')
+            ->whereDate('tanggal_mulai', '<=', $today)
+            ->whereDate('tanggal_selesai', '>=', $today)
+            ->first();
+        
+        if ($cuti) {
+            return [
+                'on_leave' => true,
+                'details' => $cuti
+            ];
+        }
+        
+        return [
+            'on_leave' => false,
+            'details' => null
+        ];
     }
 
     // =================================================================
@@ -462,6 +555,88 @@ class KaryawanController extends Controller
     }
 
     /**
+     * API: Mengambil data dashboard untuk karyawan (endpoint baru untuk /api/karyawan/dashboard-data)
+     */
+    public function getDashboardDataApi()
+    {
+        try {
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+            
+            $user = auth()->user();
+            $today = now()->format('Y-m-d');
+            
+            // Get today's attendance
+            $absensiHariIni = Absensi::where('user_id', $user->id)
+                ->whereDate('tanggal', $today)
+                ->first();
+            
+            // Check if user is on leave
+            $onLeave = $this->checkIfOnLeaveToday($user->id);
+            
+            // Get tasks statistics
+            $totalTasks = Task::where('assigned_to', $user->id)->count();
+            $pendingTasks = Task::where('assigned_to', $user->id)
+                ->where('status', '!=', 'selesai')
+                ->count();
+            $completedTasks = Task::where('assigned_to', $user->id)
+                ->where('status', 'selesai')
+                ->count();
+            
+            // Get leave requests
+            $pendingCuti = Cuti::where('user_id', $user->id)
+                ->where('status', 'pending')
+                ->count();
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'absensi_today' => $absensiHariIni ? [
+                        'status' => $absensiHariIni->status,
+                        'jam_masuk' => $absensiHariIni->jam_masuk,
+                        'jam_pulang' => $absensiHariIni->jam_pulang,
+                        'keterangan' => $absensiHariIni->keterangan
+                    ] : null,
+                    'on_leave' => $onLeave['on_leave'],
+                    'cuti_details' => $onLeave['on_leave'] ? [
+                        'tanggal_mulai' => $onLeave['details']->tanggal_mulai,
+                        'tanggal_selesai' => $onLeave['details']->tanggal_selesai,
+                        'tipe_cuti' => $onLeave['details']->tipe_cuti,
+                        'alasan' => $onLeave['details']->alasan
+                    ] : null,
+                    'tasks' => [
+                        'total' => $totalTasks,
+                        'pending' => $pendingTasks,
+                        'completed' => $completedTasks,
+                        'completion_rate' => $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 2) : 0
+                    ],
+                    'cuti' => [
+                        'pending' => $pendingCuti
+                    ],
+                    'user' => [
+                        'name' => $user->name,
+                        'divisi' => $user->divisi,
+                        'jabatan' => $user->jabatan,
+                        'email' => $user->email
+                    ]
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Dashboard API Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load dashboard data',
+                'error' => env('APP_DEBUG') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
      * Mengambil status pengajuan (pending, approved, rejected).
      */
     public function getPengajuanStatus()
@@ -522,15 +697,36 @@ class KaryawanController extends Controller
     }
 
     /**
-     * Proses absen masuk via AJAX.
+     * Proses absen masuk via AJAX dengan validasi cuti.
      */
     public function absenMasukApi(Request $request)
     {
         try {
+            $user = Auth::user();
             $today = now()->toDateString();
             
-            // Cek apakah sudah ada pengajuan ketidakhadiran yang disetujui
-            $existingAbsence = Absensi::where('user_id', Auth::id())
+            // 1. Cek apakah user sedang cuti hari ini
+            $cutiCheck = $this->checkIfOnLeaveToday($user->id);
+            if ($cutiCheck['on_leave']) {
+                $cuti = $cutiCheck['details'];
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda sedang cuti dari ' . 
+                        Carbon::parse($cuti->tanggal_mulai)->format('d/m/Y') . 
+                        ' sampai ' . 
+                        Carbon::parse($cuti->tanggal_selesai)->format('d/m/Y') . 
+                        '. Tidak dapat melakukan absensi.',
+                    'cuti_details' => [
+                        'tanggal_mulai' => $cuti->tanggal_mulai,
+                        'tanggal_selesai' => $cuti->tanggal_selesai,
+                        'tipe_cuti' => $cuti->tipe_cuti,
+                        'alasan' => $cuti->alasan
+                    ]
+                ], 403);
+            }
+            
+            // 2. Cek apakah sudah ada pengajuan ketidakhadiran yang disetujui
+            $existingAbsence = Absensi::where('user_id', $user->id)
                                       ->where('tanggal', $today)
                                       ->whereNotNull('jenis_ketidakhadiran')
                                       ->where('approval_status', 'approved')
@@ -546,16 +742,23 @@ class KaryawanController extends Controller
                 };
                 
                 return response()->json([
+                    'success' => false,
                     'message' => 'Anda tidak dapat melakukan absen masuk karena telah mengajukan "' . $jenisLabel . '" pada hari ini.'
                 ], 403);
             }
 
             $nowLocal = now();
-            $userName = Auth::user()->name;
+            $userName = $user->name;
 
-            $cek = Absensi::where('user_id', Auth::id())->where('tanggal', $today)->first();
+            $cek = Absensi::where('user_id', $user->id)
+                ->where('tanggal', $today)
+                ->first();
+                
             if ($cek && $cek->jam_masuk) {
-                return response()->json(['message' => 'Kamu sudah absen masuk hari ini'], 409);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kamu sudah absen masuk hari ini'
+                ], 409);
             }
 
             $workStartTime = $nowLocal->copy()->setTime(9, 5, 0);
@@ -564,14 +767,16 @@ class KaryawanController extends Controller
             $status = $lateMinutes > 0 ? 'Terlambat' : 'Tepat Waktu';
 
             Absensi::updateOrCreate(
-                ['user_id' => Auth::id(), 'tanggal' => $today],
+                ['user_id' => $user->id, 'tanggal' => $today],
                 [
                     'jam_masuk' => $nowLocal,
                     'approval_status' => 'approved',
+                    'status' => 'hadir'
                 ]
             );
 
             return response()->json([
+                'success' => true,
                 'message' => 'Absen masuk berhasil!',
                 'data' => [
                     'time' => $nowLocal->toDateTimeString(),
@@ -581,28 +786,62 @@ class KaryawanController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Terjadi kesalahan server. Silakan coba lagi.'], 500);
+            Log::error('Absen Masuk Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server. Silakan coba lagi.'
+            ], 500);
         }
     }
 
     /**
-     * Proses absen pulang via AJAX.
+     * Proses absen pulang via AJAX dengan validasi cuti.
      */
     public function absenPulangApi(Request $request)
     {
         try {
+            $user = Auth::user();
             $today = now()->toDateString();
-            $nowLocal = now();
-            $userName = Auth::user()->name;
+            
+            // 1. Cek apakah user sedang cuti hari ini
+            $cutiCheck = $this->checkIfOnLeaveToday($user->id);
+            if ($cutiCheck['on_leave']) {
+                $cuti = $cutiCheck['details'];
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda sedang cuti dari ' . 
+                        Carbon::parse($cuti->tanggal_mulai)->format('d/m/Y') . 
+                        ' sampai ' . 
+                        Carbon::parse($cuti->tanggal_selesai)->format('d/m/Y') . 
+                        '. Tidak dapat melakukan absensi.',
+                    'cuti_details' => [
+                        'tanggal_mulai' => $cuti->tanggal_mulai,
+                        'tanggal_selesai' => $cuti->tanggal_selesai,
+                        'tipe_cuti' => $cuti->tipe_cuti,
+                        'alasan' => $cuti->alasan
+                    ]
+                ], 403);
+            }
 
-            $absen = Absensi::where('user_id', Auth::id())->where('tanggal', $today)->first();
+            $nowLocal = now();
+            $userName = $user->name;
+
+            $absen = Absensi::where('user_id', $user->id)
+                ->where('tanggal', $today)
+                ->first();
 
             if (!$absen || !$absen->jam_masuk) {
-                return response()->json(['message' => 'Anda belum melakukan absen masuk hari ini.'], 400);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda belum melakukan absen masuk hari ini.'
+                ], 400);
             }
 
             if ($absen->jam_pulang) {
-                return response()->json(['message' => 'Anda sudah absen pulang hari ini.'], 409);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda sudah absen pulang hari ini.'
+                ], 409);
             }
 
             $workEndTime = $nowLocal->copy()->setTime(17, 0, 0);
@@ -624,6 +863,7 @@ class KaryawanController extends Controller
             ]);
 
             return response()->json([
+                'success' => true,
                 'message' => 'Absen pulang berhasil!',
                 'data' => [
                     'time' => $nowLocal->toDateTimeString(),
@@ -631,14 +871,21 @@ class KaryawanController extends Controller
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['message' => $e->validator->errors()->first()], 422);
+            return response()->json([
+                'success' => false,
+                'message' => $e->validator->errors()->first()
+            ], 422);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Terjadi kesalahan server. Silakan coba lagi.'], 500);
+            Log::error('Absen Pulang Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server. Silakan coba lagi.'
+            ], 500);
         }
     }
 
     /**
-     * Proses pengajuan izin (bisa multi-hari).
+     * Proses pengajuan izin (bisa multi-hari) dengan validasi cuti.
      */
     public function submitIzinApi(Request $request)
     {
@@ -652,6 +899,27 @@ class KaryawanController extends Controller
         $user = Auth::user();
         $period = CarbonPeriod::create($request->start_date, $request->end_date);
 
+        // Validasi: Cek apakah ada tanggal dalam periode yang sudah termasuk cuti
+        foreach ($period as $date) {
+            $dateStr = $date->toDateString();
+            
+            // Cek apakah sudah ada cuti yang disetujui di tanggal ini
+            $existingCuti = Cuti::where('user_id', $user->id)
+                ->where('status', 'disetujui')
+                ->whereDate('tanggal_mulai', '<=', $dateStr)
+                ->whereDate('tanggal_selesai', '>=', $dateStr)
+                ->exists();
+            
+            if ($existingCuti) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda sudah memiliki cuti yang disetujui pada tanggal ' . 
+                        Carbon::parse($dateStr)->format('d/m/Y') . 
+                        '. Tidak dapat mengajukan izin.'
+                ], 400);
+            }
+        }
+
         DB::beginTransaction();
         try {
             foreach ($period as $date) {
@@ -663,21 +931,29 @@ class KaryawanController extends Controller
                         'approval_status' => 'pending',
                         'tanggal_akhir' => $request->end_date,
                         'keterangan' => 'Pengajuan ' . $request->type,
+                        'status' => 'tidak_hadir'
                     ]
                 );
             }
             DB::commit();
 
-            return response()->json(['message' => 'Pengajuan ' . $request->type . ' untuk ' . $period->count() . ' hari berhasil dikirim dan menunggu persetujuan admin.']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengajuan ' . $request->type . ' untuk ' . $period->count() . ' hari berhasil dikirim dan menunggu persetujuan admin.'
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Gagal mengajukan. Terjadi kesalahan pada server.'], 500);
+            Log::error('Submit Izin Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengajukan. Terjadi kesalahan pada server.'
+            ], 500);
         }
     }
 
     /**
-     * Proses pengajuan dinas luar (bisa multi-hari).
+     * Proses pengajuan dinas luar (bisa multi-hari) dengan validasi cuti.
      */
     public function submitDinasApi(Request $request)
     {
@@ -689,7 +965,29 @@ class KaryawanController extends Controller
             'description' => 'required|string',
         ]);
 
+        $user = Auth::user();
         $period = CarbonPeriod::create($request->start_date, $request->end_date);
+
+        // Validasi: Cek apakah ada tanggal dalam periode yang sudah termasuk cuti
+        foreach ($period as $date) {
+            $dateStr = $date->toDateString();
+            
+            // Cek apakah sudah ada cuti yang disetujui di tanggal ini
+            $existingCuti = Cuti::where('user_id', $user->id)
+                ->where('status', 'disetujui')
+                ->whereDate('tanggal_mulai', '<=', $dateStr)
+                ->whereDate('tanggal_selesai', '>=', $dateStr)
+                ->exists();
+            
+            if ($existingCuti) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda sudah memiliki cuti yang disetujui pada tanggal ' . 
+                        Carbon::parse($dateStr)->format('d/m/Y') . 
+                        '. Tidak dapat mengajukan dinas luar.'
+                ], 400);
+            }
+        }
 
         DB::beginTransaction();
         try {
@@ -704,16 +1002,24 @@ class KaryawanController extends Controller
                         'approval_status' => 'pending',
                         'tanggal_akhir' => $request->end_date,
                         'keterangan' => 'Pengajuan dinas luar',
+                        'status' => 'tidak_hadir'
                     ]
                 );
             }
             DB::commit();
 
-            return response()->json(['message' => 'Pengajuan dinas luar untuk ' . $period->count() . ' hari berhasil dikirim dan menunggu persetujuan admin.']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengajuan dinas luar untuk ' . $period->count() . ' hari berhasil dikirim dan menunggu persetujuan admin.'
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Gagal mengajukan dinas luar. Terjadi kesalahan pada server.'], 500);
+            Log::error('Submit Dinas Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengajukan dinas luar. Terjadi kesalahan pada server.'
+            ], 500);
         }
     }
 
@@ -793,7 +1099,10 @@ class KaryawanController extends Controller
                 ];
             });
 
-            return response()->json($transformedTasks);
+            return response()->json([
+                'success' => true,
+                'data' => $transformedTasks
+            ]);
 
         } catch (\Exception $e) {
             Log::error('API Error: ' . $e->getMessage());
@@ -875,6 +1184,125 @@ class KaryawanController extends Controller
             return response()->json([
                 'error' => 'Internal server error',
                 'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Mengambil tanggal-tanggal yang memiliki meeting notes (endpoint baru untuk /api/karyawan/meeting-notes-dates)
+     */
+    public function getMeetingNotesDatesApi()
+    {
+        try {
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+            }
+            
+            Log::info('=== GET MEETING NOTES DATES API ===');
+            
+            // Check if table exists
+            if (!Schema::hasTable('catatan_rapats')) {
+                Log::warning('Table catatan_rapats does not exist');
+                return response()->json(['success' => true, 'dates' => []]);
+            }
+            
+            // Get dates with published meeting notes
+            // Using the actual column names from CatatanRapat model
+            $dates = CatatanRapat::where('status', 'published')
+                ->select('tanggal_rapat') // Adjust based on your actual column name
+                ->distinct()
+                ->orderBy('tanggal_rapat', 'desc')
+                ->get()
+                ->pluck('tanggal_rapat')
+                ->map(function($date) {
+                    return Carbon::parse($date)->format('Y-m-d');
+                })
+                ->toArray();
+            
+            Log::info('Found dates:', ['count' => count($dates), 'dates' => $dates]);
+            
+            return response()->json([
+                'success' => true,
+                'dates' => $dates
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Meeting Dates API Error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load meeting dates'
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Mengambil meeting notes untuk tanggal tertentu (endpoint baru untuk /api/karyawan/meeting-notes)
+     */
+    public function getMeetingNotesApi(Request $request)
+    {
+        try {
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+            }
+            
+            $date = $request->query('date');
+            if (!$date) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Date parameter is required'
+                ], 400);
+            }
+            
+            Log::info('=== GET MEETING NOTES API ===', ['date' => $date]);
+            
+            // Check if table exists
+            if (!Schema::hasTable('catatan_rapats')) {
+                Log::warning('Table catatan_rapats does not exist');
+                return response()->json(['success' => true, 'data' => []]);
+            }
+            
+            // Get meeting notes for specific date
+            // Using the actual column names from CatatanRapat model
+            $meetingNotes = CatatanRapat::where('status', 'published')
+                ->whereDate('tanggal_rapat', $date) // Adjust column name if different
+                ->orderBy('created_at', 'desc')
+                ->get([
+                    'id', 
+                    'judul', 
+                    'isi', 
+                    'tanggal_rapat', // Adjust column name
+                    'lokasi', 
+                    'created_at'
+                ]);
+            
+            Log::info('Found meeting notes:', ['count' => $meetingNotes->count()]);
+            
+            $formattedNotes = $meetingNotes->map(function ($note) {
+                return [
+                    'id' => $note->id,
+                    'judul' => $note->judul,
+                    'isi' => $note->isi,
+                    'tanggal_rapat' => $note->tanggal_rapat,
+                    'formatted_tanggal' => Carbon::parse($note->tanggal_rapat)->translatedFormat('d F Y'),
+                    'lokasi' => $note->lokasi,
+                    'created_at' => $note->created_at->format('Y-m-d H:i:s'),
+                    'formatted_created_at' => $note->created_at->translatedFormat('d F Y H:i'),
+                ];
+            });
+            
+            return response()->json([
+                'success' => true,
+                'data' => $formattedNotes,
+                'date' => $date
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Meeting Notes API Error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load meeting notes'
             ], 500);
         }
     }
@@ -974,6 +1402,116 @@ class KaryawanController extends Controller
             Log::error('Error in getAnnouncements: ' . $e->getMessage());
             Log::error('Stack trace: ' . $e->getTraceAsString());
             return response()->json([], 200); // Return empty array on error
+        }
+    }
+
+    /**
+     * API: Mengambil tanggal-tanggal yang memiliki pengumuman (endpoint baru untuk /api/karyawan/announcements-dates)
+     */
+    public function getAnnouncementDatesApi()
+    {
+        try {
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+            }
+            
+            Log::info('=== GET ANNOUNCEMENT DATES API ===');
+            
+            // Check if table exists
+            if (!Schema::hasTable('pengumuman')) {
+                Log::warning('Table pengumuman does not exist');
+                return response()->json(['success' => true, 'dates' => []]);
+            }
+            
+            // Get dates with announcements
+            // Adjust column names based on your Pengumuman model
+            $dates = Pengumuman::where('status', 'published')
+                ->select('tanggal') // Adjust column name if different
+                ->distinct()
+                ->orderBy('tanggal', 'desc')
+                ->get()
+                ->pluck('tanggal')
+                ->map(function($date) {
+                    return Carbon::parse($date)->format('Y-m-d');
+                })
+                ->toArray();
+            
+            Log::info('Found announcement dates:', ['count' => count($dates), 'dates' => $dates]);
+            
+            return response()->json([
+                'success' => true,
+                'dates' => $dates
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Announcement Dates API Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load announcement dates'
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Mengambil daftar pengumuman (endpoint baru untuk /api/karyawan/announcements)
+     */
+    public function getAnnouncementsApi()
+    {
+        try {
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+            }
+            
+            Log::info('=== GET ANNOUNCEMENTS API ===');
+            
+            // Check if table exists
+            if (!Schema::hasTable('pengumuman')) {
+                Log::warning('Table pengumuman does not exist');
+                return response()->json(['success' => true, 'data' => []]);
+            }
+            
+            // Get latest announcements
+            // Adjust column names based on your Pengumuman model
+            $announcements = Pengumuman::where('status', 'published')
+                ->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->get([
+                    'id', 
+                    'judul', 
+                    'isi', // Adjust column name if different (isi_pesan)
+                    'tanggal', // Adjust column name if different
+                    'lampiran',
+                    'created_at'
+                ]);
+            
+            Log::info('Found announcements:', ['count' => $announcements->count()]);
+            
+            $formattedAnnouncements = $announcements->map(function ($announcement) {
+                return [
+                    'id' => $announcement->id,
+                    'judul' => $announcement->judul,
+                    'isi' => $announcement->isi, // Adjust based on your column name
+                    'tanggal' => $announcement->tanggal,
+                    'formatted_tanggal' => Carbon::parse($announcement->tanggal)->translatedFormat('d F Y'),
+                    'lampiran' => $announcement->lampiran,
+                    'lampiran_url' => $announcement->lampiran ? asset('storage/' . $announcement->lampiran) : null,
+                    'created_at' => $announcement->created_at->format('Y-m-d H:i:s'),
+                    'formatted_created_at' => $announcement->created_at->translatedFormat('d F Y H:i'),
+                ];
+            });
+            
+            return response()->json([
+                'success' => true,
+                'data' => $formattedAnnouncements
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Announcements API Error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load announcements'
+            ], 500);
         }
     }
 
@@ -1109,5 +1647,71 @@ class KaryawanController extends Controller
         }
         
         return response()->json($data);
+    }
+
+    /**
+     * API: Debug endpoint untuk testing semua API karyawan
+     */
+    public function debugAllApis()
+    {
+        try {
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+            }
+            
+            $user = auth()->user();
+            $results = [];
+            
+            // Test dashboard data
+            $dashboardResponse = $this->getDashboardDataApi();
+            $dashboardData = json_decode($dashboardResponse->getContent(), true);
+            $results['dashboard_data'] = $dashboardData['success'] ? 'SUCCESS' : 'FAILED';
+            
+            // Test meeting notes dates
+            $meetingDatesResponse = $this->getMeetingNotesDatesApi();
+            $meetingDatesData = json_decode($meetingDatesResponse->getContent(), true);
+            $results['meeting_notes_dates'] = $meetingDatesData['success'] ? 'SUCCESS' : 'FAILED';
+            
+            // Test announcements dates
+            $announcementDatesResponse = $this->getAnnouncementDatesApi();
+            $announcementDatesData = json_decode($announcementDatesResponse->getContent(), true);
+            $results['announcement_dates'] = $announcementDatesData['success'] ? 'SUCCESS' : 'FAILED';
+            
+            // Test announcements
+            $announcementsResponse = $this->getAnnouncementsApi();
+            $announcementsData = json_decode($announcementsResponse->getContent(), true);
+            $results['announcements'] = $announcementsData['success'] ? 'SUCCESS' : 'FAILED';
+            
+            // Check database tables
+            $tables = [
+                'catatan_rapats' => Schema::hasTable('catatan_rapats'),
+                'pengumuman' => Schema::hasTable('pengumuman'),
+            ];
+            
+            return response()->json([
+                'success' => true,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'role' => $user->role,
+                    'divisi' => $user->divisi,
+                ],
+                'api_results' => $results,
+                'tables_exist' => $tables,
+                'routes' => [
+                    'dashboard_data' => '/karyawan/api/dashboard-data',
+                    'meeting_notes_dates' => '/karyawan/api/meeting-notes-dates',
+                    'announcement_dates' => '/karyawan/api/announcements-dates',
+                    'announcements' => '/karyawan/api/announcements',
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
     }
 }

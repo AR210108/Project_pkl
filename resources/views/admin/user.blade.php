@@ -751,12 +751,23 @@
                                                         {{ $u->role }}
                                                     </span>
                                                 </td>
-                                                <td>
-                                                    <button
-                                                        onclick="openModalEdit({{ $u->id }}, '{{ $u->name }}', {{ $u->divisi_id ?? 'null' }}, '{{ $u->email }}', '{{ $u->role }}')">
-                                                        edit
-                                                    </button>
-                                                </td>
+<!-- Di dalam desktop table (td aksi) -->
+<td style="min-width: 100px; text-align: center;">
+    <div class="flex justify-center gap-2">
+        <button onclick="openModalEdit({{ $u->id }}, '{{ $u->name }}', {{ $u->divisi_id ?? 'null' }}, '{{ $u->email }}', '{{ $u->role }}')"
+            class="p-1 rounded-full hover:bg-primary/20 text-gray-700"
+            title="Edit">
+            <span class="material-icons-outlined">edit</span>
+        </button>
+        
+        <!-- GANTI FORM DELETE INI -->
+        <button onclick="confirmDeleteUser({{ $u->id }}, '{{ $u->name }}')"
+            class="delete-user-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
+            title="Hapus">
+            <span class="material-icons-outlined">delete</span>
+        </button>
+    </div>
+</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -838,7 +849,46 @@
             </footer>
         </main>
     </div>
-
+    <!-- Modal Konfirmasi Hapus User -->
+<div id="deleteUserModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus User</h3>
+                <button type="button" class="close-modal text-gray-800 hover:text-gray-500"
+                    data-target="deleteUserModal">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            
+            <div class="mb-6">
+                <div class="flex items-center justify-center mb-4">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                        <span class="material-icons-outlined text-red-500 text-3xl">warning</span>
+                    </div>
+                </div>
+                
+                <p class="text-center text-gray-700 mb-2">
+                    Apakah Anda yakin ingin menghapus user <span id="deleteUserName" class="font-semibold"></span>?
+                </p>
+                <p class="text-center text-sm text-gray-500">
+                    Tindakan ini tidak dapat dibatalkan. Semua data terkait user ini akan dihapus.
+                </p>
+            </div>
+            
+            <div class="flex justify-center gap-3">
+                <button type="button" class="close-modal px-5 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                    data-target="deleteUserModal">
+                    Batal
+                </button>
+                <button type="button" id="confirmDeleteBtn" 
+                    class="px-5 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
+                    Hapus User
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Modal Tambah User -->
     <div id="tambahUserModal"
         class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
@@ -1641,7 +1691,108 @@ async function handleTambahUser(e) {
                 }
             }, 3000);
         });
+
+        // ==================== DELETE FUNCTIONS ====================
+let userToDelete = null;
+
+function confirmDeleteUser(userId, userName) {
+    userToDelete = userId;
+    
+    // Tampilkan modal konfirmasi
+    document.getElementById('deleteUserName').textContent = userName;
+    openModal('deleteUserModal');
+}
+
+async function handleDeleteUser() {
+    if (!userToDelete) {
+        showMinimalPopup('Error', 'User ID tidak ditemukan', 'error');
+        return;
+    }
+
+    // Disable tombol hapus
+    const deleteBtn = document.getElementById('confirmDeleteBtn');
+    const originalText = deleteBtn?.textContent || 'Hapus User';
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<span class="loading-spinner"></span> Menghapus...';
+    }
+
+    try {
+        const response = await fetch(`/admin/user/delete/${userToDelete}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log('Delete response status:', response.status);
+
+        // Parse response
+        let result;
+        try {
+            result = await response.json();
+        } catch (jsonError) {
+            console.error('Failed to parse JSON:', jsonError);
+            // Mungkin redirect dengan session message
+            if (response.redirected) {
+                showMinimalPopup('Berhasil', 'User berhasil dihapus', 'success');
+                closeModal('deleteUserModal');
+                setTimeout(() => window.location.reload(), 1500);
+                return;
+            }
+            throw new Error('Invalid server response');
+        }
+
+        if (response.ok) {
+            showMinimalPopup('Berhasil', result.message || 'User berhasil dihapus', 'success');
+            closeModal('deleteUserModal');
+            
+            // Reload halaman setelah 1.5 detik
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+            
+        } else {
+            showMinimalPopup('Error', result.message || 'Gagal menghapus user', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        showMinimalPopup('Error', 'Terjadi kesalahan: ' + error.message, 'error');
+    } finally {
+        // Reset state
+        userToDelete = null;
+        
+        // Re-enable tombol
+        if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.textContent = originalText;
+        }
+    }
+}
+
+// ==================== UPDATE EVENT LISTENERS ====================
+document.addEventListener('DOMContentLoaded', function() {
+    // ... kode yang sudah ada ...
+    
+    // Tambahkan event listener untuk tombol confirm delete
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', handleDeleteUser);
+    }
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        const deleteModal = document.getElementById('deleteUserModal');
+        if (event.target === deleteModal) {
+            closeModal('deleteUserModal');
+            userToDelete = null; // Reset
+        }
+    });
+});
     </script>
+
 </body>
 
 </html>

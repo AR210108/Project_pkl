@@ -12,7 +12,7 @@ class TaskFile extends Model
 
     protected $fillable = [
         'task_id',
-        'user_id', // ✅ Pastikan ini ada
+        'user_id',
         'filename',
         'original_name',
         'path',
@@ -25,11 +25,6 @@ class TaskFile extends Model
     protected $casts = [
         'uploaded_at' => 'datetime',
         'size' => 'integer',
-    ];
-
-    // ✅ TAMBAHKAN: Default values
-    protected $attributes = [
-        'user_id' => 1, // Default ke admin jika tidak diisi
     ];
 
     // Relationships
@@ -102,26 +97,33 @@ class TaskFile extends Model
     public function getDownloadUrlAttribute()
     {
         if ($this->path) {
-            return route('api.tasks.files.download', ['file' => $this->id]);
+            return Storage::url($this->path);
         }
         return null;
     }
 
-    // ✅ TAMBAHKAN: Boot method untuk handle user_id
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($taskFile) {
-            // Jika user_id tidak diisi, gunakan authenticated user atau default
             if (empty($taskFile->user_id)) {
                 $taskFile->user_id = auth()->id() ?? 1;
             }
             
-            // Pastikan uploaded_at diisi
             if (empty($taskFile->uploaded_at)) {
                 $taskFile->uploaded_at = now();
             }
         });
     }
+
+    // Appends
+    protected $appends = [
+        'formatted_size',
+        'file_icon',
+        'is_image',
+        'is_document',
+        'preview_url',
+        'download_url',
+    ];
 }

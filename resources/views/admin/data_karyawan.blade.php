@@ -864,14 +864,14 @@
                                                                     data-email="{{ $item->email }}"
                                                                     data-jabatan="{{ $item->jabatan }}"
                                                                     data-divisi="{{ $item->divisi }}"
-                                                                    data-gaji="{{ $item->gaji ?? '' }}"
                                                                     data-alamat="{{ $item->alamat }}"
                                                                     data-kontak="{{ $item->kontak }}"
                                                                     data-foto="{{ $item->foto ?? '' }}">
                                                                 <span class="material-icons-outlined">edit</span>
                                                             </button>
                                                             <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                                                    data-id="{{ $item->id }}">
+                                                                    data-id="{{ $item->id }}"
+                                                                    data-nama="{{ $item->nama }}">
                                                                 <span class="material-icons-outlined">delete</span>
                                                             </button>
                                                         </div>
@@ -926,7 +926,8 @@
                                                 </button>
                                                 <button
                                                     class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                                    data-id="{{ $item->id }}">
+                                                    data-id="{{ $item->id }}"
+                                                    data-nama="{{ $item->nama }}">
                                                     <span class="material-icons-outlined">delete</span>
                                                 </button>
                                             </div>
@@ -1130,39 +1131,39 @@
                 </div>
                 <form id="editKaryawanForm" class="space-y-4" enctype="multipart/form-data">
                     @csrf
-                    <input type="hidden" id="editId" name="id">
                     @method('PUT')
+                    <input type="hidden" id="editId" name="id">
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Nama -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
-                            <input type="text" id="editNama" name="nama"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan nama karyawan" required>
+                            <input type="text" id="editNama" name="nama" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="Masukkan nama karyawan">
                         </div>
 
                         <!-- Email -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                            <input type="email" id="editEmail" name="email"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan email" required>
+                            <input type="email" id="editEmail" name="email" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="Masukkan email">
                         </div>
 
                         <!-- Jabatan -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan *</label>
-                            <input type="text" id="editJabatan" name="jabatan"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan jabatan" required>
+                            <input type="text" id="editJabatan" name="jabatan" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="Masukkan jabatan">
                         </div>
 
                         <!-- Divisi -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
                             <input type="text" id="editDivisi" name="divisi"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                                 placeholder="Masukkan divisi">
                         </div>
 
@@ -1178,17 +1179,17 @@
                         <!-- Kontak -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Kontak *</label>
-                            <input type="text" id="editKontak" name="kontak"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan nomor telepon" required>
+                            <input type="text" id="editKontak" name="kontak" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="Masukkan nomor telepon">
                         </div>
 
                         <!-- Alamat -->
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
-                            <textarea id="editAlamat" name="alamat"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                rows="3" placeholder="Masukkan alamat lengkap" required></textarea>
+                            <textarea id="editAlamat" name="alamat" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                rows="3" placeholder="Masukkan alamat lengkap"></textarea>
                         </div>
 
                         <!-- Foto -->
@@ -1234,21 +1235,29 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="deleteKaryawanForm" method="POST" action="{{ route('admin.karyawan.delete', '') }}">
-                    @csrf
-                    @method('DELETE')
-                    <div class="mb-6">
-                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus data karyawan ini?</p>
-                        <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
-                        <input type="hidden" id="deleteId" name="id">
+                
+                <div class="mb-6 text-center">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="material-icons-outlined text-red-500 text-3xl">warning</span>
                     </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" id="cancelDeleteBtn"
-                            class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
-                    </div>
-                </form>
+                    
+                    <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus data karyawan ini?</p>
+                    <p class="text-sm text-gray-500 mb-4" id="deleteKaryawanName"></p>
+                    <p class="text-xs text-gray-400">Tindakan ini tidak dapat dibatalkan dan data akan dihapus permanen.</p>
+                    
+                    <input type="hidden" id="deleteId" name="id">
+                </div>
+                
+                <div class="flex justify-center gap-3">
+                    <button type="button" id="cancelDeleteBtn"
+                        class="px-5 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
+                        Batal
+                    </button>
+                    <button type="button" id="confirmDeleteBtn"
+                        class="px-5 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
+                        Hapus Data
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1303,29 +1312,35 @@
             const nextButton = document.getElementById('nextPage');
 
             // Clear existing page numbers
-            pageNumbersContainer.innerHTML = '';
+            if (pageNumbersContainer) {
+                pageNumbersContainer.innerHTML = '';
 
-            // Generate page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                const pageNumber = document.createElement('button');
-                pageNumber.textContent = i;
-                pageNumber.className = `desktop-page-btn ${i === currentPage ? 'active' : ''}`;
-                pageNumber.addEventListener('click', () => goToPage(i));
-                pageNumbersContainer.appendChild(pageNumber);
+                // Generate page numbers
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageNumber = document.createElement('button');
+                    pageNumber.textContent = i;
+                    pageNumber.className = `desktop-page-btn ${i === currentPage ? 'active' : ''}`;
+                    pageNumber.addEventListener('click', () => goToPage(i));
+                    pageNumbersContainer.appendChild(pageNumber);
+                }
+
+                // Update navigation buttons
+                if (prevButton) prevButton.disabled = currentPage === 1;
+                if (nextButton) nextButton.disabled = currentPage === totalPages || totalPages === 0;
+
+                // Add event listeners for navigation buttons
+                if (prevButton) {
+                    prevButton.onclick = () => {
+                        if (currentPage > 1) goToPage(currentPage - 1);
+                    };
+                }
+
+                if (nextButton) {
+                    nextButton.onclick = () => {
+                        if (currentPage < totalPages) goToPage(currentPage + 1);
+                    };
+                }
             }
-
-            // Update navigation buttons
-            prevButton.disabled = currentPage === 1;
-            nextButton.disabled = currentPage === totalPages || totalPages === 0;
-
-            // Add event listeners for navigation buttons
-            prevButton.onclick = () => {
-                if (currentPage > 1) goToPage(currentPage - 1);
-            };
-
-            nextButton.onclick = () => {
-                if (currentPage < totalPages) goToPage(currentPage + 1);
-            };
         }
 
         function goToPage(page) {
@@ -1376,7 +1391,10 @@
             });
 
             // Update total count
-            document.getElementById('totalCount').textContent = visibleRows.length;
+            const totalCountElement = document.getElementById('totalCount');
+            if (totalCountElement) {
+                totalCountElement.textContent = visibleRows.length;
+            }
         }
 
         // === FILTER ===
@@ -1386,6 +1404,8 @@
             const applyFilterBtn = document.getElementById('applyFilter');
             const resetFilterBtn = document.getElementById('resetFilter');
             const filterAll = document.getElementById('filterAll');
+
+            if (!filterBtn || !filterDropdown) return;
 
             // Toggle filter dropdown
             filterBtn.addEventListener('click', function(e) {
@@ -1404,60 +1424,72 @@
             });
 
             // Handle "All" checkbox
-            filterAll.addEventListener('change', function() {
-                if (this.checked) {
-                    // Uncheck all other checkboxes
-                    document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(
-                        cb => {
-                            cb.checked = false;
-                        });
-                }
-            });
+            if (filterAll) {
+                filterAll.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Uncheck all other checkboxes
+                        document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(
+                            cb => {
+                                cb.checked = false;
+                            });
+                    }
+                });
+            }
 
             // Handle other checkboxes
             document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
                 cb.addEventListener('change', function() {
                     if (this.checked) {
                         // Uncheck "All" checkbox
-                        filterAll.checked = false;
+                        if (filterAll) filterAll.checked = false;
                     }
                 });
             });
 
             // Apply filter
-            applyFilterBtn.addEventListener('click', function() {
-                const filterAll = document.getElementById('filterAll');
-                const filterManager = document.getElementById('filterManager');
-                const filterStaff = document.getElementById('filterStaff');
-                const filterIntern = document.getElementById('filterIntern');
+            if (applyFilterBtn) {
+                applyFilterBtn.addEventListener('click', function() {
+                    const filterAll = document.getElementById('filterAll');
+                    const filterManager = document.getElementById('filterManager');
+                    const filterStaff = document.getElementById('filterStaff');
+                    const filterIntern = document.getElementById('filterIntern');
 
-                activeFilters = [];
-                if (filterAll.checked) {
-                    activeFilters.push('all');
-                } else {
-                    if (filterManager.checked) activeFilters.push('manager');
-                    if (filterStaff.checked) activeFilters.push('staff');
-                    if (filterIntern.checked) activeFilters.push('intern');
-                }
+                    activeFilters = [];
+                    if (filterAll && filterAll.checked) {
+                        activeFilters.push('all');
+                    } else {
+                        if (filterManager && filterManager.checked) activeFilters.push('manager');
+                        if (filterStaff && filterStaff.checked) activeFilters.push('staff');
+                        if (filterIntern && filterIntern.checked) activeFilters.push('intern');
+                    }
 
-                applyFilters();
-                filterDropdown.classList.remove('show');
-                const visibleCount = getFilteredRows().length;
-                showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} karyawan`, 'success');
-            });
+                    applyFilters();
+                    filterDropdown.classList.remove('show');
+                    const visibleCount = getFilteredRows().length;
+                    showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} karyawan`, 'success');
+                });
+            }
 
             // Reset filter
-            resetFilterBtn.addEventListener('click', function() {
-                document.getElementById('filterAll').checked = true;
-                document.getElementById('filterManager').checked = false;
-                document.getElementById('filterStaff').checked = false;
-                document.getElementById('filterIntern').checked = false;
-                activeFilters = ['all'];
-                applyFilters();
-                filterDropdown.classList.remove('show');
-                const visibleCount = getFilteredRows().length;
-                showMinimalPopup('Filter Direset', 'Menampilkan semua karyawan', 'success');
-            });
+            if (resetFilterBtn) {
+                resetFilterBtn.addEventListener('click', function() {
+                    const filterAll = document.getElementById('filterAll');
+                    const filterManager = document.getElementById('filterManager');
+                    const filterStaff = document.getElementById('filterStaff');
+                    const filterIntern = document.getElementById('filterIntern');
+                    
+                    if (filterAll) filterAll.checked = true;
+                    if (filterManager) filterManager.checked = false;
+                    if (filterStaff) filterStaff.checked = false;
+                    if (filterIntern) filterIntern.checked = false;
+                    
+                    activeFilters = ['all'];
+                    applyFilters();
+                    filterDropdown.classList.remove('show');
+                    const visibleCount = getFilteredRows().length;
+                    showMinimalPopup('Filter Direset', 'Menampilkan semua karyawan', 'success');
+                });
+            }
         }
 
         function applyFilters() {
@@ -1532,6 +1564,8 @@
         // === SEARCH ===
         function initializeSearch() {
             const searchInput = document.getElementById('searchInput');
+            if (!searchInput) return;
+            
             let searchTimeout;
 
             searchInput.addEventListener('input', function() {
@@ -1557,31 +1591,34 @@
         }
 
         // === AUTO-FILL USER DATA ===
-        document.getElementById('userSelect').addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            
-            if (selectedOption.value) {
-                // Ambil data dari data-* attributes
-                const nama = selectedOption.getAttribute('data-nama');
-                const role = selectedOption.getAttribute('data-role');
-                const divisi = selectedOption.getAttribute('data-divisi');
-                const email = selectedOption.getAttribute('data-email');
-
-                // Auto-fill ke form
-                const namaInput = document.getElementById('namaInput');
-                const emailInput = document.getElementById('emailInput');
-                const jabatanInput = document.getElementById('jabatanInput');
-                const divisiInput = document.getElementById('divisiInput');
+        const userSelect = document.getElementById('userSelect');
+        if (userSelect) {
+            userSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
                 
-                if (namaInput) namaInput.value = nama || '';
-                if (emailInput) emailInput.value = email || '';
-                if (jabatanInput && !jabatanInput.value.trim()) jabatanInput.value = role || '';
-                if (divisiInput && !divisiInput.value.trim()) divisiInput.value = divisi || '';
-            } else {
-                // Clear jika tidak ada yang dipilih
-                clearAutoFillFields();
-            }
-        });
+                if (selectedOption.value) {
+                    // Ambil data dari data-* attributes
+                    const nama = selectedOption.getAttribute('data-nama');
+                    const role = selectedOption.getAttribute('data-role');
+                    const divisi = selectedOption.getAttribute('data-divisi');
+                    const email = selectedOption.getAttribute('data-email');
+
+                    // Auto-fill ke form
+                    const namaInput = document.getElementById('namaInput');
+                    const emailInput = document.getElementById('emailInput');
+                    const jabatanInput = document.getElementById('jabatanInput');
+                    const divisiInput = document.getElementById('divisiInput');
+                    
+                    if (namaInput) namaInput.value = nama || '';
+                    if (emailInput) emailInput.value = email || '';
+                    if (jabatanInput && !jabatanInput.value.trim()) jabatanInput.value = role || '';
+                    if (divisiInput && !divisiInput.value.trim()) divisiInput.value = divisi || '';
+                } else {
+                    // Clear jika tidak ada yang dipilih
+                    clearAutoFillFields();
+                }
+            });
+        }
 
         // Function untuk clear auto-fill fields
         function clearAutoFillFields() {
@@ -1616,31 +1653,37 @@
         const deleteKaryawanModal = document.getElementById('deleteKaryawanModal');
         const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-        const deleteKaryawanForm = document.getElementById('deleteKaryawanForm');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 
         // Modal Tambah
         function openTambahModal() {
-            tambahKaryawanModal.classList.remove('hidden');
-            
-            // Reset form dan clear auto-fill
-            clearAutoFillFields();
-            
-            // Reset user select
-            const userSelect = document.getElementById('userSelect');
-            if (userSelect) userSelect.selectedIndex = 0;
+            if (tambahKaryawanModal) {
+                tambahKaryawanModal.classList.remove('hidden');
+                
+                // Reset form dan clear auto-fill
+                clearAutoFillFields();
+                
+                // Reset user select
+                const userSelect = document.getElementById('userSelect');
+                if (userSelect) userSelect.selectedIndex = 0;
+            }
         }
 
         function closeTambahModal() {
-            tambahKaryawanModal.classList.add('hidden');
-            tambahKaryawanForm.reset();
-            fotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
-            
-            // Clear auto-fill fields
-            clearAutoFillFields();
-            
-            // Reset user select
-            const userSelect = document.getElementById('userSelect');
-            if (userSelect) userSelect.selectedIndex = 0;
+            if (tambahKaryawanModal) {
+                tambahKaryawanModal.classList.add('hidden');
+                if (tambahKaryawanForm) tambahKaryawanForm.reset();
+                if (fotoPreview) {
+                    fotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
+                }
+                
+                // Clear auto-fill fields
+                clearAutoFillFields();
+                
+                // Reset user select
+                const userSelect = document.getElementById('userSelect');
+                if (userSelect) userSelect.selectedIndex = 0;
+            }
         }
 
         // Modal Edit
@@ -1659,81 +1702,117 @@
             gajiInput.readOnly = true;
             gajiInput.classList.add('bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
 
-            // Tampilkan foto karyawan jika ada
-            if (data.foto) {
-                editFotoPreview.innerHTML =
-                    `<img src="${window.location.origin}/karyawan/${data.foto}" alt="${data.nama}" class="h-16 w-16 rounded-full object-cover">`;
-            } else {
-                editFotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
-            }
+                // Tampilkan foto karyawan jika ada
+                if (editFotoPreview) {
+                    if (data.foto) {
+                        editFotoPreview.innerHTML =
+                            `<img src="${window.location.origin}/karyawan/${data.foto}" alt="${data.nama}" class="h-16 w-16 rounded-full object-cover">`;
+                    } else {
+                        editFotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
+                    }
+                }
 
-            editKaryawanModal.classList.remove('hidden');
+                editKaryawanModal.classList.remove('hidden');
+            }
         }
 
         function closeEditModal() {
-            editKaryawanModal.classList.add('hidden');
-            editKaryawanForm.reset();
+            if (editKaryawanModal) {
+                editKaryawanModal.classList.add('hidden');
+                if (editKaryawanForm) editKaryawanForm.reset();
+            }
         }
 
         // Modal Delete
-        function openDeleteModal(id) {
-            document.getElementById('deleteId').value = id;
-            deleteKaryawanForm.action = `/admin/karyawan/delete/${id}`;
-            deleteKaryawanModal.classList.remove('hidden');
+        function openDeleteModal(id, nama) {
+            if (deleteKaryawanModal) {
+                document.getElementById('deleteId').value = id;
+                const deleteKaryawanName = document.getElementById('deleteKaryawanName');
+                if (deleteKaryawanName) {
+                    deleteKaryawanName.textContent = `"${nama}"`;
+                }
+                deleteKaryawanModal.classList.remove('hidden');
+            }
         }
 
         function closeDeleteModal() {
-            deleteKaryawanModal.classList.add('hidden');
+            if (deleteKaryawanModal) {
+                deleteKaryawanModal.classList.add('hidden');
+            }
         }
 
         // Open Modal
-        tambahKaryawanBtn.addEventListener('click', openTambahModal);
+        if (tambahKaryawanBtn) {
+            tambahKaryawanBtn.addEventListener('click', openTambahModal);
+        }
 
         // Close Modal
-        closeModalBtn.addEventListener('click', closeTambahModal);
-        cancelBtn.addEventListener('click', closeTambahModal);
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', closeTambahModal);
+        }
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', closeTambahModal);
+        }
 
-        closeEditModalBtn.addEventListener('click', closeEditModal);
-        cancelEditBtn.addEventListener('click', closeEditModal);
+        if (closeEditModalBtn) {
+            closeEditModalBtn.addEventListener('click', closeEditModal);
+        }
+        if (cancelEditBtn) {
+            cancelEditBtn.addEventListener('click', closeEditModal);
+        }
 
-        closeDeleteModalBtn.addEventListener('click', closeDeleteModal);
-        cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+        if (closeDeleteModalBtn) {
+            closeDeleteModalBtn.addEventListener('click', closeDeleteModal);
+        }
+        if (cancelDeleteBtn) {
+            cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+        }
 
         // Handle foto selection
-        pilihFotoBtn.addEventListener('click', () => {
-            fotoInput.click();
-        });
+        if (pilihFotoBtn) {
+            pilihFotoBtn.addEventListener('click', () => {
+                if (fotoInput) fotoInput.click();
+            });
+        }
 
-        pilihEditFotoBtn.addEventListener('click', () => {
-            editFotoInput.click();
-        });
+        if (pilihEditFotoBtn) {
+            pilihEditFotoBtn.addEventListener('click', () => {
+                if (editFotoInput) editFotoInput.click();
+            });
+        }
 
-        fotoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    fotoPreview.innerHTML =
-                        `<img src="${e.target.result}" alt="Preview" class="h-16 w-16 rounded-full object-cover">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+        if (fotoInput) {
+            fotoInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && fotoPreview) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        fotoPreview.innerHTML =
+                            `<img src="${e.target.result}" alt="Preview" class="h-16 w-16 rounded-full object-cover">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
 
-        editFotoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    editFotoPreview.innerHTML =
-                        `<img src="${e.target.result}" alt="Preview" class="h-16 w-16 rounded-full object-cover">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+        if (editFotoInput) {
+            editFotoInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && editFotoPreview) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        editFotoPreview.innerHTML =
+                            `<img src="${e.target.result}" alt="Preview" class="h-16 w-16 rounded-full object-cover">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
 
         // === VALIDATION ===
         function validateForm(form) {
+            if (!form) return false;
+            
             const requiredFields = form.querySelectorAll('[required]');
             let isValid = true;
             
@@ -1775,34 +1854,43 @@
         // === LOADING FUNCTIONS ===
         function showLoading(show = true) {
             const loadingOverlay = document.getElementById('loadingOverlay');
-            if (show) {
-                loadingOverlay.classList.remove('hidden');
-            } else {
-                loadingOverlay.classList.add('hidden');
+            if (loadingOverlay) {
+                if (show) {
+                    loadingOverlay.classList.remove('hidden');
+                } else {
+                    loadingOverlay.classList.add('hidden');
+                }
             }
         }
 
         // === MINIMALIST POPUP ===
         function showMinimalPopup(title, message, type = 'success') {
             const popup = document.getElementById('minimalPopup');
+            if (!popup) {
+                console.log(`${title}: ${message}`);
+                return;
+            }
+            
             const popupTitle = popup.querySelector('.minimal-popup-title');
             const popupMessage = popup.querySelector('.minimal-popup-message');
             const popupIcon = popup.querySelector('.minimal-popup-icon span');
 
             // Set content
-            popupTitle.textContent = title;
-            popupMessage.textContent = message;
+            if (popupTitle) popupTitle.textContent = title;
+            if (popupMessage) popupMessage.textContent = message;
 
             // Set type
             popup.className = 'minimal-popup show ' + type;
 
             // Set icon
-            if (type === 'success') {
-                popupIcon.textContent = 'check';
-            } else if (type === 'error') {
-                popupIcon.textContent = 'error';
-            } else if (type === 'warning') {
-                popupIcon.textContent = 'warning';
+            if (popupIcon) {
+                if (type === 'success') {
+                    popupIcon.textContent = 'check';
+                } else if (type === 'error') {
+                    popupIcon.textContent = 'error';
+                } else if (type === 'warning') {
+                    popupIcon.textContent = 'warning';
+                }
             }
 
             // Auto hide after 3 seconds
@@ -1812,179 +1900,252 @@
         }
 
         // Close popup when clicking the close button
-        document.querySelector('.minimal-popup-close').addEventListener('click', function() {
-            document.getElementById('minimalPopup').classList.remove('show');
-        });
+        const popupCloseBtn = document.querySelector('.minimal-popup-close');
+        if (popupCloseBtn) {
+            popupCloseBtn.addEventListener('click', function() {
+                const popup = document.getElementById('minimalPopup');
+                if (popup) {
+                    popup.classList.remove('show');
+                }
+            });
+        }
+
+        // === UTILITY FUNCTIONS ===
+        function getCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.content;
+        }
+
+        // Fungsi untuk menghapus row dari table tanpa reload
+        function removeKaryawanRow(id) {
+            // Hapus dari desktop table
+            const row = document.querySelector(`.karyawan-row[data-id="${id}"]`);
+            if (row) {
+                row.remove();
+            }
+            
+            // Hapus dari mobile cards
+            const card = document.querySelector(`.karyawan-card[data-id="${id}"]`);
+            if (card) {
+                card.remove();
+            }
+            
+            // Update total count
+            updateTotalCount();
+        }
+
+        // Update total count
+        function updateTotalCount() {
+            const totalRows = document.querySelectorAll('.karyawan-row:not(.hidden-by-filter)').length;
+            const totalCards = document.querySelectorAll('.karyawan-card:not(.hidden-by-filter)').length;
+            const totalCount = Math.max(totalRows, totalCards);
+            
+            const totalCountElement = document.getElementById('totalCount');
+            if (totalCountElement) {
+                totalCountElement.textContent = totalCount;
+            }
+            
+            // Update pagination
+            renderPagination();
+        }
 
         // === FORM SUBMISSION ===
         // CREATE (POST)
-        tambahKaryawanForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
+        if (tambahKaryawanForm) {
+            tambahKaryawanForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
 
-            // Validasi client-side
-            if (!validateForm(this)) {
-                showMinimalPopup('Validasi Gagal', 'Harap periksa kembali form yang diisi', 'warning');
-                return;
-            }
-
-            const submitBtn = tambahKaryawanForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-
-            submitBtn.textContent = 'Menyimpan...';
-            submitBtn.disabled = true;
-            showLoading(true);
-
-            const formData = new FormData(tambahKaryawanForm);
-
-            try {
-                const response = await fetch("/admin/karyawan/store", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRF-TOKEN": document
-                            .querySelector('meta[name="csrf-token"]')
-                            .getAttribute("content"),
-                        "Accept": "application/json"
-                    },
-                    body: formData
-                });
-
-                const res = await response.json();
-
-                // ⛔ VALIDASI ERROR
-                if (!response.ok) {
-                    if (response.status === 422 && res.errors) {
-                        const message = res.errors.foto ?
-                            res.errors.foto[0] :
-                            Object.values(res.errors)[0][0];
-
-                        showMinimalPopup('Validasi Gagal', message, 'warning');
-                        return;
-                    }
-
-                    showMinimalPopup('Error', res.message || 'Terjadi kesalahan', 'error');
+                // Validasi client-side
+                if (!validateForm(this)) {
+                    showMinimalPopup('Validasi Gagal', 'Harap periksa kembali form yang diisi', 'warning');
                     return;
                 }
 
-                // ✅ SUKSES
-                showMinimalPopup('Berhasil', res.message, 'success');
-                setTimeout(() => location.reload(), 1500);
+                const submitBtn = tambahKaryawanForm.querySelector('button[type="submit"]');
+                const originalText = submitBtn?.textContent || 'Simpan';
 
-            } catch (error) {
-                console.error(error);
-                showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
-            } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-                showLoading(false);
-            }
-        });
+                if (submitBtn) {
+                    submitBtn.textContent = 'Menyimpan...';
+                    submitBtn.disabled = true;
+                }
+                showLoading(true);
+
+                const formData = new FormData(tambahKaryawanForm);
+
+                try {
+                    const response = await fetch("/admin/karyawan/store", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRF-TOKEN": getCsrfToken(),
+                            "Accept": "application/json"
+                        },
+                        body: formData
+                    });
+
+                    const res = await response.json();
+
+                    // ⛔ VALIDASI ERROR
+                    if (!response.ok) {
+                        if (response.status === 422 && res.errors) {
+                            const message = res.errors.foto ?
+                                res.errors.foto[0] :
+                                Object.values(res.errors)[0][0];
+
+                            showMinimalPopup('Validasi Gagal', message, 'warning');
+                            return;
+                        }
+
+                        showMinimalPopup('Error', res.message || 'Terjadi kesalahan', 'error');
+                        return;
+                    }
+
+                    // ✅ SUKSES
+                    showMinimalPopup('Berhasil', res.message, 'success');
+                    closeTambahModal();
+                    
+                    // Reload halaman setelah 1.5 detik
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+
+                } catch (error) {
+                    console.error(error);
+                    showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
+                } finally {
+                    if (submitBtn) {
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                    }
+                    showLoading(false);
+                }
+            });
+        }
 
         // UPDATE (PUT)
-        editKaryawanForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
+// UPDATE (PUT) - PERBAIKI INI
+if (editKaryawanForm) {
+    editKaryawanForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-            // Validasi client-side
-            if (!validateForm(this)) {
-                showMinimalPopup('Validasi Gagal', 'Harap periksa kembali form yang diisi', 'warning');
+        // Validasi client-side
+        if (!validateForm(this)) {
+            showMinimalPopup('Validasi Gagal', 'Harap periksa kembali form yang diisi', 'warning');
+            return;
+        }
+
+        // Show loading state
+        const submitBtn = editKaryawanForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn?.textContent || 'Update';
+        
+        if (submitBtn) {
+            submitBtn.textContent = 'Memperbarui...';
+            submitBtn.disabled = true;
+        }
+        showLoading(true);
+
+        const formData = new FormData(editKaryawanForm);
+        const id = document.getElementById("editId").value;
+
+        try {
+            const response = await fetch(`/admin/karyawan/update/${id}`, {
+                method: "POST", // UBAH INI JADI POST
+                headers: {
+                    "X-CSRF-TOKEN": getCsrfToken(),
+                    "Accept": "application/json"
+                    // HAPUS "X-HTTP-Method-Override": "PUT"
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showMinimalPopup('Berhasil', data.message || 'Data karyawan berhasil diperbarui', 'success');
+                closeEditModal();
+                
+                // Reload halaman setelah 1.5 detik
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showMinimalPopup('Error', data.message || 'Terjadi kesalahan saat memperbarui data', 'error');
+            }
+        } catch (error) {
+            console.error('Edit error:', error);
+            showMinimalPopup('Error', 'Terjadi kesalahan saat memperbarui data', 'error');
+        } finally {
+            // Reset button state
+            if (submitBtn) {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+            showLoading(false);
+        }
+    });
+}
+
+        // DELETE HANDLER
+        async function handleDeleteKaryawan(id) {
+            if (!id) {
+                showMinimalPopup('Error', 'ID karyawan tidak ditemukan', 'error');
                 return;
             }
 
             // Show loading state
-            const submitBtn = editKaryawanForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Memperbarui...';
-            submitBtn.disabled = true;
             showLoading(true);
-
-            let id = document.getElementById("editId").value;
-            let formData = new FormData(editKaryawanForm);
-
-            try {
-                let response = await fetch(`/admin/karyawan/update/${id}`, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute(
-                            "content"),
-                        "X-HTTP-Method-Override": "PUT",
-                        "Accept": "application/json"
-                    },
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                let res = await response.json();
-
-                if (res.success) {
-                    showMinimalPopup('Berhasil', 'Data karyawan berhasil diperbarui', 'success');
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1500);
-                } else {
-                    showMinimalPopup('Error', res.message || 'Terjadi kesalahan saat memperbarui data',
-                        'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showMinimalPopup('Error', 'Terjadi kesalahan saat memperbarui data', 'error');
-            } finally {
-                // Reset button state
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-                showLoading(false);
+            
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            const originalText = confirmDeleteBtn?.textContent || 'Hapus';
+            
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.disabled = true;
+                confirmDeleteBtn.textContent = 'Menghapus...';
             }
-        });
-
-        // DELETE (DELETE)
-        deleteKaryawanForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            // Show loading state
-            const submitBtn = deleteKaryawanForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Menghapus...';
-            submitBtn.disabled = true;
-            showLoading(true);
 
             try {
-                let response = await fetch(deleteKaryawanForm.action, {
-                    method: "POST",
+                const response = await fetch(`/admin/karyawan/delete/${id}`, {
+                    method: 'DELETE',
                     headers: {
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute(
-                            "content"),
-                        "X-HTTP-Method-Override": "DELETE",
-                        "Accept": "application/json"
-                    },
-                    body: new FormData(deleteKaryawanForm)
+                        'X-CSRF-TOKEN': getCsrfToken(),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                const data = await response.json();
 
-                let res = await response.json();
-
-                if (res.success) {
-                    showMinimalPopup('Berhasil', 'Data karyawan berhasil dihapus', 'success');
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1500);
+                if (data.success) {
+                    showMinimalPopup('Berhasil', data.message, 'success');
+                    
+                    // Hapus row dari table tanpa reload
+                    removeKaryawanRow(id);
+                    
+                    // Tutup modal
+                    closeDeleteModal();
                 } else {
-                    showMinimalPopup('Error', res.message || 'Terjadi kesalahan saat menghapus data', 'error');
+                    showMinimalPopup('Error', data.message, 'error');
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Delete error:', error);
                 showMinimalPopup('Error', 'Terjadi kesalahan saat menghapus data', 'error');
             } finally {
                 // Reset button state
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
+                if (confirmDeleteBtn) {
+                    confirmDeleteBtn.disabled = false;
+                    confirmDeleteBtn.textContent = originalText;
+                }
                 showLoading(false);
-                closeDeleteModal();
             }
-        });
+        }
+
+        // Confirm delete button handler
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', function() {
+                const id = document.getElementById('deleteId').value;
+                if (id) {
+                    handleDeleteKaryawan(id);
+                }
+            });
+        }
 
         // === EVENT LISTENERS FOR EDIT AND DELETE BUTTONS ===
         document.querySelectorAll('.edit-btn').forEach(button => {
@@ -2002,7 +2163,6 @@
                         email: this.getAttribute('data-email'),
                         jabatan: this.getAttribute('data-jabatan'),
                         divisi: this.getAttribute('data-divisi'),
-                        gaji: this.getAttribute('data-gaji'),
                         alamat: this.getAttribute('data-alamat'),
                         kontak: this.getAttribute('data-kontak'),
                         foto: this.getAttribute('data-foto')
@@ -2016,7 +2176,8 @@
         document.querySelectorAll('.delete-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
-                openDeleteModal(id);
+                const nama = this.getAttribute('data-nama') || 'karyawan ini';
+                openDeleteModal(id, nama);
             });
         });
 
@@ -2034,6 +2195,11 @@
                     modal.classList.add('hidden');
                 });
             }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Data karyawan page loaded');
         });
     </script>
 

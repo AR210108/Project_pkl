@@ -9,40 +9,63 @@ use Illuminate\Support\Facades\Validator;
 
 class InvoiceApiController extends Controller
 {
-    // =========================
-    // GET /api/invoices
-    // =========================
-    public function index()
+    public function index(Request $request)
     {
-        $invoices = Invoice::with(['items', 'orders'])
-            ->latest()
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $invoices
+        \Log::info('API Invoice Index accessed', [
+            'user_id' => auth()->id(),
+            'user_role' => auth()->user()->role,
+            'request_params' => $request->all()
         ]);
+        
+        try {
+            $query = Invoice::latest();
+
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('company_name', 'like', "%$search%")
+                      ->orWhere('client_name', 'like', "%$search%")
+                      ->orWhere('invoice_no', 'like', "%$search%");
+                });
+            }
+
+            $perPage = $request->input('per_page', 10);
+            $invoices = $query->paginate($perPage);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data invoice berhasil diambil',
+                'data' => $invoices->items(),
+                'pagination' => [
+                    'total' => $invoices->total(),
+                    'per_page' => $invoices->perPage(),
+                    'current_page' => $invoices->currentPage(),
+                    'last_page' => $invoices->lastPage(),
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('API Invoice Index Error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat data invoice',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    // =========================
-    // POST /api/invoices
-    // =========================
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'invoice_no'       => 'required|string|unique:invoices,invoice_no',
             'invoice_date'     => 'required|date',
-
             'company_name'     => 'required|string|max:255',
             'company_address'  => 'required|string',
-
             'client_name'      => 'required|string|max:255',
-            'order_number'     => 'nullable|string|max:255',
-
             'payment_method'   => 'required|string|max:100',
             'category'         => 'required|string|max:100',
-          
-
+            'description'      => 'nullable|string',
             'subtotal'         => 'required|integer|min:0',
             'tax'              => 'required|integer|min:0',
             'total'            => 'required|integer|min:0',
@@ -62,10 +85,9 @@ class InvoiceApiController extends Controller
             'company_name',
             'company_address',
             'client_name',
-            'order_number',
             'payment_method',
             'category',
-            
+            'description',
             'subtotal',
             'tax',
             'total',
@@ -78,12 +100,9 @@ class InvoiceApiController extends Controller
         ], 201);
     }
 
-    // =========================
-    // GET /api/invoices/{id}
-    // =========================
     public function show($id)
     {
-        $invoice = Invoice::with(['items', 'orders'])->find($id);
+        $invoice = Invoice::find($id);
 
         if (!$invoice) {
             return response()->json([
@@ -98,9 +117,11 @@ class InvoiceApiController extends Controller
         ]);
     }
 
-    // =========================
-    // PUT /api/invoices/{id}
-    // =========================
+    public function edit($id)
+    {
+        return $this->show($id);
+    }
+
     public function update(Request $request, $id)
     {
         $invoice = Invoice::find($id);
@@ -115,17 +136,12 @@ class InvoiceApiController extends Controller
         $validator = Validator::make($request->all(), [
             'invoice_no'       => 'required|string|unique:invoices,invoice_no,' . $id,
             'invoice_date'     => 'required|date',
-
             'company_name'     => 'required|string|max:255',
             'company_address'  => 'required|string',
-
             'client_name'      => 'required|string|max:255',
-            'order_number'     => 'nullable|string|max:255',
-
             'payment_method'   => 'required|string|max:100',
             'category'         => 'required|string|max:100',
-          
-
+            'description'      => 'nullable|string',
             'subtotal'         => 'required|integer|min:0',
             'tax'              => 'required|integer|min:0',
             'total'            => 'required|integer|min:0',
@@ -145,10 +161,9 @@ class InvoiceApiController extends Controller
             'company_name',
             'company_address',
             'client_name',
-            'order_number',
             'payment_method',
             'category',
-          
+            'description',
             'subtotal',
             'tax',
             'total',
@@ -161,9 +176,6 @@ class InvoiceApiController extends Controller
         ]);
     }
 
-    // =========================
-    // DELETE /api/invoices/{id}
-    // =========================
     public function destroy($id)
     {
         $invoice = Invoice::find($id);

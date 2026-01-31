@@ -1266,10 +1266,10 @@
                     @method('PUT')
                     <input type="hidden" id="editId" name="id">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
-                            <input type="text" id="editNamaLayanan" name="nama_layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama layanan" required>
-                        </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
+        <input type="text" id="editNamaLayanan" name="nama_layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama layanan" required>
+    </div>
                     </div>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
@@ -1815,33 +1815,32 @@
             });
         });
 
-        // ============================
-        // HANDLE EDIT BUTTON
-        // ============================
-        document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                // SET VALUE
-                document.getElementById('editId').value = button.dataset.id;
-                document.getElementById('editNamaLayanan').value = button.dataset.nama;
-                document.getElementById('editDeskripsi').value = button.dataset.deskripsi;
-                document.getElementById('editHarga').value = button.dataset.harga;
-                document.getElementById('editCurrentFoto').value = button.dataset.foto;
-                
-                // SET FOTO
-                if (button.dataset.foto) {
-                    document.getElementById('editFotoPreview').src = `/storage/${button.dataset.foto}`;
-                    document.getElementById('editFotoContainer').classList.add('has-image');
-                } else {
-                    document.getElementById('editFotoPreview').src = '';
-                    document.getElementById('editFotoContainer').classList.remove('has-image');
-                }
+// ============================
+// HANDLE EDIT BUTTON
+// ============================
+document.querySelectorAll('.edit-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        // SET VALUE
+        document.getElementById('editId').value = button.dataset.id;
+        document.getElementById('editNamaLayanan').value = button.dataset.nama;
+        document.getElementById('editDeskripsi').value = button.dataset.deskripsi;
+        document.getElementById('editCurrentFoto').value = button.dataset.foto;
+        
+        // SET FOTO
+        if (button.dataset.foto) {
+            document.getElementById('editFotoPreview').src = `/storage/${button.dataset.foto}`;
+            document.getElementById('editFotoContainer').classList.add('has-image');
+        } else {
+            document.getElementById('editFotoPreview').src = '';
+            document.getElementById('editFotoContainer').classList.remove('has-image');
+        }
 
-                // SET ACTION URL DINAMIS
-                editLayananForm.action = `/admin/layanan/${button.dataset.id}`;
+        // SET ACTION URL DINAMIS
+        editLayananForm.action = `/admin/layanan/${button.dataset.id}`;
 
-                editLayananModal.classList.remove('hidden');
-            });
-        });
+        editLayananModal.classList.remove('hidden');
+    });
+});
 
         // ============================
         // HANDLE DELETE BUTTON
