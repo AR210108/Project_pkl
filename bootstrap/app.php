@@ -32,15 +32,17 @@ return Application::configure(basePath: dirname(__DIR__))
         */
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
+            'check.cuti' => \App\Http\Middleware\CheckCutiStatus::class,
+            'prevent.absensi.cuti' => \App\Http\Middleware\PreventAbsensiDuringCuti::class, // Ditambahkan
         ]);
 
         /*
         |--------------------------------------------------------------------------
-        | Global Middleware (Sederhana saja)
+        | Global Middleware
         |--------------------------------------------------------------------------
         */
         $middleware->use([
-            // \Illuminate\Http\Middleware\TrustHosts::class, // Opsional
+            // \Illuminate\Http\Middleware\TrustHosts::class,
             \Illuminate\Http\Middleware\TrustProxies::class,
             \Illuminate\Http\Middleware\HandleCors::class,
             \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,

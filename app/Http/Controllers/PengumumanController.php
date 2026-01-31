@@ -8,6 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class PengumumanController extends Controller
 {
@@ -23,7 +27,7 @@ class PengumumanController extends Controller
             ->latest();
         
         // Filter jika bukan admin
-        if (!$user->isAdmin()) {
+        if ($user->role !== 'admin') {
             $query->whereHas('users', function ($q) use ($user) {
                 $q->where('users.id', $user->id);
             });
@@ -241,7 +245,7 @@ class PengumumanController extends Controller
                 ->latest();
             
             // Filter berdasarkan role
-            if (!$user->isAdmin()) {
+            if ($user->role !== 'admin') {
                 $query->whereHas('users', function ($q) use ($user) {
                     $q->where('users.id', $user->id);
                 });
@@ -299,6 +303,521 @@ class PengumumanController extends Controller
                 'success' => false,
                 'message' => 'Gagal memuat data user'
             ], 500);
+        }
+    }
+
+    /**
+     * =================================================================
+     * METHOD-METHOD API BARU UNTUK KARYAWAN
+     * =================================================================
+     */
+
+    /**
+     * API: Mengambil tanggal-tanggal yang memiliki pengumuman (untuk /karyawan/api/announcements-dates)
+     */
+    public function getAnnouncementDatesApi(): JsonResponse
+    {
+        try {
+            Log::info('=== GET ANNOUNCEMENT DATES API ===');
+            
+            // Cek authentication
+            if (!Auth::check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+            
+            $userId = Auth::id();
+            $user = Auth::user();
+            
+            // Check if table exists
+            if (!Schema::hasTable('pengumuman')) {
+                Log::warning('Table pengumuman does not exist');
+                return response()->json([
+                    'success' => true,
+                    'dates' => []
+                ]);
+            }
+            
+            Log::info('User Info:', [
+                'user_id' => $userId,
+                'user_name' => $user->name,
+                'user_role' => $user->role
+            ]);
+            
+            // Query untuk mendapatkan tanggal pengumuman
+            // Untuk admin, tampilkan semua pengumuman
+            // Untuk non-admin, hanya tampilkan pengumuman yang ditugaskan ke user tersebut
+            if ($user->role === 'admin') {
+                $datesQuery = Pengumuman::where('status', 'published')
+                    ->select('tanggal')
+                    ->distinct();
+            } else {
+                $datesQuery = Pengumuman::where('status', 'published')
+                    ->whereHas('users', function ($query) use ($userId) {
+                        $query->where('users.id', $userId);
+                    })
+                    ->select('tanggal')
+                    ->distinct();
+            }
+            
+            // Get dates
+            $dates = $datesQuery->orderBy('tanggal', 'desc')
+                ->get()
+                ->pluck('tanggal')
+                ->map(function($date) {
+                    return Carbon::parse($date)->format('Y-m-d');
+                })
+                ->toArray();
+            
+            Log::info('Found announcement dates:', [
+                'count' => count($dates),
+                'dates' => $dates
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'dates' => $dates
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Announcement Dates API Error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load announcement dates',
+                'error' => env('APP_DEBUG') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Mengambil daftar pengumuman (untuk /karyawan/api/announcements)
+     */
+    public function getAnnouncementsApi(Request $request): JsonResponse
+    {
+        try {
+            Log::info('=== GET ANNOUNCEMENTS API ===');
+            
+            // Cek authentication
+            if (!Auth::check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+            
+            $userId = Auth::id();
+            $user = Auth::user();
+            
+            // Check if table exists
+            if (!Schema::hasTable('pengumuman')) {
+                Log::warning('Table pengumuman does not exist');
+                return response()->json([
+                    'success' => true,
+                    'data' => []
+                ]);
+            }
+            
+            Log::info('User Info:', [
+                'user_id' => $userId,
+                'user_name' => $user->name,
+                'user_role' => $user->role
+            ]);
+            
+            // Query untuk mendapatkan pengumuman
+            // Untuk admin, tampilkan semua pengumuman
+            // Untuk non-admin, hanya tampilkan pengumuman yang ditugaskan ke user tersebut
+            if ($user->role === 'admin') {
+                $announcementsQuery = Pengumuman::where('status', 'published')
+                    ->with(['creator:id,name']);
+            } else {
+                $announcementsQuery = Pengumuman::where('status', 'published')
+                    ->whereHas('users', function ($query) use ($userId) {
+                        $query->where('users.id', $userId);
+                    })
+                    ->with(['creator:id,name']);
+            }
+            
+            // Get latest announcements
+            $announcements = $announcementsQuery->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->get([
+                    'id', 
+                    'judul', 
+                    'isi_pesan', 
+                    'tanggal', 
+                    'lampiran',
+                    'is_important',
+                    'is_pinned',
+                    'status',
+                    'user_id',
+                    'created_at',
+                    'updated_at'
+                ]);
+            
+            Log::info('Found announcements:', ['count' => $announcements->count()]);
+            
+            // Format data untuk response
+            $formattedAnnouncements = $announcements->map(function ($announcement) {
+                return [
+                    'id' => $announcement->id,
+                    'judul' => $announcement->judul,
+                    'isi' => $announcement->isi_pesan,
+                    'ringkasan' => $this->getExcerpt($announcement->isi_pesan, 100),
+                    'tanggal' => $announcement->tanggal,
+                    'formatted_tanggal' => $announcement->tanggal ? 
+                        Carbon::parse($announcement->tanggal)->translatedFormat('d F Y') : 
+                        Carbon::parse($announcement->created_at)->translatedFormat('d F Y'),
+                    'lampiran' => $announcement->lampiran,
+                    'lampiran_url' => $announcement->lampiran ? 
+                        asset('storage/' . $announcement->lampiran) : null,
+                    'is_important' => (bool)$announcement->is_important,
+                    'is_pinned' => (bool)$announcement->is_pinned,
+                    'status' => $announcement->status,
+                    'creator_id' => $announcement->user_id,
+                    'creator_name' => $announcement->creator ? $announcement->creator->name : 'System',
+                    'created_at' => $announcement->created_at->format('Y-m-d H:i:s'),
+                    'formatted_created_at' => $announcement->created_at->translatedFormat('d F Y H:i'),
+                    'updated_at' => $announcement->updated_at->format('Y-m-d H:i:s'),
+                ];
+            });
+            
+            Log::info('Formatted announcements:', [
+                'count' => $formattedAnnouncements->count(),
+                'first_announcement' => $formattedAnnouncements->first()
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $formattedAnnouncements,
+                'count' => $formattedAnnouncements->count(),
+                'message' => $formattedAnnouncements->count() > 0 ? 
+                    'Ditemukan ' . $formattedAnnouncements->count() . ' pengumuman' : 
+                    'Tidak ada pengumuman'
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Announcements API Error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load announcements',
+                'error' => env('APP_DEBUG') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Mengambil pengumuman berdasarkan tanggal tertentu
+     */
+    public function getAnnouncementsByDateApi(Request $request): JsonResponse
+    {
+        try {
+            $date = $request->query('date');
+            
+            if (!$date) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Date parameter is required'
+                ], 400);
+            }
+            
+            Log::info('=== GET ANNOUNCEMENTS BY DATE API ===', ['date' => $date]);
+            
+            // Cek authentication
+            if (!Auth::check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+            
+            $userId = Auth::id();
+            $user = Auth::user();
+            
+            // Check if table exists
+            if (!Schema::hasTable('pengumuman')) {
+                Log::warning('Table pengumuman does not exist');
+                return response()->json([
+                    'success' => true,
+                    'data' => []
+                ]);
+            }
+            
+            // Query untuk mendapatkan pengumuman berdasarkan tanggal
+            if ($user->role === 'admin') {
+                $announcementsQuery = Pengumuman::where('status', 'published')
+                    ->whereDate('tanggal', $date)
+                    ->with(['creator:id,name']);
+            } else {
+                $announcementsQuery = Pengumuman::where('status', 'published')
+                    ->whereDate('tanggal', $date)
+                    ->whereHas('users', function ($query) use ($userId) {
+                        $query->where('users.id', $userId);
+                    })
+                    ->with(['creator:id,name']);
+            }
+            
+            $announcements = $announcementsQuery->orderBy('created_at', 'desc')
+                ->get();
+            
+            // Format data untuk response
+            $formattedAnnouncements = $announcements->map(function ($announcement) {
+                return [
+                    'id' => $announcement->id,
+                    'judul' => $announcement->judul,
+                    'isi' => $announcement->isi_pesan,
+                    'ringkasan' => $this->getExcerpt($announcement->isi_pesan, 100),
+                    'tanggal' => $announcement->tanggal,
+                    'formatted_tanggal' => Carbon::parse($announcement->tanggal)->translatedFormat('d F Y'),
+                    'lampiran' => $announcement->lampiran,
+                    'lampiran_url' => $announcement->lampiran ? 
+                        asset('storage/' . $announcement->lampiran) : null,
+                    'is_important' => (bool)$announcement->is_important,
+                    'is_pinned' => (bool)$announcement->is_pinned,
+                    'creator_name' => $announcement->creator ? $announcement->creator->name : 'System',
+                    'created_at' => $announcement->created_at->format('Y-m-d H:i:s'),
+                ];
+            });
+            
+            return response()->json([
+                'success' => true,
+                'data' => $formattedAnnouncements,
+                'date' => $date,
+                'count' => $formattedAnnouncements->count()
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Announcements by Date API Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load announcements by date'
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Debug endpoint untuk testing API pengumuman
+     */
+    public function debugAnnouncementApis(): JsonResponse
+    {
+        try {
+            if (!Auth::check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+            
+            $user = Auth::user();
+            $userId = $user->id;
+            
+            // Test getAnnouncementDatesApi
+            $datesResponse = $this->getAnnouncementDatesApi();
+            $datesData = json_decode($datesResponse->getContent(), true);
+            
+            // Test getAnnouncementsApi
+            $announcementsResponse = $this->getAnnouncementsApi(new Request());
+            $announcementsData = json_decode($announcementsResponse->getContent(), true);
+            
+            // Check database
+            $tables = [
+                'pengumuman' => Schema::hasTable('pengumuman'),
+                'pengumuman_user' => Schema::hasTable('pengumuman_user'),
+            ];
+            
+            // Get counts
+            $counts = [
+                'total_pengumuman' => Pengumuman::count(),
+                'published_pengumuman' => Pengumuman::where('status', 'published')->count(),
+                'user_assigned_pengumuman' => $user->role === 'admin' ? 
+                    Pengumuman::where('status', 'published')->count() :
+                    Pengumuman::where('status', 'published')
+                        ->whereHas('users', function ($query) use ($userId) {
+                            $query->where('users.id', $userId);
+                        })->count(),
+            ];
+            
+            return response()->json([
+                'success' => true,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'role' => $user->role,
+                    'is_admin' => $user->role === 'admin',
+                ],
+                'api_tests' => [
+                    'getAnnouncementDatesApi' => $datesData['success'] ? 'SUCCESS' : 'FAILED',
+                    'getAnnouncementsApi' => $announcementsData['success'] ? 'SUCCESS' : 'FAILED',
+                ],
+                'database' => [
+                    'tables_exist' => $tables,
+                    'counts' => $counts,
+                ],
+                'routes' => [
+                    'announcements_dates' => '/karyawan/api/announcements-dates',
+                    'announcements' => '/karyawan/api/announcements',
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    }
+
+    /**
+     * Helper method untuk mendapatkan excerpt/ringkasan
+     */
+    private function getExcerpt(string $text, int $length = 100): string
+    {
+        if (strlen($text) <= $length) {
+            return $text;
+        }
+        
+        $excerpt = substr($text, 0, $length);
+        $lastSpace = strrpos($excerpt, ' ');
+        
+        if ($lastSpace !== false) {
+            $excerpt = substr($excerpt, 0, $lastSpace);
+        }
+        
+        return $excerpt . '...';
+    }
+
+    /**
+     * API: Get pengumuman for specific user (karyawan)
+     * Ini method yang akan dipanggil oleh CatatanRapatController
+     */
+    public function getAnnouncementsForUserApi(): JsonResponse
+    {
+        try {
+            if (!Auth::check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+            
+            $userId = Auth::id();
+            $user = Auth::user();
+            
+            Log::info('Getting announcements for user:', [
+                'user_id' => $userId,
+                'user_name' => $user->name,
+                'user_role' => $user->role
+            ]);
+            
+            // Query untuk mendapatkan pengumuman untuk user ini
+            if ($user->role === 'admin') {
+                $announcements = Pengumuman::where('status', 'published')
+                    ->with(['creator:id,name'])
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            } else {
+                $announcements = Pengumuman::where('status', 'published')
+                    ->whereHas('users', function ($query) use ($userId) {
+                        $query->where('users.id', $userId);
+                    })
+                    ->with(['creator:id,name'])
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            }
+            
+            $formattedAnnouncements = $announcements->map(function ($announcement) {
+                return [
+                    'id' => $announcement->id,
+                    'judul' => $announcement->judul,
+                    'isi' => $announcement->isi_pesan,
+                    'tanggal' => $announcement->tanggal,
+                    'formatted_tanggal' => Carbon::parse($announcement->tanggal)->translatedFormat('d F Y'),
+                    'lampiran' => $announcement->lampiran,
+                    'lampiran_url' => $announcement->lampiran ? 
+                        asset('storage/' . $announcement->lampiran) : null,
+                    'creator_name' => $announcement->creator ? $announcement->creator->name : 'System',
+                    'created_at' => $announcement->created_at->format('Y-m-d H:i:s'),
+                ];
+            });
+            
+            return response()->json([
+                'success' => true,
+                'data' => $formattedAnnouncements
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error in getAnnouncementsForUserApi: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load announcements'
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Get announcement dates for user (karyawan)
+     * Ini method yang akan dipanggil oleh CatatanRapatController
+     */
+    public function getAnnouncementDatesForUserApi(): JsonResponse
+    {
+        try {
+            if (!Auth::check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+            
+            $userId = Auth::id();
+            $user = Auth::user();
+            
+            Log::info('Getting announcement dates for user:', [
+                'user_id' => $userId,
+                'user_name' => $user->name,
+                'user_role' => $user->role
+            ]);
+            
+            // Query untuk mendapatkan tanggal pengumuman untuk user ini
+            if ($user->role === 'admin') {
+                $dates = Pengumuman::where('status', 'published')
+                    ->select('tanggal')
+                    ->distinct()
+                    ->orderBy('tanggal', 'desc')
+                    ->get()
+                    ->pluck('tanggal');
+            } else {
+                $dates = Pengumuman::where('status', 'published')
+                    ->whereHas('users', function ($query) use ($userId) {
+                        $query->where('users.id', $userId);
+                    })
+                    ->select('tanggal')
+                    ->distinct()
+                    ->orderBy('tanggal', 'desc')
+                    ->get()
+                    ->pluck('tanggal');
+            }
+            
+            $formattedDates = $dates->map(function ($date) {
+                return Carbon::parse($date)->format('Y-m-d');
+            })->toArray();
+            
+            return response()->json([
+                'success' => true,
+                'dates' => $formattedDates
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error in getAnnouncementDatesForUserApi: ' . $e->getMessage());
+            return response()->json([
+                'success' => true,
+                'dates' => []
+            ]);
         }
     }
 }

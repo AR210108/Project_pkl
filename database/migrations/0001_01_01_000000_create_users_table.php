@@ -29,6 +29,10 @@ return new class extends Migration
             // Kolom Sisa Cuti (Default 12 hari, sesuai request terakhir)
             $table->integer('sisa_cuti')->default(12);
             
+            // Kolom tambahan untuk manajemen cuti
+            $table->integer('total_cuti_tahunan')->default(12)->comment('Total cuti tahunan');
+            $table->date('cuti_reset_date')->nullable()->comment('Tanggal terakhir reset cuti');
+            $table->integer('cuti_terpakai_tahun_ini')->default(0)->comment('Cuti terpakai tahun berjalan');
             // ------------------------------------
             
             $table->rememberToken();
