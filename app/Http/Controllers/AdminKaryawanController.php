@@ -272,9 +272,9 @@ public function store(Request $request)
     }
 }
 
-    /**
-     * Update the specified resource in storage.
-     */
+/**
+ * Update the specified resource in storage.
+ */
 public function update(Request $request, $id)
 {
     try {
@@ -286,23 +286,40 @@ public function update(Request $request, $id)
             'email' => 'required|email|max:255',
             'jabatan' => 'required|string|max:255',
             'divisi' => 'nullable|string|max:255',
-            'gaji' => 'required|numeric|min:0',
+            'gaji' => 'nullable|string|max:100',
             'alamat' => 'required|string',
             'kontak' => 'required|string|max:255',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        \Log::info('Validation passed', ['validated' => $validated]);
 
         // Update data karyawan
         $karyawan->nama = $validated['nama'];
         $karyawan->email = $validated['email'];
         $karyawan->jabatan = $validated['jabatan'];
         $karyawan->divisi = $validated['divisi'] ?? null;
-        $karyawan->gaji = $validated['gaji'] ?? null;
         $karyawan->alamat = $validated['alamat'];
         $karyawan->kontak = $validated['kontak'];
+        
+        // PERBAIKAN DI SINI: Hanya update gaji jika user adalah finance
+        $user = auth()->user();
+        
+        if ($user && $user->role === 'finance') {
+            // Hanya finance yang bisa update gaji
+            if (isset($validated['gaji']) && $validated['gaji'] !== 'Belum diatur') {
+                $karyawan->gaji = $validated['gaji'];
+            }
+        } else {
+            // Untuk non-finance (admin), jangan update gaji
+            // Tetap gunakan nilai gaji yang sudah ada
+            \Log::info('Non-finance user attempted to update gaji, keeping existing value');
+        }
 
         // Jika ada upload foto baru
         if ($request->hasFile('foto')) {
+            \Log::info('Foto uploaded', ['filename' => $request->file('foto')->getClientOriginalName()]);
+            
             // Hapus foto lama dari folder public/karyawan
             if ($karyawan->foto && file_exists(public_path('karyawan/' . $karyawan->foto))) {
                 unlink(public_path('karyawan/' . $karyawan->foto));
@@ -317,13 +334,25 @@ public function update(Request $request, $id)
 
         $karyawan->save();
 
+        \Log::info('Karyawan updated successfully', ['karyawan' => $karyawan->toArray()]);
+
         return response()->json([
             'success' => true, 
             'message' => 'Data Karyawan Berhasil Diupdate!',
             'data' => $karyawan
         ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Validation error in update:', ['errors' => $e->errors()]);
+        return response()->json([
+            'success' => false, 
+            'message' => 'Validasi gagal',
+            'errors' => $e->errors()
+        ], 422);
     } catch (\Exception $e) {
-        \Log::error('Update karyawan error:', ['error' => $e->getMessage()]);
+        \Log::error('Update karyawan error:', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
         return response()->json([
             'success' => false, 
             'message' => 'Gagal mengupdate data: ' . $e->getMessage()

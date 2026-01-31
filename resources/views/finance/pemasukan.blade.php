@@ -1,4 +1,4 @@
-gi<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -162,36 +162,7 @@ gi<!DOCTYPE html>
             border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 600;
-        }
-
-        .category-salary {
-            background-color: rgba(59, 130, 246, 0.15);
-            color: #1e40af;
-        }
-
-        .category-project {
-            background-color: rgba(139, 92, 246, 0.15);
-            color: #5b21b6;
-        }
-
-        .category-investment {
-            background-color: rgba(16, 185, 129, 0.15);
-            color: #065f46;
-        }
-
-        .category-office {
-            background-color: rgba(245, 158, 11, 0.15);
-            color: #92400e;
-        }
-
-        .category-marketing {
-            background-color: rgba(236, 72, 153, 0.15);
-            color: #9f1239;
-        }
-
-        .category-utilities {
-            background-color: rgba(14, 165, 233, 0.15);
-            color: #0c4a6e;
+            white-space: nowrap;
         }
 
         .sidebar-transition {
@@ -727,7 +698,7 @@ gi<!DOCTYPE html>
                     <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">Data Keuangan</h1>
                 </header>
 
-                <!-- Stat Cards (Bisa dibuat dinamis via controller jika ingin, saat ini statis) -->
+                <!-- Stat Cards (Dinamis dari Controller) -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div class="stat-card">
                         <div class="stat-card-header">
@@ -736,10 +707,10 @@ gi<!DOCTYPE html>
                                 <span class="material-icons-outlined text-green-600">trending_up</span>
                             </div>
                         </div>
-                        <div class="stat-card-value text-green-600">Rp 45.750.000</div>
+                        <div class="stat-card-value text-green-600" id="stat-income">Rp 0</div>
                         <div class="stat-card-change positive">
                             <span class="material-icons-outlined text-sm">arrow_upward</span>
-                            <span>12% dari bulan lalu</span>
+                            <span id="stat-income-change">0% dari bulan lalu</span>
                         </div>
                     </div>
 
@@ -750,10 +721,10 @@ gi<!DOCTYPE html>
                                 <span class="material-icons-outlined text-red-600">trending_down</span>
                             </div>
                         </div>
-                        <div class="stat-card-value text-red-600">Rp 28.350.000</div>
+                        <div class="stat-card-value text-red-600" id="stat-expense">Rp 0</div>
                         <div class="stat-card-change negative">
                             <span class="material-icons-outlined text-sm">arrow_upward</span>
-                            <span>8% dari bulan lalu</span>
+                            <span id="stat-expense-change">0% dari bulan lalu</span>
                         </div>
                     </div>
 
@@ -764,10 +735,10 @@ gi<!DOCTYPE html>
                                 <span class="material-icons-outlined text-blue-600">account_balance</span>
                             </div>
                         </div>
-                        <div class="stat-card-value text-blue-600">Rp 17.400.000</div>
+                        <div class="stat-card-value text-blue-600" id="stat-balance">Rp 0</div>
                         <div class="stat-card-change positive">
                             <span class="material-icons-outlined text-sm">arrow_upward</span>
-                            <span>18% dari bulan lalu</span>
+                            <span id="stat-balance-change">0% margin keuntungan</span>
                         </div>
                     </div>
                 </div>
@@ -806,38 +777,7 @@ gi<!DOCTYPE html>
                                 Filter
                             </button>
                             <div id="filterDropdown" class="filter-dropdown">
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterAll" value="all" checked>
-                                    <label for="filterAll">Semua Kategori</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterSalary" value="salary">
-                                    <label for="filterSalary">Gaji</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterProject" value="project">
-                                    <label for="filterProject">Proyek</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterInvestment" value="investment">
-                                    <label for="filterInvestment">Investasi</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterOffice" value="office">
-                                    <label for="filterOffice">Kantor</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterMarketing" value="marketing">
-                                    <label for="filterMarketing">Pemasaran</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterUtilities" value="utilities">
-                                    <label for="filterUtilities">Utilitas</label>
-                                </div>
-                                <div class="filter-actions">
-                                    <button id="applyFilter" class="filter-apply">Terapkan</button>
-                                    <button id="resetFilter" class="filter-reset">Reset</button>
-                                </div>
+                                <!-- Filter options akan diisi oleh JavaScript -->
                             </div>
                         </div>
                         <button onclick="openAddModal()"
@@ -912,7 +852,6 @@ gi<!DOCTYPE html>
     </div>
 
     <!-- Modal Tambah Data Keuangan -->
-    <!-- FORM DIPERBAIKI: Menambahkan action, method, csrf, dan name attributes -->
     <div id="addModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="p-6">
@@ -922,17 +861,11 @@ gi<!DOCTYPE html>
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <!-- Form Action ke /pemasukan dengan method POST -->
-                <form action="/pemasukan" method="POST" class="space-y-4">
+                <!-- Form Action diarahkan ke route yang benar -->
+                <form action="{{ route('finance.cashflow.store') }}" method="POST" class="space-y-4">
                     @csrf <!-- Token Keamanan Laravel -->
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Input No (Otomatis di DB, bisa dihidden atau opsional) -->
-                        <div style="display:none;">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">No</label>
-                            <input type="text" name="no" value="Auto">
-                        </div>
-
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
                             <input type="date" name="tanggal"
@@ -953,10 +886,10 @@ gi<!DOCTYPE html>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                            <select name="kategori" id="transaction-category"
+                            <select name="kategori_id" id="transaction-category"
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                                 required>
-                                <option value="">Pilih Kategori</option>
+                                <option value="">Pilih Tipe Transaksi Terlebih Dahulu</option>
                             </select>
                         </div>
 
@@ -969,7 +902,6 @@ gi<!DOCTYPE html>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah</label>
-                            <!-- Type number untuk validasi input angka -->
                             <input type="number" name="jumlah"
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                                 placeholder="Contoh: 1500000" required>
@@ -1047,11 +979,6 @@ gi<!DOCTYPE html>
                                     <span id="detail-amount"
                                         class="text-xs sm:text-sm text-text-light font-medium"></span>
                                 </div>
-                                <div class="flex flex-col sm:flex-row">
-                                    <span class="text-xs sm:text-sm text-text-muted-light sm:w-32">Metode:</span>
-                                    <span id="detail-method"
-                                        class="text-xs sm:text-sm text-text-light font-medium"></span>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -1101,29 +1028,16 @@ gi<!DOCTYPE html>
     </div>
 
     <script>
-        // 1. GANTI DATA STATIS DENGAN DATA DARI CONTROLLER
-        // Data keuangan diambil dari variable $financeData yang dikirim Controller
-        const financeData = @json($financeData ?? []);
-
-        // Kategori berdasarkan tipe
-        const categoriesByType = {
-            income: [
-                { value: "salary", label: "Gaji" },
-                { value: "project", label: "Proyek" },
-                { value: "investment", label: "Investasi" }
-            ],
-            expense: [
-                { value: "office", label: "Kantor" },
-                { value: "marketing", label: "Pemasaran" },
-                { value: "utilities", label: "Utilitas" }
-            ]
-        };
+        // 1. DATA DARI CONTROLLER
+        // Data keuangan dan kategori diambil dari variable yang dikirim Controller
+        const allFinanceData = @json($financeData ?? []);
+        const allKategori = @json($allKategori ?? []);
 
         // Pagination variables
         let financeCurrentPage = 1;
         const financeItemsPerPage = 5;
-        let financeFilteredData = [...financeData];
-        let activeFilters = ['all'];
+        let financeFilteredData = [...allFinanceData];
+        let activeFilters = new Set(['all']); // Gunakan Set untuk memudahkan pengecekan
         let activeType = 'all'; // 'all', 'income', or 'expense'
         let searchTerm = '';
 
@@ -1134,22 +1048,22 @@ gi<!DOCTYPE html>
             const toggleExpense = document.getElementById('toggleExpense');
 
             toggleAll.addEventListener('click', function () {
-                activeType = 'all';
-                updateToggleButtons();
-                applyFilters();
+                setActiveType('all');
             });
 
             toggleIncome.addEventListener('click', function () {
-                activeType = 'income';
-                updateToggleButtons();
-                applyFilters();
+                setActiveType('pemasukan');
             });
 
             toggleExpense.addEventListener('click', function () {
-                activeType = 'expense';
-                updateToggleButtons();
-                applyFilters();
+                setActiveType('pengeluaran');
             });
+        }
+
+        function setActiveType(type) {
+            activeType = type;
+            updateToggleButtons();
+            applyFilters();
         }
 
         function updateToggleButtons() {
@@ -1165,9 +1079,9 @@ gi<!DOCTYPE html>
             // Set active button
             if (activeType === 'all') {
                 toggleAll.classList.add('active');
-            } else if (activeType === 'income') {
+            } else if (activeType === 'pemasukan') {
                 toggleIncome.classList.add('active');
-            } else if (activeType === 'expense') {
+            } else if (activeType === 'pengeluaran') {
                 toggleExpense.classList.add('active');
             }
         }
@@ -1176,9 +1090,33 @@ gi<!DOCTYPE html>
         function initializeFilter() {
             const filterBtn = document.getElementById('filterBtn');
             const filterDropdown = document.getElementById('filterDropdown');
-            const applyFilterBtn = document.getElementById('applyFilter');
-            const resetFilterBtn = document.getElementById('resetFilter');
-            const filterAll = document.getElementById('filterAll');
+            const filterContainer = document.getElementById('filterDropdown');
+
+            // Buat daftar kategori unik untuk filter
+            const uniqueCategories = [...new Set(allKategori.map(k => k.nama_kategori))];
+            let filterHTML = `
+                <div class="filter-option">
+                    <input type="checkbox" id="filterAll" value="all" ${activeFilters.has('all') ? 'checked' : ''}>
+                    <label for="filterAll">Semua Kategori</label>
+                </div>
+            `;
+            uniqueCategories.forEach(cat => {
+                const isChecked = activeFilters.has(cat) ? 'checked' : '';
+                filterHTML += `
+                    <div class="filter-option">
+                        <input type="checkbox" id="filter${cat.replace(/\s+/g, '')}" value="${cat}" ${isChecked}>
+                        <label for="filter${cat.replace(/\s+/g, '')}">${cat}</label>
+                    </div>
+                `;
+            });
+            filterHTML += `
+                <div class="filter-actions">
+                    <button id="applyFilter" class="filter-apply">Terapkan</button>
+                    <button id="resetFilter" class="filter-reset">Reset</button>
+                </div>
+            `;
+            filterContainer.innerHTML = filterHTML;
+
 
             // Toggle filter dropdown
             filterBtn.addEventListener('click', function (e) {
@@ -1196,48 +1134,13 @@ gi<!DOCTYPE html>
                 e.stopPropagation();
             });
 
-            // Handle "All" checkbox
-            filterAll.addEventListener('change', function () {
-                if (this.checked) {
-                    // Uncheck all other checkboxes
-                    document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
-                        cb.checked = false;
-                    });
-                }
-            });
-
-            // Handle other checkboxes
-            document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
-                cb.addEventListener('change', function () {
-                    if (this.checked) {
-                        // Uncheck "All" checkbox
-                        filterAll.checked = false;
-                    }
-                });
-            });
-
             // Apply filter
-            applyFilterBtn.addEventListener('click', function () {
-                const filterAll = document.getElementById('filterAll');
-                const filterSalary = document.getElementById('filterSalary');
-                const filterProject = document.getElementById('filterProject');
-                const filterInvestment = document.getElementById('filterInvestment');
-                const filterOffice = document.getElementById('filterOffice');
-                const filterMarketing = document.getElementById('filterMarketing');
-                const filterUtilities = document.getElementById('filterUtilities');
-
-                activeFilters = [];
-                if (filterAll.checked) {
-                    activeFilters.push('all');
-                } else {
-                    if (filterSalary.checked) activeFilters.push('salary');
-                    if (filterProject.checked) activeFilters.push('project');
-                    if (filterInvestment.checked) activeFilters.push('investment');
-                    if (filterOffice.checked) activeFilters.push('office');
-                    if (filterMarketing.checked) activeFilters.push('marketing');
-                    if (filterUtilities.checked) activeFilters.push('utilities');
-                }
-
+            document.getElementById('applyFilter').addEventListener('click', function () {
+                activeFilters.clear();
+                const checkboxes = filterContainer.querySelectorAll('input[type="checkbox"]:checked');
+                checkboxes.forEach(cb => {
+                    activeFilters.add(cb.value);
+                });
                 applyFilters();
                 filterDropdown.classList.remove('show');
                 const visibleCount = getFilteredRows().length;
@@ -1245,15 +1148,13 @@ gi<!DOCTYPE html>
             });
 
             // Reset filter
-            resetFilterBtn.addEventListener('click', function () {
+            document.getElementById('resetFilter').addEventListener('click', function () {
+                activeFilters.clear();
+                activeFilters.add('all');
                 document.getElementById('filterAll').checked = true;
-                document.getElementById('filterSalary').checked = false;
-                document.getElementById('filterProject').checked = false;
-                document.getElementById('filterInvestment').checked = false;
-                document.getElementById('filterOffice').checked = false;
-                document.getElementById('filterMarketing').checked = false;
-                document.getElementById('filterUtilities').checked = false;
-                activeFilters = ['all'];
+                filterContainer.querySelectorAll('input[type="checkbox"]:not(#filterAll)').forEach(cb => {
+                    cb.checked = false;
+                });
                 applyFilters();
                 filterDropdown.classList.remove('show');
                 const visibleCount = getFilteredRows().length;
@@ -1262,7 +1163,7 @@ gi<!DOCTYPE html>
         }
 
         function getFilteredRows() {
-            return financeFilteredData.filter(row => !row.hiddenByFilter);
+            return financeFilteredData;
         }
 
         function applyFilters() {
@@ -1270,31 +1171,32 @@ gi<!DOCTYPE html>
             financeCurrentPage = 1;
 
             // Apply filters
-            financeFilteredData = financeData.filter(item => {
+            financeFilteredData = allFinanceData.filter(item => {
                 // Check if type matches filter
                 let typeMatches = false;
                 if (activeType === 'all') {
                     typeMatches = true;
                 } else {
-                    typeMatches = item.tipe === activeType;
+                    typeMatches = item.tipe_transaksi === activeType;
                 }
 
                 // Check if category matches filter
                 let categoryMatches = false;
-                if (activeFilters.includes('all')) {
+                if (activeFilters.has('all')) {
                     categoryMatches = true;
                 } else {
-                    categoryMatches = activeFilters.some(filter => item.kategori.includes(filter.toLowerCase()));
+                    categoryMatches = activeFilters.has(item.kategori);
                 }
 
                 // Check if search term matches
                 let searchMatches = true;
                 if (searchTerm) {
                     const searchLower = searchTerm.toLowerCase();
-                    searchMatches = item.nama.toLowerCase().includes(searchLower) ||
-                        item.deskripsi.toLowerCase().includes(searchLower) ||
+                    searchMatches = item.nama_transaksi.toLowerCase().includes(searchLower) ||
+                        (item.deskripsi && item.deskripsi.toLowerCase().includes(searchLower)) ||
                         item.kategori.toLowerCase().includes(searchLower) ||
-                        item.tipe.toLowerCase().includes(searchLower);
+                        item.tipe_transaksi.toLowerCase().includes(searchLower) ||
+                        item.nomor_transaksi.toLowerCase().includes(searchLower);
                 }
 
                 return typeMatches && categoryMatches && searchMatches;
@@ -1303,9 +1205,10 @@ gi<!DOCTYPE html>
             // Update pagination and visible items
             renderFinanceTable();
             renderFinancePagination();
+            updateStatCards();
         }
 
-        // Update category options based on selected type
+        // Update category options based on selected type (dipanggil saat form dibuka dan tipe berubah)
         function updateCategoryOptions() {
             const typeSelect = document.getElementById('transaction-type');
             const categorySelect = document.getElementById('transaction-category');
@@ -1314,12 +1217,14 @@ gi<!DOCTYPE html>
             // Clear current options
             categorySelect.innerHTML = '<option value="">Pilih Kategori</option>';
 
-            // Add options based on selected type
-            if (selectedType && categoriesByType[selectedType]) {
-                categoriesByType[selectedType].forEach(category => {
+            if (selectedType) {
+                const tipeDatabase = selectedType === 'income' ? 'pemasukan' : 'pengeluaran';
+                const filteredKategori = allKategori.filter(k => k.tipe_kategori === tipeDatabase);
+
+                filteredKategori.forEach(kategori => {
                     const option = document.createElement('option');
-                    option.value = category.value;
-                    option.textContent = category.label;
+                    option.value = kategori.id; // Simpan ID kategori
+                    option.textContent = kategori.nama_kategori; // Tampilkan nama kategori
                     categorySelect.appendChild(option);
                 });
             }
@@ -1329,6 +1234,9 @@ gi<!DOCTYPE html>
         function openAddModal() {
             document.getElementById('addModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+            // Reset form saat modal dibuka
+            document.querySelector('#addModal form').reset();
+            document.getElementById('transaction-category').innerHTML = '<option value="">Pilih Tipe Transaksi Terlebih Dahulu</option>';
         }
 
         function closeAddModal() {
@@ -1337,52 +1245,32 @@ gi<!DOCTYPE html>
         }
 
         // Transaction detail modal functions
-        function openTransactionDetailModal(transactionNo) {
-            const transaction = financeData.find(t => t.no === transactionNo);
+        function openTransactionDetailModal(transactionId) {
+            const transaction = allFinanceData.find(t => t.id == transactionId);
             if (!transaction) {
                 showMinimalPopup('Error', 'Data transaksi tidak tersedia', 'error');
                 return;
             }
 
             // Fill modal with data
-            document.getElementById('detail-no').textContent = `#${transaction.no}`;
-            document.getElementById('detail-date').textContent = transaction.tanggal;
-            document.getElementById('detail-name').textContent = transaction.nama;
-            document.getElementById('detail-amount').textContent = transaction.jumlah;
-            document.getElementById('detail-description').textContent = transaction.deskripsi;
-            document.getElementById('detail-method').textContent = "Transfer Bank";
+            document.getElementById('detail-no').textContent = transaction.nomor_transaksi;
+            document.getElementById('detail-date').textContent = transaction.tanggal_transaksi;
+            document.getElementById('detail-name').textContent = transaction.nama_transaksi;
+            document.getElementById('detail-amount').textContent = 'Rp ' + parseFloat(transaction.jumlah).toLocaleString('id-ID');
+            document.getElementById('detail-description').textContent = transaction.deskripsi || 'Tidak ada deskripsi';
 
             // Determine type badge
             let typeBadge = '';
-            if (transaction.tipe === 'income') {
+            let amountClass = '';
+            if (transaction.tipe_transaksi === 'pemasukan') {
                 typeBadge = '<span class="type-badge type-income">Pemasukan</span>';
             } else {
                 typeBadge = '<span class="type-badge type-expense">Pengeluaran</span>';
             }
             document.getElementById('detail-type').innerHTML = typeBadge;
 
-            // Determine category badge
-            let categoryBadge = '';
-            switch (transaction.kategori) {
-                case 'salary':
-                    categoryBadge = '<span class="category-badge category-salary">Gaji</span>';
-                    break;
-                case 'project':
-                    categoryBadge = '<span class="category-badge category-project">Proyek</span>';
-                    break;
-                case 'investment':
-                    categoryBadge = '<span class="category-badge category-investment">Investasi</span>';
-                    break;
-                case 'office':
-                    categoryBadge = '<span class="category-badge category-office">Kantor</span>';
-                    break;
-                case 'marketing':
-                    categoryBadge = '<span class="category-badge category-marketing">Pemasaran</span>';
-                    break;
-                case 'utilities':
-                    categoryBadge = '<span class="category-badge category-utilities">Utilitas</span>';
-                    break;
-            }
+            // Category badge
+            const categoryBadge = `<span class="category-badge">${transaction.kategori}</span>`;
             document.getElementById('detail-category').innerHTML = categoryBadge;
 
             // Show modal
@@ -1400,7 +1288,6 @@ gi<!DOCTYPE html>
         }
 
         function downloadTransaction() {
-            // Placeholder for download functionality
             showMinimalPopup('Info', 'Fitur download akan segera tersedia', 'warning');
         }
 
@@ -1437,103 +1324,49 @@ gi<!DOCTYPE html>
 
             for (let i = startIndex; i < endIndex; i++) {
                 const item = financeFilteredData[i];
+                const amount = parseFloat(item.jumlah);
+                const amountClass = item.tipe_transaksi === 'pemasukan' ? 'text-green-600' : 'text-red-600';
+                const typeBadge = item.tipe_transaksi === 'pemasukan' ?
+                    '<span class="type-badge type-income">Pemasukan</span>' :
+                    '<span class="type-badge type-expense">Pengeluaran</span>';
+                const categoryBadge = `<span class="category-badge">${item.kategori}</span>`;
 
                 // Create table row for desktop
                 const row = document.createElement('tr');
-                row.className = 'finance-row';
-                row.setAttribute('data-id', item.no);
-                row.setAttribute('data-tanggal', item.tanggal);
-                row.setAttribute('data-nama', item.nama);
-                row.setAttribute('data-kategori', item.kategori);
-                row.setAttribute('data-deskripsi', item.deskripsi);
-                row.setAttribute('data-jumlah', item.jumlah);
-                row.setAttribute('data-tipe', item.tipe);
-
-                let typeBadge = '';
-                let amountClass = '';
-                if (item.tipe === 'income') {
-                    typeBadge = '<span class="type-badge type-income">Pemasukan</span>';
-                    amountClass = 'text-green-600';
-                } else {
-                    typeBadge = '<span class="type-badge type-expense">Pengeluaran</span>';
-                    amountClass = 'text-red-600';
-                }
-
-                let categoryBadge = '';
-                switch (item.kategori) {
-                    case 'salary':
-                        categoryBadge = '<span class="category-badge category-salary">Gaji</span>';
-                        break;
-                    case 'project':
-                        categoryBadge = '<span class="category-badge category-project">Proyek</span>';
-                        break;
-                    case 'investment':
-                        categoryBadge = '<span class="category-badge category-investment">Investasi</span>';
-                        break;
-                    case 'office':
-                        categoryBadge = '<span class="category-badge category-office">Kantor</span>';
-                        break;
-                    case 'marketing':
-                        categoryBadge = '<span class="category-badge category-marketing">Pemasaran</span>';
-                        break;
-                    case 'utilities':
-                        categoryBadge = '<span class="category-badge category-utilities">Utilitas</span>';
-                        break;
-                }
-
                 row.innerHTML = `
-                    <td style="min-width: 60px;">${item.no}</td>
-                    <td style="min-width: 150px;">${item.tanggal}</td>
-                    <td style="min-width: 200px;">${item.nama}</td>
+                    <td style="min-width: 60px;">${item.id}</td>
+                    <td style="min-width: 150px;">${item.tanggal_transaksi}</td>
+                    <td style="min-width: 200px;">${item.nama_transaksi}</td>
                     <td style="min-width: 150px;">${categoryBadge}</td>
-                    <td style="min-width: 300px;">${item.deskripsi}</td>
-                    <td style="min-width: 150px;" class="${amountClass} font-semibold">${item.jumlah}</td>
+                    <td style="min-width: 300px;">${item.deskripsi || '-'}</td>
+                    <td style="min-width: 150px;" class="${amountClass} font-semibold">Rp ${amount.toLocaleString('id-ID')}</td>
                     <td style="min-width: 120px;">${typeBadge}</td>
                     <td style="min-width: 100px; text-align: center;">
                         <div class="flex justify-center gap-2">
-                            <button onclick="openTransactionDetailModal(${item.no})" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Detail">
+                            <button onclick="openTransactionDetailModal(${item.id})" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Detail">
                                 <span class="material-icons-outlined">description</span>
                             </button>
                         </div>
                     </td>
                 `;
-
                 tableBody.appendChild(row);
 
                 // Create card for mobile
                 const card = document.createElement('div');
                 card.className = 'bg-white rounded-lg border border-border-light p-4 shadow-sm finance-card';
-                card.setAttribute('data-id', item.no);
-                card.setAttribute('data-tanggal', item.tanggal);
-                card.setAttribute('data-nama', item.nama);
-                card.setAttribute('data-kategori', item.kategori);
-                card.setAttribute('data-deskripsi', item.deskripsi);
-                card.setAttribute('data-jumlah', item.jumlah);
-                card.setAttribute('data-tipe', item.tipe);
-
-                // Determine icon based on type
-                let icon = 'account_balance_wallet';
-                if (item.tipe === 'income') {
-                    icon = 'arrow_downward';
-                    amountClass = 'text-green-600';
-                } else {
-                    icon = 'arrow_upward';
-                    amountClass = 'text-red-600';
-                }
-
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-3">
                         <div class="flex items-center gap-3">
                             <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                <span class="material-icons-outlined text-primary">${icon}</span>
+                                <span class="material-icons-outlined text-primary">${item.tipe_transaksi === 'pemasukan' ? 'arrow_downward' : 'arrow_upward'}</span>
                             </div>
                             <div>
-                                <h4 class="font-semibold text-base">${item.nama}</h4>
-                                <p class="text-sm text-text-muted-light">${item.tanggal}</p>
+                                <h4 class="font-semibold text-base">${item.nama_transaksi}</h4>
+                                <p class="text-sm text-text-muted-light">${item.tanggal_transaksi}</p>
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="openTransactionDetailModal(${item.no})" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Detail">
+                            <button onclick="openTransactionDetailModal(${item.id})" class="p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Lihat Detail">
                                 <span class="material-icons-outlined">description</span>
                             </button>
                         </div>
@@ -1541,7 +1374,7 @@ gi<!DOCTYPE html>
                     <div class="grid grid-cols-2 gap-2 text-sm">
                         <div>
                             <p class="text-text-muted-light">No</p>
-                            <p class="font-medium">${item.no}</p>
+                            <p class="font-medium">${item.id}</p>
                         </div>
                         <div>
                             <p class="text-text-muted-light">Tipe</p>
@@ -1553,23 +1386,19 @@ gi<!DOCTYPE html>
                         </div>
                         <div>
                             <p class="text-text-muted-light">Jumlah</p>
-                            <p class="font-medium ${amountClass}">${item.jumlah}</p>
+                            <p class="font-medium ${amountClass}">Rp ${amount.toLocaleString('id-ID')}</p>
                         </div>
                         <div class="col-span-2">
                             <p class="text-text-muted-light">Deskripsi</p>
-                            <p class="font-medium text-xs">${item.deskripsi}</p>
+                            <p class="font-medium text-xs">${item.deskripsi || '-'}</p>
                         </div>
                     </div>
                 `;
-
                 mobileCards.appendChild(card);
             }
 
             // Update info
             document.getElementById('totalCount').textContent = financeFilteredData.length;
-
-            // Refresh stat cards to reflect visible data
-            updateStatCards();
         }
 
         function renderFinancePagination() {
@@ -1578,12 +1407,9 @@ gi<!DOCTYPE html>
             const prevButton = document.getElementById('prevPage');
             const nextButton = document.getElementById('nextPage');
 
-            // Clear existing page numbers
             pageNumbers.innerHTML = '';
-
             const totalPages = Math.ceil(financeFilteredData.length / financeItemsPerPage);
 
-            // Generate page numbers
             for (let i = 1; i <= totalPages; i++) {
                 const pageNumber = document.createElement('button');
                 pageNumber.textContent = i;
@@ -1592,160 +1418,47 @@ gi<!DOCTYPE html>
                 pageNumbers.appendChild(pageNumber);
             }
 
-            // Update navigation buttons
             prevButton.disabled = financeCurrentPage === 1;
             nextButton.disabled = financeCurrentPage === totalPages || totalPages === 0;
-
-            // Add event listeners for navigation buttons
-            prevButton.onclick = () => {
-                if (financeCurrentPage > 1) goToPage(financeCurrentPage - 1);
-            };
-
-            nextButton.onclick = () => {
-                if (financeCurrentPage < totalPages) goToPage(financeCurrentPage + 1);
-            };
+            prevButton.onclick = () => goToPage(financeCurrentPage - 1);
+            nextButton.onclick = () => goToPage(financeCurrentPage + 1);
         }
 
         function goToPage(page) {
             financeCurrentPage = page;
             renderFinanceTable();
             renderFinancePagination();
-
-            // Reset scroll position when changing pages
             const scrollableTable = document.getElementById('scrollableTable');
             if (scrollableTable) {
                 scrollableTable.scrollLeft = 0;
             }
         }
 
-        /**
-         * Helper: Extract numeric value from formatted currency string
-         * Input: "Rp 45.750.000" or similar
-         * Output: 45750000
-         */
-        function extractNumericFromCurrency(currencyStr) {
-            if (typeof currencyStr === 'number') return currencyStr;
-            // Remove 'Rp', spaces, and dots used as thousand separators
-            const cleaned = String(currencyStr).replace(/[^\d]/g, '');
-            return parseInt(cleaned, 10) || 0;
-        }
-
-        /**
-         * Format number as Indonesian Rupiah
-         * Input: 45750000
-         * Output: "Rp 45.750.000"
-         */
-        function formatCurrency(num) {
-            return 'Rp ' + num.toLocaleString('id-ID');
-        }
-
-        /**
-         * Calculate percentage change and direction
-         * Returns: { percentage: number, direction: 'positive'|'negative', text: string }
-         */
-        function calculatePercentageChange(current, previous) {
-            if (previous === 0) {
-                return {
-                    percentage: current > 0 ? 100 : 0,
-                    direction: current > 0 ? 'positive' : 'negative',
-                    text: current > 0 ? '+100% dari sebelumnya' : 'Tidak ada perubahan'
-                };
-            }
-            const change = ((current - previous) / previous) * 100;
-            return {
-                percentage: Math.abs(change),
-                direction: change >= 0 ? 'positive' : 'negative',
-                text: `${change >= 0 ? '+' : ''}${change.toFixed(1)}% dari sebelumnya`
-            };
-        }
-
-        /**
-         * Calculate average amount per transaction for a type
-         */
-        function calculateAveragePerType(type) {
-            const items = financeData.filter(item => item.tipe === type);
-            if (items.length === 0) return 0;
-            
-            let total = 0;
-            items.forEach(item => {
-                total += extractNumericFromCurrency(item.jumlah);
-            });
-            return total / items.length;
-        }
-
-        /**
-         * Update stat cards with dynamic totals from financeData
-         */
         function updateStatCards() {
             let totalIncome = 0;
             let totalExpense = 0;
-            let incomeCount = 0;
-            let expenseCount = 0;
 
-            // Use the currently filtered data so stats reflect active filters
             (financeFilteredData || []).forEach(item => {
-                const amount = extractNumericFromCurrency(item.jumlah);
-                if (item.tipe === 'income') {
+                const amount = parseFloat(item.jumlah);
+                if (item.tipe_transaksi === 'pemasukan') {
                     totalIncome += amount;
-                    incomeCount++;
-                } else if (item.tipe === 'expense') {
+                } else {
                     totalExpense += amount;
-                    expenseCount++;
                 }
             });
 
             const netBalance = totalIncome - totalExpense;
+            const balancePercentage = totalIncome > 0 ? (netBalance / totalIncome) * 100 : 0;
 
             // Update stat cards values
-            const statCards = document.querySelectorAll('.stat-card-value');
-            if (statCards.length >= 3) {
-                statCards[0].textContent = formatCurrency(totalIncome);    // Total Pemasukan
-                statCards[1].textContent = formatCurrency(totalExpense);   // Total Pengeluaran
-                statCards[2].textContent = formatCurrency(netBalance);     // Saldo Bersih
-            }
+            document.getElementById('stat-income').textContent = 'Rp ' + totalIncome.toLocaleString('id-ID');
+            document.getElementById('stat-expense').textContent = 'Rp ' + totalExpense.toLocaleString('id-ID');
+            document.getElementById('stat-balance').textContent = 'Rp ' + netBalance.toLocaleString('id-ID');
 
-            // Calculate and update percentage changes
-            const avgIncome = calculateAveragePerType('income');
-            const avgExpense = calculateAveragePerType('expense');
-
-            // Income percentage change (compare current total vs average * count)
-            const incomePercentageChange = calculatePercentageChange(totalIncome, avgIncome * incomeCount);
-            
-            // Expense percentage change (compare current total vs average * count)
-            const expensePercentageChange = calculatePercentageChange(totalExpense, avgExpense * expenseCount);
-            
-            // Net balance percentage (profit margin)
-            const balancePercentage = totalIncome > 0 ? (netBalance / totalIncome) * 100 : 0;
-            const balanceChange = {
-                percentage: Math.abs(balancePercentage),
-                direction: balancePercentage >= 0 ? 'positive' : 'negative',
-                text: `${balancePercentage >= 0 ? '+' : ''}${balancePercentage.toFixed(1)}% margin keuntungan`
-            };
-
-            // Update percentage change displays
-            const statChanges = document.querySelectorAll('.stat-card-change');
-            if (statChanges.length >= 3) {
-                // Income change
-                statChanges[0].className = `stat-card-change ${incomePercentageChange.direction}`;
-                statChanges[0].innerHTML = `
-                    <span class="material-icons-outlined text-sm">${incomePercentageChange.direction === 'positive' ? 'arrow_upward' : 'arrow_downward'}</span>
-                    <span>${incomePercentageChange.text}</span>
-                `;
-
-                // Expense change
-                statChanges[1].className = `stat-card-change ${expensePercentageChange.direction === 'positive' ? 'negative' : 'positive'}`;
-                statChanges[1].innerHTML = `
-                    <span class="material-icons-outlined text-sm">${expensePercentageChange.direction === 'positive' ? 'arrow_upward' : 'arrow_downward'}</span>
-                    <span>${expensePercentageChange.direction === 'positive' ? 'Pengeluaran naik ' : 'Pengeluaran turun '}${expensePercentageChange.percentage.toFixed(1)}%</span>
-                `;
-
-                // Net balance change
-                statChanges[2].className = `stat-card-change ${balanceChange.direction}`;
-                statChanges[2].innerHTML = `
-                    <span class="material-icons-outlined text-sm">${balanceChange.direction === 'positive' ? 'arrow_upward' : 'arrow_downward'}</span>
-                    <span>${balanceChange.text}</span>
-                `;
-            }
+            // Update percentage change displays (contoh sederhana)
+            document.getElementById('stat-income-change').textContent = `Dari ${financeFilteredData.filter(i => i.tipe_transaksi === 'pemasukan').length} transaksi`;
+            document.getElementById('stat-expense-change').textContent = `Dari ${financeFilteredData.filter(i => i.tipe_transaksi === 'pengeluaran').length} transaksi`;
+            document.getElementById('stat-balance-change').textContent = `${balancePercentage >= 0 ? '+' : ''}${balancePercentage.toFixed(1)}% margin keuntungan`;
         }
 
         function filterFinance() {
@@ -1760,14 +1473,10 @@ gi<!DOCTYPE html>
             const popupMessage = popup.querySelector('.minimal-popup-message');
             const popupIcon = popup.querySelector('.minimal-popup-icon span');
 
-            // Set content
             popupTitle.textContent = title;
             popupMessage.textContent = message;
-
-            // Set type
             popup.className = 'minimal-popup show ' + type;
 
-            // Set icon
             if (type === 'success') {
                 popupIcon.textContent = 'check';
             } else if (type === 'error') {
@@ -1776,7 +1485,6 @@ gi<!DOCTYPE html>
                 popupIcon.textContent = 'warning';
             }
 
-            // Auto hide after 3 seconds
             setTimeout(() => {
                 popup.classList.remove('show');
             }, 3000);
@@ -1787,15 +1495,13 @@ gi<!DOCTYPE html>
             document.getElementById('minimalPopup').classList.remove('show');
         });
 
-        // Initialize tables on page load
+        // Initialize everything on page load
         document.addEventListener('DOMContentLoaded', function () {
-            // Render data tanpa perlu fetch karena sudah dari PHP
             renderFinanceTable();
             renderFinancePagination();
             initializeFilter();
             initializeToggleButtons();
-
-            // Add search functionality
+            updateStatCards();
             document.getElementById('finance-search').addEventListener('input', filterFinance);
         });
     </script>
@@ -1813,6 +1519,15 @@ gi<!DOCTYPE html>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
                 showMinimalPopup('Gagal', '{{ session('error') }}', 'error');
+            });
+        </script>
+    @endif
+
+    @if($errors->any())
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                showMinimalPopup('Error', '{{ $errors->first() }}', 'error');
+                openAddModal(); // Reopen modal to show errors
             });
         </script>
     @endif

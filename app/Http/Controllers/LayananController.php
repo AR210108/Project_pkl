@@ -10,12 +10,12 @@ use Illuminate\Support\Facades\Validator;
 
 class LayananController extends Controller
 {
-    public function financeIndex()
+public function financeIndex()
 {
     // Ambil data dari database
     $layanans = Layanan::all();
 
-    // Kirim data ke view
+    // Kirim data ke view baru
     return view('finance.data_layanan', compact('layanans'));
 }
     /**
@@ -143,6 +143,47 @@ try {
             ], 500);
         }
     }
+
+    /**
+ * Update hanya harga untuk finance
+ */
+public function updateHarga(Request $request, $id)
+{
+    // Validasi hanya harga
+    $validator = Validator::make($request->all(), [
+        'harga' => 'required|numeric|min:0',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validasi gagal.',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    try {
+        $layanan = Layanan::findOrFail($id);
+        
+        // Update hanya harga
+        $layanan->update([
+            'harga' => $request->harga
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Harga layanan berhasil diperbarui!',
+            'data' => $layanan
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan saat memperbarui harga.',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 
     /**
      * Remove the specified resource from storage.
