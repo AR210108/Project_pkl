@@ -601,17 +601,109 @@
 
                 <!-- Tab Navigation -->
                 <div class="tab-nav">
-                    <button id="timTab" class="tab-button active" data-tab="tim">
-                        <span class="material-icons-outlined align-middle mr-2">groups</span>
-                        Data Tim
-                    </button>
-                    <button id="divisiTab" class="tab-button" data-tab="divisi">
+                    <button id="divisiTab" class="tab-button active" data-tab="divisi">
                         <span class="material-icons-outlined align-middle mr-2">business</span>
                         Data Divisi
                     </button>
+                    <button id="timTab" class="tab-button" data-tab="tim">
+                        <span class="material-icons-outlined align-middle mr-2">groups</span>
+                        Data Tim
+                    </button>
+
+                </div>
+                
+                <!-- Data Divisi Panel (Initially Hidden) -->
+                <div id="divisiPanel" class="panel tab-panel ">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <span class="material-icons-outlined text-primary">business</span>
+                            Data Divisi
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-text-muted-light">Total: <span
+                                    class="font-semibold text-text-light" id="divisiCount">3</span> divisi</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <!-- Search Section -->
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                            <div class="relative w-full md:w-1/3">
+                                <span
+                                    class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                                <input id="searchDivisiInput"
+                                    class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input"
+                                    placeholder="Cari nama divisi..." type="text" />
+                            </div>
+                            <div class="flex flex-wrap gap-3 w-full md:w-auto">
+                                <button id="tambahDivisiBtn"
+                                    class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
+                                    <span class="material-icons-outlined">add</span>
+                                    <span class="hidden sm:inline">Tambah Divisi</span>
+                                    <span class="sm:hidden">Tambah</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Desktop Table -->
+                        <div class="desktop-table">
+                            <div class="scrollable-table-container table-shadow" id="scrollableDivisiTable">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="min-width: 60px;">No</th>
+                                            <th style="min-width: 200px;">Nama Divisi</th>
+                                            <th style="min-width: 150px;">Jumlah Tim</th>
+                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="divisiTableBody">
+                                        @foreach ($divisis as $item)
+                                            <tr>
+                                                <td style="min-width: 60px;">{{ $loop->iteration }}</td>
+                                                <td style="min-width: 200px;">{{ $item->divisi }}</td>
+                                                <td style="min-width: 150px;">{{ $item->jumlah_tim }}</td>
+                                                <td style="min-width: 100px; text-align: center;">
+                                                    <div class="flex justify-center gap-2">
+                                                        <button
+                                                            class="edit-divisi-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                            data-id='{{ $item->id }}'>
+                                                            <span class="material-icons-outlined">edit</span>
+                                                        </button>
+                                                        <button
+                                                            class="delete-divisi-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
+                                                            data-id='{{ $item->id }}'>
+                                                            <span class="material-icons-outlined">delete</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Mobile Card View -->
+                        <div class="mobile-cards space-y-4" id="divisi-mobile-cards">
+                            <!-- Cards will be populated by JavaScript -->
+                        </div>
+
+                        <!-- Pagination -->
+                        <div id="divisiPaginationContainer" class="desktop-pagination">
+                            <button id="divisiPrevPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_left</span>
+                            </button>
+                            <div id="divisiPageNumbers" class="flex gap-1">
+                                <!-- Page numbers will be generated by JavaScript -->
+                            </div>
+                            <button id="divisiNextPage" class="desktop-nav-btn">
+                                <span class="material-icons-outlined text-sm">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <!-- Data Tim Panel -->
-                <div id="timPanel" class="panel tab-panel">
+                <div id="timPanel" class="panel tab-panel hidden">
                     <div class="panel-header">
                         <h3 class="panel-title">
                             <span class="material-icons-outlined text-primary">groups</span>
@@ -732,96 +824,6 @@
                     </div>
                 </div>
 
-                <!-- Data Divisi Panel (Initially Hidden) -->
-                <div id="divisiPanel" class="panel tab-panel hidden">
-                    <div class="panel-header">
-                        <h3 class="panel-title">
-                            <span class="material-icons-outlined text-primary">business</span>
-                            Data Divisi
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span
-                                    class="font-semibold text-text-light" id="divisiCount">3</span> divisi</span>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <!-- Search Section -->
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                            <div class="relative w-full md:w-1/3">
-                                <span
-                                    class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                                <input id="searchDivisiInput"
-                                    class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input"
-                                    placeholder="Cari nama divisi..." type="text" />
-                            </div>
-                            <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                                <button id="tambahDivisiBtn"
-                                    class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
-                                    <span class="material-icons-outlined">add</span>
-                                    <span class="hidden sm:inline">Tambah Divisi</span>
-                                    <span class="sm:hidden">Tambah</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Desktop Table -->
-                        <div class="desktop-table">
-                            <div class="scrollable-table-container table-shadow" id="scrollableDivisiTable">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th style="min-width: 60px;">No</th>
-                                            <th style="min-width: 200px;">Nama Divisi</th>
-                                            <th style="min-width: 150px;">Jumlah Tim</th>
-                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="divisiTableBody">
-                                        @foreach ($divisis as $item)
-                                            <tr>
-                                                <td style="min-width: 60px;">{{ $loop->iteration }}</td>
-                                                <td style="min-width: 200px;">{{ $item->divisi }}</td>
-                                                <td style="min-width: 150px;">{{ $item->jumlah_tim }}</td>
-                                                <td style="min-width: 100px; text-align: center;">
-                                                    <div class="flex justify-center gap-2">
-                                                        <button
-                                                            class="edit-divisi-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                            data-id='{{ $item->id }}'>
-                                                            <span class="material-icons-outlined">edit</span>
-                                                        </button>
-                                                        <button
-                                                            class="delete-divisi-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                                            data-id='{{ $item->id }}'>
-                                                            <span class="material-icons-outlined">delete</span>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Mobile Card View -->
-                        <div class="mobile-cards space-y-4" id="divisi-mobile-cards">
-                            <!-- Cards will be populated by JavaScript -->
-                        </div>
-
-                        <!-- Pagination -->
-                        <div id="divisiPaginationContainer" class="desktop-pagination">
-                            <button id="divisiPrevPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="divisiPageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
-                            </div>
-                            <button id="divisiNextPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
                 <footer
                     class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light mt-8">

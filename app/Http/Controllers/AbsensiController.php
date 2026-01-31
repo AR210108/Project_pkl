@@ -53,43 +53,25 @@ class AbsensiController extends Controller
         return view('admin.absensi', compact('stats', 'attendances', 'ketidakhadiran', 'users'));
     }
 
-/**
- * Menampilkan halaman kelola absensi untuk General Manajer (Versi Sederhana)
- * 
- * @return \Illuminate\View\View
- */
-
-
-    /**
-     * Method untuk General Manager
-     */
-public function kelolaAbsenManajer()
+public function kelolaAbsenGeneral()
 {
     try {
+        $user = Auth::user();
+        
         // 1. AMBIL FILTER DARI URL
         $startDate = request('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
         $endDate = request('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
-        $selectedDivision = request('division');
+        $selectedDivision = $user->divisi;
         $statusFilter = request('status');
 
-        // 2. INISIALISASI SEMUA VARIABLE YANG AKAN DIKIRIM KE VIEW
-        $stats = [];
-        $formattedAbsensi = collect();
-        $divisions = collect();
-        $absensiPaginator = null;
-
-        // 3. QUERY UNTUK DATA ABSENSI (DENGAN PAGINATION)
+        // 2. QUERY UNTUK DATA ABSENSI (DENGAN PAGINATION)
         $query = Absensi::with(['user:id,name,divisi', 'approver:id,name'])
             ->join('users', 'absensis.user_id', '=', 'users.id')
             ->whereBetween('absensis.tanggal', [$startDate, $endDate])
+            ->where('users.divisi', $selectedDivision)
             ->select('absensis.*', 'users.name as user_name', 'users.divisi as user_divisi')
             ->orderBy('absensis.tanggal', 'desc')
             ->orderBy('absensis.created_at', 'desc');
-
-        // Filter divisi jika dipilih
-        if ($selectedDivision && $selectedDivision !== 'semua') {
-            $query->where('users.divisi', $selectedDivision);
-        }
 
         // Filter status jika dipilih
         if ($statusFilter && $statusFilter !== 'semua') {
@@ -117,25 +99,18 @@ public function kelolaAbsenManajer()
         $absensiPaginator->appends([
             'start_date' => $startDate,
             'end_date' => $endDate,
-            'division' => $selectedDivision,
             'status' => $statusFilter
         ]);
 
-        // 4. HITUNG STATISTIK (TANPA RAW QUERY YANG KOMPLEKS)
-        $statsQuery = Absensi::join('users', 'absensis.user_id', '=', 'users.id')
-            ->whereBetween('absensis.tanggal', [$startDate, $endDate]);
-
-        if ($selectedDivision && $selectedDivision !== 'semua') {
-            $statsQuery->where('users.divisi', $selectedDivision);
-        }
-
-        // Inisialisasi semua statistik dengan nilai default 0
+        // 3. HITUNG STATISTIK
         $stats = [
             'total_tepat_waktu' => 0,
             'total_terlambat' => 0,
             'total_izin' => 0,
             'total_sakit' => 0,
             'total_tidak_masuk' => 0,
+            'total_cuti' => 0,
+            'total_dinas_luar' => 0,
             'total_semua' => $absensiPaginator->total(),
             'periode' => Carbon::parse($startDate)->translatedFormat('d M Y') . 
                         ' - ' . 
@@ -151,6 +126,10 @@ public function kelolaAbsenManajer()
                 $stats['total_izin']++;
             } elseif ($absen->jenis_ketidakhadiran == 'sakit') {
                 $stats['total_sakit']++;
+            } elseif ($absen->jenis_ketidakhadiran == 'cuti') {
+                $stats['total_cuti']++;
+            } elseif ($absen->jenis_ketidakhadiran == 'dinas-luar') {
+                $stats['total_dinas_luar']++;
             }
             
             // Hitung tepat waktu vs terlambat (hanya untuk yang hadir)
@@ -171,15 +150,7 @@ public function kelolaAbsenManajer()
             }
         }
 
-        // 5. DATA DIVISI UNTUK DROPDOWN
-        $divisions = User::select('divisi')
-            ->whereNotNull('divisi')
-            ->where('divisi', '!=', '')
-            ->distinct()
-            ->orderBy('divisi')
-            ->pluck('divisi');
-
-        // 6. FORMAT DATA ABSENSI dengan tambahan 'type' dan 'alasan'
+        // 4. FORMAT DATA ABSENSI
         $formattedAbsensi = $absensiPaginator->map(function($absen) {
             $status = $this->getStatusKehadiran($absen);
             
@@ -187,7 +158,7 @@ public function kelolaAbsenManajer()
             $type = 'absensi';
             $alasan = null;
             
-            if (in_array($absen->jenis_ketidakhadiran, ['izin', 'sakit'])) {
+            if (in_array($absen->jenis_ketidakhadiran, ['izin', 'sakit', 'cuti', 'dinas-luar'])) {
                 $type = 'ketidakhadiran';
                 $alasan = $absen->keterangan ?? $absen->reason;
             }
@@ -213,11 +184,25 @@ public function kelolaAbsenManajer()
             ];
         });
 
-        // 7. HITUNG JUMLAH DATA KETIDAKHADIRAN UNTUK TAB
-        $absenceCount = $formattedAbsensi->where('type', 'ketidakhadiran')->count();
+        // 5. DATA KETIDAKHADIRAN (untuk tab ketidakhadiran) - PERBAIKAN DI SINI
+        $ketidakhadiran = Absensi::with(['user:id,name', 'approver:id,name'])
+            ->join('users', 'absensis.user_id', '=', 'users.id')
+            ->whereBetween('absensis.tanggal', [$startDate, $endDate])
+            ->where('users.divisi', $selectedDivision)
+            ->whereNotNull('absensis.jenis_ketidakhadiran') // PERBAIKAN: gunakan jenis_ketidakhadiran
+            ->select('absensis.*', 'users.name as user_name')
+            ->orderBy('absensis.tanggal', 'desc')
+            ->get();
+
+        // 6. DATA USER (untuk dropdown di modal)
+        $users = User::where('divisi', $selectedDivision)
+            ->where('role', 'karyawan')
+            ->get();
+
+        $absenceCount = $ketidakhadiran->count();
 
     } catch (\Exception $e) {
-        \Log::error('Error in kelolaAbsenManajer: ' . $e->getMessage());
+        \Log::error('Error in kelolaAbsensiGeneral: ' . $e->getMessage());
         
         // Set default values jika terjadi error
         $stats = [
@@ -225,6 +210,8 @@ public function kelolaAbsenManajer()
             'total_terlambat' => 0,
             'total_izin' => 0,
             'total_sakit' => 0,
+            'total_cuti' => 0,
+            'total_dinas_luar' => 0,
             'total_tidak_masuk' => 0,
             'total_semua' => 0,
             'periode' => Carbon::now()->translatedFormat('F Y'),
@@ -233,19 +220,236 @@ public function kelolaAbsenManajer()
         ];
         
         $formattedAbsensi = collect();
-        $divisions = collect();
-        $selectedDivision = $selectedDivision ?? null;
-        $statusFilter = $statusFilter ?? null;
+        $ketidakhadiran = collect();
+        $users = collect();
         $absensiPaginator = null;
         $absenceCount = 0;
+        $selectedDivision = $user->divisi ?? null;
+        $statusFilter = request('status') ?? null;
+        $startDate = $startDate ?? Carbon::now()->startOfMonth()->format('Y-m-d');
+        $endDate = $endDate ?? Carbon::now()->endOfMonth()->format('Y-m-d');
     }
 
-    // 8. KIRIM KE VIEW (PASTIKAN SEMUA VARIABLE TERDEFINISI)
+    // KIRIM KE VIEW
     return view('general_manajer.kelola_absen', compact(
         'stats',
         'formattedAbsensi',
         'absensiPaginator',
-        'divisions',
+        'ketidakhadiran',
+        'users',
+        'selectedDivision',
+        'statusFilter',
+        'startDate',
+        'endDate',
+        'absenceCount'
+    ));
+}
+
+/**
+ * Menampilkan halaman kelola absensi untuk General Manajer (Versi Sederhana)
+ * 
+ * @return \Illuminate\View\View
+ */
+
+
+    /**
+     * Method untuk General Manager
+     */
+public function kelolaAbsenManajer()
+{
+    try {
+        $user = Auth::user();
+        
+        // 1. AMBIL FILTER DARI URL
+        $startDate = request('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $endDate = request('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
+        $selectedDivision = $user->divisi; // Manager hanya bisa melihat divisinya sendiri
+        $statusFilter = request('status');
+
+        // 2. INISIALISASI SEMUA VARIABLE YANG AKAN DIKIRIM KE VIEW
+        $stats = [];
+        $formattedAbsensi = collect();
+        $absensiPaginator = null;
+
+        // 3. QUERY UNTUK DATA ABSENSI (DENGAN PAGINATION)
+        $query = Absensi::with(['user:id,name,divisi', 'approver:id,name'])
+            ->join('users', 'absensis.user_id', '=', 'users.id')
+            ->whereBetween('absensis.tanggal', [$startDate, $endDate])
+            ->where('users.divisi', $selectedDivision) // Filter hanya divisi manager
+            ->select('absensis.*', 'users.name as user_name', 'users.divisi as user_divisi')
+            ->orderBy('absensis.tanggal', 'desc')
+            ->orderBy('absensis.created_at', 'desc');
+
+        // Filter status jika dipilih
+        if ($statusFilter && $statusFilter !== 'semua') {
+            if ($statusFilter === 'hadir') {
+                $query->whereNotNull('absensis.jam_masuk')
+                      ->whereNull('absensis.jenis_ketidakhadiran');
+            } elseif ($statusFilter === 'izin') {
+                $query->where('absensis.jenis_ketidakhadiran', 'izin');
+            } elseif ($statusFilter === 'sakit') {
+                $query->where('absensis.jenis_ketidakhadiran', 'sakit');
+            } elseif ($statusFilter === 'tidak-hadir') {
+                $query->whereNull('absensis.jam_masuk')
+                      ->whereNull('absensis.jenis_ketidakhadiran');
+            } elseif ($statusFilter === 'pending') {
+                $query->where('absensis.approval_status', 'pending');
+            } elseif ($statusFilter === 'approved') {
+                $query->where('absensis.approval_status', 'approved');
+            } elseif ($statusFilter === 'rejected') {
+                $query->where('absensis.approval_status', 'rejected');
+            }
+        }
+
+        // Ambil data dengan pagination
+        $absensiPaginator = $query->paginate(15);
+        $absensiPaginator->appends([
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'status' => $statusFilter
+        ]);
+
+        // 4. HITUNG STATISTIK
+        $statsQuery = Absensi::join('users', 'absensis.user_id', '=', 'users.id')
+            ->whereBetween('absensis.tanggal', [$startDate, $endDate])
+            ->where('users.divisi', $selectedDivision);
+
+        // Inisialisasi semua statistik dengan nilai default 0
+        $stats = [
+            'total_tepat_waktu' => 0,
+            'total_terlambat' => 0,
+            'total_izin' => 0,
+            'total_sakit' => 0,
+            'total_tidak_masuk' => 0,
+            'total_cuti' => 0,
+            'total_dinas_luar' => 0,
+            'total_semua' => $absensiPaginator->total(),
+            'periode' => Carbon::parse($startDate)->translatedFormat('d M Y') . 
+                        ' - ' . 
+                        Carbon::parse($endDate)->translatedFormat('d M Y'),
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+        ];
+
+        // Hitung statistik berdasarkan data yang sudah diambil
+        foreach ($absensiPaginator as $absen) {
+            // Hitung berdasarkan jenis ketidakhadiran
+            if ($absen->jenis_ketidakhadiran == 'izin') {
+                $stats['total_izin']++;
+            } elseif ($absen->jenis_ketidakhadiran == 'sakit') {
+                $stats['total_sakit']++;
+            } elseif ($absen->jenis_ketidakhadiran == 'cuti') {
+                $stats['total_cuti']++;
+            } elseif ($absen->jenis_ketidakhadiran == 'dinas-luar') {
+                $stats['total_dinas_luar']++;
+            }
+            
+            // Hitung tepat waktu vs terlambat (hanya untuk yang hadir)
+            if ($absen->jam_masuk && !$absen->jenis_ketidakhadiran) {
+                $jamMasuk = strtotime($absen->jam_masuk);
+                $batasTerlambat = strtotime('09:00:00');
+                
+                if ($jamMasuk <= $batasTerlambat) {
+                    $stats['total_tepat_waktu']++;
+                } else {
+                    $stats['total_terlambat']++;
+                }
+            }
+            
+            // Hitung tidak masuk (tanpa jam masuk dan tanpa keterangan)
+            if (!$absen->jam_masuk && !$absen->jenis_ketidakhadiran) {
+                $stats['total_tidak_masuk']++;
+            }
+        }
+
+        // 5. FORMAT DATA ABSENSI
+        $formattedAbsensi = $absensiPaginator->map(function($absen) {
+            $status = $this->getStatusKehadiran($absen);
+            
+            // Tentukan apakah ini data absensi atau ketidakhadiran
+            $type = 'absensi';
+            $alasan = null;
+            
+            if (in_array($absen->jenis_ketidakhadiran, ['izin', 'sakit', 'cuti', 'dinas-luar'])) {
+                $type = 'ketidakhadiran';
+                $alasan = $absen->keterangan ?? $absen->reason;
+            }
+            
+            return [
+                'id' => $absen->id,
+                'user_name' => $absen->user->name ?? $absen->user_name,
+                'divisi' => $absen->user->divisi ?? $absen->user_divisi,
+                'tanggal' => $absen->tanggal,
+                'jam_masuk' => $absen->jam_masuk ? substr($absen->jam_masuk, 0, 5) : '-',
+                'jam_pulang' => $absen->jam_pulang ? substr($absen->jam_pulang, 0, 5) : '-',
+                'jenis_ketidakhadiran' => $absen->jenis_ketidakhadiran,
+                'keterangan' => $absen->keterangan ?? $absen->reason,
+                'alasan' => $alasan,
+                'type' => $type,
+                'approval_status' => $absen->approval_status,
+                'rejection_reason' => $absen->rejection_reason,
+                'approved_by_name' => $absen->approver->name ?? null,
+                'status_kehadiran' => $status['label'],
+                'status_class' => $status['class'],
+                'tanggal_akhir' => $absen->tanggal_akhir,
+                'created_at' => $absen->created_at,
+            ];
+        });
+
+        // 6. HITUNG JUMLAH DATA KETIDAKHADIRAN
+        $absenceCount = $formattedAbsensi->where('type', 'ketidakhadiran')->count();
+
+        // 7. DATA KETIDAKHADIRAN (untuk tab ketidakhadiran)
+        $ketidakhadiran = Absensi::with(['user:id,name', 'approver:id,name'])
+            ->join('users', 'absensis.user_id', '=', 'users.id')
+            ->whereBetween('absensis.tanggal', [$startDate, $endDate])
+            ->where('users.divisi', $selectedDivision)
+            ->whereNotNull('absensis.jenis_ketidakhadiran')
+            ->select('absensis.*', 'users.name as user_name')
+            ->orderBy('absensis.tanggal', 'desc')
+            ->get();
+
+        // 8. DATA USER (untuk dropdown di modal)
+        $users = User::where('divisi', $selectedDivision)
+            ->where('role', 'karyawan')
+            ->get();
+
+    } catch (\Exception $e) {
+        \Log::error('Error in kelolaAbsensiManagerDivisi: ' . $e->getMessage());
+        
+        // Set default values jika terjadi error
+        $stats = [
+            'total_tepat_waktu' => 0,
+            'total_terlambat' => 0,
+            'total_izin' => 0,
+            'total_sakit' => 0,
+            'total_cuti' => 0,
+            'total_dinas_luar' => 0,
+            'total_tidak_masuk' => 0,
+            'total_semua' => 0,
+            'periode' => Carbon::now()->translatedFormat('F Y'),
+            'start_date' => $startDate ?? Carbon::now()->startOfMonth()->format('Y-m-d'),
+            'end_date' => $endDate ?? Carbon::now()->endOfMonth()->format('Y-m-d'),
+        ];
+        
+        $formattedAbsensi = collect();
+        $ketidakhadiran = collect();
+        $users = collect();
+        $absensiPaginator = null;
+        $absenceCount = 0;
+        $selectedDivision = $user->divisi ?? null;
+        $statusFilter = request('status') ?? null;
+        $startDate = $startDate ?? Carbon::now()->startOfMonth()->format('Y-m-d');
+        $endDate = $endDate ?? Carbon::now()->endOfMonth()->format('Y-m-d');
+    }
+
+    // 9. KIRIM KE VIEW
+    return view('manager_divisi.kelola_absensi', compact(
+        'stats',
+        'formattedAbsensi',
+        'absensiPaginator',
+        'ketidakhadiran',
+        'users',
         'selectedDivision',
         'statusFilter',
         'startDate',

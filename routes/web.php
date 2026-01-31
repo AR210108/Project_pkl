@@ -29,6 +29,7 @@ use App\Http\Controllers\OwnerController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\BerandaFinanceController;
+use App\Http\Controllers\CutiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -565,8 +566,14 @@ Route::middleware(['auth', 'role:general_manager'])
         });
 
         // Absensi Management
-        Route::get('/kelola-absen', [AbsensiController::class, 'kelolaAbsenManajer'])->name('kelola_absen');
+        Route::get('/kelola-absen', [AbsensiController::class, 'kelolaAbsenGeneral'])->name('kelola_absen');
 
+    // Action untuk approve/reject
+    Route::post('/general-manajer/absensi/{id}/approve', [AbsensiController::class, 'approveAbsensi'])
+        ->name('general_manajer.absensi.approve');
+
+    Route::post('/general-manajer/absensi/{id}/reject', [AbsensiController::class, 'rejectAbsensi'])
+        ->name('general_manajer.absensi.reject');
         Route::get('/tim_dan_divisi', function () {
             return view('general_manajer.tim_dan_divisi');
         })->name('tim_dan_divisi');
@@ -715,9 +722,7 @@ Route::middleware(['auth', 'role:manager_divisi'])
         // Dashboard
         Route::get('/home', function () {
             return view('manager_divisi.home'); })->name('home');
-
-        Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsensiManagerDivisi'])->name('kelola_absensi');
-
+Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsenManajer'])->name('kelola_absensi');
         // CUTI MANAGEMENT
         Route::prefix('cuti')->name('cuti.')->group(function () {
             Route::get('/', [CutiController::class, 'index'])->name('index');
@@ -767,8 +772,6 @@ Route::middleware(['auth', 'role:manager_divisi'])
             return view('manager_divisi.pengelola_tugas');
         })->name('pengelola_tugas');
             Route::get('/daftar_karyawan', [AdminKaryawanController::class, 'karyawanDivisi'])->name('daftar_karyawan');
-
-        Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsensiManagerDivisi'])->name('kelola_absensi');
 
         // Tim Saya
         Route::get('/tim-saya', function () {
@@ -1273,19 +1276,6 @@ Route::middleware(['auth'])->prefix('api/services')->name('api.services.')->grou
 |--------------------------------------------------------------------------
 */
 
-// Route untuk General Manajer dengan middleware role
-Route::middleware(['auth', 'role:general_manajer'])->group(function () {
-    // URL: http://127.0.0.1:8000/general-manajer/kelola-absen
-    Route::get('/general-manajer/kelola-absen', [AbsensiController::class, 'kelolaAbsenManajer'])
-        ->name('general_manajer.kelola_absen');
-
-    // Action untuk approve/reject
-    Route::post('/general-manajer/absensi/{id}/approve', [AbsensiController::class, 'approveAbsensi'])
-        ->name('general_manajer.absensi.approve');
-
-    Route::post('/general-manajer/absensi/{id}/reject', [AbsensiController::class, 'rejectAbsensi'])
-        ->name('general_manajer.absensi.reject');
-});
 
 // Admin Template
 Route::get('/admin/templat', function () {
