@@ -240,7 +240,7 @@
 
         <!-- Navigasi Utama -->
         <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/finance">
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="{{ route('finance.beranda') }}">
                 <span class="material-icons sidebar-icon">home</span>
                 <span class="sidebar-text">Beranda</span>
             </a>

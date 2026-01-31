@@ -27,7 +27,7 @@ use App\Http\Controllers\TimDivisiController;
 use App\Http\Controllers\OwnerController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\FinanceController;
-use App\Http\Controllers\CutiController;
+use App\Http\Controllers\BerandaFinanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -635,9 +635,9 @@ Route::middleware(['auth', 'role:finance'])
     ->prefix('finance')
     ->name('finance.')
     ->group(function () {
-        Route::get('/beranda', function () {
-            return view('finance.beranda');
-        })->name('beranda');
+        Route::get('/beranda', [BerandaFinanceController::class, 'index'])->name('beranda');
+        Route::get('/test', [BerandaFinanceController::class, 'index'])->withoutMiddleware(['auth', 'role:finance'])->name('test');
+
         Route::get('/data-layanan', function () {
             return view('finance.data_layanan');
         })->name('data_layanan');
@@ -1201,7 +1201,8 @@ Route::get('/data', [LayananController::class, 'financeIndex']);
 Route::get('/data_orderan', function () {
     return view('finance.data_orderan'); });
 Route::get('/finance', function () {
-    return view('finance.beranda'); });
+    return redirect()->route('finance.beranda');
+});
 Route::get('/pemasukan', [CashflowController::class, 'index']);
 Route::get('/pengeluaran', function () {
     return view('finance.pengeluaran'); });

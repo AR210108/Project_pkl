@@ -808,7 +808,7 @@
                                 <table class="data-table">
                                     <thead>
                                         <tr>
-                                            <th style="min-width: 60px;">No</th>
+                                            <th style="min-width: 60px;">No Transaksi</th>
                                             <th style="min-width: 150px;">Tanggal</th>
                                             <th style="min-width: 200px;">Nama</th>
                                             <th style="min-width: 150px;">Kategori</th>
@@ -945,21 +945,21 @@
                                 Transaksi</h5>
                             <div class="space-y-2">
                                 <div class="flex flex-col sm:flex-row">
-                                    <span class="text-xs sm:text-sm text-text-muted-light sm:w-32">Nomor:</span>
+                                    <span class="text-xs sm:text-sm text-text-muted-light sm:w-32">Nomor Transaksi:</span>
                                     <span id="detail-no" class="text-xs sm:text-sm text-text-light font-medium"></span>
                                 </div>
                                 <div class="flex flex-col sm:flex-row">
-                                    <span class="text-xs sm:text-sm text-text-muted-light sm:w-32">Tanggal:</span>
+                                    <span class="text-xs sm:text-sm text-text-muted-light sm:w-32">Tanggal Transaksi:</span>
                                     <span id="detail-date"
                                         class="text-xs sm:text-sm text-text-light font-medium"></span>
                                 </div>
                                 <div class="flex flex-col sm:flex-row">
-                                    <span class="text-xs sm:text-sm text-text-muted-light sm:w-32">Tipe:</span>
+                                    <span class="text-xs sm:text-sm text-text-muted-light sm:w-32">Tipe Transaksi:</span>
                                     <span id="detail-type"
                                         class="text-xs sm:text-sm text-text-light font-medium"></span>
                                 </div>
                                 <div class="flex flex-col sm:flex-row">
-                                    <span class="text-xs sm:text-sm text-text-muted-light sm:w-32">Kategori:</span>
+                                    <span class="text-xs sm:text-sm text-text-muted-light sm:w-32">Kategori Transaksi:</span>
                                     <span id="detail-category"
                                         class="text-xs sm:text-sm text-text-light font-medium"></span>
                                 </div>
@@ -1334,7 +1334,7 @@
                 // Create table row for desktop
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td style="min-width: 60px;">${item.id}</td>
+                    <td style="min-width: 60px;">${item.nomor_transaksi}</td>
                     <td style="min-width: 150px;">${item.tanggal_transaksi}</td>
                     <td style="min-width: 200px;">${item.nama_transaksi}</td>
                     <td style="min-width: 150px;">${categoryBadge}</td>

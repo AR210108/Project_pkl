@@ -10,9 +10,9 @@ use App\Models\User; // Tambahkan ini
 class Project extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'project'; // Nama tabel singular
-    
+
     protected $fillable = [
         'layanan_id',
         'nama',
@@ -48,19 +48,15 @@ class Project extends Model
     {
         return $this->belongsTo(Layanan::class, 'layanan_id');
     }
-    
-    public function penanggungJawab()
-    {
-        return $this->belongsTo(User::class, 'penanggung_jawab_id');
-    }
-    
+
+
     /**
      * Event ketika project dibuat
      */
     protected static function boot()
     {
         parent::boot();
-        
+
         // Ketika project dibuat, ambil data dari layanan
         static::creating(function ($project) {
             if ($project->layanan_id && !$project->nama) {
@@ -78,7 +74,7 @@ class Project extends Model
     public function getStatusFormattedAttribute()
     {
         $status = $this->attributes['status'] ?? $this->status;
-        
+
         $statusMap = [
             'pending' => 'Pending',
             'proses' => 'Proses',
@@ -87,7 +83,7 @@ class Project extends Model
             'Proses' => 'Proses',
             'Selesai' => 'Selesai',
         ];
-        
+
         $lowerStatus = strtolower($status);
         return $statusMap[$lowerStatus] ?? $status;
     }
