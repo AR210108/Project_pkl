@@ -1,5 +1,4 @@
 <?php
-// app/Models/Project.php
 
 namespace App\Models;
 
@@ -23,26 +22,40 @@ class Project extends Model
         'penanggung_jawab_id',
     ];
 
-    // TAMBAHKAN CASTING
     protected $casts = [
         'progres' => 'integer',
-        'status' => 'string', // Cast sebagai string
+        'status' => 'string',
         'deadline' => 'datetime',
         'harga' => 'integer',
     ];
-
-    // Atau gunakan mutator untuk status
-    public function setStatusAttribute($value)
+    
+    public function layanan()
     {
-        // Normalisasi status
-        $statusMap = [
-            'pending' => 'Pending',
-            'proses' => 'Proses',
-            'selesai' => 'Selesai',
-        ];
-        
-        $lowerValue = strtolower($value);
-        $this->attributes['status'] = $statusMap[$lowerValue] ?? ucfirst($value);
+        return $this->belongsTo(Layanan::class, 'layanan_id');
     }
-
+    
+    public function penanggungJawab()
+    {
+        return $this->belongsTo(User::class, 'penanggung_jawab_id');
+    }
+    
+    /**
+     * Event ketika project dibuat
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        // Ketika project dibuat, ambil data dari layanan
+        static::creating(function ($project) {
+            if ($project->layanan_id && !$project->nama) {
+                $layanan = Layanan::find($project->layanan_id);
+                if ($layanan) {
+                    $project->nama = $layanan->nama_layanan;
+                    $project->deskripsi = $layanan->deskripsi;
+                    $project->harga = $layanan->harga;
+                }
+            }
+        });
+    }
 }

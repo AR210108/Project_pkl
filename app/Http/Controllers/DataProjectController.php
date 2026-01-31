@@ -101,39 +101,62 @@ public function store(Request $request)
     /**
      * Update the specified resource in storage.
      */
+/**
+ * Update the specified resource in storage.
+ */
 public function update(Request $request, string $id)
 {
     $validator = Validator::make($request->all(), [
         'nama' => 'required|string|max:255',
         'deskripsi' => 'required|string',
-        'harga' => 'required|numeric|min:0',
         'deadline' => 'required|date',
-        // Tidak perlu validasi progres dan status karena tidak bisa diedit
+        // HAPUS 'harga' karena tidak diedit
     ]);
 
     if ($validator->fails()) {
+        \Log::error('Update Validation Error:', $validator->errors()->toArray());
+        \Log::error('Request Data:', $request->all());
+        
         return response()->json([
             'success' => false,
-            'message' => 'Validation error',
+            'message' => 'Validasi gagal',
             'errors' => $validator->errors()
         ], 422);
     }
 
-    $project = Project::findOrFail($id);
-    
-    $project->update([
-        'nama' => $request->nama,
-        'deskripsi' => $request->deskripsi,
-        'harga' => $request->harga,
-        'deadline' => $request->deadline,
-        // Progres dan status TIDAK diupdate
-    ]);
-    
-    return response()->json([
-        'success' => true,
-        'message' => 'Project berhasil diupdate!',
-        'data' => $project
-    ]);
+    try {
+        $project = Project::findOrFail($id);
+        
+        \Log::info('Updating project ID: ' . $id, [
+            'old_data' => $project->toArray(),
+            'new_data' => $request->all()
+        ]);
+        
+        $project->update([
+            'nama' => $request->nama,
+            'deskripsi' => $request->deskripsi,
+            'deadline' => $request->deadline,
+            // Harga tidak diupdate karena tidak ada di form edit
+        ]);
+        
+        \Log::info('Project updated successfully:', $project->toArray());
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Project berhasil diupdate!',
+            'data' => $project
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Update Error: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengupdate project: ' . $e->getMessage()
+        ], 500);
+    }
 }
 
 // Tambahkan method baru untuk update dari manager divisi
@@ -243,4 +266,37 @@ public function updategeneral(Request $request, string $id)
             'total' => $projects->total()
         ]);
     }
+    public function syncFromLayanan($layananId)
+{
+    try {
+        $layanan = Layanan::findOrFail($layananId);
+        $projects = Project::where('layanan_id', $layananId)->get();
+        
+        $updatedCount = 0;
+        
+        foreach ($projects as $project) {
+            $project->update([
+                'nama' => $layanan->nama_layanan,
+                'deskripsi' => $layanan->deskripsi,
+                'harga' => $layanan->harga,
+            ]);
+            $updatedCount++;
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => "{$updatedCount} project berhasil disinkronisasi dari layanan.",
+            'data' => [
+                'layanan' => $layanan,
+                'updated_projects_count' => $updatedCount
+            ]
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal sinkronisasi: ' . $e->getMessage()
+        ], 500);
+    }
+}
 }
