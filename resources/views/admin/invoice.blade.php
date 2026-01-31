@@ -436,6 +436,11 @@
             margin-top: 4px;
             display: block;
         }
+
+        .session-expired-modal {
+            z-index: 9999 !important;
+            background-color: rgba(0, 0, 0, 0.7) !important;
+        }
     </style>
 </head>
 
@@ -532,7 +537,7 @@
                                     </thead>
                                     <tbody id="desktopTableBody">
                                         <tr id="loadingRow">
-                                            <td colspan="12" class="px-6 py-4 text-center">
+                                            <td colspan="13" class="px-6 py-4 text-center">
                                                 <div class="flex justify-center items-center">
                                                     <div class="spinner"></div>
                                                     <span class="ml-2">Memuat data...</span>
@@ -540,7 +545,7 @@
                                             </td>
                                         </tr>
                                         <tr id="noDataRow" class="hidden">
-                                            <td colspan="12" class="px-6 py-4 text-center text-sm text-gray-500">
+                                            <td colspan="13" class="px-6 py-4 text-center text-sm text-gray-500">
                                                 Tidak ada data invoice
                                             </td>
                                         </tr>
@@ -586,6 +591,7 @@
                 </div>
                 <form id="buatInvoiceForm" class="space-y-4">
                     @csrf
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Perusahaan *</label>
@@ -648,6 +654,13 @@
                             <span class="error-message" id="tax_percentage_error"></span>
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Pajak (Rp) *</label>
+                            <input type="number" id="tax" name="tax" min="0" step="1"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                readonly required>
+                            <span class="error-message" id="tax_error"></span>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp) *</label>
                             <input type="number" id="total" name="total" min="0" step="1"
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
@@ -693,8 +706,8 @@
                 </div>
                 <form id="editInvoiceForm" class="space-y-4">
                     @csrf
-                    @method('PUT')
                     <input type="hidden" id="editInvoiceId" name="id">
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Perusahaan *</label>
@@ -732,7 +745,7 @@
                         <input type="text" id="editCompanyAddress" name="company_address"
                             class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                             required>
-                        <span class="error-message" id="edit_company_address_error"></span>
+                            <span class="error-message" id="edit_company_address_error"></span>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
@@ -757,6 +770,13 @@
                             <span class="error-message" id="edit_tax_percentage_error"></span>
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Pajak (Rp) *</label>
+                            <input type="number" id="editTax" name="tax" min="0" step="1"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                readonly required>
+                            <span class="error-message" id="edit_tax_error"></span>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp) *</label>
                             <input type="number" id="editTotal" name="total" min="0" step="1"
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
@@ -777,7 +797,6 @@
                             </select>
                             <span class="error-message" id="edit_payment_method_error"></span>
                         </div>
-
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" id="cancelEditBtn"
@@ -800,21 +819,21 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="deleteInvoiceForm" class="space-y-4">
+                <div class="space-y-4">
                     <div class="mb-6">
                         <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus invoice untuk <span
                                 id="deleteInvoiceNama" class="font-semibold"></span> dengan nomor invoice <span
                                 id="deleteInvoiceNomor" class="font-semibold"></span>?</p>
                         <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
-                        <input type="hidden" id="deleteInvoiceId" name="id">
+                        <input type="hidden" id="deleteInvoiceId">
                     </div>
                     <div class="flex justify-end gap-2">
                         <button type="button" id="cancelDeleteBtn"
                             class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit"
+                        <button type="button" id="confirmDeleteBtn"
                             class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -848,6 +867,26 @@
         </div>
     </div>
 
+    <!-- Modal Sesi Habis -->
+    <div id="sessionExpiredModal"
+        class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999] hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
+            <div class="p-6">
+                <div class="flex flex-col items-center mb-4">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                        <span class="material-icons-outlined text-red-500 text-3xl">error</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 text-center mb-2">Sesi Anda Telah Habis</h3>
+                    <p class="text-gray-600 text-center mb-6">Silakan login kembali untuk melanjutkan.</p>
+                </div>
+                <div class="flex justify-center">
+                    <button id="reloadPageBtn"
+                        class="px-6 py-3 btn-primary rounded-lg font-medium">Login Ulang</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Minimalist Popup -->
     <div id="minimalPopup" class="minimal-popup">
         <div class="minimal-popup-icon">
@@ -863,48 +902,6 @@
     </div>
 
     <script>
-        // ==================== CALCULATION FUNCTIONS ====================
-        function calculateTotal() {
-            const subtotal = parseFloat(document.getElementById('subtotal').value) || 0;
-            const taxPercentage = parseFloat(document.getElementById('tax_percentage').value) || 0;
-
-            const taxAmount = subtotal * (taxPercentage / 100);
-            const total = subtotal + taxAmount;
-
-            document.getElementById('total').value = Math.round(total);
-        }
-
-        function calculateTotalEdit() {
-            const subtotal = parseFloat(document.getElementById('editSubtotal').value) || 0;
-            const taxPercentage = parseFloat(document.getElementById('editTaxPercentage').value) || 0;
-
-            const taxAmount = subtotal * (taxPercentage / 100);
-            const total = subtotal + taxAmount;
-
-            document.getElementById('editTotal').value = Math.round(total);
-        }
-
-        // ==================== UPDATE EVENT LISTENERS ====================
-        // Tambahkan event listeners untuk perhitungan otomatis
-        document.addEventListener('DOMContentLoaded', function() {
-            // ... kode yang ada sebelumnya ...
-
-            // Event listeners untuk perhitungan otomatis
-            // Event untuk perhitungan otomatis
-            const subtotalInput = document.getElementById('subtotal');
-            const taxPercentageInput = document.getElementById('tax_percentage');
-            const editSubtotalInput = document.getElementById('editSubtotal');
-            const editTaxPercentageInput = document.getElementById('editTaxPercentage');
-            if (subtotalInput && taxPercentageInput) {
-                subtotalInput.addEventListener('input', calculateTotal);
-                taxPercentageInput.addEventListener('input', calculateTotal);
-            }
-
-            if (editSubtotalInput && editTaxPercentageInput) {
-                editSubtotalInput.addEventListener('input', calculateTotalEdit);
-                editTaxPercentageInput.addEventListener('input', calculateTotalEdit);
-            }
-        });
         // ==================== GLOBAL VARIABLES ====================
         let allInvoices = [];
         let filteredInvoices = [];
@@ -930,15 +927,90 @@
         const editInvoiceForm = document.getElementById('editInvoiceForm');
         const cancelEditBtn = document.getElementById('cancelEditBtn');
         const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+        const sessionExpiredModal = document.getElementById('sessionExpiredModal');
+        const reloadPageBtn = document.getElementById('reloadPageBtn');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
+
+        // ==================== SESSION HANDLING ====================
+        function checkSessionError(response) {
+            if (response.status === 401 || response.status === 419) {
+                showSessionExpiredModal();
+                return true;
+            }
+            return false;
+        }
+
+        function showSessionExpiredModal() {
+            showModal(sessionExpiredModal);
+        }
+
+        function hideSessionExpiredModal() {
+            hideModal(sessionExpiredModal);
+        }
+
+        // ==================== CALCULATION FUNCTIONS ====================
+        function calculateTotal() {
+            const subtotal = parseFloat(document.getElementById('subtotal').value) || 0;
+            const taxPercentage = parseFloat(document.getElementById('tax_percentage').value) || 0;
+
+            const taxAmount = Math.round(subtotal * (taxPercentage / 100));
+            const total = subtotal + taxAmount;
+
+            document.getElementById('tax').value = taxAmount;
+            document.getElementById('total').value = Math.round(total);
+        }
+
+        function calculateTotalEdit() {
+            const subtotal = parseFloat(document.getElementById('editSubtotal').value) || 0;
+            const taxPercentage = parseFloat(document.getElementById('editTaxPercentage').value) || 0;
+
+            const taxAmount = Math.round(subtotal * (taxPercentage / 100));
+            const total = subtotal + taxAmount;
+
+            document.getElementById('editTax').value = taxAmount;
+            document.getElementById('editTotal').value = Math.round(total);
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
 
         // ==================== EVENT LISTENERS ====================
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing...');
 
+            // Event listeners untuk perhitungan otomatis CREATE form
+            const subtotalInput = document.getElementById('subtotal');
+            const taxPercentageInput = document.getElementById('tax_percentage');
+
+            if (subtotalInput && taxPercentageInput) {
+                subtotalInput.addEventListener('input', calculateTotal);
+                taxPercentageInput.addEventListener('input', calculateTotal);
+            }
+
+            // Event listeners untuk perhitungan otomatis EDIT form
+            const editSubtotalInput = document.getElementById('editSubtotal');
+            const editTaxPercentageInput = document.getElementById('editTaxPercentage');
+
+            if (editSubtotalInput && editTaxPercentageInput) {
+                editSubtotalInput.addEventListener('input', calculateTotalEdit);
+                editTaxPercentageInput.addEventListener('input', calculateTotalEdit);
+            }
+
             // Event untuk tombol Buat Invoice
             if (buatInvoiceBtn) {
                 buatInvoiceBtn.addEventListener('click', function() {
                     console.log('Tombol Buat Invoice diklik');
+                    setTimeout(() => {
+                        calculateTotal();
+                    }, 100);
                     showModal(buatModal);
                 });
             }
@@ -1003,8 +1075,29 @@
                 nextPageBtn.addEventListener('click', goToNextPage);
             }
 
-            // Event untuk delete modal
-            setupDeleteModalEvents();
+            // Event untuk reload page button
+            if (reloadPageBtn) {
+                reloadPageBtn.addEventListener('click', function() {
+                    window.location.reload();
+                });
+            }
+
+            // Event untuk delete
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', handleDeleteInvoice);
+            }
+
+            if (cancelDeleteBtn) {
+                cancelDeleteBtn.addEventListener('click', function() {
+                    hideModal(document.getElementById('deleteInvoiceModal'));
+                });
+            }
+
+            if (closeDeleteModalBtn) {
+                closeDeleteModalBtn.addEventListener('click', function() {
+                    hideModal(document.getElementById('deleteInvoiceModal'));
+                });
+            }
 
             // Load data awal
             loadInvoices();
@@ -1037,17 +1130,33 @@
                     headers: {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    },
+                    credentials: 'include'
                 })
                 .then(response => {
+                    console.log('Response status:', response.status);
+
+                    if (checkSessionError(response)) {
+                        return Promise.reject('Session expired');
+                    }
+
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        return response.text().then(text => {
+                            console.error('Response text:', text);
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        });
                     }
                     return response.json();
                 })
                 .then(data => {
                     console.log('Data diterima:', data);
-                    allInvoices = data.data || [];
+
+                    if (data.error) {
+                        console.error('Error dalam response:', data.error);
+                        throw new Error(data.error || 'Terjadi kesalahan saat memuat data');
+                    }
+
+                    allInvoices = data.data || data.invoices || [];
                     filteredInvoices = [...allInvoices];
                     renderInvoices();
                     updateTotalCount();
@@ -1056,8 +1165,28 @@
                 })
                 .catch(error => {
                     console.error('Error loading invoices:', error);
-                    showPopup('error', 'Gagal', 'Gagal memuat data invoice');
+                    
+                    if (error.message === 'Session expired') {
+                        return;
+                    }
+                    
+                    showPopup('error', 'Gagal', 'Gagal memuat data invoice: ' + error.message);
                     showLoading(false);
+
+                    desktopTableBody.innerHTML = `
+                        <tr id="noDataRow">
+                            <td colspan="13" class="px-6 py-4 text-center text-sm text-gray-500">
+                                <div class="flex flex-col items-center">
+                                    <span class="material-icons-outlined text-red-500 mb-2">error</span>
+                                    <p>Gagal memuat data: ${error.message}</p>
+                                    <button onclick="loadInvoices()" class="mt-2 px-4 py-2 btn-primary rounded-lg text-sm">
+                                        Coba Lagi
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    noDataRow.classList.remove('hidden');
                 });
         }
 
@@ -1065,22 +1194,32 @@
             e.preventDefault();
             console.log('Membuat invoice baru...');
 
-            // Clear previous validation errors
             clearValidationErrors('create');
 
-            // Collect form data
             const subtotal = parseFloat(document.getElementById('subtotal').value) || 0;
             const taxPercentage = parseFloat(document.getElementById('tax_percentage').value) || 0;
             const taxAmount = Math.round(subtotal * (taxPercentage / 100));
             const total = subtotal + taxAmount;
 
+            const invoiceNo = document.getElementById('invoice_no').value.trim();
+            const invoiceDate = document.getElementById('invoice_date').value;
+            const companyName = document.getElementById('company_name').value.trim();
+            const companyAddress = document.getElementById('company_address').value.trim();
+            const clientName = document.getElementById('client_name').value.trim();
+            const paymentMethod = document.getElementById('payment_method').value;
+
+            if (!invoiceNo || !invoiceDate || !companyName || !companyAddress || !clientName || !paymentMethod) {
+                showPopup('error', 'Validasi Gagal', 'Harap lengkapi semua field yang wajib diisi');
+                return;
+            }
+
             const formData = {
-                invoice_no: document.getElementById('invoice_no').value.trim(),
-                invoice_date: document.getElementById('invoice_date').value,
-                company_name: document.getElementById('company_name').value.trim(),
-                company_address: document.getElementById('company_address').value.trim(),
-                client_name: document.getElementById('client_name').value.trim(),
-                payment_method: document.getElementById('payment_method').value,
+                invoice_no: invoiceNo,
+                invoice_date: invoiceDate,
+                company_name: companyName,
+                company_address: companyAddress,
+                client_name: clientName,
+                payment_method: paymentMethod,
                 description: document.getElementById('description').value.trim(),
                 subtotal: Math.round(subtotal),
                 tax: taxAmount,
@@ -1088,28 +1227,41 @@
                 total: Math.round(total)
             };
 
-            console.log('Data yang akan dikirim:', formData);
+            console.log('Data yang akan dikirim:', JSON.stringify(formData));
 
-            // Send data to server
+            const submitBtn = buatInvoiceForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Menyimpan...';
+            submitBtn.classList.add('opacity-50');
+
             fetch('/admin/invoice', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
                         'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(formData),
+                    credentials: 'include'
                 })
                 .then(async response => {
+                    if (checkSessionError(response)) {
+                        return Promise.reject('Session expired');
+                    }
+
                     const data = await response.json();
+                    console.log('Response dari server:', data);
 
                     if (!response.ok) {
                         if (response.status === 422 && data.errors) {
-                            // Show validation errors
                             showValidationErrorsFromServer(data.errors, 'create');
                             throw new Error('Validasi gagal');
+                        } else if (response.status === 500) {
+                            throw new Error(data.message || 'Terjadi kesalahan server. Silakan coba lagi.');
                         } else {
-                            throw new Error(data.message || 'Gagal membuat invoice');
+                            throw new Error(data.message || `Gagal membuat invoice (Status: ${response.status})`);
                         }
                     }
 
@@ -1124,9 +1276,20 @@
                 })
                 .catch(error => {
                     console.error('Error creating invoice:', error);
-                    if (error.message !== 'Validasi gagal') {
-                        showPopup('error', 'Gagal', error.message || 'Gagal membuat invoice');
+
+                    if (error.message === 'Session expired') {
+                        return;
                     }
+
+                    if (error.message !== 'Validasi gagal') {
+                        showPopup('error', 'Gagal', error.message ||
+                            'Gagal membuat invoice. Silakan cek konsol untuk detail.');
+                    }
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalBtnText;
+                    submitBtn.classList.remove('opacity-50');
                 });
         }
 
@@ -1134,46 +1297,71 @@
             e.preventDefault();
 
             const id = document.getElementById('editInvoiceId').value;
+
             const subtotal = parseFloat(document.getElementById('editSubtotal').value) || 0;
             const taxPercentage = parseFloat(document.getElementById('editTaxPercentage').value) || 0;
             const taxAmount = Math.round(subtotal * (taxPercentage / 100));
             const total = subtotal + taxAmount;
 
+            const invoiceNo = document.getElementById('editInvoiceNo').value.trim();
+            const invoiceDate = document.getElementById('editInvoiceDate').value;
+            const companyName = document.getElementById('editCompanyName').value.trim();
+            const companyAddress = document.getElementById('editCompanyAddress').value.trim();
+            const clientName = document.getElementById('editClientName').value.trim();
+            const paymentMethod = document.getElementById('editPaymentMethod').value;
+
+            if (!invoiceNo || !invoiceDate || !companyName || !companyAddress || !clientName || !paymentMethod) {
+                showPopup('error', 'Validasi Gagal', 'Harap lengkapi semua field yang wajib diisi');
+                return;
+            }
+
             const formData = {
-                invoice_no: document.getElementById('editInvoiceNo').value.trim(),
-                invoice_date: document.getElementById('editInvoiceDate').value,
-                company_name: document.getElementById('editCompanyName').value.trim(),
-                company_address: document.getElementById('editCompanyAddress').value.trim(),
-                client_name: document.getElementById('editClientName').value.trim(),
-                payment_method: document.getElementById('editPaymentMethod').value,
+                invoice_no: invoiceNo,
+                invoice_date: invoiceDate,
+                company_name: companyName,
+                company_address: companyAddress,
+                client_name: clientName,
+                payment_method: paymentMethod,
                 description: document.getElementById('editDescription').value.trim(),
                 subtotal: Math.round(subtotal),
                 tax: taxAmount,
                 tax_percentage: taxPercentage,
-                total: Math.round(total)
+                total: Math.round(total),
+                _method: 'PUT'
             };
 
-            console.log('Updating invoice:', id, formData);
+            console.log('Updating invoice:', id, JSON.stringify(formData));
+
+            const submitBtn = editInvoiceForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Memperbarui...';
+            submitBtn.classList.add('opacity-50');
 
             fetch(`/admin/invoice/${id}`, {
-                    method: 'PUT',
+                    method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
                         'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(formData),
+                    credentials: 'include'
                 })
                 .then(async response => {
+                    if (checkSessionError(response)) {
+                        return Promise.reject('Session expired');
+                    }
+
                     const data = await response.json();
 
                     if (!response.ok) {
                         if (response.status === 422 && data.errors) {
                             showValidationErrorsFromServer(data.errors, 'edit');
                             throw new Error('Validasi gagal');
-                        } else {
-                            throw new Error(data.message || 'Gagal mengupdate invoice');
                         }
+                        throw new Error(data.message || 'Gagal update invoice');
                     }
 
                     return data;
@@ -1184,40 +1372,45 @@
                     loadInvoices();
                 })
                 .catch(error => {
-                    console.error('Error updating invoice:', error);
-                    if (error.message !== 'Validasi gagal') {
-                        showPopup('error', 'Gagal', error.message || 'Gagal mengupdate invoice');
+                    console.error(error);
+                    
+                    if (error.message === 'Session expired') {
+                        return;
                     }
+                    
+                    if (error.message !== 'Validasi gagal') {
+                        showPopup('error', 'Gagal', error.message);
+                    }
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalBtnText;
+                    submitBtn.classList.remove('opacity-50');
                 });
         }
 
         function editInvoice(id) {
             console.log('Edit invoice:', id);
 
-            // Fetch invoice data
-            fetch(`/admin/invoice/${id}?edit=true`, {
+            showPopup('info', 'Memuat', 'Memuat data invoice...');
+
+            fetch(`/admin/invoice/${id}`, {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    },
+                    credentials: 'include'
                 })
                 .then(response => {
-                    if (!response.ok) {
-                        // Coba endpoint alternatif
-                        return fetch(`/admin/invoice/${id}/edit`, {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        });
+                    console.log('Edit response status:', response.status);
+
+                    if (checkSessionError(response)) {
+                        return Promise.reject('Session expired');
                     }
-                    return response;
-                })
-                .then(response => {
+
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        throw new Error(`HTTP ${response.status}`);
                     }
                     return response.json();
                 })
@@ -1239,12 +1432,6 @@
 
                     console.log('Invoice data to edit:', invoice);
 
-                    // Calculate tax percentage from tax amount
-                    const subtotal = invoice.subtotal || 0;
-                    const taxAmount = invoice.tax || 0;
-                    const taxPercentage = subtotal > 0 ? (taxAmount / subtotal * 100) : 0;
-
-                    // Map backend fields to frontend form fields
                     document.getElementById('editInvoiceId').value = invoice.id;
                     document.getElementById('editCompanyName').value = invoice.company_name || invoice
                         .nama_perusahaan || '';
@@ -1256,29 +1443,27 @@
                     document.getElementById('editCompanyAddress').value = invoice.company_address || invoice.alamat ||
                         '';
                     document.getElementById('editDescription').value = invoice.description || invoice.deskripsi || '';
-                    document.getElementById('editSubtotal').value = subtotal;
-                    document.getElementById('editTaxPercentage').value = taxPercentage.toFixed(2);
+                    document.getElementById('editSubtotal').value = invoice.subtotal || 0;
+                    document.getElementById('editTaxPercentage').value = invoice.tax_percentage || 0;
                     document.getElementById('editTotal').value = invoice.total || 0;
                     document.getElementById('editPaymentMethod').value = invoice.payment_method || invoice
                         .metode_pembayaran || 'Bank Transfer';
 
-                    // Show edit modal
+                    calculateTotalEdit();
+
                     showModal(document.getElementById('editInvoiceModal'));
                 })
                 .catch(error => {
                     console.error('Error loading invoice:', error);
 
-                    // Fallback: Coba ambil dari data yang sudah dimuat
+                    if (error.message === 'Session expired') {
+                        return;
+                    }
+
                     const invoice = allInvoices.find(inv => inv.id == id);
                     if (invoice) {
                         console.log('Using cached invoice data:', invoice);
 
-                        // Calculate tax percentage from tax amount
-                        const subtotal = invoice.subtotal || 0;
-                        const taxAmount = invoice.tax || 0;
-                        const taxPercentage = subtotal > 0 ? (taxAmount / subtotal * 100) : 0;
-
-                        // Map backend fields to frontend form fields
                         document.getElementById('editInvoiceId').value = invoice.id;
                         document.getElementById('editCompanyName').value = invoice.company_name || invoice
                             .nama_perusahaan || '';
@@ -1293,14 +1478,14 @@
                             .alamat || '';
                         document.getElementById('editDescription').value = invoice.description || invoice.deskripsi ||
                             '';
-                        document.getElementById('editSubtotal').value = subtotal;
-                        document.getElementById('editTaxPercentage').value = taxPercentage.toFixed(
-                            2); // PERBAIKAN DI SINI
+                        document.getElementById('editSubtotal').value = invoice.subtotal || 0;
+                        document.getElementById('editTaxPercentage').value = invoice.tax_percentage || 0;
                         document.getElementById('editTotal').value = invoice.total || 0;
                         document.getElementById('editPaymentMethod').value = invoice.payment_method || invoice
                             .metode_pembayaran || 'Bank Transfer';
 
-                        // Show edit modal
+                        calculateTotalEdit();
+
                         showModal(document.getElementById('editInvoiceModal'));
                     } else {
                         showPopup('error', 'Gagal', 'Gagal memuat data invoice. Silakan refresh halaman.');
@@ -1309,39 +1494,86 @@
         }
 
         function deleteInvoice(id) {
-            // Find invoice data
             const invoice = allInvoices.find(inv => inv.id == id);
             if (!invoice) return;
 
-            // Set data in delete modal
             document.getElementById('deleteInvoiceId').value = id;
             document.getElementById('deleteInvoiceNama').textContent = invoice.company_name || invoice.nama_perusahaan ||
                 '';
             document.getElementById('deleteInvoiceNomor').textContent = invoice.invoice_no || invoice.nomor_order || '';
 
-            // Show delete modal
             showModal(document.getElementById('deleteInvoiceModal'));
         }
 
-        function setupDeleteModalEvents() {
-            const deleteInvoiceForm = document.getElementById('deleteInvoiceForm');
-            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-            const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
+        function handleDeleteInvoice() {
+            const id = document.getElementById('deleteInvoiceId').value;
+            const deleteBtn = document.getElementById('confirmDeleteBtn');
+            const originalBtnText = deleteBtn.textContent;
 
-            if (deleteInvoiceForm) {
-                deleteInvoiceForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const id = document.getElementById('deleteInvoiceId').value;
+            // Tampilkan loading state
+            deleteBtn.disabled = true;
+            deleteBtn.textContent = 'Menghapus...';
+            deleteBtn.classList.add('opacity-50');
+
+            // Method 1: DELETE dengan CSRF token di header (RECOMMENDED)
+            fetch(`/admin/invoice/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'include'
+                })
+                .then(response => {
+                    console.log('Delete response status:', response.status);
+
+                    if (checkSessionError(response)) {
+                        return Promise.reject('Session expired');
+                    }
+
+                    if (!response.ok) {
+                        // Jika method DELETE gagal, coba method POST dengan _method DELETE
+                        throw new Error('DELETE method failed, trying POST method');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Delete response data:', data);
+                    if (data.success) {
+                        showPopup('success', 'Berhasil', 'Invoice berhasil dihapus');
+                        hideModal(document.getElementById('deleteInvoiceModal'));
+                        loadInvoices();
+                    } else {
+                        throw new Error(data.message || 'Gagal menghapus invoice');
+                    }
+                })
+                .catch(error => {
+                    console.log('Trying POST method for delete...');
+                    // Method 2: POST dengan _method DELETE (fallback)
+                    const formData = new FormData();
+                    formData.append('_method', 'DELETE');
+                    formData.append('_token', csrfToken);
 
                     fetch(`/admin/invoice/${id}`, {
-                            method: 'DELETE',
+                            method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': csrfToken,
-                                'Accept': 'application/json'
-                            }
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: formData,
+                            credentials: 'include'
                         })
-                        .then(response => response.json())
+                        .then(response => {
+                            if (checkSessionError(response)) {
+                                return Promise.reject('Session expired');
+                            }
+                            return response.json();
+                        })
                         .then(data => {
+                            console.log('POST delete response:', data);
                             if (data.success) {
                                 showPopup('success', 'Berhasil', 'Invoice berhasil dihapus');
                                 hideModal(document.getElementById('deleteInvoiceModal'));
@@ -1350,35 +1582,30 @@
                                 showPopup('error', 'Gagal', data.message || 'Gagal menghapus invoice');
                             }
                         })
-                        .catch(error => {
-                            console.error('Error deleting invoice:', error);
-                            showPopup('error', 'Gagal', 'Gagal menghapus invoice');
+                        .catch(secondError => {
+                            console.error('Error deleting invoice:', secondError);
+                            
+                            if (secondError.message === 'Session expired') {
+                                return;
+                            }
+                            
+                            showPopup('error', 'Gagal', 'Gagal menghapus invoice. Silakan coba lagi.');
+                        })
+                        .finally(() => {
+                            deleteBtn.disabled = false;
+                            deleteBtn.textContent = originalBtnText;
+                            deleteBtn.classList.remove('opacity-50');
                         });
                 });
-            }
-
-            if (cancelDeleteBtn) {
-                cancelDeleteBtn.addEventListener('click', function() {
-                    hideModal(document.getElementById('deleteInvoiceModal'));
-                });
-            }
-
-            if (closeDeleteModalBtn) {
-                closeDeleteModalBtn.addEventListener('click', function() {
-                    hideModal(document.getElementById('deleteInvoiceModal'));
-                });
-            }
         }
 
         function printInvoiceModal(id) {
             console.log('Print invoice modal:', id);
-
-            // Cari data invoice dari yang sudah dimuat
             const invoice = allInvoices.find(inv => inv.id == id);
             if (invoice) {
                 const namaPerusahaan = invoice.company_name || invoice.nama_perusahaan;
                 const nomorOrder = invoice.invoice_no || invoice.nomor_order;
-                const tanggal = invoice.invoice_date || invoice.tanggal;
+                const tanggal = formatTanggal(invoice.invoice_date || invoice.tanggal);
                 const namaKlien = invoice.client_name || invoice.nama_klien;
                 const alamat = invoice.company_address || invoice.alamat;
                 const deskripsi = invoice.description || invoice.deskripsi;
@@ -1386,64 +1613,73 @@
                 const subtotal = invoice.subtotal || 0;
                 const taxAmount = invoice.tax || 0;
                 const total = invoice.total || 0;
-                const taxPercentage = invoice.tax_percentage || invoice.pajak || (taxAmount > 0 ? (taxAmount / subtotal *
-                    100) : 0);
+                const taxPercentage = invoice.tax_percentage || (subtotal > 0 ? ((taxAmount / subtotal) * 100) : 0);
 
                 document.getElementById('printInvoiceContent').innerHTML = `
-                <div style="padding: 30px; background: white; max-width: 800px; margin: 0 auto; font-family: 'Poppins', sans-serif;">
-                    <div style="border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px;">
-                        <h2 style="font-size: 28px; font-weight: bold; margin: 0 0 10px 0;">${namaPerusahaan}</h2>
-                        <p style="margin: 5px 0; color: #666;">Invoice #${nomorOrder}</p>
-                        <p style="margin: 5px 0; color: #666;">Tanggal: ${tanggal}</p>
+            <div style="padding: 30px; background: white; max-width: 800px; margin: 0 auto; font-family: 'Poppins', sans-serif;">
+                <div style="border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px;">
+                    <h2 style="font-size: 28px; font-weight: bold; margin: 0 0 10px 0;">${namaPerusahaan}</h2>
+                    <p style="margin: 5px 0; color: #666;">Invoice #${nomorOrder}</p>
+                    <p style="margin: 5px 0; color: #666;">Tanggal: ${tanggal}</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px;">
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Bill To:</h3>
+                        <p style="margin: 5px 0;"><strong>Nama Klien:</strong> ${namaKlien}</p>
+                        <p style="margin: 5px 0;"><strong>Alamat:</strong> ${alamat}</p>
                     </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px;">
-                        <div>
-                            <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Bill To:</h3>
-                            <p style="margin: 5px 0;"><strong>Nama Klien:</strong> ${namaKlien}</p>
-                            <p style="margin: 5px 0;"><strong>Alamat:</strong> ${alamat}</p>
-                        </div>
-                        <div>
-                            <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Payment Details:</h3>
-                            <p style="margin: 5px 0;"><strong>Metode Pembayaran:</strong> ${metodePembayaran}</p>
-                        </div>
-                    </div>
-                    
-                    <table style="width: 100%; border-collapse: collapse; margin: 30px 0;">
-                        <thead>
-                            <tr style="background-color: #f2f2f2;">
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Deskripsi</th>
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Subtotal</th>
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Pajak (${taxPercentage.toFixed(2)}%)</th>
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="border: 1px solid #ddd; padding: 12px;">${deskripsi}</td>
-                                <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(subtotal)}</td>
-                                <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(taxAmount)}</td>
-                                <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(total)}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <div style="text-align: right; margin-top: 30px;">
-                        <table style="width: 300px; margin-left: auto; border-collapse: collapse;">
-                            <tr style="font-size: 18px; font-weight: bold;">
-                                <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;"><strong>Total:</strong></td>
-                                <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;">Rp ${formatNumber(total)}</td>
-                            </tr>
-                        </table>
-                    </div>
-                    
-                    <div style="border-top: 2px solid #333; padding-top: 20px; margin-top: 40px;">
-                        <p style="margin: 10px 0;"><strong>Catatan:</strong></p>
-                        <p style="margin: 5px 0; color: #666;">Silakan transfer ke rekening yang tertera atau bayar sesuai metode pembayaran di atas.</p>
-                        <p style="margin: 30px 0 10px 0; font-style: italic;">Terima kasih atas kerjasamanya.</p>
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Payment Details:</h3>
+                        <p style="margin: 5px 0;"><strong>Metode Pembayaran:</strong> ${metodePembayaran}</p>
                     </div>
                 </div>
-            `;
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                    <thead>
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Deskripsi</th>
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Subtotal</th>
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Pajak (${taxPercentage.toFixed(2)}%)</th>
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Jumlah Pajak</th>
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 12px;">${deskripsi}</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${formatCurrency(subtotal)}</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${taxPercentage.toFixed(2)}%</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${formatCurrency(taxAmount)}</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${formatCurrency(total)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div style="text-align: right; margin-top: 30px;">
+                    <table style="width: 300px; margin-left: auto; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 8px; text-align: right;"><strong>Subtotal:</strong></td>
+                            <td style="padding: 8px; text-align: right;">${formatCurrency(subtotal)}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; text-align: right;"><strong>Pajak (${taxPercentage.toFixed(2)}%):</strong></td>
+                            <td style="padding: 8px; text-align: right;">${formatCurrency(taxAmount)}</td>
+                        </tr>
+                        <tr style="font-size: 18px; font-weight: bold;">
+                            <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;"><strong>Total:</strong></td>
+                            <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;">${formatCurrency(total)}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div style="border-top: 2px solid #333; padding-top: 20px; margin-top: 40px;">
+                    <p style="margin: 10px 0;"><strong>Catatan:</strong></p>
+                    <p style="margin: 5px 0; color: #666;">Silakan transfer ke rekening yang tertera atau bayar sesuai metode pembayaran di atas.</p>
+                    <p style="margin: 30px 0 10px 0; font-style: italic;">Terima kasih atas kerjasamanya.</p>
+                </div>
+            </div>
+        `;
 
                 showModal(document.getElementById('printInvoiceModal'));
             } else {
@@ -1460,7 +1696,6 @@
         }
 
         function renderInvoices() {
-            // Clear existing content
             desktopTableBody.innerHTML = '';
             mobileCards.innerHTML = '';
 
@@ -1471,12 +1706,10 @@
 
             noDataRow.classList.add('hidden');
 
-            // Calculate start and end index for pagination
             const startIndex = (currentPage - 1) * perPage;
             const endIndex = Math.min(startIndex + perPage, filteredInvoices.length);
             const currentPageInvoices = filteredInvoices.slice(startIndex, endIndex);
 
-            // Render desktop table
             currentPageInvoices.forEach((invoice, index) => {
                 const rowNumber = startIndex + index + 1;
                 const namaPerusahaan = invoice.company_name || invoice.nama_perusahaan;
@@ -1485,13 +1718,11 @@
                 const alamat = invoice.company_address || invoice.alamat;
                 const deskripsi = invoice.description || invoice.deskripsi;
                 const metodePembayaran = invoice.payment_method || invoice.metode_pembayaran;
-                const tanggal = invoice.invoice_date || invoice.tanggal;
+                const tanggal = formatTanggal(invoice.invoice_date || invoice.tanggal);
                 const subtotal = invoice.subtotal || 0;
                 const taxAmount = invoice.tax || 0;
                 const total = invoice.total || 0;
-
-                // PERBAIKAN DI SINI: Hitung persentase pajak
-                const taxPercentage = subtotal > 0 ? ((taxAmount / subtotal) * 100) : 0;
+                const taxPercentage = invoice.tax_percentage || (subtotal > 0 ? ((taxAmount / subtotal) * 100) : 0);
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -1502,10 +1733,10 @@
             <td>${namaKlien}</td>
             <td>${alamat}</td>
             <td>${deskripsi}</td>
-            <td>Rp ${formatNumber(subtotal)}</td>
+            <td>${formatCurrency(subtotal)}</td>
             <td>${taxPercentage.toFixed(2)}%</td>
-            <td>Rp ${formatNumber(taxAmount)}</td> 
-            <td>Rp ${formatNumber(total)}</td>
+            <td>${formatCurrency(taxAmount)}</td>
+            <td>${formatCurrency(total)}</td>
             <td>${metodePembayaran}</td>
             <td class="text-center">
                 <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700 mx-1">Edit</button>
@@ -1516,34 +1747,38 @@
                 desktopTableBody.appendChild(row);
             });
 
-            // Render mobile cards
             currentPageInvoices.forEach((invoice, index) => {
                 const rowNumber = startIndex + index + 1;
                 const namaPerusahaan = invoice.company_name || invoice.nama_perusahaan;
                 const nomorOrder = invoice.invoice_no || invoice.nomor_order;
                 const namaKlien = invoice.client_name || invoice.nama_klien;
-                const tanggal = invoice.invoice_date || invoice.tanggal;
+                const tanggal = formatTanggal(invoice.invoice_date || invoice.tanggal);
+                const subtotal = invoice.subtotal || 0;
+                const taxAmount = invoice.tax || 0;
                 const total = invoice.total || 0;
+                const taxPercentage = invoice.tax_percentage || (subtotal > 0 ? ((taxAmount / subtotal) * 100) : 0);
 
                 const card = document.createElement('div');
                 card.className = 'bg-white border rounded-lg p-4 shadow';
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h4 class="font-semibold">${namaPerusahaan}</h4>
-                            <p class="text-sm text-gray-500">${nomorOrder}</p>
-                        </div>
-                        <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">#${rowNumber}</span>
-                    </div>
-                    <p class="text-sm mb-1"><span class="font-medium">Klien:</span> ${namaKlien}</p>
-                    <p class="text-sm mb-1"><span class="font-medium">Tanggal:</span> ${tanggal}</p>
-                    <p class="text-sm mb-2"><span class="font-medium">Total:</span> <b>Rp ${formatNumber(total)}</b></p>
-                    <div class="flex justify-between mt-3">
-                        <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700">Edit</button>
-                        <button onclick="deleteInvoice(${invoice.id})" class="text-red-500 hover:text-red-700">Hapus</button>
-                        <button onclick="printInvoiceModal(${invoice.id})" class="text-green-500 hover:text-green-700">Print</button>
-                    </div>
-                `;
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <h4 class="font-semibold">${namaPerusahaan}</h4>
+                    <p class="text-sm text-gray-500">${nomorOrder}</p>
+                </div>
+                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">#${rowNumber}</span>
+            </div>
+            <p class="text-sm mb-1"><span class="font-medium">Klien:</span> ${namaKlien}</p>
+            <p class="text-sm mb-1"><span class="font-medium">Tanggal:</span> ${tanggal}</p>
+            <p class="text-sm mb-1"><span class="font-medium">Subtotal:</span> ${formatCurrency(subtotal)}</p>
+            <p class="text-sm mb-1"><span class="font-medium">Pajak (${taxPercentage.toFixed(2)}%):</span> ${formatCurrency(taxAmount)}</p>
+            <p class="text-sm mb-2"><span class="font-medium">Total:</span> <b>${formatCurrency(total)}</b></p>
+            <div class="flex justify-between mt-3">
+                <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700">Edit</button>
+                <button onclick="deleteInvoice(${invoice.id})" class="text-red-500 hover:text-red-700">Hapus</button>
+                <button onclick="printInvoiceModal(${invoice.id})" class="text-green-500 hover:text-green-700">Print</button>
+            </div>
+        `;
                 mobileCards.appendChild(card);
             });
         }
@@ -1585,7 +1820,6 @@
             pageNumbers.innerHTML = '';
             const totalPages = Math.ceil(filteredInvoices.length / perPage);
 
-            // Update button states
             if (prevPageBtn) {
                 prevPageBtn.disabled = currentPage === 1;
             }
@@ -1594,7 +1828,6 @@
                 nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
             }
 
-            // Create page number buttons
             for (let i = 1; i <= totalPages; i++) {
                 const pageBtn = document.createElement('button');
                 pageBtn.className = `desktop-page-btn ${i === currentPage ? 'active' : ''}`;
@@ -1634,15 +1867,21 @@
         }
 
         // ==================== HELPER FUNCTIONS ====================
-        function formatNumber(num) {
-            return new Intl.NumberFormat('id-ID').format(num);
+        function formatTanggal(isoString) {
+            if (!isoString) return '-';
+
+            const date = new Date(isoString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+
+            return `${day}/${month}/${year}`;
         }
 
         function showPopup(type, title, message) {
             const popup = document.getElementById('minimalPopup');
             if (!popup) return;
 
-            // Update popup content
             const titleElement = popup.querySelector('.minimal-popup-title');
             const messageElement = popup.querySelector('.minimal-popup-message');
             const iconElement = popup.querySelector('.minimal-popup-icon');
@@ -1650,11 +1889,9 @@
             if (titleElement) titleElement.textContent = title;
             if (messageElement) messageElement.textContent = message;
 
-            // Update styles based on type
             popup.className = 'minimal-popup show';
             popup.classList.add(type);
 
-            // Update icon
             if (iconElement) {
                 iconElement.innerHTML = '';
                 const icon = document.createElement('span');
@@ -1677,12 +1914,10 @@
                 iconElement.appendChild(icon);
             }
 
-            // Auto hide after 3 seconds
             setTimeout(() => {
                 popup.classList.remove('show');
             }, 3000);
 
-            // Close button functionality
             const closeBtn = popup.querySelector('.minimal-popup-close');
             if (closeBtn) {
                 closeBtn.onclick = () => {
@@ -1695,13 +1930,11 @@
             const prefix = formType === 'create' ? '' : 'edit_';
             const form = formType === 'create' ? buatInvoiceForm : editInvoiceForm;
 
-            // Clear error styling
             const inputs = form.querySelectorAll('.form-input');
             inputs.forEach(input => {
                 input.classList.remove('error-input');
             });
 
-            // Clear error messages
             const errorElements = form.querySelectorAll('.error-message');
             errorElements.forEach(element => {
                 element.textContent = '';

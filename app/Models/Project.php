@@ -48,11 +48,7 @@ class Project extends Model
     {
         return $this->belongsTo(Layanan::class, 'layanan_id');
     }
-    
-    public function penanggungJawab()
-    {
-        return $this->belongsTo(User::class, 'penanggung_jawab_id');
-    }
+
     
     /**
      * Event ketika project dibuat
