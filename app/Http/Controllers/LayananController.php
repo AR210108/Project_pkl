@@ -88,61 +88,93 @@ try {
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
-    {
-        // 1. Cari layanan
-        $layanan = Layanan::findOrFail($id);
+/**
+ * Update the specified resource in storage.
+ */
+public function update(Request $request, $id)
+{
+    // 1. Cari layanan
+    $layanan = Layanan::findOrFail($id);
 
-        // 2. Validasi input
-        $validator = Validator::make($request->all(), [
-            'nama_layanan' => 'required|string|max:255',
-            'harga'        => 'nullable|numeric|min:0',
-            'deskripsi'    => 'required|string',
-            'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+    // 2. Validasi input
+    $validator = Validator::make($request->all(), [
+        'nama_layanan' => 'required|string|max:255',
+        'harga'        => 'nullable|numeric|min:0',
+        'deskripsi'    => 'required|string',
+        'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal.',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validasi gagal.',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+    
+    // 3. Proses data dan update
+    try {
+        // Mulai database transaction
+        \DB::beginTransaction();
         
-        // 3. Proses data dan update
-        try {
-            $data = $request->only(['nama_layanan', 'harga', 'deskripsi']);
+        $oldData = [
+            'nama_layanan' => $layanan->nama_layanan,
+            'deskripsi' => $layanan->deskripsi,
+            'harga' => $layanan->harga,
+        ];
+        
+        $data = $request->only(['nama_layanan', 'harga', 'deskripsi']);
 
-            // Handle foto upload
-            if ($request->hasFile('foto')) {
-                // Hapus foto lama jika ada
-                if ($layanan->foto) {
-                    Storage::delete('public/' . $layanan->foto);
-                }
-                
-                $foto = $request->file('foto');
-                $fotoName = time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
-                $foto->storeAs('public/layanan', $fotoName);
-                $data['foto'] = 'layanan/' . $fotoName;
+        // Handle foto upload
+        if ($request->hasFile('foto')) {
+            // Hapus foto lama jika ada
+            if ($layanan->foto) {
+                Storage::delete('public/' . $layanan->foto);
             }
             
-            $layanan->update($data);
-
-            // 4. Kembalikan respons JSON sukses
-            return response()->json([
-                'success' => true,
-                'message' => 'Layanan berhasil diperbarui!',
-                'data' => $layanan
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat memperbarui data.',
-                'error' => $e->getMessage()
-            ], 500);
+            $foto = $request->file('foto');
+            $fotoName = time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
+            $foto->storeAs('public/layanan', $fotoName);
+            $data['foto'] = 'layanan/' . $fotoName;
         }
+        
+        // Update layanan
+        $layanan->update($data);
+        
+        // 4. Update semua project yang terkait
+        $updatedProjects = [];
+        
+        if ($layanan->projects()->exists()) {
+            $updatedProjects = $layanan->projects()->update([
+                'nama' => $layanan->nama_layanan,
+                'deskripsi' => $layanan->deskripsi,
+                'harga' => $layanan->harga,
+            ]);
+        }
+        
+        // Commit transaction
+        \DB::commit();
+        
+        // 5. Kembalikan respons JSON sukses
+        return response()->json([
+            'success' => true,
+            'message' => 'Layanan berhasil diperbarui! ' . 
+                       ($updatedProjects ? "{$updatedProjects} project terkait juga diperbarui." : ''),
+            'data' => $layanan,
+            'updated_projects_count' => $updatedProjects
+        ]);
+
+    } catch (\Exception $e) {
+        // Rollback transaction jika error
+        \DB::rollBack();
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan saat memperbarui data.',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
     /**
      * Remove the specified resource from storage.

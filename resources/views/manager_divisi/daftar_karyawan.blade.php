@@ -668,44 +668,41 @@
         @include('manager_divisi/templet/sider')
         <div class="flex-1 flex flex-col main-content">
             <div class="flex-1 p-3 sm:p-8">
+                <!-- HEADER DENGAN NAMA DIVISI -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
-                    <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-0">Data Karyawan</h2>
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-bold mb-2">Data Karyawan</h2>
+                        <p class="text-gray-600">
+                            @if(isset($namaDivisiManager) && $namaDivisiManager)
+                                Divisi: <span class="font-semibold text-primary">{{ $namaDivisiManager }}</span>
+                            @else
+                                <span class="text-yellow-600">Anda belum memiliki divisi yang ditetapkan</span>
+                            @endif
+                        </p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            <span class="material-icons-outlined text-sm mr-1">badge</span>
+                            Manager Divisi
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
-                        <span
-                            class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                        <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
                         <input id="searchInput"
                             class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input"
                             placeholder="Cari nama karyawan atau jabatan..." type="text" />
                     </div>
+                    
+                    <!-- TOMBOL FILTER YANG FUNGSIONAL -->
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                        <div class="relative">
-                            <div id="filterDropdown" class="filter-dropdown">
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterAll" value="all" checked>
-                                    <label for="filterAll">Semua Status</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterAktif" value="aktif">
-                                    <label for="filterAktif">Aktif</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterCuti" value="cuti">
-                                    <label for="filterCuti">Cuti</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterTidakAktif" value="tidak aktif">
-                                    <label for="filterTidakAktif">Tidak Aktif</label>
-                                </div>
-                                <div class="filter-actions">
-                                    <button id="applyFilter" class="filter-apply">Terapkan</button>
-                                    <button id="resetFilter" class="filter-reset">Reset</button>
-                                </div>
-                            </div>
-                        </div>
+                        <button id="filterBtn" class="px-4 py-2 btn-secondary rounded-lg flex items-center gap-2">
+                            <span class="material-icons-outlined">filter_list</span>
+                            Filter
+                        </button>
                     </div>
                 </div>
 
@@ -714,7 +711,7 @@
                     <div class="panel-header">
                         <h3 class="panel-title">
                             <span class="material-icons-outlined text-primary">people</span>
-                            Data Karyawan
+                            Data Karyawan Divisi {{ $namaDivisiManager ?? 'Anda' }}
                         </h3>
                         <div class="flex items-center gap-2">
                             <span class="text-sm text-text-muted-light">Total: <span id="totalCount"
@@ -723,6 +720,17 @@
                     </div>
                     <div class="panel-body">
                         @if(count($karyawan) > 0)
+                            <!-- INFO DIVISI -->
+                            <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex items-center">
+                                    <span class="material-icons-outlined text-blue-500 mr-2">info</span>
+                                    <p class="text-sm text-blue-700">
+                                        Menampilkan karyawan dari divisi <strong>{{ $namaDivisiManager ?? 'Anda' }}</strong>. 
+                                        Hanya karyawan dengan divisi yang sama yang akan ditampilkan.
+                                    </p>
+                                </div>
+                            </div>
+
                             <!-- SCROLLABLE TABLE -->
                             <div class="desktop-table">
                                 <div class="scrollable-table-container scroll-indicator table-shadow" id="scrollableTable">
@@ -743,11 +751,15 @@
                                                 <tr class="karyawan-row" data-id="{{ $k->id }}"
                                                     data-nama="{{ $k->nama }}" data-jabatan="{{ $k->jabatan }}"
                                                     data-divisi="{{ $k->divisi }}" data-alamat="{{ $k->alamat }}"
-                                                    data-kontak="{{ $k->kontak }}" data-status="{{ $k->status }}">
+                                                    data-kontak="{{ $k->kontak }}" data-status="aktif"> <!-- Default status aktif -->
                                                     <td>{{ $index + 1 }}</td>
                                                     <td>{{ $k->nama }}</td>
                                                     <td>{{ $k->jabatan }}</td>
-                                                    <td>{{ $k->divisi }}</td>
+                                                    <td>
+                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            {{ $k->divisi }}
+                                                        </span>
+                                                    </td>
                                                     <td>{{ $k->alamat }}</td>
                                                     <td>{{ $k->kontak }}</td>
                                                     <td>
@@ -775,7 +787,7 @@
                                     <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card"
                                         data-id="{{ $k->id }}" data-nama="{{ $k->nama }}" data-jabatan="{{ $k->jabatan }}"
                                         data-divisi="{{ $k->divisi }}" data-alamat="{{ $k->alamat }}"
-                                        data-kontak="{{ $k->kontak }}" data-status="{{ $k->status }}">
+                                        data-kontak="{{ $k->kontak }}" data-status="aktif">
                                         <div class="flex justify-between items-start mb-3">
                                             <div class="flex items-center gap-3">
                                                 <div class="h-12 w-12 rounded-full overflow-hidden">
@@ -792,20 +804,11 @@
                                                 </div>
                                                 <div>
                                                     <h4 class="font-semibold text-base">{{ $k->nama }}</h4>
-                                                    <p class="text-sm text-text-muted-light">{{ $k->jabatan }} - {{ $k->divisi }}</p>
+                                                    <p class="text-sm text-text-muted-light">{{ $k->jabatan }}</p>
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 mt-1">
+                                                        {{ $k->divisi }}
+                                                    </span>
                                                 </div>
-                                            </div>
-                                            <div class="flex gap-2">
-                                                <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                    data-id="{{ $k->id }}" data-nama="{{ $k->nama }}" data-jabatan="{{ $k->jabatan }}"
-                                                    data-divisi="{{ $k->divisi }}" data-alamat="{{ $k->alamat }}"
-                                                    data-kontak="{{ $k->kontak }}" data-status="{{ $k->status }}">
-                                                    <span class="material-icons-outlined">edit</span>
-                                                </button>
-                                                <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                                    data-id="{{ $k->id }}">
-                                                    <span class="material-icons-outlined">delete</span>
-                                                </button>
                                             </div>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2 text-sm">
@@ -816,13 +819,7 @@
                                             <div>
                                                 <p class="text-text-muted-light">Status</p>
                                                 <p>
-                                                    @if($k->status == 'aktif')
-                                                        <span class="status-badge status-aktif">Aktif</span>
-                                                    @elseif($k->status == 'cuti')
-                                                        <span class="status-badge status-cuti">Cuti</span>
-                                                    @else
-                                                        <span class="status-badge status-tidak-aktif">Tidak Aktif</span>
-                                                    @endif
+                                                    <span class="status-badge status-aktif">Aktif</span>
                                                 </p>
                                             </div>
                                             <div class="col-span-2">
@@ -856,8 +853,20 @@
                                 <div class="empty-state-icon">
                                     <span class="material-icons-outlined">people</span>
                                 </div>
-                                <h3 class="empty-state-title">Belum ada data karyawan</h3>
-                                <p class="empty-state-description">Belum ada data karyawan yang tersedia. Silakan tambahkan data karyawan terlebih dahulu.</p>
+                                <h3 class="empty-state-title">
+                                    @if(isset($namaDivisiManager) && $namaDivisiManager)
+                                        Tidak ada karyawan di divisi {{ $namaDivisiManager }}
+                                    @else
+                                        Belum ada data karyawan
+                                    @endif
+                                </h3>
+                                <p class="empty-state-description">
+                                    @if(isset($namaDivisiManager) && $namaDivisiManager)
+                                        Saat ini belum ada karyawan yang terdaftar di divisi {{ $namaDivisiManager }}.
+                                    @else
+                                        Anda belum memiliki divisi yang ditetapkan. Hubungi administrator untuk menetapkan divisi Anda.
+                                    @endif
+                                </p>
                             </div>
                         @endif
                     </div>
@@ -868,6 +877,27 @@
             </footer>
         </div>
     </div>
+
+    <!-- FILTER DROPDOWN YANG LENGKAP -->
+    <div id="filterDropdown" class="filter-dropdown">
+        <div class="filter-option">
+            <input type="checkbox" id="filterAll" value="all" checked>
+            <label for="filterAll">Semua Status</label>
+        </div>
+        <div class="filter-option">
+            <input type="checkbox" id="filterAktif" value="aktif">
+            <label for="filterAktif">Aktif</label>
+        </div>
+        <div class="filter-option">
+            <input type="checkbox" id="filterCuti" value="cuti">
+            <label for="filterCuti">Cuti</label>
+        </div>
+        <div class="filter-actions">
+            <button id="applyFilter" class="filter-apply">Terapkan</button>
+            <button id="resetFilter" class="filter-reset">Reset</button>
+        </div>
+    </div>
+
     <!-- Minimalist Popup -->
     <div id="minimalPopup" class="minimal-popup">
         <div class="minimal-popup-icon">
@@ -1037,7 +1067,6 @@
                 const filterAll = document.getElementById('filterAll');
                 const filterAktif = document.getElementById('filterAktif');
                 const filterCuti = document.getElementById('filterCuti');
-                const filterTidakAktif = document.getElementById('filterTidakAktif');
 
                 activeFilters = [];
                 if (filterAll.checked) {
@@ -1045,7 +1074,6 @@
                 } else {
                     if (filterAktif.checked) activeFilters.push('aktif');
                     if (filterCuti.checked) activeFilters.push('cuti');
-                    if (filterTidakAktif.checked) activeFilters.push('tidak aktif');
                 }
 
                 applyFilters();
@@ -1059,7 +1087,6 @@
                 document.getElementById('filterAll').checked = true;
                 document.getElementById('filterAktif').checked = false;
                 document.getElementById('filterCuti').checked = false;
-                document.getElementById('filterTidakAktif').checked = false;
                 activeFilters = ['all'];
                 applyFilters();
                 filterDropdown.classList.remove('show');
@@ -1201,7 +1228,16 @@
         document.querySelector('.minimal-popup-close').addEventListener('click', function() {
             document.getElementById('minimalPopup').classList.remove('show');
         });
+
+        // Auto-focus search input
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                setTimeout(() => {
+                    searchInput.focus();
+                }, 300);
+            }
+        });
     </script>
 </body>
-
 </html>

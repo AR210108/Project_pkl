@@ -743,7 +743,13 @@
                                                 <!-- TETAP MENGGUNAKAN $i+1 untuk nomor urut -->
                                                 <td>{{ $i + 1 }}</td>
                                                 <td>{{ $u->name }}</td>
-                                                <td>{{ $u->divisi?->divisi ?? '-' }}</td>
+                                               <td>
+    @if($u->divisi) <!-- Akses via relationship -->
+        {{ $u->divisi->divisi }}
+    @else
+        -
+    @endif
+</td>
                                                 <td>{{ $u->email }}</td>
                                                 <td>
                                                     <span
@@ -751,23 +757,25 @@
                                                         {{ $u->role }}
                                                     </span>
                                                 </td>
-<!-- Di dalam desktop table (td aksi) -->
-<td style="min-width: 100px; text-align: center;">
-    <div class="flex justify-center gap-2">
-        <button onclick="openModalEdit({{ $u->id }}, '{{ $u->name }}', {{ $u->divisi_id ?? 'null' }}, '{{ $u->email }}', '{{ $u->role }}')"
-            class="p-1 rounded-full hover:bg-primary/20 text-gray-700"
-            title="Edit">
-            <span class="material-icons-outlined">edit</span>
-        </button>
-        
-        <!-- GANTI FORM DELETE INI -->
-        <button onclick="confirmDeleteUser({{ $u->id }}, '{{ $u->name }}')"
-            class="delete-user-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-            title="Hapus">
-            <span class="material-icons-outlined">delete</span>
-        </button>
-    </div>
-</td>
+                                                <!-- Di dalam desktop table (td aksi) -->
+                                                <td style="min-width: 100px; text-align: center;">
+                                                    <div class="flex justify-center gap-2">
+                                                        <button
+                                                            onclick="openModalEdit({{ $u->id }}, '{{ $u->name }}', {{ $u->divisi_id ?? 'null' }}, '{{ $u->email }}', '{{ $u->role }}')"
+                                                            class="p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                            title="Edit">
+                                                            <span class="material-icons-outlined">edit</span>
+                                                        </button>
+
+                                                        <!-- GANTI FORM DELETE INI -->
+                                                        <button
+                                                            onclick="confirmDeleteUser({{ $u->id }}, '{{ $u->name }}')"
+                                                            class="delete-user-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
+                                                            title="Hapus">
+                                                            <span class="material-icons-outlined">delete</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -811,10 +819,16 @@
                                             <p class="text-text-muted-light">No</p>
                                             <p class="font-medium">{{ $i + 1 }}</p>
                                         </div>
-                                        <div>
-                                            <p class="text-text-muted-light">Divisi</p>
-                                            <p class="font-medium">{{ $u->divisi?->divisi ?? '-' }}</p>
-                                        </div>
+<div>
+    <p class="text-text-muted-light">Divisi</p>
+    <p class="font-medium">
+        @if($u->divisi)
+            {{ $u->divisi->divisi }}
+        @else
+            -
+        @endif
+    </p>
+</div>
                                         <div>
                                             <p class="text-text-muted-light">Role</p>
                                             <p>
@@ -850,45 +864,48 @@
         </main>
     </div>
     <!-- Modal Konfirmasi Hapus User -->
-<div id="deleteUserModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus User</h3>
-                <button type="button" class="close-modal text-gray-800 hover:text-gray-500"
-                    data-target="deleteUserModal">
-                    <span class="material-icons-outlined">close</span>
-                </button>
-            </div>
-            
-            <div class="mb-6">
-                <div class="flex items-center justify-center mb-4">
-                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                        <span class="material-icons-outlined text-red-500 text-3xl">warning</span>
-                    </div>
+    <div id="deleteUserModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus User</h3>
+                    <button type="button" class="close-modal text-gray-800 hover:text-gray-500"
+                        data-target="deleteUserModal">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
                 </div>
-                
-                <p class="text-center text-gray-700 mb-2">
-                    Apakah Anda yakin ingin menghapus user <span id="deleteUserName" class="font-semibold"></span>?
-                </p>
-                <p class="text-center text-sm text-gray-500">
-                    Tindakan ini tidak dapat dibatalkan. Semua data terkait user ini akan dihapus.
-                </p>
-            </div>
-            
-            <div class="flex justify-center gap-3">
-                <button type="button" class="close-modal px-5 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-                    data-target="deleteUserModal">
-                    Batal
-                </button>
-                <button type="button" id="confirmDeleteBtn" 
-                    class="px-5 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
-                    Hapus User
-                </button>
+
+                <div class="mb-6">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                            <span class="material-icons-outlined text-red-500 text-3xl">warning</span>
+                        </div>
+                    </div>
+
+                    <p class="text-center text-gray-700 mb-2">
+                        Apakah Anda yakin ingin menghapus user <span id="deleteUserName"
+                            class="font-semibold"></span>?
+                    </p>
+                    <p class="text-center text-sm text-gray-500">
+                        Tindakan ini tidak dapat dibatalkan. Semua data terkait user ini akan dihapus.
+                    </p>
+                </div>
+
+                <div class="flex justify-center gap-3">
+                    <button type="button"
+                        class="close-modal px-5 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                        data-target="deleteUserModal">
+                        Batal
+                    </button>
+                    <button type="button" id="confirmDeleteBtn"
+                        class="px-5 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
+                        Hapus User
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
     <!-- Modal Tambah User -->
     <div id="tambahUserModal"
         class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
@@ -962,78 +979,90 @@
         </div>
     </div>
 
-    <!-- Modal Edit User -->
-    <div id="editUserModal"
-        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit User</h3>
-                    <button type="button" class="close-modal text-gray-800 hover:text-gray-500"
-                        data-target="editUserModal">
-                        <span class="material-icons-outlined">close</span>
+<!-- Modal Edit User -->
+<div id="editUserModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Edit User</h3>
+                <button type="button" class="close-modal text-gray-800 hover:text-gray-500"
+                    data-target="editUserModal">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            
+            <form id="editUserForm" class="space-y-4">
+                @csrf
+                <input type="hidden" id="editUserId" name="id">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Nama Lengkap <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="editUserName" name="name" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            minlength="2">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Email <span class="text-red-500">*</span>
+                        </label>
+                        <input type="email" id="editUserEmail" name="email" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Password (kosongkan jika tidak diubah)
+                        </label>
+                        <input type="password" id="editUserPassword" name="password"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            placeholder="Kosongkan jika tidak ingin mengubah"
+                            minlength="5">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Role <span class="text-red-500">*</span>
+                        </label>
+                        <select id="editUserRole" name="role" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                            <option value="">Pilih Role</option>
+                            <option value="owner">Owner</option>
+                            <option value="admin">Admin</option>
+                            <option value="general_manager">General Manager</option>
+                            <option value="manager_divisi">Manager Divisi</option>
+                            <option value="finance">Finance</option>
+                            <option value="karyawan">Karyawan</option>
+                        </select>
+                    </div>
+                    
+                    <!-- PERBAIKAN: Pastikan ID ini sama dengan yang dicari JavaScript -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
+                        <select name="divisi_id" id="editDivisiSelect"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                            <option value="">Pilih Divisi</option>
+                            <!-- Options akan diisi oleh JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-2 mt-6">
+                    <button type="button"
+                        class="cancel-modal px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                        data-target="editUserModal">Batal</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Update User
                     </button>
                 </div>
-                <form id="editUserForm" class="space-y-4">
-                    @csrf
-                    <input type="hidden" id="editUserId" name="id">
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
-                            <input type="text" id="editUserName" name="name" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                            <input type="email" id="editUserEmail" name="email" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Password (kosongkan jika tidak
-                                diubah)</label>
-                            <input type="password" id="editUserPassword" name="password"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Kosongkan jika tidak ingin mengubah">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Role *</label>
-                            <select id="editUserRole" name="role" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                                <option value="">Pilih Role</option>
-                                <option value="karyawan">Karyawan</option>
-                                <option value="admin">Admin</option>
-                                <option value="finance">Finance</option>
-                                <option value="manager_divisi">Manager Divisi</option>
-                                <option value="general_manager">General Manager</option>
-                                <option value="owner">Owner</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
-                            <select name="divisi_id" id="tambahDivisiSelect"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                                <option value="">Pilih Divisi</option>
-                                <!-- Options akan diisi oleh JavaScript otomatis -->
-                            </select>
-                        </div>
-
-                        <div class="flex justify-end gap-2 mt-6">
-                            <button type="button"
-                                class="cancel-modal px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                                data-target="editUserModal">Batal</button>
-                            <button type="submit"
-                                class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">Update
-                                User</button>
-                        </div>
-                </form>
-            </div>
+            </form>
         </div>
     </div>
+</div>
 
     <!-- Minimalist Popup -->
     <div id="minimalPopup" class="minimal-popup">
@@ -1109,123 +1138,188 @@
 
         // Fungsi untuk tombol edit yang ada di kode lama
         // Fungsi untuk modal edit
-        window.openModalEdit = function(id, name, divisiId, email, role) {
-            console.log('Opening edit modal for user:', {
-                id,
-                name,
-                divisiId,
-                email,
-                role
-            });
+window.openModalEdit = function(id, name, divisiId, email, role) {
+    console.log('📝 Opening edit modal for user:', {
+        id,
+        name,
+        divisiId: divisiId || 'null',
+        email,
+        role
+    });
 
-            openModal('editUserModal');
-            document.getElementById('editUserId').value = id;
-            document.getElementById('editUserName').value = name;
-            document.getElementById('editUserEmail').value = email;
-            document.getElementById('editUserRole').value = role;
+    // Buka modal dulu
+    openModal('editUserModal');
+    
+    // Isi form fields
+    document.getElementById('editUserId').value = id;
+    document.getElementById('editUserName').value = name;
+    document.getElementById('editUserEmail').value = email;
+    document.getElementById('editUserRole').value = role;
+    
+    // Reset password field
+    const passwordField = document.getElementById('editUserPassword');
+    if (passwordField) {
+        passwordField.value = '';
+    }
 
-            // Reset password field
-            document.getElementById('editUserPassword').value = '';
-
-            // Load divisi untuk modal edit
-            loadDivisis('editDivisiSelect').then(() => {
-                const select = document.getElementById('editDivisiSelect');
-                if (select && divisiId && divisiId !== 'null') {
-                    // Set nilai divisi berdasarkan ID
-                    select.value = divisiId;
-                    console.log('Set divisi to ID:', divisiId);
-
-                    // Jika tidak ada yang terpilih, coba cari berdasarkan nama
-                    if (!select.value && divisiId && divisiId !== '-') {
-                        for (let option of select.options) {
-                            if (option.textContent === divisiId) {
-                                select.value = option.value;
-                                console.log('Set divisi by name:', option.value);
-                                break;
-                            }
-                        }
-                    }
+    // Tunggu modal terbuka sepenuhnya
+    setTimeout(() => {
+        // Load divisi untuk modal edit
+        loadDivisis('editDivisiSelect').then((divisis) => {
+            const select = document.getElementById('editDivisiSelect');
+            if (select) {
+                // Konversi divisiId
+                let selectedDivisiId = divisiId;
+                
+                // Handle berbagai format divisiId
+                if (!selectedDivisiId || 
+                    selectedDivisiId === 'null' || 
+                    selectedDivisiId === 'undefined' ||
+                    selectedDivisiId === '' ||
+                    selectedDivisiId === '0') {
+                    selectedDivisiId = '';
                 }
-            });
-        };
-
+                
+                // Set value
+                select.value = selectedDivisiId;
+                console.log('✅ Set divisi select to value:', selectedDivisiId);
+                
+                // Debug: lihat options yang tersedia
+                console.log('📋 Available options:', 
+                    Array.from(select.options).map(opt => ({ 
+                        value: opt.value, 
+                        text: opt.text 
+                    }))
+                );
+            } else {
+                console.error('❌ editDivisiSelect element still not found after timeout');
+            }
+        }).catch(error => {
+            console.error('❌ Error loading divisis:', error);
+        });
+    }, 200); // Delay 200ms untuk memastikan modal terbuka
+};
 
         // ==================== DIVISI FUNCTIONS ====================
-        async function loadDivisis(selectId = 'tambahDivisiSelect') {
-            try {
-                console.log('Loading divisi for select:', selectId);
+async function loadDivisis(selectId = 'tambahDivisiSelect') {
+    try {
+        console.log('🔄 Loading divisi for select:', selectId);
 
-                const selectElement = document.getElementById(selectId);
-                if (!selectElement) {
-                    console.error('Select element not found:', selectId);
-                    return [];
-                }
-
-                // Coba fetch dari API dengan timeout
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 detik timeout
-
-                const csrfToken = getCsrfToken();
-                const headers = {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                };
-
-                if (csrfToken) {
-                    headers['X-CSRF-TOKEN'] = csrfToken;
-                }
-
-                try {
-                    const response = await fetch('/admin/divisis/list', {
-                        method: 'GET',
-                        headers: headers,
-                        credentials: 'same-origin',
-                        signal: controller.signal
-                    });
-
-                    clearTimeout(timeoutId);
-
-                    if (response.ok) {
-                        const result = await response.json();
-                        if (result.success && result.data && Array.isArray(result.data)) {
-                            console.log('Divisi loaded from API:', result.data);
-                            populateSelect(selectId, result.data);
-                            return result.data;
-                        }
-                    }
-                } catch (fetchError) {
-                    console.warn('API fetch failed, using fallback data:', fetchError);
-                }
-
-                // Gunakan data dari PHP (yang sudah dipass ke JavaScript)
-                const divisisFromPHP = window.divisisFromPHP || [];
-                if (divisisFromPHP.length > 0) {
-                    console.log('Using divisi data from PHP:', divisisFromPHP);
-                    populateSelect(selectId, divisisFromPHP);
-                    return divisisFromPHP;
-                }
-
-                // Jika semua gagal, tampilkan pesan
-                console.error('No divisi data available');
-                populateSelect(selectId, []);
-                showMinimalPopup('Info', 'Tidak ada data divisi tersedia', 'warning');
-                return [];
-
-            } catch (error) {
-                console.error('Error loading divisi:', error);
-
-                // Fallback ke data PHP
-                const divisisFromPHP = window.divisisFromPHP || [];
-                if (divisisFromPHP.length > 0) {
-                    populateSelect(selectId, divisisFromPHP);
-                    return divisisFromPHP;
-                }
-
-                populateSelect(selectId, []);
-                showMinimalPopup('Error', 'Gagal memuat data divisi', 'error');
+        // Tunggu sebentar untuk memastikan DOM siap
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const selectElement = document.getElementById(selectId);
+        if (!selectElement) {
+            console.error('❌ Select element not found:', selectId);
+            
+            // Coba cari lagi setelah delay
+            await new Promise(resolve => setTimeout(resolve, 300));
+            const retryElement = document.getElementById(selectId);
+            if (!retryElement) {
+                console.error('❌ Select element still not found after retry:', selectId);
                 return [];
             }
+            selectElement = retryElement;
         }
+
+        // Clear existing options except first one
+        while (selectElement.options.length > 1) {
+            selectElement.remove(1);
+        }
+
+        // Coba fetch dari API
+        const csrfToken = getCsrfToken();
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        };
+
+        if (csrfToken) {
+            headers['X-CSRF-TOKEN'] = csrfToken;
+        }
+
+        try {
+            const response = await fetch('/admin/divisis/list', {
+                method: 'GET',
+                headers: headers,
+                credentials: 'same-origin'
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success && result.data && Array.isArray(result.data)) {
+                    console.log('✅ Divisi loaded from API:', result.data.length);
+                    populateSelect(selectId, result.data);
+                    return result.data;
+                }
+            }
+        } catch (fetchError) {
+            console.warn('⚠️ API fetch failed:', fetchError);
+        }
+
+        // Gunakan data dari PHP (fallback)
+        const divisisFromPHP = window.divisisFromPHP || [];
+        if (divisisFromPHP.length > 0) {
+            console.log('✅ Using divisi data from PHP:', divisisFromPHP.length);
+            populateSelect(selectId, divisisFromPHP);
+            return divisisFromPHP;
+        }
+
+        // Jika semua gagal
+        console.warn('⚠️ No divisi data available');
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Tidak ada divisi tersedia';
+        selectElement.appendChild(option);
+        
+        return [];
+
+    } catch (error) {
+        console.error('❌ Error loading divisi:', error);
+        return [];
+    }
+}
+
+// Fungsi populateSelect yang diperbaiki
+function populateSelect(selectId, data) {
+    const select = document.getElementById(selectId);
+    if (!select) {
+        console.error('❌ Select element not found for populate:', selectId);
+        return;
+    }
+
+    // Simpan option pertama (Pilih Divisi)
+    const firstOption = select.options[0] ? select.options[0].outerHTML : '<option value="">Pilih Divisi</option>';
+    select.innerHTML = firstOption;
+
+    // Tambah options divisi
+    if (data && Array.isArray(data) && data.length > 0) {
+        data.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            
+            // Gunakan property yang benar
+            if (item.divisi) {
+                option.textContent = item.divisi;
+            } else if (item.nama_divisi) {
+                option.textContent = item.nama_divisi;
+            } else if (item.name) {
+                option.textContent = item.name;
+            } else {
+                option.textContent = 'Unknown';
+            }
+            
+            select.appendChild(option);
+        });
+        console.log(`✅ Loaded ${data.length} divisi into ${selectId}`);
+    } else {
+        console.warn(`⚠️ No divisi data to populate in ${selectId}`);
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Tidak ada divisi tersedia';
+        select.appendChild(option);
+    }
+}
 
         function populateSelect(selectId, data) {
             const select = document.getElementById(selectId);
@@ -1280,124 +1374,36 @@
         }
 
         // ==================== USER CRUD FUNCTIONS ====================
-async function handleTambahUser(e) {
-    e.preventDefault();
-
-    const form = e.target;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData);
-
-    console.log('Tambah user data:', data);
-
-    // Validasi
-    if (!data.name || !data.email || !data.password || !data.role) {
-        showMinimalPopup('Error', 'Harap lengkapi semua field yang wajib (*)', 'error');
-        return;
-    }
-
-    if (data.password.length < 5) {
-        showMinimalPopup('Error', 'Password minimal 5 karakter', 'error');
-        return;
-    }
-
-    // Disable submit button
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn?.textContent || 'Simpan';
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="loading-spinner"></span> Menyimpan...';
-    }
-
-    try {
-        const response = await fetch('/admin/user/store', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': getCsrfToken(),
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        console.log('Store response status:', response.status);
-
-        // Parse response
-        let result;
-        try {
-            result = await response.json();
-        } catch (jsonError) {
-            console.error('Failed to parse JSON:', jsonError);
-            throw new Error('Invalid server response');
-        }
-
-        if (response.ok && result.success) {
-            showMinimalPopup('Berhasil', result.message || 'User berhasil ditambahkan', 'success');
-            form.reset();
-            closeModal('tambahUserModal');
-
-            // OPTION 1: Reload halaman (sederhana)
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
-            
-            // OPTION 2: Tambah row baru di atas tanpa reload (advanced)
-            // addNewUserToTable(result.data);
-            
-        } else {
-            showMinimalPopup('Error', result.message || 'Gagal menambahkan user', 'error');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        showMinimalPopup('Error', 'Terjadi kesalahan pada server: ' + error.message, 'error');
-    } finally {
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-        }
-    }
-}
-
-        async function handleEditUser(e) {
+        async function handleTambahUser(e) {
             e.preventDefault();
 
             const form = e.target;
-            const userId = document.getElementById('editUserId')?.value;
-            if (!userId) {
-                showMinimalPopup('Error', 'User ID tidak ditemukan', 'error');
-                return;
-            }
-
             const formData = new FormData(form);
             const data = Object.fromEntries(formData);
 
-            console.log('Edit user data:', data);
+            console.log('Tambah user data:', data);
 
             // Validasi
-            if (!data.name || !data.email || !data.role) {
+            if (!data.name || !data.email || !data.password || !data.role) {
                 showMinimalPopup('Error', 'Harap lengkapi semua field yang wajib (*)', 'error');
                 return;
             }
 
-            if (data.password && data.password.length < 5) {
+            if (data.password.length < 5) {
                 showMinimalPopup('Error', 'Password minimal 5 karakter', 'error');
                 return;
             }
 
-            // Jika password kosong, hapus dari data
-            if (!data.password) {
-                delete data.password;
-            }
-
             // Disable submit button
             const submitBtn = form.querySelector('button[type="submit"]');
-            const originalText = submitBtn?.textContent || 'Update';
+            const originalText = submitBtn?.textContent || 'Simpan';
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="loading-spinner"></span> Memperbarui...';
+                submitBtn.innerHTML = '<span class="loading-spinner"></span> Menyimpan...';
             }
 
             try {
-                const response = await fetch(`/admin/user/update/${userId}`, {
+                const response = await fetch('/admin/user/store', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1407,7 +1413,7 @@ async function handleTambahUser(e) {
                     body: JSON.stringify(data)
                 });
 
-                console.log('Update response status:', response.status);
+                console.log('Store response status:', response.status);
 
                 // Parse response
                 let result;
@@ -1419,14 +1425,20 @@ async function handleTambahUser(e) {
                 }
 
                 if (response.ok && result.success) {
-                    showMinimalPopup('Berhasil', result.message || 'User berhasil diperbarui', 'success');
-                    closeModal('editUserModal');
+                    showMinimalPopup('Berhasil', result.message || 'User berhasil ditambahkan', 'success');
+                    form.reset();
+                    closeModal('tambahUserModal');
 
+                    // OPTION 1: Reload halaman (sederhana)
                     setTimeout(() => {
                         window.location.reload();
                     }, 1500);
+
+                    // OPTION 2: Tambah row baru di atas tanpa reload (advanced)
+                    // addNewUserToTable(result.data);
+
                 } else {
-                    showMinimalPopup('Error', result.message || 'Gagal memperbarui user', 'error');
+                    showMinimalPopup('Error', result.message || 'Gagal menambahkan user', 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -1438,6 +1450,99 @@ async function handleTambahUser(e) {
                 }
             }
         }
+
+// Di method handleEditUser, tambahkan debugging
+async function handleEditUser(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const userId = document.getElementById('editUserId')?.value;
+    if (!userId) {
+        showMinimalPopup('Error', 'User ID tidak ditemukan', 'error');
+        return;
+    }
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+
+    console.log('📝 Edit user data:', data);
+    console.log('🔗 URL:', `/admin/user/update/${userId}`);
+
+    // Validasi
+    if (!data.name || !data.email || !data.role) {
+        showMinimalPopup('Error', 'Harap lengkapi semua field yang wajib (*)', 'error');
+        return;
+    }
+
+    if (data.password && data.password.length < 5) {
+        showMinimalPopup('Error', 'Password minimal 5 karakter', 'error');
+        return;
+    }
+
+    // Jika password kosong, hapus dari data
+    if (!data.password) {
+        delete data.password;
+    }
+
+    // Disable submit button
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn?.textContent || 'Update';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="loading-spinner"></span> Memperbarui...';
+    }
+
+    try {
+        const csrfToken = getCsrfToken();
+        console.log('🔑 CSRF Token:', csrfToken);
+        
+        const response = await fetch(`/admin/user/update/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        console.log('📤 Update response status:', response.status);
+        console.log('📤 Update response headers:', response.headers);
+
+        // Parse response
+        let result;
+        try {
+            const responseText = await response.text();
+            console.log('📤 Response text:', responseText);
+            result = JSON.parse(responseText);
+        } catch (jsonError) {
+            console.error('❌ Failed to parse JSON:', jsonError);
+            throw new Error('Invalid server response');
+        }
+
+        console.log('📤 Update response result:', result);
+
+        if (response.ok && result.success) {
+            showMinimalPopup('Berhasil', result.message || 'User berhasil diperbarui', 'success');
+            closeModal('editUserModal');
+
+            // **TAMBAHKAN INI: Reload halaman untuk update data karyawan**
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showMinimalPopup('Error', result.message || 'Gagal memperbarui user', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error:', error);
+        showMinimalPopup('Error', 'Terjadi kesalahan pada server: ' + error.message, 'error');
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    }
+}
 
         // ==================== PAGINATION & SEARCH FUNCTIONS ====================
         function initializeUserManagement() {
@@ -1693,104 +1798,104 @@ async function handleTambahUser(e) {
         });
 
         // ==================== DELETE FUNCTIONS ====================
-let userToDelete = null;
+        let userToDelete = null;
 
-function confirmDeleteUser(userId, userName) {
-    userToDelete = userId;
-    
-    // Tampilkan modal konfirmasi
-    document.getElementById('deleteUserName').textContent = userName;
-    openModal('deleteUserModal');
-}
+        function confirmDeleteUser(userId, userName) {
+            userToDelete = userId;
 
-async function handleDeleteUser() {
-    if (!userToDelete) {
-        showMinimalPopup('Error', 'User ID tidak ditemukan', 'error');
-        return;
-    }
+            // Tampilkan modal konfirmasi
+            document.getElementById('deleteUserName').textContent = userName;
+            openModal('deleteUserModal');
+        }
 
-    // Disable tombol hapus
-    const deleteBtn = document.getElementById('confirmDeleteBtn');
-    const originalText = deleteBtn?.textContent || 'Hapus User';
-    if (deleteBtn) {
-        deleteBtn.disabled = true;
-        deleteBtn.innerHTML = '<span class="loading-spinner"></span> Menghapus...';
-    }
-
-    try {
-        const response = await fetch(`/admin/user/delete/${userToDelete}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': getCsrfToken(),
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        });
-
-        console.log('Delete response status:', response.status);
-
-        // Parse response
-        let result;
-        try {
-            result = await response.json();
-        } catch (jsonError) {
-            console.error('Failed to parse JSON:', jsonError);
-            // Mungkin redirect dengan session message
-            if (response.redirected) {
-                showMinimalPopup('Berhasil', 'User berhasil dihapus', 'success');
-                closeModal('deleteUserModal');
-                setTimeout(() => window.location.reload(), 1500);
+        async function handleDeleteUser() {
+            if (!userToDelete) {
+                showMinimalPopup('Error', 'User ID tidak ditemukan', 'error');
                 return;
             }
-            throw new Error('Invalid server response');
+
+            // Disable tombol hapus
+            const deleteBtn = document.getElementById('confirmDeleteBtn');
+            const originalText = deleteBtn?.textContent || 'Hapus User';
+            if (deleteBtn) {
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<span class="loading-spinner"></span> Menghapus...';
+            }
+
+            try {
+                const response = await fetch(`/admin/user/delete/${userToDelete}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': getCsrfToken(),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('Delete response status:', response.status);
+
+                // Parse response
+                let result;
+                try {
+                    result = await response.json();
+                } catch (jsonError) {
+                    console.error('Failed to parse JSON:', jsonError);
+                    // Mungkin redirect dengan session message
+                    if (response.redirected) {
+                        showMinimalPopup('Berhasil', 'User berhasil dihapus', 'success');
+                        closeModal('deleteUserModal');
+                        setTimeout(() => window.location.reload(), 1500);
+                        return;
+                    }
+                    throw new Error('Invalid server response');
+                }
+
+                if (response.ok) {
+                    showMinimalPopup('Berhasil', result.message || 'User berhasil dihapus', 'success');
+                    closeModal('deleteUserModal');
+
+                    // Reload halaman setelah 1.5 detik
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+
+                } else {
+                    showMinimalPopup('Error', result.message || 'Gagal menghapus user', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                showMinimalPopup('Error', 'Terjadi kesalahan: ' + error.message, 'error');
+            } finally {
+                // Reset state
+                userToDelete = null;
+
+                // Re-enable tombol
+                if (deleteBtn) {
+                    deleteBtn.disabled = false;
+                    deleteBtn.textContent = originalText;
+                }
+            }
         }
 
-        if (response.ok) {
-            showMinimalPopup('Berhasil', result.message || 'User berhasil dihapus', 'success');
-            closeModal('deleteUserModal');
-            
-            // Reload halaman setelah 1.5 detik
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
-            
-        } else {
-            showMinimalPopup('Error', result.message || 'Gagal menghapus user', 'error');
-        }
-    } catch (error) {
-        console.error('Error deleting user:', error);
-        showMinimalPopup('Error', 'Terjadi kesalahan: ' + error.message, 'error');
-    } finally {
-        // Reset state
-        userToDelete = null;
-        
-        // Re-enable tombol
-        if (deleteBtn) {
-            deleteBtn.disabled = false;
-            deleteBtn.textContent = originalText;
-        }
-    }
-}
+        // ==================== UPDATE EVENT LISTENERS ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... kode yang sudah ada ...
 
-// ==================== UPDATE EVENT LISTENERS ====================
-document.addEventListener('DOMContentLoaded', function() {
-    // ... kode yang sudah ada ...
-    
-    // Tambahkan event listener untuk tombol confirm delete
-    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-    if (confirmDeleteBtn) {
-        confirmDeleteBtn.addEventListener('click', handleDeleteUser);
-    }
-    
-    // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
-        const deleteModal = document.getElementById('deleteUserModal');
-        if (event.target === deleteModal) {
-            closeModal('deleteUserModal');
-            userToDelete = null; // Reset
-        }
-    });
-});
+            // Tambahkan event listener untuk tombol confirm delete
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', handleDeleteUser);
+            }
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                const deleteModal = document.getElementById('deleteUserModal');
+                if (event.target === deleteModal) {
+                    closeModal('deleteUserModal');
+                    userToDelete = null; // Reset
+                }
+            });
+        });
     </script>
 
 </body>

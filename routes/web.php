@@ -248,6 +248,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/karyawan/store', [AdminKaryawanController::class, 'store'])->name('admin.karyawan.store');
         Route::put('/karyawan/update/{id}', [AdminKaryawanController::class, 'update'])->name('admin.karyawan.update');
         Route::delete('/karyawan/delete/{id}', [AdminKaryawanController::class, 'destroy'])->name('admin.karyawan.delete');
+        Route::get('/admin/karyawan/{id}/user-data', [AdminKaryawanController::class, 'getUserData']);
 
         // ABSENSI MANAGEMENT
         Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
@@ -305,6 +306,8 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/project', [DataProjectController::class, 'store'])->name('project.store');
         Route::put('/project/{id}', [DataProjectController::class, 'update'])->name('project.update');
         Route::delete('/project/{id}', [DataProjectController::class, 'destroy'])->name('project.destroy');
+        Route::post('/admin/project/sync/{layananId}', [DataProjectController::class, 'syncFromLayanan'])
+    ->name('admin.project.sync');
 
         Route::get('/surat_kerjasama', function () {
             return redirect()->route('admin.surat_kerjasama.index');
@@ -767,6 +770,7 @@ Route::middleware(['auth', 'role:manager_divisi'])
         Route::get('/pengelola_tugas', function () {
             return view('manager_divisi.pengelola_tugas');
         })->name('pengelola_tugas');
+            Route::get('/daftar_karyawan', [AdminKaryawanController::class, 'karyawanDivisi'])->name('daftar_karyawan');
 
         Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsensiManagerDivisi'])->name('kelola_absensi');
 

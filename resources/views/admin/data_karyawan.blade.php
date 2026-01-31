@@ -1096,100 +1096,113 @@
     </div>
 
     <!-- Popup Modal untuk Edit Karyawan -->
-    <div id="editKaryawanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Karyawan</h3>
-                    <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form id="editKaryawanForm" class="space-y-4" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" id="editId" name="id">
+<!-- Popup Modal untuk Edit Karyawan -->
+<div id="editKaryawanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Edit Karyawan</h3>
+                <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <form id="editKaryawanForm" class="space-y-4" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <input type="hidden" id="editId" name="id">
+                <input type="hidden" id="editUserId" name="user_id">
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Nama -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
-                            <input type="text" id="editNama" name="nama" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan nama karyawan">
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Nama -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
+                        <input type="text" id="editNama" name="nama" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            placeholder="Masukkan nama karyawan">
+                    </div>
 
-                        <!-- Email -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                            <input type="email" id="editEmail" name="email" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan email">
-                        </div>
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                        <input type="email" id="editEmail" name="email" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            placeholder="Masukkan email">
+                    </div>
 
-                        <!-- Jabatan -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan *</label>
-                            <input type="text" id="editJabatan" name="jabatan" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan jabatan">
-                        </div>
+                    <!-- Jabatan (DISABLED - dari role user) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan *</label>
+                        <input type="text" id="editJabatan" name="jabatan" required readonly
+                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 cursor-not-allowed"
+                            placeholder="Diambil dari role user">
+                        <p class="text-xs text-gray-500 mt-1">Jabatan diambil dari role user</p>
+                    </div>
 
-                        <!-- Divisi -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
-                            <input type="text" id="editDivisi" name="divisi"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan divisi">
-                        </div>
+                    <!-- Divisi (Dropdown dari tabel divisi) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
+                        <select name="divisi" id="editDivisiSelect"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                            <option value="">Pilih Divisi</option>
+                            <!-- Options akan diisi oleh JavaScript -->
+                        </select>
+                    </div>
 
-                        <!-- Kontak -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Kontak *</label>
-                            <input type="text" id="editKontak" name="kontak" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan nomor telepon">
-                        </div>
+                    <!-- Gaji -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Gaji</label>
+                        <input type="text" id="editGaji" name="gaji"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            placeholder="Contoh: Rp 5.000.000">
+                    </div>
 
-                        <!-- Alamat -->
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
-                            <textarea id="editAlamat" name="alamat" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                rows="3" placeholder="Masukkan alamat lengkap"></textarea>
-                        </div>
+                    <!-- Kontak -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kontak *</label>
+                        <input type="text" id="editKontak" name="kontak" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            placeholder="Masukkan nomor telepon">
+                    </div>
 
-                        <!-- Foto -->
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
-                            <div class="flex items-center space-x-4">
-                                <div id="editFotoPreview"
-                                    class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-gray-500 text-2xl">person</span>
-                                </div>
-                                <div>
-                                    <input type="file" name="foto" id="editFotoInput" class="hidden"
-                                        accept="image/*">
-                                    <button type="button" id="pilihEditFotoBtn"
-                                        class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                                        Pilih Foto
-                                    </button>
-                                    <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG maks. 2MB</p>
-                                </div>
+                    <!-- Alamat -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
+                        <textarea id="editAlamat" name="alamat" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            rows="3" placeholder="Masukkan alamat lengkap"></textarea>
+                    </div>
+
+                    <!-- Foto -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
+                        <div class="flex items-center space-x-4">
+                            <div id="editFotoPreview"
+                                class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
+                                <span class="material-icons-outlined text-gray-500 text-2xl">person</span>
+                            </div>
+                            <div>
+                                <input type="file" name="foto" id="editFotoInput" class="hidden"
+                                    accept="image/*">
+                                <button type="button" id="pilihEditFotoBtn"
+                                    class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                    Pilih Foto
+                                </button>
+                                <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG maks. 2MB</p>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" id="cancelEditBtn"
-                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">Update Data</button>
-                    </div>
-                </form>
-            </div>
+                <div class="flex justify-end gap-2 mt-6">
+                    <button type="button" id="cancelEditBtn"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">Update Data</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
     <!-- Popup Modal untuk Konfirmasi Hapus -->
     <div id="deleteKaryawanModal"
@@ -2134,6 +2147,133 @@ if (editKaryawanForm) {
                 openEditModal(data);
             });
         });
+
+        // === LOAD DIVISI DATA ===
+async function loadDivisisForEdit(selectId, selectedDivisi = '') {
+    try {
+        const selectElement = document.getElementById(selectId);
+        if (!selectElement) {
+            console.error('Select element not found:', selectId);
+            return;
+        }
+
+        // Clear existing options except first one
+        while (selectElement.options.length > 1) {
+            selectElement.remove(1);
+        }
+
+        // Fetch divisi data dari server
+        const response = await fetch('/admin/divisis/list', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken()
+            }
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.data && Array.isArray(result.data)) {
+                // Add divisi options
+                result.data.forEach(divisi => {
+                    const option = document.createElement('option');
+                    option.value = divisi.divisi; // Simpan sebagai string nama divisi
+                    option.textContent = divisi.divisi;
+                    option.selected = (divisi.divisi === selectedDivisi);
+                    selectElement.appendChild(option);
+                });
+                console.log('✅ Divisi loaded:', result.data.length);
+            } else {
+                console.warn('⚠️ No divisi data from API');
+                showMinimalPopup('Info', 'Data divisi tidak tersedia', 'warning');
+            }
+        } else {
+            console.error('❌ Failed to load divisi:', response.status);
+        }
+    } catch (error) {
+        console.error('❌ Error loading divisi:', error);
+        // Fallback: gunakan data dari PHP jika ada
+        const fallbackDivisis = window.divisisFromPHP || [];
+        if (fallbackDivisis.length > 0) {
+            const selectElement = document.getElementById(selectId);
+            fallbackDivisis.forEach(divisi => {
+                const option = document.createElement('option');
+                option.value = divisi.divisi || divisi.nama_divisi || '';
+                option.textContent = divisi.divisi || divisi.nama_divisi || 'Unknown';
+                option.selected = ((divisi.divisi || divisi.nama_divisi) === selectedDivisi);
+                selectElement.appendChild(option);
+            });
+        }
+    }
+}
+
+// === MODAL EDIT FUNCTION ===
+function openEditModal(data) {
+    if (editKaryawanModal) {
+        // Set basic data
+        document.getElementById('editId').value = data.id;
+        document.getElementById('editNama').value = data.nama;
+        document.getElementById('editEmail').value = data.email || '';
+        document.getElementById('editKontak').value = data.kontak;
+        document.getElementById('editAlamat').value = data.alamat;
+        document.getElementById('editGaji').value = data.gaji || '';
+        
+        // Get user data for jabatan and divisi
+        fetchUserDataForKaryawan(data.id).then(userData => {
+            if (userData) {
+                // Set jabatan dari role user
+                document.getElementById('editJabatan').value = userData.role || data.jabatan;
+                
+                // Load divisi dropdown dan select yang sesuai
+                loadDivisisForEdit('editDivisiSelect', data.divisi || userData.divisi);
+            } else {
+                // Fallback jika tidak ada user data
+                document.getElementById('editJabatan').value = data.jabatan;
+                loadDivisisForEdit('editDivisiSelect', data.divisi);
+            }
+        }).catch(error => {
+            console.error('Error fetching user data:', error);
+            document.getElementById('editJabatan').value = data.jabatan;
+            loadDivisisForEdit('editDivisiSelect', data.divisi);
+        });
+
+        // Tampilkan foto karyawan jika ada
+        if (editFotoPreview) {
+            if (data.foto) {
+                editFotoPreview.innerHTML =
+                    `<img src="${window.location.origin}/karyawan/${data.foto}" alt="${data.nama}" class="h-16 w-16 rounded-full object-cover">`;
+            } else {
+                editFotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
+            }
+        }
+
+        editKaryawanModal.classList.remove('hidden');
+    }
+}
+
+// === FETCH USER DATA ===
+async function fetchUserDataForKaryawan(karyawanId) {
+    try {
+        const response = await fetch(`/admin/karyawan/${karyawanId}/user-data`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken()
+            }
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
+                return result.data;
+            }
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        return null;
+    }
+}
 
         document.querySelectorAll('.delete-btn').forEach(button => {
             button.addEventListener('click', function() {

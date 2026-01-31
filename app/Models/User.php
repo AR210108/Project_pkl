@@ -10,180 +10,121 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
         'role',
         'divisi_id',
-        'sisa_cuti', // Penting untuk perhitungan cuti
+        'sisa_cuti',
     ];
 
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
 
     /**
+     * Relasi ke tabel karyawan
+     */
+    public function karyawan()
+    {
+        return $this->hasOne(Karyawan::class, 'user_id');
+    }
+
+    /**
      * Relasi langsung ke tabel cuti
-     * [REVISI] Tidak lagi melalui Karyawan, langsung user_id
      */
     public function cuti()
     {
         return $this->hasMany(Cuti::class, 'user_id');
     }
 
-    /**
-     * Relasi ke tabel cuti dengan status menunggu
-     */
     public function cutiMenunggu()
     {
         return $this->cuti()->where('status', 'menunggu');
     }
 
-    /**
-     * Relasi ke tabel cuti dengan status disetujui
-     */
     public function cutiDisetujui()
     {
         return $this->cuti()->where('status', 'disetujui');
     }
 
-    /**
-     * Relasi ke tabel cuti dengan status ditolak
-     */
     public function cutiDitolak()
     {
         return $this->cuti()->where('status', 'ditolak');
     }
 
-    /**
-     * Cek apakah user adalah admin
-     */
     public function isAdmin(): bool
     {
         return in_array($this->role, ['admin', 'finance']);
     }
 
-    /**
-     * Cek apakah user adalah karyawan
-     */
     public function isKaryawan(): bool
     {
         return $this->role === 'karyawan';
     }
 
-    /**
-     * Cek apakah user adalah general manager
-     */
     public function isGeneralManager(): bool
     {
         return $this->role === 'general_manager';
     }
 
-    /**
-     * Cek apakah user adalah manager divisi
-     */
     public function isManagerDivisi(): bool
     {
         return $this->role === 'manager_divisi';
     }
 
-    /**
-     * Cek apakah user adalah owner
-     */
     public function isOwner(): bool
     {
         return $this->role === 'owner';
     }
 
-    /**
-     * Relasi dengan pengumuman
-     */
     public function pengumuman()
     {
         return $this->belongsToMany(Pengumuman::class, 'pengumuman_user');
     }
 
-    /**
-     * Relasi sebagai creator pengumuman
-     */
     public function createdPengumuman()
     {
         return $this->hasMany(Pengumuman::class, 'user_id');
     }
 
-    /**
-     * Relasi dengan absensi
-     */
     public function absensis()
     {
         return $this->hasMany(Absensi::class);
     }
 
-    /**
-     * Relasi dengan catatan rapat sebagai peserta
-     */
     public function catatanRapatPeserta()
     {
         return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_peserta');
     }
 
-    /**
-     * Relasi dengan catatan rapat sebagai penugasan
-     */
     public function catatanRapatPenugasan()
     {
         return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_penugasan');
     }
 
-    /**
-     * Scope untuk user dengan role tertentu
-     */
     public function scopeByRole($query, $role)
     {
         return $query->where('role', $role);
     }
 
-    /**
-     * Scope untuk user dalam divisi tertentu
-     */
-public function scopeByDivisiId($query, $divisiId)
-{
-    return $query->where('divisi_id', $divisiId);
-}
+    public function scopeByDivisiId($query, $divisiId)
+    {
+        return $query->where('divisi_id', $divisiId);
+    }
 
-    /**
-     * Accessor untuk nama lengkap dengan role
-     */
     public function getFullNameWithRoleAttribute(): string
     {
         return "{$this->name} ({$this->role})";
     }
 
-    /**
-     * Accessor untuk inisial nama
-     */
     public function getInitialsAttribute(): string
     {
         $words = explode(' ', $this->name);
@@ -195,37 +136,49 @@ public function scopeByDivisiId($query, $divisiId)
 
         return $initials;
     }
+
     public function catatanRapats()
     {
         return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_penugasan', 'user_id', 'catatan_rapat_id');
     }
 
-
-    /**
-     * Relasi ke model catatan rapat penugasan (detail)
-     */
     public function catatanRapatPenugasans()
     {
         return $this->hasMany(CatatanRapatPenugasan::class, 'user_id');
     }
 
-    /**
-     * Pengumuman yang ditugaskan ke user ini
-     */
     public function pengumumanDiterima()
     {
         return $this->belongsToMany(Pengumuman::class, 'pengumuman_user', 'user_id', 'pengumuman_id')
             ->withTimestamps();
     }
-public function divisi()
-{
-    return $this->belongsTo(Divisi::class, 'divisi_id');
-}
-}
-    
-    // Opsional: Hapus atau komentari relasi karyawan() jika tidak digunakan lagi
-    // public function karyawan()
-    // {
-    //     return $this->hasOne(Karyawan::class);
-    // }
 
+    public function divisi()
+    {
+        return $this->belongsTo(Divisi::class, 'divisi_id');
+    }
+
+    /**
+     * Sinkronkan data ke karyawan jika ada
+     */
+    public function syncToKaryawan(): void
+    {
+        if ($this->karyawan) {
+            $karyawan = $this->karyawan;
+            $karyawan->nama = $this->name;
+            $karyawan->email = $this->email;
+            
+            if ($this->divisi) {
+                $karyawan->divisi = $this->divisi->divisi;
+            }
+            
+            if (!$karyawan->jabatan || $karyawan->jabatan === '') {
+                $karyawan->jabatan = $this->role;
+            }
+            
+            $karyawan->save();
+        }
+    }
+
+
+}
