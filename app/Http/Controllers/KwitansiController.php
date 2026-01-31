@@ -36,6 +36,26 @@ public function index(Request $request)
     return view('admin.kwitansi', compact('kwitansis'));
 }
 
+
+public function financeIndex(Request $request)
+{
+    $query = Kwitansi::with('invoice')->latest();
+
+    if ($request->has('search') && $request->search != '') {
+        $searchTerm = $request->search;
+        $query->where(function ($q) use ($searchTerm) {
+            $q->where('nama_klien', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('nomor_order', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('nama_perusahaan', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('deskripsi', 'LIKE', "%{$searchTerm}%");
+        });
+    }
+
+    $kwitansis = $query->paginate(10);
+
+    return view('finance.kwitansi', compact('kwitansis'));
+}
+
     /**
      * Display the specified resource.
      * 

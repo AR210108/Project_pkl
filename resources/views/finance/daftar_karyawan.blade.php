@@ -627,6 +627,7 @@
         <!-- Container untuk sidebar yang akan dimuat -->
         @include('finance.templet.sider')
         
+        
         <!-- MAIN CONTENT -->
         <main class="flex-1 flex flex-col main-content">
             <div class="flex-grow p-3 sm:p-8">
@@ -691,6 +692,7 @@
                                         <tr>
                                             <th style="min-width: 60px;">No</th>
                                             <th style="min-width: 200px;">Nama</th>
+                                            <th style="min-width: 200px;">Email</th>
                                             <th style="min-width: 150px;">Jabatan</th>
                                             <th style="min-width: 150px;">Divisi</th>
                                             <th style="min-width: 150px;">Gaji</th>
@@ -706,6 +708,7 @@
 <tr class="karyawan-row">
     <td>{{ $loop->iteration }}</td>
     <td>{{ $karyawan->nama }}</td>
+    <td>{{ $karyawan->email }}</td>
     <td>
         <span class="status-badge status-{{ strtolower($karyawan->jabatan) }}">
             {{ $karyawan->jabatan }}
@@ -789,6 +792,18 @@
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                                 placeholder="Masukkan nama karyawan" required>
                         </div>
+                                <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input type="email" id="editEmail" name="email"
+                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Masukkan email" required>
+        </div>
+                            <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input type="email" id="editEmail" name="email"
+            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="Masukkan email" required>
+    </div>
 
 <div>
     <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
@@ -922,6 +937,7 @@ const karyawanData = @json($karyawanJson);
     let searchTerm = '';
     
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded');
         initializeScrollDetection();
         initializeModals();
         initializeFilter();
@@ -931,7 +947,8 @@ const karyawanData = @json($karyawanJson);
         // Set data attributes pada rows yang sudah ada di Blade
         const rows = document.querySelectorAll('.karyawan-row');
         rows.forEach((row, index) => {
-            const nama = row.querySelector('td:nth-child(2)').textContent;
+            const nama = row.querySelector('td:nth-child(2)').textContent
+            const email = row.querySelector('td:nth-child(3)').textContent;;
             const jabatan = row.querySelector('td:nth-child(3) span').textContent;
             const divisi = row.querySelector('td:nth-child(4)').textContent;
             const gajiText = row.querySelector('td:nth-child(5)').textContent;
@@ -941,6 +958,7 @@ const karyawanData = @json($karyawanJson);
             const foto = row.querySelector('td:nth-child(8) img')?.src || '';
             
             row.setAttribute('data-nama', nama);
+            row.setAttribute('data-email', email);
             row.setAttribute('data-jabatan', jabatan);
             row.setAttribute('data-divisi', divisi);
             row.setAttribute('data-gaji', gaji);
@@ -966,6 +984,20 @@ const karyawanData = @json($karyawanJson);
             e.stopPropagation();
             filterDropdown.classList.toggle('show');
         });
+
+            
+
+                if (e.target.closest('.edit-btn')) {
+            const btn = e.target.closest('.edit-btn');
+            openEditModal(btn);
+            e.preventDefault();
+        }
+
+                if (e.target.closest('button') && e.target.closest('button').classList.contains('edit-btn')) {
+
+                }
+
+
         
         // Close dropdown when clicking outside
         document.addEventListener('click', function() {
@@ -1036,8 +1068,10 @@ const karyawanData = @json($karyawanJson);
         rows.forEach((row, index) => {
             const jabatan = row.getAttribute('data-jabatan') || '';
             const nama = row.getAttribute('data-nama') || '';
+            const email = row.getAttribute('data-email') || '';
             const divisi = row.getAttribute('data-divisi') || '';
             const alamat = row.getAttribute('data-alamat') || '';
+            
             
             let jabatanMatches = false;
             if (activeFilters.includes('all')) {
@@ -1055,7 +1089,8 @@ const karyawanData = @json($karyawanJson);
                     nama.toLowerCase().includes(searchLower) || 
                     alamat.toLowerCase().includes(searchLower) ||
                     jabatan.toLowerCase().includes(searchLower) ||
-                    divisi.toLowerCase().includes(searchLower);
+                    divisi.toLowerCase().includes(searchLower); ||
+                    email.toLowerCase().includes(searchLower);
             }
             
             if (jabatanMatches && searchMatches) {
@@ -1168,11 +1203,13 @@ function openEditModal(karyawanId) {
     editForm.action = baseRoute + '/' + karyawan.id;
 
     document.getElementById('editNama').value = karyawan.nama;
+    document.getElementById('editEmail').value = karyawan.email;
     document.getElementById('editJabatan').value = karyawan.jabatan;
     document.getElementById('editDivisi').value = karyawan.divisi;
     document.getElementById('editGaji').value = karyawan.gaji;
     document.getElementById('editKontak').value = karyawan.kontak;
     document.getElementById('editAlamat').value = karyawan.alamat;
+    document.getElementById('editEmail').value = karyawan.alamat;
 
     const fotoPreview = document.getElementById('editFotoPreview');
     fotoPreview.innerHTML = karyawan.foto

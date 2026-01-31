@@ -504,7 +504,7 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         
-        /* Minimalist Popup Styles */
+        /* Minimalist Popup Styles - Modified to match second file */
         .minimal-popup {
             position: fixed;
             top: 20px;
@@ -777,6 +777,191 @@
         .user-checkbox-container::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+        
+        /* Attachment Preview Modal Styles */
+        .attachment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .attachment-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .attachment-modal-content {
+            background: white;
+            border-radius: 8px;
+            max-width: 90%;
+            max-height: 90%;
+            width: 800px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .attachment-modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+        }
+        
+        .attachment-modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .attachment-modal-close {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .attachment-modal-close:hover {
+            background-color: #e2e8f0;
+            color: #1e293b;
+        }
+        
+        .attachment-modal-body {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .attachment-preview {
+            max-width: 100%;
+            max-height: 100%;
+            position: relative;
+        }
+        
+        .attachment-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .attachment-preview iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 4px;
+        }
+        
+        .attachment-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        
+        .attachment-loading .spinner {
+            margin: 0 auto 16px;
+        }
+        
+        .attachment-error {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .attachment-error-icon {
+            width: 64px;
+            height: 64px;
+            background-color: #fee2e2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+        
+        .attachment-error-icon .material-icons-outlined {
+            color: #ef4444;
+            font-size: 32px;
+        }
+        
+        .attachment-info {
+            padding: 16px 20px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .attachment-name {
+            font-size: 14px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .attachment-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .attachment-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .attachment-btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .attachment-btn-primary:hover {
+            background-color: #2563eb;
+        }
+        
+        .attachment-btn-secondary {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .attachment-btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
     </style>
     
     <!-- Add CSRF Token -->
@@ -952,8 +1137,73 @@
             </div>
         </div>
     </div>
+    
+    <!-- Delete Confirmation Modal - Modified to match second file -->
+    <div id="deleteModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h3>
+                    <button id="closeDeleteModal" class="text-gray-800 hover:text-gray-500">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
+                </div>
+                <form id="deleteForm" method="POST" action="">
+                    @csrf
+                    @method('DELETE')
+                    <div class="mb-6">
+                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus data ini?</p>
+                        <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
+                        <input type="hidden" id="deleteId" name="id">
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button type="button" id="cancelDeleteBtn"
+                            class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Attachment Preview Modal -->
+    <div id="attachmentModal" class="attachment-modal">
+        <div class="attachment-modal-content">
+            <div class="attachment-modal-header">
+                <h3 class="attachment-modal-title">
+                    <span class="material-icons-outlined">attach_file</span>
+                    <span id="attachmentTitle">Lampiran</span>
+                </h3>
+                <button id="closeAttachmentModal" class="attachment-modal-close">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <div class="attachment-modal-body">
+                <div id="attachmentPreview" class="attachment-preview">
+                    <!-- Attachment preview will be loaded here -->
+                </div>
+            </div>
+            <div class="attachment-info">
+                <div class="attachment-name">
+                    <span class="material-icons-outlined text-sm">description</span>
+                    <span id="attachmentFileName">file.pdf</span>
+                </div>
+                <div class="attachment-actions">
+                    <button id="downloadAttachment" class="attachment-btn attachment-btn-secondary">
+                        <span class="material-icons-outlined text-sm">download</span>
+                        Unduh
+                    </button>
+                    <button id="openNewTab" class="attachment-btn attachment-btn-primary">
+                        <span class="material-icons-outlined text-sm">open_in_new</span>
+                        Buka di Tab Baru
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Minimalist Popup -->
+    <!-- Minimalist Popup - Modified to match second file -->
     <div id="notification" class="minimal-popup">
         <div class="minimal-popup-icon">
             <span class="material-icons-outlined">check</span>
@@ -979,6 +1229,8 @@
         let totalPages = 1;
         let allData = [];
         let filteredData = [];
+        let currentAttachmentUrl = '';
+        let currentAttachmentName = '';
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -1005,6 +1257,15 @@
             document.getElementById('closeModal').addEventListener('click', closeModal);
             document.getElementById('cancelBtn').addEventListener('click', closeModal);
             
+            // Delete modal event listeners
+            document.getElementById('closeDeleteModal').addEventListener('click', closeDeleteModal);
+            document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteModal);
+            
+            // Attachment modal event listeners
+            document.getElementById('closeAttachmentModal').addEventListener('click', closeAttachmentModal);
+            document.getElementById('downloadAttachment').addEventListener('click', downloadAttachment);
+            document.getElementById('openNewTab').addEventListener('click', openInNewTab);
+            
             // Close modal when clicking outside
             document.getElementById('modal').addEventListener('click', function(e) {
                 if (e.target === this) {
@@ -1012,10 +1273,26 @@
                 }
             });
             
+            // Close delete modal when clicking outside
+            document.getElementById('deleteModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeDeleteModal();
+                }
+            });
+            
+            // Close attachment modal when clicking outside
+            document.getElementById('attachmentModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeAttachmentModal();
+                }
+            });
+            
             // Close modal with Escape key
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
                     closeModal();
+                    closeDeleteModal();
+                    closeAttachmentModal();
                 }
             });
             
@@ -1220,11 +1497,11 @@
                 let attachmentDisplay = '<span class="text-gray-400">-</span>';
                 if (item.lampiran) {
                     attachmentDisplay = `
-                        <a href="/storage/pengumuman/${item.lampiran}" 
-                           target="_blank" class="text-primary hover:underline flex items-center gap-1">
+                        <button onclick="showAttachment('${item.lampiran}')" 
+                                class="text-primary hover:underline flex items-center gap-1">
                             <span class="material-icons-outlined text-sm">attach_file</span>
                             File
-                        </a>
+                        </button>
                     `;
                 }
                 
@@ -1246,7 +1523,7 @@
                                     class="action-btn edit" title="Edit">
                                 <span class="material-icons-outlined">edit</span>
                             </button>
-                            <button onclick="deletePengumuman(${item.id})" 
+                            <button onclick="openDeleteModal(${item.id})" 
                                     class="action-btn delete" title="Hapus">
                                 <span class="material-icons-outlined">delete</span>
                             </button>
@@ -1286,10 +1563,9 @@
                 let attachmentDisplay = '';
                 if (item.lampiran) {
                     attachmentDisplay = `
-                        <a href="/storage/pengumuman/${item.lampiran}" 
-                           target="_blank" class="text-primary">
+                        <button onclick="showAttachment('${item.lampiran}')" class="text-primary">
                             📎 Lampiran
-                        </a>
+                        </button>
                     `;
                 }
                 
@@ -1304,7 +1580,7 @@
                                     class="action-btn edit" title="Edit">
                                 <span class="material-icons-outlined">edit</span>
                             </button>
-                            <button onclick="deletePengumuman(${item.id})" 
+                            <button onclick="openDeleteModal(${item.id})" 
                                     class="action-btn delete" title="Hapus">
                                 <span class="material-icons-outlined">delete</span>
                             </button>
@@ -1321,6 +1597,219 @@
                 const pagination = mobileCards.querySelector('.mobile-pagination');
                 mobileCards.insertBefore(card, pagination);
             });
+        }
+        
+        // Show attachment in modal
+        function showAttachment(filename) {
+            currentAttachmentName = filename;
+            
+            // Clean filename to remove duplicate path if exists
+            let cleanFilename = filename;
+            if (filename.includes('pengumuman/')) {
+                cleanFilename = filename.split('pengumuman/').pop();
+            }
+            
+            // Update modal title
+            document.getElementById('attachmentTitle').textContent = 'Lampiran';
+            document.getElementById('attachmentFileName').textContent = cleanFilename;
+            
+            // Clear previous content and show loading
+            const previewContainer = document.getElementById('attachmentPreview');
+            previewContainer.innerHTML = `
+                <div class="attachment-loading">
+                    <div class="spinner"></div>
+                    <p class="text-gray-500">Memuat lampiran...</p>
+                </div>
+            `;
+            
+            // Show modal
+            document.getElementById('attachmentModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+            
+            // Determine file type and show appropriate preview
+            const fileExtension = cleanFilename.split('.').pop().toLowerCase();
+            
+            // Try multiple possible URLs
+            const possibleUrls = [
+                `/storage/pengumuman/${cleanFilename}`,
+                `/storage/${cleanFilename}`,
+                `/storage/pengumuman/pengumuman/${cleanFilename}`
+            ];
+            
+            // Try to load the file
+            if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(fileExtension)) {
+                // Image file - try each URL until one works
+                let urlIndex = 0;
+                
+                function tryLoadImage() {
+                    if (urlIndex >= possibleUrls.length) {
+                        // All URLs failed, show error
+                        showAttachmentError(cleanFilename);
+                        return;
+                    }
+                    
+                    const img = new Image();
+                    const currentUrl = possibleUrls[urlIndex];
+                    
+                    img.onload = function() {
+                        // Image loaded successfully
+                        currentAttachmentUrl = currentUrl;
+                        previewContainer.innerHTML = '';
+                        const imgElement = document.createElement('img');
+                        imgElement.src = currentUrl;
+                        imgElement.alt = cleanFilename;
+                        imgElement.className = 'max-w-full max-h-full object-contain';
+                        previewContainer.appendChild(imgElement);
+                    };
+                    
+                    img.onerror = function() {
+                        // Try next URL
+                        urlIndex++;
+                        tryLoadImage();
+                    };
+                    
+                    img.src = currentUrl;
+                }
+                
+                tryLoadImage();
+                
+            } else if (['pdf'].includes(fileExtension)) {
+                // PDF file - try each URL until one works
+                let urlIndex = 0;
+                
+                function tryLoadPDF() {
+                    if (urlIndex >= possibleUrls.length) {
+                        // All URLs failed, show error
+                        showAttachmentError(cleanFilename);
+                        return;
+                    }
+                    
+                    const currentUrl = possibleUrls[urlIndex];
+                    currentAttachmentUrl = currentUrl;
+                    
+                    // Create iframe
+                    const iframe = document.createElement('iframe');
+                    iframe.src = currentUrl;
+                    iframe.title = cleanFilename;
+                    iframe.className = 'w-full h-full border-none rounded';
+                    
+                    // Set timeout to detect if PDF loads
+                    setTimeout(() => {
+                        try {
+                            // Check if iframe loaded content
+                            if (iframe.contentDocument && iframe.contentDocument.body) {
+                                previewContainer.innerHTML = '';
+                                previewContainer.appendChild(iframe);
+                            } else {
+                                // Try next URL
+                                urlIndex++;
+                                tryLoadPDF();
+                            }
+                        } catch (e) {
+                            // Try next URL
+                            urlIndex++;
+                            tryLoadPDF();
+                        }
+                    }, 2000);
+                    
+                    previewContainer.innerHTML = '';
+                    previewContainer.appendChild(iframe);
+                }
+                
+                tryLoadPDF();
+                
+            } else {
+                // Other file types - show file info
+                currentAttachmentUrl = possibleUrls[0]; // Use first URL as default
+                showFileInfo(cleanFilename);
+            }
+        }
+        
+        // Show attachment error
+        function showAttachmentError(filename) {
+            const previewContainer = document.getElementById('attachmentPreview');
+            previewContainer.innerHTML = `
+                <div class="attachment-error">
+                    <div class="attachment-error-icon">
+                        <span class="material-icons-outlined">error</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">File Tidak Ditemukan</h3>
+                    <p class="text-gray-500 mb-6">File "${filename}" tidak dapat ditemukan atau telah dipindahkan</p>
+                    <button onclick="downloadAttachment()" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
+                        <span class="material-icons-outlined text-sm mr-2">download</span>
+                        Coba Unduh File
+                    </button>
+                </div>
+            `;
+        }
+        
+        // Show file info for non-previewable files
+        function showFileInfo(filename) {
+            const previewContainer = document.getElementById('attachmentPreview');
+            previewContainer.innerHTML = `
+                <div class="text-center p-8">
+                    <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <span class="material-icons-outlined text-4xl text-gray-400">description</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">${filename}</h3>
+                    <p class="text-gray-500 mb-6">Tidak dapat menampilkan pratinjau untuk jenis file ini</p>
+                    <button onclick="downloadAttachment()" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
+                        <span class="material-icons-outlined text-sm mr-2">download</span>
+                        Unduh File
+                    </button>
+                </div>
+            `;
+        }
+        
+        // Close attachment modal
+        function closeAttachmentModal() {
+            document.getElementById('attachmentModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+            currentAttachmentUrl = '';
+            currentAttachmentName = '';
+        }
+        
+        // Download attachment
+        function downloadAttachment() {
+            if (currentAttachmentName) {
+                // Try multiple possible URLs for download
+                const cleanFilename = currentAttachmentName.includes('pengumuman/') ? 
+                    currentAttachmentName.split('pengumuman/').pop() : 
+                    currentAttachmentName;
+                
+                const possibleUrls = [
+                    `/storage/pengumuman/${cleanFilename}`,
+                    `/storage/${cleanFilename}`,
+                    `/storage/pengumuman/pengumuman/${cleanFilename}`
+                ];
+                
+                // Try first URL
+                const link = document.createElement('a');
+                link.href = possibleUrls[0];
+                link.download = cleanFilename;
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Show notification
+                showMinimalPopup('Info', 'Mengunduh file...', 'warning');
+            }
+        }
+        
+        // Open attachment in new tab
+        function openInNewTab() {
+            if (currentAttachmentUrl) {
+                window.open(currentAttachmentUrl, '_blank');
+            } else if (currentAttachmentName) {
+                // Try to open with first possible URL
+                const cleanFilename = currentAttachmentName.includes('pengumuman/') ? 
+                    currentAttachmentName.split('pengumuman/').pop() : 
+                    currentAttachmentName;
+                
+                const url = `/storage/pengumuman/${cleanFilename}`;
+                window.open(url, '_blank');
+            }
         }
         
         // Load users from server
@@ -1377,6 +1866,19 @@
             document.body.style.overflow = 'auto';
             currentAction = '';
             currentId = null;
+        }
+        
+        // Delete modal functions
+        function openDeleteModal(id) {
+            document.getElementById('deleteId').value = id;
+            document.getElementById('deleteForm').action = `/pengumuman/${id}`;
+            document.getElementById('deleteModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
         }
         
         // Form template
@@ -1592,11 +2094,11 @@
                         }
                     }, 100);
                 } else {
-                    showNotification('Error', result.message || 'Gagal memuat data', 'error');
+                    showMinimalPopup('Error', result.message || 'Gagal memuat data', 'error');
                 }
             } catch (error) {
                 console.error('Error editing pengumuman:', error);
-                showNotification('Error', 'Gagal memuat data pengumuman', 'error');
+                showMinimalPopup('Error', 'Gagal memuat data pengumuman', 'error');
             }
         }
         
@@ -1624,7 +2126,7 @@
                 
                 // Validation
                 if (!judulInput || !isiInput) {
-                    showNotification('Error', 'Form tidak lengkap', 'error');
+                    showMinimalPopup('Error', 'Form tidak lengkap', 'error');
                     return;
                 }
                 
@@ -1633,12 +2135,12 @@
                 const selectedUsers = Array.from(checkboxes).map(cb => cb.value);
                 
                 if (!judul || !isi) {
-                    showNotification('Error', 'Judul dan Isi Pesan wajib diisi', 'error');
+                    showMinimalPopup('Error', 'Judul dan Isi Pesan wajib diisi', 'error');
                     return;
                 }
                 
                 if (selectedUsers.length === 0) {
-                    showNotification('Error', 'Pilih minimal satu penerima', 'error');
+                    showMinimalPopup('Error', 'Pilih minimal satu penerima', 'error');
                     return;
                 }
                 
@@ -1686,7 +2188,7 @@
                 showSubmitLoading(false);
                 
                 if (result.success) {
-                    showNotification('Berhasil', result.message || 'Pengumuman berhasil disimpan', 'success');
+                    showMinimalPopup('Berhasil', result.message || 'Pengumuman berhasil disimpan', 'success');
                     setTimeout(() => {
                         closeModal();
                         window.location.reload();
@@ -1696,22 +2198,18 @@
                     if (result.errors) {
                         errorMsg = Object.values(result.errors).flat().join(', ');
                     }
-                    showNotification('Error', errorMsg, 'error');
+                    showMinimalPopup('Error', errorMsg, 'error');
                 }
                 
             } catch (error) {
                 console.error('Error saving pengumuman:', error);
                 showSubmitLoading(false);
-                showNotification('Error', 'Gagal menyimpan: ' + error.message, 'error');
+                showMinimalPopup('Error', 'Gagal menyimpan: ' + error.message, 'error');
             }
         }
         
         // Delete pengumuman
         async function deletePengumuman(id) {
-            if (!confirm('Apakah Anda yakin ingin menghapus pengumuman ini?')) {
-                return;
-            }
-            
             try {
                 const response = await fetch(`/pengumuman/${id}`, {
                     method: 'DELETE',
@@ -1724,14 +2222,14 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    showNotification('Berhasil', result.message || 'Pengumuman berhasil dihapus', 'success');
+                    showMinimalPopup('Berhasil', result.message || 'Pengumuman berhasil dihapus', 'success');
                     setTimeout(() => window.location.reload(), 1000);
                 } else {
-                    showNotification('Error', result.message || 'Gagal menghapus pengumuman', 'error');
+                    showMinimalPopup('Error', result.message || 'Gagal menghapus pengumuman', 'error');
                 }
             } catch (error) {
                 console.error('Error deleting pengumuman:', error);
-                showNotification('Error', 'Gagal menghapus pengumuman', 'error');
+                showMinimalPopup('Error', 'Gagal menghapus pengumuman', 'error');
             }
         }
         
@@ -1905,40 +2403,83 @@
             }
         }
         
-        // Notification functions
-        function showNotification(title, message, type = 'success') {
-            const notif = document.getElementById('notification');
-            const icon = notif.querySelector('.minimal-popup-icon span');
-            const notifTitle = notif.querySelector('.minimal-popup-title');
-            const notifMessage = notif.querySelector('.minimal-popup-message');
-            
-            // Set styles based on type
-            notif.className = 'minimal-popup show';
-            
-            if (type === 'success') {
-                notif.classList.add('success');
-                icon.textContent = 'check';
-            } else if (type === 'error') {
-                notif.classList.add('error');
-                icon.textContent = 'error';
-            } else if (type === 'info') {
-                notif.classList.add('info');
-                icon.textContent = 'info';
-            }
-            
+        // Modified notification function to match second file
+        function showMinimalPopup(title, message, type = 'success') {
+            const popup = document.getElementById('notification');
+            const popupTitle = popup.querySelector('.minimal-popup-title');
+            const popupMessage = popup.querySelector('.minimal-popup-message');
+            const popupIcon = popup.querySelector('.minimal-popup-icon span');
+
             // Set content
-            notifTitle.textContent = title;
-            notifMessage.textContent = message;
-            
-            // Auto hide after 5 seconds
+            popupTitle.textContent = title;
+            popupMessage.textContent = message;
+
+            // Set type
+            popup.className = 'minimal-popup show ' + type;
+
+            // Set icon
+            if (type === 'success') {
+                popupIcon.textContent = 'check';
+            } else if (type === 'error') {
+                popupIcon.textContent = 'error';
+            } else if (type === 'warning') {
+                popupIcon.textContent = 'warning';
+            }
+
+            // Auto hide after 3 seconds (changed from 5 seconds)
             setTimeout(() => {
-                notif.classList.remove('show');
-            }, 5000);
+                popup.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Keep the old function for backward compatibility
+        function showNotification(title, message, type = 'success') {
+            showMinimalPopup(title, message, type);
         }
         
         function hideNotif() {
             document.getElementById('notification').classList.remove('show');
         }
+        
+        // Delete form submission handler
+        document.getElementById('deleteForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('deleteId').value;
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Menghapus...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`/pengumuman/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMinimalPopup('Berhasil', result.message || 'Pengumuman berhasil dihapus', 'success');
+                    closeDeleteModal();
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showMinimalPopup('Error', result.message || 'Gagal menghapus pengumuman', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting pengumuman:', error);
+                showMinimalPopup('Error', 'Gagal menghapus pengumuman', 'error');
+            } finally {
+                // Reset button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
     </script>
 </body>
 </html>

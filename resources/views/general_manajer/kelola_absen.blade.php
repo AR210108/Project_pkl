@@ -104,18 +104,12 @@
             background-color: rgba(59, 130, 246, 0.15);
             color: #1e40af;
         }
-        .status-cuti {
-            background-color: rgba(239, 68, 68, 0.15);
-            color: #991b1b;
-        }
+
         .status-sakit {
             background-color: rgba(251, 146, 60, 0.15);
             color: #9a3412;
         }
-        .status-dinas {
-            background-color: rgba(139, 92, 246, 0.15);
-            color: #5b21b6;
-        }
+
         .status-pending {
             background-color: rgba(245, 158, 11, 0.15);
             color: #92400e;
@@ -477,36 +471,6 @@
                         </div>
                     </div>
 
-                    <!-- Cuti Card -->
-                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
-                        <div class="flex items-center">
-                            <div class="icon-container bg-yellow-100 mr-3 md:mr-4">
-                                <span class="material-icons-outlined text-yellow-600 text-lg md:text-xl">event_busy</span>
-                            </div>
-                            <div>
-                                <p class="text-xs md:text-sm text-gray-500">Cuti</p>
-                                <p class="text-xl md:text-2xl font-bold text-yellow-600">
-                                    {{ $stats['total_cuti'] ?? 0 }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dinas Luar Card -->
-                    <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
-                        <div class="flex items-center">
-                            <div class="icon-container bg-purple-100 mr-3 md:mr-4">
-                                <span class="material-icons-outlined text-purple-600 text-lg md:text-xl">directions_car</span>
-                            </div>
-                            <div>
-                                <p class="text-xs md:text-sm text-gray-500">Dinas Luar</p>
-                                <p class="text-xl md:text-2xl font-bold text-purple-600">
-                                    {{ $stats['total_dinas_luar'] ?? 0 }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Sakit Card -->
                     <div class="card bg-white p-4 md:p-6 rounded-xl shadow-md">
                         <div class="flex items-center">
@@ -572,9 +536,7 @@
                                     <option value="hadir" {{ $statusFilter == 'hadir' ? 'selected' : '' }}>Hadir</option>
                                     <option value="terlambat" {{ $statusFilter == 'terlambat' ? 'selected' : '' }}>Terlambat</option>
                                     <option value="izin" {{ $statusFilter == 'izin' ? 'selected' : '' }}>Izin</option>
-                                    <option value="cuti" {{ $statusFilter == 'cuti' ? 'selected' : '' }}>Cuti</option>
                                     <option value="sakit" {{ $statusFilter == 'sakit' ? 'selected' : '' }}>Sakit</option>
-                                    <option value="dinas" {{ $statusFilter == 'dinas' ? 'selected' : '' }}>Dinas Luar</option>
                                     <option value="pending" {{ $statusFilter == 'pending' ? 'selected' : '' }}>Pending</option>
                                     <option value="approved" {{ $statusFilter == 'approved' ? 'selected' : '' }}>Approved</option>
                                     <option value="rejected" {{ $statusFilter == 'rejected' ? 'selected' : '' }}>Rejected</option>
@@ -640,63 +602,31 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($formattedAbsensi as $index => $absen)
-                                    <tr class="hover:bg-gray-50">
-                                        <td style="min-width: 60px;">{{ $index + 1 }}</td>
-                                        <td style="min-width: 200px;">{{ $absen['user_name'] }}</td>
-                                        <td style="min-width: 120px;">{{ $absen['divisi'] }}</td>
-                                        <td style="min-width: 120px;">{{ \Carbon\Carbon::parse($absen['tanggal'])->format('d/m/Y') }}</td>
-                                        <td style="min-width: 120px;">{{ $absen['jam_masuk'] }}</td>
-                                        <td style="min-width: 120px;">{{ $absen['jam_pulang'] }}</td>
-                                        <td style="min-width: 120px;">
-                                            <span class="status-badge {{ $absen['status_class'] }}">
-                                                {{ $absen['status_kehadiran'] }}
-                                            </span>
-                                        </td>
-                                        <td style="min-width: 120px;">
-                                            @if($absen['type'] == 'ketidakhadiran' && $absen['approval_status'] == 'pending')
-                                                <span class="status-badge status-pending">
-                                                    Pending
-                                                </span>
-                                                <div class="mt-1 flex space-x-2">
-                                                    <form action="{{ route('general_manajer.absensi.approve', $absen['id']) }}" method="POST" class="inline">
-                                                        @csrf
-                                                        <button type="submit" class="text-green-600 hover:text-green-900 text-sm">
-                                                            Approve
-                                                        </button>
-                                                    </form>
-                                                    <form action="{{ route('general_manajer.absensi.reject', $absen['id']) }}" method="POST" class="inline">
-                                                        @csrf
-                                                        <button type="button" onclick="showRejectModal('{{ $absen['id'] }}', '{{ $absen['user_name'] }}')" 
-                                                                class="text-red-600 hover:text-red-900 text-sm">
-                                                            Reject
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            @elseif($absen['type'] == 'ketidakhadiran' && $absen['approval_status'] == 'approved')
-                                                <span class="status-badge status-approved">
-                                                    Approved
-                                                </span>
-                                            @elseif($absen['type'] == 'ketidakhadiran' && $absen['approval_status'] == 'rejected')
-                                                <span class="status-badge status-rejected">
-                                                    Rejected
-                                                </span>
-                                            @else
-                                                <span class="text-sm text-gray-500">-</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="8" class="px-6 py-8 text-center text-gray-500">
-                                            <div class="flex flex-col items-center">
-                                                <span class="material-icons-outlined text-4xl text-gray-300 mb-2">search_off</span>
-                                                <p class="text-lg">Tidak ada data ditemukan</p>
-                                                <p class="text-sm mt-1">Coba ubah filter pencarian Anda</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforelse
+<!-- Di view, pastikan menggunakan $formattedAbsensi bukan $attendances -->
+@forelse($formattedAbsensi as $index => $absen)
+    <tr>
+        <td>{{ $index + 1 }}</td>
+        <td>{{ $absen['user_name'] }}</td>
+        <td>{{ $absen['divisi'] }}</td>
+        <td>{{ \Carbon\Carbon::parse($absen['tanggal'])->format('d/m/Y') }}</td>
+        <td>{{ $absen['jam_masuk'] }}</td>
+        <td>{{ $absen['jam_pulang'] }}</td>
+        <td>
+            <span class="status-badge {{ $absen['status_class'] }}">
+                {{ $absen['status_kehadiran'] }}
+            </span>
+        </td>
+        <td>
+            @if($absen['type'] == 'ketidakhadiran' && $absen['approval_status'] == 'pending')
+                <!-- Tombol approve/reject -->
+            @endif
+        </td>
+    </tr>
+@empty
+    <tr>
+        <td colspan="8" class="text-center py-8">Tidak ada data ditemukan</td>
+    </tr>
+@endforelse
                                 </tbody>
                             </table>
                         </div>
@@ -732,63 +662,65 @@
                                 </thead>
                                 <tbody id="absenceTableBody">
                                     <!-- Data rows will be populated by JavaScript -->
-                                    @forelse($formattedAbsensi->where('type', 'ketidakhadiran') as $index => $absen)
-                                    <tr class="hover:bg-gray-50">
-                                        <td style="min-width: 60px;">{{ $index + 1 }}</td>
-                                        <td style="min-width: 200px;">{{ $absen['user_name'] }}</td>
-                                        <td style="min-width: 120px;">{{ $absen['divisi'] }}</td>
-                                        <td style="min-width: 120px;">{{ \Carbon\Carbon::parse($absen['tanggal'])->format('d/m/Y') }}</td>
-                                        <td style="min-width: 120px;">{{ $absen['tanggal_akhir'] ? \Carbon\Carbon::parse($absen['tanggal_akhir'])->format('d/m/Y') : '-' }}</td>
-                                        <td style="min-width: 200px;">{{ $absen['alasan'] ?? '-' }}</td>
-                                        <td style="min-width: 120px;">
-                                            <span class="status-badge {{ $absen['status_class'] }}">
-                                                {{ $absen['status_kehadiran'] }}
-                                            </span>
-                                        </td>
-                                        <td style="min-width: 120px;">
-                                            @if($absen['approval_status'] == 'pending')
-                                                <span class="status-badge status-pending">
-                                                    Pending
-                                                </span>
-                                                <div class="mt-1 flex space-x-2">
-                                                    <form action="{{ route('general_manajer.absensi.approve', $absen['id']) }}" method="POST" class="inline">
-                                                        @csrf
-                                                        <button type="submit" class="text-green-600 hover:text-green-900 text-sm">
-                                                            Approve
-                                                        </button>
-                                                    </form>
-                                                    <form action="{{ route('general_manajer.absensi.reject', $absen['id']) }}" method="POST" class="inline">
-                                                        @csrf
-                                                        <button type="button" onclick="showRejectModal('{{ $absen['id'] }}', '{{ $absen['user_name'] }}')" 
-                                                                class="text-red-600 hover:text-red-900 text-sm">
-                                                            Reject
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            @elseif($absen['approval_status'] == 'approved')
-                                                <span class="status-badge status-approved">
-                                                    Approved
-                                                </span>
-                                            @elseif($absen['approval_status'] == 'rejected')
-                                                <span class="status-badge status-rejected">
-                                                    Rejected
-                                                </span>
-                                            @else
-                                                <span class="text-sm text-gray-500">-</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="8" class="px-6 py-8 text-center text-gray-500">
-                                            <div class="flex flex-col items-center">
-                                                <span class="material-icons-outlined text-4xl text-gray-300 mb-2">search_off</span>
-                                                <p class="text-lg">Tidak ada data ditemukan</p>
-                                                <p class="text-sm mt-1">Coba ubah filter pencarian Anda</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforelse
+@forelse($formattedAbsensi->where('type', 'ketidakhadiran') as $index => $absen)
+<tr class="hover:bg-gray-50">
+    <td style="min-width: 60px;">{{ $index + 1 }}</td>
+    <td style="min-width: 200px;">{{ $absen['user_name'] }}</td>
+    <td style="min-width: 120px;">{{ $absen['divisi'] }}</td>
+    <td style="min-width: 120px;">{{ \Carbon\Carbon::parse($absen['tanggal'])->format('d/m/Y') }}</td>
+    <td style="min-width: 120px;">{{ $absen['tanggal_akhir'] ? \Carbon\Carbon::parse($absen['tanggal_akhir'])->format('d/m/Y') : '-' }}</td>
+    <td style="min-width: 200px;">{{ $absen['alasan'] ?? '-' }}</td>
+    <td style="min-width: 120px;">
+        @if($absen['jenis_ketidakhadiran'] == 'izin')
+            <span class="status-badge status-izin">Izin</span>
+        @elseif($absen['jenis_ketidakhadiran'] == 'sakit')
+            <span class="status-badge status-sakit">Sakit</span>
+        @endif
+    </td>
+    <td style="min-width: 120px;">
+        @if($absen['approval_status'] == 'pending')
+            <span class="status-badge status-pending">
+                Pending
+            </span>
+            <div class="mt-1 flex space-x-2">
+                <form action="{{ route('general_manajer.absensi.approve', $absen['id']) }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="text-green-600 hover:text-green-900 text-sm">
+                        Approve
+                    </button>
+                </form>
+                <form action="{{ route('general_manajer.absensi.reject', $absen['id']) }}" method="POST" class="inline">
+                    @csrf
+                    <button type="button" onclick="showRejectModal('{{ $absen['id'] }}', '{{ $absen['user_name'] }}')" 
+                            class="text-red-600 hover:text-red-900 text-sm">
+                        Reject
+                    </button>
+                </form>
+            </div>
+        @elseif($absen['approval_status'] == 'approved')
+            <span class="status-badge status-approved">
+                Approved
+            </span>
+        @elseif($absen['approval_status'] == 'rejected')
+            <span class="status-badge status-rejected">
+                Rejected
+            </span>
+        @else
+            <span class="text-sm text-gray-500">-</span>
+        @endif
+    </td>
+</tr>
+@empty
+<tr>
+    <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+        <div class="flex flex-col items-center">
+            <span class="material-icons-outlined text-4xl text-gray-300 mb-2">search_off</span>
+            <p class="text-lg">Tidak ada data ditemukan</p>
+            <p class="text-sm mt-1">Coba ubah filter pencarian Anda</p>
+        </div>
+    </td>
+</tr>
+@endforelse
                                 </tbody>
                             </table>
                         </div>

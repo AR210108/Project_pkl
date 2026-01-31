@@ -14,8 +14,15 @@ return new class extends Migration
         Schema::create('project', function (Blueprint $table) {
             $table->id();
             $table->foreignId('layanan_id')
-              ->constrained('layanans') // kalau tabel kamu namanya "layanan"
+              ->constrained('layanans')
               ->cascadeOnDelete();
+            
+            // Tambahkan field penanggung jawab di sini
+            $table->foreignId('penanggung_jawab_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null');
+            
             $table->string('nama');
             $table->text('deskripsi');
             $table->string('harga')->nullable();

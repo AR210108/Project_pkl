@@ -17,21 +17,36 @@ class RoleMiddleware
      * @param  string|null  ...$roles
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    public function handle(Request $request, Closure $next, ...$roles)
-    {
-        // 1. PERIKSA: Apakah user sudah login?
-        if (!Auth::check()) {
-            // Jika belum, redirect ke halaman login dengan pesan
-            return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
-        }
+  public function handle(Request $request, Closure $next, ...$roles)
+{
+    \Log::info('RoleMiddleware checking', [
+        'user_id' => Auth::id(),
+        'user_role' => Auth::user()->role ?? 'none',
+        'required_roles' => $roles,
+        'path' => $request->path(),
+        'url' => $request->url()
+    ]);
 
-        // 2. PERIKSA: Apakah role user ada di dalam daftar role yang diizinkan?
-        if (!in_array(Auth::user()->role, $roles)) {
-            // Jika role-nya tidak sesuai, tampilkan error 403 yang lebih jelas
-            abort(403, 'Anda tidak memiliki izin untuk mengakses halaman ini.');
-        }
-
-        // 3. LANJUTKAN: Jika semua pengecekan lolos, lanjutkan request
-        return $next($request);
+    // 1. PERIKSA: Apakah user sudah login?
+    if (!Auth::check()) {
+        \Log::warning('User not authenticated for role middleware');
+        return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
     }
+
+    // 2. PERIKSA: Apakah role user ada di dalam daftar role yang diizinkan?
+    if (!in_array(Auth::user()->role, $roles)) {
+        \Log::warning('User role not authorized', [
+            'user_role' => Auth::user()->role,
+            'required_roles' => $roles
+        ]);
+        abort(403, 'Anda tidak memiliki izin untuk mengakses halaman ini. Role Anda: ' . Auth::user()->role);
+    }
+
+    // 3. LANJUTKAN: Jika semua pengecekan lolos, lanjutkan request
+    \Log::info('RoleMiddleware passed for user', [
+        'user_id' => Auth::id(),
+        'user_role' => Auth::user()->role
+    ]);
+    return $next($request);
+}
 }

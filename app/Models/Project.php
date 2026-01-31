@@ -1,4 +1,5 @@
 <?php
+// app/Models/Project.php
 
 namespace App\Models;
 
@@ -9,11 +10,11 @@ class Project extends Model
 {
     use HasFactory;
     
-    // Tambahkan baris ini
-    protected $table = 'project'; // Beri tahu model untuk menggunakan tabel 'orderan'
+    protected $table = 'project';
     
     protected $fillable = [
         'layanan_id',
+        'penanggung_jawab_id', // tambahkan ini
         'nama',
         'deskripsi',
         'harga',
@@ -26,8 +27,14 @@ class Project extends Model
         'deadline' => 'date',
         'progres' => 'integer'
     ];
+    
     public function layanan()
-{
-    return $this->belongsTo(Layanan::class);
-}
+    {
+        return $this->belongsTo(Layanan::class);
+    }
+    
+    public function penanggungJawab()
+    {
+        return $this->belongsTo(User::class, 'penanggung_jawab_id');
+    }
 }

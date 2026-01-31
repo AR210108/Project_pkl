@@ -13,13 +13,18 @@ return new class extends Migration
     {
         Schema::create('cuti', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('karyawan_id')->constrained('karyawan')->onDelete('cascade');
+            
+            // [REVISI] Mengubah karyawan_id menjadi user_id agar user bisa cuti 
+            // meskipun data profil karyawan belum lengkap.
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai');
             $table->integer('durasi');
             $table->text('keterangan');
             $table->enum('jenis_cuti', ['tahunan', 'sakit', 'penting', 'melahirkan', 'lainnya'])->default('lainnya');
             $table->enum('status', ['menunggu', 'disetujui', 'ditolak'])->default('menunggu');
+            
             $table->foreignId('disetujui_oleh')->nullable()->constrained('users')->onDelete('set null');
             $table->text('catatan_penolakan')->nullable();
             $table->timestamp('disetujui_pada')->nullable();
@@ -27,7 +32,7 @@ return new class extends Migration
             $table->softDeletes();
             
             // Indexes
-            $table->index('karyawan_id');
+            $table->index('user_id'); // Index diganti ke user_id
             $table->index('status');
             $table->index('tanggal_mulai');
             $table->index('tanggal_selesai');

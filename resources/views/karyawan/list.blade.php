@@ -126,6 +126,7 @@
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark min-h-screen">

@@ -10,20 +10,10 @@ class Cuti extends Model
 {
     use HasFactory, SoftDeletes;
 
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
     protected $table = 'cuti';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
-        'karyawan_id',
+        'user_id',
         'tanggal_mulai',
         'tanggal_selesai',
         'durasi',
@@ -35,11 +25,6 @@ class Cuti extends Model
         'disetujui_pada',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
@@ -47,11 +32,11 @@ class Cuti extends Model
     ];
 
     /**
-     * Relationships
+     * RELASI
      */
-    public function karyawan()
+    public function user()
     {
-        return $this->belongsTo(Karyawan::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function disetujuiOleh()
@@ -65,7 +50,70 @@ class Cuti extends Model
     }
 
     /**
-     * Scopes
+     * ACCESSORS (TANPA NIK)
+     */
+    public function getNamaKaryawanAttribute()
+    {
+        return $this->user ? $this->user->name : 'Unknown';
+    }
+
+    public function getDivisiKaryawanAttribute()
+    {
+        return $this->user ? $this->user->divisi : 'Unknown';
+    }
+
+   
+
+    public function getSisaCutiKaryawanAttribute()
+    {
+        return $this->user ? $this->user->sisa_cuti : 0;
+    }
+
+    /**
+     * Format tanggal dengan fallback
+     */
+    public function getTanggalMulaiFormattedAttribute()
+    {
+        return $this->tanggal_mulai ? $this->tanggal_mulai->format('d F Y') : '-';
+    }
+
+    public function getTanggalSelesaiFormattedAttribute()
+    {
+        return $this->tanggal_selesai ? $this->tanggal_selesai->format('d F Y') : '-';
+    }
+
+    public function getPeriodeAttribute()
+    {
+        if (!$this->tanggal_mulai || !$this->tanggal_selesai) return '-';
+        return $this->tanggal_mulai->format('d/m/Y') . ' - ' . $this->tanggal_selesai->format('d/m/Y');
+    }
+
+    public function getStatusLabelAttribute()
+    {
+        $labels = [
+            'menunggu' => 'Menunggu Persetujuan',
+            'disetujui' => 'Disetujui',
+            'ditolak' => 'Ditolak',
+        ];
+        
+        return $labels[$this->status] ?? ucfirst($this->status);
+    }
+
+    public function getJenisCutiTextAttribute()
+    {
+        $jenis = [
+            'tahunan' => 'Cuti Tahunan',
+            'sakit' => 'Cuti Sakit',
+            'penting' => 'Cuti Penting',
+            'melahirkan' => 'Cuti Melahirkan',
+            'lainnya' => 'Cuti Lainnya',
+        ];
+
+        return $jenis[$this->jenis_cuti] ?? 'Cuti Lainnya';
+    }
+
+    /**
+     * SCOPES
      */
     public function scopeMenunggu($query)
     {
@@ -92,55 +140,13 @@ class Cuti extends Model
         return $query->whereYear('created_at', now()->year);
     }
 
-    public function scopeUntukKaryawan($query, $karyawanId)
+    public function scopeUntukUser($query, $userId)
     {
-        return $query->where('karyawan_id', $karyawanId);
+        return $query->where('user_id', $userId);
     }
 
     /**
-     * Accessors & Mutators
-     */
-    public function getTanggalMulaiFormattedAttribute()
-    {
-        return $this->tanggal_mulai->translatedFormat('d F Y');
-    }
-
-    public function getTanggalSelesaiFormattedAttribute()
-    {
-        return $this->tanggal_selesai->translatedFormat('d F Y');
-    }
-
-    public function getPeriodeAttribute()
-    {
-        return $this->tanggal_mulai->format('d/m/Y') . ' - ' . $this->tanggal_selesai->format('d/m/Y');
-    }
-
-    public function getStatusBadgeAttribute()
-    {
-        $badges = [
-            'menunggu' => '<span class="status-badge status-menunggu">Menunggu</span>',
-            'disetujui' => '<span class="status-badge status-disetujui">Disetujui</span>',
-            'ditolak' => '<span class="status-badge status-ditolak">Ditolak</span>',
-        ];
-
-        return $badges[$this->status] ?? '';
-    }
-
-    public function getJenisCutiTextAttribute()
-    {
-        $jenis = [
-            'tahunan' => 'Cuti Tahunan',
-            'sakit' => 'Cuti Sakit',
-            'penting' => 'Cuti Penting',
-            'melahirkan' => 'Cuti Melahirkan',
-            'lainnya' => 'Cuti Lainnya',
-        ];
-
-        return $jenis[$this->jenis_cuti] ?? 'Cuti Lainnya';
-    }
-
-    /**
-     * Business Logic Methods
+     * BUSINESS LOGIC
      */
     public function dapatDisetujui()
     {
@@ -157,12 +163,9 @@ class Cuti extends Model
         return $this->status === 'menunggu';
     }
 
-    /**
-     * Check if cuti overlaps with existing cuti
-     */
     public function isOverlapping()
     {
-        return self::where('karyawan_id', $this->karyawan_id)
+        return self::where('user_id', $this->user_id)
             ->where('id', '!=', $this->id)
             ->where('status', 'disetujui')
             ->where(function ($query) {

@@ -10,31 +10,79 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'name',
         'email',
         'password',
         'role',
-        'divisi',
-        // ... kolom lainnya
+        'divisi_id',
+        'sisa_cuti', // Penting untuk perhitungan cuti
     ];
 
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array<int, string>
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
 
     /**
+     * Relasi langsung ke tabel cuti
+     * [REVISI] Tidak lagi melalui Karyawan, langsung user_id
+     */
+    public function cuti()
+    {
+        return $this->hasMany(Cuti::class, 'user_id');
+    }
+
+    /**
+     * Relasi ke tabel cuti dengan status menunggu
+     */
+    public function cutiMenunggu()
+    {
+        return $this->cuti()->where('status', 'menunggu');
+    }
+
+    /**
+     * Relasi ke tabel cuti dengan status disetujui
+     */
+    public function cutiDisetujui()
+    {
+        return $this->cuti()->where('status', 'disetujui');
+    }
+
+    /**
+     * Relasi ke tabel cuti dengan status ditolak
+     */
+    public function cutiDitolak()
+    {
+        return $this->cuti()->where('status', 'ditolak');
+    }
+
+    /**
      * Cek apakah user adalah admin
      */
     public function isAdmin(): bool
     {
-        return in_array($this->role, ['admin','finance']);
+        return in_array($this->role, ['admin', 'finance']);
     }
 
     /**
@@ -85,10 +133,13 @@ class User extends Authenticatable
         return $this->hasMany(Pengumuman::class, 'user_id');
     }
 
+    /**
+     * Relasi dengan absensi
+     */
     public function absensis()
-{
-    return $this->hasMany(Absensi::class);
-}
+    {
+        return $this->hasMany(Absensi::class);
+    }
 
     /**
      * Relasi dengan catatan rapat sebagai peserta
@@ -117,10 +168,10 @@ class User extends Authenticatable
     /**
      * Scope untuk user dalam divisi tertentu
      */
-    public function scopeByDivisi($query, $divisi)
-    {
-        return $query->where('divisi', $divisi);
-    }
+public function scopeByDivisiId($query, $divisiId)
+{
+    return $query->where('divisi_id', $divisiId);
+}
 
     /**
      * Accessor untuk nama lengkap dengan role
@@ -137,29 +188,44 @@ class User extends Authenticatable
     {
         $words = explode(' ', $this->name);
         $initials = '';
-        
+
         foreach ($words as $word) {
             $initials .= strtoupper(substr($word, 0, 1));
         }
-        
+
         return $initials;
     }
-public function catatanRapats()
-{
-    return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_penugasan', 'user_id', 'catatan_rapat_id');
-}
+    public function catatanRapats()
+    {
+        return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_penugasan', 'user_id', 'catatan_rapat_id');
+    }
 
-public function catatanRapatPenugasans()
-{
-    return $this->hasMany(CatatanRapatPenugasan::class, 'user_id');
-}
 
-/**
- * Pengumuman yang ditugaskan ke user ini
- */
-public function pengumumanDiterima()
+    /**
+     * Relasi ke model catatan rapat penugasan (detail)
+     */
+    public function catatanRapatPenugasans()
+    {
+        return $this->hasMany(CatatanRapatPenugasan::class, 'user_id');
+    }
+
+    /**
+     * Pengumuman yang ditugaskan ke user ini
+     */
+    public function pengumumanDiterima()
+    {
+        return $this->belongsToMany(Pengumuman::class, 'pengumuman_user', 'user_id', 'pengumuman_id')
+            ->withTimestamps();
+    }
+public function divisi()
 {
-    return $this->belongsToMany(Pengumuman::class, 'pengumuman_user', 'user_id', 'pengumuman_id')
-        ->withTimestamps();
+    return $this->belongsTo(Divisi::class, 'divisi_id');
 }
 }
+    
+    // Opsional: Hapus atau komentari relasi karyawan() jika tidak digunakan lagi
+    // public function karyawan()
+    // {
+    //     return $this->hasOne(Karyawan::class);
+    // }
+

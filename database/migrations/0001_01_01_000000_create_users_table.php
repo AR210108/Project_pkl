@@ -6,17 +6,33 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // Relasi ke divisi
+            $table->foreignId('divisi_id')->nullable()->constrained('divisi')->onDelete('set null');
+
+            
+            // --- TAMBAHAN KOLOM YANG HILANG ---
+            
+            // Kolom Role (Sesuai enum di error sebelumnya)
+            $table->enum('role', ['owner', 'admin', 'general_manager', 'manager_divisi', 'finance', 'karyawan'])->default('karyawan');
+            
+            // Kolom Divisi (Agar tidak error saat group by divisi)
+            $table->string('divisi')->nullable();
+            
+            // Kolom Sisa Cuti (Default 12 hari, sesuai request terakhir)
+            $table->integer('sisa_cuti')->default(12);
+            
+            // ------------------------------------
+            
             $table->rememberToken();
             $table->timestamps();
         });
@@ -37,13 +53,10 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };
