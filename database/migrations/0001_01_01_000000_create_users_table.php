@@ -25,8 +25,6 @@ return new class extends Migration
             // Kolom Role (Sesuai enum di error sebelumnya)
             $table->enum('role', ['owner', 'admin', 'general_manager', 'manager_divisi', 'finance', 'karyawan'])->default('karyawan');
             
-            // Kolom Divisi (Agar tidak error saat group by divisi)
-            $table->string('divisi')->nullable();
             
             // Kolom Sisa Cuti (Default 12 hari, sesuai request terakhir)
             $table->integer('sisa_cuti')->default(12);

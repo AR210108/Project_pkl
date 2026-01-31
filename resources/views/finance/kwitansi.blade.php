@@ -812,22 +812,32 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
-                            <input type="number" id="harga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <input type="number" id="harga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="0" min="0" step="0.01" value="0" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Sub Total (Rp)</label>
-                            <input type="number" id="subTotal" name="sub_total" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <input type="number" id="subTotal" name="sub_total" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="0" min="0" step="0.01" value="0" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Fee Maintenance (Rp)</label>
-                            <input type="number" id="feeMaintenance" name="fee_maintenance" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <input type="number" id="feeMaintenance" name="fee_maintenance" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="0" min="0" step="0.01" value="0">
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp)</label>
-                        <input type="text" id="total" name="total_display" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700" readonly>
-                        <!-- Hidden input for the actual numeric total value -->
-                        <input type="hidden" id="totalValue" name="total" value="0">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp)</label>
+                            <input type="text" id="total" name="total_display" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700" readonly>
+                            <!-- Hidden input for the actual numeric total value -->
+                            <input type="hidden" id="totalValue" name="total" value="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                                <option value="">-- Pilih Status --</option>
+                                <option value="Pembayawan Awal">Pembayaran Awal</option>
+                                <option value="Lunas">Lunas</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" id="cancelBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -877,22 +887,32 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
-                            <input type="number" id="editHarga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <input type="number" id="editHarga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="0" min="0" step="0.01" value="0" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Sub Total (Rp)</label>
-                            <input type="number" id="editSubTotal" name="sub_total" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <input type="number" id="editSubTotal" name="sub_total" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="0" min="0" step="0.01" value="0" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Fee Maintenance (Rp)</label>
-                            <input type="number" id="editFeeMaintenance" name="fee_maintenance" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <input type="number" id="editFeeMaintenance" name="fee_maintenance" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="0" min="0" step="0.01" value="0">
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp)</label>
-                        <input type="text" id="editTotal" name="total_display" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700" readonly>
-                        <!-- Hidden input for the actual numeric total value -->
-                        <input type="hidden" id="editTotalValue" name="total" value="0">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp)</label>
+                            <input type="text" id="editTotal" name="total_display" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700" readonly>
+                            <!-- Hidden input for the actual numeric total value -->
+                            <input type="hidden" id="editTotalValue" name="total" value="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select id="editStatus" name="status" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
+                                <option value="">-- Pilih Status --</option>
+                                <option value="Pembayawan Awal">Pembayaran Awal</option>
+                                <option value="Lunas">Lunas</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" id="cancelEditBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -1477,8 +1497,8 @@
             // Get form data
             const formData = new FormData(form);
             
-            // Send data to API
-            fetch('/api/kwitansi', {
+            // Send data to web route
+            fetch('/finance/kwitansi', {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -1532,8 +1552,8 @@
             const id = document.getElementById('editKwitansiId').value;
             const formData = new FormData(form);
             
-            // Send data to API
-            fetch(`/api/kwitansi/${id}`, {
+            // Send data to web route
+            fetch(`/finance/kwitansi/${id}`, {
                 method: 'PUT',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -1581,8 +1601,8 @@
             submitBtn.textContent = 'Menghapus...';
             submitBtn.disabled = true;
             
-            // Send delete request to API
-            fetch(`/api/kwitansi/${id}`, {
+            // Send delete request to web route
+            fetch(`/finance/kwitansi/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

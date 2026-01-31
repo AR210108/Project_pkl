@@ -1,5 +1,4 @@
 <?php
-// app/Models/Project.php
 
 namespace App\Models;
 
@@ -11,9 +10,9 @@ use App\Models\User; // Tambahkan ini
 class Project extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'project'; // Nama tabel singular
-    
+
     protected $fillable = [
         'layanan_id',
         'nama',
@@ -25,7 +24,6 @@ class Project extends Model
         'penanggung_jawab_id',
     ];
 
-    // TAMBAHKAN CASTING
     protected $casts = [
         'progres' => 'integer',
         'status' => 'string',
@@ -48,22 +46,35 @@ class Project extends Model
     // Atau gunakan mutator untuk status
     public function setStatusAttribute($value)
     {
-        // Normalisasi status
-        $statusMap = [
-            'pending' => 'Pending',
-            'proses' => 'Proses',
-            'selesai' => 'Selesai',
-        ];
-        
-        $lowerValue = strtolower($value);
-        $this->attributes['status'] = $statusMap[$lowerValue] ?? ucfirst($value);
+        return $this->belongsTo(Layanan::class, 'layanan_id');
+    }
+
+
+    /**
+     * Event ketika project dibuat
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Ketika project dibuat, ambil data dari layanan
+        static::creating(function ($project) {
+            if ($project->layanan_id && !$project->nama) {
+                $layanan = Layanan::find($project->layanan_id);
+                if ($layanan) {
+                    $project->nama = $layanan->nama_layanan;
+                    $project->deskripsi = $layanan->deskripsi;
+                    $project->harga = $layanan->harga;
+                }
+            }
+        });
     }
 
     // **TAMBAHKAN ACCESSOR UNTUK STATUS YANG AMAN**
     public function getStatusFormattedAttribute()
     {
         $status = $this->attributes['status'] ?? $this->status;
-        
+
         $statusMap = [
             'pending' => 'Pending',
             'proses' => 'Proses',
@@ -72,7 +83,7 @@ class Project extends Model
             'Proses' => 'Proses',
             'Selesai' => 'Selesai',
         ];
-        
+
         $lowerStatus = strtolower($status);
         return $statusMap[$lowerStatus] ?? $status;
     }

@@ -7,6 +7,7 @@ use App\Models\Divisi; // TAMBAHKAN INI
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -16,8 +17,8 @@ class UserController extends Controller
 public function index()
 {
     // TAMPILKAN DATA TERBARU DI ATAS (DESCENDING)
-    $users = User::with('divisi')
-                ->orderBy('created_at', 'desc') // atau 'id', 'desc'
+    $users = User::with('divisi') // Load relationship divisi
+                ->orderBy('created_at', 'desc')
                 ->get();
     
     $divisis = Divisi::orderBy('divisi', 'asc')->get();
@@ -91,7 +92,7 @@ public function store(Request $request)
             'name'      => 'required|string|max:255',
             'email'     => 'required|email|unique:users,email',
             'password'  => 'required|min:5',
-            'role'      => 'required',
+            'role'      => 'required|in:owner,admin,general_manager,manager_divisi,finance,karyawan',
             'divisi_id' => 'nullable|exists:divisi,id',
         ]);
 
@@ -101,15 +102,21 @@ public function store(Request $request)
             'password'  => bcrypt($validated['password']),
             'role'      => $validated['role'],
             'divisi_id' => $validated['divisi_id'] ?? null,
+            'sisa_cuti' => 12, // Default value sesuai migration
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'User berhasil ditambahkan',
-            'data'    => $user
+            'data'    => $user->load('divisi')
         ], 200);
 
     } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('User Store Validation Error:', [
+            'errors' => $e->errors(),
+            'request_data' => $request->all()
+        ]);
+        
         return response()->json([
             'success' => false,
             'message' => 'Validasi gagal',
@@ -117,6 +124,10 @@ public function store(Request $request)
         ], 422);
 
     } catch (\Exception $e) {
+        \Log::error('User Store Error: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString()
+        ]);
+        
         return response()->json([
             'success' => false,
             'message' => 'Terjadi kesalahan server',
@@ -125,37 +136,134 @@ public function store(Request $request)
     }
 }
 
-
     /**
      * Update user
      */
 public function update(Request $request, $id)
 {
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email,' . $id,
-        'role' => 'required|in:admin,karyawan,general_manager,manager_divisi,finance,owner',
-        'divisi_id' => 'nullable|exists:divisi,id'
-    ]);
+    try {
+        \Log::info('=== USER UPDATE REQUEST ===');
+        \Log::info('User ID: ' . $id);
+        \Log::info('Request Data:', $request->all());
+        
+        // Validasi
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'role' => 'required|in:owner,admin,general_manager,manager_divisi,finance,karyawan',
+            'divisi_id' => 'nullable|exists:divisi,id',
+            'password' => 'nullable|min:5'
+        ]);
 
-    $user = User::findOrFail($id);
+        // Cari user dengan relasi karyawan
+        $user = User::with(['karyawan', 'divisi'])->findOrFail($id);
+        
+        if (!$user) {
+            throw new \Exception('User tidak ditemukan');
+        }
+        
+        \Log::info('User ditemukan: ' . $user->name);
 
-    $user->name = $request->name;
-    $user->email = $request->email;
-    $user->role = $request->role;
-    $user->divisi_id = $request->divisi_id; // Update divisi_id
-    
-    if ($request->filled('password')) {
-        $user->password = Hash::make($request->password);
+        // Mulai transaksi database
+        DB::beginTransaction(); // GUNAKAN DB:: bukan \DB::
+
+        // Update data user
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->role = $validated['role'];
+        $user->divisi_id = $validated['divisi_id'] ?? null;
+        
+        // Update password jika diisi
+        if (!empty($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+
+        $user->save();
+        
+        // **SINKRONKAN KE KARYAWAN JIKA ADA**
+        if ($user->karyawan) {
+            $karyawan = $user->karyawan;
+            $karyawanUpdated = false;
+            
+            // Update nama karyawan jika berbeda
+            if ($karyawan->nama !== $user->name) {
+                $karyawan->nama = $user->name;
+                $karyawanUpdated = true;
+            }
+            
+            // Update email karyawan jika berbeda
+            if ($karyawan->email !== $user->email) {
+                $karyawan->email = $user->email;
+                $karyawanUpdated = true;
+            }
+            
+            // Update divisi di karyawan jika user memiliki divisi
+            if ($user->divisi && $karyawan->divisi !== $user->divisi->divisi) {
+                $karyawan->divisi = $user->divisi->divisi;
+                $karyawanUpdated = true;
+            }
+            
+            // Jika jabatan kosong dan role adalah karyawan, isi jabatan
+            if ((!$karyawan->jabatan || $karyawan->jabatan === '') && $user->role === 'karyawan') {
+                $karyawan->jabatan = $user->role;
+                $karyawanUpdated = true;
+            }
+            
+            if ($karyawanUpdated) {
+                $karyawan->save();
+                \Log::info('Manual sync: Karyawan updated from User controller', [
+                    'user_id' => $user->id,
+                    'karyawan_id' => $karyawan->id
+                ]);
+            }
+        }
+
+        DB::commit();
+        
+        \Log::info('User dan Karyawan berhasil diupdate:', [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'divisi_id' => $user->divisi_id
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User dan data karyawan berhasil diperbarui',
+            'data' => $user->load('divisi', 'karyawan')
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        DB::rollBack();
+        \Log::error('User Update Validation Error:', $e->errors());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Validasi gagal',
+            'errors' => $e->errors()
+        ], 422);
+
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        DB::rollBack();
+        \Log::error('User not found: ' . $id);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'User tidak ditemukan'
+        ], 404);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('User Update Error: ' . $e->getMessage());
+        \Log::error('Stack Trace: ' . $e->getTraceAsString());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan server: ' . $e->getMessage(),
+            'error' => $e->getMessage()
+        ], 500);
     }
-    
-    $user->save();
-
-    return response()->json([
-        'success' => true,
-        'message' => 'User berhasil diperbarui',
-        'data' => $user
-    ]);
 }
 
     /**

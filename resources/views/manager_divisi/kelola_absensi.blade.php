@@ -1,580 +1,51 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Kelola Absensi</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Kelola Absensi - Dashboard Manajer</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#3b82f6",
-                        success: "#10b981",
-                        warning: "#f59e0b",
-                        danger: "#ef4444",
-                        "text-light": "#1e293b",
-                        "text-dark": "#f8fafc",
-                        "text-muted-light": "#64748b",
-                        "text-muted-dark": "#94a3b8",
-                        "border-light": "#e2e8f0",
-                        "border-dark": "#334155",
-                    },
-                    fontFamily: {
-                        display: ["Poppins", "sans-serif"],
-                    }
-                },
-            },
-        };
-    </script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .material-icons-outlined {
-            font-size: 24px;
-            vertical-align: middle;
-        }
-
-        /* Fix untuk layout sidebar */
-        .main-wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 256px;
-            flex-shrink: 0;
-            position: fixed;
-            height: 100vh;
-            z-index: 40;
-            overflow-y: auto;
-        }
-
-        .main-content {
-            flex: 1;
-            margin-left: 256px;
-            width: calc(100% - 256px);
-            min-height: 100vh;
-            overflow-y: auto;
-        }
-
-        /* Responsive untuk mobile */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-            }
-
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-            }
-
-            .main-wrapper {
-                flex-direction: column;
-            }
-        }
-
-        .card {
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .status-hadir {
-            background-color: rgba(16, 185, 129, 0.15);
-            color: #065f46;
-        }
-
-        .status-terlambat {
-            background-color: rgba(245, 158, 11, 0.15);
-            color: #92400e;
-        }
-
-        .status-izin {
-            background-color: rgba(59, 130, 246, 0.15);
-            color: #1e40af;
-        }
-
-        .status-cuti {
-            background-color: rgba(239, 68, 68, 0.15);
-            color: #991b1b;
-        }
-
-        .status-sakit {
-            background-color: rgba(236, 72, 153, 0.15);
-            color: #9f1239;
-        }
-
-        .status-dinas-luar {
-            background-color: rgba(139, 92, 246, 0.15);
-            color: #5b21b6;
-        }
-
-        .icon-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 0.5rem;
-        }
-
-        .tab-nav {
-            display: flex;
-            border-bottom: 2px solid #e2e8f0;
-            margin-bottom: 1.5rem;
-        }
-
-        .tab-button {
-            padding: 0.75rem 1.5rem;
-            font-weight: 500;
-            color: #64748b;
-            background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .tab-button:hover {
-            color: #3b82f6;
-        }
-
-        .tab-button.active {
-            color: #3b82f6;
-            border-bottom-color: #3b82f6;
-        }
-
-        .panel {
-            background: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-        }
-
-        .panel-header {
-            background: #f8fafc;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .panel-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .panel-body {
-            padding: 1.5rem;
-        }
-
-        .scrollable-table-container {
-            width: 100%;
-            overflow-x: auto;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            background: white;
-        }
-
-        .scrollable-table-container::-webkit-scrollbar {
-            height: 12px;
-            width: 12px;
-        }
-
-        .scrollable-table-container::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 6px;
-        }
-
-        .scrollable-table-container::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 6px;
-            border: 2px solid #f1f5f9;
-        }
-
-        .scrollable-table-container::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        .data-table {
-            width: 100%;
-            min-width: 1200px;
-            border-collapse: collapse;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-            white-space: nowrap;
-        }
-
-        .data-table th {
-            background: #f8fafc;
-            font-weight: 600;
-            color: #374151;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .data-table tbody tr:nth-child(even) {
-            background: #f9fafb;
-        }
-
-        .data-table tbody tr:hover {
-            background: #f3f4f6;
-        }
-
-        .desktop-pagination {
-            display: none;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin-top: 24px;
-        }
-
-        @media (min-width: 768px) {
-            .desktop-pagination {
-                display: flex;
-            }
-        }
-
-        .desktop-page-btn {
-            min-width: 32px;
-            height: 32px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .desktop-page-btn.active {
-            background-color: #3b82f6;
-            color: white;
-        }
-
-        .desktop-page-btn:not(.active) {
-            background-color: #f1f5f9;
-            color: #64748b;
-        }
-
-        .desktop-page-btn:not(.active):hover {
-            background-color: #e2e8f0;
-        }
-
-        .desktop-nav-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #f1f5f9;
-            color: #64748b;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .desktop-nav-btn:hover:not(:disabled) {
-            background-color: #e2e8f0;
-        }
-
-        .desktop-nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .mobile-pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin-top: 16px;
-        }
-
-        @media (min-width: 768px) {
-            .mobile-pagination {
-                display: none;
-            }
-        }
-
-        .mobile-page-btn {
-            min-width: 32px;
-            height: 32px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .mobile-page-btn.active {
-            background-color: #3b82f6;
-            color: white;
-        }
-
-        .mobile-page-btn:not(.active) {
-            background-color: #f1f5f9;
-            color: #64748b;
-        }
-
-        .mobile-page-btn:not(.active):hover {
-            background-color: #e2e8f0;
-        }
-
-        .mobile-nav-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #f1f5f9;
-            color: #64748b;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .mobile-nav-btn:hover:not(:disabled) {
-            background-color: #e2e8f0;
-        }
-
-        .mobile-nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .modal {
-            backdrop-filter: blur(5px);
-        }
-
-        .notification {
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* Form input styles */
-        .form-input {
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s ease;
-        }
-
-        .form-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        /* Filter Dropdown Styles */
-        .filter-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 8px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            padding: 16px;
-            min-width: 200px;
-            z-index: 100;
-            display: none;
-        }
-
-        .filter-dropdown.show {
-            display: block;
-        }
-
-        .filter-option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 0;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .filter-option:hover {
-            color: #3b82f6;
-        }
-
-        .filter-option input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .filter-option label {
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .filter-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .filter-actions button {
-            flex: 1;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
-        }
-
-        .filter-apply {
-            background-color: #3b82f6;
-            color: white;
-        }
-
-        .filter-apply:hover {
-            background-color: #2563eb;
-        }
-
-        .filter-reset {
-            background-color: #f1f5f9;
-            color: #64748b;
-        }
-
-        .filter-reset:hover {
-            background-color: #e2e8f0;
-        }
-
-        /* Hidden class for filtering */
-        .hidden-by-filter {
-            display: none !important;
-        }
-
-        /* Mobile Card View */
-        @media (max-width: 639px) {
-            .desktop-table {
-                display: none;
-            }
-
-            .mobile-cards {
-                display: block;
-            }
-        }
-
-        @media (min-width: 640px) {
-            .desktop-table {
-                display: block;
-            }
-
-            .mobile-cards {
-                display: none;
-            }
-        }
-
-        /* Mobile card styles */
-        .mobile-card {
-            background: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            border: 1px solid #e2e8f0;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .mobile-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.75rem;
-        }
-
-        .mobile-card-title {
-            font-weight: 600;
-            color: #1e293b;
-        }
-
-        .mobile-card-body {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-        }
-
-        .mobile-card-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .mobile-card-label {
-            font-size: 0.75rem;
-            color: #64748b;
-        }
-
-        .mobile-card-value {
-            font-weight: 500;
-            color: #1e293b;
-        }
+        body { font-family: 'Poppins', sans-serif; }
+        .material-icons-outlined { font-size: 24px; vertical-align: middle; }
+        .card { transition: all 0.3s ease; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); }
+        .status-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .status-hadir { background-color: rgba(16, 185, 129, 0.15); color: #065f46; }
+        .status-terlambat { background-color: rgba(245, 158, 11, 0.15); color: #92400e; }
+        .status-izin { background-color: rgba(59, 130, 246, 0.15); color: #1e40af; }
+        .status-cuti { background-color: rgba(239, 68, 68, 0.15); color: #991b1b; }
+        .status-sakit { background-color: rgba(251, 146, 60, 0.15); color: #9a3412; }
+        .status-dinas-luar { background-color: rgba(139, 92, 246, 0.15); color: #5b21b6; }
+        .status-tidak-masuk { background-color: rgba(239, 68, 68, 0.15); color: #991b1b; }
+        .icon-container { display: flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        .data-table th { background: #f8fafc; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .data-table tbody tr:nth-child(even) { background: #f9fafb; }
+        .data-table tbody tr:hover { background: #f3f4f6; }
+        .form-input { border: 1px solid #e2e8f0; padding: 0.5rem 1rem; border-radius: 0.375rem; transition: all 0.2s ease; }
+        .form-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); outline: none; }
     </style>
 </head>
 
-<body class="font-display bg-gray-50 text-gray-800">
-    <div class="main-wrapper">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            @include('manager_divisi/templet/sider')
-        </div>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="p-4 md:p-6 lg:p-8">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
-                    <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-0">Kelola Absensi</h2>
+<body class="bg-gray-100 text-gray-800">
+    @include('general_manajer/templet/header')
+    
+    <main class="p-4 sm:p-6 lg:p-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Kelola Absensi</h1>
+                    @if($selectedDivision)
+                        <p class="text-sm text-blue-600 mt-1">
+                            <span class="material-icons-outlined text-sm align-middle">filter_list</span>
+                            Menampilkan untuk divisi: <span class="font-semibold">{{ $selectedDivision }}</span>
+                        </p>
+                    @endif
                 </div>
 
                 <!-- Statistics Cards -->
@@ -657,6 +128,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
                 <!-- Tab Navigation -->
                 <div class="tab-nav">
@@ -736,7 +208,7 @@
                             Data Absensi
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-gray-500">Total: <span id="totalCount" class="font-semibold text-gray-800">{{ $attendances->count() }}</span> data</span>
+                            <span class="text-sm text-gray-500">Total: <span id="totalCount" class="font-semibold text-gray-800">{{ $formattedAbsensi->count() }}</span> data</span>
                         </div>
                     </div>
                     <div class="panel-body">
@@ -756,7 +228,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="absensiTableBody">
-                                        @foreach ($attendances as $i => $absen)
+                                        @foreach ($formattedAbsensi as $i => $absen)
                                             <tr class="absensi-row" data-id="{{ $absen->id }}">
                                                 <td>{{ $i + 1 }}</td>
                                                 <td>{{ optional($absen->user)->name ?? 'User tidak ditemukan' }}</td>
@@ -808,7 +280,7 @@
 
                         <!-- Mobile Card View -->
                         <div class="mobile-cards" id="absensiMobileCards">
-                            @foreach ($attendances as $i => $absen)
+                            @foreach ($formattedAbsensi as $i => $absen)
                                 <div class="mobile-card absensi-card" data-id="{{ $absen->id }}">
                                     <div class="mobile-card-header">
                                         <div class="mobile-card-title">{{ optional($absen->user)->name ?? 'User tidak ditemukan' }}</div>
@@ -1008,6 +480,23 @@
                                     </div>
                                 </div>
                             @endforeach
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                            <span class="material-icons-outlined text-sm align-middle mr-1">filter_list</span>
+                            Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+                <div class="card bg-white p-4 rounded-xl shadow-md">
+                    <div class="flex items-center">
+                        <div class="icon-container bg-green-100 mr-3">
+                            <span class="material-icons-outlined text-green-600 text-xl">check_circle</span>
                         </div>
 
                         <!-- Mobile Pagination -->
@@ -1025,11 +514,6 @@
                     </div>
                 </div>
             </div>
-            <footer class="bg-white border-t border-gray-200 px-4 md:px-8 py-4 text-center">
-                <p class="text-sm text-gray-500">Copyright ©2025 by digicity.id</p>
-            </footer>
-        </main>
-    </div>
 
     <!-- Edit Cuti Modal -->
     <div id="editCutiModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">

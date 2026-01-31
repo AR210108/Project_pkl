@@ -286,8 +286,8 @@
             <!-- Menu Surat Kerjasama (Dropdown) -->
             <div class="relative">
                 <button
-                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors w-full text-left"
-                    onclick="toggleDropdown('dokumen-dropdown')" data-page="dokumen">
+                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors w-full text-left dropdown-toggle"
+                    data-dropdown="dokumen-dropdown" data-page="dokumen">
                     <span class="material-icons sidebar-icon">description</span>
                     <span class="sidebar-text">Dokumen</span>
                     <span class="material-icons sidebar-icon ml-auto transition-transform duration-200"
@@ -333,7 +333,8 @@
         </nav>
 
         <div class="sidebar-footer border-t border-gray-200">
-            <form action="{{ route('logout') }}" method="POST">
+            <!-- FORM LOGOUT YANG DIPERBAIKI -->
+            <form id="logout-form" action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button type="submit"
                     class="nav-item w-full flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
@@ -345,154 +346,167 @@
     </aside>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // --- ELEMEN DOM ---
-        const hamburger = document.getElementById('hamburger');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- ELEMEN DOM ---
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
 
-        // --- CEK ELEMEN PENTING ---
-        // Jika salah satu elemen utama tidak ditemukan, hentikan eksekusi
-        if (!hamburger || !sidebar || !overlay) {
-            console.error('Error: Elemen hamburger, sidebar, atau overlay tidak ditemukan.');
-            return;
-        }
-
-        // --- FUNGSI SIDEBAR ---
-        function openSidebar() {
-            sidebar.classList.remove('translate-x-full');
-            overlay.classList.remove('hidden');
-            hamburger.classList.add('hamburger-active');
-            document.body.style.overflow = 'hidden'; // Mencegah scroll background
-        }
-
-        function closeSidebar() {
-            sidebar.classList.add('translate-x-full');
-            overlay.classList.add('hidden');
-            hamburger.classList.remove('hamburger-active');
-            document.body.style.overflow = ''; // Kembalikan scroll
-        }
-
-        // --- EVENT LISTENER UNTUK HAMBURGER ---
-        hamburger.addEventListener('click', () => {
-            // Cek apakah sidebar sedang tersembunyi (memiliki class translate-x-full)
-            if (sidebar.classList.contains('translate-x-full')) {
-                openSidebar();
-            } else {
-                closeSidebar();
+            // --- CEK ELEMEN PENTING ---
+            // Jika salah satu elemen utama tidak ditemukan, hentikan eksekusi
+            if (!hamburger || !sidebar || !overlay) {
+                console.error('Error: Elemen hamburger, sidebar, atau overlay tidak ditemukan.');
+                return;
             }
-        });
 
-        // --- EVENT LISTENER UNTUK OVERLAY ---
-        overlay.addEventListener('click', closeSidebar);
-
-        // --- TUTUP SIDEBAR DENGAN TOMBOL ESC ---
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !sidebar.classList.contains('translate-x-full')) {
-                closeSidebar();
+            // --- FUNGSI SIDEBAR ---
+            function openSidebar() {
+                sidebar.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                hamburger.classList.add('hamburger-active');
+                document.body.style.overflow = 'hidden'; // Mencegah scroll background
             }
-        });
 
-        // --- FUNGSI UNTUK MENU AKTIF ---
-        function setActiveNavItem() {
-            const activePage = sessionStorage.getItem('activeSidebar');
-            if (!activePage) return;
+            function closeSidebar() {
+                sidebar.classList.add('translate-x-full');
+                overlay.classList.add('hidden');
+                hamburger.classList.remove('hamburger-active');
+                document.body.style.overflow = ''; // Kembalikan scroll
+            }
 
-            // Hapus class 'active' dari semua item
+            // --- EVENT LISTENER UNTUK HAMBURGER ---
+            hamburger.addEventListener('click', () => {
+                // Cek apakah sidebar sedang tersembunyi (memiliki class translate-x-full)
+                if (sidebar.classList.contains('translate-x-full')) {
+                    openSidebar();
+                } else {
+                    closeSidebar();
+                }
+            });
+
+            // --- EVENT LISTENER UNTUK OVERLAY ---
+            overlay.addEventListener('click', closeSidebar);
+
+            // --- TUTUP SIDEBAR DENGAN TOMBOL ESC ---
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('translate-x-full')) {
+                    closeSidebar();
+                }
+            });
+
+            // --- FUNGSI UNTUK MENU AKTIF ---
+            function setActiveNavItem() {
+                const activePage = sessionStorage.getItem('activeSidebar');
+                if (!activePage) return;
+
+                // Hapus class 'active' dari semua item
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Tambahkan class 'active' ke item yang sesuai
+                const activeItem = document.querySelector(`.nav-item[data-page="${activePage}"]`);
+                if (activeItem) {
+                    activeItem.classList.add('active');
+
+                    // Jika item berada di dalam dropdown, buka dropdown tersebut
+                    const dropdownParent = activeItem.closest('[id$="-dropdown"]');
+                    if (dropdownParent) {
+                        dropdownParent.classList.remove('hidden');
+                        const iconId = dropdownParent.id.replace('-dropdown', '-icon');
+                        const icon = document.getElementById(iconId);
+                        if (icon) {
+                            icon.textContent = 'expand_less';
+                        }
+                    }
+                }
+            }
+
+            // --- EVENT LISTENER UNTUK SETIAP ITEM NAVIGASI ---
             document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-
-            // Tambahkan class 'active' ke item yang sesuai
-            const activeItem = document.querySelector(`.nav-item[data-page="${activePage}"]`);
-            if (activeItem) {
-                activeItem.classList.add('active');
-
-                // Jika item berada di dalam dropdown, buka dropdown tersebut
-                const dropdownParent = activeItem.closest('[id$="-dropdown"]');
-                if (dropdownParent) {
-                    dropdownParent.classList.remove('hidden');
-                    const icon = document.getElementById(dropdownParent.id.replace('-dropdown', '-icon'));
-                    if (icon) {
-                        icon.textContent = 'expand_less';
+                item.addEventListener('click', () => {
+                    const page = item.getAttribute('data-page');
+                    if (page) {
+                        sessionStorage.setItem('activeSidebar', page);
+                        // Set status aktif sebelum pindah halaman (untuk efek instan)
+                        setActiveNavItem();
                     }
-                }
-            }
-        }
-
-        // --- EVENT LISTENER UNTUK SETIAP ITEM NAVIGASI ---
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const page = item.getAttribute('data-page');
-                if (page) {
-                    sessionStorage.setItem('activeSidebar', page);
-                    // Set status aktif sebelum pindah halaman (untuk efek instan)
-                    setActiveNavItem();
-                }
-            });
-        });
-
-        // --- FUNGSI UNTUK DROPDOWN ---
-        // Membuat fungsi global agar bisa dipanggil dari onclick di HTML
-        window.toggleDropdown = function(id) {
-            const dropdown = document.getElementById(id);
-            const icon = document.getElementById(id.replace('-dropdown', '-icon'));
-
-            if (dropdown && icon) {
-                dropdown.classList.toggle('hidden');
-                icon.textContent = dropdown.classList.contains('hidden') ? 'expand_more' : 'expand_less';
-            }
-        };
-
-        // --- INISIALISASI ---
-        setActiveNavItem();
-
-        // --- HANDLER LOGOUT YANG LEBIH AMAN ---
-        const logoutForm = document.querySelector('form[action*="logout"]');
-        if (logoutForm) {
-            logoutForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-                
-                // Cek keberadaan meta tag CSRF
-                const csrfToken = document.querySelector('meta[name="csrf-token"]');
-                if (!csrfToken) {
-                    console.error('Meta tag CSRF-Token tidak ditemukan!');
-                    alert('Terjadi kesalahan konfigurasi. Logout tidak dapat diproses.');
-                    return;
-                }
-
-                // Kirim form menggunakan fetch
-                fetch(this.action, {
-                    method: 'POST',
-                    body: new FormData(this),
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
-                        'Accept': 'application/json',
-                    }
-                })
-                .then(response => {
-                    // Jika response adalah redirect (bukan JSON), arahkan saja
-                    if (response.redirected) {
-                        window.location.href = response.url;
-                        return;
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Ini hanya dijalankan jika response adalah JSON
-                    if (data && data.success) {
-                        window.location.href = data.redirect_to || '/login';
-                    } else if (data && data.message) {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Logout Error:', error);
-                    alert('Terjadi kesalahan saat mencoba logout.');
                 });
             });
-        }
-    });
+
+            // --- FUNGSI UNTUK DROPDOWN ---
+            function toggleDropdown(dropdownId) {
+                const dropdown = document.getElementById(dropdownId);
+                const iconId = dropdownId.replace('-dropdown', '-icon');
+                const icon = document.getElementById(iconId);
+
+                if (dropdown && icon) {
+                    dropdown.classList.toggle('hidden');
+                    icon.textContent = dropdown.classList.contains('hidden') ? 'expand_more' : 'expand_less';
+                }
+            }
+
+            // Membuat fungsi global agar bisa dipanggil dari onclick di HTML
+            window.toggleDropdown = toggleDropdown;
+
+            // --- EVENT LISTENER UNTUK DROPDOWN BUTTON ---
+            document.querySelectorAll('.dropdown-toggle').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Mencegah event bubbling
+                    const dropdownId = this.getAttribute('data-dropdown');
+                    if (dropdownId) {
+                        toggleDropdown(dropdownId);
+                    }
+                });
+            });
+
+            // --- INISIALISASI ---
+            setActiveNavItem();
+
+            // --- HANDLER LOGOUT YANG LEBIH AMAN ---
+            const logoutForm = document.getElementById('logout-form');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Ambil CSRF token dari meta tag
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                    
+                    if (!csrfToken) {
+                        console.error('CSRF token tidak ditemukan');
+                        // Fallback: submit form biasa
+                        this.submit();
+                        return;
+                    }
+                    
+                    // Kirim request logout dengan fetch
+                    fetch(this.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    })
+                    .then(response => {
+                        if (response.ok || response.redirected) {
+                            // Redirect ke halaman login
+                            window.location.href = '/login';
+                        } else {
+                            console.error('Logout gagal');
+                            // Fallback: submit form biasa
+                            this.submit();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Fallback: submit form biasa
+                        this.submit();
+                    });
+                });
+            }
+        });
     </script>
 
 </body>

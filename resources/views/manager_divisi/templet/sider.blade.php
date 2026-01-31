@@ -243,12 +243,12 @@
                 </a>
 
                 <!-- DATA KARYAWAN -->
-                <a href="/manager_divisi/api/daftar_karyawan/{divisi}"
+                <a href="/manager_divisi/daftar_karyawan"
                     class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    :class="window.location.pathname === '/karyawan_by_divisi/{divisi}' ? 'active' : ''">
+                    :class="window.location.pathname === '/manager_divisi/daftar_karyawan' ? 'active' : ''">
                     <span class="material-symbols-outlined sidebar-icon">groups</span>
                     <span class="sidebar-text">Data Karyawan</span>
-                    </>
+            </a>
 
                     <!-- LAPORAN ABSENSI -->
                     <a href="/manager_divisi/kelola_absensi"

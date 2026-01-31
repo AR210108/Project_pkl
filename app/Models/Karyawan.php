@@ -26,13 +26,13 @@ class Karyawan extends Model
 
     /**
      * Relasi ke tabel users.
-     * Setiap karyawan dimiliki oleh satu user.
      */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-        public function getJabatanFromUserAttribute()
+
+    public function getJabatanFromUserAttribute()
     {
         if ($this->user) {
             return $this->user->role;
@@ -40,7 +40,7 @@ class Karyawan extends Model
         return $this->jabatan;
     }
     
-        public function getNamaFromUserAttribute()
+    public function getNamaFromUserAttribute()
     {
         if ($this->user) {
             return $this->user->name;
@@ -48,44 +48,29 @@ class Karyawan extends Model
         return $this->nama;
     }
 
-    /**
-     * Relasi ke tabel cuti.
-     * Satu karyawan dapat memiliki banyak cuti.
-     */
     public function cuti()
     {
         return $this->hasMany(Cuti::class);
     }
 
-    /**
-     * Relasi ke tabel cuti dengan status menunggu.
-     */
     public function cutiMenunggu()
     {
         return $this->hasMany(Cuti::class)->where('status', 'menunggu');
     }
 
-    /**
-     * Relasi ke tabel cuti dengan status disetujui.
-     */
     public function cutiDisetujui()
     {
         return $this->hasMany(Cuti::class)->where('status', 'disetujui');
     }
 
-    /**
-     * Relasi ke tabel cuti dengan status ditolak.
-     */
     public function cutiDitolak()
     {
         return $this->hasMany(Cuti::class)->where('status', 'ditolak');
     }
 
-    /**
-     * Relasi ke tabel cuti tahunan.
-     */
     public function cutiTahunan()
     {
         return $this->hasMany(Cuti::class)->where('jenis_cuti', 'tahunan');
     }
+
 }

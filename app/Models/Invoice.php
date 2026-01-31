@@ -11,27 +11,25 @@ class Invoice extends Model
 
     protected $table = 'invoices';
 
-    // Use the actual database column names (Indonesian) used in migrations
+    // Use the actual database column names matching frontend form
     protected $fillable = [
-        'nomor_order',
-        'nama_perusahaan',
-        'nama_klien',
-        'alamat',
-        'deskripsi',
-        'harga',
-        'qty',
+        'invoice_no',
+        'invoice_date',
+        'company_name',
+        'company_address',
+        'client_name',
+        'description',
+        'subtotal',
+        'tax',
         'total',
-        'pajak',
-        'metode_pembayaran',
-        'tanggal',
+        'payment_method',
     ];
 
     protected $casts = [
-        'tanggal' => 'date',
-        'harga' => 'decimal:2',
+        'invoice_date' => 'date',
+        'subtotal' => 'decimal:2',
         'total' => 'decimal:2',
-        'pajak' => 'decimal:2',
-        'qty' => 'integer',
+        'tax' => 'decimal:2',
     ];
 
     public function items()
