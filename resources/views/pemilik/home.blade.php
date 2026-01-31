@@ -304,22 +304,49 @@
                         <p id="totalIncome" class="text-lg md:text-xl font-bold text-white loading-dots">Memuat</p>
                     </div>
                 </div>
-                <div class="card-hover bg-card-light p-4 rounded-lg shadow-sm flex items-start space-x-4">
-                    <div class="bg-gray-700 p-3 rounded-md">
-                        <span class="material-icons text-white">arrow_upward</span>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400">Total Pengeluaran</p>
-                        <p id="totalExpense" class="text-lg md:text-xl font-bold text-white loading-dots">Memuat</p>
+
+                <!-- TOTAL PEMASUKAN CARD -->
+                <div class="card-hover stat-card bg-card-light p-4 rounded-lg shadow-sm">
+                    <div class="stat-card-content">
+                        <div class="flex items-start space-x-4 mb-3">
+                            <div class="bg-gray-700 p-3 rounded-md flex-shrink-0">
+                                <span class="material-icons text-white">arrow_downward</span>
+                            </div>
+                        </div>
+                        <div class="mt-auto">
+                            <p class="text-xs text-gray-400 mb-1">Total Pemasukan</p>
+                            <p id="totalIncome" class="text-lg md:text-xl font-bold text-white loading-dots">Memuat</p>
+                        </div>
                     </div>
                 </div>
-                <div class="card-hover bg-card-light p-4 rounded-lg shadow-sm flex items-start space-x-4">
-                    <div class="bg-gray-700 p-3 rounded-md">
-                        <span class="material-icons text-white">account_balance_wallet</span>
+
+                <!-- TOTAL PENGELUARAN CARD -->
+                <div class="card-hover stat-card bg-card-light p-4 rounded-lg shadow-sm">
+                    <div class="stat-card-content">
+                        <div class="flex items-start space-x-4 mb-3">
+                            <div class="bg-gray-700 p-3 rounded-md flex-shrink-0">
+                                <span class="material-icons text-white">arrow_upward</span>
+                            </div>
+                        </div>
+                        <div class="mt-auto">
+                            <p class="text-xs text-gray-400 mb-1">Total Pengeluaran</p>
+                            <p id="totalExpense" class="text-lg md:text-xl font-bold text-white loading-dots">Memuat</p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-xs text-gray-400">Total Keuntungan</p>
-                        <p id="totalProfit" class="text-lg md:text-xl font-bold text-white loading-dots">Memuat</p>
+                </div>
+
+                <!-- TOTAL KEUNTUNGAN CARD -->
+                <div class="card-hover stat-card bg-card-light p-4 rounded-lg shadow-sm">
+                    <div class="stat-card-content">
+                        <div class="flex items-start space-x-4 mb-3">
+                            <div class="bg-gray-700 p-3 rounded-md flex-shrink-0">
+                                <span class="material-icons text-white">account_balance_wallet</span>
+                            </div>
+                        </div>
+                        <div class="mt-auto">
+                            <p class="text-xs text-gray-400 mb-1">Total Keuntungan</p>
+                            <p id="totalProfit" class="text-lg md:text-xl font-bold text-white loading-dots">Memuat</p>
+                        </div>
                     </div>
                 </div>
             </section>

@@ -49,7 +49,7 @@ class Project extends Model
         return $this->belongsTo(Layanan::class, 'layanan_id');
     }
 
-
+    
     /**
      * Event ketika project dibuat
      */

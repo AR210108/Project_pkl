@@ -11,34 +11,54 @@ class Invoice extends Model
 
     protected $table = 'invoices';
 
-    // Use the actual database column names matching frontend form
-    protected $fillable = [
+    // Use the actual database column names (Indonesian) used in migrations
+   protected $fillable = [
         'invoice_no',
         'invoice_date',
         'company_name',
         'company_address',
         'client_name',
+        'order_number',
+        'payment_method',
         'description',
         'subtotal',
         'tax',
         'total',
-        'payment_method',
+        'status'
     ];
 
     protected $casts = [
         'invoice_date' => 'date',
-        'subtotal' => 'decimal:2',
-        'total' => 'decimal:2',
-        'tax' => 'decimal:2',
+        'subtotal' => 'integer',
+        'tax' => 'integer',
+        'total' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
-    public function items()
+    // Optional: Tambahkan accessor jika perlu kompatibilitas dengan field lama
+    public function getNamaPerusahaanAttribute()
     {
-        return $this->hasMany(InvoiceItem::class);
+        return $this->company_name;
     }
 
-    public function orders()
+    public function getNamaKlienAttribute()
     {
-        return $this->hasMany(Order::class);
+        return $this->client_name;
+    }
+
+    public function getAlamatAttribute()
+    {
+        return $this->company_address;
+    }
+
+    public function getPajakAttribute()
+    {
+        return $this->tax;
+    }
+
+    public function getTotalAttribute()
+    {
+        return $this->attributes['total'] ?? 0;
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CashflowController;
+use App\Http\Controllers\OwnerBerandaController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\OwnerController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\BerandaFinanceController;
+use App\Http\Controllers\CutiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -562,17 +564,23 @@ Route::middleware(['auth', 'role:general_manager'])
             Route::get('/karyawan-by-divisi/{divisi}', [GeneralManagerTaskController::class, 'getKaryawanByDivisi'])
                 ->name('karyawan.by_divisi');
         });
-        
+
         // Absensi Management
-        Route::get('/kelola-absen', [AbsensiController::class, 'kelolaAbsenManajer'])->name('kelola_absen');
-        
+        Route::get('/kelola-absen', [AbsensiController::class, 'kelolaAbsenGeneral'])->name('kelola_absen');
+
+    // Action untuk approve/reject
+    Route::post('/general-manajer/absensi/{id}/approve', [AbsensiController::class, 'approveAbsensi'])
+        ->name('general_manajer.absensi.approve');
+
+    Route::post('/general-manajer/absensi/{id}/reject', [AbsensiController::class, 'rejectAbsensi'])
+        ->name('general_manajer.absensi.reject');
         Route::get('/tim_dan_divisi', function () {
             return view('general_manajer.tim_dan_divisi');
         })->name('tim_dan_divisi');
 
         // Halaman utama tim divisi
         Route::get('/tim_divisi', [TimDivisiController::class, 'index'])->name('tim_divisi');
-        
+
         // Tim routes
         Route::prefix('tim')->group(function () {
             Route::post('/', [TimDivisiController::class, 'storeTim'])->name('tim.store');
@@ -580,7 +588,7 @@ Route::middleware(['auth', 'role:general_manager'])
             Route::delete('/{id}', [TimDivisiController::class, 'destroyTim'])->name('tim.destroy');
             Route::get('/search', [TimDivisiController::class, 'searchTim'])->name('tim.search');
         });
-        
+
         // Divisi routes
         Route::prefix('divisi')->group(function () {
             Route::post('/', [TimDivisiController::class, 'storeDivisi'])->name('divisi.store');
@@ -588,7 +596,7 @@ Route::middleware(['auth', 'role:general_manager'])
             Route::delete('/{id}', [TimDivisiController::class, 'destroyDivisi'])->name('divisi.destroy');
             Route::get('/search', [TimDivisiController::class, 'searchDivisi'])->name('divisi.search');
         });
-        
+
         // Utility route
         Route::get('/divisis/list', [TimDivisiController::class, 'getDivisis'])->name('divisis.list');
     }); // <-- TUTUP GROUP GENERAL MANAGER DI SINI
@@ -602,9 +610,9 @@ Route::middleware(['auth', 'role:owner'])
     ->prefix('owner')
     ->name('owner.')
     ->group(function () {
-        Route::get('/home', function () {
-            return view('pemilik.home');
-        })->name('home');
+
+        Route::get('home' , [OwnerBerandaController::class , 'index'])->name('home');
+        
         Route::get('/rekap_absen', [AbsensiController::class, 'rekapAbsensi'])->name('rekap_absen');
         Route::get('/laporan', function () {
             return view('pemilik.laporan');
@@ -653,7 +661,7 @@ Route::middleware(['auth', 'role:finance'])
         Route::put('/karyawan/{karyawan}', [AdminKaryawanController::class, 'update'])->name('karyawan.update');
         Route::delete('/karyawan/{karyawan}', [AdminKaryawanController::class, 'destroy'])->name('karyawan.destroy');
        Route::get('/layanan', [LayananController::class, 'financeIndex'])->name('layanan.index');
-        
+
         // Update harga saja
         Route::put('/layanan/{id}/update-harga', [LayananController::class, 'updateHarga'])->name('layanan.update-harga');
         // CUTI VIEW ONLY untuk finance
@@ -767,8 +775,6 @@ Route::middleware(['auth', 'role:manager_divisi'])
             return view('manager_divisi.pengelola_tugas');
         })->name('pengelola_tugas');
             Route::get('/daftar_karyawan', [AdminKaryawanController::class, 'karyawanDivisi'])->name('daftar_karyawan');
-
-        Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsensiManagerDivisi'])->name('kelola_absensi');
 
         // Tim Saya
         Route::get('/tim-saya', function () {
@@ -1289,19 +1295,6 @@ Route::middleware(['auth'])->prefix('api/services')->name('api.services.')->grou
 |--------------------------------------------------------------------------
 */
 
-// Route untuk General Manajer dengan middleware role
-Route::middleware(['auth', 'role:general_manajer'])->group(function () {
-    // URL: http://127.0.0.1:8000/general-manajer/kelola-absen
-    Route::get('/general-manajer/kelola-absen', [AbsensiController::class, 'kelolaAbsenManajer'])
-        ->name('general_manajer.kelola_absen');
-    
-    // Action untuk approve/reject
-    Route::post('/general-manajer/absensi/{id}/approve', [AbsensiController::class, 'approveAbsensi'])
-        ->name('general_manajer.absensi.approve');
-    
-    Route::post('/general-manajer/absensi/{id}/reject', [AbsensiController::class, 'rejectAbsensi'])
-        ->name('general_manajer.absensi.reject');
-});
 
 // Admin Template
 Route::get('/admin/templat', function () {

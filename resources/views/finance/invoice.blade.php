@@ -587,7 +587,7 @@
                         <input type="text" id="company_address" name="company_address"
                             class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                             required>
-                        <span class="error-message" id="company_address_error"></span>
+                            <span class="error-message" id="company_address_error"></span>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
@@ -901,6 +901,41 @@
         const closeEditModalBtn = document.getElementById('closeEditModalBtn');
 
         // ==================== HELPER FUNCTIONS ====================
+        function formatTanggal(isoString) {
+            if (!isoString) return '-';
+
+            try {
+                const date = new Date(isoString);
+                if (isNaN(date.getTime())) return isoString; // Jika parsing gagal, kembalikan aslinya
+
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+
+                return `${day}/${month}/${year}`;
+            } catch (error) {
+                console.error('Error formatting date:', error, isoString);
+                return isoString;
+            }
+        }
+
+        function formatTanggalPrint(isoString) {
+            if (!isoString) return '-';
+            try {
+                const date = new Date(isoString);
+                if (isNaN(date.getTime())) return isoString;
+
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+
+                return `${day}/${month}/${year}`;
+            } catch (error) {
+                console.error('Error formatting date for print:', error, isoString);
+                return isoString;
+            }
+        }
+
         function formatNumber(num) {
             return new Intl.NumberFormat('id-ID').format(num);
         }
@@ -1347,77 +1382,89 @@
             showModal(document.getElementById('deleteInvoiceModal'));
         }
 
+        // Alias untuk kompatibilitas dengan onclick lama
+        function deleteInvoice(id) {
+            confirmDeleteInvoice(id);
+        }
+
         // ==================== PRINT FUNCTIONS ====================
-        function viewPrintInvoice(id) {
+        function printInvoiceModal(id) {
+            console.log('Print invoice modal:', id);
+
+            // Cari data invoice dari yang sudah dimuat
             const invoice = allInvoices.find(inv => inv.id == id);
             if (invoice) {
-                const namaPerusahaan = invoice.company_name || '';
-                const nomorOrder = invoice.invoice_no || '';
-                const tanggal = invoice.invoice_date || '';
-                const namaKlien = invoice.client_name || '';
-                const alamat = invoice.company_address || '';
-                const deskripsi = invoice.description || '';
-                const metodePembayaran = invoice.payment_method || '';
+                const namaPerusahaan = invoice.company_name || invoice.nama_perusahaan;
+                const nomorOrder = invoice.invoice_no || invoice.nomor_order;
+                const tanggal = invoice.invoice_date || invoice.tanggal;
+                const namaKlien = invoice.client_name || invoice.nama_klien;
+                const alamat = invoice.company_address || invoice.alamat;
+                const deskripsi = invoice.description || invoice.deskripsi;
+                const metodePembayaran = invoice.payment_method || invoice.metode_pembayaran;
                 const subtotal = invoice.subtotal || 0;
                 const taxAmount = invoice.tax || 0;
                 const total = invoice.total || 0;
-                const taxPercentage = invoice.tax || (taxAmount > 0 ? (taxAmount / subtotal * 100) : 0);
+                const taxPercentage = invoice.tax_percentage || invoice.pajak || (taxAmount > 0 ? (taxAmount / subtotal *
+                    100) : 0);
+
+                // Format tanggal untuk print
+                const tanggalFormatted = formatTanggalPrint(tanggal);
 
                 document.getElementById('printInvoiceContent').innerHTML = `
-                <div style="padding: 30px; background: white; max-width: 800px; margin: 0 auto; font-family: 'Poppins', sans-serif;">
-                    <div style="border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px;">
-                        <h2 style="font-size: 28px; font-weight: bold; margin: 0 0 10px 0;">${namaPerusahaan}</h2>
-                        <p style="margin: 5px 0; color: #666;">Invoice #${nomorOrder}</p>
-                        <p style="margin: 5px 0; color: #666;">Tanggal: ${tanggal}</p>
+            <div style="padding: 30px; background: white; max-width: 800px; margin: 0 auto; font-family: 'Poppins', sans-serif;">
+                <div style="border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px;">
+                    <h2 style="font-size: 28px; font-weight: bold; margin: 0 0 10px 0;">${namaPerusahaan}</h2>
+                    <p style="margin: 5px 0; color: #666;">Invoice #${nomorOrder}</p>
+                    <p style="margin: 5px 0; color: #666;">Tanggal: ${tanggalFormatted}</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px;">
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Bill To:</h3>
+                        <p style="margin: 5px 0;"><strong>Nama Klien:</strong> ${namaKlien}</p>
+                        <p style="margin: 5px 0;"><strong>Alamat:</strong> ${alamat}</p>
                     </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px;">
-                        <div>
-                            <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Bill To:</h3>
-                            <p style="margin: 5px 0;"><strong>Nama Klien:</strong> ${namaKlien}</p>
-                            <p style="margin: 5px 0;"><strong>Alamat:</strong> ${alamat}</p>
-                        </div>
-                        <div>
-                            <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Payment Details:</h3>
-                            <p style="margin: 5px 0;"><strong>Metode Pembayaran:</strong> ${metodePembayaran}</p>
-                        </div>
-                    </div>
-                    
-                    <table style="width: 100%; border-collapse: collapse; margin: 30px 0;">
-                        <thead>
-                            <tr style="background-color: #f2f2f2;">
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Deskripsi</th>
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Subtotal</th>
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Pajak</th>
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="border: 1px solid #ddd; padding: 12px;">${deskripsi}</td>
-                                <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(subtotal)}</td>
-                                <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(taxAmount)}</td>
-                                <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(total)}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <div style="text-align: right; margin-top: 30px;">
-                        <table style="width: 300px; margin-left: auto; border-collapse: collapse;">
-                            <tr style="font-size: 18px; font-weight: bold;">
-                                <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;"><strong>Total:</strong></td>
-                                <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;">Rp ${formatNumber(total)}</td>
-                            </tr>
-                        </table>
-                    </div>
-                    
-                    <div style="border-top: 2px solid #333; padding-top: 20px; margin-top: 40px;">
-                        <p style="margin: 10px 0;"><strong>Catatan:</strong></p>
-                        <p style="margin: 5px 0; color: #666;">Silakan transfer ke rekening yang tertera atau bayar sesuai metode pembayaran di atas.</p>
-                        <p style="margin: 30px 0 10px 0; font-style: italic;">Terima kasih atas kerjasamanya.</p>
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Payment Details:</h3>
+                        <p style="margin: 5px 0;"><strong>Metode Pembayaran:</strong> ${metodePembayaran}</p>
                     </div>
                 </div>
-            `;
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                    <thead>
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Deskripsi</th>
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Subtotal</th>
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Pajak (${taxPercentage.toFixed(2)}%)</th>
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 12px;">${deskripsi}</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(subtotal)}</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(taxAmount)}</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">Rp ${formatNumber(total)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div style="text-align: right; margin-top: 30px;">
+                    <table style="width: 300px; margin-left: auto; border-collapse: collapse;">
+                        <tr style="font-size: 18px; font-weight: bold;">
+                            <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;"><strong>Total:</strong></td>
+                            <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;">Rp ${formatNumber(total)}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div style="border-top: 2px solid #333; padding-top: 20px; margin-top: 40px;">
+                    <p style="margin: 10px 0;"><strong>Catatan:</strong></p>
+                    <p style="margin: 5px 0; color: #666;">Silakan transfer ke rekening yang tertera atau bayar sesuai metode pembayaran di atas.</p>
+                    <p style="margin: 30px 0 10px 0; font-style: italic;">Terima kasih atas kerjasamanya.</p>
+                </div>
+            </div>
+        `;
 
                 showModal(document.getElementById('printInvoiceModal'));
             } else {
@@ -1479,17 +1526,16 @@
                 const deskripsi = invoice.description || invoice.deskripsi;
                 const metodePembayaran = invoice.payment_method || invoice.metode_pembayaran;
                 const tanggal = invoice.invoice_date || invoice.tanggal;
+                const tanggalFormatted = formatTanggal(tanggal);
                 const subtotal = invoice.subtotal || 0;
                 const taxAmount = invoice.tax || 0;
                 const total = invoice.total || 0;
-
-                // Hitung persentase pajak
                 const taxPercentage = subtotal > 0 ? ((taxAmount / subtotal) * 100) : 0;
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${rowNumber}</td>
-                    <td>${tanggal}</td>
+                    <td>${tanggalFormatted}</td>
                     <td>${namaPerusahaan}</td>
                     <td>${nomorOrder}</td>
                     <td>${namaKlien}</td>
@@ -1497,13 +1543,13 @@
                     <td>${deskripsi}</td>
                     <td>Rp ${formatNumber(subtotal)}</td>
                     <td>${taxPercentage.toFixed(2)}%</td>
-                    <td>Rp ${formatNumber(taxAmount)}</td>
+                    <td>Rp ${formatNumber(taxAmount)}</td> 
                     <td>Rp ${formatNumber(total)}</td>
                     <td>${metodePembayaran}</td>
                     <td class="text-center">
                         <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700 mx-1">Edit</button>
                         <button onclick="confirmDeleteInvoice(${invoice.id})" class="text-red-500 hover:text-red-700 mx-1">Hapus</button>
-                        <button onclick="viewPrintInvoice(${invoice.id})" class="text-green-500 hover:text-green-700 mx-1">Print</button>
+                        <button onclick="printInvoiceModal(${invoice.id})" class="text-green-500 hover:text-green-700 mx-1">Print</button>
                     </td>
                 `;
                 desktopTableBody.appendChild(row);
@@ -1512,23 +1558,30 @@
             // Render mobile cards
             currentPageInvoices.forEach((invoice, index) => {
                 const rowNumber = startIndex + index + 1;
+                const namaPerusahaan = invoice.company_name || invoice.nama_perusahaan;
+                const nomorOrder = invoice.invoice_no || invoice.nomor_order;
+                const namaKlien = invoice.client_name || invoice.nama_klien;
+                const tanggal = invoice.invoice_date || invoice.tanggal;
+                const tanggalFormatted = formatTanggal(tanggal);
+                const total = invoice.total || 0;
+
                 const card = document.createElement('div');
                 card.className = 'bg-white border rounded-lg p-4 shadow';
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-2">
                         <div>
-                            <h4 class="font-semibold">${invoice.company_name || ''}</h4>
-                            <p class="text-sm text-gray-500">${invoice.invoice_no || ''}</p>
+                            <h4 class="font-semibold">${namaPerusahaan}</h4>
+                            <p class="text-sm text-gray-500">${nomorOrder}</p>
                         </div>
                         <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">#${rowNumber}</span>
                     </div>
-                    <p class="text-sm mb-1"><span class="font-medium">Klien:</span> ${invoice.client_name || ''}</p>
-                    <p class="text-sm mb-1"><span class="font-medium">Tanggal:</span> ${invoice.invoice_date || ''}</p>
-                    <p class="text-sm mb-2"><span class="font-medium">Total:</span> <b>Rp ${formatNumber(invoice.total || 0)}</b></p>
+                    <p class="text-sm mb-1"><span class="font-medium">Klien:</span> ${namaKlien}</p>
+                    <p class="text-sm mb-1"><span class="font-medium">Tanggal:</span> ${tanggalFormatted}</p>
+                    <p class="text-sm mb-2"><span class="font-medium">Total:</span> <b>Rp ${formatNumber(total)}</b></p>
                     <div class="flex justify-between mt-3">
                         <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700">Edit</button>
                         <button onclick="confirmDeleteInvoice(${invoice.id})" class="text-red-500 hover:text-red-700">Hapus</button>
-                        <button onclick="viewPrintInvoice(${invoice.id})" class="text-green-500 hover:text-green-700">Print</button>
+                        <button onclick="printInvoiceModal(${invoice.id})" class="text-green-500 hover:text-green-700">Print</button>
                     </div>
                 `;
                 mobileCards.appendChild(card);

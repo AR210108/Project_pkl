@@ -276,7 +276,8 @@
 
         @media (min-width: 768px) {
             .main-content {
-                margin-left: 256px; /* Lebar sidebar */
+                margin-left: 256px;
+                /* Lebar sidebar */
             }
         }
 
@@ -385,26 +386,34 @@
 
                 <!-- Stat Cards Grid -->
                 <div class="grid grid-cols-2 gap-3 mb-6 sm:mb-8">
-                    <div class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
-                        <div class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-blue-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
+                    <div
+                        class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
+                        <div
+                            class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-blue-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
                             <span class="material-icons-outlined text-primary">trending_up</span>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Pemasukan</p>
-                            <p class="value-text text-base sm:text-xl font-bold truncate" id="income-value">Rp 20.000.000</p>
+                            <p class="value-text text-base sm:text-xl font-bold truncate" id="income-value">Rp
+                                20.000.000</p>
                         </div>
                     </div>
-                    <div class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
-                        <div class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-red-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
+                    <div
+                        class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
+                        <div
+                            class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-red-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
                             <span class="material-icons-outlined text-red-500">trending_down</span>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Pengeluaran</p>
-                            <p class="value-text text-base sm:text-xl font-bold truncate" id="expense-value">Rp 10.000.000</p>
+                            <p class="value-text text-base sm:text-xl font-bold truncate" id="expense-value">Rp
+                                10.000.000</p>
                         </div>
                     </div>
-                    <div class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
-                        <div class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-green-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
+                    <div
+                        class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
+                        <div
+                            class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-green-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
                             <span class="material-icons-outlined text-green-500">business_center</span>
                         </div>
                         <div class="min-w-0 flex-1">
@@ -412,13 +421,16 @@
                             <p class="value-text text-base sm:text-xl font-bold truncate" id="service-count">100</p>
                         </div>
                     </div>
-                    <div class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
-                        <div class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-purple-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
+                    <div
+                        class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
+                        <div
+                            class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-purple-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
                             <span class="material-icons-outlined text-purple-500">account_balance_wallet</span>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Total Keuangan</p>
-                            <p class="value-text text-base sm:text-xl font-bold truncate" id="total-finance">Rp 10.000.000</p>
+                            <p class="value-text text-base sm:text-xl font-bold truncate" id="total-finance">Rp
+                                10.000.000</p>
                         </div>
                     </div>
                 </div>
@@ -448,7 +460,8 @@
                         <h3 class="text-lg font-semibold">Order List</h3>
                         <div class="flex flex-wrap gap-2 w-full sm:w-auto">
                             <div class="relative">
-                                <button id="filterBtn" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
+                                <button id="filterBtn"
+                                    class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
                                     <span class="material-icons-outlined text-sm">filter_list</span>
                                     Filter
                                 </button>
@@ -559,9 +572,16 @@
         const jumlahLayanan = @json($jumlahLayanan);
         const totalKeuangan = @json($totalKeuangan);
 
+        const formatter = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        });
+
+
         // Update stat cards
-        document.getElementById('income-value').textContent = 'Rp' + totalPemasukan.toLocaleString('id-ID');
-        document.getElementById('expense-value').textContent = 'Rp' + totalPengeluaran.toLocaleString('id-ID');
+        document.getElementById('income-value').textContent = formatter.format(totalPemasukan);
+        document.getElementById('expense-value').textContent = formatter.format(totalPengeluaran)
         document.getElementById('service-count').textContent = jumlahLayanan;
         document.getElementById('total-finance').textContent = 'Rp' + totalKeuangan.toLocaleString('id-ID');
 
@@ -605,8 +625,11 @@
                 // Bulan ini: Minggu 1 sampai 4
                 const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
                 const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                const totalWeeks = Math.ceil((endOfMonth.getDate() - startOfMonth.getDate() + startOfMonth.getDay() + 1) / 7);
-                labels = Array.from({length: totalWeeks}, (_, i) => `Minggu ${i + 1}`);
+                const totalWeeks = Math.ceil((endOfMonth.getDate() - startOfMonth.getDate() + startOfMonth.getDay() + 1) /
+                    7);
+                labels = Array.from({
+                    length: totalWeeks
+                }, (_, i) => `Minggu ${i + 1}`);
                 income = new Array(totalWeeks).fill(0);
                 expense = new Array(totalWeeks).fill(0);
 
@@ -640,7 +663,11 @@
                 });
             }
 
-            return { labels, income, expense };
+            return {
+                labels,
+                income,
+                expense
+            };
         }
 
         // Pagination variables
@@ -663,7 +690,7 @@
                 row.className = 'border-b border-border-light';
 
                 let statusBadge = '';
-                switch(item.status) {
+                switch (item.status) {
                     case 'paid':
                         statusBadge = '<span class="status-badge status-paid">Lunas</span>';
                         break;
@@ -705,7 +732,7 @@
                 const item = filteredData[i];
 
                 let statusBadge = '';
-                switch(item.status) {
+                switch (item.status) {
                     case 'paid':
                         statusBadge = '<span class="status-badge status-paid">Lunas</span>';
                         break;
@@ -816,8 +843,7 @@
                 type: 'line',
                 data: {
                     labels: data.labels,
-                    datasets: [
-                        {
+                    datasets: [{
                             label: 'Pemasukan',
                             data: data.income,
                             borderColor: '#3b82f6',
