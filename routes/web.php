@@ -36,6 +36,7 @@ use App\Http\Controllers\CutiController;
 | Helper Functions
 |--------------------------------------------------------------------------
 */
+
 if (!function_exists('redirectToRolePage')) {
     function redirectToRolePage($user)
     {
@@ -74,6 +75,19 @@ Route::prefix('api')->name('api.')->group(function () {
     Route::get('/articles', [SettingController::class, 'getArticlesData'])->name('articles');
     Route::get('/portfolios', [SettingController::class, 'getPortfoliosData'])->name('portfolios');
     Route::get('/layanan', [LayananController::class, 'index'])->name('layanan.public');
+    
+    // Test API untuk finance (temporary)
+    Route::get('/finance/layanan-test', function() {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                ['id' => 1, 'nama_layanan' => 'Web Development', 'harga' => 10000000, 'deskripsi' => 'Pembuatan website'],
+                ['id' => 2, 'nama_layanan' => 'Mobile App Development', 'harga' => 15000000, 'deskripsi' => 'Pembuatan aplikasi mobile'],
+                ['id' => 3, 'nama_layanan' => 'UI/UX Design', 'harga' => 5000000, 'deskripsi' => 'Desain antarmuka'],
+            ],
+            'message' => 'Data dummy untuk testing finance layanan'
+        ]);
+    })->name('api.finance.layanan.test');
 });
 
 // Auth routes
@@ -215,6 +229,12 @@ Route::middleware('auth')->group(function () {
         Route::prefix('owner')->middleware(['role:owner'])->name('owner.')->group(function () {
             Route::get('/data', [OwnerController::class, 'getData'])->name('data');
         });
+        
+        // Finance API
+        Route::prefix('finance')->middleware(['role:finance'])->name('finance.')->group(function () {
+            Route::get('/layanan', [LayananController::class, 'financeApi'])->name('layanan.api');
+            Route::get('/invoices', [InvoiceController::class, 'getFinanceInvoices'])->name('invoices.api');
+        });
     });
 });
 
@@ -244,10 +264,10 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/data_user', function () {
             return redirect()->route('admin.user');
         });
-Route::get('/data_karyawan', [AdminKaryawanController::class, 'index'])->name('admin.karyawan');
-Route::post('/karyawan/store', [AdminKaryawanController::class, 'store'])->name('admin.karyawan.store');
-Route::put('/karyawan/update/{id}', [AdminKaryawanController::class, 'update'])->name('admin.karyawan.update');
-Route::delete('/karyawan/delete/{id}', [AdminKaryawanController::class, 'destroy'])->name('admin.karyawan.delete');
+        Route::get('/data_karyawan', [AdminKaryawanController::class, 'index'])->name('admin.karyawan');
+        Route::post('/karyawan/store', [AdminKaryawanController::class, 'store'])->name('admin.karyawan.store');
+        Route::put('/karyawan/update/{id}', [AdminKaryawanController::class, 'update'])->name('admin.karyawan.update');
+        Route::delete('/karyawan/delete/{id}', [AdminKaryawanController::class, 'destroy'])->name('admin.karyawan.delete');
         // ABSENSI MANAGEMENT
         Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
 
@@ -286,6 +306,9 @@ Route::delete('/karyawan/delete/{id}', [AdminKaryawanController::class, 'destroy
             Route::post('/', [LayananController::class, 'store'])->name('store');
             Route::put('/{id}', [LayananController::class, 'update'])->name('update');
             Route::delete('/{id}', [LayananController::class, 'destroy'])->name('delete');
+            Route::get('/dropdown', [LayananController::class, 'getForInvoiceDropdown'])->name('dropdown');
+            Route::get('/{id}', [LayananController::class, 'show'])->name('show');
+            Route::post('/{id}/update-harga', [LayananController::class, 'updateHarga'])->name('update.harga');
         });
 
         // Surat Kerjasama
@@ -297,6 +320,9 @@ Route::delete('/karyawan/delete/{id}', [AdminKaryawanController::class, 'destroy
             Route::get('/{id}/edit', [SuratKerjasamaController::class, 'edit'])->name('edit');
             Route::put('/{id}', [SuratKerjasamaController::class, 'update'])->name('update');
             Route::delete('/{id}', [SuratKerjasamaController::class, 'destroy'])->name('destroy');
+            Route::get('/data/layanan', [InvoiceController::class, 'getLayananData'])->name('data.layanan');
+            Route::get('/list/layanan', [InvoiceController::class, 'getLayananList'])->name('list.layanan');
+            Route::get('/list/status-pembayaran', [InvoiceController::class, 'getStatusPembayaranList'])->name('list.status');
         });
 
         // Data Project
@@ -305,7 +331,7 @@ Route::delete('/karyawan/delete/{id}', [AdminKaryawanController::class, 'destroy
         Route::put('/project/{id}', [DataProjectController::class, 'update'])->name('project.update');
         Route::delete('/project/{id}', [DataProjectController::class, 'destroy'])->name('project.destroy');
         Route::post('/admin/project/sync/{layananId}', [DataProjectController::class, 'syncFromLayanan'])
-    ->name('admin.project.sync');
+            ->name('admin.project.sync');
 
         Route::get('/surat_kerjasama', function () {
             return redirect()->route('admin.surat_kerjasama.index');
@@ -499,11 +525,6 @@ Route::middleware(['auth', 'role:karyawan'])
 | Role: GENERAL MANAGER Routes
 |--------------------------------------------------------------------------
 */
-/*
-|--------------------------------------------------------------------------
-| Role: GENERAL MANAGER Routes
-|--------------------------------------------------------------------------
-*/
 Route::middleware(['auth', 'role:general_manager'])
     ->prefix('general_manajer')
     ->name('general_manajer.')
@@ -568,12 +589,12 @@ Route::middleware(['auth', 'role:general_manager'])
         // Absensi Management
         Route::get('/kelola-absen', [AbsensiController::class, 'kelolaAbsenGeneral'])->name('kelola_absen');
 
-    // Action untuk approve/reject
-    Route::post('/general-manajer/absensi/{id}/approve', [AbsensiController::class, 'approveAbsensi'])
-        ->name('general_manajer.absensi.approve');
+        // Action untuk approve/reject
+        Route::post('/general-manajer/absensi/{id}/approve', [AbsensiController::class, 'approveAbsensi'])
+            ->name('general_manajer.absensi.approve');
 
-    Route::post('/general-manajer/absensi/{id}/reject', [AbsensiController::class, 'rejectAbsensi'])
-        ->name('general_manajer.absensi.reject');
+        Route::post('/general-manajer/absensi/{id}/reject', [AbsensiController::class, 'rejectAbsensi'])
+            ->name('general_manajer.absensi.reject');
         Route::get('/tim_dan_divisi', function () {
             return view('general_manajer.tim_dan_divisi');
         })->name('tim_dan_divisi');
@@ -599,7 +620,7 @@ Route::middleware(['auth', 'role:general_manager'])
 
         // Utility route
         Route::get('/divisis/list', [TimDivisiController::class, 'getDivisis'])->name('divisis.list');
-    }); // <-- TUTUP GROUP GENERAL MANAGER DI SINI
+    });
 
 /*
 |--------------------------------------------------------------------------
@@ -611,8 +632,8 @@ Route::middleware(['auth', 'role:owner'])
     ->name('owner.')
     ->group(function () {
 
-        Route::get('home' , [OwnerBerandaController::class , 'index'])->name('home');
-        
+        Route::get('home', [OwnerBerandaController::class, 'index'])->name('home');
+
         Route::get('/rekap_absen', [AbsensiController::class, 'rekapAbsensi'])->name('rekap_absen');
         Route::get('/laporan', function () {
             return view('pemilik.laporan');
@@ -636,7 +657,7 @@ Route::middleware(['auth', 'role:owner'])
 
 /*
 |--------------------------------------------------------------------------
-| Role: FINANCE Routes
+| Role: FINANCE Routes - DIPERBAIKI DENGAN API ENDPOINTS
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:finance'])
@@ -660,10 +681,11 @@ Route::middleware(['auth', 'role:finance'])
         // EDIT & DELETE KARYAWAN
         Route::put('/karyawan/{karyawan}', [AdminKaryawanController::class, 'update'])->name('karyawan.update');
         Route::delete('/karyawan/{karyawan}', [AdminKaryawanController::class, 'destroy'])->name('karyawan.destroy');
-       Route::get('/layanan', [LayananController::class, 'financeIndex'])->name('layanan.index');
+        Route::get('/layanan', [LayananController::class, 'financeIndex'])->name('layanan.index');
 
         // Update harga saja
         Route::put('/layanan/{id}/update-harga', [LayananController::class, 'updateHarga'])->name('layanan.update-harga');
+        
         // CUTI VIEW ONLY untuk finance
         Route::prefix('cuti')->name('cuti.')->group(function () {
             Route::get('/', [CutiController::class, 'index'])->name('index');
@@ -704,11 +726,18 @@ Route::middleware(['auth', 'role:finance'])
             Route::get('/{id}/cetak', [KwitansiController::class, 'cetak'])->name('cetak');
         });
 
-        // Route API untuk kategori (dipanggil oleh JavaScript)
-        // Diletakkan di luar prefix agar URL-nya bersih /api/kategori/...
-        Route::get('/api/kategori/{tipe}', [CashflowController::class, 'getKategoriByType']);
-
-    }); // <-- Kurung penutup untuk group 'finance'
+        // API ENDPOINTS UNTUK FINANCE - TAMBAHAN BARU
+        Route::prefix('api')->name('api.')->group(function () {
+            // API untuk layanan finance (JSON response)
+            Route::get('/layanan', [LayananController::class, 'financeApi'])->name('layanan.api');
+            
+            // API untuk invoices finance (JSON response)
+            Route::get('/invoices', [InvoiceController::class, 'getFinanceInvoices'])->name('invoices.api');
+            
+            // API untuk kategori cashflow
+            Route::get('/kategori/{tipe}', [CashflowController::class, 'getKategoriByType'])->name('kategori.by.type');
+        });
+    });
 
 /*
 |--------------------------------------------------------------------------
@@ -721,8 +750,9 @@ Route::middleware(['auth', 'role:manager_divisi'])
     ->group(function () {
         // Dashboard
         Route::get('/home', function () {
-            return view('manager_divisi.home'); })->name('home');
-Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsenManajer'])->name('kelola_absensi');
+            return view('manager_divisi.home');
+        })->name('home');
+        Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsenManajer'])->name('kelola_absensi');
         // CUTI MANAGEMENT
         Route::prefix('cuti')->name('cuti.')->group(function () {
             Route::get('/', [CutiController::class, 'index'])->name('index');
@@ -771,7 +801,7 @@ Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsenManajer'])-
         Route::get('/pengelola_tugas', function () {
             return view('manager_divisi.pengelola_tugas');
         })->name('pengelola_tugas');
-            Route::get('/daftar_karyawan', [AdminKaryawanController::class, 'karyawanDivisi'])->name('daftar_karyawan');
+        Route::get('/daftar_karyawan', [AdminKaryawanController::class, 'karyawanDivisi'])->name('daftar_karyawan');
 
         // Tim Saya
         Route::get('/tim-saya', function () {
@@ -1043,7 +1073,6 @@ if (env('APP_DEBUG', false)) {
                 if ($quotaData['success']) {
                     echo "<pre>" . print_r($quotaData['data'], true) . "</pre>";
                 }
-
             } catch (\Exception $e) {
                 echo "<h1>ERROR: " . $e->getMessage() . "</h1>";
                 echo "<pre>" . $e->getTraceAsString() . "</pre>";
@@ -1203,28 +1232,34 @@ Route::middleware(['auth', 'role:general_manager'])
 // Finance legacy routes
 Route::get('/data', [LayananController::class, 'financeIndex']);
 Route::get('/data_orderan', function () {
-    return view('finance.data_orderan'); });
+    return view('finance.data_orderan');
+});
 Route::get('/finance', function () {
     return redirect()->route('finance.beranda');
 });
 Route::get('/pemasukan', [CashflowController::class, 'index']);
 Route::get('/pengeluaran', function () {
-    return view('finance.pengeluaran'); });
+    return view('finance.pengeluaran');
+});
 Route::get('/finance/invoice', function () {
-    return view('finance.invoice'); });
+    return view('finance.invoice');
+});
 
 // General Manager legacy shortcuts
 Route::get('/general_manajer', function () {
-    return view('general_manajer.home'); });
+    return view('general_manajer.home');
+});
 Route::get('/kelola_tugas', function () {
     return redirect()->route('general_manajer.kelola_tugas');
 });
 Route::get('/kelola_absen', function () {
-    return view('general_manajer.kelola_absen'); });
+    return view('general_manajer.kelola_absen');
+});
 
 // Admin legacy
 Route::get('/admin/templat', function () {
-    return view('admin.templet_surat'); });
+    return view('admin.templet_surat');
+});
 
 // Invoice print
 Route::get('/invoices/{invoice}/print', function (\App\Models\Invoice $invoice) {
@@ -1270,12 +1305,6 @@ Route::middleware(['auth', 'role:owner'])->prefix('api/owner')->name('api.owner.
 Route::middleware(['auth'])->prefix('api/services')->name('api.services.')->group(function () {
     Route::get('/count', [LayananController::class, 'getCount'])->name('count');
 });
-/*
-|--------------------------------------------------------------------------
-| Role-Based Routes - GENERAL MANAGER
-|--------------------------------------------------------------------------
-*/
-
 
 // Admin Template
 Route::get('/admin/templat', function () {
