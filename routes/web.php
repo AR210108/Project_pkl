@@ -496,7 +496,7 @@ Route::middleware(['auth', 'role:karyawan'])
             // Existing API routes...
             Route::get('/dashboard', [KaryawanController::class, 'getDashboardData'])->name('dashboard');
             Route::get('/dashboard-data', [KaryawanController::class, 'getDashboardData'])->name('dashboard.data'); // Alias untuk kompatibilitas
-
+    
             // Absensi - Status Hari Ini
             Route::get('/today-status', [KaryawanController::class, 'getTodayStatus'])->name('today.status');
 
@@ -752,7 +752,13 @@ Route::middleware(['auth', 'role:manager_divisi'])
         Route::get('/home', function () {
             return view('manager_divisi.home');
         })->name('home');
+<<<<<<< HEAD
         Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsenManajer'])->name('kelola_absensi');
+=======
+
+        Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsensiManagerDivisi'])->name('kelola_absensi');
+
+>>>>>>> 315a31210070e4d0cbdacb5b6480acfbf9ed93ee
         // CUTI MANAGEMENT
         Route::prefix('cuti')->name('cuti.')->group(function () {
             Route::get('/', [CutiController::class, 'index'])->name('index');
@@ -881,6 +887,16 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
         Route::post('/absen-pulang', [AbsensiController::class, 'apiAbsenPulang'])->name('absen-pulang');
         Route::post('/submit-izin', [AbsensiController::class, 'apiSubmitIzin'])->name('submit-izin');
     });
+
+    /* =====================================================
+     |  API MEETING NOTES & ANNOUNCEMENTS - PERBAIKAN
+     ===================================================== */
+    Route::get('/karyawan/meeting-notes', [KaryawanController::class, 'getMeetingNotes']);
+    Route::get('/karyawan/meeting-notes-dates', [KaryawanController::class, 'getMeetingNotesDates']);
+    Route::get('/karyawan/announcements', [KaryawanController::class, 'getAnnouncements']);
+    Route::get('/karyawan/announcements-by-date', [KaryawanController::class, 'getAnnouncementsByDate']);
+    Route::get('/karyawan/announcements-dates', [KaryawanController::class, 'getAnnouncementsDates']);
+    Route::get('/karyawan/calendar-dates', [KaryawanController::class, 'getCalendarDates']);
 
     /* TASKS API */
     Route::prefix('tasks')->name('tasks.')->group(function () {
@@ -1235,7 +1251,7 @@ Route::get('/data_orderan', function () {
     return view('finance.data_orderan');
 });
 Route::get('/finance', function () {
-    return redirect()->route('finance.beranda');
+    return view('finance.beranda');
 });
 Route::get('/pemasukan', [CashflowController::class, 'index']);
 Route::get('/pengeluaran', function () {
@@ -1339,4 +1355,43 @@ Route::fallback(function () {
     }
 
     return redirect('/login');
+<<<<<<< HEAD
 });
+=======
+});
+
+// Di routes/web.php
+
+Route::prefix('general_manager/api')->middleware(['auth'])->group(function () {
+    // Route untuk Catatan Rapat
+    Route::get('/meeting-notes-dates', [CatatanRapatController::class, 'getMeetingNotesDatesForGM']);
+    Route::get('/meeting-notes', [CatatanRapatController::class, 'getMeetingNotesByDateForGM']);
+
+    // Route untuk Pengumuman
+    Route::get('/announcements-dates', [PengumumanController::class, 'getAnnouncementDatesForGM']);
+    Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsForGM']);
+});
+
+
+// Grup route untuk Owner
+Route::prefix('owner/api')->middleware(['auth', 'role:owner'])->group(function () {
+    // Route untuk Catatan Rapat
+    Route::get('/meeting-notes-dates', [CatatanRapatController::class, 'getMeetingNotesDatesForOwner']);
+    Route::get('/meeting-notes', [CatatanRapatController::class, 'getMeetingNotesByDateForOwner']);
+
+    // Route untuk Pengumuman
+    Route::get('/announcements-dates', [PengumumanController::class, 'getAnnouncementDatesForOwner']);
+    Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsForOwner']);
+});
+
+// Grup route untuk Manager Divisi
+Route::prefix('manager_divisi/api')->middleware(['auth', 'role:manager_divisi'])->group(function () {
+    // Route untuk Catatan Rapat
+    Route::get('/meeting-notes-dates', [CatatanRapatController::class, 'getMeetingNotesDatesForManager']);
+    Route::get('/meeting-notes', [CatatanRapatController::class, 'getMeetingNotesByDateForManager']);
+
+    // Route untuk Pengumuman
+    Route::get('/announcements-dates', [PengumumanController::class, 'getAnnouncementDatesForManager']);
+    Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsForManager']);
+});
+>>>>>>> 315a31210070e4d0cbdacb5b6480acfbf9ed93ee
