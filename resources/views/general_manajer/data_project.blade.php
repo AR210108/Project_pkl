@@ -510,7 +510,7 @@
                                 Daftar Project
                             </h3>
                             <div class="flex items-center gap-2">
-                                <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light">{{ $project->total() }}</span> project</span>
+                                <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light">{{ $projects->total() }}</span> project</span>
                             </div>
                         </div>
                         <div class="panel-body">
@@ -546,9 +546,9 @@
                                             </tr>
                                         </thead>
                                         <tbody id="desktopTableBody">
-                                            @foreach($project as $index => $item)
+                                            @foreach($projects as $index => $item)
                                                 <tr>
-                                                    <td style="min-width: 60px;">{{ ($project->currentPage() - 1) * $project->perPage() + $index + 1 }}</td>
+                                                    <td style="min-width: 60px;">{{ ($projects->currentPage() - 1) * $projects->perPage() + $index + 1 }}</td>
                                                     <td style="min-width: 200px;">{{ $item->nama }}</td>
                                                     <td style="min-width: 250px;" class="truncate-text" title="{{ $item->deskripsi }}">
                                                         {{ Str::limit($item->deskripsi, 40) }}
@@ -579,7 +579,7 @@
                                                     <td style="min-width: 120px;">
                                                         <span class="status-badge 
                                                             @if($item->status == 'Pending') status-Pending 
-                                                            @elseif($item->status == 'Dalam Pengerjaan ') status-Dalam Pengerjaan 
+                                                            @elseif($item->status == 'Dalam Pengerjaan') status-Dalam Pengerjaan 
                                                             @elseif($item->status == 'Selesai') status-Selesai 
                                                             @else status-todo @endif">
                                                             {{ $item->status }}
@@ -603,18 +603,18 @@
                             
                             <!-- Desktop Pagination -->
                             <div class="desktop-pagination">
-                                <button class="desktop-nav-btn" @if($project->currentPage() == 1) disabled @endif onclick="window.location.href='{{ $project->previousPageUrl() }}'">
+                                <button class="desktop-nav-btn" @if($projects->currentPage() == 1) disabled @endif onclick="window.location.href='{{ $projects->previousPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_left</span>
                                 </button>
                                 <div class="flex gap-1">
-                                    @for($i = 1; $i <= $project->lastPage(); $i++)
-                                        <button class="desktop-page-btn {{ $i == $project->currentPage() ? 'active' : '' }}" 
-                                            onclick="window.location.href='{{ $project->url($i) }}'">
+                                    @for($i = 1; $i <= $projects->lastPage(); $i++)
+                                        <button class="desktop-page-btn {{ $i == $projects->currentPage() ? 'active' : '' }}" 
+                                            onclick="window.location.href='{{ $projects->url($i) }}'">
                                             {{ $i }}
                                         </button>
                                     @endfor
                                 </div>
-                                <button class="desktop-nav-btn" @if($project->currentPage() == $project->lastPage()) disabled @endif onclick="window.location.href='{{ $project->nextPageUrl() }}'">
+                                <button class="desktop-nav-btn" @if($projects->currentPage() == $projects->lastPage()) disabled @endif onclick="window.location.href='{{ $projects->nextPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_right</span>
                                 </button>
                             </div>
@@ -832,41 +832,40 @@
     });
 
     // Open edit modal with data - HANYA UNTUK MENETAPKAN PENANGGUNG JAWAB
-// Open edit modal with data - untuk menetapkan penanggung jawab
-function openEditModal(id, nama, deskripsi, harga, deadline, progres, status, penanggungJawabId) {
-    document.getElementById('editId').value = id;
-    
-    // Tampilkan info project (readonly)
-    document.getElementById('editNamaDisplay').value = nama;
-    document.getElementById('editNama').value = nama;
-    
-    document.getElementById('editDeadlineDisplay').value = deadline;
-    document.getElementById('editDeadline').value = deadline;
-    
-    // Set hidden fields lainnya
-    document.getElementById('editDeskripsi').value = deskripsi;
-    document.getElementById('editHarga').value = harga;
-    document.getElementById('editProgres').value = progres;
-    document.getElementById('editStatus').value = status;
-    
-    // Set penanggung jawab dropdown (focus utama)
-    const penanggungJawabSelect = document.getElementById('editPenanggungJawab');
-    if (penanggungJawabId && penanggungJawabId !== 'null') {
-        penanggungJawabSelect.value = penanggungJawabId;
-    } else {
-        penanggungJawabSelect.value = '';
+    function openEditModal(id, nama, deskripsi, harga, deadline, progres, status, penanggungJawabId) {
+        document.getElementById('editId').value = id;
+        
+        // Tampilkan info project (readonly)
+        document.getElementById('editNamaDisplay').value = nama;
+        document.getElementById('editNama').value = nama;
+        
+        document.getElementById('editDeadlineDisplay').value = deadline;
+        document.getElementById('editDeadline').value = deadline;
+        
+        // Set hidden fields lainnya
+        document.getElementById('editDeskripsi').value = deskripsi;
+        document.getElementById('editHarga').value = harga;
+        document.getElementById('editProgres').value = progres;
+        document.getElementById('editStatus').value = status;
+        
+        // Set penanggung jawab dropdown (focus utama)
+        const penanggungJawabSelect = document.getElementById('editPenanggungJawab');
+        if (penanggungJawabId && penanggungJawabId !== 'null') {
+            penanggungJawabSelect.value = penanggungJawabId;
+        } else {
+            penanggungJawabSelect.value = '';
+        }
+        
+        // Update form action
+        const editForm = document.getElementById('editForm');
+        editForm.action = `/general_manajer/data_project/${id}`;
+        
+        // Focus ke dropdown saat modal terbuka
+        document.getElementById('editModal').classList.remove('hidden');
+        setTimeout(() => {
+            penanggungJawabSelect.focus();
+        }, 100);
     }
-    
-    // Update form action
-    const editForm = document.getElementById('editForm');
-    editForm.action = `/general_manajer/data_project/${id}`;
-    
-    // Focus ke dropdown saat modal terbuka
-    document.getElementById('editModal').classList.remove('hidden');
-    setTimeout(() => {
-        penanggungJawabSelect.focus();
-    }, 100);
-}
 </script>
     
     <!-- Add CSRF token meta tag -->

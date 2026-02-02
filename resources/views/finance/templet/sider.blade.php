@@ -237,20 +237,20 @@
         <div class="sidebar-header flex items-center justify-center border-b border-gray-200 flex-shrink-0">
             <img src="{{ asset('images/logo_inovindo.jpg') }}" alt="Login Background" class="sidebar-logo">
         </div>
-        
+
         <!-- Navigasi Utama -->
         <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/finance">
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="{{ route('finance.beranda') }}">
                 <span class="material-icons sidebar-icon">home</span>
                 <span class="sidebar-text">Beranda</span>
             </a>
-            
+
             <!-- Item Pemasukan & Pengeluaran (menggantikan dropdown Keuangan) -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/pemasukan">
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="{{ route('finance.cashflow.index') }}">
                 <span class="material-icons sidebar-icon">swap_vert</span>
                 <span class="sidebar-text">Pemasukan & <br>Pengeluaran</span>
             </a>
-            
+
             <!-- Dropdown untuk Dokumen -->
             <div class="relative">
                 <button class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors w-full text-left" onclick="toggleDropdown('dokumen-dropdown')">
@@ -258,36 +258,36 @@
                     <span class="sidebar-text">Dokumen</span>
                     <span class="material-icons sidebar-icon ml-auto transition-transform duration-200" id="dokumen-icon">expand_more</span>
                 </button>
-                
+
                 <div id="dokumen-dropdown" class="pl-6 mt-1 space-y-1 hidden">
                     <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/finance/invoice">
                         <span class="material-icons sidebar-icon">request_quote</span>
                         <span class="sidebar-text">Invoice</span>
                     </a>
-                    
+
                     <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/finance/kwitansi">
                         <span class="material-icons sidebar-icon">receipt_long</span>
                         <span class="sidebar-text">Kwitansi</span>
                     </a>
                 </div>
             </div>
-            
+
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/data">
                 <span class="material-icons sidebar-icon">list_alt</span>
                 <span class="sidebar-text">Data Layanan</span>
             </a>
-            
+
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/data_orderan">
                 <span class="material-icons">receipt_long</span>
                 <span class="sidebar-text">Data Orderan</span>
             </a>
-            
+
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" href="/finance/daftar_karyawan">
                 <span class="material-icons sidebar-icon">people</span>
                 <span class="sidebar-text">Data Karyawan</span>
             </a>
         </nav>
-        
+
         <!-- Footer Sidebar -->
         <div class="sidebar-footer border-t border-gray-200 flex-shrink-0">
             <form method="POST" action="{{ route('logout') }}">
@@ -365,13 +365,13 @@
                     }
                 });
             });
-            
+
             // Inisialisasi margin konten utama
             if (window.innerWidth >= 768) {
                 mainContent.style.marginLeft = '256px'; // Lebar sidebar yang tetap
                 mainContent.style.width = 'calc(100% - 256px)'; // Lebar konten utama yang tetap
             }
-            
+
             // Menandai halaman aktif
             setActiveNavItem();
         }
@@ -383,7 +383,7 @@
 
             // Hapus kelas aktif dari semua item terlebih dahulu
             navItems.forEach(item => item.classList.remove('active'));
-            
+
             // Cari item yang cocok dengan URL saat ini
             navItems.forEach(item => {
                 const href = item.getAttribute('href');

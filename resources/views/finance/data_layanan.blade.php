@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Data Layanan</title>
+    <title>Data Layanan - Finance</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
@@ -64,262 +64,6 @@
             vertical-align: middle;
         }
         
-        /* Card hover effects */
-        .stat-card {
-            transition: all 0.3s ease;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        
-        /* Table styles */
-        .order-table {
-            transition: all 0.2s ease;
-        }
-        
-        .order-table tr:hover {
-            background-color: rgba(59, 130, 246, 0.05);
-        }
-        
-        /* Button styles */
-        .btn-primary {
-            background-color: #3b82f6;
-            color: white;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-primary:hover {
-            background-color: #2563eb;
-        }
-        
-        .btn-secondary {
-            background-color: #f1f5f9;
-            color: #64748b;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #e2e8f0;
-        }
-        
-        /* Modal styles */
-        .modal {
-            transition: opacity 0.25s ease;
-        }
-        
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-        }
-
-        /* Custom styles untuk transisi */
-        .sidebar-transition {
-            transition: transform 0.3s ease-in-out;
-        }
-        
-        /* Animasi hamburger */
-        .hamburger-line {
-            transition: all 0.3s ease-in-out;
-        }
-        
-        .hamburger-active .line1 {
-            transform: rotate(45deg) translate(5px, 5px);
-        }
-        
-        .hamburger-active .line2 {
-            opacity: 0;
-        }
-        
-        .hamburger-active .line3 {
-            transform: rotate(-45deg) translate(7px, -6px);
-        }
-        
-        /* Gaya untuk indikator aktif/hover */
-        .nav-item {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .nav-item::before {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 0;
-            height: 100%;
-            width: 3px;
-            background-color: #3b82f6;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-        }
-        
-        @media (min-width: 768px) {
-            .nav-item::before {
-                right: auto;
-                left: 0;
-                transform: translateX(-100%);
-            }
-        }
-        
-        .nav-item:hover::before,
-        .nav-item.active::before {
-            transform: translateX(0);
-        }
-        
-        /* Memastikan sidebar tetap di posisinya saat scroll */
-        .sidebar-fixed {
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 40;
-        }
-        
-        /* Menyesuaikan konten utama agar tidak tertutup sidebar */
-        .main-content {
-            margin-left: 0;
-            transition: margin-left 0.3s ease-in-out;
-        }
-        
-        @media (min-width: 768px) {
-            .main-content {
-                margin-left: 256px; /* Lebar sidebar */
-            }
-        }
-        
-        /* Scrollbar kustom untuk sidebar */
-        .sidebar-fixed::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .sidebar-fixed::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        
-        .sidebar-fixed::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
-        }
-        
-        .sidebar-fixed::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
-        /* Table mobile adjustments */
-        @media (max-width: 639px) {
-            .desktop-table {
-                display: none;
-            }
-            
-            .mobile-cards {
-                display: block;
-            }
-            
-            /* Hide desktop pagination on mobile */
-            .desktop-pagination {
-                display: none !important;
-            }
-        }
-        
-        @media (min-width: 640px) {
-            .desktop-table {
-                display: block;
-            }
-            
-            .mobile-cards {
-                display: none;
-            }
-            
-            /* Hide mobile pagination on desktop */
-            .mobile-pagination {
-                display: none !important;
-            }
-        }
-        
-        /* Form input styles */
-        .form-input {
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s ease;
-        }
-        
-        .form-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        /* Pagination styles */
-        .page-btn {
-            transition: all 0.2s ease;
-        }
-        
-        .page-btn:hover:not(:disabled) {
-            transform: scale(1.1);
-        }
-        
-        .page-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        /* Desktop pagination styles */
-        .desktop-pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin-top: 24px;
-        }
-        
-        .desktop-page-btn {
-            min-width: 32px;
-            height: 32px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        
-        .desktop-page-btn.active {
-            background-color: #3b82f6;
-            color: white;
-        }
-        
-        .desktop-page-btn:not(.active) {
-            background-color: #f1f5f9;
-            color: #64748b;
-        }
-        
-        .desktop-page-btn:not(.active):hover {
-            background-color: #e2e8f0;
-        }
-        
-        .desktop-nav-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #f1f5f9;
-            color: #64748b;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        
-        .desktop-nav-btn:hover:not(:disabled) {
-            background-color: #e2e8f0;
-        }
-        
-        .desktop-nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
         /* Panel Styles */
         .panel {
             background: white;
@@ -362,31 +106,6 @@
             background: white;
         }
         
-        .scrollable-table-container {
-            scrollbar-width: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .scrollable-table-container::-webkit-scrollbar {
-            height: 12px;
-            width: 12px;
-        }
-        
-        .scrollable-table-container::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 6px;
-        }
-        
-        .scrollable-table-container::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 6px;
-            border: 2px solid #f1f5f9;
-        }
-        
-        .scrollable-table-container::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        
         .data-table {
             width: 100%;
             min-width: 1200px;
@@ -416,10 +135,6 @@
         
         .data-table tbody tr:hover {
             background: #f3f4f6;
-        }
-        
-        .table-shadow {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         
         /* Minimalist Popup Styles */
@@ -478,21 +193,6 @@
             color: #f59e0b;
         }
         
-        .minimal-popup-content {
-            flex-grow: 1;
-        }
-        
-        .minimal-popup-title {
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 2px;
-        }
-        
-        .minimal-popup-message {
-            font-size: 14px;
-            color: #64748b;
-        }
-        
         .minimal-popup-close {
             flex-shrink: 0;
             background: none;
@@ -509,9 +209,18 @@
             color: #64748b;
         }
         
-        /* Hidden class for filtering */
-        .hidden-by-filter {
-            display: none !important;
+        /* Mobile cards */
+        .mobile-cards {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .desktop-table {
+                display: none;
+            }
+            .mobile-cards {
+                display: block;
+            }
         }
     </style>
     <!-- Add CSRF token meta tag -->
@@ -520,8 +229,9 @@
 
 <body class="font-display bg-background-light text-text-light">
     <div class="flex min-h-screen">
-        <!-- Menggunakan template header -->
+        <!-- Sidebar -->
         @include('finance.templet.sider')
+        
         <div class="flex-1 flex flex-col main-content">
             <div class="flex-1 p-3 sm:p-8">
                 <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Data Layanan</h2>
@@ -539,16 +249,16 @@
                     <div class="panel-header">
                         <h3 class="panel-title">
                             <span class="material-icons-outlined text-primary">miscellaneous_services</span>
-                            Data Layanan
+                            Data Layanan (Finance View)
                         </h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">12</span> layanan</span>
+                            <span class="text-sm text-text-muted-light">Total: <span id="totalCount" class="font-semibold text-text-light">{{ count($layanans) }}</span> layanan</span>
                         </div>
                     </div>
                     <div class="panel-body">
-                        <!-- SCROLLABLE TABLE -->
+                        <!-- Desktop Table -->
                         <div class="desktop-table">
-                            <div class="scrollable-table-container scroll-indicator table-shadow" id="scrollableTable">
+                            <div class="scrollable-table-container scroll-indicator">
                                 <table class="data-table">
                                     <thead>
                                         <tr>
@@ -559,103 +269,69 @@
                                             <th style="min-width: 100px; text-align: center;">Aksi</th>
                                         </tr>
                                     </thead>
-                                   <!-- GANTI ISI TUBUH TABEL DESKTOP -->
-<tbody id="desktopTableBody">
-    @forelse ($layanans as $index => $layanan)
-    <tr class="layanan-row" data-id="{{ $layanan->id }}" data-nama="{{ $layanan->nama_layanan }}" data-deskripsi="{{ $layanan->deskripsi }}" data-harga="{{ $layanan->harga }}">
-        <td style="min-width: 60px;">{{ $index + 1 }}</td>
-        <td style="min-width: 200px;">{{ $layanan->nama_layanan }}</td>
-        <td style="min-width: 250px;">{{ $layanan->deskripsi ?? 'Tidak ada deskripsi' }}</td>
-        <td style="min-width: 150px;">Rp. {{ number_format($layanan->harga, 0, ',', '.') }}</td>
-        <td style="min-width: 100px; text-align: center;">
-            <div class="flex justify-center gap-2">
-                <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                        data-id="{{ $layanan->id }}" 
-                        data-nama="{{ $layanan->nama_layanan }}" 
-                        data-deskripsi="{{ $layanan->deskripsi }}" 
-                        data-harga="{{ $layanan->harga }}">
-                    <span class="material-icons-outlined">edit</span>
-                </button>
-                <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="{{ $layanan->id }}">
-                    <span class="material-icons-outlined">delete</span>
-                </button>
-            </div>
-        </td>
-    </tr>
-    @empty
-    <tr>
-        <td colspan="5" class="text-center py-8 text-gray-500">Belum ada data layanan.</td>
-    </tr>
-    @endforelse
-</tbody>
+                                    <tbody id="desktopTableBody">
+                                        @forelse ($layanans as $index => $layanan)
+                                        <tr class="layanan-row" data-id="{{ $layanan->id }}" data-nama="{{ $layanan->nama_layanan }}" data-deskripsi="{{ $layanan->deskripsi }}" data-harga="{{ $layanan->harga }}">
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $layanan->nama_layanan }}</td>
+                                            <td>{{ $layanan->deskripsi ?? 'Tidak ada deskripsi' }}</td>
+                                            <td>Rp. {{ number_format($layanan->harga, 0, ',', '.') }}</td>
+                                            <td style="text-align: center;">
+                                                <button class="edit-harga-btn px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                                                        data-id="{{ $layanan->id }}"
+                                                        data-nama="{{ $layanan->nama_layanan }}"
+                                                        data-deskripsi="{{ $layanan->deskripsi }}"
+                                                        data-harga="{{ $layanan->harga }}">
+                                                    Edit Harga
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center py-8 text-gray-500">Belum ada data layanan.</td>
+                                        </tr>
+                                        @endforelse
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
                         
-                       <!-- GANTI ISI KARTU MOBILE -->
-<div class="mobile-cards space-y-4" id="mobile-cards">
-    @forelse ($layanans as $index => $layanan)
-    <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" 
-         data-id="{{ $layanan->id }}" 
-         data-nama="{{ $layanan->nama_layanan }}" 
-         data-deskripsi="{{ $layanan->deskripsi }}" 
-         data-harga="{{ $layanan->harga }}">
-        <div class="flex justify-between items-start mb-3">
-            <div class="flex items-center gap-3">
-                <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span class="material-icons-outlined text-primary">miscellaneous_services</span>
-                </div>
-                <div>
-                    <h4 class="font-semibold text-base">{{ $layanan->nama_layanan }}</h4>
-                    <p class="text-sm text-text-muted-light">Rp. {{ number_format($layanan->harga, 0, ',', '.') }}</p>
-                </div>
-            </div>
-            <div class="flex gap-2">
-                <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" 
-                        data-id="{{ $layanan->id }}" 
-                        data-nama="{{ $layanan->nama_layanan }}" 
-                        data-deskripsi="{{ $layanan->deskripsi }}" 
-                        data-harga="{{ $layanan->harga }}">
-                    <span class="material-icons-outlined">edit</span>
-                </button>
-                <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" data-id="{{ $layanan->id }}">
-                    <span class="material-icons-outlined">delete</span>
-                </button>
-            </div>
-        </div>
-        <div class="grid grid-cols-2 gap-2 text-sm">
-            <div>
-                <p class="text-text-muted-light">No</p>
-                <p class="font-medium">{{ $index + 1 }}</p>
-            </div>
-            <div>
-                <p class="text-text-muted-light">Harga</p>
-                <p class="font-medium">Rp. {{ number_format($layanan->harga, 0, ',', '.') }}</p>
-            </div>
-            <div class="col-span-2">
-                <p class="text-text-muted-light">Deskripsi</p>
-                <p class="font-medium">{{ $layanan->deskripsi ?? 'Tidak ada deskripsi' }}</p>
-            </div>
-        </div>
-    </div>
-    @empty
-    <div class="bg-white rounded-lg border border-border-light p-8 text-center text-gray-500">
-        Belum ada data layanan.
-    </div>
-    @endforelse
-</div>
-                        
-                        <!-- Pagination -->
-                        <div id="paginationContainer" class="desktop-pagination">
-                            <button id="prevPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_left</span>
-                            </button>
-                            <div id="pageNumbers" class="flex gap-1">
-                                <!-- Page numbers will be generated by JavaScript -->
+                        <!-- Mobile Cards -->
+                        <div class="mobile-cards space-y-4">
+                            @forelse ($layanans as $index => $layanan)
+                            <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm layanan-card" 
+                                 data-id="{{ $layanan->id }}" 
+                                 data-nama="{{ $layanan->nama_layanan }}" 
+                                 data-deskripsi="{{ $layanan->deskripsi }}" 
+                                 data-harga="{{ $layanan->harga }}">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <span class="material-icons-outlined text-primary">miscellaneous_services</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-base">{{ $layanan->nama_layanan }}</h4>
+                                            <p class="text-sm text-text-muted-light">Rp. {{ number_format($layanan->harga, 0, ',', '.') }}</p>
+                                        </div>
+                                    </div>
+                                    <button class="edit-harga-btn px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors"
+                                            data-id="{{ $layanan->id }}"
+                                            data-nama="{{ $layanan->nama_layanan }}"
+                                            data-deskripsi="{{ $layanan->deskripsi }}"
+                                            data-harga="{{ $layanan->harga }}">
+                                        Edit Harga
+                                    </button>
+                                </div>
+                                <div class="text-sm">
+                                    <p class="text-text-muted-light mb-1">Deskripsi</p>
+                                    <p class="font-medium">{{ $layanan->deskripsi ?? 'Tidak ada deskripsi' }}</p>
+                                </div>
                             </div>
-                            <button id="nextPage" class="desktop-nav-btn">
-                                <span class="material-icons-outlined text-sm">chevron_right</span>
-                            </button>
+                            @empty
+                            <div class="bg-white rounded-lg border border-border-light p-8 text-center text-gray-500">
+                                Belum ada data layanan.
+                            </div>
+                            @endforelse
                         </div>
                     </div>
                 </div>
@@ -666,60 +342,44 @@
         </div>
     </div>
 
-    <!-- Modal Edit Layanan -->
-    <div id="editLayananModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Layanan</h3>
-                    <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form id="editLayananForm" class="space-y-4">
-                    <input type="hidden" id="editId" name="id">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
-                            <input type="text" id="editNamaLayanan" name="nama_layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama layanan" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                            <input type="text" id="editHarga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan harga" required>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi layanan" required></textarea>
-                    </div>
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" id="batalEditBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Data</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Delete Konfirmasi -->
-    <div id="deleteModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <!-- Modal Edit Harga -->
+    <div id="editHargaModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h3>
-                    <button id="closeDeleteModalBtn" class="text-gray-800 hover:text-gray-500">
+                    <h3 class="text-xl font-bold text-gray-800">Edit Harga Layanan</h3>
+                    <button id="closeModalBtn" class="text-gray-800 hover:text-gray-500">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="deleteForm" class="space-y-4">
-                    <div class="mb-6">
-                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus layanan ini?</p>
-                        <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
-                        <input type="hidden" id="deleteId" name="id">
+                <form id="editHargaForm" class="space-y-4">
+                    <input type="hidden" id="editId" name="id">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
+                        <input type="text" id="editNamaLayanan" 
+                               class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 cursor-not-allowed" 
+                               readonly>
                     </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" id="batalDeleteBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                        <textarea id="editDeskripsi" 
+                                  class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 cursor-not-allowed" 
+                                  rows="2" readonly></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Harga <span class="text-red-500">*</span></label>
+                        <input type="text" id="editHarga" name="harga" 
+                               class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" 
+                               placeholder="Masukkan harga" required>
+                        <p class="text-xs text-gray-500 mt-1">Hanya dapat mengedit harga</p>
+                    </div>
+                    
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" id="cancelBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">Simpan Harga</button>
                     </div>
                 </form>
             </div>
@@ -741,381 +401,328 @@
     </div>
 
     <script>
-        // Inisialisasi variabel untuk pagination dan search
-        let currentPage = 1;
-        const itemsPerPage = 5;
-        let searchTerm = '';
-        
-        // Dapatkan semua elemen layanan
-        const layananRows = document.querySelectorAll('.layanan-row');
-        const layananCards = document.querySelectorAll('.layanan-card');
-        
-        // Inisialisasi pagination dan search
-        initializePagination();
-        initializeSearch();
-        initializeScrollDetection();
+        // === INITIALIZATION ===
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Finance Layanan Page Loaded');
+            
+            // Initialize sidebar jika elemen ada
+            initSidebar();
+            
+            // Initialize modal dan fungsi lainnya
+            initializePage();
+        });
 
-        // === PAGINATION ===
-        function initializePagination() {
-            renderPagination();
-            updateVisibleItems();
-        }
-        
-        function renderPagination() {
-            const visibleRows = getFilteredRows();
-            const totalPages = Math.ceil(visibleRows.length / itemsPerPage);
-            const pageNumbersContainer = document.getElementById('pageNumbers');
-            const prevButton = document.getElementById('prevPage');
-            const nextButton = document.getElementById('nextPage');
+        // === SIDEBAR INITIALIZATION ===
+        function initSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
             
-            // Clear existing page numbers
-            pageNumbersContainer.innerHTML = '';
-            
-            // Generate page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                const pageNumber = document.createElement('button');
-                pageNumber.textContent = i;
-                pageNumber.className = `desktop-page-btn ${i === currentPage ? 'active' : ''}`;
-                pageNumber.addEventListener('click', () => goToPage(i));
-                pageNumbersContainer.appendChild(pageNumber);
+            // Cek dulu apakah elemen ada
+            if (!sidebar) {
+                console.log('Sidebar element not found - skipping sidebar initialization');
+                return;
             }
             
-            // Update navigation buttons
-            prevButton.disabled = currentPage === 1;
-            nextButton.disabled = currentPage === totalPages || totalPages === 0;
+            console.log('Initializing sidebar...');
             
-            // Add event listeners for navigation buttons
-            prevButton.onclick = () => {
-                if (currentPage > 1) goToPage(currentPage - 1);
-            };
+            // Atur posisi awal sidebar
+            sidebar.style.transform = 'translateX(0)';
             
-            nextButton.onclick = () => {
-                if (currentPage < totalPages) goToPage(currentPage + 1);
-            };
-        }
-        
-        function goToPage(page) {
-            currentPage = page;
-            renderPagination();
-            updateVisibleItems();
+            if (overlay) {
+                overlay.style.display = 'block';
+            }
             
-            // Reset scroll position when changing pages
-            const scrollableTable = document.getElementById('scrollableTable');
-            if (scrollableTable) {
-                scrollableTable.scrollLeft = 0;
+            // Event listeners untuk toggle sidebar (jika ada hamburger menu)
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+            
+            if (hamburgerBtn) {
+                hamburgerBtn.addEventListener('click', toggleSidebar);
+            }
+            
+            if (closeSidebarBtn) {
+                closeSidebarBtn.addEventListener('click', toggleSidebar);
+            }
+            
+            // Close sidebar ketika klik overlay
+            if (overlay) {
+                overlay.addEventListener('click', toggleSidebar);
+            }
+            
+            function toggleSidebar() {
+                const isOpen = sidebar.style.transform === 'translateX(0px)' || 
+                              sidebar.style.transform === 'translateX(0)';
+                
+                if (isOpen) {
+                    sidebar.style.transform = 'translateX(-100%)';
+                    if (overlay) overlay.style.display = 'none';
+                } else {
+                    sidebar.style.transform = 'translateX(0)';
+                    if (overlay) overlay.style.display = 'block';
+                }
             }
         }
-        
-        function getFilteredRows() {
-            return Array.from(layananRows).filter(row => !row.classList.contains('hidden-by-filter'));
-        }
-        
-        function getFilteredCards() {
-            return Array.from(layananCards).filter(card => !card.classList.contains('hidden-by-filter'));
-        }
-        
-        function updateVisibleItems() {
-            const visibleRows = getFilteredRows();
-            const visibleCards = getFilteredCards();
+
+        // === PAGE INITIALIZATION ===
+        function initializePage() {
+            console.log('Initializing finance layanan page...');
             
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
+            // Modal elements
+            const editHargaModal = document.getElementById('editHargaModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const editHargaForm = document.getElementById('editHargaForm');
             
-            // Hide all rows and cards first
-            layananRows.forEach(row => row.style.display = 'none');
-            layananCards.forEach(card => card.style.display = 'none');
+            // Check if modal elements exist
+            if (!editHargaModal || !closeModalBtn || !cancelBtn || !editHargaForm) {
+                console.log('Modal elements not found - finance may only have view permission');
+                return;
+            }
             
-            // Show only the rows for current page
-            visibleRows.forEach((row, index) => {
-                if (index >= startIndex && index < endIndex) {
-                    row.style.display = '';
+            // Show popup function
+            function showPopup(title, message, type = 'success') {
+                const popup = document.getElementById('minimalPopup');
+                if (!popup) {
+                    console.log('Popup element not found');
+                    return;
+                }
+                
+                const popupTitle = popup.querySelector('.minimal-popup-title');
+                const popupMessage = popup.querySelector('.minimal-popup-message');
+                const popupIcon = popup.querySelector('.minimal-popup-icon span');
+                
+                if (popupTitle) popupTitle.textContent = title;
+                if (popupMessage) popupMessage.textContent = message;
+                popup.className = 'minimal-popup show ' + type;
+                
+                if (popupIcon) {
+                    if (type === 'success') {
+                        popupIcon.textContent = 'check';
+                    } else if (type === 'error') {
+                        popupIcon.textContent = 'error';
+                    }
+                }
+                
+                setTimeout(() => {
+                    popup.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Close popup when clicking close button
+            const popupCloseBtn = document.querySelector('.minimal-popup-close');
+            if (popupCloseBtn) {
+                popupCloseBtn.addEventListener('click', function() {
+                    const popup = document.getElementById('minimalPopup');
+                    if (popup) popup.classList.remove('show');
+                });
+            }
+            
+            // Format input harga
+            function formatHargaInput(input) {
+                if (!input) return;
+                
+                let value = input.value.replace(/\./g, '');
+                
+                // Hanya angka
+                if (!/^\d*$/.test(value)) {
+                    value = value.replace(/\D/g, '');
+                }
+                
+                if (value) {
+                    input.value = parseInt(value).toLocaleString('id-ID');
+                }
+            }
+            
+            // Format harga on input
+            const hargaInput = document.getElementById('editHarga');
+            if (hargaInput) {
+                hargaInput.addEventListener('input', function(e) {
+                    formatHargaInput(this);
+                });
+            }
+            
+            // Handle edit buttons
+            document.querySelectorAll('.edit-harga-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const nama = this.getAttribute('data-nama');
+                    const deskripsi = this.getAttribute('data-deskripsi');
+                    const harga = this.getAttribute('data-harga');
+                    
+                    // Set modal values
+                    document.getElementById('editId').value = id;
+                    document.getElementById('editNamaLayanan').value = nama;
+                    document.getElementById('editDeskripsi').value = deskripsi;
+                    
+                    // Format harga untuk input
+                    const formattedHarga = parseInt(harga).toLocaleString('id-ID');
+                    document.getElementById('editHarga').value = formattedHarga;
+                    
+                    // Show modal
+                    editHargaModal.classList.remove('hidden');
+                });
+            });
+            
+            // Close modal events
+            closeModalBtn.addEventListener('click', function() {
+                editHargaModal.classList.add('hidden');
+                editHargaForm.reset();
+            });
+            
+            cancelBtn.addEventListener('click', function() {
+                editHargaModal.classList.add('hidden');
+                editHargaForm.reset();
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === editHargaModal) {
+                    editHargaModal.classList.add('hidden');
+                    editHargaForm.reset();
                 }
             });
             
-            // Show only the cards for current page
-            visibleCards.forEach((card, index) => {
-                if (index >= startIndex && index < endIndex) {
-                    card.style.display = '';
+            // Handle form submission
+            editHargaForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const id = document.getElementById('editId').value;
+                const hargaInput = document.getElementById('editHarga').value;
+                const nama = document.getElementById('editNamaLayanan').value;
+                
+                // Convert harga from formatted string to number
+                const harga = parseInt(hargaInput.replace(/\./g, '')) || 0;
+                
+                if (harga <= 0) {
+                    showPopup('Error', 'Harga harus lebih dari 0', 'error');
+                    return;
+                }
+                
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span> Menyimpan...';
+                
+                try {
+                    const response = await fetch(`/finance/layanan/${id}/update-harga`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            harga: harga
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Update UI
+                        const row = document.querySelector(`.layanan-row[data-id="${id}"]`);
+                        if (row) {
+                            row.setAttribute('data-harga', harga);
+                            const hargaCell = row.querySelector('td:nth-child(4)');
+                            if (hargaCell) {
+                                hargaCell.textContent = `Rp. ${harga.toLocaleString('id-ID')}`;
+                            }
+                            
+                            // Update button data attribute
+                            const editBtn = row.querySelector('.edit-harga-btn');
+                            if (editBtn) {
+                                editBtn.setAttribute('data-harga', harga);
+                            }
+                        }
+                        
+                        // Update mobile cards
+                        const card = document.querySelector(`.layanan-card[data-id="${id}"]`);
+                        if (card) {
+                            card.setAttribute('data-harga', harga);
+                            const priceElement = card.querySelector('.text-text-muted-light');
+                            if (priceElement) {
+                                priceElement.textContent = `Rp. ${harga.toLocaleString('id-ID')}`;
+                            }
+                            
+                            const editBtnMobile = card.querySelector('.edit-harga-btn');
+                            if (editBtnMobile) {
+                                editBtnMobile.setAttribute('data-harga', harga);
+                            }
+                        }
+                        
+                        // Close modal and show success
+                        editHargaModal.classList.add('hidden');
+                        editHargaForm.reset();
+                        showPopup('Berhasil', 'Harga layanan berhasil diperbarui', 'success');
+                        
+                        // Notify admin side (optional)
+                        console.log('Harga updated, admin should see the change');
+                    } else {
+                        showPopup('Gagal', result.message || 'Gagal memperbarui harga', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showPopup('Error', 'Terjadi kesalahan saat menyimpan', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
                 }
             });
             
-            // Update total count
-            document.getElementById('totalCount').textContent = visibleRows.length;
-        }
-        
-        // === SEARCH ===
-        function initializeSearch() {
+            // Search functionality
             const searchInput = document.getElementById('searchInput');
-            let searchTimeout;
-            
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    searchTerm = searchInput.value.trim();
-                    applySearch();
-                }, 300); // Debounce search
-            });
-        }
-        
-        function applySearch() {
-            // Reset to first page
-            currentPage = 1;
-            
-            // Apply search to rows
-            layananRows.forEach(row => {
-                const nama = row.getAttribute('data-nama').toLowerCase();
-                const deskripsi = row.getAttribute('data-deskripsi').toLowerCase();
+            if (searchInput) {
+                let searchTimeout;
                 
-                // Check if search term matches
-                let searchMatches = true;
-                if (searchTerm) {
-                    const searchLower = searchTerm.toLowerCase();
-                    searchMatches = nama.includes(searchLower) || 
-                                   deskripsi.includes(searchLower);
-                }
-                
-                if (searchMatches) {
-                    row.classList.remove('hidden-by-filter');
-                } else {
-                    row.classList.add('hidden-by-filter');
-                }
-            });
-            
-            // Apply same search to cards
-            layananCards.forEach(card => {
-                const nama = card.getAttribute('data-nama').toLowerCase();
-                const deskripsi = card.getAttribute('data-deskripsi').toLowerCase();
-                
-                // Check if search term matches
-                let searchMatches = true;
-                if (searchTerm) {
-                    const searchLower = searchTerm.toLowerCase();
-                    searchMatches = nama.includes(searchLower) || 
-                                   deskripsi.includes(searchLower);
-                }
-                
-                if (searchMatches) {
-                    card.classList.remove('hidden-by-filter');
-                } else {
-                    card.classList.add('hidden-by-filter');
-                }
-            });
-            
-            // Update pagination and visible items
-            renderPagination();
-            updateVisibleItems();
-        }
-
-        // Initialize scroll detection for table
-        function initializeScrollDetection() {
-            const scrollableTable = document.getElementById('scrollableTable');
-            
-            if (scrollableTable) {
-                // Add scroll event listener
-                scrollableTable.addEventListener('scroll', function() {
-                    const scrollLeft = scrollableTable.scrollLeft;
-                    const maxScroll = scrollableTable.scrollWidth - scrollableTable.clientWidth;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        const searchTerm = this.value.toLowerCase().trim();
+                        const rows = document.querySelectorAll('.layanan-row');
+                        const cards = document.querySelectorAll('.layanan-card');
+                        let visibleCount = 0;
+                        
+                        rows.forEach(row => {
+                            const nama = row.getAttribute('data-nama').toLowerCase();
+                            const deskripsi = row.getAttribute('data-deskripsi').toLowerCase();
+                            
+                            if (searchTerm === '' || nama.includes(searchTerm) || deskripsi.includes(searchTerm)) {
+                                row.style.display = '';
+                                visibleCount++;
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+                        
+                        cards.forEach(card => {
+                            const nama = card.getAttribute('data-nama').toLowerCase();
+                            const deskripsi = card.getAttribute('data-deskripsi').toLowerCase();
+                            
+                            if (searchTerm === '' || nama.includes(searchTerm) || deskripsi.includes(searchTerm)) {
+                                card.style.display = '';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        });
+                        
+                        const totalCountElement = document.getElementById('totalCount');
+                        if (totalCountElement) {
+                            totalCountElement.textContent = visibleCount;
+                        }
+                    }, 300);
                 });
             }
         }
 
-        // Minimalist Popup
-        function showMinimalPopup(title, message, type = 'success') {
-            const popup = document.getElementById('minimalPopup');
-            const popupTitle = popup.querySelector('.minimal-popup-title');
-            const popupMessage = popup.querySelector('.minimal-popup-message');
-            const popupIcon = popup.querySelector('.minimal-popup-icon span');
+        // === ERROR HANDLING ===
+        // Tangkap error global
+        window.addEventListener('error', function(e) {
+            console.error('Global error caught:', e.message, 'at', e.filename, 'line', e.lineno);
             
-            // Set content
-            popupTitle.textContent = title;
-            popupMessage.textContent = message;
-            
-            // Set type
-            popup.className = 'minimal-popup show ' + type;
-            
-            // Set icon
-            if (type === 'success') {
-                popupIcon.textContent = 'check';
-            } else if (type === 'error') {
-                popupIcon.textContent = 'error';
-            } else if (type === 'warning') {
-                popupIcon.textContent = 'warning';
-            }
-            
-            // Auto hide after 3 seconds
-            setTimeout(() => {
-                popup.classList.remove('show');
-            }, 3000);
-        }
-        
-        // Close popup when clicking the close button
-        document.querySelector('.minimal-popup-close').addEventListener('click', function() {
-            document.getElementById('minimalPopup').classList.remove('show');
-        });
-
-        // Modal elements
-        const editLayananModal = document.getElementById('editLayananModal');
-        const deleteModal = document.getElementById('deleteModal');
-
-        // Buttons
-        const batalEditBtn = document.getElementById('batalEditBtn');
-        const batalDeleteBtn = document.getElementById('batalDeleteBtn');
-        const closeEditModalBtn = document.getElementById('closeEditModalBtn');
-        const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
-
-        // Forms
-        const editLayananForm = document.getElementById('editLayananForm');
-
-        // Close edit modal
-        batalEditBtn.addEventListener('click', () => {
-            editLayananModal.classList.add('hidden');
-            editLayananForm.reset();
-        });
-
-        closeEditModalBtn.addEventListener('click', () => {
-            editLayananModal.classList.add('hidden');
-            editLayananForm.reset();
-        });
-
-        // Close delete modal
-        batalDeleteBtn.addEventListener('click', () => {
-            deleteModal.classList.add('hidden');
-        });
-
-        closeDeleteModalBtn.addEventListener('click', () => {
-            deleteModal.classList.add('hidden');
-        });
-
-        // ============================
-        // HANDLE EDIT BUTTON
-        // ============================
-        document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                // SET VALUE
-                document.getElementById('editId').value = button.dataset.id;
-                document.getElementById('editNamaLayanan').value = button.dataset.nama;
-                document.getElementById('editDeskripsi').value = button.dataset.deskripsi;
-                document.getElementById('editHarga').value = button.dataset.harga;
-
-                editLayananModal.classList.remove('hidden');
-            });
-        });
-
-        // ============================
-        // HANDLE DELETE BUTTON
-        // ============================
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const id = button.dataset.id;
-
-                // Set action form delete
-                document.getElementById('deleteForm').action = `/admin/layanan/${id}`;
-                document.getElementById('deleteId').value = id;
-
-                // Tampilkan modal
-                deleteModal.classList.remove('hidden');
-            });
-        });
-
-        // ============================
-        // SUBMIT FORM EDIT
-        // ============================
-        editLayananForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            // Simulasi pengiriman data
-            const id = document.getElementById('editId').value;
-            const nama = document.getElementById('editNamaLayanan').value;
-            const deskripsi = document.getElementById('editDeskripsi').value;
-            const harga = document.getElementById('editHarga').value;
-            
-            // Update data di tabel
-            const row = document.querySelector(`.layanan-row[data-id="${id}"]`);
-            if (row) {
-                row.setAttribute('data-nama', nama);
-                row.setAttribute('data-deskripsi', deskripsi);
-                row.setAttribute('data-harga', harga);
-                
-                // Update tampilan
-                row.cells[1].textContent = nama;
-                row.cells[2].textContent = deskripsi;
-                row.cells[3].textContent = `Rp. ${parseInt(harga).toLocaleString('id-ID')}`;
-                
-                // Update tombol edit
-                const editBtn = row.querySelector('.edit-btn');
-                editBtn.setAttribute('data-nama', nama);
-                editBtn.setAttribute('data-deskripsi', deskripsi);
-                editBtn.setAttribute('data-harga', harga);
-            }
-            
-            // Update data di card mobile
-            const card = document.querySelector(`.layanan-card[data-id="${id}"]`);
-            if (card) {
-                card.setAttribute('data-nama', nama);
-                card.setAttribute('data-deskripsi', deskripsi);
-                card.setAttribute('data-harga', harga);
-                
-                // Update tampilan
-                card.querySelector('h4').textContent = nama;
-                card.querySelector('.text-text-muted-light').textContent = `Rp. ${parseInt(harga).toLocaleString('id-ID')}`;
-                card.querySelector('.grid .col-span-2 p:last-child').textContent = deskripsi;
-                
-                // Update tombol edit
-                const editBtn = card.querySelector('.edit-btn');
-                editBtn.setAttribute('data-nama', nama);
-                editBtn.setAttribute('data-deskripsi', deskripsi);
-                editBtn.setAttribute('data-harga', harga);
-            }
-            
-            editLayananModal.classList.add('hidden');
-            editLayananForm.reset();
-            showMinimalPopup('Berhasil', 'Data layanan berhasil diperbarui', 'success');
-        });
-
-        // ============================
-        // SUBMIT FORM DELETE
-        // ============================
-        document.getElementById('deleteForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const id = document.getElementById('deleteId').value;
-            
-            // Hapus baris dari tabel
-            const row = document.querySelector(`.layanan-row[data-id="${id}"]`);
-            if (row) {
-                row.remove();
-            }
-            
-            // Hapus card mobile
-            const card = document.querySelector(`.layanan-card[data-id="${id}"]`);
-            if (card) {
-                card.remove();
-            }
-            
-            deleteModal.classList.add('hidden');
-            showMinimalPopup('Berhasil', 'Data layanan berhasil dihapus', 'success');
-            
-            // Update pagination
-            renderPagination();
-            updateVisibleItems();
-        });
-        
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            if (event.target == editLayananModal) {
-                editLayananModal.classList.add('hidden');
-                editLayananForm.reset();
-            }
-            if (event.target == deleteModal) {
-                deleteModal.classList.add('hidden');
-            }
-        }
-        
-        // Handle escape key to close modals
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                editLayananModal.classList.add('hidden');
-                deleteModal.classList.add('hidden');
+            // Suppress sidebar errors jika sidebar tidak ada
+            if (e.message.includes('sidebar') || e.message.includes('null')) {
+                console.log('Sidebar error suppressed - element may not exist on this page');
+                e.preventDefault();
             }
         });
     </script>

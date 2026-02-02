@@ -4,51 +4,45 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes; // Opsional: jika pakai soft deletes
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Project extends Model
 {
     use HasFactory;
-    // use SoftDeletes; // Uncomment jika tabel ada kolom deleted_at
+    use SoftDeletes; // Aktif karena migrasi Anda memiliki $table->softDeletes()
 
     /**
      * Nama tabel yang terkait dengan model.
-     * Sesuaikan dengan nama tabel di database Anda.
-     * - Konvensi Laravel: 'projects' (Plural)
-     * - Jika tabel di DB Anda 'project', biarkan $table ini aktif.
+     * Default Laravel adalah 'projects', tapi kita pakai 'project' sesuai request.
      */
     protected $table = 'project';
-
-    /**
-     * Primary key (opsional, jika id bukan default)
-     */
-    // protected $primaryKey = 'id_project';
 
     /**
      * Kolom yang bisa diisi secara mass-assignment.
      */
     protected $fillable = [
         'layanan_id',
-        'nama', // Sesuaikan dengan DB: 'nama' atau 'name'
-        'deskripsi', // Sesuaikan dengan DB: 'deskripsi' atau 'description'
+        'divisi_id',          // Kolom baru dari revisi migrasi
+        'penanggung_jawab_id',
+        'created_by',         // User yang membuat project
+        'nama',
+        'deskripsi',
         'harga',
         'deadline',
         'progres',
         'status',
-        'penanggung_jawab_id',
-        'manager_id', // Tambahan: ID manager yang membuat/menangani
     ];
 
     /**
      * Type Casting (Otomatis ubah tipe data)
      */
     protected $casts = [
-        'progres' => 'integer', // Pastikan di DB 0-100
-        'status' => 'string',
         'deadline' => 'datetime',
-        'harga' => 'integer', // Atau 'decimal' jika perlu presisi uang
+        'harga' => 'decimal:2', // Penting: Decimal agar uang presisi (contoh: 100000.50)
+        'progres' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     // =========================================================================
@@ -56,7 +50,7 @@ class Project extends Model
     // =========================================================================
 
     /**
-     * Relasi ke Layanan (Service/Category)
+     * Relasi ke Layanan
      */
     public function layanan()
     {
@@ -65,21 +59,27 @@ class Project extends Model
 
     /**
      * Relasi ke Penanggung Jawab (User)
-     * User yang bertanggung jawab langsung atas project ini.
      */
     public function penanggungJawab()
     {
         return $this->belongsTo(User::class, 'penanggung_jawab_id')
-                    ->select(['id', 'name', 'email', 'avatar']); // Select spesifik utk performa
+                    ->select(['id', 'name', 'email', 'divisi_id']);
     }
 
     /**
-     * Relasi ke Manager/User Creator (Opsional)
-     * User yang membuat project ini di database.
+     * Relasi ke Divisi
      */
-    public function manager()
+    public function divisi()
     {
-        return $this->belongsTo(User::class, 'manager_id');
+        return $this->belongsTo(Divisi::class, 'divisi_id');
+    }
+
+    /**
+     * Relasi ke User yang membuat Project (Creator)
+     */
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**
@@ -96,7 +96,6 @@ class Project extends Model
 
     /**
      * Mutator: Menormalisasi input status sebelum simpan ke DB
-     * Contoh: input 'pending' -> disimpan 'Pending' (atau format lain yg diinginkan)
      */
     public function setStatusAttribute($value)
     {
@@ -107,34 +106,52 @@ class Project extends Model
             'pending' => 'Pending',
             'proses'  => 'Proses',
             'selesai' => 'Selesai',
-            'process' => 'Proses', // Alternatif bahasa inggris
+            'process' => 'Proses', 
             'done'    => 'Selesai',
         ];
 
-        // Jika ada di map, pakai map-nya. Jika tidak, pakai input asli (Capitalize first letter)
+        // Simpan status yang sudah diformat
         $this->attributes['status'] = $statusMap[$lowerValue] ?? ucfirst($lowerValue);
+        
+        // PERBAIKAN BUG: Menghapus baris return milik fungsi layanan() yang salah tempat
+    }
+
+    
+    /**
+     * Event ketika project dibuat (Auto-populate dari Layanan)
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($project) {
+            // Jika ada layanan_id tapi nama project kosong, ambil dari data layanan
+            if ($project->layanan_id && empty($project->nama)) {
+                $layanan = Layanan::find($project->layanan_id);
+                if ($layanan) {
+                    // Sesuaikan field ini dengan tabel 'layanans' Anda
+                    $project->nama = $layanan->nama_layanan ?? $layanan->nama ?? 'Project Baru';
+                    $project->deskripsi = $layanan->deskripsi ?? null;
+                    $project->harga = $layanan->harga ?? 0;
+                }
+            }
+        });
     }
 
     /**
-     * Accessor: Mengambil status yang sudah diformat dengan aman
-     * Dipanggil via: $project->status_formatted
+     * Accessor: Mengambil status yang sudah diformat
      */
     public function getStatusFormattedAttribute()
     {
-        // Ambil nilai status mentah dari atribut DB
         $rawStatus = $this->attributes['status'] ?? null;
 
-        // Jika null, kembalikan string kosong atau default
-        if (!$rawStatus) {
-            return '-';
-        }
+        if (!$rawStatus) return '-';
 
         $lowerStatus = strtolower($rawStatus);
         
-        // Map status agar tampilan konsisten di frontend
         $statusMap = [
             'pending' => 'Pending',
-            'proses'  => 'Dalam Proses', // Tampilan lebih panjang
+            'proses'  => 'Dalam Proses',
             'selesai' => 'Selesai',
         ];
 
@@ -142,11 +159,15 @@ class Project extends Model
     }
 
     /**
-     * Accessor Helper: Cek apakah project overdue (Lewat deadline)
+     * Accessor: Cek apakah project overdue
      */
     public function getIsOverdueAttribute()
     {
-        return $this->deadline && $this->deadline->isPast() && $this->status !== 'Selesai';
+        // Cek jika ada deadline, tanggalnya sudah lewat, dan status bukan Selesai
+        return $this->deadline && 
+               $this->deadline->isPast() && 
+               $this->status !== 'Selesai' && 
+               $this->status !== 'Dibatalkan';
     }
 
     // =========================================================================
@@ -154,19 +175,26 @@ class Project extends Model
     // =========================================================================
 
     /**
-     * Scope: Filter project milik manager tertentu
-     * Penggunaan: Project::managedBy($userId)->get();
-     */
-    public function scopeManagedBy($query, $userId)
-    {
-        return $query->where('manager_id', $userId);
-    }
-
-    /**
-     * Scope: Filter project aktif
+     * Scope: Filter project aktif (bukan Selesai/Dibatalkan)
      */
     public function scopeActive($query)
     {
-        return $query->where('status', '!=', 'Selesai');
+        return $query->whereIn('status', ['Pending', 'Proses']);
+    }
+
+    /**
+     * Scope: Filter project berdasarkan divisi
+     */
+    public function scopeByDivisi($query, $divisiId)
+    {
+        return $query->where('divisi_id', $divisiId);
+    }
+
+    /**
+     * Scope: Filter project yang menjadi tanggung jawab user tertentu
+     */
+    public function scopeByPenanggungJawab($query, $userId)
+    {
+        return $query->where('penanggung_jawab_id', $userId);
     }
 }

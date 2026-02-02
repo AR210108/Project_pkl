@@ -12,6 +12,7 @@ return new class extends Migration
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
             $table->string('judul');
+            
             $table->text('deskripsi');
             $table->dateTime('deadline');
             $table->enum('status', ['pending', 'proses', 'selesai', 'dibatalkan'])->default('pending');

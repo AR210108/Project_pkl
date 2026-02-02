@@ -23,7 +23,7 @@
                     colors: {
                         primary: "#3b82f6",
                         programmer: "#3b82f6",
-                        desainer: "#8b5cf6",
+                        denainer: "#8b5cf6",
                         marketing: "#10b981",
                     },
                     fontFamily: {
@@ -78,7 +78,7 @@
 
         .sidebar-header { height: 5rem; min-height: 5rem; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; }
         .sidebar-header img { max-height: 3rem; width: auto; object-fit: contain; }
-        
+    
         .sidebar-nav { flex: 1; padding: 1.5rem 1rem; overflow-y: auto; }
         
         .nav-item {
@@ -141,7 +141,7 @@
         .btn-primary { background-color: #3b82f6; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; cursor: pointer; font-weight: 500; transition: background-color 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; }
         .btn-primary:hover { background-color: #2563eb; }
         
-        .btn-secondary { background-color: #f3f4f6; color: #4b5563; padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid #d1d5db; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+        .btn-secondary { background-color: #f3f4f6; color: #4b5563; padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid #d1d5db; cursor: pointer; font-weight:500; transition: all 0.2s; }
         .btn-secondary:hover { background-color: #e5e7eb; color: #1f2937; }
 
         .badge { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; line-height: 1; }
@@ -172,9 +172,11 @@
         .scrollable-table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .scrollable-table-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        .data-table { width: 100%; min-width: 1100px; border-collapse: collapse; }
+        .data-table { width: 100%; min-width: 900px; border-collapse: collapse; }
+        .data-table th { position: sticky; top: 0; z-index: 10; background-color: #f9fafb; }
+        
         .data-table th, .data-table td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
-        .data-table th { background-color: #f9fafb; font-weight: 600; color: #374151; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .data-table th { background-color: #f9fafb; font-weight: 600; color: #374151; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid #e5e7eb; }
         .data-table tbody tr:nth-child(even) { background-color: #f9fafb; }
         .data-table tbody tr:hover { background-color: #f3f4f6; }
         .truncate-text { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: middle; }
@@ -228,6 +230,26 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* Project Filter Dropdown */
+        .project-filter-container {
+            position: relative;
+            width: 100%;
+        }
+        .project-filter-dropdown {
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 20;
+        }
+        .project-option {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .project-option:hover {
+            background-color: #f3f4f6;
+        }
     </style>
 </head>
 
@@ -259,19 +281,17 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-8 gap-4">
                         <div>
                             <h2 class="text-xl sm:text-3xl font-bold text-gray-900">
-                                Kelola Tugas
+                                Daftar Tugas & Project
                             </h2>
-                            @if(auth()->user()->divisi)
-                            <p class="text-sm text-gray-600 mt-1">Divisi {{ auth()->user()->divisi }}</p>
-                            @endif
+                            <p class="text-sm text-gray-600 mt-1">Kelola tugas berdasarkan project</p>
                         </div>
                         
                         <div class="flex items-center gap-3">
                             @if(in_array(auth()->user()->role, ['general_manager', 'manager_divisi', 'admin']))
                             <button id="buatTugasBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2">
                                 <span class="material-icons-outlined text-lg">add</span>
-                                <span class="hidden sm:inline">Buat Tugas</span>
-                                <span class="sm:hidden">Buat</span>
+                                <span class="hidden sm:inline">Tambah Tugas</span>
+                                <span class="sm:hidden">Tambah</span>
                             </button>
                             @endif
                         </div>
@@ -340,11 +360,25 @@
                         </div>
                     </div>
                     
-                    <!-- Filters -->
+                    <!-- PROJECT FILTER (DI ATAS) -->
+                    <div class="mb-6">
+                        <div class="project-filter-container">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter Berdasarkan Project</label>
+                            <div class="relative">
+                                <select id="projectFilter" class="w-full px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors form-input text-base">
+                                    <option value="all">Semua Project</option>
+                                    <!-- Options akan diisi oleh JavaScript -->
+                                </select>
+                                <span class="material-icons-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filters (BAWAH) -->
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                         <div class="relative w-full md:w-1/3">
                             <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                            <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari tugas..." type="text" />
+                            <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama tugas atau deskripsi..." type="text" />
                         </div>
                         <div class="flex flex-wrap gap-3 w-full md:w-auto">
                             <select id="statusFilter" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
@@ -387,12 +421,12 @@
                                         <thead>
                                             <tr>
                                                 <th style="min-width: 60px;">No</th>
-                                                <th style="min-width: 200px;">Judul</th>
+                                                <th style="min-width: 200px;">Nama Project</th>
+                                                <th style="min-width: 200px;">Judul Tugas</th>
+                                                <th style="min-width: 200px;">Nama Tugas</th>
                                                 <th style="min-width: 250px;">Deskripsi</th>
                                                 <th style="min-width: 150px;">Deadline</th>
-                                                <th style="min-width: 150px;">Project</th>
                                                 <th style="min-width: 150px;">Ditugaskan Kepada</th>
-                                                <th style="min-width: 100px;">Divisi</th>
                                                 <th style="min-width: 100px;">Status</th>
                                                 <th style="min-width: 180px; text-align: center;">Aksi</th>
                                             </tr>
@@ -412,7 +446,7 @@
                                 @if(in_array(auth()->user()->role, ['general_manager', 'manager_divisi', 'admin']))
                                 <button id="buatTugasBtnMobile" class="btn-primary mt-4">
                                     <span class="material-icons-outlined">add</span>
-                                    Buat Tugas Pertama
+                                    Tambah Tugas Pertama
                                 </button>
                                 @endif
                             </div>
@@ -460,1277 +494,1724 @@
 
     <!-- JavaScript -->
     <script>
-        // CSRF Token untuk AJAX
-        let csrfToken = '';
-        try {
-            const metaTag = document.querySelector('meta[name="csrf-token"]');
-            if (metaTag) {
-                csrfToken = metaTag.getAttribute('content');
+       // CSRF Token untuk AJAX
+let csrfToken = '';
+try {
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    if (metaTag) {
+        csrfToken = metaTag.getAttribute('content');
+    }
+} catch (e) {
+    console.error('Failed to get CSRF token:', e);
+}
+
+// State Management
+const state = {
+    currentPage: 1,
+    itemsPerPage: 10,
+    totalPages: 1,
+    allTasks: [],
+    filteredTasks: [],
+    currentUser: {
+        id: {{ auth()->id() }},
+        name: '{{ auth()->user()->name }}',
+        role: '{{ auth()->user()->role }}',
+        divisi: '{{ auth()->user()->divisi ?? "" }}',
+        divisi_id: {{ auth()->user()->divisi_id ? auth()->user()->divisi_id : 'null' }}
+    },
+    karyawanList: [],
+    projectList: [],
+    projectDetails: {},
+    isLoading: false,
+    sortField: 'created_at',
+    sortDirection: 'desc',
+    selectedProjectId: 'all' // Tambahkan state untuk filter project
+};
+
+// Utility Functions
+const utils = {
+    showToast: (message, type = 'success') => {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        
+        const colors = {
+            success: '#10b981',
+            error: '#ef4444',
+            warning: '#f59e0b',
+            info: '#3b82f6'
+        };
+        
+        toast.style.backgroundColor = colors[type] || colors.success;
+        toastMessage.textContent = message;
+        
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+        
+        setTimeout(() => {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-20', 'opacity-0');
+        }, 3000);
+    },
+    
+    showLoading: (show) => {
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const desktopTable = document.getElementById('desktopTable');
+        const mobileCards = document.getElementById('mobile-cards');
+        const noDataMessage = document.getElementById('noDataMessage');
+        const desktopPagination = document.getElementById('desktopPaginationContainer');
+        const mobilePagination = document.getElementById('mobilePaginationContainer');
+        
+        if (show) {
+            loadingIndicator.style.display = 'block';
+            desktopTable.style.display = 'none';
+            mobileCards.style.display = 'none';
+            noDataMessage.style.display = 'none';
+            desktopPagination.style.display = 'none';
+            mobilePagination.style.display = 'none';
+        } else {
+            loadingIndicator.style.display = 'none';
+        }
+    },
+    
+    createModal: (title, content, onSubmit = null) => {
+        const modalTemplate = document.getElementById('modalTemplate');
+        const modalClone = modalTemplate.cloneNode(true);
+        modalClone.id = 'activeModal';
+        modalClone.classList.remove('hidden');
+        modalClone.querySelector('.modal-title').textContent = title;
+        modalClone.querySelector('.modal-content').innerHTML = content;
+        
+        const closeModal = () => {
+            document.body.removeChild(modalClone);
+        };
+        
+        modalClone.querySelectorAll('.close-modal').forEach(button => {
+            button.addEventListener('click', closeModal);
+        });
+        
+        modalClone.addEventListener('click', (e) => {
+            if (e.target === modalClone) {
+                closeModal();
             }
-        } catch (e) {
-            console.error('Failed to get CSRF token:', e);
+        });
+        
+        // Setup auto-fill untuk project - MENGGANTI JUDUL DENGAN NAMA PROJECT
+        const setupProjectAutoFill = () => {
+            const projectSelect = modalClone.querySelector('select[name="project_id"]');
+            const namaTugasInput = modalClone.querySelector('input[name="nama_tugas"]');
+            const judulInput = modalClone.querySelector('input[name="judul"]');
+            const deskripsiTextarea = modalClone.querySelector('textarea[name="deskripsi"]');
+            const deadlineInput = modalClone.querySelector('input[name="deadline"]');
+            
+            if (projectSelect) {
+                projectSelect.addEventListener('change', function() {
+                    const projectId = this.value;
+                    console.log('Project selected:', projectId);
+                    
+                    if (projectId && projectId !== '') {
+                        const projectData = state.projectDetails[projectId];
+                        console.log('Project data from cache for ID', projectId, ':', projectData);
+                        
+                        if (projectData) {
+                            // MODIFIKASI: Gunakan nama project untuk field "Judul Tugas"
+                            if (judulInput) {
+                                judulInput.value = projectData.nama;
+                                console.log('Auto-filled judul dengan nama project:', judulInput.value);
+                            }
+                            
+                            // MODIFIKASI: Beri saran untuk field "Nama Tugas"
+                            if (namaTugasInput && (!namaTugasInput.value || namaTugasInput.value.trim() === '')) {
+                                // Beri placeholder atau contoh nama tugas berdasarkan project
+                                namaTugasInput.placeholder = `Contoh: Melakukan analisis untuk ${projectData.nama}`;
+                                namaTugasInput.setAttribute('data-project-name', projectData.nama);
+                                console.log('Set placeholder for nama_tugas with project name:', projectData.nama);
+                            }
+                            
+                            // Fill deskripsi jika kosong
+                            if (deskripsiTextarea) {
+                                if (!deskripsiTextarea.value || deskripsiTextarea.value.trim() === '') {
+                                    if (projectData.deskripsi && projectData.deskripsi.trim() !== '') {
+                                        deskripsiTextarea.value = projectData.deskripsi;
+                                        console.log('Auto-filled deskripsi:', projectData.deskripsi.substring(0, 100) + '...');
+                                    } else {
+                                        console.log('No description available for this project');
+                                        deskripsiTextarea.value = `Tugas terkait dengan project: ${projectData.nama}`;
+                                    }
+                                }
+                            }
+                            
+                            // Fill deadline jika kosong dan tersedia
+                            if (deadlineInput && (!deadlineInput.value || deadlineInput.value.trim() === '')) {
+                                if (projectData.deadline) {
+                                    try {
+                                        let dateValue = projectData.deadline;
+                                        
+                                        // Parse tanggal dengan memperhatikan timezone
+                                        const formattedDate = utils.formatDateForInput(dateValue);
+                                        if (formattedDate) {
+                                            deadlineInput.value = formattedDate;
+                                            console.log('Auto-filled deadline:', deadlineInput.value);
+                                        }
+                                    } catch (e) {
+                                        console.error('Error parsing deadline:', e, 'date value:', projectData.deadline);
+                                    }
+                                } else {
+                                    console.log('No deadline available for this project');
+                                }
+                            }
+                            
+                            utils.showToast(`Data dari project "${projectData.nama}" telah diisi otomatis`, 'info');
+                        } else {
+                            console.warn('No project data in cache for ID:', projectId);
+                            utils.showToast('Memuat detail project...', 'info');
+                            
+                            api.fetchProjectDetail(projectId).then(data => {
+                                if (data) {
+                                    state.projectDetails[projectId] = data;
+                                    console.log('Project detail fetched and cached:', data);
+                                    setTimeout(() => {
+                                        projectSelect.dispatchEvent(new Event('change'));
+                                    }, 100);
+                                } else {
+                                    utils.showToast('Data project tidak ditemukan', 'warning');
+                                }
+                            }).catch(err => {
+                                console.error('Error fetching project detail:', err);
+                                utils.showToast('Gagal memuat detail project', 'error');
+                            });
+                        }
+                    } else {
+                        // Jika project tidak dipilih, reset placeholder
+                        if (namaTugasInput) {
+                            namaTugasInput.placeholder = 'Masukkan nama tugas';
+                            namaTugasInput.removeAttribute('data-project-name');
+                        }
+                        if (judulInput) {
+                            judulInput.value = '';
+                        }
+                    }
+                });
+                
+                // Trigger change event jika sudah ada value
+                if (projectSelect.value) {
+                    setTimeout(() => {
+                        projectSelect.dispatchEvent(new Event('change'));
+                    }, 200);
+                }
+            }
+        };
+        
+        if (onSubmit) {
+            const form = modalClone.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(form);
+                    
+                    try {
+                        await onSubmit(formData);
+                        closeModal();
+                    } catch (error) {
+                        console.error('Modal submit error:', error);
+                        utils.showToast(error.message || 'Terjadi kesalahan', 'error');
+                    }
+                });
+            }
         }
         
-        // State Management
-        const state = {
-            currentPage: 1,
-            itemsPerPage: 10,
-            totalPages: 1,
-            allTasks: [],
-            filteredTasks: [],
-            currentUser: {
-                id: {{ auth()->id() }},
-                name: '{{ auth()->user()->name }}',
-                role: '{{ auth()->user()->role }}',
-                divisi: '{{ auth()->user()->divisi ?? "" }}',
-                divisi_id: {{ auth()->user()->divisi_id ? auth()->user()->divisi_id : 'null' }}
-            },
-            karyawanList: [],
-            projectList: [], // Menampung data project
-            isLoading: false,
-            sortField: 'created_at',
-            sortDirection: 'desc'
+        document.body.appendChild(modalClone);
+        
+        setTimeout(setupProjectAutoFill, 100);
+        
+        const firstInput = modalClone.querySelector('input, textarea, select');
+        if (firstInput) firstInput.focus();
+        
+        return modalClone;
+    },
+    
+    formatDate: (dateString) => {
+        if (!dateString) return '-';
+        
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '-';
+            
+            // Adjust for timezone offset (UTC to local Asia/Jakarta)
+            // Indonesia is UTC+7, so we need to add 7 hours
+            const timezoneOffset = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
+            const localDate = new Date(date.getTime() + timezoneOffset);
+            
+            const options = { 
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            };
+            
+            return localDate.toLocaleDateString('id-ID', options);
+        } catch (e) {
+            console.error('Error formatting date:', e, 'dateString:', dateString);
+            return '-';
+        }
+    },
+    
+    formatDateForInput: (dateString) => {
+        if (!dateString) return null;
+        
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return null;
+            
+            // Adjust for timezone offset (UTC to local Asia/Jakarta)
+            // Indonesia is UTC+7, so we need to add 7 hours
+            const timezoneOffset = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
+            const localDate = new Date(date.getTime() + timezoneOffset);
+            
+            // Format to YYYY-MM-DD for input[type="date"]
+            const year = localDate.getFullYear();
+            const month = String(localDate.getMonth() + 1).padStart(2, '0');
+            const day = String(localDate.getDate()).padStart(2, '0');
+            
+            return `${year}-${month}-${day}`;
+        } catch (e) {
+            console.error('Error formatting date for input:', e, 'dateString:', dateString);
+            return null;
+        }
+    },
+    
+    getStatusClass: (status) => {
+        return `status-${status}`;
+    },
+    
+    getStatusText: (status) => {
+        const statusMap = {
+            'pending': 'Pending',
+            'proses': 'Dalam Proses',
+            'selesai': 'Selesai',
+            'dibatalkan': 'Dibatalkan'
         };
-
-        // Utility Functions
-        const utils = {
-            showToast: (message, type = 'success') => {
-                const toast = document.getElementById('toast');
-                const toastMessage = document.getElementById('toastMessage');
-                
-                const colors = {
-                    success: '#10b981',
-                    error: '#ef4444',
-                    warning: '#f59e0b',
-                    info: '#3b82f6'
-                };
-                
-                toast.style.backgroundColor = colors[type] || colors.success;
-                toastMessage.textContent = message;
-                
-                toast.classList.remove('translate-y-20', 'opacity-0');
-                toast.classList.add('translate-y-0', 'opacity-100');
-                
-                setTimeout(() => {
-                    toast.classList.remove('translate-y-0', 'opacity-100');
-                    toast.classList.add('translate-y-20', 'opacity-0');
-                }, 3000);
-            },
-            
-            showLoading: (show) => {
-                const loadingIndicator = document.getElementById('loadingIndicator');
-                const desktopTable = document.getElementById('desktopTable');
-                const mobileCards = document.getElementById('mobile-cards');
-                const noDataMessage = document.getElementById('noDataMessage');
-                const desktopPagination = document.getElementById('desktopPaginationContainer');
-                const mobilePagination = document.getElementById('mobilePaginationContainer');
-                
-                if (show) {
-                    loadingIndicator.style.display = 'block';
-                    desktopTable.style.display = 'none';
-                    mobileCards.style.display = 'none';
-                    noDataMessage.style.display = 'none';
-                    desktopPagination.style.display = 'none';
-                    mobilePagination.style.display = 'none';
-                } else {
-                    loadingIndicator.style.display = 'none';
-                }
-            },
-            
-            createModal: (title, content, onSubmit = null) => {
-                const modalTemplate = document.getElementById('modalTemplate');
-                const modalClone = modalTemplate.cloneNode(true);
-                modalClone.id = 'activeModal';
-                modalClone.classList.remove('hidden');
-                modalClone.querySelector('.modal-title').textContent = title;
-                modalClone.querySelector('.modal-content').innerHTML = content;
-                
-                const closeModal = () => {
-                    document.body.removeChild(modalClone);
-                };
-                
-                modalClone.querySelectorAll('.close-modal').forEach(button => {
-                    button.addEventListener('click', closeModal);
-                });
-                
-                modalClone.addEventListener('click', (e) => {
-                    if (e.target === modalClone) {
-                        closeModal();
-                    }
-                });
-                
-                if (onSubmit) {
-                    const form = modalClone.querySelector('form');
-                    if (form) {
-                        form.addEventListener('submit', async (e) => {
-                            e.preventDefault();
-                            const formData = new FormData(form);
-                            
-                            try {
-                                await onSubmit(formData);
-                                closeModal();
-                            } catch (error) {
-                                console.error('Modal submit error:', error);
-                                utils.showToast(error.message || 'Terjadi kesalahan', 'error');
-                            }
-                        });
-                    }
-                }
-                
-                document.body.appendChild(modalClone);
-                
-                const firstInput = modalClone.querySelector('input, textarea, select');
-                if (firstInput) firstInput.focus();
-                
-                return modalClone;
-            },
-            
-            formatDate: (dateString) => {
-                if (!dateString) return '-';
-                
-                try {
-                    const date = new Date(dateString);
-                    if (isNaN(date.getTime())) return '-';
-                    
-                    return date.toLocaleDateString('id-ID', { 
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                } catch (e) {
-                    return '-';
-                }
-            },
-            
-            // Helper untuk format datetime-local input
-            formatDateTimeLocal: (dateString) => {
-                if (!dateString) return '';
-                try {
-                    const date = new Date(dateString);
-                    // Handle timezone offset agar sesuai waktu lokal
-                    const offset = date.getTimezoneOffset() * 60000;
-                    const localISOTime = (new Date(date - offset)).toISOString().slice(0, 16);
-                    return localISOTime;
-                } catch (e) {
-                    return '';
-                }
-            },
-            
-            getStatusClass: (status) => {
-                return `status-${status}`;
-            },
-            
-            getStatusText: (status) => {
-                const statusMap = {
-                    'pending': 'Pending',
-                    'proses': 'Dalam Proses',
-                    'selesai': 'Selesai',
-                    'dibatalkan': 'Dibatalkan'
-                };
-                return statusMap[status] || status;
-            },
-            
-            getDivisiClass: (divisi) => {
-                if (!divisi) return 'badge-programmer';
-                const divisiLower = divisi.toLowerCase();
-                if (divisiLower.includes('marketing')) return 'badge-marketing';
-                if (divisiLower.includes('desain')) return 'badge-desainer';
-                return 'badge-programmer';
-            },
-            
-            escapeHtml: (text) => {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            },
-            
-            truncateText: (text, length = 50) => !text ? '' : text.length > length ? text.substring(0, length) + '...' : text,
-            
-            checkOverdue: (deadline, status) => {
-                if (!deadline || status === 'selesai' || status === 'dibatalkan') return false;
-                
-                const now = new Date();
-                const deadlineDate = new Date(deadline);
-                return deadlineDate < now;
+        return statusMap[status] || status;
+    },
+    
+    cleanDivisiString: (divisiString) => {
+        if (!divisiString) return '';
+        if (typeof divisiString === 'string' && divisiString.includes('{"id":') && divisiString.includes('divisi":"')) {
+            try {
+                const parsed = JSON.parse(divisiString);
+                return parsed.divisi || '';
+            } catch (e) {
+                return divisiString;
             }
-        };
-
-        // API Functions
-        const api = {
-            getApiEndpoint: () => {
-                const userRole = state.currentUser.role;
-                
-                if (userRole === 'manager_divisi') {
-                    return '/manager_divisi/api/tasks-api'; 
-                } else if (userRole === 'admin') {
-                    return '/admin/api/tasks';
-                } else if (userRole === 'general_manager') {
-                    return '/api/general-manager/tasks';
-                } else {
-                    console.warn('Role tidak valid untuk tasks:', userRole);
-                    return null;
-                }
-            },
+        }
+        return divisiString;
+    },
+    
+    escapeHtml: (text) => {
+        if (text === null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    },
+    
+    truncateText: (text, length = 50) => {
+        if (!text) return '';
+        return text.length > length ? text.substring(0, length) + '...' : text;
+    },
+    
+    checkOverdue: (deadline, status) => {
+        if (!deadline || status === 'selesai' || status === 'dibatalkan') return false;
+        
+        try {
+            const now = new Date();
+            const deadlineDate = new Date(deadline);
             
-            getStatisticsEndpoint: () => {
-                const userRole = state.currentUser.role;
-                
-                if (userRole === 'manager_divisi') {
-                    return '/manager_divisi/api/tasks/statistics';
-                } else if (userRole === 'admin') {
-                    return '/admin/api/tasks/statistics';
-                } else if (userRole === 'general_manager') {
-                    return '/api/general-manager/tasks/statistics';
-                } else {
-                    return '/api/tasks/statistics';
-                }
-            },
+            if (isNaN(deadlineDate.getTime())) return false;
             
-            getCreateTaskEndpoint: () => {
-                const userRole = state.currentUser.role;
-                
-                if (userRole === 'manager_divisi') {
-                    return '/manager_divisi/tasks';
-                } else if (userRole === 'admin') {
-                    return '/admin/tasks';
-                } else if (userRole === 'general_manager') {
-                    return '/general_manager/tasks';
-                } else {
-                    return null;
-                }
-            },
+            // Adjust both dates for timezone comparison
+            const timezoneOffset = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
+            const adjustedNow = new Date(now.getTime() + timezoneOffset);
+            const adjustedDeadline = new Date(deadlineDate.getTime() + timezoneOffset);
+            
+            // Compare only date part (without time)
+            const nowDateOnly = new Date(adjustedNow.getFullYear(), adjustedNow.getMonth(), adjustedNow.getDate());
+            const deadlineDateOnly = new Date(adjustedDeadline.getFullYear(), adjustedDeadline.getMonth(), adjustedDeadline.getDate());
+            
+            return deadlineDateOnly < nowDateOnly;
+        } catch (e) {
+            console.error('Error checking overdue:', e);
+            return false;
+        }
+    }
+};
 
-            // Fetch Projects
-            fetchProjects: async () => {
+// API Functions
+const api = {
+    getApiEndpoint: () => {
+        const userRole = state.currentUser.role;
+        
+        if (userRole === 'manager_divisi') {
+            return '/manager_divisi/api/tasks-api';
+        } else if (userRole === 'admin') {
+            return '/admin/api/tasks';
+        } else if (userRole === 'general_manager') {
+            return '/api/general-manager/tasks';
+        } else {
+            return null;
+        }
+    },
+    
+    getStatisticsEndpoint: () => {
+        const userRole = state.currentUser.role;
+        
+        if (userRole === 'manager_divisi') {
+            return '/manager_divisi/api/tasks/statistics';
+        } else if (userRole === 'admin') {
+            return '/admin/api/tasks/statistics';
+        } else if (userRole === 'general_manager') {
+            return '/api/general-manager/tasks/statistics';
+        } else {
+            return '/api/tasks/statistics';
+        }
+    },
+    
+    getCreateTaskEndpoint: () => {
+        const userRole = state.currentUser.role;
+        
+        if (userRole === 'manager_divisi') {
+            return '/manager_divisi/tasks';
+        } else if (userRole === 'admin') {
+            return '/admin/tasks';
+        } else if (userRole === 'general_manager') {
+            return '/general_manager/tasks';
+        } else {
+            return null;
+        }
+    },
+
+    // Fetch projects dengan debugging yang lebih baik
+    fetchProjects: async () => {
+        try {
+            console.log('Fetching projects for manager divisi...');
+            
+            const endpoints = [
+                '/manager_divisi/api/projects-dropdown',
+                '/manager_divisi/api/projects',
+                '/api/projects'
+            ];
+            
+            let projectsData = [];
+            let lastSuccessfulEndpoint = '';
+            
+            for (const endpoint of endpoints) {
                 try {
-                    const endpoint = '/manager_divisi/api/projects-dropdown';
-                    
+                    console.log('Trying endpoint:', endpoint);
                     const response = await fetch(endpoint, {
+                        method: 'GET',
                         headers: {
-                            'Content-Type': 'application/json',
                             'Accept': 'application/json',
                             'X-CSRF-TOKEN': csrfToken,
                             'X-Requested-With': 'XMLHttpRequest'
-                        }
+                        },
+                        credentials: 'same-origin'
                     });
 
-                    if (!response.ok) {
-                        throw new Error('Gagal mengambil data project');
-                    }
-
-                    const data = await response.json();
+                    console.log('Response status:', response.status);
                     
-                    if (data.success && Array.isArray(data.data)) {
-                        state.projectList = data.data;
-                    } else {
-                        state.projectList = []; 
-                    }
-                } catch (error) {
-                    console.error('Failed to fetch projects:', error);
-                    state.projectList = [];
-                }
-            },
-
-            request: async (url, options = {}) => {
-                const defaultOptions = {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    credentials: 'same-origin'
-                };
-                
-                const mergedOptions = { ...defaultOptions, ...options };
-                
-                if (options.body instanceof FormData) {
-                    delete mergedOptions.headers['Content-Type'];
-                } else if (typeof options.body === 'object' && options.body !== null) {
-                    mergedOptions.body = JSON.stringify(options.body);
-                }
-                
-                try {
-                    const response = await fetch(url, mergedOptions);
-                    
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
+                    if (response.ok) {
                         const data = await response.json();
-                        return data;
-                    }
-                    
-                    const text = await response.text();
-                    return text;
-                } catch (error) {
-                    console.error('API Error:', error);
-                    throw error;
-                }
-            },
-            
-            fetchTasks: async () => {
-                state.isLoading = true;
-                utils.showLoading(true);
-                
-                try {
-                    const endpoint = api.getApiEndpoint();
-                    
-                    if (!endpoint) {
-                        throw new Error('Endpoint tidak tersedia untuk role Anda');
-                    }
-                    
-                    const data = await api.request(endpoint);
-                    
-                    if (Array.isArray(data)) {
-                        state.allTasks = data;
-                    } else if (data.success === true && data.data) {
-                        state.allTasks = data.data;
-                    } else if (data.tasks && Array.isArray(data.tasks)) {
-                        state.allTasks = data.tasks;
+                        console.log('Full response from', endpoint, ':', data);
+                        
+                        lastSuccessfulEndpoint = endpoint;
+                        
+                        if (data.success === true && Array.isArray(data.data)) {
+                            projectsData = data.data;
+                            console.log('✓ Found data in data.data array:', projectsData.length, 'items');
+                            console.log('Sample project:', projectsData[0]);
+                            break;
+                        } else if (Array.isArray(data.data)) {
+                            projectsData = data.data;
+                            console.log('✓ Found data in data.data array (direct):', projectsData.length, 'items');
+                            break;
+                        } else if (Array.isArray(data.projects)) {
+                            projectsData = data.projects;
+                            console.log('✓ Found data in data.projects array:', projectsData.length, 'items');
+                            break;
+                        } else if (data.success === true && data.data && Array.isArray(data.data.data)) {
+                            projectsData = data.data.data;
+                            console.log('✓ Found data in data.data.data (paginated):', projectsData.length, 'items');
+                            break;
+                        } else if (Array.isArray(data)) {
+                            projectsData = data;
+                            console.log('✓ Found direct array response:', projectsData.length, 'items');
+                            break;
+                        } else {
+                            console.warn('Unexpected response format:', data);
+                        }
                     } else {
-                        state.allTasks = [];
-                    }
-                    
-                    state.allTasks.forEach(task => {
-                        task.is_overdue = utils.checkOverdue(task.deadline, task.status);
-                    });
-                    
-                    state.filteredTasks = [...state.allTasks];
-                    render.renderTable();
-                    await api.fetchStatistics();
-                    
-                } catch (error) {
-                    console.error('Error fetching tasks:', error);
-                    utils.showToast('Gagal memuat data tugas', 'error');
-                    state.allTasks = [];
-                    state.filteredTasks = [];
-                    render.renderTable();
-                } finally {
-                    state.isLoading = false;
-                    utils.showLoading(false);
-                }
-            },
-            
-            fetchStatistics: async () => {
-                try {
-                    const endpoint = api.getStatisticsEndpoint();
-                    
-                    if (!endpoint) {
-                        api.calculateStatsFromTasks();
-                        return;
-                    }
-                    
-                    const data = await api.request(endpoint);
-                    
-                    if (data.success !== false) {
-                        const stats = data.data || data;
-                        document.getElementById('totalTasks').textContent = stats.total || 0;
-                        document.getElementById('inProgressTasks').textContent = stats.in_progress || stats.proses || 0;
-                        document.getElementById('completedTasks').textContent = stats.completed || stats.selesai || 0;
-                        document.getElementById('overdueTasks').textContent = stats.overdue || 0;
-                    } else {
-                        api.calculateStatsFromTasks();
+                        console.warn('Response not OK:', response.status);
                     }
                 } catch (error) {
-                    api.calculateStatsFromTasks();
-                }
-            },
-            
-            calculateStatsFromTasks: () => {
-                const now = new Date();
-                
-                const stats = {
-                    total: state.allTasks.length,
-                    in_progress: state.allTasks.filter(task => 
-                        task.status === 'proses' || task.status === 'pending'
-                    ).length,
-                    completed: state.allTasks.filter(task => 
-                        task.status === 'selesai'
-                    ).length,
-                    overdue: state.allTasks.filter(task => 
-                        utils.checkOverdue(task.deadline, task.status)
-                    ).length
-                };
-                
-                document.getElementById('totalTasks').textContent = stats.total;
-                document.getElementById('inProgressTasks').textContent = stats.in_progress;
-                document.getElementById('completedTasks').textContent = stats.completed;
-                document.getElementById('overdueTasks').textContent = stats.overdue;
-            },
-            
-            fetchKaryawan: async () => {
-                try {
-                    const userRole = state.currentUser.role;
-                    const divisi = state.currentUser.divisi;
-                    const divisiId = state.currentUser.divisi_id;
-                    
-                    let endpoint;
-                    
-                    if (userRole === 'manager_divisi') {
-                        endpoint = '/manager_divisi/api/karyawan-dropdown';
-                    } else {
-                        endpoint = '/api/users/data?role=karyawan';
-                    }
-                    
-                    const data = await api.request(endpoint);
-                    
-                    if (data.success === true && data.data && Array.isArray(data.data)) {
-                        state.karyawanList = data.data;
-                    } else if (Array.isArray(data)) {
-                        state.karyawanList = data;
-                    } else if (data.success === true && Array.isArray(data.karyawan)) {
-                        state.karyawanList = data.karyawan;
-                    } else if (data.data && Array.isArray(data.data)) {
-                        state.karyawanList = data.data;
-                    } else {
-                        state.karyawanList = [];
-                    }
-                    
-                    // Filter Logic
-                    if (state.karyawanList.length > 0) {
-                        state.karyawanList = state.karyawanList.filter(k => {
-                            let karyawanDivisiId = null;
-                            
-                            if (k.divisi_id) {
-                                karyawanDivisiId = k.divisi_id;
-                            } else if (k.user && k.user.divisi_id) {
-                                karyawanDivisiId = k.user.divisi_id;
-                            }
-                            
-                            if (divisiId && karyawanDivisiId) {
-                                if (parseInt(karyawanDivisiId) === parseInt(divisiId)) return true;
-                            }
-                            
-                            if (divisi && divisi.trim() !== "") {
-                                let karyawanDivisi = null;
-                                if (k.divisi) karyawanDivisi = k.divisi;
-                                else if (k.user && k.user.divisi) karyawanDivisi = k.user.divisi;
-
-                                if (karyawanDivisi && karyawanDivisi.toLowerCase() === divisi.toLowerCase()) return true;
-                            }
-                            
-                            return false;
-                        });
-                    }
-                    
-                } catch (error) {
-                    console.error('Failed to fetch karyawan:', error);
-                    utils.showToast('Gagal memuat daftar karyawan', 'error');
-                    state.karyawanList = [];
-                }
-            },
-            
-            createTask: async (formData) => {
-                try {
-                    const endpoint = api.getCreateTaskEndpoint();
-                    
-                    if (!endpoint) {
-                        throw new Error('Anda tidak memiliki izin untuk membuat tugas');
-                    }
-                    
-                    const response = await api.request(endpoint, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    utils.showToast('Tugas berhasil dibuat', 'success');
-                    await api.fetchTasks();
-                    
-                    return response;
-                } catch (error) {
-                    throw error;
-                }
-            },
-            
-            updateTask: async (id, formData) => {
-                try {
-                    const userRole = state.currentUser.role;
-                    let endpoint;
-                    
-                    if (userRole === 'manager_divisi') {
-                        endpoint = `/manager_divisi/tasks/${id}`;
-                    } else if (userRole === 'admin') {
-                        endpoint = `/admin/tasks/${id}`;
-                    } else if (userRole === 'general_manager') {
-                        endpoint = `/general_manager/tasks/${id}`;
-                    } else {
-                        throw new Error('Anda tidak memiliki izin untuk mengedit tugas');
-                    }
-                    
-                    const data = {};
-                    for (let [key, value] of formData.entries()) {
-                        data[key] = value;
-                    }
-                    
-                    const response = await api.request(endpoint, {
-                        method: 'PUT',
-                        body: data
-                    });
-                    
-                    utils.showToast('Tugas berhasil diperbarui', 'success');
-                    await api.fetchTasks();
-                    
-                    return response;
-                } catch (error) {
-                    throw error;
-                }
-            },
-            
-            deleteTask: async (id) => {
-                try {
-                    const userRole = state.currentUser.role;
-                    let endpoint;
-                    
-                    if (userRole === 'manager_divisi') {
-                        endpoint = `/manager_divisi/tasks/${id}`;
-                    } else if (userRole === 'admin') {
-                        endpoint = `/admin/tasks/${id}`;
-                    } else if (userRole === 'general_manager') {
-                        endpoint = `/general_manager/tasks/${id}`;
-                    } else {
-                        throw new Error('Anda tidak memiliki izin untuk menghapus tugas');
-                    }
-                    
-                    const response = await api.request(endpoint, {
-                        method: 'DELETE'
-                    });
-                    
-                    utils.showToast('Tugas berhasil dihapus', 'success');
-                    await api.fetchTasks();
-                    
-                    return response;
-                } catch (error) {
-                    throw error;
-                }
-            },
-            
-            getTaskDetail: async (id) => {
-                try {
-                    const userRole = state.currentUser.role;
-                    let endpoint;
-                    
-                    if (userRole === 'manager_divisi') {
-                        endpoint = `/manager_divisi/api/tasks/${id}`; 
-                    } else if (userRole === 'admin') {
-                        endpoint = `/admin/tasks/${id}`;
-                    } else if (userRole === 'general_manager') {
-                        endpoint = `/general_manager/tasks/${id}`;
-                    } else {
-                        endpoint = `/api/tasks/${id}`;
-                    }
-                    
-                    const data = await api.request(endpoint);
-                    return data.data || data.task || data;
-                } catch (error) {
-                    throw error;
+                    console.log('Failed with endpoint', endpoint, ':', error.message);
+                    continue;
                 }
             }
-        };
-
-        // Render Functions
-        const render = {
-            filterTasks: () => {
-                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-                const statusFilter = document.getElementById('statusFilter').value;
-                
-                state.filteredTasks = state.allTasks.filter(task => {
-                    const searchMatch = !searchTerm || 
-                        (task.judul && task.judul.toLowerCase().includes(searchTerm)) ||
-                        (task.deskripsi && task.deskripsi.toLowerCase().includes(searchTerm)) ||
-                        (task.assignee_name && task.assignee_name.toLowerCase().includes(searchTerm)) ||
-                        (task.assigned_to_name && task.assigned_to_name.toLowerCase().includes(searchTerm));
-                    
-                    const statusMatch = statusFilter === 'all' || task.status === statusFilter;
-                    
-                    return searchMatch && statusMatch;
-                });
-                
-                state.currentPage = 1;
-                render.renderTable();
-            },
             
-            renderTable: () => {
-                const startIndex = (state.currentPage - 1) * state.itemsPerPage;
-                const endIndex = Math.min(startIndex + state.itemsPerPage, state.filteredTasks.length);
-                const currentTasks = state.filteredTasks.slice(startIndex, endIndex);
+            if (projectsData.length === 0) {
+                console.warn('No projects found from any endpoint');
+                utils.showToast('Tidak ada project yang tersedia', 'warning');
+            } else {
+                console.log(`✓ Successfully loaded ${projectsData.length} projects from ${lastSuccessfulEndpoint}`);
+            }
+            
+            state.projectList = projectsData;
+            
+            // Update dropdown filter project
+            render.updateProjectFilterDropdown();
+            
+            state.projectDetails = {};
+            projectsData.forEach((project, index) => {
+                if (project && project.id) {
+                    console.log(`Project ${index + 1} (ID: ${project.id}) properties:`, Object.keys(project));
+                    
+                    let nama = '';
+                    if (project.nama) nama = project.nama;
+                    else if (project.name) nama = project.name;
+                    else if (project.nama_project) nama = project.nama_project;
+                    else if (project.project_name) nama = project.project_name;
+                    else {
+                        console.warn(`No name found for project ${project.id}, using fallback`);
+                        nama = `Project ${project.id}`;
+                    }
+                    
+                    let deskripsi = '';
+                    if (project.deskripsi) deskripsi = project.deskripsi;
+                    else if (project.description) deskripsi = project.description;
+                    else if (project.deskripsi_project) deskripsi = project.deskripsi_project;
+                    else if (project.project_description) deskripsi = project.project_description;
+                    else {
+                        console.warn(`No description found for project ${project.id}`);
+                        deskripsi = '';
+                    }
+                    
+                    let deadline = '';
+                    if (project.deadline) deadline = project.deadline;
+                    else if (project.tanggal_selesai) deadline = project.tanggal_selesai;
+                    else if (project.deadline_date) deadline = project.deadline_date;
+                    
+                    state.projectDetails[project.id] = {
+                        id: project.id,
+                        nama: nama,
+                        deskripsi: deskripsi,
+                        deadline: deadline,
+                        harga: project.harga || project.budget || project.price || 0,
+                        progres: project.progres || project.progress || 0,
+                        status: project.status || 'pending',
+                        divisi_id: project.divisi_id || project.divisi || project.division_id || null,
+                        created_by: project.created_by || project.user_id || project.created_by_id || null
+                    };
+                    
+                    console.log(`Cached project ${project.id}:`, {
+                        nama: state.projectDetails[project.id].nama,
+                        deskripsi: state.projectDetails[project.id].deskripsi ? 
+                                   state.projectDetails[project.id].deskripsi.substring(0, 50) + '...' : 
+                                   '(empty)',
+                        deadline: state.projectDetails[project.id].deadline
+                    });
+                } else {
+                    console.warn('Invalid project data at index', index, ':', project);
+                }
+            });
+            
+            console.log(`Total cached projects: ${Object.keys(state.projectDetails).length}`);
+            
+            return projectsData;
+            
+        } catch (error) {
+            console.error('Error fetching projects:', error);
+            utils.showToast('Gagal memuat daftar project: ' + error.message, 'error');
+            state.projectList = [];
+            state.projectDetails = {};
+            return [];
+        }
+    },
+
+    fetchProjectDetail: async (projectId) => {
+        if (state.projectDetails[projectId]) {
+            return state.projectDetails[projectId];
+        }
+        
+        try {
+            const endpoints = [
+                `/api/projects/${projectId}`,
+                `/manager_divisi/api/projects/${projectId}`,
+                `/projects/${projectId}`
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(endpoint, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.data) {
+                            const project = data.data;
+                            state.projectDetails[projectId] = {
+                                id: project.id,
+                                nama: project.nama || project.name || project.nama_project || `Project ${project.id}`,
+                                deskripsi: project.deskripsi || project.description || project.deskripsi_project || '',
+                                deadline: project.deadline || project.tanggal_selesai || '',
+                                harga: project.harga || project.budget || 0,
+                                progres: project.progres || project.progress || 0,
+                                status: project.status || 'pending',
+                                divisi_id: project.divisi_id || project.divisi || null,
+                                created_by: project.created_by || project.user_id || null
+                            };
+                            return state.projectDetails[projectId];
+                        }
+                    }
+                } catch (error) {
+                    continue;
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching project detail:', error);
+        }
+        
+        return null;
+    },
+
+    request: async (url, options = {}) => {
+        const defaultOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            credentials: 'same-origin'
+        };
+        
+        const mergedOptions = { ...defaultOptions, ...options };
+        
+        if (options.body instanceof FormData) {
+            delete mergedOptions.headers['Content-Type'];
+        } else if (typeof options.body === 'object' && options.body !== null) {
+            mergedOptions.body = JSON.stringify(options.body);
+        }
+        
+        try {
+            const response = await fetch(url, mergedOptions);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+                return data;
+            }
+            
+            const text = await response.text();
+            return text;
+        } catch (error) {
+            console.error('API Error:', error);
+            throw error;
+        }
+    },
+    
+    fetchTasks: async () => {
+        state.isLoading = true;
+        utils.showLoading(true);
+        
+        try {
+            const endpoint = api.getApiEndpoint();
+            
+            if (!endpoint) {
+                throw new Error('Endpoint tidak tersedia untuk role Anda');
+            }
+            
+            console.log('Fetching tasks from:', endpoint);
+            const data = await api.request(endpoint);
+            console.log('Tasks API response:', data);
+            
+            if (data.success === true && Array.isArray(data.data)) {
+                state.allTasks = data.data;
+            } else if (Array.isArray(data.data)) {
+                state.allTasks = data.data;
+            } else if (Array.isArray(data)) {
+                state.allTasks = data;
+            } else if (data.success === true && Array.isArray(data.tasks)) {
+                state.allTasks = data.tasks;
+            } else {
+                state.allTasks = [];
+            }
+            
+            console.log('Loaded tasks:', state.allTasks.length);
+            
+            state.allTasks.forEach((task, index) => {
+                task.is_overdue = utils.checkOverdue(task.deadline, task.status);
                 
-                // Update counts
-                document.getElementById('totalCount').textContent = state.filteredTasks.length;
-                document.getElementById('panelTitle').textContent = `Daftar Tugas (${state.filteredTasks.length})`;
+                let projectName = '';
                 
-                // Check if no data
-                if (state.filteredTasks.length === 0) {
-                    document.getElementById('noDataMessage').style.display = 'block';
-                    document.getElementById('desktopTable').style.display = 'none';
-                    document.getElementById('mobile-cards').style.display = 'none';
-                    document.getElementById('desktopPaginationContainer').style.display = 'none';
-                    document.getElementById('mobilePaginationContainer').style.display = 'none';
-                    return;
+                if (task.project_name) projectName = task.project_name;
+                else if (task.project_nama) projectName = task.project_nama;
+                
+                if (!projectName && task.project_id && state.projectDetails[task.project_id]) {
+                    projectName = state.projectDetails[task.project_id].nama;
+                    console.log(`Got project name from cache for task ${task.id}:`, projectName);
                 }
                 
-                // Render desktop table
-                const desktopTableBody = document.getElementById('desktopTableBody');
-                desktopTableBody.innerHTML = '';
+                if (!projectName && task.project_id) {
+                    const project = state.projectList.find(p => p.id == task.project_id);
+                    if (project) {
+                        projectName = project.nama || project.name || project.nama_project || project.project_name || `Project ${project.id}`;
+                        console.log(`Got project name from list for task ${task.id}:`, projectName);
+                    }
+                }
                 
-                currentTasks.forEach((task, index) => {
-                    const rowNumber = startIndex + index + 1;
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50';
-                    
-                    row.innerHTML = `
-                        <td class="text-center">${rowNumber}</td>
-                        <td class="font-medium text-gray-900">${utils.escapeHtml(task.judul || '')}</td>
-                        <td title="${utils.escapeHtml(task.deskripsi || '')}">
-                            <div class="truncate-text">${utils.truncateText(task.deskripsi || '', 50)}</div>
-                        </td>
-                        <td class="${task.is_overdue ? 'text-red-600 font-semibold' : 'text-gray-700'}">
-                            ${utils.formatDate(task.deadline)}
-                            ${task.is_overdue ? '<br><span class="text-xs text-red-500">Terlambat</span>' : ''}
-                        </td>
-                        <td>
-                            <span class="badge badge-default">
-                                ${utils.escapeHtml(task.project_name || '-')}
-                            </span>
-                        </td>
-                        <td>${utils.escapeHtml(task.assignee_name || task.assigned_to_name || '-')}</td>
-                        <td>
-                            <span class="badge ${utils.getDivisiClass(task.target_divisi || task.divisi)}">
-                                ${utils.escapeHtml(task.target_divisi || task.divisi || '-')}
-                            </span>
-                        </td>
-                        <td>
+                if (!projectName) {
+                    projectName = task.project_nama || 'Tidak ada Project';
+                }
+                
+                task.project_name = projectName;
+                
+                // Debug tanggal
+                console.log(`Task ${index + 1}:`, {
+                    judul: task.judul,
+                    nama_tugas: task.nama_tugas || task.judul, // Gunakan nama_tugas jika ada, fallback ke judul
+                    deadline_original: task.deadline,
+                    deadline_formatted: utils.formatDate(task.deadline),
+                    deadline_input_format: utils.formatDateForInput(task.deadline),
+                    is_overdue: task.is_overdue
+                });
+            });
+            
+            state.filteredTasks = [...state.allTasks];
+            render.filterTasks(); // Gunakan filterTasks untuk menerapkan filter project
+            
+            try {
+                await api.fetchStatistics();
+            } catch(e) {
+                console.log('Using calculated statistics:', e);
+                api.calculateStatsFromTasks();
+            }
+            
+        } catch (error) {
+            console.error('Error fetching tasks:', error);
+            utils.showToast('Gagal memuat data tugas', 'error');
+            state.allTasks = [];
+            state.filteredTasks = [];
+            render.renderTable();
+        } finally {
+            state.isLoading = false;
+            utils.showLoading(false);
+        }
+    },
+    
+    fetchStatistics: async () => {
+        try {
+            const endpoint = api.getStatisticsEndpoint();
+            
+            if (!endpoint) {
+                api.calculateStatsFromTasks();
+                return;
+            }
+            
+            const data = await api.request(endpoint);
+            
+            if (data.success !== false) {
+                const stats = data.data || data;
+                document.getElementById('totalTasks').textContent = stats.total || 0;
+                document.getElementById('inProgressTasks').textContent = stats.in_progress || stats.proses || 0;
+                document.getElementById('completedTasks').textContent = stats.completed || stats.selesai || 0;
+                document.getElementById('overdueTasks').textContent = stats.overdue || 0;
+            } else {
+                api.calculateStatsFromTasks();
+            }
+        } catch (error) {
+            console.error('Error fetching statistics:', error);
+            api.calculateStatsFromTasks();
+        }
+    },
+    
+    calculateStatsFromTasks: () => {
+        const now = new Date();
+        
+        const stats = {
+            total: state.allTasks.length,
+            in_progress: state.allTasks.filter(task => 
+                task.status === 'proses' || task.status === 'pending'
+            ).length,
+            completed: state.allTasks.filter(task => 
+                task.status === 'selesai'
+            ).length,
+            overdue: state.allTasks.filter(task => 
+                utils.checkOverdue(task.deadline, task.status)
+            ).length
+        };
+        
+        document.getElementById('totalTasks').textContent = stats.total;
+        document.getElementById('inProgressTasks').textContent = stats.in_progress;
+        document.getElementById('completedTasks').textContent = stats.completed;
+        document.getElementById('overdueTasks').textContent = stats.overdue;
+    },
+    
+    fetchKaryawan: async () => {
+        try {
+            const userRole = state.currentUser.role;
+            
+            let endpoint;
+            
+            if (userRole === 'manager_divisi') {
+                endpoint = '/manager_divisi/api/karyawan-dropdown';
+            } else {
+                endpoint = '/api/users/data?role=karyawan';
+            }
+            
+            const response = await fetch(endpoint, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': "XMLHttpRequest"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (data.success === true && data.data && Array.isArray(data.data)) {
+                state.karyawanList = data.data;
+            } else if (Array.isArray(data)) {
+                state.karyawanList = data;
+            } else if (data.success === true && Array.isArray(data.karyawan)) {
+                state.karyawanList = data.karyawan;
+            } else if (data.data && Array.isArray(data.data)) {
+                state.karyawanList = data.data;
+            } else {
+                state.karyawanList = [];
+            }
+            
+            state.karyawanList = state.karyawanList.map(karyawan => {
+                const cleanKaryawan = { ...karyawan };
+                if (karyawan.divisi && typeof karyawan.divisi === 'string') {
+                    cleanKaryawan.divisi = utils.cleanDivisiString(karyawan.divisi);
+                }
+                return cleanKaryawan;
+            });
+            
+            console.log('Karyawan loaded:', state.karyawanList.length);
+            
+        } catch (error) {
+            console.error('Failed to fetch karyawan:', error);
+            utils.showToast('Gagal memuat daftar karyawan', 'error');
+            state.karyawanList = [];
+        }
+    },
+    
+    createTask: async (formData) => {
+        try {
+            const endpoint = api.getCreateTaskEndpoint();
+            
+            if (!endpoint) {
+                throw new Error('Anda tidak memiliki izin untuk membuat tugas');
+            }
+            
+            const response = await api.request(endpoint, {
+                method: 'POST',
+                body: formData
+            });
+            
+            utils.showToast('Tugas berhasil dibuat', 'success');
+            await api.fetchTasks();
+            
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    },
+    
+    updateTask: async (id, formData) => {
+        try {
+            const userRole = state.currentUser.role;
+            let endpoint;
+            
+            if (userRole === 'manager_divisi') {
+                endpoint = `/manager_divisi/tasks/${id}`;
+            } else if (userRole === 'admin') {
+                endpoint = `/admin/tasks/${id}`;
+            } else if (userRole === 'general_manager') {
+                endpoint = `/general_manager/tasks/${id}`;
+            } else {
+                throw new Error('Anda tidak memiliki izin untuk mengedit tugas');
+            }
+            
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            const response = await api.request(endpoint, {
+                method: 'PUT',
+                body: data
+            });
+            
+            utils.showToast('Tugas berhasil diperbarui', 'success');
+            await api.fetchTasks();
+            
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    },
+    
+    deleteTask: async (id) => {
+        try {
+            const userRole = state.currentUser.role;
+            let endpoint;
+            
+            if (userRole === 'manager_divisi') {
+                endpoint = `/manager_divisi/tasks/${id}`;
+            } else if (userRole === 'admin') {
+                endpoint = `/admin/tasks/${id}`;
+            } else if (userRole === 'general_manager') {
+                endpoint = `/general_manager/tasks/${id}`;
+            } else {
+                throw new Error('Anda tidak memiliki izin untuk menghapus tugas');
+            }
+            
+            const response = await api.request(endpoint, {
+                method: 'DELETE'
+            });
+            
+            utils.showToast('Tugas berhasil dihapus', 'success');
+            await api.fetchTasks();
+            
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    },
+    
+    getTaskDetail: async (id) => {
+        try {
+            const userRole = state.currentUser.role;
+            let endpoint;
+            
+            if (userRole === 'manager_divisi') {
+                endpoint = `/manager_divisi/api/tasks/${id}`;
+            } else if (userRole === 'admin') {
+                endpoint = `/admin/tasks/${id}`;
+            } else if (userRole === 'general_manager') {
+                endpoint = `/general_manager/tasks/${id}`;
+            } else {
+                endpoint = `/api/tasks/${id}`;
+            }
+            
+            const data = await api.request(endpoint);
+            
+            if (data.success === true && data.data) {
+                return data.data;
+            } else if (data.task) {
+                return data.task;
+            } else if (data) {
+                return data;
+            } else {
+                throw new Error('Data tugas tidak ditemukan');
+            }
+        } catch (error) {
+            throw error;
+        }
+    }
+};
+
+// Render Functions
+const render = {
+    // Fungsi untuk update dropdown filter project
+    updateProjectFilterDropdown: () => {
+        const projectFilter = document.getElementById('projectFilter');
+        if (!projectFilter) return;
+        
+        // Simpan nilai yang dipilih sebelumnya
+        const currentValue = projectFilter.value;
+        
+        // Clear existing options except the first one
+        while (projectFilter.options.length > 1) {
+            projectFilter.remove(1);
+        }
+        
+        // Add project options
+        state.projectList.forEach((project) => {
+            const projectName = project.nama || project.name || project.nama_project || `Project ${project.id}`;
+            const option = document.createElement('option');
+            option.value = project.id;
+            option.textContent = utils.escapeHtml(projectName);
+            projectFilter.appendChild(option);
+        });
+        
+        // Restore selected value if it still exists
+        if (currentValue && Array.from(projectFilter.options).some(opt => opt.value === currentValue)) {
+            projectFilter.value = currentValue;
+        } else {
+            projectFilter.value = 'all';
+            state.selectedProjectId = 'all';
+        }
+    },
+    
+    filterTasks: () => {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const projectFilter = document.getElementById('projectFilter');
+        const selectedProjectId = projectFilter ? projectFilter.value : 'all';
+        
+        // Update state
+        state.selectedProjectId = selectedProjectId;
+        
+        state.filteredTasks = state.allTasks.filter(task => {
+            // Filter berdasarkan pencarian
+            const searchMatch = !searchTerm || 
+                ((task.nama_tugas && task.nama_tugas.toLowerCase().includes(searchTerm)) ||
+                 (task.judul && task.judul.toLowerCase().includes(searchTerm)) ||
+                 (task.deskripsi && task.deskripsi.toLowerCase().includes(searchTerm)) ||
+                 (task.assignee_name && task.assignee_name.toLowerCase().includes(searchTerm)) ||
+                 (task.assigned_to_name && task.assigned_to_name.toLowerCase().includes(searchTerm)) ||
+                 (task.project_name && task.project_name.toLowerCase().includes(searchTerm)));
+            
+            // Filter berdasarkan status
+            const statusMatch = statusFilter === 'all' || task.status === statusFilter;
+            
+            // Filter berdasarkan project
+            let projectMatch = true;
+            if (selectedProjectId !== 'all') {
+                if (task.project_id) {
+                    projectMatch = task.project_id == selectedProjectId;
+                } else {
+                    // Coba match berdasarkan nama project jika ID tidak ada
+                    const taskProjectName = task.project_name || task.project_nama || '';
+                    const selectedProject = state.projectList.find(p => p.id == selectedProjectId);
+                    if (selectedProject) {
+                        const selectedProjectName = selectedProject.nama || selectedProject.name || selectedProject.nama_project || '';
+                        projectMatch = taskProjectName.includes(selectedProjectName) || 
+                                      selectedProjectName.includes(taskProjectName);
+                    } else {
+                        projectMatch = false;
+                    }
+                }
+            }
+            
+            return searchMatch && statusMatch && projectMatch;
+        });
+        
+        state.currentPage = 1;
+        render.renderTable();
+        
+        // Update panel title berdasarkan filter
+        let panelTitle = 'Daftar Tugas';
+        if (selectedProjectId !== 'all') {
+            const selectedProject = state.projectList.find(p => p.id == selectedProjectId);
+            if (selectedProject) {
+                const projectName = selectedProject.nama || selectedProject.name || selectedProject.nama_project || `Project ${selectedProjectId}`;
+                panelTitle = `Tugas dari: ${utils.truncateText(projectName, 30)}`;
+            }
+        }
+        document.getElementById('panelTitle').textContent = `${panelTitle} (${state.filteredTasks.length})`;
+    },
+    
+    renderTable: () => {
+        const startIndex = (state.currentPage - 1) * state.itemsPerPage;
+        const endIndex = Math.min(startIndex + state.itemsPerPage, state.filteredTasks.length);
+        const currentTasks = state.filteredTasks.slice(startIndex, endIndex);
+        
+        document.getElementById('totalCount').textContent = state.filteredTasks.length;
+        
+        if (state.filteredTasks.length === 0) {
+            document.getElementById('noDataMessage').style.display = 'block';
+            document.getElementById('desktopTable').style.display = 'none';
+            document.getElementById('mobile-cards').style.display = 'none';
+            document.getElementById('desktopPaginationContainer').style.display = 'none';
+            document.getElementById('mobilePaginationContainer').style.display = 'none';
+            return;
+        }
+        
+        const desktopTableBody = document.getElementById('desktopTableBody');
+        desktopTableBody.innerHTML = '';
+        
+        currentTasks.forEach((task, index) => {
+            const rowNumber = startIndex + index + 1;
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50';
+            
+            // Gunakan nama_tugas jika ada, fallback ke judul
+            const namaTugas = task.nama_tugas || task.judul || '';
+            const judulTugas = task.judul || task.nama_tugas || '';
+            
+            row.innerHTML = `
+                <td class="text-center">${rowNumber}</td>
+                <td class="font-medium text-gray-900">
+                    <div class="truncate-text" title="${utils.escapeHtml(task.project_name || 'Tidak ada Project')}">
+                        ${utils.escapeHtml(task.project_name || 'Tidak ada Project')}
+                    </div>
+                </td>
+                <td class="font-medium text-gray-900">${utils.escapeHtml(judulTugas)}</td>
+                <td class="font-medium text-gray-900">${utils.escapeHtml(namaTugas)}</td>
+                <td title="${utils.escapeHtml(task.deskripsi || '')}">
+                    <div class="truncate-text">${utils.truncateText(task.deskripsi || '', 50)}</div>
+                </td>
+                <td class="${task.is_overdue ? 'text-red-600 font-semibold' : 'text-gray-700'}">
+                    ${utils.formatDate(task.deadline)}
+                    ${task.is_overdue ? '<br><span class="text-xs text-red-500">Terlambat</span>' : ''}
+                </td>
+                <td>${utils.escapeHtml(task.assignee_name || task.assigned_to_name || 'Tidak ditugaskan')}</td>
+                <td>
+                    <span class="badge ${utils.getStatusClass(task.status)}">
+                        ${utils.getStatusText(task.status)}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <div class="flex justify-center gap-2">
+                        <button onclick="modal.showDetail(${task.id})" class="p-2 rounded-full hover:bg-blue-50 transition-colors" title="Detail">
+                            <span class="material-icons-outlined text-blue-600 text-lg">visibility</span>
+                        </button>
+                        
+                        ${state.currentUser.role !== 'karyawan' || task.assigned_to == state.currentUser.id ? `
+                        <button onclick="modal.showEdit(${task.id})" class="p-2 rounded-full hover:bg-green-50 transition-colors" title="Edit">
+                            <span class="material-icons-outlined text-green-600 text-lg">edit</span>
+                        </button>
+                        ` : ''}
+                    </div>
+                </td>
+            `;
+            
+            desktopTableBody.appendChild(row);
+        });
+        
+        const mobileCards = document.getElementById('mobile-cards');
+        mobileCards.innerHTML = currentTasks.map((task, index) => `
+            <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <div class="text-xs text-primary font-medium mb-1">
+                            ${utils.escapeHtml(task.project_name || 'Tidak ada Project')}
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-1">
+                            <div class="text-sm text-gray-600">Judul: ${utils.escapeHtml(task.judul || task.nama_tugas || '')}</div>
+                            <div class="text-sm font-medium mt-1">Tugas: ${utils.escapeHtml(task.nama_tugas || task.judul || '')}</div>
+                        </h4>
+                        <div class="flex items-center gap-2 mt-2">
                             <span class="badge ${utils.getStatusClass(task.status)}">
                                 ${utils.getStatusText(task.status)}
                             </span>
-                        </td>
-                        <td class="text-center">
-                            <div class="flex justify-center gap-2">
-                                <button onclick="modal.showDetail(${task.id})" class="p-2 rounded-full hover:bg-blue-50 transition-colors" title="Detail">
-                                    <span class="material-icons-outlined text-blue-600 text-lg">visibility</span>
-                                </button>
-                                
-                                ${state.currentUser.role !== 'karyawan' || task.assigned_to == state.currentUser.id ? `
-                                <button onclick="modal.showEdit(${task.id})" class="p-2 rounded-full hover:bg-green-50 transition-colors" title="Edit">
-                                    <span class="material-icons-outlined text-green-600 text-lg">edit</span>
-                                </button>
-                                ` : ''}
-                                
-                                ${['admin', 'general_manager'].includes(state.currentUser.role) || 
-                                  (state.currentUser.role === 'manager_divisi' && task.target_divisi === state.currentUser.divisi) ? `
-                                <button onclick="modal.showDelete(${task.id})" class="p-2 rounded-full hover:bg-red-50 transition-colors" title="Hapus">
-                                    <span class="material-icons-outlined text-red-600 text-lg">delete</span>
-                                </button>
-                                ` : ''}
-                            </div>
-                        </td>
-                    `;
-                    
-                    desktopTableBody.appendChild(row);
-                });
-                
-                // Render mobile cards
-                const mobileCards = document.getElementById('mobile-cards');
-                mobileCards.innerHTML = currentTasks.map((task, index) => `
-                    <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                        <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <h4 class="font-semibold text-gray-900 mb-1">${utils.escapeHtml(task.judul || '')}</h4>
-                                <div class="flex items-center gap-2">
-                                    <span class="badge ${utils.getStatusClass(task.status)}">
-                                        ${utils.getStatusText(task.status)}
-                                    </span>
-                                    <span class="text-xs text-gray-500">
-                                        ${utils.formatDate(task.deadline)}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="flex gap-1">
-                                <button onclick="modal.showDetail(${task.id})" class="p-1 hover:bg-blue-50 rounded">
-                                    <span class="material-icons-outlined text-blue-600">visibility</span>
-                                </button>
-                                ${state.currentUser.role !== 'karyawan' || task.assigned_to == state.currentUser.id ? `
-                                <button onclick="modal.showEdit(${task.id})" class="p-1 hover:bg-green-50 rounded">
-                                    <span class="material-icons-outlined text-green-600">edit</span>
-                                </button>
-                                ` : ''}
-                            </div>
-                        </div>
-                        
-                        <p class="text-sm text-gray-600 mb-3">${utils.truncateText(task.deskripsi || '', 80)}</p>
-                        
-                        <div class="flex justify-between items-center text-sm">
-                            <div>
-                                <span class="text-gray-700 font-medium">${utils.escapeHtml(task.assignee_name || task.assigned_to_name || 'Tidak ditugaskan')}</span>
-                                <span class="badge ${utils.getDivisiClass(task.target_divisi || task.divisi)} ml-2">
-                                    ${utils.escapeHtml(task.target_divisi || task.divisi || '-')}
-                                </span>
-                            </div>
-                            <div class="mt-1">
-                                <span class="badge badge-default">
-                                    ${utils.escapeHtml(task.project_name || 'Tidak ada Project')}
-                                </span>
-                            </div>
-                            ${task.is_overdue ? '<span class="text-red-600 text-xs font-semibold">Terlambat</span>' : ''}
+                            <span class="text-xs text-gray-500">
+                                ${utils.formatDate(task.deadline)}
+                            </span>
                         </div>
                     </div>
-                `).join('');
+                    <div class="flex gap-1">
+                        <button onclick="modal.showDetail(${task.id})" class="p-1 hover:bg-blue-50 rounded">
+                            <span class="material-icons-outlined text-blue-600">visibility</span>
+                        </button>
+                        ${state.currentUser.role !== 'karyawan' || task.assigned_to == state.currentUser.id ? `
+                        <button onclick="modal.showEdit(${task.id})" class="p-1 hover:bg-green-50 rounded">
+                            <span class="material-icons-outlined text-green-600">edit</span>
+                        </button>
+                        ` : ''}
+                    </div>
+                </div>
                 
-                document.getElementById('noDataMessage').style.display = 'none';
-                document.getElementById('desktopTable').style.display = 'block';
-                document.getElementById('mobile-cards').style.display = window.innerWidth < 768 ? 'block' : 'none';
+                <p class="text-sm text-gray-600 mb-3">${utils.truncateText(task.deskripsi || '', 80)}</p>
                 
-                render.updatePagination();
-            },
-            
-            updatePagination: () => {
-                state.totalPages = Math.ceil(state.filteredTasks.length / state.itemsPerPage);
-                
-                const desktopPageNumbers = document.getElementById('desktopPageNumbers');
-                desktopPageNumbers.innerHTML = '';
-                
-                for (let i = 1; i <= state.totalPages; i++) {
-                    const pageButton = document.createElement('button');
-                    pageButton.className = `desktop-page-btn ${i === state.currentPage ? 'active' : ''}`;
-                    pageButton.textContent = i;
-                    pageButton.addEventListener('click', () => {
-                        state.currentPage = i;
-                        render.renderTable();
-                    });
-                    desktopPageNumbers.appendChild(pageButton);
-                }
-                
-                document.getElementById('desktopPrevPage').disabled = state.currentPage === 1;
-                document.getElementById('desktopNextPage').disabled = state.currentPage === state.totalPages;
-                
-                const mobilePageNumbers = document.getElementById('pageNumbers');
-                mobilePageNumbers.innerHTML = '';
-                
-                for (let i = 1; i <= state.totalPages; i++) {
-                    const pageButton = document.createElement('button');
-                    pageButton.className = `w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${i === state.currentPage ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`;
-                    pageButton.textContent = i;
-                    pageButton.addEventListener('click', () => {
-                        state.currentPage = i;
-                        render.renderTable();
-                    });
-                    mobilePageNumbers.appendChild(pageButton);
-                }
-                
-                document.getElementById('prevPage').disabled = state.currentPage === 1;
-                document.getElementById('nextPage').disabled = state.currentPage === state.totalPages;
-                
-                const showPagination = state.totalPages > 1;
-                document.getElementById('desktopPaginationContainer').style.display = showPagination ? 'flex' : 'none';
-                document.getElementById('mobilePaginationContainer').style.display = (showPagination && window.innerWidth < 768) ? 'flex' : 'none';
-            }
-        };
+                <div class="flex justify-between items-center text-sm">
+                    <div>
+                        <span class="text-gray-700 font-medium">${utils.escapeHtml(task.assignee_name || task.assigned_to_name || 'Tidak ditugaskan')}</span>
+                    </div>
+                    ${task.is_overdue ? '<span class="text-red-600 text-xs font-semibold">Terlambat</span>' : ''}
+                </div>
+            </div>
+        `).join('');
+        
+        document.getElementById('noDataMessage').style.display = 'none';
+        document.getElementById('desktopTable').style.display = 'block';
+        document.getElementById('mobile-cards').style.display = window.innerWidth < 768 ? 'block' : 'none';
+        
+        render.updatePagination();
+    },
+    
+    updatePagination: () => {
+        state.totalPages = Math.ceil(state.filteredTasks.length / state.itemsPerPage);
+        
+        const desktopPageNumbers = document.getElementById('desktopPageNumbers');
+        desktopPageNumbers.innerHTML = '';
+        
+        for (let i = 1; i <= state.totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.className = `desktop-page-btn ${i === state.currentPage ? 'active' : ''}`;
+            pageButton.textContent = i;
+            pageButton.addEventListener('click', () => {
+                state.currentPage = i;
+                render.renderTable();
+            });
+            desktopPageNumbers.appendChild(pageButton);
+        }
+        
+        document.getElementById('desktopPrevPage').disabled = state.currentPage === 1;
+        document.getElementById('desktopNextPage').disabled = state.currentPage === state.totalPages;
+        
+        const mobilePageNumbers = document.getElementById('pageNumbers');
+        mobilePageNumbers.innerHTML = '';
+        
+        for (let i = 1; i <= state.totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.className = `w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${i === state.currentPage ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`;
+            pageButton.textContent = i;
+            pageButton.addEventListener('click', () => {
+                state.currentPage = i;
+                render.renderTable();
+            });
+            mobilePageNumbers.appendChild(pageButton);
+        }
+        
+        document.getElementById('prevPage').disabled = state.currentPage === 1;
+        document.getElementById('nextPage').disabled = state.currentPage === state.totalPages;
+        
+        const showPagination = state.totalPages > 1;
+        document.getElementById('desktopPaginationContainer').style.display = showPagination ? 'flex' : 'none';
+        document.getElementById('mobilePaginationContainer').style.display = (showPagination && window.innerWidth < 768) ? 'flex' : 'none';
+    }
+};
 
-        // Modal Functions
-        const modal = {
-            showDetail: async (id) => {
-                try {
-                    const task = await api.getTaskDetail(id);
-                    
-                    const modalContent = `
-                        <div class="space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Judul</h4>
-                                    <p class="font-medium text-gray-900">${utils.escapeHtml(task.judul || '')}</p>
-                                </div>
-                                <div>
-                                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Deadline</h4>
-                                    <p class="${task.is_overdue ? 'text-red-600 font-semibold' : 'text-gray-900'}">
-                                        ${utils.formatDate(task.deadline)}
-                                        ${task.is_overdue ? '<br><span class="text-xs text-red-500">Terlambat</span>' : ''}
-                                    </p>
-                                </div>
-                                <div>
-                                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</h4>
-                                    <span class="badge ${utils.getStatusClass(task.status)}">
-                                        ${utils.getStatusText(task.status)}
-                                    </span>
-                                </div>
-                                <div>
-                                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Ditugaskan Kepada</h4>
-                                    <p class="text-gray-900">${utils.escapeHtml(task.assignee_name || task.assigned_to_name || '-')}</p>
-                                </div>
-                                <div>
-                                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Divisi</h4>
-                                    <span class="badge ${utils.getDivisiClass(task.target_divisi || task.divisi)}">
-                                        ${utils.escapeHtml(task.target_divisi || task.divisi || '-')}
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Project</h4>
-                                <p class="text-gray-900">${utils.escapeHtml(task.project_name || 'Tidak ada Project')}</p>
-                            </div>
-                            
-                            <div>
-                                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Deskripsi</h4>
-                                <div class="bg-gray-50 p-3 rounded-lg mt-1">
-                                    <p class="text-gray-700 whitespace-pre-line">${utils.escapeHtml(task.deskripsi || 'Tidak ada deskripsi')}</p>
-                                </div>
-                            </div>
-                            
-                            ${task.catatan ? `
-                            <div>
-                                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Catatan</h4>
-                                <div class="bg-gray-50 p-3 rounded-lg mt-1">
-                                    <p class="text-gray-700 whitespace-pre-line">${utils.escapeHtml(task.catatan)}</p>
-                                </div>
-                            ` : ''}
-                            
-                            <div class="pt-4 border-t">
-                                <button class="close-modal btn-secondary w-full py-2">Tutup</button>
-                            </div>
-                        </div>
-                    `;
-                    
-                    utils.createModal('Detail Tugas', modalContent);
-                    
-                } catch (error) {
-                    console.error('Error showing detail:', error);
-                    utils.showToast('Gagal memuat detail tugas', 'error');
-                }
-            },
+// Modal Functions
+const modal = {
+    showDetail: async (id) => {
+        try {
+            const task = await api.getTaskDetail(id);
             
-            showEdit: async (id) => {
-                try {
-                    const task = await api.getTaskDetail(id);
-                    
-                    let karyawanOptions = '';
-                    let hasKaryawanInDivisi = false;
-                    
-                    if (state.karyawanList.length > 0) {
-                        state.karyawanList.forEach((k) => {
-                            const karyawanName = k.name || k.nama || 'Tanpa Nama';
-                            const karyawanId = k.id || k.user_id;
-                            const isSelected = task.assigned_to == karyawanId ? 'selected' : '';
-                            
-                            karyawanOptions += `
-                                <option value="${karyawanId}" ${isSelected}>
-                                    ${utils.escapeHtml(karyawanName)}
-                                </option>
-                            `;
-                            
-                            hasKaryawanInDivisi = true;
-                        });
-                    }
-                    
-                    let karyawanSelectHtml = '';
-                    if (hasKaryawanInDivisi) {
-                        karyawanSelectHtml = `
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    Ditugaskan Kepada <span class="text-red-500">*</span>
-                                </label>
-                                <select name="assigned_to" class="form-input w-full" required>
-                                    <option value="">-- Pilih Karyawan --</option>
-                                    ${karyawanOptions}
-                                </select>
-                            </div>
-                        `;
-                    } else {
-                        karyawanSelectHtml = `
-                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                                <div class="flex">
-                                    <div class="flex-shrink-0">
-                                        <span class="material-icons-outlined text-yellow-600">warning</span>
-                                    </div>
-                                    <div class="ml-3">
-                                        <h3 class="text-sm font-medium text-yellow-800">Tidak Ada Karyawan</h3>
-                                        <div class="mt-2 text-sm text-yellow-700">
-                                            <p>Tidak ditemukan karyawan dalam divisi ini.</p>
-                                        </div>
-                                    </div>
-                                <input type="hidden" name="assigned_to" value="">
-                            </div>
-                        `;
-                    }
-                    
-                    let projectOptions = '';
-                    if (state.projectList.length > 0) {
-                        state.projectList.forEach(p => {
-                            const isSelected = task.project_id == p.id ? 'selected' : '';
-                            projectOptions += `<option value="${p.id}" ${isSelected}>${utils.escapeHtml(p.name)}</option>`;
-                        });
-                    }
-                    
-                    const modalContent = `
-                        <form id="editTaskForm">
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Judul <span class="text-red-500">*</span></label>
-                                    <input type="text" name="judul" value="${utils.escapeHtml(task.judul || '')}" 
-                                           class="form-input" required>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi <span class="text-red-500">*</span></label>
-                                    <textarea name="deskripsi" rows="3" class="form-input" required>${utils.escapeHtml(task.deskripsi || '')}</textarea>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Project</label>
-                                    <select name="project_id" class="form-input w-full">
-                                        <option value="">-- Tidak Ada Project --</option>
-                                        ${projectOptions}
-                                    </select>
-                                    <p class="text-xs text-gray-500 mt-1">Pilih project terkait (Opsional)</p>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Deadline <span class="text-red-500">*</span></label>
-                                    <input type="datetime-local" name="deadline" 
-                                           value="${utils.formatDateTimeLocal(task.deadline)}" 
-                                           class="form-input" required>
-                                </div>
-                                
-                                ${karyawanSelectHtml}
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
-                                    <select name="status" class="form-input" required>
-                                        <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>Pending</option>
-                                        <option value="proses" ${task.status === 'proses' ? 'selected' : ''}>Dalam Proses</option>
-                                        <option value="selesai" ${task.status === 'selesai' ? 'selected' : ''}>Selesai</option>
-                                        <option value="dibatalkan" ${task.status === 'dibatalkan' ? 'selected' : ''}>Dibatalkan</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
-                                    <textarea name="catatan" rows="2" class="form-input">${utils.escapeHtml(task.catatan || '')}</textarea>
-                                </div>
-                                
-                                <div class="flex gap-2 pt-4">
-                                    <button type="button" class="close-modal btn-secondary flex-1 py-2">Batal</button>
-                                    <button type="submit" class="btn-primary flex-1 py-2">Simpan Perubahan</button>
-                                </div>
-                            </div>
-                        </form>
-                    `;
-                    
-                    const modalElement = utils.createModal('Edit Tugas', modalContent, async (formData) => {
-                        await api.updateTask(id, formData);
-                    });
-                    
-                } catch (error) {
-                    console.error('Error showing edit form:', error);
-                    utils.showToast('Gagal memuat form edit', 'error');
-                }
-            },
+            let projectName = task.project_name || task.project_nama;
+            if (!projectName && task.project_id && state.projectDetails[task.project_id]) {
+                projectName = state.projectDetails[task.project_id].nama;
+            }
             
-            showDelete: async (id) => {
-                try {
-                    const task = await api.getTaskDetail(id);
-                    
-                    const modalContent = `
-                        <div class="text-center">
-                            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                                <span class="material-icons-outlined text-red-600 text-2xl">warning</span>
-                            </div>
-                            
-                            <h4 class="text-lg font-semibold text-gray-900 mb-2">Hapus Tugas?</h4>
-                            <p class="text-gray-600 mb-4">
-                                Tugas "<span class="font-medium">${utils.escapeHtml(task.judul || '')}</span>" akan dihapus permanen.
-                            </p>
-                            <p class="text-sm text-gray-500 mb-6">
-                                Tindakan ini tidak dapat dibatalkan.
-                            </p>
-                            
-                            <div class="flex gap-3 justify-center">
-                                <button type="button" class="close-modal btn-secondary px-6 py-2">Batal</button>
-                                <button id="confirmDeleteBtn" 
-                                        class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                                    Hapus
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    
-                    const modalElement = utils.createModal('Konfirmasi Hapus', modalContent);
-                    
-                    const confirmDeleteBtn = modalElement.querySelector('#confirmDeleteBtn');
-                    confirmDeleteBtn.addEventListener('click', async () => {
-                        try {
-                            confirmDeleteBtn.disabled = true;
-                            confirmDeleteBtn.textContent = 'Menghapus...';
-                            
-                            await api.deleteTask(id);
-                        } catch (error) {
-                            console.error('Error deleting task:', error);
-                            utils.showToast('Gagal menghapus tugas', 'error');
-                            modalElement.querySelector('.close-modal').click();
-                        }
-                    });
-                    
-                } catch (error) {
-                    console.error('Error showing delete confirmation:', error);
-                    utils.showToast('Gagal memuat konfirmasi hapus', 'error');
-                }
-            },
+            // Gunakan nama_tugas jika ada, fallback ke judul
+            const namaTugas = task.nama_tugas || task.judul || '';
+            const judulTugas = task.judul || task.nama_tugas || '';
             
-            showCreate: () => {
-                try {
-                    let karyawanOptions = '';
-                    let hasKaryawanInDivisi = false;
-                    
-                    if (state.karyawanList.length > 0) {
-                        state.karyawanList.forEach((k) => {
-                            const karyawanName = k.name || k.nama || 'Tanpa Nama';
-                            const karyawanId = k.id || k.user_id;
-                            
-                            karyawanOptions += `
-                                <option value="${karyawanId}">
-                                    ${utils.escapeHtml(karyawanName)}
-                                </option>
-                            `;
-                            
-                            hasKaryawanInDivisi = true;
-                        });
-                    }
-                    
-                    let projectOptions = '';
-                    if (state.projectList.length > 0) {
-                        state.projectList.forEach(p => {
-                            const projectName = p.name || 'Tidak Ada Project';
-                            const projectId = p.id;
-                            
-                            projectOptions += `<option value="${projectId}">${utils.escapeHtml(projectName)}</option>`;
-                        });
-                    }
-                    
-                    let karyawanSelectHtml = '';
-                    if (hasKaryawanInDivisi) {
-                        karyawanSelectHtml = `
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    Ditugaskan Kepada <span class="text-red-500">*</span>
-                                </label>
-                                <select name="assigned_to" class="form-input w-full" required>
-                                    <option value="">-- Pilih Karyawan --</option>
-                                    ${karyawanOptions}
-                                </select>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    <span class="font-medium">${state.karyawanList.length} karyawan</span> tersedia di divisi ${state.currentUser.divisi}
-                                </p>
-                            </div>
-                        `;
-                    } else {
-                        karyawanSelectHtml = `
-                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                                <div class="flex">
-                                    <div class="flex-shrink-0">
-                                        <span class="material-icons-outlined text-yellow-600">warning</span>
-                                    </div>
-                                    <div class="ml-3">
-                                        <h3 class="text-sm font-medium text-yellow-800">Tidak Ada Karyawan</h3>
-                                        <div class="mt-2 text-sm text-yellow-700">
-                                            <p>Tidak ditemukan karyawan di divisi ini.</p>
-                                            <p class="mt-1">Hubungi administrator untuk menambahkan karyawan ke divisi Anda.</p>
-                                        </div>
-                                    </div>
-                                <input type="hidden" name="assigned_to" value="">
-                            </div>
-                        `;
-                    }
-                    
-                    let projectSelectHtml = `
+            const modalContent = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Project</label>
-                            <select id="create_project_id" name="project_id" class="form-input w-full">
-                                <option value="">-- Pilih Project --</option>
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Nama Project</h4>
+                            <p class="font-medium text-gray-900">${utils.escapeHtml(projectName || 'Tidak ada Project')}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Judul Tugas</h4>
+                            <p class="font-medium text-gray-900">${utils.escapeHtml(judulTugas)}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Nama Tugas</h4>
+                            <p class="font-medium text-gray-900">${utils.escapeHtml(namaTugas)}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Deadline</h4>
+                            <p class="${task.is_overdue ? 'text-red-600 font-semibold' : 'text-gray-900'}">
+                                ${utils.formatDate(task.deadline)}
+                                ${task.is_overdue ? '<br><span class="text-xs text-red-500">Terlambat</span>' : ''}
+                            </p>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</h4>
+                            <span class="badge ${utils.getStatusClass(task.status)}">
+                                ${utils.getStatusText(task.status)}
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Ditugaskan Kepada</h4>
+                            <p class="text-gray-900">${utils.escapeHtml(task.assignee_name || task.assigned_to_name || '-')}</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Deskripsi</h4>
+                        <div class="bg-gray-50 p-3 rounded-lg mt-1">
+                            <p class="text-gray-700 whitespace-pre-line">${utils.escapeHtml(task.deskripsi || 'Tidak ada deskripsi')}</p>
+                        </div>
+                    </div>
+                    
+                    ${task.catatan ? `
+                    <div>
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Catatan</h4>
+                        <div class="bg-gray-50 p-3 rounded-lg mt-1">
+                            <p class="text-gray-700 whitespace-pre-line">${utils.escapeHtml(task.catatan)}</p>
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="pt-4 border-t">
+                        <button class="close-modal btn-secondary w-full py-2">Tutup</button>
+                    </div>
+                </div>
+            `;
+            
+            utils.createModal('Detail Tugas', modalContent);
+            
+        } catch (error) {
+            console.error('Error showing detail:', error);
+            utils.showToast('Gagal memuat detail tugas', 'error');
+        }
+    },
+    
+    showEdit: async (id) => {
+        try {
+            const task = await api.getTaskDetail(id);
+            
+            let karyawanOptions = '';
+            let hasKaryawanInDivisi = false;
+            
+            if (state.karyawanList.length > 0) {
+                state.karyawanList.forEach((k) => {
+                    const karyawanName = k.name || k.nama || 'Tanpa Nama';
+                    const karyawanId = k.id || k.user_id;
+                    const isSelected = task.assigned_to == karyawanId ? 'selected' : '';
+                    
+                    karyawanOptions += `
+                        <option value="${karyawanId}" ${isSelected}>
+                            ${utils.escapeHtml(karyawanName)}
+                        </option>
+                    `;
+                    
+                    hasKaryawanInDivisi = true;
+                });
+            }
+            
+            let projectOptions = '<option value="">-- Pilih Project --</option>';
+            if (state.projectList.length > 0) {
+                state.projectList.forEach(p => {
+                    const projectName = p.nama || p.name || p.nama_project || `Project ${p.id}`;
+                    const projectId = p.id;
+                    const isSelected = task.project_id == projectId ? 'selected' : '';
+                    projectOptions += `<option value="${projectId}" ${isSelected}>${utils.escapeHtml(projectName)}</option>`;
+                });
+            }
+            
+            // Format deadline untuk input date
+            const formattedDeadline = task.deadline ? utils.formatDateForInput(task.deadline) : '';
+            
+            // Gunakan nama_tugas jika ada, fallback ke judul
+            const namaTugasValue = task.nama_tugas || '';
+            const judulTugasValue = task.judul || '';
+            
+            const modalContent = `
+                <form>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
+                            <select name="project_id" class="form-input w-full">
                                 ${projectOptions}
                             </select>
+                            <p class="text-xs text-gray-500 mt-1">Pilih project terkait (Opsional)</p>
                         </div>
-                    `;
-                    
-                    const modalContent = `
-                        <form id="createTaskForm">
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Judul <span class="text-red-500">*</span></label>
-                                    <input type="text" name="judul" class="form-input" required 
-                                           placeholder="Masukkan judul tugas">
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Judul Tugas <span class="text-red-500">*</span></label>
+                            <input type="text" name="judul" value="${utils.escapeHtml(judulTugasValue)}" 
+                                   class="form-input" required placeholder="Judul tugas (akan diisi otomatis dari nama project)">
+                            <p class="text-xs text-gray-500 mt-1">Judul akan diisi otomatis saat memilih project</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Tugas <span class="text-red-500">*</span></label>
+                            <input type="text" name="nama_tugas" value="${utils.escapeHtml(namaTugasValue)}" 
+                                   class="form-input" required placeholder="Masukkan nama tugas spesifik">
+                            <p class="text-xs text-gray-500 mt-1">Contoh: Analisis kebutuhan, Desain UI, Pengembangan fitur X</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi <span class="text-red-500">*</span></label>
+                            <textarea name="deskripsi" rows="3" class="form-input" required>${utils.escapeHtml(task.deskripsi || '')}</textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deadline <span class="text-red-500">*</span></label>
+                            <input type="date" name="deadline" 
+                                   value="${formattedDeadline}" 
+                                   class="form-input" required>
+                        </div>
+                        
+                        ${hasKaryawanInDivisi ? `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ditugaskan Kepada <span class="text-red-500">*</span></label>
+                            <select name="assigned_to" class="form-input w-full" required>
+                                <option value="">-- Pilih Karyawan --</option>
+                                ${karyawanOptions}
+                            </select>
+                        </div>
+                        ` : `
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <span class="material-icons-outlined text-yellow-600">warning</span>
                                 </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi <span class="text-red-500">*</span></label>
-                                    <textarea name="deskripsi" rows="3" class="form-input" required 
-                                              placeholder="Deskripsi lengkap tugas"></textarea>
-                                </div>
-                                
-                                ${projectSelectHtml}
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Deadline <span class="text-red-500">*</span></label>
-                                    <input type="datetime-local" name="deadline" class="form-input" required>
-                                </div>
-                                
-                                ${karyawanSelectHtml}
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
-                                    <select name="status" class="form-input" required>
-                                        <option value="pending">Pending</option>
-                                        <option value="proses">Dalam Proses</option>
-                                        <option value="selesai">Selesai</option>
-                                        <option value="dibatalkan">Dibatalkan</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
-                                    <textarea name="catatan" rows="2" class="form-input" 
-                                              placeholder="Tambahkan catatan (opsional)"></textarea>
-                                </div>
-                                
-                                <div>
-                                    <input type="hidden" name="target_divisi" value="${state.currentUser.divisi}">
-                                    <input type="hidden" name="target_divisi_id" value="${state.currentUser.divisi_id}">
-                                </div>
-                                
-                                <div class="flex gap-2 pt-4">
-                                    <button type="button" class="close-modal btn-secondary flex-1 py-2">Batal</button>
-                                    <button type="submit" class="btn-primary flex-1 py-2">Buat Tugas</button>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-yellow-800">Tidak Ada Karyawan</h3>
+                                    <div class="mt-2 text-sm text-yellow-700">
+                                        <p>Tidak ditemukan karyawan dalam divisi ini.</p>
+                                    </div>
                                 </div>
                             </div>
-                        </form>
+                            <input type="hidden" name="assigned_to" value="">
+                        </div>
+                        `}
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
+                            <select name="status" class="form-input" required>
+                                <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                <option value="proses" ${task.status === 'proses' ? 'selected' : ''}>Dalam Proses</option>
+                                <option value="selesai" ${task.status === 'selesai' ? 'selected' : ''}>Selesai</option>
+                                <option value="dibatalkan" ${task.status === 'dibatalkan' ? 'selected' : ''}>Dibatalkan</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
+                            <textarea name="catatan" rows="2" class="form-input">${utils.escapeHtml(task.catatan || '')}</textarea>
+                        </div>
+                        
+                        <div class="flex gap-2 pt-4">
+                            <button type="button" class="close-modal btn-secondary flex-1 py-2">Batal</button>
+                            <button type="submit" class="btn-primary flex-1 py-2">Simpan Perubahan</button>
+                        </div>
+                    </div>
+                </form>
+            `;
+            
+            utils.createModal('Edit Tugas', modalContent, async (formData) => {
+                await api.updateTask(id, formData);
+            });
+            
+        } catch (error) {
+            console.error('Error showing edit form:', error);
+            utils.showToast('Gagal memuat form edit', 'error');
+        }
+    },
+    
+    showCreate: () => {
+        try {
+            let karyawanOptions = '';
+            let hasKaryawanInDivisi = false;
+            
+            if (state.karyawanList.length > 0) {
+                state.karyawanList.forEach((k) => {
+                    const karyawanName = k.name || k.nama || 'Tanpa Nama';
+                    const karyawanId = k.id || k.user_id;
+                    
+                    karyawanOptions += `
+                        <option value="${karyawanId}">
+                            ${utils.escapeHtml(karyawanName)}
+                        </option>
                     `;
                     
-                    utils.createModal('Buat Tugas Baru', modalContent, async (formData) => {
-                        if (!formData.has('target_divisi') && state.currentUser.divisi) {
-                            formData.append('target_divisi', state.currentUser.divisi);
-                        }
-                        await api.createTask(formData);
-                    });
-                } catch (error) {
-                    console.error('Error showing create form:', error);
-                    utils.showToast('Gagal memuat form buat tugas', 'error');
-                }
+                    hasKaryawanInDivisi = true;
+                });
             }
-        };
-
-        // Initialization
-        document.addEventListener('DOMContentLoaded', () => {
             
-            const safeAddEventListener = (elementId, eventType, handler) => {
-                const element = document.getElementById(elementId);
-                if (element && element.addEventListener) {
-                    element.addEventListener(eventType, handler);
-                } else {
-                    console.warn(`Element #${elementId} not found`);
-                }
-            };
-
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            const hamburger = document.getElementById('hamburgerBtn');
-            const hamburgerIcon = document.getElementById('hamburgerIcon');
-
-            if (sidebar && overlay && hamburger && hamburgerIcon) {
-                function toggleSidebar() {
-                    sidebar.classList.toggle('translate-x-0');
-                    overlay.classList.toggle('active');
-                    hamburgerIcon.classList.toggle('hamburger-active');
-                }
-                hamburger.addEventListener('click', toggleSidebar);
-                overlay.addEventListener('click', toggleSidebar);
+            let projectOptions = '<option value="">-- Pilih Project --</option>';
+            if (state.projectList.length > 0) {
+                state.projectList.forEach(p => {
+                    const projectName = p.nama || p.name || p.nama_project || `Project ${p.id}`; 
+                    const projectId = p.id;
+                    
+                    projectOptions += `<option value="${projectId}">${utils.escapeHtml(projectName)}</option>`;
+                });
             }
+            
+            const modalContent = `
+                <form>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
+                            <select name="project_id" class="form-input w-full">
+                                ${projectOptions}
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Pilih project untuk mengisi otomatis judul tugas</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Judul Tugas <span class="text-red-500">*</span></label>
+                            <input type="text" name="judul" class="form-input" required 
+                                   placeholder="Judul tugas (akan diisi otomatis dari nama project)">
+                            <p class="text-xs text-gray-500 mt-1">Akan diisi otomatis dengan nama project yang dipilih</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Tugas <span class="text-red-500">*</span></label>
+                            <input type="text" name="nama_tugas" class="form-input" required 
+                                   placeholder="Masukkan nama tugas spesifik">
+                            <p class="text-xs text-gray-500 mt-1">Contoh: Analisis kebutuhan, Desain UI, Pengembangan fitur X, Testing</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi <span class="text-red-500">*</span></label>
+                            <textarea name="deskripsi" rows="3" class="form-input" required 
+                                      placeholder="Deskripsi lengkap tugas"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deadline <span class="text-red-500">*</span></label>
+                            <input type="date" name="deadline" class="form-input" required>
+                            <p class="text-xs text-gray-500 mt-1">Akan diisi otomatis dari deadline project jika tersedia</p>
+                        </div>
+                        
+                        ${hasKaryawanInDivisi ? `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ditugaskan Kepada <span class="text-red-500">*</span></label>
+                            <select name="assigned_to" class="form-input w-full" required>
+                                <option value="">-- Pilih Karyawan --</option>
+                                ${karyawanOptions}
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">
+                                <span class="font-medium">${state.karyawanList.length} karyawan</span> tersedia
+                            </p>
+                        </div>
+                        ` : `
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <span class="material-icons-outlined text-yellow-600">warning</span>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-yellow-800">Tidak Ada Karyawan</h3>
+                                    <div class="mt-2 text-sm text-yellow-700">
+                                        <p>Tidak ditemukan karyawan di divisi ini.</p>
+                                        <p class="mt-1">Hubungi administrator untuk menambahkan karyawan ke divisi Anda.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="assigned_to" value="">
+                        </div>
+                        `}
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
+                            <select name="status" class="form-input" required>
+                                <option value="pending">Pending</option>
+                                <option value="proses">Dalam Proses</option>
+                                <option value="selesai">Selesai</option>
+                                <option value="dibatalkan">Dibatalkan</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
+                            <textarea name="catatan" rows="2" class="form-input" 
+                                      placeholder="Tambahkan catatan (opsional)"></textarea>
+                        </div>
+                        
+                        <input type="hidden" name="target_divisi_id" value="${state.currentUser.divisi_id}">
+                        
+                        <div class="flex gap-2 pt-4">
+                            <button type="button" class="close-modal btn-secondary flex-1 py-2">Batal</button>
+                            <button type="submit" class="btn-primary flex-1 py-2">Tambah Tugas</button>
+                        </div>
+                    </div>
+                </form>
+            `;
+            
+            utils.createModal('Tambah Tugas Baru', modalContent, async (formData) => {
+                await api.createTask(formData);
+            });
+            
+        } catch (error) {
+            console.error('Error showing create form:', error);
+            utils.showToast('Gagal memuat form tambah tugas', 'error');
+        }
+    }
+};
 
-            safeAddEventListener('searchInput', 'input', () => {
-                render.filterTasks();
-            });
-            
-            safeAddEventListener('statusFilter', 'change', () => {
-                render.filterTasks();
-            });
-            
-            safeAddEventListener('refreshBtn', 'click', () => {
-                api.fetchTasks();
-                utils.showToast('Data tugas diperbarui', 'success');
-            });
-            
-            safeAddEventListener('closeToast', 'click', () => {
-                const toast = document.getElementById('toast');
-                if (toast) {
-                    toast.classList.remove('translate-y-0', 'opacity-100');
-                    toast.classList.add('translate-y-20', 'opacity-0');
-                }
-            });
-            
-            safeAddEventListener('desktopPrevPage', 'click', () => {
-                if (state.currentPage > 1) {
-                    state.currentPage--;
-                    render.renderTable();
-                }
-            });
-            
-            safeAddEventListener('desktopNextPage', 'click', () => {
-                if (state.currentPage < state.totalPages) {
-                    state.currentPage++;
-                    render.renderTable();
-                }
-            });
-            
-            safeAddEventListener('prevPage', 'click', () => {
-                if (state.currentPage > 1) {
-                    state.currentPage--;
-                    render.renderTable();
-                }
-            });
-            
-            safeAddEventListener('nextPage', 'click', () => {
-                if (state.currentPage < state.totalPages) {
-                    state.currentPage++;
-                    render.renderTable();
-                }
-            });
-            
-            safeAddEventListener('buatTugasBtn', 'click', modal.showCreate);
-            safeAddEventListener('buatTugasBtnMobile', 'click', modal.showCreate);
-            
-            window.addEventListener('resize', () => {
-                if (state.filteredTasks.length > 0) {
-                    render.renderTable();
-                }
-            });
-            
-            const init = async () => {
-                try {
-                    // 1. Load Projects
-                    await api.fetchProjects();
-                    
-                    // 2. Load Karyawan
-                    await api.fetchKaryawan();
-                    
-                    // 3. Load Tasks
-                    await api.fetchTasks();
-                    
-                    if (state.karyawanList.length === 0) {
-                        utils.showToast(`Tidak ada karyawan yang tersedia.`, 'warning');
-                    }
-                    
-                } catch (error) {
-                    console.error('Error in initialization:', error);
-                    utils.showToast('Gagal memuat data awal', 'error');
-                }
-            };
-            
-            init();
+// Debug Functions
+window.debugProjects = () => {
+    console.log('=== PROJECTS DEBUG ===');
+    console.log('Project list count:', state.projectList.length);
+    console.log('Cached projects:', Object.keys(state.projectDetails).length);
+    
+    if (state.projectList.length > 0) {
+        console.log('First project in list:', state.projectList[0]);
+        console.log('All properties of first project:', Object.keys(state.projectList[0]));
+    }
+    
+    if (Object.keys(state.projectDetails).length > 0) {
+        const firstId = Object.keys(state.projectDetails)[0];
+        console.log('First cached project details:', state.projectDetails[firstId]);
+    }
+    
+    state.projectList.forEach((p, i) => {
+        const hasDeskripsi = p.deskripsi || p.description || p.deskripsi_project;
+        console.log(`Project ${i+1} (${p.id}): ${p.nama || p.name} - Has description: ${hasDeskripsi ? 'YES' : 'NO'}`);
+    });
+};
+
+// Debug date function
+window.debugDate = (dateString) => {
+    console.log('=== DATE DEBUG ===');
+    console.log('Original string:', dateString);
+    
+    const date = new Date(dateString);
+    console.log('JS Date object:', date);
+    console.log('JS Date toString:', date.toString());
+    console.log('JS Date toISOString:', date.toISOString());
+    console.log('JS Date toUTCString:', date.toUTCString());
+    console.log('JS Date getDate():', date.getDate());
+    console.log('JS Date getUTCDate():', date.getUTCDate());
+    console.log('JS Timezone offset (minutes):', date.getTimezoneOffset());
+    
+    // Format untuk Indonesia
+    const timezoneOffset = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
+    const localDate = new Date(date.getTime() + timezoneOffset);
+    console.log('Adjusted local date (+7 hours):', localDate);
+    console.log('Local date getDate():', localDate.getDate());
+    
+    return {
+        original: dateString,
+        jsDate: date,
+        jsUTCDate: date.getUTCDate(),
+        jsLocalDate: date.getDate(),
+        adjustedLocalDate: localDate.getDate(),
+        formatted: utils.formatDate(dateString),
+        formattedForInput: utils.formatDateForInput(dateString)
+    };
+};
+
+// Initialization
+document.addEventListener('DOMContentLoaded', () => {
+    
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const hamburger = document.getElementById('hamburgerBtn');
+    const hamburgerIcon = document.getElementById('hamburgerIcon');
+
+    if (sidebar && overlay && hamburger && hamburgerIcon) {
+        function toggleSidebar() {
+            sidebar.classList.toggle('translate-x-0');
+            overlay.classList.toggle('active');
+            hamburgerIcon.classList.toggle('hamburger-active');
+        }
+        hamburger.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+    }
+
+    // Event Listeners
+    document.getElementById('searchInput').addEventListener('input', () => {
+        render.filterTasks();
+    });
+    
+    document.getElementById('statusFilter').addEventListener('change', () => {
+        render.filterTasks();
+    });
+    
+    // Event listener untuk filter project
+    const projectFilter = document.getElementById('projectFilter');
+    if (projectFilter) {
+        projectFilter.addEventListener('change', () => {
+            render.filterTasks();
         });
+    }
+    
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+        api.fetchProjects().then(() => {
+            api.fetchTasks();
+            utils.showToast('Data tugas diperbarui', 'success');
+        });
+    });
+    
+    document.getElementById('closeToast').addEventListener('click', () => {
+        const toast = document.getElementById('toast');
+        if (toast) {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-20', 'opacity-0');
+        }
+    });
+    
+    document.getElementById('desktopPrevPage').addEventListener('click', () => {
+        if (state.currentPage > 1) {
+            state.currentPage--;
+            render.renderTable();
+        }
+    });
+    
+    document.getElementById('desktopNextPage').addEventListener('click', () => {
+        if (state.currentPage < state.totalPages) {
+            state.currentPage++;
+            render.renderTable();
+        }
+    });
+    
+    document.getElementById('prevPage').addEventListener('click', () => {
+        if (state.currentPage > 1) {
+            state.currentPage--;
+            render.renderTable();
+        }
+    });
+    
+    document.getElementById('nextPage').addEventListener('click', () => {
+        if (state.currentPage < state.totalPages) {
+            state.currentPage++;
+            render.renderTable();
+        }
+    });
+    
+    document.getElementById('buatTugasBtn').addEventListener('click', modal.showCreate);
+    document.getElementById('buatTugasBtnMobile').addEventListener('click', modal.showCreate);
+    
+    window.addEventListener('resize', () => {
+        if (state.filteredTasks.length > 0) {
+            render.renderTable();
+        }
+    });
+    
+    // Initialize
+    const init = async () => {
+        try {
+            console.log('Starting initialization...');
+            
+            console.log('Fetching projects...');
+            await api.fetchProjects();
+            
+            console.log('Fetching karyawan...');
+            await api.fetchKaryawan();
+            
+            console.log('Fetching tasks...');
+            await api.fetchTasks();
+            
+            if (state.karyawanList.length === 0) {
+                utils.showToast('Tidak ada karyawan yang tersedia.', 'warning');
+            }
+            
+            console.log('Initialization complete:', {
+                projects: state.projectList.length,
+                projectDetails: Object.keys(state.projectDetails).length,
+                karyawan: state.karyawanList.length,
+                tasks: state.allTasks.length
+            });
+            
+        } catch (error) {
+            console.error('Error in initialization:', error);
+            utils.showToast('Gagal memuat data awal', 'error');
+        }
+    };
+    
+    init();
+});
 
-        window.modal = modal;
+window.modal = modal;
+window.state = state;
+window.api = api;
+window.utils = utils;
     </script>
 </body>
 </html>

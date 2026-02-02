@@ -265,6 +265,13 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
+        .input-readonly {
+        background-color: #f3f4f6 !important;
+        color: #6b7280 !important;
+        cursor: not-allowed !important;
+        border-color: #d1d5db !important;
+        }
+        
         /* Pagination styles */
         .page-btn {
             transition: all 0.2s ease;
@@ -773,6 +780,7 @@
                                             <th style="min-width: 200px;">Email</th>
                                             <th style="min-width: 150px;">Jabatan</th>
                                             <th style="min-width: 150px;">Divisi</th>
+                                            <th style="min-width: 150px;">Gaji</th>
                                             <th style="min-width: 250px;">Alamat</th>
                                             <th style="min-width: 150px;">Kontak</th>
                                             <th style="min-width: 100px;">Foto</th>
@@ -788,6 +796,7 @@
                                                     data-email="{{ $item->email }}"
                                                     data-jabatan="{{ $item->jabatan }}"
                                                     data-divisi="{{ $item->divisi }}"
+                                                    data-gaji="{{ $item->gaji ?? 'Belum diatur' }}"
                                                     data-alamat="{{ $item->alamat }}" 
                                                     data-kontak="{{ $item->kontak }}"
                                                     data-foto="{{ $item->foto ?? '' }}">
@@ -827,6 +836,13 @@
                                                         </span>
                                                     </td>
                                                     <td style="min-width: 150px;">{{ $item->divisi ?? '-' }}</td>
+                                                                    <td style="min-width: 150px;">
+                                                    @if($item->gaji)
+                                                    {{ $item->gaji }}
+                                                    @else
+                                                    <span class="text-gray-500 italic">Belum diatur</span>
+                                                    @endif
+                                                    </td>
                                                     <td style="min-width: 250px;">{{ $item->alamat }}</td>
                                                     <td style="min-width: 150px;">{{ $item->kontak }}</td>
                                                     <td style="min-width: 100px;">
@@ -864,7 +880,7 @@
                                             @endforeach
                                         @else
                                             <tr>
-                                                <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">
+                                                <td colspan="10" class="px-6 py-4 text-center text-sm text-gray-500">
                                                     Tidak ada data karyawan
                                                 </td>
                                             </tr>
@@ -1045,6 +1061,14 @@
                             <p class="text-xs text-gray-500 mt-1">Akan terisi otomatis dari divisi user</p>
                         </div>
 
+                        <!-- Gaji -->
+<div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Gaji</label>
+    <input type="text" name="gaji" id="gajiInput" readonly
+        class="w-full px-3 py-2 bg-gray-200 border border-gray-300 rounded-lg text-gray-500 cursor-not-allowed"
+        placeholder="Hanya finance yang dapat mengisi gaji">
+    <p class="text-xs text-gray-500 mt-1">Silakan hubungi finance untuk pengisian gaji</p>
+</div>
 
                         <!-- Kontak -->
                         <div>
@@ -1096,52 +1120,66 @@
     </div>
 
     <!-- Popup Modal untuk Edit Karyawan -->
-    <div id="editKaryawanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Karyawan</h3>
-                    <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form id="editKaryawanForm" class="space-y-4" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" id="editId" name="id">
+<!-- Popup Modal untuk Edit Karyawan -->
+<div id="editKaryawanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Edit Karyawan</h3>
+                <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <form id="editKaryawanForm" class="space-y-4" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <input type="hidden" id="editId" name="id">
+                <input type="hidden" id="editUserId" name="user_id">
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Nama -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
-                            <input type="text" id="editNama" name="nama" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan nama karyawan">
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Nama -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
+                        <input type="text" id="editNama" name="nama" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            placeholder="Masukkan nama karyawan">
+                    </div>
 
-                        <!-- Email -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                            <input type="email" id="editEmail" name="email" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan email">
-                        </div>
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                        <input type="email" id="editEmail" name="email" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            placeholder="Masukkan email">
+                    </div>
 
-                        <!-- Jabatan -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan *</label>
-                            <input type="text" id="editJabatan" name="jabatan" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan jabatan">
-                        </div>
+                    <!-- Jabatan (DISABLED - dari role user) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan *</label>
+                        <input type="text" id="editJabatan" name="jabatan" required readonly
+                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 cursor-not-allowed"
+                            placeholder="Diambil dari role user">
+                        <p class="text-xs text-gray-500 mt-1">Jabatan diambil dari role user</p>
+                    </div>
 
-                        <!-- Divisi -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
-                            <input type="text" id="editDivisi" name="divisi"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Masukkan divisi">
-                        </div>
+                    <!-- Divisi (Dropdown dari tabel divisi) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
+                        <select name="divisi" id="editDivisiSelect"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                            <option value="">Pilih Divisi</option>
+                            <!-- Options akan diisi oleh JavaScript -->
+                        </select>
+                    </div>
+
+                        <!-- Gaji -->
+<div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Gaji</label>
+    <input type="text" id="editGaji" name="gaji" readonly
+        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 cursor-not-allowed"
+        placeholder="Hanya finance yang dapat mengedit gaji">
+    <p class="text-xs text-gray-500 mt-1">Silakan hubungi finance untuk perubahan gaji</p>
+</div>
 
                         <!-- Kontak -->
                         <div>
@@ -1151,45 +1189,53 @@
                                 placeholder="Masukkan nomor telepon">
                         </div>
 
-                        <!-- Alamat -->
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
-                            <textarea id="editAlamat" name="alamat" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                rows="3" placeholder="Masukkan alamat lengkap"></textarea>
-                        </div>
+                    <!-- Kontak -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kontak *</label>
+                        <input type="text" id="editKontak" name="kontak" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            placeholder="Masukkan nomor telepon">
+                    </div>
 
-                        <!-- Foto -->
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
-                            <div class="flex items-center space-x-4">
-                                <div id="editFotoPreview"
-                                    class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
-                                    <span class="material-icons-outlined text-gray-500 text-2xl">person</span>
-                                </div>
-                                <div>
-                                    <input type="file" name="foto" id="editFotoInput" class="hidden"
-                                        accept="image/*">
-                                    <button type="button" id="pilihEditFotoBtn"
-                                        class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                                        Pilih Foto
-                                    </button>
-                                    <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG maks. 2MB</p>
-                                </div>
+                    <!-- Alamat -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
+                        <textarea id="editAlamat" name="alamat" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            rows="3" placeholder="Masukkan alamat lengkap"></textarea>
+                    </div>
+
+                    <!-- Foto -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
+                        <div class="flex items-center space-x-4">
+                            <div id="editFotoPreview"
+                                class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
+                                <span class="material-icons-outlined text-gray-500 text-2xl">person</span>
+                            </div>
+                            <div>
+                                <input type="file" name="foto" id="editFotoInput" class="hidden"
+                                    accept="image/*">
+                                <button type="button" id="pilihEditFotoBtn"
+                                    class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                    Pilih Foto
+                                </button>
+                                <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG maks. 2MB</p>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" id="cancelEditBtn"
-                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">Update Data</button>
-                    </div>
-                </form>
-            </div>
+                <div class="flex justify-end gap-2 mt-6">
+                    <button type="button" id="cancelEditBtn"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">Update Data</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
     <!-- Popup Modal untuk Konfirmasi Hapus -->
     <div id="deleteKaryawanModal"
@@ -1248,481 +1294,799 @@
         <div class="loading-spinner"></div>
     </div>
 
-    <script>
-        // Inisialisasi variabel untuk pagination, filter, dan search
-        let currentPage = 1;
-        const itemsPerPage = 5;
-        let activeFilters = ['all'];
-        let searchTerm = '';
+<script>
+    // Inisialisasi variabel untuk pagination, filter, dan search
+    let currentPage = 1;
+    const itemsPerPage = 5;
+    let activeFilters = ['all'];
+    let searchTerm = '';
 
-        // Dapatkan semua elemen karyawan
-        const karyawanRows = document.querySelectorAll('.karyawan-row');
-        const karyawanCards = document.querySelectorAll('.karyawan-card');
+    // Dapatkan semua elemen karyawan
+    const karyawanRows = document.querySelectorAll('.karyawan-row');
+    const karyawanCards = document.querySelectorAll('.karyawan-card');
 
-        // Inisialisasi pagination, filter, dan search
-        initializePagination();
-        initializeFilter();
-        initializeSearch();
-        initializeScrollDetection();
+    // === UTILITY FUNCTIONS ===
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.content;
+    }
 
-        // === PAGINATION ===
-        function initializePagination() {
-            renderPagination();
-            updateVisibleItems();
+    function showLoading(show = true) {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            if (show) {
+                loadingOverlay.classList.remove('hidden');
+            } else {
+                loadingOverlay.classList.add('hidden');
+            }
         }
+    }
 
-        function renderPagination() {
-            const visibleRows = getFilteredRows();
-            const totalPages = Math.ceil(visibleRows.length / itemsPerPage);
-            const pageNumbersContainer = document.getElementById('pageNumbers');
-            const prevButton = document.getElementById('prevPage');
-            const nextButton = document.getElementById('nextPage');
+    function showMinimalPopup(title, message, type = 'success') {
+        const popup = document.getElementById('minimalPopup');
+        if (!popup) {
+            console.log(`${title}: ${message}`);
+            return;
+        }
+        
+        const popupTitle = popup.querySelector('.minimal-popup-title');
+        const popupMessage = popup.querySelector('.minimal-popup-message');
+        const popupIcon = popup.querySelector('.minimal-popup-icon span');
 
-            // Clear existing page numbers
-            if (pageNumbersContainer) {
-                pageNumbersContainer.innerHTML = '';
+        if (popupTitle) popupTitle.textContent = title;
+        if (popupMessage) popupMessage.textContent = message;
 
-                // Generate page numbers
-                for (let i = 1; i <= totalPages; i++) {
-                    const pageNumber = document.createElement('button');
-                    pageNumber.textContent = i;
-                    pageNumber.className = `desktop-page-btn ${i === currentPage ? 'active' : ''}`;
-                    pageNumber.addEventListener('click', () => goToPage(i));
-                    pageNumbersContainer.appendChild(pageNumber);
-                }
+        popup.className = 'minimal-popup show ' + type;
 
-                // Update navigation buttons
-                if (prevButton) prevButton.disabled = currentPage === 1;
-                if (nextButton) nextButton.disabled = currentPage === totalPages || totalPages === 0;
-
-                // Add event listeners for navigation buttons
-                if (prevButton) {
-                    prevButton.onclick = () => {
-                        if (currentPage > 1) goToPage(currentPage - 1);
-                    };
-                }
-
-                if (nextButton) {
-                    nextButton.onclick = () => {
-                        if (currentPage < totalPages) goToPage(currentPage + 1);
-                    };
-                }
+        if (popupIcon) {
+            if (type === 'success') {
+                popupIcon.textContent = 'check';
+            } else if (type === 'error') {
+                popupIcon.textContent = 'error';
+            } else if (type === 'warning') {
+                popupIcon.textContent = 'warning';
             }
         }
 
-        function goToPage(page) {
-            currentPage = page;
-            renderPagination();
-            updateVisibleItems();
+        setTimeout(() => {
+            popup.classList.remove('show');
+        }, 3000);
+    }
 
-            // Reset scroll position when changing pages
-            const scrollableTable = document.getElementById('scrollableTable');
-            if (scrollableTable) {
-                scrollableTable.scrollLeft = 0;
+    // === PAGINATION ===
+    function initializePagination() {
+        renderPagination();
+        updateVisibleItems();
+    }
+
+    function getFilteredRows() {
+        return Array.from(karyawanRows).filter(row => !row.classList.contains('hidden-by-filter'));
+    }
+
+    function getFilteredCards() {
+        return Array.from(karyawanCards).filter(card => !card.classList.contains('hidden-by-filter'));
+    }
+
+    function renderPagination() {
+        const visibleRows = getFilteredRows();
+        const totalPages = Math.ceil(visibleRows.length / itemsPerPage);
+        const pageNumbersContainer = document.getElementById('pageNumbers');
+        const prevButton = document.getElementById('prevPage');
+        const nextButton = document.getElementById('nextPage');
+
+        if (!pageNumbersContainer) return;
+
+        pageNumbersContainer.innerHTML = '';
+
+        for (let i = 1; i <= totalPages; i++) {
+            const pageNumber = document.createElement('button');
+            pageNumber.textContent = i;
+            pageNumber.className = `desktop-page-btn ${i === currentPage ? 'active' : ''}`;
+            pageNumber.addEventListener('click', () => goToPage(i));
+            pageNumbersContainer.appendChild(pageNumber);
+        }
+
+        if (prevButton) prevButton.disabled = currentPage === 1;
+        if (nextButton) nextButton.disabled = currentPage === totalPages || totalPages === 0;
+
+        if (prevButton) {
+            prevButton.onclick = () => {
+                if (currentPage > 1) goToPage(currentPage - 1);
+            };
+        }
+
+        if (nextButton) {
+            nextButton.onclick = () => {
+                if (currentPage < totalPages) goToPage(currentPage + 1);
+            };
+        }
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        renderPagination();
+        updateVisibleItems();
+
+        const scrollableTable = document.getElementById('scrollableTable');
+        if (scrollableTable) {
+            scrollableTable.scrollLeft = 0;
+        }
+    }
+
+    function updateVisibleItems() {
+        const visibleRows = getFilteredRows();
+        const visibleCards = getFilteredCards();
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+
+        karyawanRows.forEach(row => row.style.display = 'none');
+        karyawanCards.forEach(card => card.style.display = 'none');
+
+        visibleRows.forEach((row, index) => {
+            if (index >= startIndex && index < endIndex) {
+                row.style.display = '';
             }
+        });
+
+        visibleCards.forEach((card, index) => {
+            if (index >= startIndex && index < endIndex) {
+                card.style.display = 'block';
+            }
+        });
+
+        const totalCountElement = document.getElementById('totalCount');
+        if (totalCountElement) {
+            totalCountElement.textContent = visibleRows.length;
         }
+    }
 
-        function getFilteredRows() {
-            return Array.from(karyawanRows).filter(row => !row.classList.contains('hidden-by-filter'));
-        }
+    // === FILTER ===
+    function initializeFilter() {
+        const filterBtn = document.getElementById('filterBtn');
+        const filterDropdown = document.getElementById('filterDropdown');
+        const applyFilterBtn = document.getElementById('applyFilter');
+        const resetFilterBtn = document.getElementById('resetFilter');
+        const filterAll = document.getElementById('filterAll');
 
-        function getFilteredCards() {
-            return Array.from(karyawanCards).filter(card => !card.classList.contains('hidden-by-filter'));
-        }
+        if (!filterBtn || !filterDropdown) return;
 
-        function updateVisibleItems() {
-            const visibleRows = getFilteredRows();
-            const visibleCards = getFilteredCards();
+        filterBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            filterDropdown.classList.toggle('show');
+        });
 
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
+        document.addEventListener('click', function() {
+            filterDropdown.classList.remove('show');
+        });
 
-            // Hide all rows and cards first
-            karyawanRows.forEach(row => row.style.display = 'none');
-            karyawanCards.forEach(card => card.style.display = 'none');
+        filterDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
 
-            // Show only the rows for current page
-            visibleRows.forEach((row, index) => {
-                if (index >= startIndex && index < endIndex) {
-                    row.style.display = '';
+        if (filterAll) {
+            filterAll.addEventListener('change', function() {
+                if (this.checked) {
+                    document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(
+                        cb => {
+                            cb.checked = false;
+                        });
                 }
             });
+        }
 
-            // Show only the cards for current page
-            visibleCards.forEach((card, index) => {
-                if (index >= startIndex && index < endIndex) {
-                    card.style.display = 'block';
+        document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
+            cb.addEventListener('change', function() {
+                if (this.checked) {
+                    if (filterAll) filterAll.checked = false;
+                }
+            });
+        });
+
+        if (applyFilterBtn) {
+            applyFilterBtn.addEventListener('click', function() {
+                const filterAll = document.getElementById('filterAll');
+                const filterManager = document.getElementById('filterManager');
+                const filterStaff = document.getElementById('filterStaff');
+                const filterIntern = document.getElementById('filterIntern');
+
+                activeFilters = [];
+                if (filterAll && filterAll.checked) {
+                    activeFilters.push('all');
                 } else {
-                    card.style.display = 'none';
+                    if (filterManager && filterManager.checked) activeFilters.push('manager');
+                    if (filterStaff && filterStaff.checked) activeFilters.push('staff');
+                    if (filterIntern && filterIntern.checked) activeFilters.push('intern');
                 }
-            });
 
-            // Update total count
-            const totalCountElement = document.getElementById('totalCount');
-            if (totalCountElement) {
-                totalCountElement.textContent = visibleRows.length;
-            }
-        }
-
-        // === FILTER ===
-        function initializeFilter() {
-            const filterBtn = document.getElementById('filterBtn');
-            const filterDropdown = document.getElementById('filterDropdown');
-            const applyFilterBtn = document.getElementById('applyFilter');
-            const resetFilterBtn = document.getElementById('resetFilter');
-            const filterAll = document.getElementById('filterAll');
-
-            if (!filterBtn || !filterDropdown) return;
-
-            // Toggle filter dropdown
-            filterBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                filterDropdown.classList.toggle('show');
-            });
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function() {
+                applyFilters();
                 filterDropdown.classList.remove('show');
-            });
-
-            // Prevent dropdown from closing when clicking inside
-            filterDropdown.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-
-            // Handle "All" checkbox
-            if (filterAll) {
-                filterAll.addEventListener('change', function() {
-                    if (this.checked) {
-                        // Uncheck all other checkboxes
-                        document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(
-                            cb => {
-                                cb.checked = false;
-                            });
-                    }
-                });
-            }
-
-            // Handle other checkboxes
-            document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
-                cb.addEventListener('change', function() {
-                    if (this.checked) {
-                        // Uncheck "All" checkbox
-                        if (filterAll) filterAll.checked = false;
-                    }
-                });
-            });
-
-            // Apply filter
-            if (applyFilterBtn) {
-                applyFilterBtn.addEventListener('click', function() {
-                    const filterAll = document.getElementById('filterAll');
-                    const filterManager = document.getElementById('filterManager');
-                    const filterStaff = document.getElementById('filterStaff');
-                    const filterIntern = document.getElementById('filterIntern');
-
-                    activeFilters = [];
-                    if (filterAll && filterAll.checked) {
-                        activeFilters.push('all');
-                    } else {
-                        if (filterManager && filterManager.checked) activeFilters.push('manager');
-                        if (filterStaff && filterStaff.checked) activeFilters.push('staff');
-                        if (filterIntern && filterIntern.checked) activeFilters.push('intern');
-                    }
-
-                    applyFilters();
-                    filterDropdown.classList.remove('show');
-                    const visibleCount = getFilteredRows().length;
-                    showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} karyawan`, 'success');
-                });
-            }
-
-            // Reset filter
-            if (resetFilterBtn) {
-                resetFilterBtn.addEventListener('click', function() {
-                    const filterAll = document.getElementById('filterAll');
-                    const filterManager = document.getElementById('filterManager');
-                    const filterStaff = document.getElementById('filterStaff');
-                    const filterIntern = document.getElementById('filterIntern');
-                    
-                    if (filterAll) filterAll.checked = true;
-                    if (filterManager) filterManager.checked = false;
-                    if (filterStaff) filterStaff.checked = false;
-                    if (filterIntern) filterIntern.checked = false;
-                    
-                    activeFilters = ['all'];
-                    applyFilters();
-                    filterDropdown.classList.remove('show');
-                    const visibleCount = getFilteredRows().length;
-                    showMinimalPopup('Filter Direset', 'Menampilkan semua karyawan', 'success');
-                });
-            }
-        }
-
-        function applyFilters() {
-            // Reset to first page
-            currentPage = 1;
-
-            // Apply filters to rows
-            karyawanRows.forEach(row => {
-                const jabatan = row.getAttribute('data-jabatan').toLowerCase();
-                const nama = row.getAttribute('data-nama').toLowerCase();
-                const alamat = row.getAttribute('data-alamat').toLowerCase();
-
-                // Check if jabatan matches filter
-                let jabatanMatches = false;
-                if (activeFilters.includes('all')) {
-                    jabatanMatches = true;
-                } else {
-                    jabatanMatches = activeFilters.some(filter => jabatan.includes(filter.toLowerCase()));
-                }
-
-                // Check if search term matches
-                let searchMatches = true;
-                if (searchTerm) {
-                    const searchLower = searchTerm.toLowerCase();
-                    searchMatches = nama.includes(searchLower) ||
-                        alamat.includes(searchLower) ||
-                        jabatan.includes(searchLower);
-                }
-
-                if (jabatanMatches && searchMatches) {
-                    row.classList.remove('hidden-by-filter');
-                } else {
-                    row.classList.add('hidden-by-filter');
-                }
-            });
-
-            // Apply same filters to cards
-            karyawanCards.forEach(card => {
-                const jabatan = card.getAttribute('data-jabatan').toLowerCase();
-                const nama = card.getAttribute('data-nama').toLowerCase();
-                const alamat = card.getAttribute('data-alamat').toLowerCase();
-
-                // Check if jabatan matches filter
-                let jabatanMatches = false;
-                if (activeFilters.includes('all')) {
-                    jabatanMatches = true;
-                } else {
-                    jabatanMatches = activeFilters.some(filter => jabatan.includes(filter.toLowerCase()));
-                }
-
-                // Check if search term matches
-                let searchMatches = true;
-                if (searchTerm) {
-                    const searchLower = searchTerm.toLowerCase();
-                    searchMatches = nama.includes(searchLower) ||
-                        alamat.includes(searchLower) ||
-                        jabatan.includes(searchLower);
-                }
-
-                if (jabatanMatches && searchMatches) {
-                    card.classList.remove('hidden-by-filter');
-                } else {
-                    card.classList.add('hidden-by-filter');
-                }
-            });
-
-            // Update pagination and visible items
-            renderPagination();
-            updateVisibleItems();
-        }
-
-        // === SEARCH ===
-        function initializeSearch() {
-            const searchInput = document.getElementById('searchInput');
-            if (!searchInput) return;
-            
-            let searchTimeout;
-
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    searchTerm = searchInput.value.trim();
-                    applyFilters();
-                }, 300); // Debounce search
+                const visibleCount = getFilteredRows().length;
+                showMinimalPopup('Filter Diterapkan', `Menampilkan ${visibleCount} karyawan`, 'success');
             });
         }
 
-        // Initialize scroll detection for table
-        function initializeScrollDetection() {
-            const scrollableTable = document.getElementById('scrollableTable');
-
-            if (scrollableTable) {
-                // Add scroll event listener
-                scrollableTable.addEventListener('scroll', function() {
-                    const scrollLeft = scrollableTable.scrollLeft;
-                    const maxScroll = scrollableTable.scrollWidth - scrollableTable.clientWidth;
-                });
-            }
-        }
-
-        // === AUTO-FILL USER DATA ===
-        const userSelect = document.getElementById('userSelect');
-        if (userSelect) {
-            userSelect.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
+        if (resetFilterBtn) {
+            resetFilterBtn.addEventListener('click', function() {
+                const filterAll = document.getElementById('filterAll');
+                const filterManager = document.getElementById('filterManager');
+                const filterStaff = document.getElementById('filterStaff');
+                const filterIntern = document.getElementById('filterIntern');
                 
-                if (selectedOption.value) {
-                    // Ambil data dari data-* attributes
-                    const nama = selectedOption.getAttribute('data-nama');
-                    const role = selectedOption.getAttribute('data-role');
-                    const divisi = selectedOption.getAttribute('data-divisi');
-                    const email = selectedOption.getAttribute('data-email');
-
-                    // Auto-fill ke form
-                    const namaInput = document.getElementById('namaInput');
-                    const emailInput = document.getElementById('emailInput');
-                    const jabatanInput = document.getElementById('jabatanInput');
-                    const divisiInput = document.getElementById('divisiInput');
-                    
-                    if (namaInput) namaInput.value = nama || '';
-                    if (emailInput) emailInput.value = email || '';
-                    if (jabatanInput && !jabatanInput.value.trim()) jabatanInput.value = role || '';
-                    if (divisiInput && !divisiInput.value.trim()) divisiInput.value = divisi || '';
-                } else {
-                    // Clear jika tidak ada yang dipilih
-                    clearAutoFillFields();
-                }
+                if (filterAll) filterAll.checked = true;
+                if (filterManager) filterManager.checked = false;
+                if (filterStaff) filterStaff.checked = false;
+                if (filterIntern) filterIntern.checked = false;
+                
+                activeFilters = ['all'];
+                applyFilters();
+                filterDropdown.classList.remove('show');
+                const visibleCount = getFilteredRows().length;
+                showMinimalPopup('Filter Direset', 'Menampilkan semua karyawan', 'success');
             });
         }
+    }
 
-        // Function untuk clear auto-fill fields
-        function clearAutoFillFields() {
-            const inputs = ['namaInput', 'emailInput', 'jabatanInput', 'divisiInput'];
+    function applyFilters() {
+        currentPage = 1;
+
+        karyawanRows.forEach(row => {
+            const jabatan = row.getAttribute('data-jabatan').toLowerCase();
+            const nama = row.getAttribute('data-nama').toLowerCase();
+            const alamat = row.getAttribute('data-alamat').toLowerCase();
+
+            let jabatanMatches = false;
+            if (activeFilters.includes('all')) {
+                jabatanMatches = true;
+            } else {
+                jabatanMatches = activeFilters.some(filter => jabatan.includes(filter.toLowerCase()));
+            }
+
+            let searchMatches = true;
+            if (searchTerm) {
+                const searchLower = searchTerm.toLowerCase();
+                searchMatches = nama.includes(searchLower) ||
+                    alamat.includes(searchLower) ||
+                    jabatan.includes(searchLower);
+            }
+
+            if (jabatanMatches && searchMatches) {
+                row.classList.remove('hidden-by-filter');
+            } else {
+                row.classList.add('hidden-by-filter');
+            }
+        });
+
+        karyawanCards.forEach(card => {
+            const jabatan = card.getAttribute('data-jabatan').toLowerCase();
+            const nama = card.getAttribute('data-nama').toLowerCase();
+            const alamat = card.getAttribute('data-alamat').toLowerCase();
+
+            let jabatanMatches = false;
+            if (activeFilters.includes('all')) {
+                jabatanMatches = true;
+            } else {
+                jabatanMatches = activeFilters.some(filter => jabatan.includes(filter.toLowerCase()));
+            }
+
+            let searchMatches = true;
+            if (searchTerm) {
+                const searchLower = searchTerm.toLowerCase();
+                searchMatches = nama.includes(searchLower) ||
+                    alamat.includes(searchLower) ||
+                    jabatan.includes(searchLower);
+            }
+
+            if (jabatanMatches && searchMatches) {
+                card.classList.remove('hidden-by-filter');
+            } else {
+                card.classList.add('hidden-by-filter');
+            }
+        });
+
+        renderPagination();
+        updateVisibleItems();
+    }
+
+    // === SEARCH ===
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        if (!searchInput) return;
+        
+        let searchTimeout;
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchTerm = searchInput.value.trim();
+                applyFilters();
+            }, 300);
+        });
+    }
+
+    // === AUTO-FILL USER DATA ===
+    function initializeAutoFill() {
+        const userSelect = document.getElementById('userSelect');
+        if (!userSelect) return;
+
+        userSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
             
-            inputs.forEach(id => {
-                const input = document.getElementById(id);
-                if (input) {
-                    input.value = '';
+            if (selectedOption.value) {
+                const nama = selectedOption.getAttribute('data-nama');
+                const role = selectedOption.getAttribute('data-role');
+                const divisi = selectedOption.getAttribute('data-divisi');
+                const email = selectedOption.getAttribute('data-email');
+
+                const namaInput = document.getElementById('namaInput');
+                const emailInput = document.getElementById('emailInput');
+                const jabatanInput = document.getElementById('jabatanInput');
+                const divisiInput = document.getElementById('divisiInput');
+                
+                if (namaInput) namaInput.value = nama || '';
+                if (emailInput) emailInput.value = email || '';
+                if (jabatanInput && !jabatanInput.value.trim()) jabatanInput.value = role || '';
+                if (divisiInput && !divisiInput.value.trim()) divisiInput.value = divisi || '';
+            } else {
+                clearAutoFillFields();
+            }
+        });
+    }
+
+    function clearAutoFillFields() {
+        const inputs = ['namaInput', 'emailInput', 'jabatanInput', 'divisiInput'];
+        
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.value = '';
+            }
+        });
+    }
+
+    // === MODAL FUNCTIONS ===
+    // Modal Edit
+// Modal Edit
+// Modal Edit
+function openEditModal(data) {
+    console.log('Opening edit modal with data:', data);
+    
+    if (!data || !data.id) {
+        showMinimalPopup('Error', 'Data karyawan tidak valid', 'error');
+        return;
+    }
+
+    const editId = document.getElementById('editId');
+    const editNama = document.getElementById('editNama');
+    const editEmail = document.getElementById('editEmail');
+    const editJabatan = document.getElementById('editJabatan');
+    const editDivisi = document.getElementById('editDivisi');
+    const editGaji = document.getElementById('editGaji');
+    const editKontak = document.getElementById('editKontak');
+    const editAlamat = document.getElementById('editAlamat');
+    const editFotoPreview = document.getElementById('editFotoPreview');
+    const editKaryawanForm = document.getElementById('editKaryawanForm');
+    const editKaryawanModal = document.getElementById('editKaryawanModal');
+
+    if (!editId || !editNama || !editKaryawanForm || !editKaryawanModal) {
+        console.error('Required modal elements not found');
+        return;
+    }
+
+    // Set nilai form
+    editId.value = data.id;
+    editNama.value = data.nama || '';
+    if (editEmail) editEmail.value = data.email || '';
+    if (editJabatan) editJabatan.value = data.jabatan || '';
+    if (editDivisi) editDivisi.value = data.divisi || '';
+    if (editKontak) editKontak.value = data.kontak || '';
+    if (editAlamat) editAlamat.value = data.alamat || '';
+    
+    // PERBAIKAN DI SINI: Set gaji dengan cara yang benar
+    if (editGaji) {
+        if (data.gaji && data.gaji !== 'Belum diatur') {
+            editGaji.value = data.gaji;
+        } else {
+            editGaji.value = 'Belum diatur';
+        }
+        
+        // SELALU set gaji sebagai readonly untuk admin
+        editGaji.readOnly = true;
+        editGaji.classList.add('bg-gray-100', 'text-gray-700', 'cursor-not-allowed');
+        editGaji.classList.remove('border-gray-300', 'focus:ring-primary', 'focus:border-primary');
+    }
+
+    // Tampilkan foto karyawan jika ada
+    if (editFotoPreview) {
+        if (data.foto) {
+            let fotoUrl = data.foto;
+            if (!data.foto.startsWith('http') && !data.foto.startsWith('/') && !data.foto.includes('karyawan/')) {
+                fotoUrl = `/karyawan/${data.foto}`;
+            } else if (data.foto.startsWith('karyawan/')) {
+                fotoUrl = `/${data.foto}`;
+            }
+            
+            editFotoPreview.innerHTML = 
+                `<img src="${fotoUrl}" alt="${data.nama}" class="h-16 w-16 rounded-full object-cover">`;
+        } else {
+            editFotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
+        }
+    }
+
+    // PERBAIKAN DI SINI: Gunakan URL hardcoded
+    const karyawanId = data.id;
+    editKaryawanForm.action = `/admin/karyawan/update/${karyawanId}`;
+    console.log('Form action updated to:', editKaryawanForm.action);
+
+    // Tampilkan modal
+    editKaryawanModal.classList.remove('hidden');
+}
+    function closeEditModal() {
+        const modal = document.getElementById('editKaryawanModal');
+        const form = document.getElementById('editKaryawanForm');
+        const fotoPreview = document.getElementById('editFotoPreview');
+        
+        if (modal) modal.classList.add('hidden');
+        if (form) {
+            form.reset();
+            const editId = document.getElementById('editId');
+            if (editId) editId.value = '';
+        }
+        if (fotoPreview) {
+            fotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
+        }
+    }
+
+    // Modal Tambah
+    function openTambahModal() {
+        const modal = document.getElementById('tambahKaryawanModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            clearAutoFillFields();
+            
+            const userSelect = document.getElementById('userSelect');
+            if (userSelect) userSelect.selectedIndex = 0;
+        }
+    }
+
+    function closeTambahModal() {
+        const modal = document.getElementById('tambahKaryawanModal');
+        const form = document.getElementById('tambahKaryawanForm');
+        const fotoPreview = document.getElementById('fotoPreview');
+        
+        if (modal) modal.classList.add('hidden');
+        if (form) form.reset();
+        if (fotoPreview) {
+            fotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
+        }
+        
+        clearAutoFillFields();
+        
+        const userSelect = document.getElementById('userSelect');
+        if (userSelect) userSelect.selectedIndex = 0;
+    }
+
+    // Modal Delete
+    function openDeleteModal(id, nama) {
+        const modal = document.getElementById('deleteKaryawanModal');
+        if (modal) {
+            document.getElementById('deleteId').value = id;
+            const deleteKaryawanName = document.getElementById('deleteKaryawanName');
+            if (deleteKaryawanName) {
+                deleteKaryawanName.textContent = `"${nama}"`;
+            }
+            modal.classList.remove('hidden');
+        }
+    }
+
+    function closeDeleteModal() {
+        const modal = document.getElementById('deleteKaryawanModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    // === FORM VALIDATION ===
+    function validateForm(form) {
+        if (!form) return false;
+        
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('input-error');
+                isValid = false;
+                
+                const errorMsg = field.parentElement.querySelector('.error-message');
+                if (errorMsg) {
+                    errorMsg.textContent = 'Field ini wajib diisi';
+                    errorMsg.classList.add('show');
                 }
-            });
+            } else {
+                field.classList.remove('input-error');
+                
+                const errorMsg = field.parentElement.querySelector('.error-message');
+                if (errorMsg) {
+                    errorMsg.classList.remove('show');
+                }
+            }
+        });
+        
+        const emailField = form.querySelector('input[type="email"]');
+        if (emailField && emailField.value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailField.value)) {
+                emailField.classList.add('input-error');
+                isValid = false;
+            }
+        }
+        
+        return isValid;
+    }
+
+    // === FORM SUBMISSION ===
+    // CREATE (POST)
+    function initializeCreateForm() {
+        const tambahKaryawanForm = document.getElementById('tambahKaryawanForm');
+        if (!tambahKaryawanForm) return;
+
+        tambahKaryawanForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!validateForm(this)) {
+                showMinimalPopup('Validasi Gagal', 'Harap periksa kembali form yang diisi', 'warning');
+                return;
+            }
+
+            const submitBtn = tambahKaryawanForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn?.textContent || 'Simpan';
+
+            if (submitBtn) {
+                submitBtn.textContent = 'Menyimpan...';
+                submitBtn.disabled = true;
+            }
+            showLoading(true);
+
+            const formData = new FormData(tambahKaryawanForm);
+
+            try {
+                const response = await fetch("/admin/karyawan/store", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": getCsrfToken(),
+                        "Accept": "application/json"
+                    },
+                    body: formData
+                });
+
+                const res = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 422 && res.errors) {
+                        const message = res.errors.foto ?
+                            res.errors.foto[0] :
+                            Object.values(res.errors)[0][0];
+
+                        showMinimalPopup('Validasi Gagal', message, 'warning');
+                        return;
+                    }
+
+                    showMinimalPopup('Error', res.message || 'Terjadi kesalahan', 'error');
+                    return;
+                }
+
+                showMinimalPopup('Berhasil', res.message, 'success');
+                closeTambahModal();
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+
+            } catch (error) {
+                console.error(error);
+                showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+                showLoading(false);
+            }
+        });
+    }
+
+    // UPDATE (PUT/POST) - PERBAIKI BAGIAN INI
+// UPDATE (PUT/POST) - PERBAIKI BAGIAN INI
+function initializeUpdateForm() {
+    const editKaryawanForm = document.getElementById('editKaryawanForm');
+    if (!editKaryawanForm) return;
+
+    editKaryawanForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        if (!validateForm(this)) {
+            showMinimalPopup('Validasi Gagal', 'Harap periksa kembali form yang diisi', 'warning');
+            return;
         }
 
-        // === MODAL FUNCTIONS ===
+        const submitBtn = editKaryawanForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn?.textContent || 'Update';
+        
+        if (submitBtn) {
+            submitBtn.textContent = 'Memperbarui...';
+            submitBtn.disabled = true;
+        }
+        showLoading(true);
+
+        const formData = new FormData(editKaryawanForm);
+        const id = document.getElementById("editId").value;
+
+        if (!id) {
+            showMinimalPopup('Error', 'ID karyawan tidak ditemukan', 'error');
+            if (submitBtn) {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+            showLoading(false);
+            return;
+        }
+
+        // Gunakan URL yang benar - ambil dari form action
+        const updateUrl = editKaryawanForm.action;
+        console.log('Sending request to:', updateUrl);
+
+        try {
+            // Coba dengan method PUT
+            const response = await fetch(updateUrl, {
+                method: "PUT",
+                headers: {
+                    "X-CSRF-TOKEN": getCsrfToken(),
+                    "Accept": "application/json"
+                },
+                body: formData
+            });
+
+            let data;
+            try {
+                data = await response.json();
+            } catch (jsonError) {
+                console.error('JSON parse error:', jsonError);
+                
+                // Jika PUT gagal, coba dengan POST
+                console.log('PUT failed, trying POST method...');
+                const postResponse = await fetch(updateUrl, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": getCsrfToken(),
+                        "Accept": "application/json",
+                        "X-HTTP-Method-Override": "PUT"
+                    },
+                    body: formData
+                });
+                
+                data = await postResponse.json();
+            }
+
+            if (data && data.success) {
+                showMinimalPopup('Berhasil', data.message || 'Data karyawan berhasil diperbarui', 'success');
+                closeEditModal();
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                const errorMessage = data && data.message ? data.message : 
+                                   data && data.errors ? Object.values(data.errors)[0] : 
+                                   'Terjadi kesalahan saat memperbarui data';
+                showMinimalPopup('Error', errorMessage, 'error');
+            }
+        } catch (error) {
+            console.error('Edit error:', error);
+            showMinimalPopup('Error', error.message || 'Terjadi kesalahan saat memperbarui data', 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+            showLoading(false);
+        }
+    });
+}
+    // DELETE HANDLER
+    async function handleDeleteKaryawan(id) {
+        if (!id) {
+            showMinimalPopup('Error', 'ID karyawan tidak ditemukan', 'error');
+            return;
+        }
+
+        showLoading(true);
+        
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const originalText = confirmDeleteBtn?.textContent || 'Hapus';
+        
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.disabled = true;
+            confirmDeleteBtn.textContent = 'Menghapus...';
+        }
+
+        try {
+            const response = await fetch(`/admin/karyawan/delete/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showMinimalPopup('Berhasil', data.message, 'success');
+                
+                // Hapus row dari table
+                const row = document.querySelector(`.karyawan-row[data-id="${id}"]`);
+                const card = document.querySelector(`.karyawan-card[data-id="${id}"]`);
+                
+                if (row) row.remove();
+                if (card) card.remove();
+                
+                // Update total count
+                const totalCountElement = document.getElementById('totalCount');
+                if (totalCountElement) {
+                    const currentCount = parseInt(totalCountElement.textContent) || 0;
+                    totalCountElement.textContent = Math.max(0, currentCount - 1);
+                }
+                
+                closeDeleteModal();
+            } else {
+                showMinimalPopup('Error', data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            showMinimalPopup('Error', 'Terjadi kesalahan saat menghapus data', 'error');
+        } finally {
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.disabled = false;
+                confirmDeleteBtn.textContent = originalText;
+            }
+            showLoading(false);
+        }
+    }
+
+    // === EVENT LISTENERS ===
+    function initializeEventListeners() {
+        // Button event listeners
         const tambahKaryawanBtn = document.getElementById('tambahKaryawanBtn');
-        const tambahKaryawanModal = document.getElementById('tambahKaryawanModal');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const cancelBtn = document.getElementById('cancelBtn');
-        const tambahKaryawanForm = document.getElementById('tambahKaryawanForm');
-        const pilihFotoBtn = document.getElementById('pilihFotoBtn');
-        const fotoInput = document.getElementById('fotoInput');
-        const fotoPreview = document.getElementById('fotoPreview');
-
-        const editKaryawanModal = document.getElementById('editKaryawanModal');
         const closeEditModalBtn = document.getElementById('closeEditModalBtn');
         const cancelEditBtn = document.getElementById('cancelEditBtn');
-        const editKaryawanForm = document.getElementById('editKaryawanForm');
-        const pilihEditFotoBtn = document.getElementById('pilihEditFotoBtn');
-        const editFotoInput = document.getElementById('editFotoInput');
-        const editFotoPreview = document.getElementById('editFotoPreview');
-
-        const deleteKaryawanModal = document.getElementById('deleteKaryawanModal');
         const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const pilihFotoBtn = document.getElementById('pilihFotoBtn');
+        const fotoInput = document.getElementById('fotoInput');
+        const pilihEditFotoBtn = document.getElementById('pilihEditFotoBtn');
+        const editFotoInput = document.getElementById('editFotoInput');
+        const popupCloseBtn = document.querySelector('.minimal-popup-close');
 
-        // Modal Tambah
-        function openTambahModal() {
-            if (tambahKaryawanModal) {
-                tambahKaryawanModal.classList.remove('hidden');
-                
-                // Reset form dan clear auto-fill
-                clearAutoFillFields();
-                
-                // Reset user select
-                const userSelect = document.getElementById('userSelect');
-                if (userSelect) userSelect.selectedIndex = 0;
-            }
-        }
-
-        function closeTambahModal() {
-            if (tambahKaryawanModal) {
-                tambahKaryawanModal.classList.add('hidden');
-                if (tambahKaryawanForm) tambahKaryawanForm.reset();
-                if (fotoPreview) {
-                    fotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
-                }
-                
-                // Clear auto-fill fields
-                clearAutoFillFields();
-                
-                // Reset user select
-                const userSelect = document.getElementById('userSelect');
-                if (userSelect) userSelect.selectedIndex = 0;
-            }
-        }
-
-        // Modal Edit
-        function openEditModal(data) {
-            if (editKaryawanModal) {
-                document.getElementById('editId').value = data.id;
-                document.getElementById('editNama').value = data.nama;
-                document.getElementById('editEmail').value = data.email || '';
-                document.getElementById('editJabatan').value = data.jabatan;
-                document.getElementById('editDivisi').value = data.divisi || '';
-                document.getElementById('editKontak').value = data.kontak;
-                document.getElementById('editAlamat').value = data.alamat;
-
-                // Tampilkan foto karyawan jika ada
-                if (editFotoPreview) {
-                    if (data.foto) {
-                        editFotoPreview.innerHTML =
-                            `<img src="${window.location.origin}/karyawan/${data.foto}" alt="${data.nama}" class="h-16 w-16 rounded-full object-cover">`;
-                    } else {
-                        editFotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
-                    }
-                }
-
-                editKaryawanModal.classList.remove('hidden');
-            }
-        }
-
-        function closeEditModal() {
-            if (editKaryawanModal) {
-                editKaryawanModal.classList.add('hidden');
-                if (editKaryawanForm) editKaryawanForm.reset();
-            }
-        }
-
-        // Modal Delete
-        function openDeleteModal(id, nama) {
-            if (deleteKaryawanModal) {
-                document.getElementById('deleteId').value = id;
-                const deleteKaryawanName = document.getElementById('deleteKaryawanName');
-                if (deleteKaryawanName) {
-                    deleteKaryawanName.textContent = `"${nama}"`;
-                }
-                deleteKaryawanModal.classList.remove('hidden');
-            }
-        }
-
-        function closeDeleteModal() {
-            if (deleteKaryawanModal) {
-                deleteKaryawanModal.classList.add('hidden');
-            }
-        }
-
-        // Open Modal
+        // Modal buttons
         if (tambahKaryawanBtn) {
             tambahKaryawanBtn.addEventListener('click', openTambahModal);
         }
-
-        // Close Modal
         if (closeModalBtn) {
             closeModalBtn.addEventListener('click', closeTambahModal);
         }
         if (cancelBtn) {
             cancelBtn.addEventListener('click', closeTambahModal);
         }
-
         if (closeEditModalBtn) {
             closeEditModalBtn.addEventListener('click', closeEditModal);
         }
         if (cancelEditBtn) {
             cancelEditBtn.addEventListener('click', closeEditModal);
         }
-
         if (closeDeleteModalBtn) {
             closeDeleteModalBtn.addEventListener('click', closeDeleteModal);
         }
@@ -1730,22 +2094,33 @@
             cancelDeleteBtn.addEventListener('click', closeDeleteModal);
         }
 
-        // Handle foto selection
+        // Delete confirmation
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', function() {
+                const id = document.getElementById('deleteId').value;
+                if (id) {
+                    handleDeleteKaryawan(id);
+                }
+            });
+        }
+
+        // Foto buttons
         if (pilihFotoBtn) {
             pilihFotoBtn.addEventListener('click', () => {
                 if (fotoInput) fotoInput.click();
             });
         }
-
         if (pilihEditFotoBtn) {
             pilihEditFotoBtn.addEventListener('click', () => {
                 if (editFotoInput) editFotoInput.click();
             });
         }
 
+        // Foto preview
         if (fotoInput) {
             fotoInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
+                const fotoPreview = document.getElementById('fotoPreview');
                 if (file && fotoPreview) {
                     const reader = new FileReader();
                     reader.onload = function(e) {
@@ -1760,6 +2135,7 @@
         if (editFotoInput) {
             editFotoInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
+                const editFotoPreview = document.getElementById('editFotoPreview');
                 if (file && editFotoPreview) {
                     const reader = new FileReader();
                     reader.onload = function(e) {
@@ -1771,386 +2147,61 @@
             });
         }
 
-        // === VALIDATION ===
-        function validateForm(form) {
-            if (!form) return false;
-            
-            const requiredFields = form.querySelectorAll('[required]');
-            let isValid = true;
-            
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    field.classList.add('input-error');
-                    isValid = false;
-                    
-                    // Tampilkan error message jika ada
-                    const errorMsg = field.parentElement.querySelector('.error-message');
-                    if (errorMsg) {
-                        errorMsg.textContent = 'Field ini wajib diisi';
-                        errorMsg.classList.add('show');
-                    }
-                } else {
-                    field.classList.remove('input-error');
-                    
-                    // Sembunyikan error message
-                    const errorMsg = field.parentElement.querySelector('.error-message');
-                    if (errorMsg) {
-                        errorMsg.classList.remove('show');
-                    }
-                }
-            });
-            
-            // Validasi email khusus
-            const emailField = form.querySelector('input[type="email"]');
-            if (emailField && emailField.value) {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(emailField.value)) {
-                    emailField.classList.add('input-error');
-                    isValid = false;
-                }
-            }
-            
-            return isValid;
-        }
-
-        // === LOADING FUNCTIONS ===
-        function showLoading(show = true) {
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            if (loadingOverlay) {
-                if (show) {
-                    loadingOverlay.classList.remove('hidden');
-                } else {
-                    loadingOverlay.classList.add('hidden');
-                }
-            }
-        }
-
-        // === MINIMALIST POPUP ===
-        function showMinimalPopup(title, message, type = 'success') {
-            const popup = document.getElementById('minimalPopup');
-            if (!popup) {
-                console.log(`${title}: ${message}`);
-                return;
-            }
-            
-            const popupTitle = popup.querySelector('.minimal-popup-title');
-            const popupMessage = popup.querySelector('.minimal-popup-message');
-            const popupIcon = popup.querySelector('.minimal-popup-icon span');
-
-            // Set content
-            if (popupTitle) popupTitle.textContent = title;
-            if (popupMessage) popupMessage.textContent = message;
-
-            // Set type
-            popup.className = 'minimal-popup show ' + type;
-
-            // Set icon
-            if (popupIcon) {
-                if (type === 'success') {
-                    popupIcon.textContent = 'check';
-                } else if (type === 'error') {
-                    popupIcon.textContent = 'error';
-                } else if (type === 'warning') {
-                    popupIcon.textContent = 'warning';
-                }
-            }
-
-            // Auto hide after 3 seconds
-            setTimeout(() => {
-                popup.classList.remove('show');
-            }, 3000);
-        }
-
-        // Close popup when clicking the close button
-        const popupCloseBtn = document.querySelector('.minimal-popup-close');
-        if (popupCloseBtn) {
-            popupCloseBtn.addEventListener('click', function() {
-                const popup = document.getElementById('minimalPopup');
-                if (popup) {
-                    popup.classList.remove('show');
-                }
-            });
-        }
-
-        // === UTILITY FUNCTIONS ===
-        function getCsrfToken() {
-            return document.querySelector('meta[name="csrf-token"]')?.content;
-        }
-
-        // Fungsi untuk menghapus row dari table tanpa reload
-        function removeKaryawanRow(id) {
-            // Hapus dari desktop table
-            const row = document.querySelector(`.karyawan-row[data-id="${id}"]`);
-            if (row) {
-                row.remove();
-            }
-            
-            // Hapus dari mobile cards
-            const card = document.querySelector(`.karyawan-card[data-id="${id}"]`);
-            if (card) {
-                card.remove();
-            }
-            
-            // Update total count
-            updateTotalCount();
-        }
-
-        // Update total count
-        function updateTotalCount() {
-            const totalRows = document.querySelectorAll('.karyawan-row:not(.hidden-by-filter)').length;
-            const totalCards = document.querySelectorAll('.karyawan-card:not(.hidden-by-filter)').length;
-            const totalCount = Math.max(totalRows, totalCards);
-            
-            const totalCountElement = document.getElementById('totalCount');
-            if (totalCountElement) {
-                totalCountElement.textContent = totalCount;
-            }
-            
-            // Update pagination
-            renderPagination();
-        }
-
-        // === FORM SUBMISSION ===
-        // CREATE (POST)
-        if (tambahKaryawanForm) {
-            tambahKaryawanForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                // Validasi client-side
-                if (!validateForm(this)) {
-                    showMinimalPopup('Validasi Gagal', 'Harap periksa kembali form yang diisi', 'warning');
-                    return;
-                }
-
-                const submitBtn = tambahKaryawanForm.querySelector('button[type="submit"]');
-                const originalText = submitBtn?.textContent || 'Simpan';
-
-                if (submitBtn) {
-                    submitBtn.textContent = 'Menyimpan...';
-                    submitBtn.disabled = true;
-                }
-                showLoading(true);
-
-                const formData = new FormData(tambahKaryawanForm);
-
-                try {
-                    const response = await fetch("/admin/karyawan/store", {
-                        method: "POST",
-                        headers: {
-                            "X-CSRF-TOKEN": getCsrfToken(),
-                            "Accept": "application/json"
-                        },
-                        body: formData
-                    });
-
-                    const res = await response.json();
-
-                    // ⛔ VALIDASI ERROR
-                    if (!response.ok) {
-                        if (response.status === 422 && res.errors) {
-                            const message = res.errors.foto ?
-                                res.errors.foto[0] :
-                                Object.values(res.errors)[0][0];
-
-                            showMinimalPopup('Validasi Gagal', message, 'warning');
-                            return;
-                        }
-
-                        showMinimalPopup('Error', res.message || 'Terjadi kesalahan', 'error');
-                        return;
-                    }
-
-                    // ✅ SUKSES
-                    showMinimalPopup('Berhasil', res.message, 'success');
-                    closeTambahModal();
-                    
-                    // Reload halaman setelah 1.5 detik
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-
-                } catch (error) {
-                    console.error(error);
-                    showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
-                } finally {
-                    if (submitBtn) {
-                        submitBtn.textContent = originalText;
-                        submitBtn.disabled = false;
-                    }
-                    showLoading(false);
-                }
-            });
-        }
-
-        // UPDATE (PUT)
-// UPDATE (PUT) - PERBAIKI INI
-if (editKaryawanForm) {
-    editKaryawanForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        // Validasi client-side
-        if (!validateForm(this)) {
-            showMinimalPopup('Validasi Gagal', 'Harap periksa kembali form yang diisi', 'warning');
-            return;
-        }
-
-        // Show loading state
-        const submitBtn = editKaryawanForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn?.textContent || 'Update';
-        
-        if (submitBtn) {
-            submitBtn.textContent = 'Memperbarui...';
-            submitBtn.disabled = true;
-        }
-        showLoading(true);
-
-        const formData = new FormData(editKaryawanForm);
-        const id = document.getElementById("editId").value;
-
-        try {
-            const response = await fetch(`/admin/karyawan/update/${id}`, {
-                method: "POST", // UBAH INI JADI POST
-                headers: {
-                    "X-CSRF-TOKEN": getCsrfToken(),
-                    "Accept": "application/json"
-                    // HAPUS "X-HTTP-Method-Override": "PUT"
-                },
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                showMinimalPopup('Berhasil', data.message || 'Data karyawan berhasil diperbarui', 'success');
-                closeEditModal();
+        // Edit buttons (delegated event handling)
+        document.addEventListener('click', function(e) {
+            // Edit button
+            if (e.target.closest('.edit-btn')) {
+                const button = e.target.closest('.edit-btn');
                 
-                // Reload halaman setelah 1.5 detik
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-            } else {
-                showMinimalPopup('Error', data.message || 'Terjadi kesalahan saat memperbarui data', 'error');
-            }
-        } catch (error) {
-            console.error('Edit error:', error);
-            showMinimalPopup('Error', 'Terjadi kesalahan saat memperbarui data', 'error');
-        } finally {
-            // Reset button state
-            if (submitBtn) {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
-            showLoading(false);
-        }
-    });
-}
-
-        // DELETE HANDLER
-        async function handleDeleteKaryawan(id) {
-            if (!id) {
-                showMinimalPopup('Error', 'ID karyawan tidak ditemukan', 'error');
-                return;
-            }
-
-            // Show loading state
-            showLoading(true);
-            
-            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-            const originalText = confirmDeleteBtn?.textContent || 'Hapus';
-            
-            if (confirmDeleteBtn) {
-                confirmDeleteBtn.disabled = true;
-                confirmDeleteBtn.textContent = 'Menghapus...';
-            }
-
-            try {
-                const response = await fetch(`/admin/karyawan/delete/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': getCsrfToken(),
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showMinimalPopup('Berhasil', data.message, 'success');
-                    
-                    // Hapus row dari table tanpa reload
-                    removeKaryawanRow(id);
-                    
-                    // Tutup modal
-                    closeDeleteModal();
-                } else {
-                    showMinimalPopup('Error', data.message, 'error');
-                }
-            } catch (error) {
-                console.error('Delete error:', error);
-                showMinimalPopup('Error', 'Terjadi kesalahan saat menghapus data', 'error');
-            } finally {
-                // Reset button state
-                if (confirmDeleteBtn) {
-                    confirmDeleteBtn.disabled = false;
-                    confirmDeleteBtn.textContent = originalText;
-                }
-                showLoading(false);
-            }
-        }
-
-        // Confirm delete button handler
-        if (confirmDeleteBtn) {
-            confirmDeleteBtn.addEventListener('click', function() {
-                const id = document.getElementById('deleteId').value;
-                if (id) {
-                    handleDeleteKaryawan(id);
-                }
-            });
-        }
-
-        // === EVENT LISTENERS FOR EDIT AND DELETE BUTTONS ===
-        document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', function() {
                 let data;
                 
-                if (this.hasAttribute('data-karyawan')) {
+                if (button.hasAttribute('data-karyawan')) {
                     // Untuk mobile cards
-                    data = JSON.parse(this.getAttribute('data-karyawan'));
+                    try {
+                        data = JSON.parse(button.getAttribute('data-karyawan'));
+                    } catch (error) {
+                        console.error('Error parsing karyawan data:', error);
+                        showMinimalPopup('Error', 'Data karyawan tidak valid', 'error');
+                        return;
+                    }
                 } else {
-                    // Untuk desktop table
+                    // Untuk desktop table - ambil dari parent row
+                    const row = button.closest('tr');
+                    if (!row) return;
+                    
                     data = {
-                        id: this.getAttribute('data-id'),
-                        nama: this.getAttribute('data-nama'),
-                        email: this.getAttribute('data-email'),
-                        jabatan: this.getAttribute('data-jabatan'),
-                        divisi: this.getAttribute('data-divisi'),
-                        alamat: this.getAttribute('data-alamat'),
-                        kontak: this.getAttribute('data-kontak'),
-                        foto: this.getAttribute('data-foto')
+                        id: row.getAttribute('data-id'),
+                        nama: row.getAttribute('data-nama'),
+                        email: row.getAttribute('data-email'),
+                        jabatan: row.getAttribute('data-jabatan'),
+                        divisi: row.getAttribute('data-divisi'),
+                        alamat: row.getAttribute('data-alamat'),
+                        kontak: row.getAttribute('data-kontak'),
+                        foto: row.getAttribute('data-foto'),
+                        gaji: row.getAttribute('data-gaji')
                     };
                 }
                 
                 openEditModal(data);
-            });
-        });
-
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                const nama = this.getAttribute('data-nama') || 'karyawan ini';
+            }
+            
+            // Delete button
+            if (e.target.closest('.delete-btn')) {
+                const button = e.target.closest('.delete-btn');
+                const id = button.getAttribute('data-id');
+                const nama = button.getAttribute('data-nama') || 'karyawan ini';
                 openDeleteModal(id, nama);
-            });
+            }
         });
 
-        // === CLOSE MODAL ON OUTSIDE CLICK AND ESC ===
+        // Close modal on outside click
         document.addEventListener('click', function(e) {
-            // Close modal jika klik di backdrop
             if (e.target.classList.contains('modal')) {
                 e.target.classList.add('hidden');
             }
         });
 
+        // Close modal on ESC
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 document.querySelectorAll('.modal').forEach(modal => {
@@ -2159,11 +2210,31 @@ if (editKaryawanForm) {
             }
         });
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Data karyawan page loaded');
-        });
-    </script>
+        // Close popup
+        if (popupCloseBtn) {
+            popupCloseBtn.addEventListener('click', function() {
+                const popup = document.getElementById('minimalPopup');
+                if (popup) {
+                    popup.classList.remove('show');
+                }
+            });
+        }
+    }
+
+    // === INITIALIZE ALL ===
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Data karyawan page loaded');
+        
+        // Initialize pagination, filter, search
+        initializePagination();
+        initializeFilter();
+        initializeSearch();
+        initializeAutoFill();
+        initializeEventListeners();
+        initializeCreateForm();
+        initializeUpdateForm();
+    });
+</script>
 
 </body>
 
