@@ -12,7 +12,7 @@ class Invoice extends Model
     protected $table = 'invoices';
 
     // Use the actual database column names (Indonesian) used in migrations
-   protected $fillable = [
+    protected $fillable = [
         'invoice_no',
         'invoice_date',
         'company_name',
@@ -24,7 +24,9 @@ class Invoice extends Model
         'subtotal',
         'tax',
         'total',
-        'status'
+        'status',
+        'nama_layanan', // Tambah field baru
+        'status_pembayaran' // Tambah field baru
     ];
 
     protected $casts = [
@@ -60,5 +62,11 @@ class Invoice extends Model
     public function getTotalAttribute()
     {
         return $this->attributes['total'] ?? 0;
+    }
+
+    // Relationship dengan model Layanan (jika ada)
+    public function layanan()
+    {
+        return $this->belongsTo(Layanan::class, 'nama_layanan', 'nama_layanan');
     }
 }
