@@ -1,19 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="id">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Beranda Dashboard</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: "#3b82f6", // Biru yang lebih terang dan standar
+                        primary: "#3b82f6",
                         "background-light": "#ffffff",
                         "background-dark": "#f8fafc",
                         "sidebar-light": "#f3f4f6",
@@ -34,7 +35,7 @@
                         display: ["Poppins", "sans-serif"],
                     },
                     borderRadius: {
-                        DEFAULT: "0.75rem", // 12px
+                        DEFAULT: "0.75rem",
                     },
                     boxShadow: {
                         card: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
@@ -49,9 +50,12 @@
             font-family: 'Poppins', sans-serif;
         }
 
-        .material-icons-outlined {
-            font-size: 24px;
-            vertical-align: middle;
+        .material-symbols-outlined {
+            font-variation-settings:
+                'FILL' 0,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24
         }
 
         /* Card hover effects */
@@ -63,15 +67,6 @@
         .stat-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        /* Table styles */
-        .order-table {
-            transition: all 0.2s ease;
-        }
-
-        .order-table tr:hover {
-            background-color: rgba(59, 130, 246, 0.05);
         }
 
         .status-badge {
@@ -122,86 +117,6 @@
 
         .btn-primary:hover {
             background-color: #2563eb;
-        }
-
-        /* Filter Dropdown Styles */
-        .filter-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 8px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            padding: 16px;
-            min-width: 200px;
-            z-index: 100;
-            display: none;
-        }
-
-        .filter-dropdown.show {
-            display: block;
-        }
-
-        .filter-option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 0;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .filter-option:hover {
-            color: #3b82f6;
-        }
-
-        .filter-option input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .filter-option label {
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .filter-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .filter-actions button {
-            flex: 1;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
-        }
-
-        .filter-apply {
-            background-color: #3b82f6;
-            color: white;
-        }
-
-        .filter-apply:hover {
-            background-color: #2563eb;
-        }
-
-        .filter-reset {
-            background-color: #f1f5f9;
-            color: #64748b;
-        }
-
-        .filter-reset:hover {
-            background-color: #e2e8f0;
         }
 
         /* Date Filter Styles */
@@ -290,10 +205,6 @@
         }
 
         /* Dark mode adjustments */
-        .dark .order-table tr:hover {
-            background-color: rgba(59, 130, 246, 0.1);
-        }
-
         .dark .status-paid {
             background-color: rgba(16, 185, 129, 0.25);
             color: #6ee7b7;
@@ -320,7 +231,7 @@
                 height: 2rem !important;
             }
 
-            .stat-card .material-icons-outlined {
+            .stat-card .material-symbols-outlined {
                 font-size: 1.25rem !important;
             }
 
@@ -338,16 +249,6 @@
                 margin-right: 0.5rem !important;
             }
 
-            /* Hide table on mobile */
-            .order-table-container {
-                display: none;
-            }
-
-            /* Show mobile cards */
-            .mobile-order-cards {
-                display: block;
-            }
-
             .pagination-container {
                 flex-wrap: wrap;
             }
@@ -355,21 +256,132 @@
             .chart-container {
                 height: 250px;
             }
+            
+            /* Calendar adjustments for mobile */
+            .calendar-day {
+                min-height: 40px !important;
+            }
+            
+            .calendar-day-number {
+                font-size: 0.75rem !important;
+            }
+            
+            .calendar-event {
+                font-size: 0.625rem !important;
+                padding: 1px 3px !important;
+            }
+        }
+        
+        /* Calendar Styles - Updated with indicators */
+        .calendar-day {
+            transition: all 0.2s ease;
+            position: relative;
+            color: #000000; /* Teks hitam untuk hari-hari */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 3rem; /* Tinggi minimum untuk memberi ruang pada indikator */
         }
 
-        /* Show table on desktop */
-        @media (min-width: 640px) {
-            .order-table-container {
-                display: block;
-            }
+        .calendar-day.has-event {
+            cursor: pointer;
+        }
 
-            .mobile-order-cards {
-                display: none;
-            }
+        .calendar-day.has-event:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
 
-            .pagination-container {
-                justify-content: flex-end;
-            }
+        .calendar-day.highlighted {
+            background-color: rgba(59, 130, 246, 0.2);
+            font-weight: 600;
+            color: #000000; /* Teks hitam untuk tanggal yang dihighlight */
+        }
+
+        .calendar-day.selected {
+            background-color: rgba(59, 130, 246, 0.3);
+            font-weight: 700;
+            color: #000000; /* Teks hitam untuk tanggal yang dipilih */
+        }
+        
+        /* Indicators positioned at the bottom */
+        .indicators-container {
+            position: absolute;
+            bottom: 2px;
+            display: flex;
+            gap: 2px;
+        }
+
+        .event-indicator {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: #3b82f6; /* Blue for meeting */
+        }
+
+        .announcement-indicator {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: #f59e0b; /* Orange for announcement */
+        }
+        
+        /* Event Modal Styles */
+        .event-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .event-modal.show {
+            display: flex;
+        }
+        
+        .event-modal-content {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .event-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .event-modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+        
+        .event-modal-close:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .event-modal-body {
+            margin-bottom: 1rem;
+        }
+        
+        .event-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
         }
     </style>
 </head>
@@ -390,7 +402,7 @@
                         class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
                         <div
                             class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-blue-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
-                            <span class="material-icons-outlined text-primary">trending_up</span>
+                            <span class="material-symbols-outlined text-primary">trending_up</span>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Pemasukan</p>
@@ -402,7 +414,7 @@
                         class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
                         <div
                             class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-red-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
-                            <span class="material-icons-outlined text-red-500">trending_down</span>
+                            <span class="material-symbols-outlined text-red-500">trending_down</span>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Pengeluaran</p>
@@ -414,7 +426,7 @@
                         class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
                         <div
                             class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-green-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
-                            <span class="material-icons-outlined text-green-500">business_center</span>
+                            <span class="material-symbols-outlined text-green-500">business_center</span>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Jumlah Layanan</p>
@@ -425,7 +437,7 @@
                         class="stat-card bg-card-light rounded-DEFAULT p-2 sm:p-5 flex items-center border border-border-light">
                         <div
                             class="icon-container w-8 h-8 sm:w-12 sm:h-12 bg-purple-100 rounded-lg mr-3 sm:mr-4 flex items-center justify-center">
-                            <span class="material-icons-outlined text-purple-500">account_balance_wallet</span>
+                            <span class="material-symbols-outlined text-purple-500">account_balance_wallet</span>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="label-text text-xs sm:text-sm text-text-muted-light truncate">Total Keuangan</p>
@@ -454,94 +466,84 @@
                     </div>
                 </div>
 
-                <!-- Order Table Section -->
-                <div class="bg-card-light rounded-DEFAULT p-3 sm:p-6 border border-border-light shadow-card">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                        <h3 class="text-lg font-semibold">Order List</h3>
-                        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                            <div class="relative">
-                                <button id="filterBtn"
-                                    class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
-                                    <span class="material-icons-outlined text-sm">filter_list</span>
-                                    Filter
+                <!-- Calendar and Meeting Notes Section - Updated with new design -->
+                <section class="bg-white p-3 sm:p-6 rounded-2xl shadow-sm border border-gray-200 mt-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Calendar Section -->
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg md:text-xl font-bold text-black">Kalender</h3>
+                                <div class="flex items-center space-x-2">
+                                    <button id="prev-month"
+                                        class="p-2 rounded-full bg-gray-100 text-black hover:bg-gray-200 transition-colors">
+                                        <span class="material-symbols-outlined text-sm">chevron_left</span>
+                                    </button>
+                                    <span id="current-month" class="text-lg font-medium text-black"></span>
+                                    <button id="next-month"
+                                        class="p-2 rounded-full bg-gray-100 text-black hover:bg-gray-200 transition-colors">
+                                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-7 gap-1 text-center text-sm font-medium text-gray-600 mb-2">
+                                <div>Min</div>
+                                <div>Sen</div>
+                                <div>Sel</div>
+                                <div>Rab</div>
+                                <div>Kam</div>
+                                <div>Jum</div>
+                                <div>Sab</div>
+                            </div>
+                            <div id="calendar-days" class="grid grid-cols-7 gap-1">
+                                <!-- Calendar days will be generated by JavaScript -->
+                            </div>
+                            <div class="flex justify-center mt-4 space-x-4 text-xs">
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full mr-1"></div>
+                                    <span class="text-gray-600">Meeting</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 bg-amber-500 rounded-full mr-1"></div>
+                                    <span class="text-gray-600">Pengumuman</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Meeting Notes Section -->
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg md:text-xl font-bold text-black">Catatan Meeting</h3>
+                                <button id="refresh-notes"
+                                    class="p-2 rounded-full bg-gray-100 text-black hover:bg-gray-200 transition-colors">
+                                    <span class="material-symbols-outlined text-sm">refresh</span>
                                 </button>
-                                <div id="filterDropdown" class="filter-dropdown">
-                                    <div class="date-filter">
-                                        <select id="day-filter">
-                                            <option value="">Semua Hari</option>
-                                            <option value="1">Senin</option>
-                                            <option value="2">Selasa</option>
-                                            <option value="3">Rabu</option>
-                                            <option value="4">Kamis</option>
-                                            <option value="5">Jumat</option>
-                                            <option value="6">Sabtu</option>
-                                            <option value="7">Minggu</option>
-                                        </select>
-                                    </div>
-                                    <div class="date-filter">
-                                        <select id="month-filter">
-                                            <option value="">Semua Bulan</option>
-                                            <option value="1">Januari</option>
-                                            <option value="2">Februari</option>
-                                            <option value="3">Maret</option>
-                                            <option value="4">April</option>
-                                            <option value="5">Mei</option>
-                                            <option value="6">Juni</option>
-                                            <option value="7">Juli</option>
-                                            <option value="8">Agustus</option>
-                                            <option value="9">September</option>
-                                            <option value="10">Oktober</option>
-                                            <option value="11">November</option>
-                                            <option value="12">Desember</option>
-                                        </select>
-                                    </div>
-                                    <div class="date-filter">
-                                        <select id="year-filter">
-                                            <option value="">Semua Tahun</option>
-                                            <option value="2023">2023</option>
-                                            <option value="2024" selected>2024</option>
-                                            <option value="2025">2025</option>
-                                        </select>
-                                    </div>
-                                    <div class="filter-actions">
-                                        <button id="applyFilter" class="filter-apply">Terapkan</button>
-                                        <button id="resetFilter" class="filter-reset">Reset</button>
-                                    </div>
+                            </div>
+                            <div id="meeting-notes-container" class="space-y-3 max-h-96 overflow-y-auto">
+                                <div class="text-center py-8 text-gray-500">
+                                    <span class="material-symbols-outlined text-4xl">event_note</span>
+                                    <p class="mt-2">Pilih tanggal untuk melihat catatan meeting</p>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </section>
 
-                    <!-- Desktop Table View -->
-                    <div class="order-table-container overflow-x-auto">
-                        <table class="w-full text-left text-sm order-table">
-                            <thead>
-                                <tr class="border-b border-border-light">
-                                    <th class="p-3 font-semibold">NO</th>
-                                    <th class="p-3 font-semibold">LAYANAN</th>
-                                    <th class="p-3 font-semibold">HARGA</th>
-                                    <th class="p-3 font-semibold">KLIEN</th>
-                                    <th class="p-3 font-semibold text-center">PEMBAYARAN AWAL</th>
-                                    <th class="p-3 font-semibold">PELUNASAN</th>
-                                    <th class="p-3 font-semibold">STATUS</th>
-                                </tr>
-                            </thead>
-                            <tbody id="order-table-body">
-                                <!-- Data akan diisi dengan JavaScript -->
-                            </tbody>
-                        </table>
+                <!-- Announcements Section -->
+                <section class="bg-white p-3 sm:p-6 rounded-2xl shadow-sm border border-gray-200 mt-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg md:text-xl font-bold text-black">Pengumuman</h3>
+                        <button id="refresh-announcements"
+                            class="p-2 rounded-full bg-gray-100 text-black hover:bg-gray-200 transition-colors">
+                            <span class="material-symbols-outlined text-sm">refresh</span>
+                        </button>
                     </div>
-
-                    <!-- Mobile Card View -->
-                    <div class="mobile-order-cards space-y-4" id="mobile-order-cards">
-                        <!-- Data akan diisi dengan JavaScript -->
+                    <div id="announcements-container" class="space-y-3 max-h-96 overflow-y-auto">
+                        <div class="text-center py-8 text-gray-500">
+                            <span class="material-symbols-outlined text-4xl">campaign</span>
+                            <p class="mt-2">Tidak ada pengumuman</p>
+                        </div>
                     </div>
-
-                    <!-- Pagination -->
-                    <div class="pagination-container" id="pagination-container">
-                        <!-- Pagination buttons akan diisi dengan JavaScript -->
-                    </div>
-                </div>
+                </section>
             </div>
             <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light">
                 Copyright ©2025 by digicity.id
@@ -549,28 +551,39 @@
         </main>
     </div>
 
+    <!-- Event Modal -->
+    <div id="event-modal" class="event-modal">
+        <div class="event-modal-content">
+            <div class="event-modal-header">
+                <h3 id="event-modal-title" class="text-lg font-semibold"></h3>
+                <button id="event-modal-close" class="event-modal-close">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="event-modal-body" id="event-modal-body">
+                <!-- Event details will be inserted here -->
+            </div>
+            <div class="event-modal-footer">
+                <button id="event-modal-view-details" class="btn-primary px-4 py-2 rounded-lg">
+                    Lihat Detail
+                </button>
+                <button id="event-modal-close-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        @php
-            $layanans = $layanans ?? collect();
-            $financeData = $financeData ?? collect();
-            $allKategori = $allKategori ?? collect();
-            $orders = $orders ?? collect();
-            $orderData = $orderData ?? collect();
-            $totalPemasukan = $totalPemasukan ?? 0;
-            $totalPengeluaran = $totalPengeluaran ?? 0;
-            $totalKeuangan = $totalKeuangan ?? 0;
-            $jumlahLayanan = $jumlahLayanan ?? 0;
-        @endphp
         // Data dari PHP
-        const layananData = @json($layanans);
-        const financeDataPHP = @json($financeData);
+        const financeDataPHP = @json($financeData ?? []);
 
         // Statistik dari database
-        const totalPemasukan = @json($totalPemasukan);
-        const totalPengeluaran = @json($totalPengeluaran);
-        const jumlahLayanan = @json($jumlahLayanan);
-        const totalKeuangan = @json($totalKeuangan);
+        const totalPemasukan = @json($totalPemasukan ?? 0);
+        const totalPengeluaran = @json($totalPengeluaran ?? 0);
+        const jumlahLayanan = @json($jumlahLayanan ?? 0);
+        const totalKeuangan = @json($totalKeuangan ?? 0);
 
         const formatter = new Intl.NumberFormat('id-ID', {
             style: 'currency',
@@ -578,15 +591,46 @@
             minimumFractionDigits: 0
         });
 
-
         // Update stat cards
-        document.getElementById('income-value').textContent = formatter.format(totalPemasukan);
-        document.getElementById('expense-value').textContent = formatter.format(totalPengeluaran)
-        document.getElementById('service-count').textContent = jumlahLayanan;
-        document.getElementById('total-finance').textContent = 'Rp' + totalKeuangan.toLocaleString('id-ID');
+        const incomeValueEl = document.getElementById('income-value');
+        const expenseValueEl = document.getElementById('expense-value');
+        const serviceCountEl = document.getElementById('service-count');
+        const totalFinanceEl = document.getElementById('total-finance');
 
-        // Data order dari database
-        const orderData = @json($orderData);
+        if (incomeValueEl) incomeValueEl.textContent = formatter.format(totalPemasukan);
+        if (expenseValueEl) expenseValueEl.textContent = formatter.format(totalPengeluaran);
+        if (serviceCountEl) serviceCountEl.textContent = jumlahLayanan;
+        if (totalFinanceEl) totalFinanceEl.textContent = 'Rp' + totalKeuangan.toLocaleString('id-ID');
+
+        // Calendar variables
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+        let selectedDate = null;
+        let meetingNotes = [];
+        let announcements = [];
+
+        // CSRF Token
+        window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // --- VARIABEL GLOBAL ---
+        let highlightedDates = [];
+        let announcementDates = [];
+
+        // --- FUNGSI API ---
+        async function apiFetch(endpoint, options = {}) {
+            const cacheBuster = `_t=${Date.now()}`;
+            const url = `/finance/api${endpoint}${endpoint.includes('?') ? '&' : '?'}${cacheBuster}`;
+            const defaultOptions = { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': window.csrfToken } };
+            const finalOptions = { ...defaultOptions, ...options };
+
+            const response = await fetch(url, finalOptions);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Server Error');
+            }
+            return await response.json();
+        }
 
         // Function to get chart data based on filter
         function getChartData(filterType) {
@@ -670,165 +714,14 @@
             };
         }
 
-        // Pagination variables
-        let currentPage = 1;
-        const itemsPerPage = 5;
-        let filteredData = [...orderData];
         let chartInstance = null;
-
-        // Function to render table
-        function renderTable() {
-            const tableBody = document.getElementById('order-table-body');
-            tableBody.innerHTML = '';
-
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
-
-            for (let i = startIndex; i < endIndex; i++) {
-                const item = filteredData[i];
-                const row = document.createElement('tr');
-                row.className = 'border-b border-border-light';
-
-                let statusBadge = '';
-                switch (item.status) {
-                    case 'paid':
-                        statusBadge = '<span class="status-badge status-paid">Lunas</span>';
-                        break;
-                    case 'pending':
-                        statusBadge = '<span class="status-badge status-pending">Pending</span>';
-                        break;
-                    case 'overdue':
-                        statusBadge = '<span class="status-badge status-overdue">Terlambat</span>';
-                        break;
-                }
-
-                row.innerHTML = `
-                    <td class="p-3">${item.no}</td>
-                    <td class="p-3">${item.layanan}</td>
-                    <td class="p-3">${item.harga}</td>
-                    <td class="p-3">${item.klien}</td>
-                    <td class="p-3 text-center">${item.awal}</td>
-                    <td class="p-3">${item.lunas}</td>
-                    <td class="p-3">${statusBadge}</td>
-                `;
-
-                tableBody.appendChild(row);
-            }
-
-            renderPagination();
-            renderMobileCards();
-            updateStatCards();
-        }
-
-        // Function to render mobile cards
-        function renderMobileCards() {
-            const mobileCards = document.getElementById('mobile-order-cards');
-            mobileCards.innerHTML = '';
-
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
-
-            for (let i = startIndex; i < endIndex; i++) {
-                const item = filteredData[i];
-
-                let statusBadge = '';
-                switch (item.status) {
-                    case 'paid':
-                        statusBadge = '<span class="status-badge status-paid">Lunas</span>';
-                        break;
-                    case 'pending':
-                        statusBadge = '<span class="status-badge status-pending">Pending</span>';
-                        break;
-                    case 'overdue':
-                        statusBadge = '<span class="status-badge status-overdue">Terlambat</span>';
-                        break;
-                }
-
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-lg border border-border-light p-4 shadow-sm';
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <h4 class="font-semibold text-base">${item.layanan}</h4>
-                            <p class="text-sm text-text-muted-light">${item.klien}</p>
-                        </div>
-                        ${statusBadge}
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                            <p class="text-text-muted-light">Total Harga</p>
-                            <p class="font-medium">${item.harga}</p>
-                        </div>
-                        <div>
-                            <p class="text-text-muted-light">Pembayaran Awal</p>
-                            <p class="font-medium">${item.awal}</p>
-                        </div>
-                        <div>
-                            <p class="text-text-muted-light">Pelunasan</p>
-                            <p class="font-medium">${item.lunas}</p>
-                        </div>
-                    </div>
-                `;
-
-                mobileCards.appendChild(card);
-            }
-        }
-
-        // Function to render pagination
-        function renderPagination() {
-            const paginationContainer = document.getElementById('pagination-container');
-            paginationContainer.innerHTML = '';
-
-            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-            // Previous button
-            const prevBtn = document.createElement('button');
-            prevBtn.className = 'pagination-btn';
-            prevBtn.innerHTML = '<span class="material-icons-outlined">chevron_left</span>';
-            prevBtn.disabled = currentPage === 1;
-            prevBtn.onclick = () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderTable();
-                }
-            };
-            paginationContainer.appendChild(prevBtn);
-
-            // Page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                const pageBtn = document.createElement('button');
-                pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
-                pageBtn.textContent = i;
-                pageBtn.onclick = () => {
-                    currentPage = i;
-                    renderTable();
-                };
-                paginationContainer.appendChild(pageBtn);
-            }
-
-            // Next button
-            const nextBtn = document.createElement('button');
-            nextBtn.className = 'pagination-btn';
-            nextBtn.innerHTML = '<span class="material-icons-outlined">chevron_right</span>';
-            nextBtn.disabled = currentPage === totalPages;
-            nextBtn.onclick = () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderTable();
-                }
-            };
-            paginationContainer.appendChild(nextBtn);
-        }
-
-        // Function to update stat cards
-        function updateStatCards() {
-            // Hanya update jumlah layanan jika diperlukan nanti
-            // document.getElementById('service-count').textContent = filteredData.length;
-        }
 
         // Function to initialize chart
         function initChart(filterType = 'month') {
-            const ctx = document.getElementById('finance-chart').getContext('2d');
+            const canvas = document.getElementById('finance-chart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
 
             // Hancurkan chart yang sudah ada jika ada
             if (chartInstance) {
@@ -899,102 +792,296 @@
             });
         }
 
-        // Function to apply filters
-        function applyFilters() {
-            const dayFilter = document.getElementById('day-filter').value;
-            const monthFilter = document.getElementById('month-filter').value;
-            const yearFilter = document.getElementById('year-filter').value;
+        // --- FUNGSI KALENDER ---
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", 
+                              "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            
+            const monthElement = document.getElementById('current-month');
+            const calendarDays = document.getElementById('calendar-days');
+            if (!monthElement || !calendarDays) {
+                console.error("Elemen kalender tidak ditemukan!");
+                return;
+            }
 
-            // Filter data berdasarkan pilihan
-            filteredData = orderData.filter(item => {
-                const date = new Date(item.date);
-                const day = date.getDay() === 0 ? 7 : date.getDay(); // Konversi: Minggu = 7
-                const month = date.getMonth() + 1; // Bulan dimulai dari 0
-                const year = date.getFullYear();
+            monthElement.textContent = `${monthNames[month]} ${year}`;
+            calendarDays.innerHTML = '';
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            // Tambahkan hari kosong di awal bulan
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                calendarDays.appendChild(emptyDay);
+            }
+            
+            // Tambahkan hari-hari dalam bulan
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day p-2 text-center rounded cursor-pointer';
+                
+                // Tambahkan angka hari
+                const dayNumber = document.createElement('span');
+                dayNumber.textContent = day;
+                dayElement.appendChild(dayNumber);
+                
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                // Buat semua tanggal bisa diklik
+                dayElement.addEventListener('click', () => selectDate(dateStr));
+                
+                // Cek apakah tanggal ini memiliki event
+                const hasMeeting = highlightedDates.includes(dateStr);
+                const hasAnnouncement = announcementDates.includes(dateStr);
 
-                // Jika tidak ada filter, tampilkan semua
-                if (!dayFilter && !monthFilter && !yearFilter) {
-                    return true;
+                if (hasMeeting || hasAnnouncement) {
+                    dayElement.classList.add('has-event', 'font-bold');
+                    
+                    // Buat container untuk indikator
+                    const indicatorsContainer = document.createElement('div');
+                    indicatorsContainer.className = 'indicators-container';
+                    
+                    if (hasMeeting) {
+                        const indicator = document.createElement('div');
+                        indicator.className = 'event-indicator';
+                        indicatorsContainer.appendChild(indicator);
+                    }
+                    
+                    if (hasAnnouncement) {
+                        const indicator = document.createElement('div');
+                        indicator.className = 'announcement-indicator';
+                        indicatorsContainer.appendChild(indicator);
+                    }
+                    
+                    dayElement.appendChild(indicatorsContainer);
                 }
-
-                // Filter berdasarkan hari
-                if (dayFilter && day != dayFilter) {
-                    return false;
+                
+                // Tandai tanggal yang dipilih
+                if (selectedDate === dateStr) {
+                    dayElement.classList.add('selected');
                 }
-
-                // Filter berdasarkan bulan
-                if (monthFilter && month != monthFilter) {
-                    return false;
-                }
-
-                // Filter berdasarkan tahun
-                if (yearFilter && year != yearFilter) {
-                    return false;
-                }
-
-                return true;
-            });
-
-            // Reset ke halaman pertama
-            currentPage = 1;
-
-            // Render ulang tabel
-            renderTable();
-
-            // Tutup dropdown filter
-            document.getElementById('filterDropdown').classList.remove('show');
+                
+                calendarDays.appendChild(dayElement);
+            }
         }
 
-        // Function to reset filters
-        function resetFilters() {
-            document.getElementById('day-filter').value = '';
-            document.getElementById('month-filter').value = '';
-            document.getElementById('year-filter').value = '';
-
-            // Kembalikan ke data asli
-            filteredData = [...orderData];
-
-            // Reset ke halaman pertama
-            currentPage = 1;
-
-            // Render ulang tabel
-            renderTable();
-
-            // Tutup dropdown filter
-            document.getElementById('filterDropdown').classList.remove('show');
+        function selectDate(dateStr) {
+            console.log('Tanggal dipilih:', dateStr);
+            selectedDate = dateStr;
+            renderCalendar();
+            // Memuat catatan meeting untuk tanggal yang dipilih
+            loadMeetingNotes(dateStr);
         }
 
-        // Initialize tables on page load
+        // --- FUNGSI PEMANGGIL DATA ---
+        async function loadHighlightedDates() {
+            try {
+                const dates = await apiFetch('/meeting-notes-dates');
+                highlightedDates = dates.map(date => new Date(date).toISOString().split('T')[0]);
+                console.log('Tanggal meeting berhasil dimuat:', highlightedDates);
+                renderCalendar();
+            } catch (error) { console.error('Gagal load tanggal meeting:', error); }
+        }
+        
+        async function loadAnnouncementDates() {
+            try {
+                const dates = await apiFetch('/announcements-dates');
+                announcementDates = dates.map(date => new Date(date).toISOString().split('T')[0]);
+                console.log('Tanggal pengumuman berhasil dimuat:', announcementDates);
+                renderCalendar();
+            } catch (error) { console.error('Gagal load tanggal pengumuman:', error); }
+        }
+        
+        async function loadMeetingNotes(date) {
+            const container = document.getElementById('meeting-notes-container');
+            // Tampilkan loading state
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <span class="material-symbols-outlined text-4xl animate-spin">refresh</span>
+                    <p class="mt-2">Memuat catatan...</p>
+                </div>
+            `;
+            
+            try {
+                // Format tanggal untuk API
+                const formattedDate = new Date(date + 'T00:00:00').toISOString().split('T')[0];
+                console.log('Memuat catatan untuk tanggal:', formattedDate);
+                
+                const response = await apiFetch(`/meeting-notes?date=${encodeURIComponent(formattedDate)}`);
+                const notes = response.data || [];
+                
+                if (!Array.isArray(notes) || notes.length === 0) {
+                    // Format tanggal untuk tampilan
+                    const dateObj = new Date(date + 'T00:00:00');
+                    const formattedDateDisplay = dateObj.toLocaleDateString('id-ID', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <span class="material-symbols-outlined text-4xl">event_note</span>
+                            <p class="mt-2">Tidak ada catatan meeting</p>
+                            <p class="text-xs mt-1">${formattedDateDisplay}</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Tampilkan catatan meeting
+                container.innerHTML = notes.map(note => `
+                    <div class="bg-gray-100 p-4 rounded-lg">
+                        <h4 class="font-semibold text-black mb-2">${note.topik || 'Tanpa Topik'}</h4>
+                        <div class="text-sm text-gray-600 space-y-2">
+                            <div><span class="font-medium">Hasil Diskusi:</span><p class="mt-1">${note.hasil_diskusi || 'Tidak ada hasil diskusi'}</p></div>
+                            <div><span class="font-medium">Keputusan:</span><p class="mt-1">${note.keputusan || 'Tidak ada keputusan'}</p></div>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading meeting notes:', error);
+                container.innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <span class="material-symbols-outlined text-4xl">error</span>
+                        <p class="mt-2">Gagal memuat catatan meeting</p>
+                        <p class="text-xs mt-1">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadAnnouncements() {
+            const container = document.getElementById('announcements-container');
+            container.innerHTML = '<p class="text-center text-gray-500">Memuat...</p>';
+            try {
+                const response = await apiFetch('/announcements');
+                const announcements = response.data || [];
+                
+                if (!Array.isArray(announcements) || announcements.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <span class="material-symbols-outlined text-4xl">campaign</span>
+                            <p class="mt-2">Tidak ada pengumuman</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = announcements.map(announcement => `
+                    <div class="bg-gray-100 p-4 rounded-lg">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-semibold text-black">${announcement.judul || 'Tanpa Judul'}</h4>
+                            <span class="text-xs text-gray-600">${announcement.tanggal_indo || new Date(announcement.created_at).toLocaleDateString('id-ID')}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">${announcement.ringkasan || announcement.isi_pesan || 'Tidak ada pesan'}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-600">Oleh: ${announcement.creator || 'System'}</span>
+                            ${announcement.lampiran_url ? `<a href="${announcement.lampiran_url}" target="_blank" class="text-xs text-blue-600 hover:underline">Lihat Lampiran</a>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading announcements:', error);
+                container.innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <span class="material-symbols-outlined text-4xl">error</span>
+                        <p class="mt-2">Gagal memuat pengumuman</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            renderTable();
             initChart('month'); // Inisialisasi grafik dengan filter bulan
 
-            // Event listener untuk filter dropdown
-            document.getElementById('filterBtn').addEventListener('click', function(e) {
-                e.stopPropagation();
-                document.getElementById('filterDropdown').classList.toggle('show');
-            });
-
-            // Tutup dropdown saat klik di luar
-            document.addEventListener('click', function() {
-                document.getElementById('filterDropdown').classList.remove('show');
-            });
-
-            // Mencegah dropdown tertutup saat klik di dalamnya
-            document.getElementById('filterDropdown').addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-
-            // Event listener untuk tombol filter
-            document.getElementById('applyFilter').addEventListener('click', applyFilters);
-            document.getElementById('resetFilter').addEventListener('click', resetFilters);
-
             // Event listener untuk filter chart
-            document.getElementById('chart-filter').addEventListener('change', function() {
-                initChart(this.value);
-            });
+            const chartFilter = document.getElementById('chart-filter');
+            if (chartFilter) {
+                chartFilter.addEventListener('change', function() {
+                    initChart(this.value);
+                });
+            }
+            
+            // Calendar event listeners
+            const prevMonthBtn = document.getElementById('prev-month');
+            const nextMonthBtn = document.getElementById('next-month');
+            const refreshNotesBtn = document.getElementById('refresh-notes');
+            const refreshAnnouncementsBtn = document.getElementById('refresh-announcements');
+            
+            if (prevMonthBtn) {
+                prevMonthBtn.addEventListener('click', function() {
+                    currentDate.setMonth(currentDate.getMonth() - 1);
+                    renderCalendar();
+                });
+            }
+            
+            if (nextMonthBtn) {
+                nextMonthBtn.addEventListener('click', function() {
+                    currentDate.setMonth(currentDate.getMonth() + 1);
+                    renderCalendar();
+                });
+            }
+            
+            if (refreshNotesBtn) {
+                refreshNotesBtn.addEventListener('click', function() {
+                    if (selectedDate) loadMeetingNotes(selectedDate);
+                });
+            }
+            
+            if (refreshAnnouncementsBtn) {
+                refreshAnnouncementsBtn.addEventListener('click', loadAnnouncements);
+            }
+            
+            // Event modal listeners
+            const eventModalClose = document.getElementById('event-modal-close');
+            const eventModalCloseBtn = document.getElementById('event-modal-close-btn');
+            const eventModal = document.getElementById('event-modal');
+            
+            if (eventModalClose) {
+                eventModalClose.addEventListener('click', function() {
+                    eventModal.classList.remove('show');
+                });
+            }
+            
+            if (eventModalCloseBtn) {
+                eventModalCloseBtn.addEventListener('click', function() {
+                    eventModal.classList.remove('show');
+                });
+            }
+            
+            if (eventModal) {
+                eventModal.addEventListener('click', function(e) {
+                    if (e.target === eventModal) {
+                        eventModal.classList.remove('show');
+                    }
+                });
+            }
+            
+            // Initialize calendar and load data
+            console.log('Inisialisasi dimulai...');
+            renderCalendar();
+            
+            // Load data asynchronously
+            (async function() {
+                await loadHighlightedDates();
+                await loadAnnouncementDates();
+                await loadAnnouncements();
+                
+                // Pilih hari ini dan muat catatannya
+                const today = new Date();
+                const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                selectDate(todayStr);
+                console.log('Inisialisasi selesai.');
+            })();
         });
     </script>
 </body>
-
 </html>

@@ -1365,3 +1365,15 @@ Route::prefix('manager_divisi/api')->middleware(['auth', 'role:manager_divisi'])
     Route::get('/announcements-dates', [PengumumanController::class, 'getAnnouncementDatesForManager']);
     Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsForManager']);
 });
+
+// Route untuk pengaturan jam operasional
+Route::post('/admin/settings/operational-hours', [App\Http\Controllers\SettingController::class, 'saveOperationalHours'])->name('admin.settings.operational-hours');
+Route::get('/admin/settings/operational-hours', [App\Http\Controllers\SettingController::class, 'getOperationalHours'])->name('admin.settings.operational-hours.get');
+// Route untuk API jam operasional
+Route::get('/api/operational-hours', [App\Http\Controllers\AbsensiController::class, 'apiGetOperationalHours']);
+
+// Finance API routes
+Route::middleware(['auth', 'role:finance'])->prefix('finance/api')->group(function () {
+    Route::get('/meeting-notes', [CatatanRapatController::class, 'getMeetingNotesForFinance']);
+    Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsForFinance']);
+});

@@ -170,7 +170,7 @@
             position: relative;
             transition: all 0.2s ease;
             white-space: nowrap;
-            flex: 1; /* Membuat tab membagi ruang secara merata */
+            flex: 1;
         }
 
         .tab-button:hover {
@@ -629,6 +629,53 @@
                                     </div>
                                 </div>
 
+                                <!-- Pengaturan Keterlambatan -->
+                                <div class="border-t pt-4 mt-4">
+                                    <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+                                        <span class="material-icons-outlined text-warning mr-2">warning</span>
+                                        Pengaturan Keterlambatan
+                                    </h4>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Jam Batas
+                                                Keterlambat</label>
+                                            <select name="late_limit_hour" id="lateLimitHourInput"
+                                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input">
+                                                <option value="7">07:00</option>
+                                                <option value="8">08:00</option>
+                                                <option value="9" selected>09:00</option>
+                                                <option value="10">10:00</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Menit Batas
+                                                Keterlambat</label>
+                                            <select name="late_limit_minute" id="lateLimitMinuteInput"
+                                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input">
+                                                <option value="0">00 menit</option>
+                                                <option value="5" selected>05 menit</option>
+                                                <option value="10">10 menit</option>
+                                                <option value="15">15 menit</option>
+                                                <option value="30">30 menit</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="md:col-span-2">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Toleransi
+                                                Keterlambatan (menit)</label>
+                                            <input type="number" name="late_tolerance_minutes"
+                                                id="lateToleranceMinutesInput"
+                                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                                value="0" min="0" max="60"
+                                                placeholder="Jumlah menit toleransi keterlambatan">
+                                            <p class="text-xs text-gray-500 mt-1">Karyawan tidak dianggap terlambat jika
+                                                masuk dalam toleransi ini</p>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="flex flex-col sm:flex-row justify-end gap-2 mt-6">
                                     <button type="button" id="cancelOperationalBtn"
                                         class="px-4 py-2 btn-secondary rounded-lg w-full sm:w-auto">Batal</button>
@@ -967,7 +1014,7 @@
                 }
             });
 
-            // Operational Form
+            // Operational Form - UPDATE KODE DI SINI
             document.getElementById('operationalForm').addEventListener('submit', async function (e) {
                 e.preventDefault();
 
@@ -977,21 +1024,66 @@
                 submitBtn.disabled = true;
 
                 const formData = new FormData(this);
+                const data = {
+                    start_time: formData.get('start_time'),
+                    end_time: formData.get('end_time'),
+                    late_limit_hour: formData.get('late_limit_hour'),
+                    late_limit_minute: formData.get('late_limit_minute'),
+                    late_tolerance_minutes: formData.get('late_tolerance_minutes') || 0,
+                    _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                };
 
                 try {
-                    // Simulasi API call
-                    setTimeout(() => {
-                        showMinimalPopup('Berhasil', 'Jam operasional berhasil diperbarui', 'success');
-                        submitBtn.textContent = originalText;
-                        submitBtn.disabled = false;
-                    }, 1000);
+                    const response = await fetch("/admin/settings/operational-hours", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json",
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const res = await response.json();
+
+                    if (!response.ok) {
+                        if (response.status === 422 && res.errors) {
+                            const message = Object.values(res.errors)[0][0];
+                            showMinimalPopup('Validasi Gagal', message, 'warning');
+                            return;
+                        }
+
+                        showMinimalPopup('Error', res.message || 'Terjadi kesalahan', 'error');
+                        return;
+                    }
+
+                    showMinimalPopup('Berhasil', res.message, 'success');
                 } catch (error) {
                     console.error(error);
                     showMinimalPopup('Error', 'Terjadi kesalahan server', 'error');
+                } finally {
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
                 }
             });
+
+            // Load existing operational hours when page loads - TAMBAHKAN KODE INI
+            (async function loadOperationalHours() {
+                try {
+                    const response = await fetch("/admin/settings/operational-hours");
+                    const res = await response.json();
+
+                    if (res.success && res.data) {
+                        document.getElementById('startTimeInput').value = res.data.start_time;
+                        document.getElementById('endTimeInput').value = res.data.end_time;
+                        document.getElementById('lateLimitHourInput').value = res.data.late_limit_hour;
+                        document.getElementById('lateLimitMinuteInput').value = res.data.late_limit_minute;
+                        document.getElementById('lateToleranceMinutesInput').value = res.data.late_tolerance_minutes;
+                    }
+                } catch (error) {
+                    console.error('Error loading operational hours:', error);
+                }
+            })();
 
             // Holiday Modal
             const holidayModal = document.getElementById('holidayModal');
