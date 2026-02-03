@@ -13,6 +13,9 @@ class Layanan extends Model
         'foto',
     ];
     
+    /**
+     * Relasi ke Project - PERBAIKAN: gunakan 'project' bukan 'projects'
+     */
     public function projects()
     {
         return $this->hasMany(Project::class, 'layanan_id');

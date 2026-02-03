@@ -426,7 +426,7 @@
                                                 <th style="min-width: 200px;">Nama Tugas</th>
                                                 <th style="min-width: 250px;">Deskripsi</th>
                                                 <th style="min-width: 150px;">Deadline</th>
-                                                <th style="min-width: 150px;">Ditugaskan Kepada</th>
+                                                <th style="min-width: 200px;">Ditugaskan Kepada</th>
                                                 <th style="min-width: 100px;">Status</th>
                                                 <th style="min-width: 180px; text-align: center;">Aksi</th>
                                             </tr>
@@ -494,7 +494,7 @@
 
     <!-- JavaScript -->
     <script>
-       // CSRF Token untuk AJAX
+    // CSRF Token untuk AJAX
 let csrfToken = '';
 try {
     const metaTag = document.querySelector('meta[name="csrf-token"]');
@@ -525,7 +525,7 @@ const state = {
     isLoading: false,
     sortField: 'created_at',
     sortDirection: 'desc',
-    selectedProjectId: 'all' // Tambahkan state untuk filter project
+    selectedProjectId: 'all'
 };
 
 // Utility Functions
@@ -595,7 +595,7 @@ const utils = {
             }
         });
         
-        // Setup auto-fill untuk project - MENGGANTI JUDUL DENGAN NAMA PROJECT
+        // Setup auto-fill untuk project
         const setupProjectAutoFill = () => {
             const projectSelect = modalClone.querySelector('select[name="project_id"]');
             const namaTugasInput = modalClone.querySelector('input[name="nama_tugas"]');
@@ -606,25 +606,20 @@ const utils = {
             if (projectSelect) {
                 projectSelect.addEventListener('change', function() {
                     const projectId = this.value;
-                    console.log('Project selected:', projectId);
                     
                     if (projectId && projectId !== '') {
                         const projectData = state.projectDetails[projectId];
-                        console.log('Project data from cache for ID', projectId, ':', projectData);
                         
                         if (projectData) {
-                            // MODIFIKASI: Gunakan nama project untuk field "Judul Tugas"
+                            // Gunakan nama project untuk field "Judul Tugas"
                             if (judulInput) {
                                 judulInput.value = projectData.nama;
-                                console.log('Auto-filled judul dengan nama project:', judulInput.value);
                             }
                             
-                            // MODIFIKASI: Beri saran untuk field "Nama Tugas"
+                            // Beri saran untuk field "Nama Tugas"
                             if (namaTugasInput && (!namaTugasInput.value || namaTugasInput.value.trim() === '')) {
-                                // Beri placeholder atau contoh nama tugas berdasarkan project
                                 namaTugasInput.placeholder = `Contoh: Melakukan analisis untuk ${projectData.nama}`;
                                 namaTugasInput.setAttribute('data-project-name', projectData.nama);
-                                console.log('Set placeholder for nama_tugas with project name:', projectData.nama);
                             }
                             
                             // Fill deskripsi jika kosong
@@ -632,9 +627,7 @@ const utils = {
                                 if (!deskripsiTextarea.value || deskripsiTextarea.value.trim() === '') {
                                     if (projectData.deskripsi && projectData.deskripsi.trim() !== '') {
                                         deskripsiTextarea.value = projectData.deskripsi;
-                                        console.log('Auto-filled deskripsi:', projectData.deskripsi.substring(0, 100) + '...');
                                     } else {
-                                        console.log('No description available for this project');
                                         deskripsiTextarea.value = `Tugas terkait dengan project: ${projectData.nama}`;
                                     }
                                 }
@@ -644,31 +637,23 @@ const utils = {
                             if (deadlineInput && (!deadlineInput.value || deadlineInput.value.trim() === '')) {
                                 if (projectData.deadline) {
                                     try {
-                                        let dateValue = projectData.deadline;
-                                        
-                                        // Parse tanggal dengan memperhatikan timezone
-                                        const formattedDate = utils.formatDateForInput(dateValue);
+                                        const formattedDate = utils.formatDateForInput(projectData.deadline);
                                         if (formattedDate) {
                                             deadlineInput.value = formattedDate;
-                                            console.log('Auto-filled deadline:', deadlineInput.value);
                                         }
                                     } catch (e) {
-                                        console.error('Error parsing deadline:', e, 'date value:', projectData.deadline);
+                                        console.error('Error parsing deadline:', e);
                                     }
-                                } else {
-                                    console.log('No deadline available for this project');
                                 }
                             }
                             
                             utils.showToast(`Data dari project "${projectData.nama}" telah diisi otomatis`, 'info');
                         } else {
-                            console.warn('No project data in cache for ID:', projectId);
                             utils.showToast('Memuat detail project...', 'info');
                             
                             api.fetchProjectDetail(projectId).then(data => {
                                 if (data) {
                                     state.projectDetails[projectId] = data;
-                                    console.log('Project detail fetched and cached:', data);
                                     setTimeout(() => {
                                         projectSelect.dispatchEvent(new Event('change'));
                                     }, 100);
@@ -736,9 +721,7 @@ const utils = {
             const date = new Date(dateString);
             if (isNaN(date.getTime())) return '-';
             
-            // Adjust for timezone offset (UTC to local Asia/Jakarta)
-            // Indonesia is UTC+7, so we need to add 7 hours
-            const timezoneOffset = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
+            const timezoneOffset = 7 * 60 * 60 * 1000;
             const localDate = new Date(date.getTime() + timezoneOffset);
             
             const options = { 
@@ -761,12 +744,9 @@ const utils = {
             const date = new Date(dateString);
             if (isNaN(date.getTime())) return null;
             
-            // Adjust for timezone offset (UTC to local Asia/Jakarta)
-            // Indonesia is UTC+7, so we need to add 7 hours
-            const timezoneOffset = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
+            const timezoneOffset = 7 * 60 * 60 * 1000;
             const localDate = new Date(date.getTime() + timezoneOffset);
             
-            // Format to YYYY-MM-DD for input[type="date"]
             const year = localDate.getFullYear();
             const month = String(localDate.getMonth() + 1).padStart(2, '0');
             const day = String(localDate.getDate()).padStart(2, '0');
@@ -826,12 +806,10 @@ const utils = {
             
             if (isNaN(deadlineDate.getTime())) return false;
             
-            // Adjust both dates for timezone comparison
-            const timezoneOffset = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
+            const timezoneOffset = 7 * 60 * 60 * 1000;
             const adjustedNow = new Date(now.getTime() + timezoneOffset);
             const adjustedDeadline = new Date(deadlineDate.getTime() + timezoneOffset);
             
-            // Compare only date part (without time)
             const nowDateOnly = new Date(adjustedNow.getFullYear(), adjustedNow.getMonth(), adjustedNow.getDate());
             const deadlineDateOnly = new Date(adjustedDeadline.getFullYear(), adjustedDeadline.getMonth(), adjustedDeadline.getDate());
             
@@ -840,6 +818,29 @@ const utils = {
             console.error('Error checking overdue:', e);
             return false;
         }
+    },
+
+    // FUNGSI BARU: Pencarian Nama Assignee yang Cerdas
+    getAssigneeName: (task) => {
+        // 1. Coba dari relasi API (Eager Loading)
+        if (task.assignee && task.assignee.name) {
+            return task.assignee.name;
+        }
+        
+        // 2. Coba dari data API alternatif
+        if (task.assignee_name) return task.assignee_name;
+        if (task.assigned_to_name) return task.assigned_to_name;
+        
+        // 3. Fallback: Cari di local state (karyawanList)
+        if (task.assigned_to && state.karyawanList.length > 0) {
+            const karyawan = state.karyawanList.find(k => k.id == task.assigned_to);
+            if (karyawan) {
+                return karyawan.name || karyawan.nama;
+            }
+        }
+        
+        // 4. Jika tidak ketemu sama sekali, return string debug
+        return `Unknown (ID: ${task.assigned_to || '?'})`;
     }
 };
 
@@ -877,17 +878,16 @@ const api = {
         const userRole = state.currentUser.role;
         
         if (userRole === 'manager_divisi') {
-            return '/manager_divisi/tasks';
+            return '/manager_divisi/tasks/createTask';
         } else if (userRole === 'admin') {
-            return '/admin/tasks';
+            return '/admin/tasks/createTask';
         } else if (userRole === 'general_manager') {
-            return '/general_manager/tasks';
+            return '/general_manager/tasks/createTask';
         } else {
             return null;
         }
     },
 
-    // Fetch projects dengan debugging yang lebih baik
     fetchProjects: async () => {
         try {
             console.log('Fetching projects for manager divisi...');
@@ -899,11 +899,9 @@ const api = {
             ];
             
             let projectsData = [];
-            let lastSuccessfulEndpoint = '';
             
             for (const endpoint of endpoints) {
                 try {
-                    console.log('Trying endpoint:', endpoint);
                     const response = await fetch(endpoint, {
                         method: 'GET',
                         headers: {
@@ -913,44 +911,28 @@ const api = {
                         },
                         credentials: 'same-origin'
                     });
-
-                    console.log('Response status:', response.status);
                     
                     if (response.ok) {
                         const data = await response.json();
-                        console.log('Full response from', endpoint, ':', data);
-                        
-                        lastSuccessfulEndpoint = endpoint;
                         
                         if (data.success === true && Array.isArray(data.data)) {
                             projectsData = data.data;
-                            console.log('✓ Found data in data.data array:', projectsData.length, 'items');
-                            console.log('Sample project:', projectsData[0]);
                             break;
                         } else if (Array.isArray(data.data)) {
                             projectsData = data.data;
-                            console.log('✓ Found data in data.data array (direct):', projectsData.length, 'items');
                             break;
                         } else if (Array.isArray(data.projects)) {
                             projectsData = data.projects;
-                            console.log('✓ Found data in data.projects array:', projectsData.length, 'items');
                             break;
                         } else if (data.success === true && data.data && Array.isArray(data.data.data)) {
                             projectsData = data.data.data;
-                            console.log('✓ Found data in data.data.data (paginated):', projectsData.length, 'items');
                             break;
                         } else if (Array.isArray(data)) {
                             projectsData = data;
-                            console.log('✓ Found direct array response:', projectsData.length, 'items');
                             break;
-                        } else {
-                            console.warn('Unexpected response format:', data);
                         }
-                    } else {
-                        console.warn('Response not OK:', response.status);
                     }
                 } catch (error) {
-                    console.log('Failed with endpoint', endpoint, ':', error.message);
                     continue;
                 }
             }
@@ -959,7 +941,7 @@ const api = {
                 console.warn('No projects found from any endpoint');
                 utils.showToast('Tidak ada project yang tersedia', 'warning');
             } else {
-                console.log(`✓ Successfully loaded ${projectsData.length} projects from ${lastSuccessfulEndpoint}`);
+                console.log(`Successfully loaded ${projectsData.length} projects`);
             }
             
             state.projectList = projectsData;
@@ -968,29 +950,20 @@ const api = {
             render.updateProjectFilterDropdown();
             
             state.projectDetails = {};
-            projectsData.forEach((project, index) => {
+            projectsData.forEach((project) => {
                 if (project && project.id) {
-                    console.log(`Project ${index + 1} (ID: ${project.id}) properties:`, Object.keys(project));
-                    
                     let nama = '';
                     if (project.nama) nama = project.nama;
                     else if (project.name) nama = project.name;
                     else if (project.nama_project) nama = project.nama_project;
                     else if (project.project_name) nama = project.project_name;
-                    else {
-                        console.warn(`No name found for project ${project.id}, using fallback`);
-                        nama = `Project ${project.id}`;
-                    }
+                    else nama = `Project ${project.id}`;
                     
                     let deskripsi = '';
                     if (project.deskripsi) deskripsi = project.deskripsi;
                     else if (project.description) deskripsi = project.description;
                     else if (project.deskripsi_project) deskripsi = project.deskripsi_project;
                     else if (project.project_description) deskripsi = project.project_description;
-                    else {
-                        console.warn(`No description found for project ${project.id}`);
-                        deskripsi = '';
-                    }
                     
                     let deadline = '';
                     if (project.deadline) deadline = project.deadline;
@@ -1008,16 +981,6 @@ const api = {
                         divisi_id: project.divisi_id || project.divisi || project.division_id || null,
                         created_by: project.created_by || project.user_id || project.created_by_id || null
                     };
-                    
-                    console.log(`Cached project ${project.id}:`, {
-                        nama: state.projectDetails[project.id].nama,
-                        deskripsi: state.projectDetails[project.id].deskripsi ? 
-                                   state.projectDetails[project.id].deskripsi.substring(0, 50) + '...' : 
-                                   '(empty)',
-                        deadline: state.projectDetails[project.id].deadline
-                    });
-                } else {
-                    console.warn('Invalid project data at index', index, ':', project);
                 }
             });
             
@@ -1154,7 +1117,7 @@ const api = {
             
             console.log('Loaded tasks:', state.allTasks.length);
             
-            state.allTasks.forEach((task, index) => {
+            state.allTasks.forEach((task) => {
                 task.is_overdue = utils.checkOverdue(task.deadline, task.status);
                 
                 let projectName = '';
@@ -1164,14 +1127,12 @@ const api = {
                 
                 if (!projectName && task.project_id && state.projectDetails[task.project_id]) {
                     projectName = state.projectDetails[task.project_id].nama;
-                    console.log(`Got project name from cache for task ${task.id}:`, projectName);
                 }
                 
                 if (!projectName && task.project_id) {
                     const project = state.projectList.find(p => p.id == task.project_id);
                     if (project) {
                         projectName = project.nama || project.name || project.nama_project || project.project_name || `Project ${project.id}`;
-                        console.log(`Got project name from list for task ${task.id}:`, projectName);
                     }
                 }
                 
@@ -1180,20 +1141,10 @@ const api = {
                 }
                 
                 task.project_name = projectName;
-                
-                // Debug tanggal
-                console.log(`Task ${index + 1}:`, {
-                    judul: task.judul,
-                    nama_tugas: task.nama_tugas || task.judul, // Gunakan nama_tugas jika ada, fallback ke judul
-                    deadline_original: task.deadline,
-                    deadline_formatted: utils.formatDate(task.deadline),
-                    deadline_input_format: utils.formatDateForInput(task.deadline),
-                    is_overdue: task.is_overdue
-                });
             });
             
             state.filteredTasks = [...state.allTasks];
-            render.filterTasks(); // Gunakan filterTasks untuk menerapkan filter project
+            render.filterTasks();
             
             try {
                 await api.fetchStatistics();
@@ -1241,8 +1192,6 @@ const api = {
     },
     
     calculateStatsFromTasks: () => {
-        const now = new Date();
-        
         const stats = {
             total: state.allTasks.length,
             in_progress: state.allTasks.filter(task => 
@@ -1319,6 +1268,21 @@ const api = {
     
     createTask: async (formData) => {
         try {
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+            
+            if (!data.nama_tugas || data.nama_tugas.trim() === '') {
+                data.nama_tugas = data.judul;
+            }
+            
+            if (!data.target_divisi_id || data.target_divisi_id === '') {
+                data.target_divisi_id = state.currentUser.divisi_id;
+            }
+            
+            console.log('Sending task data:', data);
+            
             const endpoint = api.getCreateTaskEndpoint();
             
             if (!endpoint) {
@@ -1327,7 +1291,7 @@ const api = {
             
             const response = await api.request(endpoint, {
                 method: 'POST',
-                body: formData
+                body: data
             });
             
             utils.showToast('Tugas berhasil dibuat', 'success');
@@ -1335,6 +1299,7 @@ const api = {
             
             return response;
         } catch (error) {
+            console.error('Error creating task:', error);
             throw error;
         }
     },
@@ -1435,20 +1400,16 @@ const api = {
 
 // Render Functions
 const render = {
-    // Fungsi untuk update dropdown filter project
     updateProjectFilterDropdown: () => {
         const projectFilter = document.getElementById('projectFilter');
         if (!projectFilter) return;
         
-        // Simpan nilai yang dipilih sebelumnya
         const currentValue = projectFilter.value;
         
-        // Clear existing options except the first one
         while (projectFilter.options.length > 1) {
             projectFilter.remove(1);
         }
         
-        // Add project options
         state.projectList.forEach((project) => {
             const projectName = project.nama || project.name || project.nama_project || `Project ${project.id}`;
             const option = document.createElement('option');
@@ -1457,7 +1418,6 @@ const render = {
             projectFilter.appendChild(option);
         });
         
-        // Restore selected value if it still exists
         if (currentValue && Array.from(projectFilter.options).some(opt => opt.value === currentValue)) {
             projectFilter.value = currentValue;
         } else {
@@ -1472,29 +1432,23 @@ const render = {
         const projectFilter = document.getElementById('projectFilter');
         const selectedProjectId = projectFilter ? projectFilter.value : 'all';
         
-        // Update state
         state.selectedProjectId = selectedProjectId;
         
         state.filteredTasks = state.allTasks.filter(task => {
-            // Filter berdasarkan pencarian
             const searchMatch = !searchTerm || 
                 ((task.nama_tugas && task.nama_tugas.toLowerCase().includes(searchTerm)) ||
                  (task.judul && task.judul.toLowerCase().includes(searchTerm)) ||
                  (task.deskripsi && task.deskripsi.toLowerCase().includes(searchTerm)) ||
-                 (task.assignee_name && task.assignee_name.toLowerCase().includes(searchTerm)) ||
-                 (task.assigned_to_name && task.assigned_to_name.toLowerCase().includes(searchTerm)) ||
+                 (utils.getAssigneeName(task) && utils.getAssigneeName(task).toLowerCase().includes(searchTerm)) ||
                  (task.project_name && task.project_name.toLowerCase().includes(searchTerm)));
             
-            // Filter berdasarkan status
             const statusMatch = statusFilter === 'all' || task.status === statusFilter;
             
-            // Filter berdasarkan project
             let projectMatch = true;
             if (selectedProjectId !== 'all') {
                 if (task.project_id) {
                     projectMatch = task.project_id == selectedProjectId;
                 } else {
-                    // Coba match berdasarkan nama project jika ID tidak ada
                     const taskProjectName = task.project_name || task.project_nama || '';
                     const selectedProject = state.projectList.find(p => p.id == selectedProjectId);
                     if (selectedProject) {
@@ -1513,7 +1467,6 @@ const render = {
         state.currentPage = 1;
         render.renderTable();
         
-        // Update panel title berdasarkan filter
         let panelTitle = 'Daftar Tugas';
         if (selectedProjectId !== 'all') {
             const selectedProject = state.projectList.find(p => p.id == selectedProjectId);
@@ -1549,10 +1502,13 @@ const render = {
             const row = document.createElement('tr');
             row.className = 'hover:bg-gray-50';
             
-            // Gunakan nama_tugas jika ada, fallback ke judul
             const namaTugas = task.nama_tugas || task.judul || '';
             const judulTugas = task.judul || task.nama_tugas || '';
             
+            // PERBAIKAN UTAMA: Menggunakan fungsi getAssigneeName
+            const assigneeName = utils.getAssigneeName(task);
+            const isAssigneeUnknown = assigneeName.includes('Unknown');
+
             row.innerHTML = `
                 <td class="text-center">${rowNumber}</td>
                 <td class="font-medium text-gray-900">
@@ -1569,7 +1525,10 @@ const render = {
                     ${utils.formatDate(task.deadline)}
                     ${task.is_overdue ? '<br><span class="text-xs text-red-500">Terlambat</span>' : ''}
                 </td>
-                <td>${utils.escapeHtml(task.assignee_name || task.assigned_to_name || 'Tidak ditugaskan')}</td>
+                <!-- KOLOM REVISI: Ditugaskan Kepada -->
+                <td class="${isAssigneeUnknown ? 'text-red-600 font-bold bg-red-50' : 'text-gray-700'}">
+                    ${utils.escapeHtml(assigneeName)}
+                </td>
                 <td>
                     <span class="badge ${utils.getStatusClass(task.status)}">
                         ${utils.getStatusText(task.status)}
@@ -1594,7 +1553,11 @@ const render = {
         });
         
         const mobileCards = document.getElementById('mobile-cards');
-        mobileCards.innerHTML = currentTasks.map((task, index) => `
+        mobileCards.innerHTML = currentTasks.map((task) => {
+            const assigneeName = utils.getAssigneeName(task);
+            const isAssigneeUnknown = assigneeName.includes('Unknown');
+
+            return `
             <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
                 <div class="flex justify-between items-start mb-3">
                     <div>
@@ -1630,12 +1593,12 @@ const render = {
                 
                 <div class="flex justify-between items-center text-sm">
                     <div>
-                        <span class="text-gray-700 font-medium">${utils.escapeHtml(task.assignee_name || task.assigned_to_name || 'Tidak ditugaskan')}</span>
+                        <span class="text-gray-700 font-medium ${isAssigneeUnknown ? 'text-red-600 bg-red-50 px-1 rounded' : ''}">${utils.escapeHtml(assigneeName)}</span>
                     </div>
                     ${task.is_overdue ? '<span class="text-red-600 text-xs font-semibold">Terlambat</span>' : ''}
                 </div>
             </div>
-        `).join('');
+        `}).join('');
         
         document.getElementById('noDataMessage').style.display = 'none';
         document.getElementById('desktopTable').style.display = 'block';
@@ -1698,9 +1661,9 @@ const modal = {
                 projectName = state.projectDetails[task.project_id].nama;
             }
             
-            // Gunakan nama_tugas jika ada, fallback ke judul
             const namaTugas = task.nama_tugas || task.judul || '';
             const judulTugas = task.judul || task.nama_tugas || '';
+            const assigneeName = utils.getAssigneeName(task);
             
             const modalContent = `
                 <div class="space-y-4">
@@ -1732,7 +1695,7 @@ const modal = {
                         </div>
                         <div>
                             <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Ditugaskan Kepada</h4>
-                            <p class="text-gray-900">${utils.escapeHtml(task.assignee_name || task.assigned_to_name || '-')}</p>
+                            <p class="text-gray-900">${utils.escapeHtml(assigneeName || '-')}</p>
                         </div>
                     </div>
                     
@@ -1799,10 +1762,7 @@ const modal = {
                 });
             }
             
-            // Format deadline untuk input date
             const formattedDeadline = task.deadline ? utils.formatDateForInput(task.deadline) : '';
-            
-            // Gunakan nama_tugas jika ada, fallback ke judul
             const namaTugasValue = task.nama_tugas || '';
             const judulTugasValue = task.judul || '';
             
@@ -2042,49 +2002,7 @@ window.debugProjects = () => {
     
     if (state.projectList.length > 0) {
         console.log('First project in list:', state.projectList[0]);
-        console.log('All properties of first project:', Object.keys(state.projectList[0]));
     }
-    
-    if (Object.keys(state.projectDetails).length > 0) {
-        const firstId = Object.keys(state.projectDetails)[0];
-        console.log('First cached project details:', state.projectDetails[firstId]);
-    }
-    
-    state.projectList.forEach((p, i) => {
-        const hasDeskripsi = p.deskripsi || p.description || p.deskripsi_project;
-        console.log(`Project ${i+1} (${p.id}): ${p.nama || p.name} - Has description: ${hasDeskripsi ? 'YES' : 'NO'}`);
-    });
-};
-
-// Debug date function
-window.debugDate = (dateString) => {
-    console.log('=== DATE DEBUG ===');
-    console.log('Original string:', dateString);
-    
-    const date = new Date(dateString);
-    console.log('JS Date object:', date);
-    console.log('JS Date toString:', date.toString());
-    console.log('JS Date toISOString:', date.toISOString());
-    console.log('JS Date toUTCString:', date.toUTCString());
-    console.log('JS Date getDate():', date.getDate());
-    console.log('JS Date getUTCDate():', date.getUTCDate());
-    console.log('JS Timezone offset (minutes):', date.getTimezoneOffset());
-    
-    // Format untuk Indonesia
-    const timezoneOffset = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
-    const localDate = new Date(date.getTime() + timezoneOffset);
-    console.log('Adjusted local date (+7 hours):', localDate);
-    console.log('Local date getDate():', localDate.getDate());
-    
-    return {
-        original: dateString,
-        jsDate: date,
-        jsUTCDate: date.getUTCDate(),
-        jsLocalDate: date.getDate(),
-        adjustedLocalDate: localDate.getDate(),
-        formatted: utils.formatDate(dateString),
-        formattedForInput: utils.formatDateForInput(dateString)
-    };
 };
 
 // Initialization
@@ -2114,7 +2032,6 @@ document.addEventListener('DOMContentLoaded', () => {
         render.filterTasks();
     });
     
-    // Event listener untuk filter project
     const projectFilter = document.getElementById('projectFilter');
     if (projectFilter) {
         projectFilter.addEventListener('change', () => {
@@ -2179,13 +2096,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             console.log('Starting initialization...');
             
-            console.log('Fetching projects...');
             await api.fetchProjects();
-            
-            console.log('Fetching karyawan...');
             await api.fetchKaryawan();
-            
-            console.log('Fetching tasks...');
             await api.fetchTasks();
             
             if (state.karyawanList.length === 0) {
@@ -2194,7 +2106,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             console.log('Initialization complete:', {
                 projects: state.projectList.length,
-                projectDetails: Object.keys(state.projectDetails).length,
                 karyawan: state.karyawanList.length,
                 tasks: state.allTasks.length
             });

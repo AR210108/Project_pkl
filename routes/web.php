@@ -159,6 +159,17 @@ Route::middleware('auth')->group(function () {
 
         // Tasks API - Global
         Route::prefix('tasks')->name('tasks.')->group(function () {
+            // Store task global
+            Route::post('/', [TaskController::class, 'store'])->name('store');
+            
+            // Route khusus untuk manager divisi
+            Route::post('/store-for-manager', [TaskController::class, 'storeForManager'])
+                ->middleware(['role:manager_divisi'])
+                ->name('store.for-manager');
+            
+            // Test endpoint untuk debugging
+            Route::post('/test', [TaskController::class, 'testCreateTask'])->name('test');
+            
             Route::get('/{id}', [TaskController::class, 'show'])->name('show');
             Route::get('/{id}/detail', [TaskController::class, 'getTaskDetailApi'])->name('detail');
             Route::post('/{id}/upload-file', [TaskController::class, 'uploadTaskFile'])->name('upload.file');
@@ -170,7 +181,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/files/{file}/download', [TaskController::class, 'downloadFileById'])->name('files.download');
             Route::delete('/files/{file}', [TaskController::class, 'deleteFile'])->name('files.delete');
             Route::get('/{id}/download', [TaskController::class, 'downloadSubmission'])->name('download.submission');
-            Route::get('/statistics', [TaskController::class, 'getStatistics'])->name('statistics');
+            Route::get('/statistics', [TaskController::class, 'apiGetStatistics'])->name('statistics');
             Route::get('/karyawan/statistics', [TaskController::class, 'getKaryawanStatistics'])->name('karyawan.statistics');
         });
 
@@ -216,7 +227,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/tasks/statistics', [ManagerDivisiTaskController::class, 'getStatistics'])->name('tasks.statistics');
             Route::get('/karyawan-by-divisi/{divisi}', [ManagerDivisiTaskController::class, 'getKaryawanByDivisi'])->name('karyawan.by_divisi');
             
-            // Route khusus untuk projects-dropdown - PERBAIKAN UTAMA
+            // Route khusus untuk projects-dropdown
             Route::get('/project-dropdown', [ManagerDivisiTaskController::class, 'getProjectsDropdown'])->name('project.dropdown');
             
             // Route alternatif untuk kompatibilitas
@@ -531,7 +542,6 @@ Route::middleware(['auth', 'role:general_manager'])
         Route::get('/layanan', [LayananController::class, 'Generalindex'])->name('layanan');
 
         // DATA PROJECT - ROUTES
-        // Shortcut route for the index page to fix 'Route not defined' error
         Route::get('/data_project', [DataProjectController::class, 'index'])->name('data_project');
 
         Route::prefix('data_project')->name('data_project.')->group(function () {
@@ -726,7 +736,7 @@ Route::middleware(['auth', 'role:finance'])
 
 /*
 |--------------------------------------------------------------------------
-| Role: MANAGER DIVISI Routes
+| Role: MANAGER DIVISI Routes - DIPERBAIKI
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:manager_divisi'])
@@ -747,60 +757,25 @@ Route::middleware(['auth', 'role:manager_divisi'])
         Route::get('/kelola-tugas', [ManagerDivisiTaskController::class, 'index'])
             ->name('kelola-tugas');
         
-        // CRUD Tugas
-        Route::post('/tasks', [ManagerDivisiTaskController::class, 'store'])
-            ->name('tasks.store');
-        Route::put('/tasks/{id}', [ManagerDivisiTaskController::class, 'update'])
-            ->name('tasks.update');
-        Route::delete('/tasks/{id}', [ManagerDivisiTaskController::class, 'destroy'])
-            ->name('tasks.destroy');
-        
-        // Data Karyawan
-        Route::get('/data-karyawan', [ManagerDivisiTaskController::class, 'dataKaryawan'])
-            ->name('data-karyawan');
-
-        /* ============================================
-           API ENDPOINTS KHUSUS MANAGER DIVISI
-           ============================================ */
-        Route::prefix('api')->name('api.')->group(function () {
-            // Data Project untuk Dropdown - ROUTE UTAMA yang dicari frontend
-            Route::get('/projects-dropdown', [ManagerDivisiTaskController::class, 'getProjectsDropdown'])
-                ->name('projects-dropdown');
-            
-            // Data Karyawan untuk Dropdown
-            Route::get('/karyawan-dropdown', [ManagerDivisiTaskController::class, 'getKaryawanDropdown'])
-                ->name('karyawan-dropdown');
-            
-            // Data Karyawan berdasarkan divisi (alternatif)
-            Route::get('/karyawan-by-divisi', [ManagerDivisiTaskController::class, 'getKaryawanByDivisi'])
-                ->name('karyawan-by-divisi');
-            
-            // Data Tasks utama
-            Route::get('/tasks-api', [ManagerDivisiTaskController::class, 'getTasksApi'])
-                ->name('tasks-api');
-            
-            // Statistik tugas
-            Route::get('/tasks/statistics', [ManagerDivisiTaskController::class, 'getStatistics'])
-                ->name('tasks.statistics');
-            
-            // Detail task
-            Route::get('/tasks/{id}', [ManagerDivisiTaskController::class, 'show'])
-                ->name('tasks.show');
-            
-            // Debug endpoint untuk testing
-            Route::get('/debug-projects', [ManagerDivisiTaskController::class, 'debugProjects'])
-                ->name('debug-projects');
-        });
-
-        // Halaman view untuk pengelolaan tugas
+        // Halaman view untuk pengelolaan tugas (kompatibilitas)
         Route::get('/pengelola_tugas', [TaskController::class, 'managerTasks'])->name('pengelola_tugas');
         
-        // TUGAS MANAGEMENT (View routes)
+        // =========== TUGAS MANAGEMENT ROUTES (CRUD) - DIPERBAIKI ===========
         Route::prefix('tasks')->name('tasks.')->group(function () {
-            Route::get('/', [TaskController::class, 'managerTasks'])->name('index');
+            // ROUTE UTAMA untuk store task - MENGGUNAKAN createTask()
+            Route::post('/createTask', [ManagerDivisiTaskController::class, 'createTask'])->name('createTask');
+            
+            // Route untuk halaman create (view)
             Route::get('/create', [TaskController::class, 'create'])->name('create');
+            
+            // Route untuk halaman index/view
+            Route::get('/', [TaskController::class, 'managerTasks'])->name('index');
+            
+            // CRUD lainnya
             Route::get('/{id}', [TaskController::class, 'show'])->name('show');
             Route::get('/{id}/edit', [TaskController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [TaskController::class, 'update'])->name('update');
+            Route::delete('/{id}', [TaskController::class, 'destroy'])->name('destroy');
             
             // Comments dan Files
             Route::get('/{id}/comments', [TaskController::class, 'getComments'])->name('comments');
@@ -813,6 +788,60 @@ Route::middleware(['auth', 'role:manager_divisi'])
             // Status update
             Route::put('/{id}/status', [TaskController::class, 'updateTaskStatus'])->name('update.status');
             Route::post('/{id}/complete', [TaskController::class, 'markAsComplete'])->name('complete');
+        });
+
+        // Data Karyawan
+        Route::get('/data-karyawan', function() {
+            $user = Auth::user();
+            $karyawan = \App\Models\User::where('divisi_id', $user->divisi_id)
+                ->where('role', 'karyawan')
+                ->get();
+            return view('manager_divisi.data_karyawan', compact('karyawan'));
+        })->name('data-karyawan');
+
+        /* ============================================
+           API ENDPOINTS KHUSUS MANAGER DIVISI - DIPERBAIKI
+           ============================================ */
+        Route::prefix('api')->name('api.')->group(function () {
+            // Data Project untuk Dropdown - ROUTE UTAMA yang dicari frontend
+            Route::get('/projects-dropdown', [ManagerDivisiTaskController::class, 'getProjectsDropdown'])
+                ->name('projects-dropdown');
+            
+            // Data Karyawan untuk Dropdown
+            Route::get('/karyawan-dropdown', [ManagerDivisiTaskController::class, 'getKaryawanDropdown'])
+                ->name('karyawan-dropdown');
+            
+            // Data Tasks utama - MENGGUNAKAN TaskController::apiGetManagerTasks
+            Route::get('/tasks-api', [TaskController::class, 'apiGetManagerTasks'])
+                ->name('tasks-api');
+            
+            // Statistik tugas - MENGGUNAKAN TaskController::apiGetStatistics
+            Route::get('/tasks/statistics', [TaskController::class, 'apiGetStatistics'])
+                ->name('tasks.statistics');
+            
+            // API untuk create task - GUNAKAN createTask() dari ManagerDivisiTaskController
+            Route::post('/tasks/create-task', [ManagerDivisiTaskController::class, 'createTask'])
+                ->name('tasks.create-task');
+            
+            // Alternate route untuk compatibility
+            Route::post('/tasks', [ManagerDivisiTaskController::class, 'store'])
+                ->name('tasks.store.api');
+            
+            // Route khusus untuk mendapatkan detail task
+            Route::get('/tasks/{id}', [ManagerDivisiTaskController::class, 'show'])
+                ->name('tasks.show.api');
+                
+            // Update task
+            Route::put('/tasks/{id}', [ManagerDivisiTaskController::class, 'update'])
+                ->name('tasks.update.api');
+            
+            // Delete task
+            Route::delete('/tasks/{id}', [ManagerDivisiTaskController::class, 'destroy'])
+                ->name('tasks.destroy.api');
+            
+            // Test endpoint untuk create task
+            Route::post('/tasks/test-create', [TaskController::class, 'testCreateTask'])
+                ->name('tasks.test-create');
         });
 
         // ABSENSI
@@ -853,7 +882,7 @@ Route::middleware(['auth', 'role:manager_divisi'])
 
 /*
 |--------------------------------------------------------------------------
-| GLOBAL API ROUTES (Additional)
+| GLOBAL API ROUTES (Additional) - DIPERBAIKI
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->prefix('api')->group(function () {
@@ -920,6 +949,14 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
         Route::get('/{id}/download', [TaskController::class, 'downloadSubmission'])->name('download.submission');
         Route::get('/statistics', [TaskController::class, 'getStatistics'])->name('statistics');
         Route::get('/karyawan/statistics', [TaskController::class, 'getKaryawanStatistics'])->name('karyawan.statistics');
+        
+        // Route khusus untuk manager divisi store
+        Route::post('/store-for-manager', [TaskController::class, 'storeForManager'])
+            ->middleware(['role:manager_divisi'])
+            ->name('store.for-manager');
+            
+        // Test endpoint
+        Route::post('/test-create', [TaskController::class, 'testCreateTask'])->name('test-create');
     });
 
     /* TASKS UNTUK KARYAWAN */
@@ -1029,12 +1066,55 @@ Route::get('/quota', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Debug & Test Routes (Development Only)
+| Debug & Test Routes (Development Only) - DITAMBAHKAN
 |--------------------------------------------------------------------------
 */
 
 if (env('APP_DEBUG', false)) {
     Route::middleware(['auth'])->group(function () {
+        // Test route khusus untuk TaskController
+        Route::get('/test/task-controller', function () {
+            $user = Auth::user();
+            
+            return response()->json([
+                'success' => true,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'role' => $user->role,
+                    'divisi_id' => $user->divisi_id
+                ],
+                'endpoints' => [
+                    'createTask' => route('manager_divisi.tasks.createTask'),
+                    'api_create_task' => route('manager_divisi.api.tasks.create-task'),
+                    'api_tasks_store' => route('manager_divisi.api.tasks.store.api'),
+                    'test_create' => route('manager_divisi.api.tasks.test-create'),
+                ],
+                'controller_methods' => [
+                    'ManagerDivisiTaskController::createTask' => method_exists(ManagerDivisiTaskController::class, 'createTask'),
+                    'TaskController::storeForManager' => method_exists(TaskController::class, 'storeForManager'),
+                    'TaskController::testCreateTask' => method_exists(TaskController::class, 'testCreateTask'),
+                    'TaskController::apiGetManagerTasks' => method_exists(TaskController::class, 'apiGetManagerTasks'),
+                ]
+            ]);
+        });
+
+        // Test untuk check divisi
+        Route::get('/test/divisi-check', function() {
+            $divisi = \App\Models\Divisi::find(1);
+            
+            return response()->json([
+                'divisi_exists' => !is_null($divisi),
+                'divisi_table' => (new \App\Models\Divisi())->getTable(),
+                'divisi_model' => get_class($divisi),
+                'all_divisis' => \App\Models\Divisi::all()->toArray()
+            ]);
+        });
+
+        // Test untuk create task secara langsung
+        Route::post('/test/create-task-direct', [TaskController::class, 'testCreateTask'])
+            ->withoutMiddleware(['role:manager_divisi']);
+            
         Route::get('/debug/cuti-fix', function () {
             try {
                 $controller = new \App\Http\Controllers\CutiController();
@@ -1165,6 +1245,8 @@ if (env('APP_DEBUG', false)) {
                     'api_projects_dropdown' => route('manager.divisi.project.dropdown'),
                     'karyawan_dropdown' => route('manager_divisi.api.karyawan-dropdown'),
                     'tasks_api' => route('manager_divisi.api.tasks-api'),
+                    'tasks_createTask' => route('manager_divisi.tasks.createTask'),
+                    'api_tasks_create_task' => route('manager_divisi.api.tasks.create-task'),
                 ],
                 'user' => [
                     'id' => $user->id,

@@ -112,10 +112,7 @@ class Project extends Model
 
         // Simpan status yang sudah diformat
         $this->attributes['status'] = $statusMap[$lowerValue] ?? ucfirst($lowerValue);
-        
-        // PERBAIKAN BUG: Menghapus baris return milik fungsi layanan() yang salah tempat
     }
-
     
     /**
      * Event ketika project dibuat (Auto-populate dari Layanan)
