@@ -157,6 +157,10 @@ Route::middleware('auth')->group(function () {
         return redirect('/');
     })->name('logout.get');
 
+
+    // Route agar finance bisa akses data perusahaan
+    Route::get('/perusahaan/data', [\App\Http\Controllers\Admin\PerusahaanController::class, 'getDataForDropdown'])->name('perusahaan.data');
+
     // Orders & Invoices
     Route::resource('orders', OrderController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
     Route::get('invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');

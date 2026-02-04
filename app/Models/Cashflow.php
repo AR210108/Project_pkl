@@ -29,6 +29,7 @@ class Cashflow extends Model
         'jumlah',
         'tipe_transaksi',
         'kategori_id',
+        'subkategori',
     ];
 
     /**
