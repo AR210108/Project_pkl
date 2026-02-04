@@ -5,11 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Divisi; 
+// Tambahkan model lain yang diperlukan agar tidak error
+use App\Models\Karyawan;
+use App\Models\Cuti;
+use App\Models\Pengumuman;
+use App\Models\Absensi;
+use App\Models\CatatanRapat;
+use App\Models\CatatanRapatPenugasan;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'name',
         'email',
@@ -19,15 +32,29 @@ class User extends Authenticatable
         'sisa_cuti',
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    // ============================================
+    // RELASI
+    // ============================================
 
     /**
      * Relasi ke tabel karyawan
@@ -60,6 +87,79 @@ class User extends Authenticatable
         return $this->cuti()->where('status', 'ditolak');
     }
 
+    /**
+     * Relasi ke Pengumuman
+     */
+    public function pengumuman()
+    {
+        return $this->belongsToMany(Pengumuman::class, 'pengumuman_user');
+    }
+
+    public function createdPengumuman()
+    {
+        return $this->hasMany(Pengumuman::class, 'user_id');
+    }
+
+    /**
+     * Relasi ke Absensi
+     */
+    public function absensis()
+    {
+        return $this->hasMany(Absensi::class);
+    }
+
+    /**
+     * Relasi ke Catatan Rapat
+     */
+    public function catatanRapatPeserta()
+    {
+        return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_peserta');
+    }
+
+    public function catatanRapatPenugasan()
+    {
+        return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_penugasan');
+    }
+
+    public function catatanRapats()
+    {
+        return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_penugasan', 'user_id', 'catatan_rapat_id');
+    }
+
+    public function catatanRapatPenugasans()
+    {
+        return $this->hasMany(CatatanRapatPenugasan::class, 'user_id');
+    }
+
+    public function pengumumanDiterima()
+    {
+        return $this->belongsToMany(Pengumuman::class, 'pengumuman_user', 'user_id', 'pengumuman_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relasi Utama ke Divisi
+     * Menggunakan kolom 'divisi_id' di tabel users
+     */
+    public function divisi()
+    {
+        return $this->belongsTo(Divisi::class, 'divisi_id');
+    }
+
+    /**
+     * SOLUSI 1: Alias untuk relasi divisi()
+     * Digunakan oleh CutiController agar konsisten dengan nama relasi 'divisionDetail'.
+     * Method ini mengembalikan hasil dari divisi() agar tidak duplikasi logika.
+     */
+    public function divisionDetail()
+    {
+        return $this->divisi();
+    }
+
+    // ============================================
+    // HELPER METHODS & SCOPES
+    // ============================================
+
     public function isAdmin(): bool
     {
         return in_array($this->role, ['admin', 'finance']);
@@ -83,31 +183,6 @@ class User extends Authenticatable
     public function isOwner(): bool
     {
         return $this->role === 'owner';
-    }
-
-    public function pengumuman()
-    {
-        return $this->belongsToMany(Pengumuman::class, 'pengumuman_user');
-    }
-
-    public function createdPengumuman()
-    {
-        return $this->hasMany(Pengumuman::class, 'user_id');
-    }
-
-    public function absensis()
-    {
-        return $this->hasMany(Absensi::class);
-    }
-
-    public function catatanRapatPeserta()
-    {
-        return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_peserta');
-    }
-
-    public function catatanRapatPenugasan()
-    {
-        return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_penugasan');
     }
 
     public function scopeByRole($query, $role)
@@ -137,29 +212,8 @@ class User extends Authenticatable
         return $initials;
     }
 
-    public function catatanRapats()
-    {
-        return $this->belongsToMany(CatatanRapat::class, 'catatan_rapat_penugasan', 'user_id', 'catatan_rapat_id');
-    }
-
-    public function catatanRapatPenugasans()
-    {
-        return $this->hasMany(CatatanRapatPenugasan::class, 'user_id');
-    }
-
-    public function pengumumanDiterima()
-    {
-        return $this->belongsToMany(Pengumuman::class, 'pengumuman_user', 'user_id', 'pengumuman_id')
-            ->withTimestamps();
-    }
-
-    public function divisi()
-    {
-        return $this->belongsTo(Divisi::class, 'divisi_id');
-    }
-
     /**
-     * Sinkronkan data ke karyawan jika ada
+     * Sinkronkan data user ke tabel karyawan
      */
     public function syncToKaryawan(): void
     {
@@ -168,6 +222,8 @@ class User extends Authenticatable
             $karyawan->nama = $this->name;
             $karyawan->email = $this->email;
             
+            // Perbaikan: Mengakses relasi divisi dengan () agar mengembalikan object query builder
+            // Kemudian menggunakan ->first() untuk mendapatkan data modelnya
             if ($this->divisi) {
                 $karyawan->divisi = $this->divisi->divisi;
             }
@@ -179,6 +235,4 @@ class User extends Authenticatable
             $karyawan->save();
         }
     }
-
-
 }

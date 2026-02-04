@@ -6,11 +6,14 @@ use App\Models\Task;
 use App\Models\User;
 use App\Models\Project;
 use App\Models\Divisi;
+use App\Models\TugasKaryawanToManager;
+use App\Models\TugasApprovalHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Storage;
 
 class ManagerDivisiTaskController extends Controller
 {
@@ -24,6 +27,354 @@ class ManagerDivisiTaskController extends Controller
             'user' => $user
         ]);
     }
+
+    /**
+     * Menampilkan halaman tugas dari karyawan
+     */
+    public function tugasDariKaryawan()
+    {
+        $user = Auth::user();
+        return view('manager_divisi.tugas-dari-karyawan', [
+            'user' => $user
+        ]);
+    }
+
+    /**
+     * ==============================================
+     * API UNTUK TUGAS DARI KARYAWAN KE MANAGER
+     * ==============================================
+     */
+
+    /**
+     * API: Mendapatkan daftar tugas dari karyawan untuk Manager Divisi
+     */
+    public function getTasksFromKaryawan(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            
+            // Validasi hanya manager divisi
+            if ($user->role !== 'manager_divisi') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya manager divisi yang dapat mengakses'
+                ], 403);
+            }
+
+            Log::info('API: Get tasks from karyawan for manager', [
+                'user_id' => $user->id,
+                'divisi_id' => $user->divisi_id
+            ]);
+
+            $query = TugasKaryawanToManager::with(['karyawan:id,name,email', 'project:id,nama'])
+                ->where('manager_divisi_id', $user->id)
+                ->orderBy('created_at', 'desc');
+
+            // Filter berdasarkan status
+            if ($request->has('status') && $request->status !== 'all') {
+                $query->where('status', $request->status);
+            }
+
+            // Filter berdasarkan project
+            if ($request->has('project_id') && $request->project_id !== 'all') {
+                $query->where('project_id', $request->project_id);
+            }
+
+            // Pencarian
+            if ($request->has('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('judul', 'like', "%{$search}%")
+                      ->orWhere('nama_tugas', 'like', "%{$search}%")
+                      ->orWhere('deskripsi', 'like', "%{$search}%")
+                      ->orWhereHas('karyawan', function($q) use ($search) {
+                          $q->where('name', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('project', function($q) use ($search) {
+                          $q->where('nama', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            $tasks = $query->get()->map(function($task) {
+                $isOverdue = false;
+                if ($task->deadline && !in_array($task->status, ['selesai', 'dibatalkan'])) {
+                    try {
+                        $isOverdue = \Carbon\Carbon::parse($task->deadline)->isPast();
+                    } catch (\Exception $e) {
+                        $isOverdue = false;
+                    }
+                }
+
+                return [
+                    'id' => $task->id,
+                    'karyawan_id' => $task->karyawan_id,
+                    'karyawan_name' => $task->karyawan->name ?? 'Unknown',
+                    'project_id' => $task->project_id,
+                    'project_name' => $task->project->nama ?? 'Tidak ada Project',
+                    'judul' => $task->judul,
+                    'nama_tugas' => $task->nama_tugas,
+                    'deskripsi' => $task->deskripsi,
+                    'deadline' => $task->deadline ? $task->deadline->format('Y-m-d H:i:s') : null,
+                    'status' => $task->status,
+                    'catatan' => $task->catatan,
+                    'lampiran' => $task->lampiran,
+                    'lampiran_url' => $task->lampiran ? Storage::url($task->lampiran) : null,
+                    'is_overdue' => $isOverdue,
+                    'created_at' => $task->created_at ? $task->created_at->format('Y-m-d H:i:s') : null,
+                    'updated_at' => $task->updated_at ? $task->updated_at->format('Y-m-d H:i:s') : null,
+                ];
+            });
+
+            Log::info('Tasks from karyawan loaded', ['count' => $tasks->count()]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $tasks,
+                'count' => $tasks->count()
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error getTasksFromKaryawan: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data tugas dari karyawan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Statistik tugas dari karyawan
+     */
+    public function getTasksFromKaryawanStatistics(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            
+            if ($user->role !== 'manager_divisi') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+
+            $total = TugasKaryawanToManager::where('manager_divisi_id', $user->id)->count();
+            $pending = TugasKaryawanToManager::where('manager_divisi_id', $user->id)
+                ->where('status', 'pending')
+                ->count();
+            $proses = TugasKaryawanToManager::where('manager_divisi_id', $user->id)
+                ->where('status', 'proses')
+                ->count();
+            $selesai = TugasKaryawanToManager::where('manager_divisi_id', $user->id)
+                ->where('status', 'selesai')
+                ->count();
+            $dibatalkan = TugasKaryawanToManager::where('manager_divisi_id', $user->id)
+                ->where('status', 'dibatalkan')
+                ->count();
+            
+            // Hitung overdue (deadline sudah lewat dan status bukan selesai/dibatalkan)
+            $overdue = TugasKaryawanToManager::where('manager_divisi_id', $user->id)
+                ->where('status', '!=', 'selesai')
+                ->where('status', '!=', 'dibatalkan')
+                ->whereDate('deadline', '<', now())
+                ->count();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'total' => $total,
+                    'pending' => $pending,
+                    'proses' => $proses,
+                    'selesai' => $selesai,
+                    'dibatalkan' => $dibatalkan,
+                    'overdue' => $overdue,
+                    'in_progress' => $proses
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error getTasksFromKaryawanStatistics: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Approve tugas dari karyawan
+     */
+    public function approveTaskFromKaryawan(Request $request, $id)
+    {
+        try {
+            $user = Auth::user();
+            
+            if ($user->role !== 'manager_divisi') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya manager divisi yang dapat menyetujui tugas'
+                ], 403);
+            }
+
+            $task = TugasKaryawanToManager::findOrFail($id);
+            
+            // Validasi hanya manager yang berhak
+            if ($task->manager_divisi_id !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak berhak mengakses tugas ini'
+                ], 403);
+            }
+
+            $validated = $request->validate([
+                'action' => 'required|in:approved,rejected,returned',
+                'notes' => 'nullable|string',
+                'status' => 'required_if:action,approved|in:proses,selesai,dibatalkan'
+            ]);
+
+            // Update status tugas
+            if ($validated['action'] === 'approved') {
+                $task->status = $validated['status'];
+                $task->save();
+            } elseif ($validated['action'] === 'rejected') {
+                $task->status = 'dibatalkan';
+                $task->save();
+            }
+            // Jika returned, status tetap pending
+
+            // Simpan riwayat approval
+            TugasApprovalHistory::create([
+                'tugas_id' => $task->id,
+                'approved_by' => $user->id,
+                'action' => $validated['action'],
+                'notes' => $validated['notes'] ?? null,
+            ]);
+
+            Log::info('Task approved/rejected', [
+                'task_id' => $task->id,
+                'action' => $validated['action'],
+                'manager_id' => $user->id,
+                'status' => $task->status
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tugas berhasil diproses',
+                'data' => $task->fresh()
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error approveTaskFromKaryawan: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Detail tugas dari karyawan
+     */
+    public function getTaskFromKaryawanDetail($id)
+    {
+        try {
+            $user = Auth::user();
+            
+            if ($user->role !== 'manager_divisi') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+
+            $task = TugasKaryawanToManager::with(['karyawan:id,name,email', 'project:id,nama,deskripsi', 'approvalHistory.approver:id,name'])
+                ->where('manager_divisi_id', $user->id)
+                ->findOrFail($id);
+
+            $isOverdue = false;
+            if ($task->deadline && !in_array($task->status, ['selesai', 'dibatalkan'])) {
+                try {
+                    $isOverdue = \Carbon\Carbon::parse($task->deadline)->isPast();
+                } catch (\Exception $e) {
+                    $isOverdue = false;
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'id' => $task->id,
+                    'karyawan' => $task->karyawan,
+                    'project' => $task->project,
+                    'judul' => $task->judul,
+                    'nama_tugas' => $task->nama_tugas,
+                    'deskripsi' => $task->deskripsi,
+                    'deadline' => $task->deadline ? $task->deadline->format('Y-m-d H:i:s') : null,
+                    'status' => $task->status,
+                    'catatan' => $task->catatan,
+                    'lampiran' => $task->lampiran,
+                    'lampiran_url' => $task->lampiran ? Storage::url($task->lampiran) : null,
+                    'is_overdue' => $isOverdue,
+                    'approval_history' => $task->approvalHistory,
+                    'created_at' => $task->created_at ? $task->created_at->format('Y-m-d H:i:s') : null,
+                    'updated_at' => $task->updated_at ? $task->updated_at->format('Y-m-d H:i:s') : null,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error getTaskFromKaryawanDetail: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Daftar karyawan dalam divisi
+     */
+    public function getKaryawanInDivisi()
+    {
+        try {
+            $user = Auth::user();
+            
+            if ($user->role !== 'manager_divisi') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+
+            $karyawan = User::where('role', 'karyawan')
+                ->where('divisi_id', $user->divisi_id)
+                ->select('id', 'name', 'email', 'divisi')
+                ->orderBy('name')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $karyawan
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error getKaryawanInDivisi: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * ==============================================
+     * API UNTUK TUGAS BIASA (Manager ke Karyawan)
+     * ==============================================
+     */
 
     /**
      * API: Mendapatkan daftar tugas untuk Manager Divisi
@@ -150,7 +501,7 @@ class ManagerDivisiTaskController extends Controller
     }
 
     /**
-     * API: Mendapatkan daftar Projects untuk Dropdown & Auto-fill
+     * API: Dropdown Projects
      */
     public function getProjectsDropdown(Request $request)
     {
@@ -263,131 +614,124 @@ class ManagerDivisiTaskController extends Controller
     }
 
     /**
-     * Store: Membuat Tugas Baru - DIPERBAIKI
+     * Store: Membuat Tugas Baru
      */
-    /**
-     * Store: Membuat Tugas Baru - FIXED (Tanpa Priority)
-     */
-/**
- * Store: Membuat Tugas Baru - DIPERBAIKI untuk Manager Divisi
- */
-public function store(Request $request)
-{
-    try {
-        $user = Auth::user();
-        
-        Log::info('=== MANAGER STORE TASK REQUEST ===', $request->all());
-        
-        // Validasi yang sesuai dengan form
-        $validator = Validator::make($request->all(), [
-            'project_id'        => 'required|exists:project,id',
-            'judul'             => 'required|string|max:255',
-            'nama_tugas'        => 'nullable|string|max:255',
-            'deskripsi'         => 'required|string',
-            'deadline'          => 'required|date',
-            'assigned_to'       => 'required|exists:users,id',
-            'status'            => 'nullable|in:pending,proses,selesai,dibatalkan',
-            'target_divisi_id'  => 'required|exists:divisi,id',
-            'catatan'           => 'nullable|string',
-            // HAPUS 'priority' karena tidak ada di database
-        ]);
-        
-        if ($validator->fails()) {
-            Log::error('Validation failed', ['errors' => $validator->errors()->toArray()]);
-            throw new ValidationException($validator);
-        }
-        
-        $validated = $validator->validated();
-        
-        // Tambahkan field default
-        $validated['created_by'] = $user->id;
-        $validated['assigned_by_manager'] = $user->id;
-        $validated['target_type'] = 'karyawan';
-        $validated['is_broadcast'] = false;
-        $validated['status'] = $validated['status'] ?? 'pending';
-        
-        // Jika nama_tugas kosong, gunakan judul
-        if (empty($validated['nama_tugas'])) {
-            $validated['nama_tugas'] = $validated['judul'];
-        }
-        
-        // Pastikan project_id valid
-        if (!$this->userHasAccessToProject($user, $validated['project_id'])) {
+    public function store(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            
+            Log::info('=== MANAGER STORE TASK REQUEST ===', $request->all());
+            
+            // Validasi yang sesuai dengan form
+            $validator = Validator::make($request->all(), [
+                'project_id'        => 'required|exists:project,id',
+                'judul'             => 'required|string|max:255',
+                'nama_tugas'        => 'nullable|string|max:255',
+                'deskripsi'         => 'required|string',
+                'deadline'          => 'required|date',
+                'assigned_to'       => 'required|exists:users,id',
+                'status'            => 'nullable|in:pending,proses,selesai,dibatalkan',
+                'target_divisi_id'  => 'required|exists:divisi,id',
+                'catatan'           => 'nullable|string',
+            ]);
+            
+            if ($validator->fails()) {
+                Log::error('Validation failed', ['errors' => $validator->errors()->toArray()]);
+                throw new ValidationException($validator);
+            }
+            
+            $validated = $validator->validated();
+            
+            // Tambahkan field default
+            $validated['created_by'] = $user->id;
+            $validated['assigned_by_manager'] = $user->id;
+            $validated['target_type'] = 'karyawan';
+            $validated['is_broadcast'] = false;
+            $validated['status'] = $validated['status'] ?? 'pending';
+            
+            // Jika nama_tugas kosong, gunakan judul
+            if (empty($validated['nama_tugas'])) {
+                $validated['nama_tugas'] = $validated['judul'];
+            }
+            
+            // Pastikan project_id valid
+            if (!$this->userHasAccessToProject($user, $validated['project_id'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses ke project ini'
+                ], 403);
+            }
+            
+            // Pastikan karyawan berada di divisi yang sama
+            $karyawan = User::find($validated['assigned_to']);
+            if (!$karyawan || $karyawan->divisi_id != $validated['target_divisi_id']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Karyawan tidak berada di divisi yang sama'
+                ], 422);
+            }
+            
+            // Buat task
+            $task = Task::create($validated);
+            
+            Log::info('Task created successfully', [
+                'task_id' => $task->id,
+                'manager_id' => $user->id,
+                'assigned_to' => $task->assigned_to,
+                'divisi_id' => $task->target_divisi_id
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Tugas berhasil dibuat',
+                'data' => $task->load(['project', 'assignee', 'creator', 'targetDivisi'])
+            ]);
+            
+        } catch (ValidationException $e) {
+            Log::error('Validation failed in store task', ['errors' => $e->errors()]);
             return response()->json([
                 'success' => false,
-                'message' => 'Anda tidak memiliki akses ke project ini'
-            ], 403);
-        }
-        
-        // Pastikan karyawan berada di divisi yang sama
-        $karyawan = User::find($validated['assigned_to']);
-        if (!$karyawan || $karyawan->divisi_id != $validated['target_divisi_id']) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Karyawan tidak berada di divisi yang sama'
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors()
             ], 422);
+            
+        } catch (\Exception $e) {
+            Log::error('Error store task: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all()
+            ]);
+            return response()->json([
+                'success' => false, 
+                'message' => 'Gagal membuat tugas: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Cek akses user ke project
+     */
+    private function userHasAccessToProject($user, $projectId)
+    {
+        if ($user->role === 'admin') {
+            return true;
         }
         
-        // Buat task
-        $task = Task::create($validated);
+        $project = Project::find($projectId);
+        if (!$project) {
+            return false;
+        }
         
-        Log::info('Task created successfully', [
-            'task_id' => $task->id,
-            'manager_id' => $user->id,
-            'assigned_to' => $task->assigned_to,
-            'divisi_id' => $task->target_divisi_id
-        ]);
+        // Manager divisi hanya bisa mengakses project di divisinya
+        if ($user->role === 'manager_divisi') {
+            return $project->divisi_id == $user->divisi_id;
+        }
         
-        return response()->json([
-            'success' => true,
-            'message' => 'Tugas berhasil dibuat',
-            'data' => $task->load(['project', 'assignee', 'creator', 'targetDivisi'])
-        ]);
-        
-    } catch (ValidationException $e) {
-        Log::error('Validation failed in store task', ['errors' => $e->errors()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Validasi gagal',
-            'errors' => $e->errors()
-        ], 422);
-        
-    } catch (\Exception $e) {
-        Log::error('Error store task: ' . $e->getMessage(), [
-            'trace' => $e->getTraceAsString(),
-            'request' => $request->all()
-        ]);
-        return response()->json([
-            'success' => false, 
-            'message' => 'Gagal membuat tugas: ' . $e->getMessage()
-        ], 500);
-    }
-}
-
-/**
- * Cek akses user ke project
- */
-private function userHasAccessToProject($user, $projectId)
-{
-    if ($user->role === 'admin') {
-        return true;
-    }
-    
-    $project = Project::find($projectId);
-    if (!$project) {
         return false;
     }
     
-    // Manager divisi hanya bisa mengakses project di divisinya
-    if ($user->role === 'manager_divisi') {
-        return $project->divisi_id == $user->divisi_id;
-    }
-    
-    return false;
-}
-    
     /**
-     * Store khusus untuk pengelola_tugas.blade.php - FIXED (Tanpa Priority)
+     * Store khusus untuk pengelola_tugas.blade.php
      */
     public function createTask(Request $request)
     {
@@ -429,7 +773,6 @@ private function userHasAccessToProject($user, $projectId)
                 'assigned_by_manager' => $user->id,
                 'target_type'       => 'karyawan',
                 'is_broadcast'      => false,
-                // Tidak ada priority, assigned_at, progress_percentage
             ];
             
             $task = Task::create($taskData);
@@ -559,7 +902,7 @@ private function userHasAccessToProject($user, $projectId)
     }
     
     /**
-     * API: Statistik Tugas
+     * API: Statistik Tugas (Manager ke Karyawan)
      */
     public function getStatistics()
     {

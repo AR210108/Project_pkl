@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
-use App\Models\Comment;
+use App\Models\TaskComment; 
 use App\Models\TaskFile;
 use App\Models\User;
 use App\Models\Project;
@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+
 
 class TaskController extends Controller
 {

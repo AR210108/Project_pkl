@@ -78,8 +78,6 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        /* Sidebar link styles - Dihapus karena sudah ada di template header */
-
         /* Button styles */
         .btn-primary {
             background-color: #3b82f6;
@@ -356,25 +354,25 @@
             </div>
 
             <!-- Calendar and Meeting Notes Section -->
-            <section class="bg-card-light rounded-xl p-3 sm:p-8 border border-border-light shadow-card mt-6">
+            <section class="bg-white rounded-xl p-3 sm:p-8 border border-gray-200 shadow-card mt-6">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Calendar Section -->
-                    <div class="bg-card-light rounded-lg p-4 border border-border-light">
+                    <div class="bg-white rounded-lg p-4 border border-gray-200">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-semibold text-text-light">Kalender</h3>
+                            <h3 class="text-xl font-semibold text-black">Kalender</h3>
                             <div class="flex items-center space-x-2">
                                 <button id="prev-month"
-                                    class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    class="p-2 rounded-full hover:bg-gray-100">
                                     <span class="material-icons-outlined">chevron_left</span>
                                 </button>
-                                <span id="current-month" class="text-lg font-medium text-text-light"></span>
+                                <span id="current-month" class="text-lg font-medium text-black"></span>
                                 <button id="next-month"
-                                    class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    class="p-2 rounded-full hover:bg-gray-100">
                                     <span class="material-icons-outlined">chevron_right</span>
                                 </button>
                             </div>
                         </div>
-                        <div class="grid grid-cols-7 gap-1 text-center text-sm font-medium text-text-muted-light mb-2">
+                        <div class="grid grid-cols-7 gap-1 text-center text-sm font-medium text-gray-600 mb-2">
                             <div>Min</div>
                             <div>Sen</div>
                             <div>Sel</div>
@@ -389,26 +387,26 @@
                         <div class="flex justify-center mt-4 space-x-4 text-xs">
                             <div class="flex items-center">
                                 <div class="w-2 h-2 bg-blue-500 rounded-full mr-1"></div>
-                                <span class="text-text-muted-light">Meeting</span>
+                                <span class="text-gray-600">Meeting</span>
                             </div>
                             <div class="flex items-center">
                                 <div class="w-2 h-2 bg-amber-500 rounded-full mr-1"></div>
-                                <span class="text-text-muted-light">Pengumuman</span>
+                                <span class="text-gray-600">Pengumuman</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Meeting Notes Section -->
-                    <div class="bg-card-light rounded-lg p-4 border border-border-light">
+                    <div class="bg-white rounded-lg p-4 border border-gray-200">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-semibold text-text-light">Catatan Meeting</h3>
+                            <h3 class="text-xl font-semibold text-black">Catatan Meeting</h3>
                             <button id="refresh-notes"
-                                class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                                class="p-2 rounded-full hover:bg-gray-100">
                                 <span class="material-icons-outlined">refresh</span>
                             </button>
                         </div>
                         <div id="meeting-notes-container" class="space-y-3 max-h-96 overflow-y-auto">
-                            <div class="text-center py-8 text-text-muted-light">
+                            <div class="text-center py-8 text-gray-600">
                                 <span class="material-icons-outlined text-4xl">event_note</span>
                                 <p class="mt-2">Tidak ada catatan pada tanggal ini</p>
                             </div>
@@ -418,23 +416,23 @@
             </section>
 
             <!-- Announcements Section -->
-            <section class="bg-card-light rounded-xl p-3 sm:p-8 border border-border-light shadow-card mt-6">
+            <section class="bg-white rounded-xl p-3 sm:p-8 border border-gray-200 shadow-card mt-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-semibold text-text-light">Pengumuman</h3>
+                    <h3 class="text-xl font-semibold text-black">Pengumuman</h3>
                     <button id="refresh-announcements"
-                        class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                        class="p-2 rounded-full hover:bg-gray-100">
                         <span class="material-icons-outlined">refresh</span>
                     </button>
                 </div>
                 <div id="announcements-container" class="space-y-3 max-h-96 overflow-y-auto">
-                    <div class="text-center py-8 text-text-muted-light">
+                    <div class="text-center py-8 text-gray-600">
                         <span class="material-icons-outlined text-4xl">campaign</span>
                         <p class="mt-2">Tidak ada pengumuman</p>
                     </div>
                 </div>
             </section>
 
-            <footer class="text-center p-4 bg-gray-100 text-text-muted-light text-sm border-t border-border-light">
+            <footer class="text-center p-4 bg-gray-100 text-gray-600 text-sm border-t border-gray-200">
                 Copyright ©2025 by digicity.id
             </footer>
         </main>
@@ -503,7 +501,7 @@
         // Tambahkan hari-hari dalam bulan
         for (let day = 1; day <= daysInMonth; day++) {
             const dayElement = document.createElement('div');
-            dayElement.className = 'calendar-day p-2 text-center rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer'; // Tambahkan style hover dan cursor
+            dayElement.className = 'calendar-day p-2 text-center rounded hover:bg-gray-100 cursor-pointer'; // Tambahkan style hover dan cursor
             dayElement.textContent = day;
             
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -575,7 +573,7 @@
             
             if (!Array.isArray(notes) || notes.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center py-8 text-text-muted-light">
+                    <div class="text-center py-8 text-gray-600">
                         <span class="material-icons-outlined text-4xl">event_note</span>
                         <p class="mt-2">Tidak ada catatan pada tanggal ini</p>
                         <p class="text-xs mt-1">Tanggal: ${date}</p>
@@ -585,9 +583,9 @@
             }
             
             container.innerHTML = notes.map(note => `
-                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                    <h4 class="font-semibold text-text-light mb-2">${note.topik || 'Tanpa Topik'}</h4>
-                    <div class="text-sm text-text-muted-light space-y-2">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-black mb-2">${note.topik || 'Tanpa Topik'}</h4>
+                    <div class="text-sm text-gray-600 space-y-2">
                         <div><span class="font-medium">Hasil Diskusi:</span><p class="mt-1">${note.hasil_diskusi || 'Tidak ada hasil diskusi'}</p></div>
                         <div><span class="font-medium">Keputusan:</span><p class="mt-1">${note.keputusan || 'Tidak ada keputusan'}</p></div>
                     </div>
@@ -615,7 +613,7 @@
             
             if (!Array.isArray(announcements) || announcements.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center py-8 text-text-muted-light">
+                    <div class="text-center py-8 text-gray-600">
                         <span class="material-icons-outlined text-4xl">campaign</span>
                         <p class="mt-2">Tidak ada pengumuman</p>
                     </div>
@@ -624,14 +622,14 @@
             }
             
             container.innerHTML = announcements.map(announcement => `
-                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <div class="bg-gray-50 p-4 rounded-lg">
                     <div class="flex justify-between items-start mb-2">
-                        <h4 class="font-semibold text-text-light">${announcement.judul || 'Tanpa Judul'}</h4>
-                        <span class="text-xs text-text-muted-light">${announcement.tanggal_indo || new Date(announcement.created_at).toLocaleDateString('id-ID')}</span>
+                        <h4 class="font-semibold text-black">${announcement.judul || 'Tanpa Judul'}</h4>
+                        <span class="text-xs text-gray-600">${announcement.tanggal_indo || new Date(announcement.created_at).toLocaleDateString('id-ID')}</span>
                     </div>
-                    <p class="text-sm text-text-muted-light mb-2">${announcement.ringkasan || announcement.isi_pesan || 'Tidak ada pesan'}</p>
+                    <p class="text-sm text-gray-600 mb-2">${announcement.ringkasan || announcement.isi_pesan || 'Tidak ada pesan'}</p>
                     <div class="flex justify-between items-center">
-                        <span class="text-xs text-text-muted-light">Oleh: ${announcement.creator || 'System'}</span>
+                        <span class="text-xs text-gray-600">Oleh: ${announcement.creator || 'System'}</span>
                         ${announcement.lampiran_url ? `<a href="${announcement.lampiran_url}" target="_blank" class="text-xs text-primary hover:underline">Lihat Lampiran</a>` : ''}
                     </div>
                 </div>

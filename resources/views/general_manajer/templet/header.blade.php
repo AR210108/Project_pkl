@@ -277,12 +277,7 @@
                 <span class="sidebar-text">Data Project</span>
             </a>
 
-            <!-- Menu Kelola Tugas -->
-            <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="{{ route('general_manajer.kelola_tugas') }}" data-page="kelola_tugas" data-path="general_manajer/kelola_tugas">
-                <span class="material-icons sidebar-icon">assignment</span>
-                <span class="sidebar-text">Kelola Tugas</span>
-            </a>
+         
 
             <!-- Menu Tim dan Divisi -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"

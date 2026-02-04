@@ -1013,4 +1013,62 @@ class CatatanRapatController extends Controller
             return response()->json(['message' => 'Server Error'], 500);
         }
     }
+
+   /**
+ * API: Mendapatkan catatan rapat untuk Finance
+ * Hanya menampilkan catatan rapat yang ditugaskan ke finance
+ */
+public function getMeetingNotesForFinance(): JsonResponse
+{
+    try {
+        // Cek authentication
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        $user = Auth::user();
+        if ($user->role !== 'finance') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied'
+            ], 403);
+        }
+
+        // Query untuk mendapatkan catatan rapat yang ditugaskan ke finance
+        $meetingNotes = CatatanRapat::whereHas('penugasan', function ($query) use ($user) {
+            $query->where('users.id', $user->id);
+        })
+            ->with(['user:id,name'])
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        $formattedNotes = $meetingNotes->map(function ($note) {
+            return [
+                'id' => $note->id,
+                'topik' => $note->topik,
+                'hasil_diskusi' => $note->hasil_diskusi,
+                'keputusan' => $note->keputusan,
+                'tanggal' => $note->tanggal,
+                'formatted_tanggal' => Carbon::parse($note->tanggal)->translatedFormat('d F Y'),
+                'creator_name' => $note->user ? $note->user->name : 'System',
+                'created_at' => $note->created_at->format('Y-m-d H:i:s'),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $formattedNotes
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error in getMeetingNotesForFinance: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Server Error'
+        ], 500);
+    }
+}
 }

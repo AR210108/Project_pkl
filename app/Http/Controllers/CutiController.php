@@ -7,20 +7,19 @@ use App\Models\User;
 use App\Models\Absensi;
 use App\Models\CutiHistory;
 use App\Models\CutiQuota;
-use App\Models\Divisi; // Pastikan model Divisi ada
+use App\Models\Divisi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Schema; // FIX: Import Schema agar tidak error
 
 class CutiController extends Controller
 {
     protected $user;
     protected $currentRole;
-    protected $currentDivisi;
+    protected $currentDivisiName;
 
     public function __construct()
     {
@@ -30,13 +29,11 @@ class CutiController extends Controller
             $this->user = Auth::user();
             $this->currentRole = $this->user->role ?? null;
             
-            // Ambil divisi dengan aman. 
-            if (isset($this->user->divisi)) {
-                $this->currentDivisi = $this->user->divisi;
-            } elseif (isset($this->user->divisi_id) && $this->user->divisionDetail) {
-                $this->currentDivisi = $this->user->divisionDetail->divisi;
+            // Ambil nama divisi dari relasi divisionDetail
+            if ($this->user && $this->user->divisionDetail) {
+                $this->currentDivisiName = $this->user->divisionDetail->divisi;
             } else {
-                $this->currentDivisi = null;
+                $this->currentDivisiName = null;
             }
             
             if (!$this->user) {
@@ -92,23 +89,17 @@ class CutiController extends Controller
     public function indexManagerDivisi(Request $request)
     {
         try {
-            if (!$this->currentDivisi) {
+            if (!$this->currentDivisiName) {
                 return response()->json(['success' => false, 'message' => 'User tidak memiliki divisi'], 400);
             }
             
-            $divisi = $this->currentDivisi;
+            $divisiName = $this->currentDivisiName;
             $statusFilter = $request->get('status', 'all');
             $search = $request->get('search', '');
             
-            $query = Cuti::whereHas('user', function ($query) use ($divisi) {
-                if (Schema::hasColumn('users', 'divisi')) {
-                    $query->where('divisi', $divisi);
-                } elseif (Schema::hasColumn('users', 'divisi_id')) {
-                     $query->whereHas('divisionDetail', function($q) use ($divisi) {
-                         $q->where('divisi', $divisi);
-                     });
-                }
-            })->with('user:id,name,divisi');
+            $query = Cuti::whereHas('user.divisionDetail', function ($query) use ($divisiName) {
+                $query->where('divisi', $divisiName);
+            })->with(['user:id,name,divisi_id,sisa_cuti,email', 'user.divisionDetail']);
             
             if ($statusFilter !== 'all') {
                 $query->where('status', $statusFilter);
@@ -125,16 +116,17 @@ class CutiController extends Controller
             
             $cuti = $query->orderBy('created_at', 'desc')->get();
             
-            // Stats
             $total = (clone $query)->count();
             $menunggu = (clone $query)->where('status', 'menunggu')->count();
             $disetujui = (clone $query)->where('status', 'disetujui')->count();
             $ditolak = (clone $query)->where('status', 'ditolak')->count();
             
-            $karyawanDivisi = User::where('divisi', $divisi)
+            $karyawanDivisi = User::whereHas('divisionDetail', function($q) use ($divisiName) {
+                                    $q->where('divisi', $divisiName);
+                                })
                                 ->where('role', 'karyawan')
                                 ->orderBy('name')
-                                ->get(['id', 'name', 'divisi', 'sisa_cuti', 'email']);
+                                ->get(['id', 'name', 'divisi_id', 'sisa_cuti', 'email']);
             
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -158,7 +150,7 @@ class CutiController extends Controller
                 'menunggu',
                 'disetujui',
                 'ditolak',
-                'divisi',
+                'divisiName',
                 'karyawanDivisi'
             ));
         } catch (\Exception $e) {
@@ -170,27 +162,19 @@ class CutiController extends Controller
     public function indexGeneralManager(Request $request)
     {
         try {
-            // Untuk filter
             $statusFilter = $request->get('status', 'all');
             $divisiFilter = $request->get('divisi', 'all');
             $search = $request->get('search', '');
             
-            // Eager load user dan relation yang dibutuhkan
-            $query = Cuti::with(['user:id,name,divisi,email', 'disetujuiOleh:id,name']);
+            $query = Cuti::with(['user:id,name,divisi_id,sisa_cuti,email', 'user.divisionDetail', 'disetujuiOleh:id,name']);
             
             if ($statusFilter !== 'all') {
                 $query->where('status', $statusFilter);
             }
             
             if ($divisiFilter !== 'all') {
-                $query->whereHas('user', function($q) use ($divisiFilter) {
-                    if (Schema::hasColumn('users', 'divisi')) {
-                        $q->where('divisi', $divisiFilter);
-                    } elseif (Schema::hasColumn('users', 'divisi_id')) {
-                        $q->whereHas('divisionDetail', function($dq) use ($divisiFilter) {
-                            $dq->where('divisi', $divisiFilter);
-                        });
-                    }
+                $query->whereHas('user.divisionDetail', function($q) use ($divisiFilter) {
+                    $q->where('divisi', $divisiFilter);
                 });
             }
             
@@ -199,67 +183,18 @@ class CutiController extends Controller
                     $q->where('keterangan', 'like', "%{$search}%")
                       ->orWhere('jenis_cuti', 'like', "%{$search}%")
                       ->orWhereHas('user', function($q2) use ($search) {
-                          $q2->where('name', 'like', "%{$search}%");
-                          if (Schema::hasColumn('users', 'divisi')) {
-                              $q2->orWhere('divisi', 'like', "%{$search}%");
-                          }
-                          $q2->orWhere('email', 'like', "%{$search}%");
+                          $q2->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                          $q2->orWhereHas('divisionDetail', function($qDiv) use ($search) {
+                              $qDiv->where('divisi', 'like', "%{$search}%");
+                          });
                       });
                 });
             }
             
-            $cuti = $query->orderBy('created_at', 'desc')
-                         ->paginate(10);
+            $cuti = $query->orderBy('created_at', 'desc')->paginate(10);
             
-            // ==========================================
-            // PERBAIKAN UTAMA: Divisi list untuk filter
-            // ==========================================
-            
-            $divisiList = collect(); // Inisialisasi sebagai kosong Collection
-
-            // Opsi 1: Coba ambil dari kolom divisi di users (String)
-            try {
-                if (Schema::hasColumn('users', 'divisi')) {
-                    $rawDivisi = User::where('role', 'karyawan')
-                                    ->whereNotNull('divisi')
-                                    ->select('divisi')
-                                    ->distinct()
-                                    ->pluck('divisi')
-                                    ->toArray();
-                    
-                    if (!empty($rawDivisi)) {
-                        $divisiList = collect($rawDivisi);
-                    }
-                }
-            } catch (\Exception $e) {
-                // Abaikan error
-            }
-
-            // Opsi 2: Jika kosong atau gagal, coba ambil dari tabel Model Divisi (Relasi)
-            if ($divisiList->isEmpty()) {
-                try {
-                    $rawDivisiRelasi = Divisi::whereHas('users', function($q) {
-                                        $q->where('role', 'karyawan');
-                                    })
-                                    ->pluck('divisi')
-                                    ->toArray();
-
-                    if (!empty($rawDivisiRelasi)) {
-                        $divisiList = collect($rawDivisiRelasi);
-                    }
-                } catch (\Exception $e) {
-                    // Abaikan jika model/tabel tidak ada
-                }
-            }
-
-            // Opsi 3: Jika masih kosong, gunakan array default agar filter tidak error di frontend
-            if ($divisiList->isEmpty()) {
-                $divisiList = collect(['digital_marketing', 'hrd', 'finance', 'it', 'operational']);
-            }
-            
-            // ==========================================
-            // AKHIR PERBAIKAN
-            // ==========================================
+            $divisiList = Divisi::orderBy('divisi', 'asc')->pluck('divisi')->toArray();
             
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -312,7 +247,6 @@ class CutiController extends Controller
             
             $user = $this->user;
             
-            // Get quota info
             $quotaInfo = [];
             try {
                 $quotaInfo = CutiQuota::getUserQuota($user->id, date('Y'));
@@ -334,7 +268,7 @@ class CutiController extends Controller
                     'user' => [
                         'id' => $user->id,
                         'name' => $user->name,
-                        'divisi' => $user->divisi ?? '-',
+                        'divisi' => $user->divisionDetail ? $user->divisionDetail->divisi : '-',
                         'sisa_cuti' => (int)($user->sisa_cuti ?? 0)
                     ],
                     'quota_info' => $quotaInfo,
@@ -363,7 +297,8 @@ class CutiController extends Controller
         try {
             $query = Cuti::query();
             $query->with([
-                'user:id,name,divisi,sisa_cuti,email',
+                'user:id,name,divisi_id,sisa_cuti,email',
+                'user.divisionDetail',
                 'disetujuiOleh:id,name'
             ]);
 
@@ -372,17 +307,11 @@ class CutiController extends Controller
                     $query->where('user_id', $this->user->id);
                     break;
                 case 'manager_divisi':
-                    if (!$this->currentDivisi) {
+                    if (!$this->currentDivisiName) {
                         return response()->json(['success' => false, 'message' => 'User tidak memiliki divisi'], 400);
                     }
-                    $query->whereHas('user', function ($q) {
-                         if (Schema::hasColumn('users', 'divisi')) {
-                            $q->where('divisi', $this->currentDivisi);
-                         } elseif (Schema::hasColumn('users', 'divisi_id')) {
-                             $q->whereHas('divisionDetail', function($dq) {
-                                 $dq->where('divisi', $this->currentDivisi);
-                             });
-                         }
+                    $query->whereHas('user.divisionDetail', function ($q) {
+                         $q->where('divisi', $this->currentDivisiName);
                     });
                     break;
                 case 'general_manager':
@@ -404,14 +333,8 @@ class CutiController extends Controller
             
             if (in_array($this->currentRole, ['general_manager', 'admin', 'owner', 'finance']) && 
                 $request->has('divisi') && $request->divisi !== 'all') {
-                $query->whereHas('user', function ($q) use ($request) {
-                    if (Schema::hasColumn('users', 'divisi')) {
-                        $q->where('divisi', $request->divisi);
-                    } elseif (Schema::hasColumn('users', 'divisi_id')) {
-                        $q->whereHas('divisionDetail', function($dq) use ($request) {
-                             $dq->where('divisi', $request->divisi);
-                        });
-                    }
+                $query->whereHas('user.divisionDetail', function ($q) use ($request) {
+                    $q->where('divisi', $request->divisi);
                 });
             }
             
@@ -423,9 +346,9 @@ class CutiController extends Controller
                       ->orWhereHas('user', function($q) use ($search) {
                           $q->where('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%");
-                          if (Schema::hasColumn('users', 'divisi')) {
-                              $q->orWhere('divisi', 'like', "%{$search}%");
-                          }
+                          $q->orWhereHas('divisionDetail', function($qDiv) use ($search) {
+                              $qDiv->where('divisi', 'like', "%{$search}%");
+                          });
                       });
                 });
             }
@@ -486,7 +409,12 @@ class CutiController extends Controller
             
             if ($item->user) {
                 $userName = $item->user->name ?? 'Unknown';
-                $userDivisi = $item->user->divisi ?? '-';
+                if ($item->user->relationLoaded('divisionDetail') && $item->user->divisionDetail) {
+                    $userDivisi = $item->user->divisionDetail->divisi;
+                } else {
+                    $userDivisi = $item->user->divisi ?? '-'; 
+                }
+                
                 $userEmail = $item->user->email ?? null;
                 $sisaCuti = (int)($item->user->sisa_cuti ?? 0);
             }
@@ -498,21 +426,13 @@ class CutiController extends Controller
             if ($item->tanggal_mulai) {
                 try {
                     $tMulai = Carbon::parse($item->tanggal_mulai)->translatedFormat('d F Y');
-                    $tMulaiDate = Carbon::parse($item->tanggal_mulai)->format('Y-m-d');
-                } catch (\Exception $e) {
-                    $tMulai = '-';
-                    $tMulaiDate = null;
-                }
+                } catch (\Exception $e) { $tMulai = '-'; }
             }
             
             if ($item->tanggal_selesai) {
                 try {
                     $tSelesai = Carbon::parse($item->tanggal_selesai)->translatedFormat('d F Y');
-                    $tSelesaiDate = Carbon::parse($item->tanggal_selesai)->format('Y-m-d');
-                } catch (\Exception $e) {
-                    $tSelesai = '-';
-                    $tSelesaiDate = null;
-                }
+                } catch (\Exception $e) { $tSelesai = '-'; }
             }
             
             if ($item->tanggal_mulai && $item->tanggal_selesai) {
@@ -520,9 +440,7 @@ class CutiController extends Controller
                     $start = Carbon::parse($item->tanggal_mulai)->format('d/m/Y');
                     $end = Carbon::parse($item->tanggal_selesai)->format('d/m/Y');
                     $periode = $start . ' - ' . $end;
-                } catch (\Exception $e) {
-                    $periode = '-';
-                }
+                } catch (\Exception $e) { $periode = '-'; }
             }
             
             $jenisMap = [
@@ -565,45 +483,12 @@ class CutiController extends Controller
                 }
             }
             
-            $dibatalkanOleh = null;
-            $dibatalkanPada = null;
-            
-            if ($item->dibatalkanOleh) {
-                $dibatalkanOleh = $item->dibatalkanOleh->name;
-            }
-            
-            if ($item->dibatalkan_pada) {
-                try {
-                    $dibatalkanPada = Carbon::parse($item->dibatalkan_pada)->format('d F Y H:i');
-                } catch (\Exception $e) {
-                    $dibatalkanPada = null;
-                }
-            }
-            
             $createdAt = '-';
             if ($item->created_at) {
                 try {
                     $createdAt = Carbon::parse($item->created_at)->format('d F Y H:i');
                 } catch (\Exception $e) {
                     $createdAt = '-';
-                }
-            }
-            
-            $dapatDisetujui = $item->status === 'menunggu';
-            $dapatDiubah = $item->status === 'menunggu' && 
-                          ($this->currentRole === 'karyawan' ? $item->user_id === $this->user->id : true);
-            $dapatDihapus = $item->status === 'menunggu' && 
-                           ($this->currentRole === 'karyawan' ? $item->user_id === $this->user->id : true);
-            $dapatLihat = true;
-            $dapatBatalkan = $item->status === 'disetujui' && 
-                            ($this->currentRole !== 'karyawan' || $item->user_id === $this->user->id);
-            
-            $isOverlapping = false;
-            if (method_exists($item, 'isOverlapping')) {
-                try {
-                    $isOverlapping = $item->isOverlapping();
-                } catch (\Exception $e) {
-                    // Ignore error
                 }
             }
             
@@ -630,18 +515,19 @@ class CutiController extends Controller
                 'sisa_cuti_sesudah' => $item->sisa_cuti_sesudah ?? null,
                 'disetujui_oleh' => $disetujuiOleh,
                 'disetujui_pada' => $disetujuiPada,
-                'dibatalkan_oleh' => $dibatalkanOleh,
-                'dibatalkan_pada' => $dibatalkanPada,
                 'catatan_penolakan' => $item->catatan_penolakan ?? null,
                 'catatan_pembatalan' => $item->catatan_pembatalan ?? null,
                 'created_at' => $createdAt,
-                'dapat_disetujui' => $dapatDisetujui,
-                'dapat_diubah' => $dapatDiubah,
-                'dapat_dihapus' => $dapatDihapus,
-                'dapat_lihat' => $dapatLihat,
-                'dapat_batalkan' => $dapatBatalkan,
-                'is_overlapping' => $isOverlapping,
-                'overlap_warning' => $isOverlapping ? 'Cuti ini bertabrakan dengan cuti lain yang sudah disetujui' : null
+                'dapat_disetujui' => $item->status === 'menunggu',
+                'dapat_diubah' => $item->status === 'menunggu' && 
+                                  ($this->currentRole === 'karyawan' ? $item->user_id === $this->user->id : true),
+                'dapat_dihapus' => $item->status === 'menunggu' && 
+                                   ($this->currentRole === 'karyawan' ? $item->user_id === $this->user->id : true),
+                'dapat_lihat' => true,
+                'dapat_batalkan' => $item->status === 'disetujui' && 
+                                    ($this->currentRole !== 'karyawan' || $item->user_id === $this->user->id),
+                'is_overlapping' => method_exists($item, 'isOverlapping') ? $item->isOverlapping() : false,
+                'overlap_warning' => (method_exists($item, 'isOverlapping') && $item->isOverlapping()) ? 'Cuti ini bertabrakan dengan cuti lain yang sudah disetujui' : null
             ];
         } catch (\Exception $e) {
             Log::error('Error formatCutiData: ' . $e->getMessage());
@@ -650,8 +536,6 @@ class CutiController extends Controller
                 'user_id' => $item->user_id ?? 0,
                 'nama' => 'Error',
                 'divisi' => '-',
-                'keterangan' => 'Error loading data',
-                'jenis_cuti' => 'Error',
                 'status' => 'error',
                 'status_label' => 'Error',
                 'status_color' => 'secondary',
@@ -731,20 +615,12 @@ class CutiController extends Controller
                     break;
                     
                 case 'manager_divisi':
-                    if (!$this->currentDivisi) {
+                    if (!$this->currentDivisiName) {
                         throw new \Exception('User tidak memiliki divisi');
                     }
                     
-                    $divisi = $this->currentDivisi;
-                    
-                    $baseQuery = Cuti::whereHas('user', function ($query) use ($divisi) {
-                         if (Schema::hasColumn('users', 'divisi')) {
-                            $query->where('divisi', $divisi);
-                         } elseif (Schema::hasColumn('users', 'divisi_id')) {
-                             $query->whereHas('divisionDetail', function($dq) use ($divisi) {
-                                 $dq->where('divisi', $divisi);
-                             });
-                         }
+                    $baseQuery = Cuti::whereHas('user.divisionDetail', function ($query) {
+                         $query->where('divisi', $this->currentDivisiName);
                     });
                     
                     $total = (clone $baseQuery)->count();
@@ -753,9 +629,11 @@ class CutiController extends Controller
                     $ditolak = (clone $baseQuery)->where('status', 'ditolak')->count();
                     $dibatalkan = (clone $baseQuery)->where('status', 'dibatalkan')->count();
                     
-                    $totalKaryawan = User::where('divisi', $divisi)
-                                        ->where('role', 'karyawan')
-                                        ->count();
+                    $totalKaryawan = User::whereHas('divisionDetail', function($q) {
+                                        $q->where('divisi', $this->currentDivisiName);
+                                    })
+                                    ->where('role', 'karyawan')
+                                    ->count();
                     
                     $data = [
                         'total_pengajuan' => $total,
@@ -860,6 +738,8 @@ class CutiController extends Controller
                 ->whereYear('tanggal_mulai', $year)
                 ->count();
             
+            $userDivisiName = $user->divisionDetail ? $user->divisionDetail->divisi : '-';
+
             $data = [
                 'quota' => [
                     'id' => $quota->id,
@@ -882,7 +762,7 @@ class CutiController extends Controller
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
-                    'divisi' => $user->divisi ?? '-',
+                    'divisi' => $userDivisiName,
                     'sisa_cuti' => $user->sisa_cuti ?? 0,
                     'cuti_terpakai_tahun_ini' => $user->cuti_terpakai_tahun_ini ?? 0,
                     'cuti_reset_date' => $user->cuti_reset_date
@@ -1015,19 +895,23 @@ class CutiController extends Controller
     }
 
     // ============================================
-    // SHOW METHOD (GET BY ID)
+    // SHOW METHOD
     // ============================================
 
     public function show($id) 
     {
         try {
-            $cuti = Cuti::with(['user:id,name,divisi,email,sisa_cuti', 'disetujuiOleh:id,name', 'dibatalkanOleh:id,name', 'histories.user:id,name'])->findOrFail($id);
+            $cuti = Cuti::with(['user:id,name,divisi_id,sisa_cuti,email', 'user.divisionDetail', 'disetujuiOleh:id,name', 'dibatalkanOleh:id,name', 'histories.user:id,name'])->findOrFail($id);
             
             if ($this->currentRole === 'karyawan' && $cuti->user_id !== $this->user->id) {
                 return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
             }
-            if ($this->currentRole === 'manager_divisi' && (!$cuti->user || $cuti->user->divisi !== $this->currentDivisi)) {
-                return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+            
+            if ($this->currentRole === 'manager_divisi') {
+                $userDivisiName = $cuti->user && $cuti->user->divisionDetail ? $cuti->user->divisionDetail->divisi : null;
+                if (!$cuti->user || $userDivisiName !== $this->currentDivisiName) {
+                    return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+                }
             }
             
             $histories = $cuti->histories->map(function($history) {
@@ -1056,13 +940,13 @@ class CutiController extends Controller
     }
 
     // ============================================
-    // EDIT METHOD (GET EDIT DATA)
+    // EDIT METHOD
     // ============================================
 
     public function edit($id) 
     {
         try {
-            $cuti = Cuti::with(['user:id,name,divisi,email,sisa_cuti'])->findOrFail($id);
+            $cuti = Cuti::with(['user:id,name,divisi_id,sisa_cuti,email', 'user.divisionDetail'])->findOrFail($id);
             
             if ($cuti->user_id !== $this->user->id && !in_array($this->currentRole, ['admin', 'general_manager'])) {
                 return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
@@ -1087,6 +971,8 @@ class CutiController extends Controller
                 ];
             }
             
+            $divisiName = $cuti->user->divisionDetail ? $cuti->user->divisionDetail->divisi : '-';
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -1094,7 +980,7 @@ class CutiController extends Controller
                     'user_id' => $cuti->user_id,
                     'nama' => $cuti->user->name ?? 'Unknown',
                     'email' => $cuti->user->email ?? '',
-                    'divisi' => $cuti->user->divisi ?? '',
+                    'divisi' => $divisiName,
                     'keterangan' => $cuti->keterangan,
                     'jenis_cuti' => $cuti->jenis_cuti,
                     'jenis_cuti_kode' => $cuti->jenis_cuti,
@@ -1142,7 +1028,7 @@ class CutiController extends Controller
     }
 
     // ============================================
-    // UPDATE METHOD
+    // UPDATE METHOD (FLEKSIBEL)
     // ============================================
 
     public function update(Request $request, $id)
@@ -1151,6 +1037,7 @@ class CutiController extends Controller
         try {
             $cuti = Cuti::with('user')->findOrFail($id);
             
+            // Cek hak akses
             if ($cuti->user_id !== $this->user->id && !in_array($this->currentRole, ['admin', 'general_manager'])) {
                 return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
             }
@@ -1159,28 +1046,46 @@ class CutiController extends Controller
                 return response()->json(['success' => false, 'message' => 'Cuti tidak dapat diubah karena sudah diproses'], 400);
             }
             
+            // VALIDASI FLEKSIBEL
+            // Gunakan 'sometimes' agar field tidak wajib diisi
             $validated = $request->validate([
-                'keterangan' => 'required|string|max:255',
-                'jenis_cuti' => 'required|in:tahunan,sakit,penting,melahirkan,lainnya',
-                'tanggal_mulai' => 'required|date',
-                'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-                'durasi' => 'required|integer|min:1'
+                'keterangan' => 'sometimes|string|max:255',
+                'jenis_cuti' => 'sometimes|in:tahunan,sakit,penting,melahirkan,lainnya',
+                'tanggal_mulai' => 'sometimes|date',
+                'tanggal_selesai' => 'sometimes|date|after_or_equal:tanggal_mulai',
+                'durasi' => 'sometimes|integer|min:1'
             ]);
             
+            // GABUNGKAN DATA INPUT DENGAN DATA LAMA
+            // Jika user tidak mengirim field tertentu, gunakan nilai lama
+            $finalData = [
+                'keterangan' => $request->filled('keterangan') ? $validated['keterangan'] : $cuti->keterangan,
+                'jenis_cuti' => $request->filled('jenis_cuti') ? $validated['jenis_cuti'] : $cuti->jenis_cuti,
+                'tanggal_mulai' => $request->filled('tanggal_mulai') ? $validated['tanggal_mulai'] : $cuti->tanggal_mulai,
+                'tanggal_selesai' => $request->filled('tanggal_selesai') ? $validated['tanggal_selesai'] : $cuti->tanggal_selesai,
+                'durasi' => $request->filled('durasi') ? $validated['durasi'] : $cuti->durasi,
+            ];
+            
+            // Hitung selisih hari untuk penyesuaian kuota
             $selisihHari = 0;
             $oldDurasi = $cuti->durasi;
-            $newDurasi = $validated['durasi'];
+            $newDurasi = $finalData['durasi'];
             
-            if ($cuti->jenis_cuti === 'tahunan' || $validated['jenis_cuti'] === 'tahunan') {
-                if ($cuti->jenis_cuti === 'tahunan' && $validated['jenis_cuti'] === 'tahunan') {
+            // Logika perubahan jenis cuti terkait kuota tahunan
+            $oldJenis = $cuti->jenis_cuti;
+            $newJenis = $finalData['jenis_cuti'];
+            
+            if ($oldJenis === 'tahunan' || $newJenis === 'tahunan') {
+                if ($oldJenis === 'tahunan' && $newJenis === 'tahunan') {
                     $selisihHari = $newDurasi - $oldDurasi;
-                } else if ($cuti->jenis_cuti !== 'tahunan' && $validated['jenis_cuti'] === 'tahunan') {
+                } else if ($oldJenis !== 'tahunan' && $newJenis === 'tahunan') {
                     $selisihHari = $newDurasi;
-                } else if ($cuti->jenis_cuti === 'tahunan' && $validated['jenis_cuti'] !== 'tahunan') {
+                } else if ($oldJenis === 'tahunan' && $newJenis !== 'tahunan') {
                     $selisihHari = -$oldDurasi;
                 }
             }
             
+            // Cek kuota jika ada penambahan hari cuti tahunan
             if ($selisihHari > 0) {
                 $currentYear = date('Y');
                 $quota = CutiQuota::getUserQuota($cuti->user_id, $currentYear);
@@ -1193,15 +1098,16 @@ class CutiController extends Controller
                 }
             }
             
+            // Cek tabrakan tanggal
             $overlapCuti = Cuti::where('user_id', $cuti->user_id)
                 ->where('status', 'disetujui')
                 ->where('id', '!=', $cuti->id)
-                ->where(function($query) use ($validated) {
-                    $query->whereBetween('tanggal_mulai', [$validated['tanggal_mulai'], $validated['tanggal_selesai']])
-                          ->orWhereBetween('tanggal_selesai', [$validated['tanggal_mulai'], $validated['tanggal_selesai']])
-                          ->orWhere(function($q) use ($validated) {
-                              $q->where('tanggal_mulai', '<=', $validated['tanggal_mulai'])
-                                ->where('tanggal_selesai', '>=', $validated['tanggal_selesai']);
+                ->where(function($query) use ($finalData) {
+                    $query->whereBetween('tanggal_mulai', [$finalData['tanggal_mulai'], $finalData['tanggal_selesai']])
+                          ->orWhereBetween('tanggal_selesai', [$finalData['tanggal_mulai'], $finalData['tanggal_selesai']])
+                          ->orWhere(function($q) use ($finalData) {
+                              $q->where('tanggal_mulai', '<=', $finalData['tanggal_mulai'])
+                                ->where('tanggal_selesai', '>=', $finalData['tanggal_selesai']);
                           });
                 })
                 ->exists();
@@ -1215,6 +1121,7 @@ class CutiController extends Controller
             
             $oldData = $cuti->toArray();
             
+            // Update Kuota jika ada perubahan durasi/tipe
             if ($selisihHari != 0) {
                 $currentYear = date('Y');
                 $quota = CutiQuota::getUserQuota($cuti->user_id, $currentYear);
@@ -1228,11 +1135,15 @@ class CutiController extends Controller
                 }
             }
             
-            $cuti->update($validated);
+            // Update data cuti
+            $cuti->update($finalData);
             
+            // Catat history
             $changes = [];
-            foreach ($validated as $key => $value) {
-                if ($oldData[$key] != $value) {
+            foreach ($finalData as $key => $value) {
+                // Hanya catat jika ada perubahan
+                // Kita bandingkan string/nilai untuk memastikan akurasi
+                if (isset($oldData[$key]) && $oldData[$key] != $value) {
                     $changes[$key] = [
                         'from' => $oldData[$key],
                         'to' => $value
@@ -1276,13 +1187,17 @@ class CutiController extends Controller
     {
         DB::beginTransaction();
         try {
-            $cuti = Cuti::with('user')->findOrFail($id);
+            $cuti = Cuti::with(['user', 'user.divisionDetail'])->findOrFail($id);
             
             if ($this->currentRole === 'karyawan') {
                 return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
             }
-            if ($this->currentRole === 'manager_divisi' && (!$cuti->user || $cuti->user->divisi !== $this->currentDivisi)) {
-                return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses ke divisi ini'], 403);
+
+            if ($this->currentRole === 'manager_divisi') {
+                $userDivisiName = $cuti->user->divisionDetail ? $cuti->user->divisionDetail->divisi : null;
+                if (!$cuti->user || $userDivisiName !== $this->currentDivisiName) {
+                    return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses ke divisi ini'], 403);
+                }
             }
 
             if ($cuti->status !== 'menunggu') {
@@ -1375,13 +1290,17 @@ class CutiController extends Controller
         DB::beginTransaction();
         try {
             $validated = $request->validate(['alasan_penolakan' => 'required|string|max:255']);
-            $cuti = Cuti::with('user')->findOrFail($id);
+            $cuti = Cuti::with(['user', 'user.divisionDetail'])->findOrFail($id);
             
             if ($this->currentRole === 'karyawan') {
                 return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
             }
-            if ($this->currentRole === 'manager_divisi' && (!$cuti->user || $cuti->user->divisi !== $this->currentDivisi)) {
-                return response()->json(['success' => false, 'message' => 'Akses divisi ditolak'], 403);
+
+            if ($this->currentRole === 'manager_divisi') {
+                $userDivisiName = $cuti->user->divisionDetail ? $cuti->user->divisionDetail->divisi : null;
+                if (!$cuti->user || $userDivisiName !== $this->currentDivisiName) {
+                    return response()->json(['success' => false, 'message' => 'Akses divisi ditolak'], 403);
+                }
             }
             
             if ($cuti->status !== 'menunggu') {
@@ -1413,7 +1332,7 @@ class CutiController extends Controller
     }
 
     // ============================================
-    // CANCEL CUTI (Karyawan Cancel)
+    // CANCEL CUTI (Karyawan)
     // ============================================
 
     public function cancel(Request $request, $id)
@@ -1452,7 +1371,7 @@ class CutiController extends Controller
     }
 
     // ============================================
-    // CANCEL CUTI (With Refund) - Admin/Manager
+    // CANCEL CUTI (With Refund)
     // ============================================
 
     public function cancelWithRefund(Request $request, $id)
@@ -1621,22 +1540,18 @@ class CutiController extends Controller
                 return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
             }
             
-            if (!$this->currentDivisi) {
+            if (!$this->currentDivisiName) {
                 return response()->json(['success' => false, 'message' => 'User tidak memiliki divisi'], 400);
             }
             
-            $query = User::where('role', 'karyawan');
-            
-            if (Schema::hasColumn('users', 'divisi')) {
-                $query->where('divisi', $this->currentDivisi);
-            } elseif (Schema::hasColumn('users', 'divisi_id')) {
-                $query->whereHas('divisionDetail', function($q) {
-                    $q->where('divisi', $this->currentDivisi);
-                });
-            }
+            $query = User::where('role', 'karyawan')
+                         ->with('divisionDetail')
+                         ->whereHas('divisionDetail', function($q) {
+                             $q->where('divisi', $this->currentDivisiName);
+                         });
             
             $karyawan = $query->orderBy('name')
-                            ->get(['id', 'name', 'divisi', 'sisa_cuti', 'email'])
+                            ->get(['id', 'name', 'divisi_id', 'sisa_cuti', 'email'])
                             ->map(function($user) {
                                 $quotaInfo = [];
                                 try {
@@ -1645,10 +1560,12 @@ class CutiController extends Controller
                                     Log::warning('Failed to get quota for user ' . $user->id . ': ' . $e->getMessage());
                                 }
                                 
+                                $divisiName = $user->divisionDetail ? $user->divisionDetail->divisi : '-';
+
                                 return [
                                     'id' => $user->id,
                                     'name' => $user->name,
-                                    'divisi' => $user->divisi ?? '-',
+                                    'divisi' => $divisiName,
                                     'sisa_cuti' => (int)($user->sisa_cuti ?? 0),
                                     'email' => $user->email,
                                     'cuti_terpakai' => 12 - (int)($user->sisa_cuti ?? 0),
@@ -1819,7 +1736,7 @@ class CutiController extends Controller
                 return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
             }
             
-            $query = Cuti::with(['user:id,name,divisi', 'disetujuiOleh:id,name']);
+            $query = Cuti::with(['user:id,name,divisi_id,sisa_cuti,email', 'user.divisionDetail', 'disetujuiOleh:id,name']);
             
             if ($request->has('year')) {
                 $year = $request->year;
@@ -1827,14 +1744,8 @@ class CutiController extends Controller
             }
             
             if ($request->has('divisi') && $request->divisi !== 'all') {
-                $query->whereHas('user', function($q) use ($request) {
-                    if (Schema::hasColumn('users', 'divisi')) {
-                        $q->where('divisi', $request->divisi);
-                    } elseif (Schema::hasColumn('users', 'divisi_id')) {
-                        $q->whereHas('divisionDetail', function($dq) use ($request) {
-                             $dq->where('divisi', $request->divisi);
-                        });
-                    }
+                $query->whereHas('user.divisionDetail', function($q) use ($request) {
+                    $q->where('divisi', $request->divisi);
                 });
             }
             
@@ -1845,10 +1756,11 @@ class CutiController extends Controller
             $cuti = $query->orderBy('tanggal_mulai', 'desc')->get();
             
             $data = $cuti->map(function($item) {
+                $divisiName = $item->user && $item->user->divisionDetail ? $item->user->divisionDetail->divisi : '-';
                 return [
                     'ID' => $item->id,
                     'Nama Karyawan' => $item->user->name ?? 'Unknown',
-                    'Divisi' => $item->user->divisi ?? '-',
+                    'Divisi' => $divisiName,
                     'Jenis Cuti' => $this->getJenisCutiLabel($item->jenis_cuti),
                     'Tanggal Mulai' => $item->tanggal_mulai ? Carbon::parse($item->tanggal_mulai)->format('d/m/Y') : '-',
                     'Tanggal Selesai' => $item->tanggal_selesai ? Carbon::parse($item->tanggal_selesai)->format('d/m/Y') : '-',
@@ -1917,8 +1829,9 @@ class CutiController extends Controller
             
             $divisiStats = Cuti::whereYear('tanggal_mulai', $year)
                 ->join('users', 'cutis.user_id', '=', 'users.id')
-                ->select('users.divisi', DB::raw('count(*) as total'))
-                ->groupBy('users.divisi')
+                ->join('divisis', 'users.divisi_id', '=', 'divisis.id')
+                ->select('divisis.divisi', DB::raw('count(*) as total'))
+                ->groupBy('divisis.divisi')
                 ->get();
             
             return response()->json([
@@ -1988,15 +1901,9 @@ class CutiController extends Controller
             
             $query = Cuti::whereYear('tanggal_mulai', $year);
             
-            if ($this->currentRole === 'manager_divisi' && $this->currentDivisi) {
-                $query->whereHas('user', function($q) {
-                    if (Schema::hasColumn('users', 'divisi')) {
-                        $q->where('divisi', $this->currentDivisi);
-                    } elseif (Schema::hasColumn('users', 'divisi_id')) {
-                        $q->whereHas('divisionDetail', function($dq) {
-                             $dq->where('divisi', $this->currentDivisi);
-                        });
-                    }
+            if ($this->currentRole === 'manager_divisi' && $this->currentDivisiName) {
+                $query->whereHas('user.divisionDetail', function($q) {
+                     $q->where('divisi', $this->currentDivisiName);
                 });
             }
             
@@ -2011,8 +1918,9 @@ class CutiController extends Controller
             $topKaryawan = Cuti::whereYear('tanggal_mulai', $year)
                 ->where('status', 'disetujui')
                 ->join('users', 'cutis.user_id', '=', 'users.id')
-                ->select('users.name', 'users.divisi', DB::raw('sum(cutis.durasi) as total_hari'))
-                ->groupBy('users.id', 'users.name', 'users.divisi')
+                ->leftJoin('divisis', 'users.divisi_id', '=', 'divisis.id')
+                ->select('users.name', 'divisis.divisi', DB::raw('sum(cutis.durasi) as total_hari'))
+                ->groupBy('users.id', 'users.name', 'divisis.divisi')
                 ->orderBy('total_hari', 'desc')
                 ->limit(5)
                 ->get();
@@ -2111,7 +2019,7 @@ class CutiController extends Controller
                     'id' => $this->user->id,
                     'name' => $this->user->name,
                     'role' => $this->user->role,
-                    'divisi' => $this->user->divisi ?? '-'
+                    'divisi' => $this->user->divisionDetail ? $this->user->divisionDetail->divisi : '-'
                 ] : null
             ]);
         } catch (\Exception $e) {
