@@ -985,34 +985,6 @@
                         <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari judul atau isi pengumuman..." type="text" />
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                        <div class="relative">
-                            <button id="filterBtn" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
-                                <span class="material-icons-outlined text-sm">filter_list</span>
-                                Filter
-                            </button>
-                            <div id="filterDropdown" class="filter-dropdown">
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterAll" value="all" checked>
-                                    <label for="filterAll">Semua Kategori</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterUmum" value="umum">
-                                    <label for="filterUmum">Umum</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterPenting" value="penting">
-                                    <label for="filterPenting">Penting</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterInternal" value="internal">
-                                    <label for="filterInternal">Internal</label>
-                                </div>
-                                <div class="filter-actions">
-                                    <button id="applyFilter" class="filter-apply">Terapkan</button>
-                                    <button id="resetFilter" class="filter-reset">Reset</button>
-                                </div>
-                            </div>
-                        </div>
                         <button id="createBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
                             <span class="material-icons-outlined">add</span>
                             <span class="hidden sm:inline">Buat Pengumuman</span>

@@ -15,6 +15,7 @@ public function up()
         $table->id();
         $table->string('nama_layanan');
         $table->text('deskripsi')->nullable();
+        $table->integer('hpp')->nullable();
         $table->integer('harga')->nullable();
         $table->timestamps();
     });

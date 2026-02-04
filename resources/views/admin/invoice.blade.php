@@ -441,6 +441,65 @@
             z-index: 9999 !important;
             background-color: rgba(0, 0, 0, 0.7) !important;
         }
+
+        /* CSS untuk modal detail */
+        .detail-status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .detail-status-lunas {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .detail-status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .detail-status-pembayaran-awal {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .detail-amount {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .invoice-detail-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .invoice-detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .invoice-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-buttons button {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
@@ -478,7 +537,7 @@
                                     </div>
                                     <div class="filter-option">
                                         <input type="checkbox" id="filterPembayaranAwal" value="pembayaran awal">
-                                        <label for="filterPembayaranAwal">Pembayaran Awal</label>
+                                        <label for="filterPembayaranAwal">Down Payment</label>
                                     </div>
                                     <div class="filter-option">
                                         <input type="checkbox" id="filterLunas" value="lunas">
@@ -533,7 +592,7 @@
                                             <th style="min-width: 120px;">Total</th>
                                             <th style="min-width: 150px;">Metode Pembayaran</th>
                                             <th style="min-width: 120px;">Status Pembayaran</th>
-                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
+                                            <th style="min-width: 150px; text-align: center;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="desktopTableBody">
@@ -654,7 +713,7 @@
                             <select id="status_pembayaran" name="status_pembayaran"
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                                 required>
-                                <option value="pembayaran awal">Pembayaran Awal</option>
+                                <option value="pembayaran awal">Down Payment</option>
                                 <option value="lunas">Lunas</option>
                             </select>
                             <span class="error-message" id="status_pembayaran_error"></span>
@@ -792,7 +851,7 @@
                             <select id="editStatusPembayaran" name="status_pembayaran"
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                                 required>
-                                <option value="pembayaran awal">Pembayaran Awal</option>
+                                <option value="pembayaran awal">Down Payment</option>
                                 <option value="lunas">Lunas</option>
                             </select>
                             <span class="error-message" id="edit_status_pembayaran_error"></span>
@@ -883,6 +942,186 @@
         </div>
     </div>
 
+    <!-- Modal Detail Invoice -->
+    <div id="detailInvoiceModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span class="material-icons-outlined text-blue-600 text-2xl">receipt_long</span>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Detail Invoice</h3>
+                            <p class="text-gray-600" id="detailInvoiceSubtitle">Informasi lengkap invoice</p>
+                        </div>
+                    </div>
+                    <button id="closeDetailModalBtn" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
+                        <span class="material-icons-outlined text-2xl">close</span>
+                    </button>
+                </div>
+                
+                <!-- Invoice Header -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 border border-blue-100">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="material-icons-outlined text-blue-600">business</span>
+                                <h4 class="font-semibold text-blue-700">Perusahaan</h4>
+                            </div>
+                            <p id="detailCompanyName" class="text-xl font-bold text-gray-800 truncate"></p>
+                            <p id="detailCompanyAddress" class="text-gray-600 text-sm"></p>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="material-icons-outlined text-green-600">person</span>
+                                <h4 class="font-semibold text-green-700">Klien</h4>
+                            </div>
+                            <p id="detailClientName" class="text-xl font-bold text-gray-800"></p>
+                            <div class="flex items-center gap-2">
+                                <span class="material-icons-outlined text-gray-400 text-sm">date_range</span>
+                                <span id="detailInvoiceDate" class="text-gray-600 text-sm"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="material-icons-outlined text-purple-600">tag</span>
+                                <h4 class="font-semibold text-purple-700">Invoice Info</h4>
+                            </div>
+                            <p id="detailInvoiceNo" class="text-xl font-bold text-gray-800 font-mono"></p>
+                            <div id="detailStatusBadge" class="inline-block mt-1"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Invoice Details -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Left Column - Service & Payment Info -->
+                    <div class="space-y-6">
+                        <!-- Service Information -->
+                        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                            <h4 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <span class="material-icons-outlined text-blue-500">description</span>
+                                Informasi Layanan
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center invoice-detail-item">
+                                    <span class="text-gray-600 font-medium">Nama Layanan</span>
+                                    <span id="detailNamaLayanan" class="font-semibold text-gray-800"></span>
+                                </div>
+                                <div class="flex justify-between items-center invoice-detail-item">
+                                    <span class="text-gray-600 font-medium">Metode Pembayaran</span>
+                                    <span id="detailPaymentMethod" class="font-semibold text-gray-800"></span>
+                                </div>
+                                <div class="flex justify-between items-center invoice-detail-item">
+                                    <span class="text-gray-600 font-medium">Deskripsi</span>
+                                    <span id="detailDescription" class="font-semibold text-gray-800 text-right max-w-xs"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Timeline -->
+                        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                            <h4 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <span class="material-icons-outlined text-green-500">history</span>
+                                Riwayat Status
+                            </h4>
+                            <div class="relative pl-8">
+                                <!-- Timeline line -->
+                                <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                                
+                                <!-- Created -->
+                                <div class="relative mb-6">
+                                    <div class="absolute left-[-20px] top-0 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                                        <span class="material-icons-outlined text-white text-sm">check</span>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="font-medium text-gray-800">Invoice Dibuat</p>
+                                        <p id="detailCreatedAt" class="text-sm text-gray-500 mt-1"></p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Status Update -->
+                                <div class="relative">
+                                    <div id="detailStatusIcon" class="absolute left-[-20px] top-0 w-8 h-8 rounded-full flex items-center justify-center">
+                                        <!-- Icon akan diisi berdasarkan status -->
+                                    </div>
+                                    <div class="ml-4">
+                                        <p id="detailStatusText" class="font-medium text-gray-800">Status Pembayaran</p>
+                                        <p id="detailUpdatedAt" class="text-sm text-gray-500 mt-1"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column - Financial Summary -->
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-5 shadow-sm">
+                        <h4 class="font-semibold text-gray-800 mb-6 flex items-center gap-2">
+                            <span class="material-icons-outlined text-purple-500">payments</span>
+                            Ringkasan Keuangan
+                        </h4>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center py-3 px-4 bg-white rounded-lg border border-gray-200">
+                                <div>
+                                    <span class="text-gray-600">Subtotal</span>
+                                    <p class="text-xs text-gray-500 mt-1">Sebelum pajak</p>
+                                </div>
+                                <span id="detailSubtotal" class="text-lg font-bold text-gray-800 detail-amount"></span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center py-3 px-4 bg-white rounded-lg border border-gray-200">
+                                <div>
+                                    <span class="text-gray-600">Pajak</span>
+                                    <p id="detailTaxPercentageText" class="text-xs text-gray-500 mt-1"></p>
+                                </div>
+                                <span id="detailTax" class="text-lg font-bold text-gray-800 detail-amount"></span>
+                            </div>
+                            
+                            <div class="mt-6 pt-6 border-t border-gray-300">
+                                <div class="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                                    <div>
+                                        <span class="text-lg font-bold text-gray-800">Total</span>
+                                        <p class="text-sm text-gray-600 mt-1">Jumlah yang harus dibayar</p>
+                                    </div>
+                                    <span id="detailTotal" class="text-2xl font-bold text-blue-600 detail-amount"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t border-gray-200">
+                    <div class="text-sm text-gray-500">
+                        <p>Invoice ID: <span id="detailInvoiceId" class="font-mono font-medium"></span></p>
+                        <p class="mt-1">Terakhir diupdate: <span id="detailLastUpdated" class="font-medium"></span></p>
+                    </div>
+                    <div class="action-buttons">
+                        <button onclick="closeDetailModal()"
+                            class="px-5 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
+                            <span class="material-icons-outlined">close</span>
+                            Tutup
+                        </button>
+                        <button onclick="printInvoiceModalFromDetail()"
+                            class="px-5 py-2.5 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
+                            <span class="material-icons-outlined">print</span>
+                            Cetak
+                        </button>
+                        <button onclick="editInvoiceFromDetail()"
+                            class="px-5 py-2.5 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2">
+                            <span class="material-icons-outlined">edit</span>
+                            Edit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Print Invoice -->
     <div id="printInvoiceModal"
         class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
@@ -954,6 +1193,7 @@
         const perPage = 10;
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         let dataLayanan = [];
+        let currentDetailInvoiceId = null;
 
         // ==================== DOM ELEMENTS ====================
         const buatInvoiceBtn = document.getElementById('buatInvoiceBtn');
@@ -973,6 +1213,7 @@
         const editInvoiceForm = document.getElementById('editInvoiceForm');
         const cancelEditBtn = document.getElementById('cancelEditBtn');
         const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+        const closeDetailModalBtn = document.getElementById('closeDetailModalBtn');
         const sessionExpiredModal = document.getElementById('sessionExpiredModal');
         const reloadPageBtn = document.getElementById('reloadPageBtn');
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
@@ -987,7 +1228,7 @@
         function loadDataLayanan() {
             console.log('Memuat data layanan dari endpoint...');
             
-            fetch('/admin/layanan?ajax=1&for_dropdown=true', {
+            fetch('{{ route("admin.layanan.dropdown") }}?ajax=1&for_dropdown=true', {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -1182,6 +1423,16 @@
             if (buatInvoiceBtn) {
                 buatInvoiceBtn.addEventListener('click', function() {
                     console.log('Tombol Buat Invoice diklik');
+                    
+                    // Set tanggal default ke hari ini
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('invoice_date').value = today;
+                    
+                    // Load data layanan jika belum
+                    if (dataLayanan.length === 0) {
+                        loadDataLayanan();
+                    }
+                    
                     setTimeout(() => {
                         calculateTotal();
                     }, 100);
@@ -1306,6 +1557,28 @@
                 }
             });
 
+            // Event untuk close modal detail
+            if (closeDetailModalBtn) {
+                closeDetailModalBtn.addEventListener('click', closeDetailModal);
+            }
+
+            // Close modal detail dengan ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const detailModal = document.getElementById('detailInvoiceModal');
+                    if (!detailModal.classList.contains('hidden')) {
+                        closeDetailModal();
+                    }
+                }
+            });
+
+            // Close modal detail ketika klik di luar
+            document.getElementById('detailInvoiceModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeDetailModal();
+                }
+            });
+
             // Load data awal
             loadInvoices();
             loadDataLayanan();
@@ -1328,12 +1601,217 @@
             }
         }
 
+        // ==================== DETAIL INVOICE FUNCTIONS ====================
+        function showDetailModal(id) {
+            console.log('Showing detail for invoice:', id);
+            currentDetailInvoiceId = id;
+            
+            // Tampilkan loading
+            showPopup('info', 'Memuat', 'Memuat detail invoice...');
+            
+            // Cari invoice dari data yang sudah dimuat
+            const invoice = allInvoices.find(inv => inv.id == id);
+            if (invoice) {
+                populateDetailModal(invoice);
+                showModal(document.getElementById('detailInvoiceModal'));
+            } else {
+                // Jika tidak ada di cache, fetch dari server
+                fetchInvoiceDetail(id);
+            }
+        }
+
+        function fetchInvoiceDetail(id) {
+            fetch(`{{ route("admin.invoice.show", ":id") }}`.replace(':id', id), {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'include'
+            })
+            .then(response => {
+                if (checkSessionError(response)) {
+                    return Promise.reject('Session expired');
+                }
+                return response.json();
+            })
+            .then(data => {
+                let invoice;
+                if (data.success) {
+                    invoice = data.data || data.invoice;
+                } else if (data.invoice) {
+                    invoice = data.invoice;
+                } else {
+                    invoice = data;
+                }
+                
+                if (invoice) {
+                    populateDetailModal(invoice);
+                    showModal(document.getElementById('detailInvoiceModal'));
+                } else {
+                    throw new Error('Data invoice tidak ditemukan');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading invoice detail:', error);
+                if (error.message !== 'Session expired') {
+                    showPopup('error', 'Gagal', 'Gagal memuat detail invoice');
+                }
+            });
+        }
+
+        function populateDetailModal(invoice) {
+            console.log('Populating detail modal with:', invoice);
+            
+            // Format tanggal
+            const formatDate = (dateString) => {
+                if (!dateString) return '-';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            };
+            
+            const formatDateTime = (dateString) => {
+                if (!dateString) return '-';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('id-ID', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            };
+            
+            // Basic Information
+            document.getElementById('detailCompanyName').textContent = 
+                invoice.company_name || invoice.nama_perusahaan || '-';
+            document.getElementById('detailCompanyAddress').textContent = 
+                invoice.company_address || invoice.alamat || '-';
+            document.getElementById('detailClientName').textContent = 
+                invoice.client_name || invoice.nama_klien || '-';
+            document.getElementById('detailInvoiceNo').textContent = 
+                invoice.invoice_no || invoice.nomor_order || '-';
+            document.getElementById('detailInvoiceDate').textContent = 
+                formatDate(invoice.invoice_date || invoice.tanggal);
+            document.getElementById('detailInvoiceSubtitle').textContent = 
+                `Invoice #${invoice.invoice_no || invoice.nomor_order || ''}`;
+            document.getElementById('detailInvoiceId').textContent = invoice.id || '-';
+            
+            // Service Information
+            document.getElementById('detailNamaLayanan').textContent = 
+                invoice.nama_layanan || '-';
+            document.getElementById('detailPaymentMethod').textContent = 
+                invoice.payment_method || invoice.metode_pembayaran || '-';
+            
+            // Description
+            const description = invoice.description || invoice.deskripsi || 'Tidak ada deskripsi';
+            document.getElementById('detailDescription').textContent = description;
+            
+            // Status dengan styling
+            const status = invoice.status_pembayaran || 'pembayaran awal';
+            const statusElement = document.getElementById('detailStatusBadge');
+            const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+            
+            let statusClass = '';
+            let statusIcon = '';
+            
+            if (status === 'lunas') {
+                statusClass = 'detail-status-lunas';
+                statusIcon = '<span class="material-icons-outlined text-sm">check_circle</span>';
+            } else if (status === 'pembayaran awal') {
+                statusClass = 'detail-status-pembayaran-awal';
+                statusIcon = '<span class="material-icons-outlined text-sm">payments</span>';
+            } else {
+                statusClass = 'detail-status-pending';
+                statusIcon = '<span class="material-icons-outlined text-sm">pending</span>';
+            }
+            
+            statusElement.innerHTML = `
+                <span class="detail-status-badge ${statusClass} flex items-center gap-1">
+                    ${statusIcon}
+                    ${statusText}
+                </span>
+            `;
+            
+            // Financial Information
+            const subtotal = invoice.subtotal || 0;
+            const taxAmount = invoice.tax || 0;
+            const total = invoice.total || 0;
+            const taxPercentage = invoice.tax_percentage || (subtotal > 0 ? ((taxAmount / subtotal) * 100) : 0);
+            
+            document.getElementById('detailSubtotal').textContent = formatCurrency(subtotal);
+            document.getElementById('detailTax').textContent = formatCurrency(taxAmount);
+            document.getElementById('detailTotal').textContent = formatCurrency(total);
+            document.getElementById('detailTaxPercentageText').textContent = 
+                `Pajak ${taxPercentage.toFixed(2)}%`;
+            
+            // Timeline/History
+            document.getElementById('detailCreatedAt').textContent = 
+                formatDateTime(invoice.created_at || new Date().toISOString());
+            document.getElementById('detailUpdatedAt').textContent = 
+                formatDateTime(invoice.updated_at || invoice.created_at || new Date().toISOString());
+            document.getElementById('detailLastUpdated').textContent = 
+                formatDateTime(invoice.updated_at || invoice.created_at || new Date().toISOString());
+            
+            // Status Icon
+            const statusIconElement = document.getElementById('detailStatusIcon');
+            statusIconElement.innerHTML = '';
+            statusIconElement.className = 'absolute left-[-20px] top-0 w-8 h-8 rounded-full flex items-center justify-center ';
+            
+            const icon = document.createElement('span');
+            icon.className = 'material-icons-outlined text-white text-sm';
+            
+            if (status === 'lunas') {
+                statusIconElement.classList.add('bg-green-500');
+                icon.textContent = 'check_circle';
+                document.getElementById('detailStatusText').textContent = 'Lunas';
+            } else if (status === 'pembayaran awal') {
+                statusIconElement.classList.add('bg-blue-500');
+                icon.textContent = 'payments';
+                document.getElementById('detailStatusText').textContent = 'Pembayaran Awal';
+            } else {
+                statusIconElement.classList.add('bg-yellow-500');
+                icon.textContent = 'pending';
+                document.getElementById('detailStatusText').textContent = 'Menunggu Pembayaran';
+            }
+            
+            statusIconElement.appendChild(icon);
+        }
+
+        function closeDetailModal() {
+            hideModal(document.getElementById('detailInvoiceModal'));
+            currentDetailInvoiceId = null;
+        }
+
+        function printInvoiceModalFromDetail() {
+            if (currentDetailInvoiceId) {
+                closeDetailModal();
+                setTimeout(() => {
+                    printInvoiceModal(currentDetailInvoiceId);
+                }, 300);
+            }
+        }
+
+        function editInvoiceFromDetail() {
+            if (currentDetailInvoiceId) {
+                closeDetailModal();
+                setTimeout(() => {
+                    editInvoice(currentDetailInvoiceId);
+                }, 300);
+            }
+        }
+
         // ==================== INVOICE FUNCTIONS ====================
         function loadInvoices() {
             console.log('Memuat data invoice...');
             showLoading(true);
 
-            fetch('/admin/invoice', {
+            fetch('{{ route("admin.invoice.index") }}?ajax=1', {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
@@ -1387,7 +1865,9 @@
                                 <div class="flex flex-col items-center">
                                     <span class="material-icons-outlined text-red-500 mb-2">error</span>
                                     <p>Gagal memuat data: ${error.message}</p>
-                                    <button onclick="loadInvoices()" class="mt-2 px-4 py-2 btn-primary rounded-lg text-sm">
+                                    <p class="text-xs text-gray-400 mt-1">Periksa koneksi internet atau coba refresh halaman</p>
+                                    <button onclick="loadInvoices()" class="mt-3 px-4 py-2 btn-primary rounded-lg text-sm">
+                                        <span class="material-icons-outlined text-sm mr-2">refresh</span>
                                         Coba Lagi
                                     </button>
                                 </div>
@@ -1458,7 +1938,7 @@
             submitBtn.textContent = 'Menyimpan...';
             submitBtn.classList.add('opacity-50');
 
-            fetch('/admin/invoice', {
+            fetch('{{ route("admin.invoice.store") }}', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
@@ -1576,7 +2056,7 @@
             submitBtn.textContent = 'Memperbarui...';
             submitBtn.classList.add('opacity-50');
 
-            fetch(`/admin/invoice/${id}`, {
+            fetch(`{{ route("admin.invoice.update", ":id") }}`.replace(':id', id), {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
@@ -1632,7 +2112,7 @@
 
             showPopup('info', 'Memuat', 'Memuat data invoice...');
 
-            fetch(`/admin/invoice/${id}`, {
+            fetch(`{{ route("admin.invoice.show", ":id") }}`.replace(':id', id), {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
@@ -1761,7 +2241,7 @@
             deleteBtn.textContent = 'Menghapus...';
             deleteBtn.classList.add('opacity-50');
 
-            fetch(`/admin/invoice/${id}`, {
+            fetch(`{{ route("admin.invoice.destroy", ":id") }}`.replace(':id', id), {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
@@ -1800,7 +2280,7 @@
                     formData.append('_method', 'DELETE');
                     formData.append('_token', csrfToken);
 
-                    fetch(`/admin/invoice/${id}`, {
+                    fetch(`{{ route("admin.invoice.destroy", ":id") }}`.replace(':id', id), {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': csrfToken,
@@ -1953,6 +2433,15 @@
             }
         }
 
+        // Tampilkan badge untuk status pembayaran di detail
+        function getDetailStatusBadge(status) {
+            if (status === 'lunas') {
+                return '<span class="px-3 py-1.5 bg-green-100 text-green-800 text-sm font-medium rounded-full flex items-center gap-1"><span class="material-icons-outlined text-sm">check_circle</span> Lunas</span>';
+            } else {
+                return '<span class="px-3 py-1.5 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full flex items-center gap-1"><span class="material-icons-outlined text-sm">payments</span> Pembayaran Awal</span>';
+            }
+        }
+
         function renderInvoices() {
             desktopTableBody.innerHTML = '';
             mobileCards.innerHTML = '';
@@ -1993,8 +2482,8 @@
             <td>${nomorOrder}</td>
             <td>${namaKlien}</td>
             <td>${namaLayanan}</td>
-            <td>${alamat}</td>
-            <td>${deskripsi}</td>
+            <td class="max-w-xs truncate">${alamat}</td>
+            <td class="max-w-xs truncate">${deskripsi}</td>
             <td>${formatCurrency(subtotal)}</td>
             <td>${taxPercentage.toFixed(2)}%</td>
             <td>${formatCurrency(taxAmount)}</td>
@@ -2002,9 +2491,20 @@
             <td>${metodePembayaran}</td>
             <td>${getStatusBadge(statusPembayaran)}</td>
             <td class="text-center">
-                <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700 mx-1">Edit</button>
-                <button onclick="deleteInvoice(${invoice.id})" class="text-red-500 hover:text-red-700 mx-1">Hapus</button>
-                <button onclick="printInvoiceModal(${invoice.id})" class="text-green-500 hover:text-green-700 mx-1">Print</button>
+                <div class="flex items-center justify-center gap-2">
+                    <button onclick="showDetailModal(${invoice.id})" class="text-purple-500 hover:text-purple-700 p-1 rounded-full hover:bg-purple-50" title="Detail">
+                        <span class="material-icons-outlined text-sm">visibility</span>
+                    </button>
+                    <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-50" title="Edit">
+                        <span class="material-icons-outlined text-sm">edit</span>
+                    </button>
+                    <button onclick="deleteInvoice(${invoice.id})" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50" title="Hapus">
+                        <span class="material-icons-outlined text-sm">delete</span>
+                    </button>
+                    <button onclick="printInvoiceModal(${invoice.id})" class="text-green-500 hover:text-green-700 p-1 rounded-full hover:bg-green-50" title="Print">
+                        <span class="material-icons-outlined text-sm">print</span>
+                    </button>
+                </div>
             </td>
         `;
                 desktopTableBody.appendChild(row);
@@ -2042,9 +2542,18 @@
             <p class="text-sm mb-1"><span class="font-medium">Pajak (${taxPercentage.toFixed(2)}%):</span> ${formatCurrency(taxAmount)}</p>
             <p class="text-sm mb-2"><span class="font-medium">Total:</span> <b>${formatCurrency(total)}</b></p>
             <div class="flex justify-between mt-3">
-                <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700">Edit</button>
-                <button onclick="deleteInvoice(${invoice.id})" class="text-red-500 hover:text-red-700">Hapus</button>
-                <button onclick="printInvoiceModal(${invoice.id})" class="text-green-500 hover:text-green-700">Print</button>
+                <button onclick="showDetailModal(${invoice.id})" class="text-purple-500 hover:text-purple-700 p-1 rounded-full hover:bg-purple-50" title="Detail">
+                    <span class="material-icons-outlined text-sm">visibility</span>
+                </button>
+                <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-50" title="Edit">
+                    <span class="material-icons-outlined text-sm">edit</span>
+                </button>
+                <button onclick="deleteInvoice(${invoice.id})" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50" title="Hapus">
+                    <span class="material-icons-outlined text-sm">delete</span>
+                </button>
+                <button onclick="printInvoiceModal(${invoice.id})" class="text-green-500 hover:text-green-700 p-1 rounded-full hover:bg-green-50" title="Print">
+                    <span class="material-icons-outlined text-sm">print</span>
+                </button>
             </div>
         `;
                 mobileCards.appendChild(card);
