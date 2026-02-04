@@ -138,14 +138,14 @@ class KaryawanController extends Controller
             }
         }
 
-        // Hitung Jumlah Ketidakhadiran (Sakit, Izin, Cuti yang disetujui) - PERBAIKAN
+        // Hitung Jumlah Ketidakhadiran (Sakit, Izin, Cuti yang disetujui)
         $ketidakhadiranCount = Absensi::where('user_id', $userId)
                                 ->where('approval_status', 'approved')
-                                ->whereIn('jenis_ketidakhadiran', ['cuti', 'sakit', 'izin']) // PERBAIKAN
+                                ->whereIn('jenis_ketidakhadiran', ['cuti', 'sakit', 'izin'])
                                 ->count();
 
         // Hitung Jumlah Tugas dari tabel tasks
-        $userDivisi = $user->divisi;
+        $userDivisi = $user->divisi; // Pastikan kolom ini ada di tabel users atau diambil dari relasi
         $tugasCount = Task::where(function ($query) use ($userId, $userDivisi) {
             // Tugas yang ditugaskan langsung ke user
             $query->where('assigned_to', $userId)
@@ -188,77 +188,77 @@ class KaryawanController extends Controller
     /**
      * Menampilkan halaman absensi karyawan.
      */
-   // Di KaryawanController.php - Line 234 dan seterusnya
-public function absensiPage(Request $request)
-{
-    $user = Auth::user();
-    $today = Carbon::today();
-    
-    // Cek absensi hari ini
-    $absensiHariIni = Absensi::where('user_id', $user->id)
-        ->whereDate('tanggal', $today)
-        ->first();
-    
-    $startOfMonth = Carbon::now()->startOfMonth();
-    $endOfMonth = Carbon::now()->endOfMonth();
-    
-    $riwayatAbsensi = Absensi::where('user_id', $user->id)
-        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
-        ->orderBy('tanggal', 'desc')
-        ->get();
-    
-    // Hitung statistik - SESUAIKAN DENGAN STRUKTUR TABEL
-    
-    // 1. Total Hadir = ada jam_masuk DAN approval_status = approved
-    $totalHadir = Absensi::where('user_id', $user->id)
-        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
-        ->whereNotNull('jam_masuk') // ADA CHECK-IN
-        ->where('approval_status', 'approved') // DISETUJUI
-        ->count();
-    
-    // 2. Total Izin = jenis_ketidakhadiran = 'izin' DAN approval_status = approved
-    $totalIzin = Absensi::where('user_id', $user->id)
-        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
-        ->where('jenis_ketidakhadiran', 'izin')
-        ->where('approval_status', 'approved')
-        ->count();
-    
-    // 3. Total Sakit
-    $totalSakit = Absensi::where('user_id', $user->id)
-        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
-        ->where('jenis_ketidakhadiran', 'sakit')
-        ->where('approval_status', 'approved')
-        ->count();
-    
-    // 4. Total Cuti
-    $totalCuti = Absensi::where('user_id', $user->id)
-        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
-        ->where('jenis_ketidakhadiran', 'cuti')
-        ->where('approval_status', 'approved')
-        ->count();
-    
-    // 5. Total Dinas Luar
-    $totalDinasLuar = Absensi::where('user_id', $user->id)
-        ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
-        ->where('jenis_ketidakhadiran', 'dinas-luar')
-        ->where('approval_status', 'approved')
-        ->count();
-    
-    // 6. Total Alpha = tidak ada data absensi sama sekali untuk hari kerja
-    // (Perlu logika khusus)
-    
-    return view('karyawan.absen', [
-        'on_leave' => false,
-        'cuti_details' => null,
-        'absensiHariIni' => $absensiHariIni,
-        'riwayatAbsensi' => $riwayatAbsensi,
-        'totalHadir' => $totalHadir,
-        'totalIzin' => $totalIzin,
-        'totalSakit' => $totalSakit,
-        'totalCuti' => $totalCuti,
-        'totalDinasLuar' => $totalDinasLuar,
-    ]);
-}
+    public function absensiPage(Request $request)
+    {
+        $user = Auth::user();
+        $today = Carbon::today();
+
+        // Cek absensi hari ini
+        $absensiHariIni = Absensi::where('user_id', $user->id)
+            ->whereDate('tanggal', $today)
+            ->first();
+
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        $riwayatAbsensi = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        // Hitung statistik - SESUAIKAN DENGAN STRUKTUR TABEL
+
+        // 1. Total Hadir = ada jam_masuk DAN approval_status = approved
+        $totalHadir = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+            ->whereNotNull('jam_masuk') // ADA CHECK-IN
+            ->where('approval_status', 'approved') // DISETUJUI
+            ->count();
+
+        // 2. Total Izin = jenis_ketidakhadiran = 'izin' DAN approval_status = approved
+        $totalIzin = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+            ->where('jenis_ketidakhadiran', 'izin')
+            ->where('approval_status', 'approved')
+            ->count();
+
+        // 3. Total Sakit
+        $totalSakit = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+            ->where('jenis_ketidakhadiran', 'sakit')
+            ->where('approval_status', 'approved')
+            ->count();
+
+        // 4. Total Cuti
+        $totalCuti = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+            ->where('jenis_ketidakhadiran', 'cuti')
+            ->where('approval_status', 'approved')
+            ->count();
+
+        // 5. Total Dinas Luar
+        $totalDinasLuar = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+            ->where('jenis_ketidakhadiran', 'dinas-luar')
+            ->where('approval_status', 'approved')
+            ->count();
+
+        // 6. Total Alpha = tidak ada data absensi sama sekali untuk hari kerja
+        // (Perlu logika khusus)
+
+        return view('karyawan.absen', [
+            'on_leave' => false,
+            'cuti_details' => null,
+            'absensiHariIni' => $absensiHariIni,
+            'riwayatAbsensi' => $riwayatAbsensi,
+            'totalHadir' => $totalHadir,
+            'totalIzin' => $totalIzin,
+            'totalSakit' => $totalSakit,
+            'totalCuti' => $totalCuti,
+            'totalDinasLuar' => $totalDinasLuar,
+        ]);
+    }
+
     /**
      * Menampilkan halaman daftar TUGAS karyawan.
      */
@@ -267,7 +267,7 @@ public function absensiPage(Request $request)
         try {
             $userId = Auth::id();
             $user = Auth::user();
-            $userDivisi = $user->divisi;
+            $userDivisi = $user->divisi; // Pastikan property divisi ada
             $userName = $user->name;
 
             Log::info('=== KARYAWAN TUGAS LIST ===', [
@@ -278,39 +278,10 @@ public function absensiPage(Request $request)
                 'role' => $user->role,
                 'timestamp' => now()->toDateTimeString(),
             ]);
-            
-            // LOG 1: Cek data user di database
-            $dbUser = User::find($userId);
-            Log::info('Database User Check:', [
-                'db_user_id' => $dbUser->id,
-                'db_user_name' => $dbUser->name,
-                'db_user_divisi' => $dbUser->divisi,
-                'db_user_role' => $dbUser->role,
-                'match_with_auth' => ($dbUser->divisi === $userDivisi) ? 'YES' : 'NO',
-            ]);
-            
-            // LOG 2: Cek total tugas di database
-            $totalTasksInDB = Task::count();
-            Log::info('Total Tasks in Database:', ['count' => $totalTasksInDB]);
-            
-            // LOG 3: Cek tugas untuk Digital Marketing secara spesifik
-            $marketingTasks = Task::where('target_divisi', 'Digital Marketing')->get();
-            Log::info('Marketing Tasks in Database:', [
-                'count' => $marketingTasks->count(),
-                'tasks' => $marketingTasks->map(function($task) {
-                    return [
-                        'id' => $task->id,
-                        'judul' => $task->judul,
-                        'target_type' => $task->target_type,
-                        'target_divisi' => $task->target_divisi,
-                        'status' => $task->status,
-                    ];
-                })->toArray()
-            ]);
-            
+
             // PERBAIKAN UTAMA: Query yang lebih komprehensif
             $tasks = Task::where(function ($query) use ($userId, $userDivisi) {
-                // 1. Tugas untuk divisi (yang paling penting!)
+                // 1. Tugas untuk divisi
                 $query->where('target_type', 'divisi')
                     ->where('target_divisi', $userDivisi);
             })
@@ -336,8 +307,6 @@ public function absensiPage(Request $request)
 
         } catch (\Exception $e) {
             Log::error('CRITICAL ERROR in KaryawanController@listPage: ' . $e->getMessage());
-            Log::error('Stack Trace: ' . $e->getTraceAsString());
-
             return view('karyawan.list', [
                 'tasks' => collect([]),
                 'error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
@@ -379,20 +348,20 @@ public function absensiPage(Request $request)
     private function checkIfOnLeaveToday($userId)
     {
         $today = Carbon::today()->format('Y-m-d');
-        
+
         $cuti = Cuti::where('user_id', $userId)
-            ->where('status', 'disetujui')
+            ->where('status', 'disetujui') // Pastikan kolom status di tabel cuti menggunakan 'disetujui' atau 'approved'
             ->whereDate('tanggal_mulai', '<=', $today)
             ->whereDate('tanggal_selesai', '>=', $today)
             ->first();
-        
+
         if ($cuti) {
             return [
                 'on_leave' => true,
                 'details' => $cuti
             ];
         }
-        
+
         return [
             'on_leave' => false,
             'details' => null
@@ -405,6 +374,7 @@ public function absensiPage(Request $request)
 
     /**
      * Mengambil status absensi hari ini.
+     * PERBAIKAN: Format response sesuai harapan Frontend { success: true, data: {...} }
      */
     public function getTodayStatus()
     {
@@ -413,93 +383,136 @@ public function absensiPage(Request $request)
             ->where('tanggal', $today)
             ->first();
 
-        if (!$absen) {
-            return response()->json([
-                'jam_masuk' => null,
-                'jam_pulang' => null,
-                'status' => 'Belum Absen',
-                'late_minutes' => 0,
-                'approval_status' => 'approved',
-            ]);
+        $data = [
+            'jam_masuk' => null,
+            'jam_pulang' => null,
+            'status' => 'Belum Absen',
+            'late_minutes' => 0,
+            'approval_status' => 'approved',
+            'is_on_leave' => false,
+            'jenis_ketidakhadiran' => null,
+            'keterangan' => null
+        ];
+
+        if ($absen) {
+            $data['jam_masuk'] = $absen->jam_masuk;
+            $data['jam_pulang'] = $absen->jam_pulang;
+            $data['approval_status'] = $absen->approval_status;
+            $data['jenis_ketidakhadiran'] = $absen->jenis_ketidakhadiran;
+            $data['keterangan'] = $absen->keterangan;
+
+            if ($absen->jam_masuk) {
+                // Hitung keterlambatan
+                $jamMasuk = Carbon::parse($absen->jam_masuk);
+                $jamBatas = Carbon::parse('09:05'); // Sesuai logika check-in API
+                $data['status'] = $jamMasuk->gt($jamBatas) ? 'Terlambat' : 'Tepat Waktu';
+                $data['late_minutes'] = $jamMasuk->gt($jamBatas) ? $jamMasuk->diffInMinutes($jamBatas) : 0;
+            } elseif ($absen->jenis_ketidakhadiran) {
+                $data['status'] = match($absen->jenis_ketidakhadiran) {
+                    'cuti' => 'Cuti',
+                    'sakit' => 'Sakit',
+                    'izin' => 'Izin',
+                    'dinas-luar' => 'Dinas Luar',
+                    default => 'Tidak Hadir',
+                };
+            }
         }
 
-        // Tentukan status berdasarkan jam_masuk atau jenis_ketidakhadiran
-        $status = 'Belum Absen';
-        $lateMinutes = 0;
-        
-        if ($absen->jam_masuk) {
-            // Hitung keterlambatan
-            $jamMasuk = Carbon::parse($absen->jam_masuk);
-            $jamBatas = Carbon::parse('08:00');
-            $status = $jamMasuk->gt($jamBatas) ? 'Terlambat' : 'Tepat Waktu';
-            $lateMinutes = $jamMasuk->gt($jamBatas) ? $jamMasuk->diffInMinutes($jamBatas) : 0;
-        } elseif ($absen->jenis_ketidakhadiran) {
-            $status = match($absen->jenis_ketidakhadiran) {
-                'cuti' => 'Cuti',
-                'sakit' => 'Sakit',
-                'izin' => 'Izin',
-                'dinas-luar' => 'Dinas Luar',
-                default => 'Tidak Hadir',
-            };
+        // Cek status cuti
+        $leaveStatus = $this->checkIfOnLeaveToday(Auth::id());
+        if ($leaveStatus['on_leave']) {
+            $data['is_on_leave'] = true;
+            $data['leave_type'] = $leaveStatus['details']->tipe_cuti;
+            $data['leave_reason'] = $leaveStatus['details']->alasan;
+            $data['leave_dates'] = [
+                'start' => $leaveStatus['details']->tanggal_mulai,
+                'end' => $leaveStatus['details']->tanggal_selesai
+            ];
         }
 
         return response()->json([
-            'jam_masuk' => $absen->jam_masuk,
-            'jam_pulang' => $absen->jam_pulang,
-            'status' => $status,
-            'late_minutes' => $lateMinutes,
-            'approval_status' => $absen->approval_status,
+            'success' => true,
+            'data' => $data
         ]);
     }
 
     /**
      * Mengambil riwayat absensi.
+     * PERBAIKAN PENTING:
+     * 1. Format JSON { success: true, data: [...] } agar frontend membaca.
+     * 2. Nama Key disesuaikan (jam_masuk, jam_pulang) sesuai frontend.
      */
-    public function getHistory()
+    public function getHistory(Request $request)
     {
-        $history = Absensi::where('user_id', Auth::id())
-                          ->orderBy('tanggal', 'desc')
-                          ->get()
-                          ->map(function ($item) {
-                              // Tentukan status berdasarkan kondisi
-                              $status = 'Tidak Hadir';
-                              $lateMinutes = 0;
-                              
-                              if ($item->jam_masuk) {
-                                  $jamMasuk = Carbon::parse($item->jam_masuk);
-                                  $jamBatas = Carbon::parse('08:00');
-                                  $status = $jamMasuk->gt($jamBatas) ? 'Terlambat' : 'Tepat Waktu';
-                                  $lateMinutes = $jamMasuk->gt($jamBatas) ? $jamMasuk->diffInMinutes($jamBatas) : 0;
-                              } elseif ($item->jenis_ketidakhadiran) {
-                                  $status = match($item->jenis_ketidakhadiran) {
-                                      'cuti' => 'Cuti',
-                                      'sakit' => 'Sakit',
-                                      'izin' => 'Izin',
-                                      'dinas-luar' => 'Dinas Luar',
-                                      default => 'Tidak Hadir',
-                                  };
-                              }
-                              
-                              return [
-                                  'id' => $item->id,
-                                  'date' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
-                                  'checkIn' => $item->jam_masuk,
-                                  'checkOut' => $item->jam_pulang,
-                                  'status' => $status,
-                                  'lateMinutes' => $lateMinutes,
-                                  'isEarlyCheckout' => $item->is_early_checkout,
-                                  'earlyCheckoutReason' => $item->early_checkout_reason,
-                                  'approvalStatus' => $item->approval_status,
-                                  'reason' => $item->reason,
-                                  'location' => $item->location,
-                                  'purpose' => $item->purpose,
-                                  'jenis_ketidakhadiran' => $item->jenis_ketidakhadiran,
-                                  'keterangan' => $item->keterangan,
-                              ];
-                          })
-                          ->all();
+        $query = Absensi::where('user_id', Auth::id());
+        
+        // Filter Logic sesuai frontend JS
+        $filterType = $request->get('filter', 'month');
+        $month = $request->get('month');
+        $year = $request->get('year');
 
-        return response()->json($history);
+        if ($filterType === 'custom' && $month && $year) {
+            $query->whereMonth('tanggal', '=', $month)
+                  ->whereYear('tanggal', '=', $year);
+        } elseif ($filterType === 'week') {
+            $query->whereBetween('tanggal', [
+                Carbon::now()->startOfWeek()->toDateString(),
+                Carbon::now()->endOfWeek()->toDateString()
+            ]);
+        } elseif ($filterType === 'year') {
+            $query->whereYear('tanggal', '=', date('Y'));
+        } else {
+            // Default: Bulan Ini
+            $query->whereMonth('tanggal', '=', date('m'))
+                  ->whereYear('tanggal', '=', date('Y'));
+        }
+
+        $history = $query->orderBy('tanggal', 'desc')->get();
+
+        $formattedData = $history->map(function ($item) {
+            // Tentukan status
+            $status = 'Tidak Hadir';
+            $lateMinutes = 0;
+
+            if ($item->jam_masuk) {
+                $jamMasuk = Carbon::parse($item->jam_masuk);
+                $jamBatas = Carbon::parse('09:05');
+                $status = $jamMasuk->gt($jamBatas) ? 'Terlambat' : 'Tepat Waktu';
+                $lateMinutes = $jamMasuk->gt($jamBatas) ? $jamMasuk->diffInMinutes($jamBatas) : 0;
+            } elseif ($item->jenis_ketidakhadiran) {
+                $status = match($item->jenis_ketidakhadiran) {
+                    'cuti' => 'Cuti',
+                    'sakit' => 'Sakit',
+                    'izin' => 'Izin',
+                    'dinas-luar' => 'Dinas Luar',
+                    default => 'Tidak Hadir',
+                };
+            }
+
+            return [
+                'id' => $item->id,
+                'tanggal' => $item->tanggal, // Tanggal string mentah
+                'date' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'), // Format label
+                'jam_masuk' => $item->jam_masuk, // Key disamakan dengan frontend
+                'jam_pulang' => $item->jam_pulang, // Key disamakan dengan frontend
+                'status' => $status,
+                'lateMinutes' => $lateMinutes,
+                'is_early_checkout' => $item->is_early_checkout,
+                'early_checkout_reason' => $item->early_checkout_reason,
+                'approval_status' => $item->approval_status,
+                'reason' => $item->reason,
+                'location' => $item->location,
+                'purpose' => $item->purpose,
+                'jenis_ketidakhadiran' => $item->jenis_ketidakhadiran,
+                'keterangan' => $item->keterangan,
+                'is_on_leave' => false // Akan dihandle di level view/logika jika perlu
+            ];
+        })->all();
+
+        return response()->json([
+            'success' => true,
+            'data' => $formattedData
+        ]);
     }
 
     /**
@@ -548,9 +561,12 @@ public function absensiPage(Request $request)
             ->count();
 
         return response()->json([
-            'attendance_status' => $attendanceStatus,
-            'ketidakhadiran_count' => $ketidakhadiranCount,
-            'tugas_count' => $tugasCount,
+            'success' => true,
+            'data' => [
+                'attendance_status' => $attendanceStatus,
+                'ketidakhadiran_count' => $ketidakhadiranCount,
+                'tugas_count' => $tugasCount,
+            ]
         ]);
     }
 
@@ -566,18 +582,18 @@ public function absensiPage(Request $request)
                     'message' => 'Unauthorized'
                 ], 401);
             }
-            
+
             $user = auth()->user();
             $today = now()->format('Y-m-d');
-            
+
             // Get today's attendance
             $absensiHariIni = Absensi::where('user_id', $user->id)
                 ->whereDate('tanggal', $today)
                 ->first();
-            
+
             // Check if user is on leave
             $onLeave = $this->checkIfOnLeaveToday($user->id);
-            
+
             // Get tasks statistics
             $totalTasks = Task::where('assigned_to', $user->id)->count();
             $pendingTasks = Task::where('assigned_to', $user->id)
@@ -586,12 +602,12 @@ public function absensiPage(Request $request)
             $completedTasks = Task::where('assigned_to', $user->id)
                 ->where('status', 'selesai')
                 ->count();
-            
+
             // Get leave requests
             $pendingCuti = Cuti::where('user_id', $user->id)
                 ->where('status', 'pending')
                 ->count();
-            
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -619,13 +635,14 @@ public function absensiPage(Request $request)
                     ],
                     'user' => [
                         'name' => $user->name,
-                        'divisi' => $user->divisi,
-                        'jabatan' => $user->jabatan,
+                        // Hati-hati memanggil divisi jika kolom tidak ada di users
+                        'divisi' => $user->divisi ?? '-', 
+                        'jabatan' => $user->jabatan ?? '-',
                         'email' => $user->email
                     ]
                 ]
             ]);
-            
+
         } catch (\Exception $e) {
             Log::error('Dashboard API Error: ' . $e->getMessage());
             return response()->json([
@@ -691,8 +708,11 @@ public function absensiPage(Request $request)
                                     });
 
         return response()->json([
-            'pending' => $pendingSubmissions,
-            'recent' => $recentSubmissions,
+            'success' => true,
+            'data' => [
+                'pending' => $pendingSubmissions,
+                'recent' => $recentSubmissions,
+            ]
         ]);
     }
 
@@ -704,17 +724,17 @@ public function absensiPage(Request $request)
         try {
             $user = Auth::user();
             $today = now()->toDateString();
-            
+
             // 1. Cek apakah user sedang cuti hari ini
             $cutiCheck = $this->checkIfOnLeaveToday($user->id);
             if ($cutiCheck['on_leave']) {
                 $cuti = $cutiCheck['details'];
                 return response()->json([
                     'success' => false,
-                    'message' => 'Anda sedang cuti dari ' . 
-                        Carbon::parse($cuti->tanggal_mulai)->format('d/m/Y') . 
-                        ' sampai ' . 
-                        Carbon::parse($cuti->tanggal_selesai)->format('d/m/Y') . 
+                    'message' => 'Anda sedang cuti dari ' .
+                        Carbon::parse($cuti->tanggal_mulai)->format('d/m/Y') .
+                        ' sampai ' .
+                        Carbon::parse($cuti->tanggal_selesai)->format('d/m/Y') .
                         '. Tidak dapat melakukan absensi.',
                     'cuti_details' => [
                         'tanggal_mulai' => $cuti->tanggal_mulai,
@@ -724,7 +744,7 @@ public function absensiPage(Request $request)
                     ]
                 ], 403);
             }
-            
+
             // 2. Cek apakah sudah ada pengajuan ketidakhadiran yang disetujui
             $existingAbsence = Absensi::where('user_id', $user->id)
                                       ->where('tanggal', $today)
@@ -740,7 +760,7 @@ public function absensiPage(Request $request)
                     'dinas-luar' => 'Dinas Luar',
                     default => 'Ketidakhadiran',
                 };
-                
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Anda tidak dapat melakukan absen masuk karena telah mengajukan "' . $jenisLabel . '" pada hari ini.'
@@ -753,7 +773,7 @@ public function absensiPage(Request $request)
             $cek = Absensi::where('user_id', $user->id)
                 ->where('tanggal', $today)
                 ->first();
-                
+
             if ($cek && $cek->jam_masuk) {
                 return response()->json([
                     'success' => false,
@@ -766,7 +786,7 @@ public function absensiPage(Request $request)
 
             $status = $lateMinutes > 0 ? 'Terlambat' : 'Tepat Waktu';
 
-            Absensi::updateOrCreate(
+            $absensi = Absensi::updateOrCreate(
                 ['user_id' => $user->id, 'tanggal' => $today],
                 [
                     'jam_masuk' => $nowLocal,
@@ -779,7 +799,9 @@ public function absensiPage(Request $request)
                 'success' => true,
                 'message' => 'Absen masuk berhasil!',
                 'data' => [
+                    'id' => $absensi->id,
                     'time' => $nowLocal->toDateTimeString(),
+                    'jam_masuk' => $nowLocal->toTimeString(), // Tambahkan jam_masuk
                     'status' => $status,
                     'late_minutes' => $lateMinutes,
                 ]
@@ -802,17 +824,17 @@ public function absensiPage(Request $request)
         try {
             $user = Auth::user();
             $today = now()->toDateString();
-            
+
             // 1. Cek apakah user sedang cuti hari ini
             $cutiCheck = $this->checkIfOnLeaveToday($user->id);
             if ($cutiCheck['on_leave']) {
                 $cuti = $cutiCheck['details'];
                 return response()->json([
                     'success' => false,
-                    'message' => 'Anda sedang cuti dari ' . 
-                        Carbon::parse($cuti->tanggal_mulai)->format('d/m/Y') . 
-                        ' sampai ' . 
-                        Carbon::parse($cuti->tanggal_selesai)->format('d/m/Y') . 
+                    'message' => 'Anda sedang cuti dari ' .
+                        Carbon::parse($cuti->tanggal_mulai)->format('d/m/Y') .
+                        ' sampai ' .
+                        Carbon::parse($cuti->tanggal_selesai)->format('d/m/Y') .
                         '. Tidak dapat melakukan absensi.',
                     'cuti_details' => [
                         'tanggal_mulai' => $cuti->tanggal_mulai,
@@ -866,7 +888,9 @@ public function absensiPage(Request $request)
                 'success' => true,
                 'message' => 'Absen pulang berhasil!',
                 'data' => [
+                    'id' => $absen->id,
                     'time' => $nowLocal->toDateTimeString(),
+                    'jam_pulang' => $nowLocal->toTimeString(),
                 ]
             ]);
 
@@ -902,19 +926,19 @@ public function absensiPage(Request $request)
         // Validasi: Cek apakah ada tanggal dalam periode yang sudah termasuk cuti
         foreach ($period as $date) {
             $dateStr = $date->toDateString();
-            
+
             // Cek apakah sudah ada cuti yang disetujui di tanggal ini
             $existingCuti = Cuti::where('user_id', $user->id)
                 ->where('status', 'disetujui')
                 ->whereDate('tanggal_mulai', '<=', $dateStr)
                 ->whereDate('tanggal_selesai', '>=', $dateStr)
                 ->exists();
-            
+
             if ($existingCuti) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Anda sudah memiliki cuti yang disetujui pada tanggal ' . 
-                        Carbon::parse($dateStr)->format('d/m/Y') . 
+                    'message' => 'Anda sudah memiliki cuti yang disetujui pada tanggal ' .
+                        Carbon::parse($dateStr)->format('d/m/Y') .
                         '. Tidak dapat mengajukan izin.'
                 ], 400);
             }
@@ -971,19 +995,19 @@ public function absensiPage(Request $request)
         // Validasi: Cek apakah ada tanggal dalam periode yang sudah termasuk cuti
         foreach ($period as $date) {
             $dateStr = $date->toDateString();
-            
+
             // Cek apakah sudah ada cuti yang disetujui di tanggal ini
             $existingCuti = Cuti::where('user_id', $user->id)
                 ->where('status', 'disetujui')
                 ->whereDate('tanggal_mulai', '<=', $dateStr)
                 ->whereDate('tanggal_selesai', '>=', $dateStr)
                 ->exists();
-            
+
             if ($existingCuti) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Anda sudah memiliki cuti yang disetujui pada tanggal ' . 
-                        Carbon::parse($dateStr)->format('d/m/Y') . 
+                    'message' => 'Anda sudah memiliki cuti yang disetujui pada tanggal ' .
+                        Carbon::parse($dateStr)->format('d/m/Y') .
                         '. Tidak dapat mengajukan dinas luar.'
                 ], 400);
             }
@@ -1114,7 +1138,7 @@ public function absensiPage(Request $request)
     }
 
     // =================================================================
-    // METHOD UNTUK MEETING NOTES DAN PENGUMUMAN (MENGGUNAKAN RELASI)
+    // METHOD UNTUK MEETING NOTES DAN PENGUMUMAN
     // =================================================================
 
     /**
@@ -1123,31 +1147,19 @@ public function absensiPage(Request $request)
     public function getMeetingNotes(Request $request)
     {
         try {
-            Log::info('=== GET MEETING NOTES (USING MODEL RELATIONSHIPS) ===');
-            
+            Log::info('=== GET MEETING NOTES ===');
             $date = $request->query('date');
-            Log::info('Requested date:', ['date' => $date]);
             
             if (!$date) {
-                Log::warning('No date parameter provided');
                 return response()->json(['error' => 'Date parameter is required'], 400);
             }
 
             $userId = Auth::id();
-            Log::info('User ID:', ['user_id' => $userId]);
             
-            if (!$userId) {
-                Log::error('User not authenticated');
-                return response()->json(['error' => 'User not authenticated'], 401);
-            }
-            
-            // Check if tables exist
             if (!Schema::hasTable('catatan_rapats') || !Schema::hasTable('catatan_rapat_penugasan')) {
-                Log::error('Required tables do not exist');
                 return response()->json(['error' => 'Tables not found'], 500);
             }
             
-            // Get notes assigned to this user using the penugasan relationship
             $notes = CatatanRapat::whereHas('penugasan', function ($query) use ($userId) {
                     $query->where('user_id', $userId);
                 })
@@ -1157,8 +1169,6 @@ public function absensiPage(Request $request)
                 }])
                 ->get();
                 
-            Log::info('Found notes:', ['count' => $notes->count()]);
-            
             $formattedNotes = $notes->map(function ($item) {
                 return [
                     'id' => $item->id,
@@ -1171,112 +1181,59 @@ public function absensiPage(Request $request)
                 ];
             });
 
-            Log::info('Final result:', [
-                'count' => $formattedNotes->count(),
-                'notes' => $formattedNotes->toArray()
-            ]);
-            
             return response()->json($formattedNotes);
 
         } catch (\Exception $e) {
             Log::error('Error in getMeetingNotes: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
-            return response()->json([
-                'error' => 'Internal server error',
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['error' => 'Internal server error'], 500);
         }
     }
 
     /**
-     * API: Mengambil tanggal-tanggal yang memiliki meeting notes (endpoint baru untuk /api/karyawan/meeting-notes-dates)
+     * API: Mengambil tanggal-tanggal yang memiliki meeting notes
      */
     public function getMeetingNotesDatesApi()
     {
         try {
-            if (!auth()->check()) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
-            }
+            if (!auth()->check()) return response()->json(['success' => false], 401);
             
-            Log::info('=== GET MEETING NOTES DATES API ===');
-            
-            // Check if table exists
             if (!Schema::hasTable('catatan_rapats')) {
-                Log::warning('Table catatan_rapats does not exist');
                 return response()->json(['success' => true, 'dates' => []]);
             }
             
-            // Get dates with published meeting notes
-            // Using the actual column names from CatatanRapat model
             $dates = CatatanRapat::where('status', 'published')
-                ->select('tanggal_rapat') // Adjust based on your actual column name
+                ->select('tanggal_rapat') 
                 ->distinct()
                 ->orderBy('tanggal_rapat', 'desc')
-                ->get()
                 ->pluck('tanggal_rapat')
-                ->map(function($date) {
-                    return Carbon::parse($date)->format('Y-m-d');
-                })
+                ->map(function($date) { return Carbon::parse($date)->format('Y-m-d'); })
                 ->toArray();
             
-            Log::info('Found dates:', ['count' => count($dates), 'dates' => $dates]);
-            
-            return response()->json([
-                'success' => true,
-                'dates' => $dates
-            ]);
+            return response()->json(['success' => true, 'dates' => $dates]);
             
         } catch (\Exception $e) {
-            Log::error('Meeting Dates API Error: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to load meeting dates'
-            ], 500);
+            return response()->json(['success' => false], 500);
         }
     }
 
     /**
-     * API: Mengambil meeting notes untuk tanggal tertentu (endpoint baru untuk /api/karyawan/meeting-notes)
+     * API: Mengambil meeting notes untuk tanggal tertentu
      */
     public function getMeetingNotesApi(Request $request)
     {
         try {
-            if (!auth()->check()) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
-            }
-            
+            if (!auth()->check()) return response()->json(['success' => false], 401);
             $date = $request->query('date');
-            if (!$date) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Date parameter is required'
-                ], 400);
-            }
+            if (!$date) return response()->json(['success' => false, 'message' => 'Date required'], 400);
             
-            Log::info('=== GET MEETING NOTES API ===', ['date' => $date]);
-            
-            // Check if table exists
             if (!Schema::hasTable('catatan_rapats')) {
-                Log::warning('Table catatan_rapats does not exist');
                 return response()->json(['success' => true, 'data' => []]);
             }
             
-            // Get meeting notes for specific date
-            // Using the actual column names from CatatanRapat model
             $meetingNotes = CatatanRapat::where('status', 'published')
-                ->whereDate('tanggal_rapat', $date) // Adjust column name if different
+                ->whereDate('tanggal_rapat', $date)
                 ->orderBy('created_at', 'desc')
-                ->get([
-                    'id', 
-                    'judul', 
-                    'isi', 
-                    'tanggal_rapat', // Adjust column name
-                    'lokasi', 
-                    'created_at'
-                ]);
-            
-            Log::info('Found meeting notes:', ['count' => $meetingNotes->count()]);
+                ->get(['id', 'judul', 'isi', 'tanggal_rapat', 'lokasi', 'created_at']);
             
             $formattedNotes = $meetingNotes->map(function ($note) {
                 return [
@@ -1291,19 +1248,10 @@ public function absensiPage(Request $request)
                 ];
             });
             
-            return response()->json([
-                'success' => true,
-                'data' => $formattedNotes,
-                'date' => $date
-            ]);
+            return response()->json(['success' => true, 'data' => $formattedNotes, 'date' => $date]);
             
         } catch (\Exception $e) {
-            Log::error('Meeting Notes API Error: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to load meeting notes'
-            ], 500);
+            return response()->json(['success' => false], 500);
         }
     }
 
@@ -1313,23 +1261,11 @@ public function absensiPage(Request $request)
     public function getMeetingNotesDates()
     {
         try {
-            Log::info('=== GET MEETING NOTES DATES (USING MODEL RELATIONSHIPS) ===');
-
             $userId = Auth::id();
-            Log::info('User ID:', ['user_id' => $userId]);
-            
-            if (!$userId) {
-                Log::error('User not authenticated');
-                return response()->json(['error' => 'User not authenticated'], 401);
-            }
-
-            // Check if tables exist
             if (!Schema::hasTable('catatan_rapats') || !Schema::hasTable('catatan_rapat_penugasan')) {
-                Log::error('Required tables do not exist');
                 return response()->json([]);
             }
             
-            // Get distinct dates for notes assigned to this user using the penugasan relationship
             $dates = CatatanRapat::whereHas('penugasan', function ($query) use ($userId) {
                     $query->where('user_id', $userId);
                 })
@@ -1337,160 +1273,92 @@ public function absensiPage(Request $request)
                 ->distinct()
                 ->orderBy('tanggal', 'desc')
                 ->pluck('tanggal');
-
-            Log::info('Found dates:', ['count' => $dates->count(), 'dates' => $dates->toArray()]);
+                
             return response()->json($dates);
-
         } catch (\Exception $e) {
-            Log::error('Error in getMeetingNotesDates: ' . $e->getMessage());
-            return response()->json([], 200); // Return empty array on error
+            return response()->json([]);
         }
     }
 
     /**
-     * API untuk mendapatkan pengumuman (MENGGUNAKAN MODEL PENGUMUMAN)
+     * API untuk mendapatkan pengumuman
      */
     public function getAnnouncements()
     {
         try {
-            Log::info('=== GET ANNOUNCEMENTS (USING MODEL RELATIONSHIPS) ===');
-
             $userId = Auth::id();
-            Log::info('User ID:', ['user_id' => $userId]);
             
-            if (!$userId) {
-                Log::error('User not authenticated');
-                return response()->json(['error' => 'User not authenticated'], 401);
-            }
-
-            // Check if tables exist
             if (!Schema::hasTable('pengumuman') || !Schema::hasTable('pengumuman_user')) {
-                Log::error('Required tables do not exist');
                 return response()->json([]);
             }
             
-            // Get announcements for this user using the scopeForUser method
             $announcements = Pengumuman::forUser($userId)
-                ->with(['creator:id,name']) // Load the creator's name
+                ->with(['creator:id,name']) 
                 ->orderBy('created_at', 'desc')
                 ->get();
                 
-            Log::info('Found announcements:', ['count' => $announcements->count()]);
-            
             $formattedAnnouncements = $announcements->map(function ($item) {
                 return [
                     'id' => $item->id,
                     'judul' => $item->judul,
                     'isi_pesan' => $item->isi_pesan,
-                    'ringkasan' => $item->ringkasan, // Menggunakan accessor dari model
+                    'ringkasan' => $item->ringkasan,
                     'lampiran' => $item->lampiran,
-                    'lampiran_url' => $item->lampiran_url, // Menggunakan accessor dari model
+                    'lampiran_url' => $item->lampiran_url,
                     'created_at' => $item->created_at->format('Y-m-d H:i:s'),
-                    'tanggal_indo' => $item->tanggal_indo, // Menggunakan accessor dari model
+                    'tanggal_indo' => $item->tanggal_indo,
                     'creator' => $item->creator ? $item->creator->name : 'System',
                 ];
             });
 
-            Log::info('Final result:', [
-                'count' => $formattedAnnouncements->count(),
-                'announcements' => $formattedAnnouncements->toArray()
-            ]);
-            
             return response()->json($formattedAnnouncements);
-
         } catch (\Exception $e) {
-            Log::error('Error in getAnnouncements: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
-            return response()->json([], 200); // Return empty array on error
+            return response()->json([]);
         }
     }
 
     /**
-     * API: Mengambil tanggal-tanggal yang memiliki pengumuman (endpoint baru untuk /api/karyawan/announcements-dates)
+     * API: Mengambil tanggal-tanggal yang memiliki pengumuman
      */
     public function getAnnouncementDatesApi()
     {
         try {
-            if (!auth()->check()) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
-            }
+            if (!auth()->check()) return response()->json(['success' => false], 401);
+            if (!Schema::hasTable('pengumuman')) return response()->json(['success' => true, 'dates' => []]);
             
-            Log::info('=== GET ANNOUNCEMENT DATES API ===');
-            
-            // Check if table exists
-            if (!Schema::hasTable('pengumuman')) {
-                Log::warning('Table pengumuman does not exist');
-                return response()->json(['success' => true, 'dates' => []]);
-            }
-            
-            // Get dates with announcements
-            // Adjust column names based on your Pengumuman model
             $dates = Pengumuman::where('status', 'published')
-                ->select('tanggal') // Adjust column name if different
+                ->select('tanggal')
                 ->distinct()
                 ->orderBy('tanggal', 'desc')
-                ->get()
                 ->pluck('tanggal')
-                ->map(function($date) {
-                    return Carbon::parse($date)->format('Y-m-d');
-                })
+                ->map(function($date) { return Carbon::parse($date)->format('Y-m-d'); })
                 ->toArray();
             
-            Log::info('Found announcement dates:', ['count' => count($dates), 'dates' => $dates]);
-            
-            return response()->json([
-                'success' => true,
-                'dates' => $dates
-            ]);
-            
+            return response()->json(['success' => true, 'dates' => $dates]);
         } catch (\Exception $e) {
-            Log::error('Announcement Dates API Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to load announcement dates'
-            ], 500);
+            return response()->json(['success' => false], 500);
         }
     }
 
     /**
-     * API: Mengambil daftar pengumuman (endpoint baru untuk /api/karyawan/announcements)
+     * API: Mengambil daftar pengumuman
      */
     public function getAnnouncementsApi()
     {
         try {
-            if (!auth()->check()) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
-            }
+            if (!auth()->check()) return response()->json(['success' => false], 401);
+            if (!Schema::hasTable('pengumuman')) return response()->json(['success' => true, 'data' => []]);
             
-            Log::info('=== GET ANNOUNCEMENTS API ===');
-            
-            // Check if table exists
-            if (!Schema::hasTable('pengumuman')) {
-                Log::warning('Table pengumuman does not exist');
-                return response()->json(['success' => true, 'data' => []]);
-            }
-            
-            // Get latest announcements
-            // Adjust column names based on your Pengumuman model
             $announcements = Pengumuman::where('status', 'published')
                 ->orderBy('created_at', 'desc')
                 ->limit(20)
-                ->get([
-                    'id', 
-                    'judul', 
-                    'isi', // Adjust column name if different (isi_pesan)
-                    'tanggal', // Adjust column name if different
-                    'lampiran',
-                    'created_at'
-                ]);
-            
-            Log::info('Found announcements:', ['count' => $announcements->count()]);
+                ->get(['id', 'judul', 'isi', 'tanggal', 'lampiran', 'created_at']);
             
             $formattedAnnouncements = $announcements->map(function ($announcement) {
                 return [
                     'id' => $announcement->id,
                     'judul' => $announcement->judul,
-                    'isi' => $announcement->isi, // Adjust based on your column name
+                    'isi' => $announcement->isi,
                     'tanggal' => $announcement->tanggal,
                     'formatted_tanggal' => Carbon::parse($announcement->tanggal)->translatedFormat('d F Y'),
                     'lampiran' => $announcement->lampiran,
@@ -1500,218 +1368,9 @@ public function absensiPage(Request $request)
                 ];
             });
             
-            return response()->json([
-                'success' => true,
-                'data' => $formattedAnnouncements
-            ]);
-            
+            return response()->json(['success' => true, 'data' => $formattedAnnouncements]);
         } catch (\Exception $e) {
-            Log::error('Announcements API Error: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to load announcements'
-            ], 500);
-        }
-    }
-
-    /**
-     * Debug endpoint untuk meeting notes dengan penugasan
-     */
-    public function debugMeetingNotesPenugasan(Request $request)
-    {
-        $userId = Auth::id();
-        $date = $request->query('date', now()->toDateString());
-        
-        // Get all penugasan for user
-        $allPenugasans = DB::table('catatan_rapat_penugasan')
-            ->where('user_id', $userId)
-            ->get();
-        
-        // Get assigned note IDs
-        $assignedNoteIds = $allPenugasans->pluck('catatan_rapat_id')->toArray();
-        
-        // Get notes for specific date
-        $dateNotes = CatatanRapat::whereIn('id', $assignedNoteIds)
-            ->where('tanggal', $date)
-            ->with(['user:id,name'])
-            ->get();
-        
-        // Get all assigned notes
-        $allAssignedNotes = CatatanRapat::whereIn('id', $assignedNoteIds)
-            ->with(['user:id,name'])
-            ->get();
-        
-        // Get notes using relationship
-        $relationshipNotes = CatatanRapat::whereHas('penugasan', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            })
-            ->where('tanggal', $date)
-            ->with(['user:id,name', 'penugasan'])
-            ->get();
-        
-        return response()->json([
-            'user_id' => $userId,
-            'requested_date' => $date,
-            'all_penugasans_count' => $allPenugasans->count(),
-            'assigned_note_ids' => $assignedNoteIds,
-            'all_assigned_notes_count' => $allAssignedNotes->count(),
-            'date_notes_count' => $dateNotes->count(),
-            'relationship_notes_count' => $relationshipNotes->count(),
-            'all_penugasans' => $allPenugasans->toArray(),
-            'all_assigned_notes' => $allAssignedNotes->toArray(),
-            'date_notes' => $dateNotes->toArray(),
-            'relationship_notes' => $relationshipNotes->toArray(),
-        ]);
-    }
-
-    /**
-     * Debug endpoint untuk pengumuman
-     */
-    public function debugPengumuman(Request $request)
-    {
-        $userId = Auth::id();
-        
-        // Get all pengumuman_user for user
-        $allPengumumanUsers = DB::table('pengumuman_user')
-            ->where('user_id', $userId)
-            ->get();
-        
-        // Get assigned pengumuman IDs
-        $assignedPengumumanIds = $allPengumumanUsers->pluck('pengumuman_id')->toArray();
-        
-        // Get all assigned announcements
-        $allAssignedAnnouncements = Pengumuman::whereIn('id', $assignedPengumumanIds)
-            ->with(['creator:id,name'])
-            ->get();
-        
-        // Get announcements using scopeForUser method
-        $scopeAnnouncements = Pengumuman::forUser($userId)
-            ->with(['creator:id,name'])
-            ->get();
-        
-        return response()->json([
-            'user_id' => $userId,
-            'all_pengumuman_users_count' => $allPengumumanUsers->count(),
-            'assigned_pengumuman_ids' => $assignedPengumumanIds,
-            'all_assigned_announcements_count' => $allAssignedAnnouncements->count(),
-            'scope_announcements_count' => $scopeAnnouncements->count(),
-            'all_pengumuman_users' => $allPengumumanUsers->toArray(),
-            'all_assigned_announcements' => $allAssignedAnnouncements->toArray(),
-            'scope_announcements' => $scopeAnnouncements->toArray(),
-        ]);
-    }
-
-    /**
-     * Test endpoint untuk debugging API endpoints
-     */
-    public function testApiEndpoints()
-    {
-        $userId = Auth::id();
-        
-        // Test database connection
-        try {
-            DB::connection()->getPdo();
-            $dbStatus = 'Connected';
-        } catch (\Exception $e) {
-            $dbStatus = 'Error: ' . $e->getMessage();
-        }
-        
-        // Check tables
-        $tables = [
-            'catatan_rapats' => Schema::hasTable('catatan_rapats'),
-            'catatan_rapat_penugasan' => Schema::hasTable('catatan_rapat_penugasan'),
-            'pengumuman' => Schema::hasTable('pengumuman'), // Perbaiki nama tabel
-            'pengumuman_user' => Schema::hasTable('pengumuman_user'),
-        ];
-        
-        // Check data
-        $data = [
-            'user_id' => $userId,
-            'db_status' => $dbStatus,
-            'tables' => $tables,
-            'meeting_notes_penugasan_count' => 0,
-            'announcements_count' => 0,
-        ];
-        
-        if ($tables['catatan_rapat_penugasan']) {
-            $data['meeting_notes_penugasan_count'] = DB::table('catatan_rapat_penugasan')
-                ->where('user_id', $userId)
-                ->count();
-        }
-        
-        if ($tables['pengumuman_user']) {
-            $data['announcements_count'] = DB::table('pengumuman_user')
-                ->where('user_id', $userId)
-                ->count();
-        }
-        
-        return response()->json($data);
-    }
-
-    /**
-     * API: Debug endpoint untuk testing semua API karyawan
-     */
-    public function debugAllApis()
-    {
-        try {
-            if (!auth()->check()) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
-            }
-            
-            $user = auth()->user();
-            $results = [];
-            
-            // Test dashboard data
-            $dashboardResponse = $this->getDashboardDataApi();
-            $dashboardData = json_decode($dashboardResponse->getContent(), true);
-            $results['dashboard_data'] = $dashboardData['success'] ? 'SUCCESS' : 'FAILED';
-            
-            // Test meeting notes dates
-            $meetingDatesResponse = $this->getMeetingNotesDatesApi();
-            $meetingDatesData = json_decode($meetingDatesResponse->getContent(), true);
-            $results['meeting_notes_dates'] = $meetingDatesData['success'] ? 'SUCCESS' : 'FAILED';
-            
-            // Test announcements dates
-            $announcementDatesResponse = $this->getAnnouncementDatesApi();
-            $announcementDatesData = json_decode($announcementDatesResponse->getContent(), true);
-            $results['announcement_dates'] = $announcementDatesData['success'] ? 'SUCCESS' : 'FAILED';
-            
-            // Test announcements
-            $announcementsResponse = $this->getAnnouncementsApi();
-            $announcementsData = json_decode($announcementsResponse->getContent(), true);
-            $results['announcements'] = $announcementsData['success'] ? 'SUCCESS' : 'FAILED';
-            
-            // Check database tables
-            $tables = [
-                'catatan_rapats' => Schema::hasTable('catatan_rapats'),
-                'pengumuman' => Schema::hasTable('pengumuman'),
-            ];
-            
-            return response()->json([
-                'success' => true,
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'role' => $user->role,
-                    'divisi' => $user->divisi,
-                ],
-                'api_results' => $results,
-                'tables_exist' => $tables,
-                'routes' => [
-                    'dashboard_data' => '/karyawan/api/dashboard-data',
-                    'meeting_notes_dates' => '/karyawan/api/meeting-notes-dates',
-                    'announcement_dates' => '/karyawan/api/announcements-dates',
-                    'announcements' => '/karyawan/api/announcements',
-                ]
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ], 500);
+            return response()->json(['success' => false], 500);
         }
     }
 }

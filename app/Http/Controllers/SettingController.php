@@ -6,11 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache; // Tambahkan ini
 use Illuminate\Validation\Rules\Password;
 use App\Models\Setting;
 use App\Models\User;
-use App\Models\Article; // <-- TAMBAHKAN INI
-use Illuminate\Support\Str; // <-- TAMBAHKAN INI JUGA
+use App\Models\Article;
+use Illuminate\Support\Str;
 use App\Models\Portfolio;
 
 class SettingController extends Controller
@@ -138,6 +139,104 @@ class SettingController extends Controller
             'success' => true,
             'data' => $aboutData
         ]);
+    }
+
+    // ==================== FUNGSI PENGELOLAAN JAM OPERASIONAL ====================
+
+    /**
+     * Menyimpan pengaturan jam operasional
+     */
+    public function saveOperationalHours(Request $request)
+    {
+        $request->validate([
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'late_limit_hour' => 'required|integer|min:0|max:23',
+            'late_limit_minute' => 'required|integer|min:0|max:59',
+            'late_tolerance_minutes' => 'nullable|integer|min:0|max:60',
+        ]);
+
+        try {
+            // Simpan ke database melalui model Setting
+            $setting = Setting::updateOrCreate(
+                ['key' => 'operational_hours'],
+                [
+                    'value' => json_encode([
+                        'start_time' => $request->start_time,
+                        'end_time' => $request->end_time,
+                        'late_limit_hour' => $request->late_limit_hour,
+                        'late_limit_minute' => $request->late_limit_minute,
+                        'late_tolerance_minutes' => $request->late_tolerance_minutes ?? 0,
+                        'updated_at' => now()
+                    ]),
+                    'description' => 'Pengaturan jam operasional dan keterlambatan'
+                ]
+            );
+
+            // Juga simpan ke cache untuk akses cepat
+            $cacheData = [
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+                'late_limit_hour' => $request->late_limit_hour,
+                'late_limit_minute' => $request->late_limit_minute,
+                'late_tolerance_minutes' => $request->late_tolerance_minutes ?? 0,
+            ];
+            Cache::forever('operational_hours', $cacheData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengaturan jam operasional berhasil disimpan',
+                'data' => $cacheData
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Mendapatkan pengaturan jam operasional
+     */
+    public function getOperationalHours()
+    {
+        try {
+            // Coba ambil dari cache dulu
+            $settings = Cache::get('operational_hours');
+            
+            // Jika tidak ada di cache, ambil dari database
+            if (!$settings) {
+                $setting = Setting::where('key', 'operational_hours')->first();
+                if ($setting) {
+                    $settings = json_decode($setting->value, true);
+                    // Simpan ke cache untuk akses cepat
+                    Cache::forever('operational_hours', $settings);
+                }
+            }
+            
+            // Jika masih tidak ada, gunakan default value
+            if (!$settings) {
+                $settings = [
+                    'start_time' => '08:00',
+                    'end_time' => '17:00',
+                    'late_limit_hour' => 9,
+                    'late_limit_minute' => 5,
+                    'late_tolerance_minutes' => 0,
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $settings
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     // ==================== FUNGSI PENGELOLAAN ARTIKEL ====================
@@ -313,6 +412,7 @@ class SettingController extends Controller
             'data' => $articles
         ]);
     }
+
     /**
      * Menampilkan halaman pengaturan portofolio
      */

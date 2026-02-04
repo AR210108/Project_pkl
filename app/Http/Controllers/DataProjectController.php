@@ -74,10 +74,9 @@ class DataProjectController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        // Get invoices for dropdown
-        $invoices = Invoice::where('status', 'lunas') // Hanya invoice yang sudah lunas
-            ->orderBy('id', 'desc')
-            ->get();
+    $invoices = Invoice::query();
+
+    $invoices = $invoices->orderBy('id', 'desc')->get();
 
         return view('admin.data_project', compact('project', 'invoices'));
     }

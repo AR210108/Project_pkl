@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\CatatanRapat;
+use App\Models\Layanan;
+use App\Models\Perusahaan;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -1013,4 +1015,109 @@ class CatatanRapatController extends Controller
             return response()->json(['message' => 'Server Error'], 500);
         }
     }
+
+    public function getPerusahaanData(Request $request)
+{
+    try {
+        $perusahaanList = Perusahaan::orderBy('nama_perusahaan', 'asc')
+            ->get(['id', 'nama_perusahaan', 'klien', 'alamat', 'jumlah_kerjasama']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data perusahaan berhasil diambil',
+            'data' => $perusahaanList
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error getting perusahaan data: ' . $e->getMessage());
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengambil data perusahaan',
+            'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+        ], 500);
+    }
+}
+
+/**
+ * Get layanan data for dropdown
+ */
+public function getLayananData(Request $request)
+{
+    try {
+        $layanan = Layanan::orderBy('nama_layanan', 'asc')
+            ->get(['id', 'nama_layanan', 'harga', 'deskripsi']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data layanan berhasil diambil',
+            'data' => $layanan
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error getting layanan data: ' . $e->getMessage());
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengambil data layanan',
+            'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+        ], 500);
+    }
+}
+
+   /**
+ * API: Mendapatkan catatan rapat untuk Finance
+ * Hanya menampilkan catatan rapat yang ditugaskan ke finance
+ */
+public function getMeetingNotesForFinance(): JsonResponse
+{
+    try {
+        // Cek authentication
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        $user = Auth::user();
+        if ($user->role !== 'finance') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied'
+            ], 403);
+        }
+
+        // Query untuk mendapatkan catatan rapat yang ditugaskan ke finance
+        $meetingNotes = CatatanRapat::whereHas('penugasan', function ($query) use ($user) {
+            $query->where('users.id', $user->id);
+        })
+            ->with(['user:id,name'])
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        $formattedNotes = $meetingNotes->map(function ($note) {
+            return [
+                'id' => $note->id,
+                'topik' => $note->topik,
+                'hasil_diskusi' => $note->hasil_diskusi,
+                'keputusan' => $note->keputusan,
+                'tanggal' => $note->tanggal,
+                'formatted_tanggal' => Carbon::parse($note->tanggal)->translatedFormat('d F Y'),
+                'creator_name' => $note->user ? $note->user->name : 'System',
+                'created_at' => $note->created_at->format('Y-m-d H:i:s'),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $formattedNotes
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error in getMeetingNotesForFinance: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Server Error'
+        ], 500);
+    }
+}
 }

@@ -9,6 +9,7 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\Admin\PerusahaanController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminKaryawanController;
 use App\Http\Controllers\CatatanRapatController;
@@ -279,7 +280,17 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/data_user', function () {
             return redirect()->route('admin.user');
         });
-        // KARYAWAN MANAGEMENT - ROUTE YANG DIPERBAIKI
+
+        Route::get('/perusahaan', [PerusahaanController::class, 'index'])->name('perusahaan.index');
+Route::get('/perusahaan/create', [PerusahaanController::class, 'create'])->name('perusahaan.create');
+Route::post('/perusahaan', [PerusahaanController::class, 'store'])->name('perusahaan.store');
+Route::get('/perusahaan/{perusahaan}/edit', [PerusahaanController::class, 'edit'])->name('perusahaan.edit');
+Route::put('/perusahaan/{perusahaan}', [PerusahaanController::class, 'update'])->name('perusahaan.update'); // INI YANG PENTING
+Route::delete('/perusahaan/{perusahaan}', [PerusahaanController::class, 'destroy'])->name('perusahaan.delete'); // Nama route 'delete' atau 'destroy' harus konsisten
+        Route::get('/perusahaan/data', [PerusahaanController::class, 'getDataForDropdown'])
+            ->name('perusahaan.data');
+
+// KARYAWAN MANAGEMENT - ROUTE YANG DIPERBAIKI
         Route::get('/data_karyawan', [AdminKaryawanController::class, 'index'])->name('karyawan.index');
         Route::post('/karyawan/store', [AdminKaryawanController::class, 'store'])->name('karyawan.store');
         
@@ -377,6 +388,11 @@ Route::middleware(['auth', 'role:admin'])
             Route::delete('/{id}', [InvoiceController::class, 'destroy'])->name('destroy');
             Route::get('/{id}/print', [InvoiceController::class, 'print'])->name('print');
         });
+            Route::get('/invoice/perusahaan-data', [InvoiceController::class, 'getPerusahaanData'])
+        ->name('invoice.perusahaan.data');
+    Route::get('/invoice/layanan-data', [InvoiceController::class, 'getLayananData'])
+        ->name('invoice.layanan.data');
+        
 
         // ================= KWITANSI WEB =================
         Route::get('/kwitansi', [KwitansiController::class, 'index'])
@@ -404,31 +420,6 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/invoices-for-kwitansi', [InvoiceController::class, 'getInvoicesForKwitansi']);
             Route::get('/invoice-for-kwitansi/{id}', [InvoiceController::class, 'getInvoiceDetailForKwitansi']);
             Route::get('/all-invoices', [InvoiceController::class, 'getAllInvoicesApi']);
-        });
-
-        // CUTI MANAGEMENT WITH QUOTA - PERBAIKAN ROUTE
-        Route::prefix('cuti')->name('cuti.')->group(function () {
-            Route::get('/', [CutiController::class, 'index'])->name('index');
-            Route::get('/data', [CutiController::class, 'getData'])->name('data');
-            Route::get('/stats', [CutiController::class, 'stats'])->name('stats');
-            Route::get('/quota-info', [CutiController::class, 'getQuotaInfo'])->name('quota.info');
-            Route::post('/reset-quota', [CutiController::class, 'resetQuota'])->name('reset.quota');
-            Route::get('/create', [CutiController::class, 'create'])->name('create');
-            Route::post('/', [CutiController::class, 'store'])->name('store');
-            Route::post('/{cuti}/approve', [CutiController::class, 'approve'])->name('approve');
-            Route::post('/{cuti}/reject', [CutiController::class, 'reject'])->name('reject');
-            Route::post('/{cuti}/cancel-refund', [CutiController::class, 'cancelWithRefund'])->name('cancel.refund');
-            Route::get('/{cuti}', [CutiController::class, 'show'])->name('show');
-            Route::get('/{cuti}/edit', [CutiController::class, 'edit'])->name('edit');
-            Route::put('/{cuti}', [CutiController::class, 'update'])->name('update');
-            Route::delete('/{cuti}', [CutiController::class, 'destroy'])->name('destroy');
-            Route::get('/{cuti}/history', [CutiController::class, 'getHistory'])->name('history');
-            Route::get('/summary', [CutiController::class, 'getSummary'])->name('summary');
-            Route::get('/export', [CutiController::class, 'export'])->name('export');
-            Route::get('/report', [CutiController::class, 'report'])->name('report');
-            Route::post('/calculate-duration', [CutiController::class, 'calculateDuration'])->name('calculate-duration');
-            Route::get('/karyawan-by-divisi', [CutiController::class, 'getKaryawanByDivisi'])->name('karyawan.by-divisi');
-            Route::get('/check-leave-status', [CutiController::class, 'checkLeaveStatusApi'])->name('check-leave-status');
         });
 
         // Settings
@@ -1481,4 +1472,16 @@ Route::prefix('manager_divisi/api')->middleware(['auth', 'role:manager_divisi'])
     // Route untuk Pengumuman
     Route::get('/announcements-dates', [PengumumanController::class, 'getAnnouncementDatesForManager']);
     Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsForManager']);
+});
+
+// Route untuk pengaturan jam operasional
+Route::post('/admin/settings/operational-hours', [App\Http\Controllers\SettingController::class, 'saveOperationalHours'])->name('admin.settings.operational-hours');
+Route::get('/admin/settings/operational-hours', [App\Http\Controllers\SettingController::class, 'getOperationalHours'])->name('admin.settings.operational-hours.get');
+// Route untuk API jam operasional
+Route::get('/api/operational-hours', [App\Http\Controllers\AbsensiController::class, 'apiGetOperationalHours']);
+
+// Finance API routes
+Route::middleware(['auth', 'role:finance'])->prefix('finance/api')->group(function () {
+    Route::get('/meeting-notes', [CatatanRapatController::class, 'getMeetingNotesForFinance']);
+    Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsForFinance']);
 });

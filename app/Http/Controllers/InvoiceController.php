@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Layanan;
+use App\Models\Perusahaan;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
@@ -95,134 +96,146 @@ class InvoiceController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        $user = Auth::user();
 
-        // Ambil data layanan untuk dropdown dari model Layanan
-        try {
-            $layanan = Layanan::orderBy('nama_layanan', 'asc')
-                ->get(['id', 'nama_layanan', 'harga']);
 
-            if ($user && $user->role == 'finance') {
-                $viewName = 'finance.invoice_create';
-            } else {
-                $viewName = 'admin.invoice_create';
-            }
+public function create()
+{
+    $user = Auth::user();
 
-            return view($viewName, compact('layanan'));
-        } catch (\Exception $e) {
-            Log::error('Error getting layanan data for create form: ' . $e->getMessage());
+    try {
+        // Ambil data layanan untuk dropdown
+        $layanan = Layanan::orderBy('nama_layanan', 'asc')
+            ->get(['id', 'nama_layanan', 'harga', 'deskripsi']);
 
-            // Tetap tampilkan view meski data layanan gagal
-            $layanan = collect();
+        // Ambil data perusahaan untuk dropdown
+        $perusahaanList = Perusahaan::orderBy('nama_perusahaan', 'asc')
+            ->get(['id', 'nama_perusahaan', 'klien', 'alamat', 'jumlah_kerjasama']);
 
-            if ($user && $user->role == 'finance') {
-                $viewName = 'finance.invoice_create';
-            } else {
-                $viewName = 'admin.invoice_create';
-            }
-
-            return view($viewName, compact('layanan'));
+        if ($user && $user->role == 'finance') {
+            $viewName = 'finance.invoice_create';
+        } else {
+            $viewName = 'admin.invoice_create';
         }
+
+        return view($viewName, compact('layanan', 'perusahaanList'));
+    } catch (\Exception $e) {
+        Log::error('Error getting data for create form: ' . $e->getMessage());
+
+        $layanan = collect();
+        $perusahaanList = collect();
+
+        if ($user && $user->role == 'finance') {
+            $viewName = 'finance.invoice_create';
+        } else {
+            $viewName = 'admin.invoice_create';
+        }
+
+        return view($viewName, compact('layanan', 'perusahaanList'));
+    }
+}
+
+
+public function store(Request $request)
+{
+    Log::info('Store Invoice Request:', $request->all());
+
+    // Validasi dengan field baru
+    $validator = Validator::make($request->all(), [
+        'invoice_no' => 'required|string|unique:invoices,invoice_no',
+        'invoice_date' => 'required|date',
+        'company_name' => 'required|string|max:255',
+        'company_address' => 'required|string',
+        'client_name' => 'required|string|max:255',
+        'nama_layanan' => 'required|string|max:255',
+        'status_pembayaran' => 'required|in:pembayaran awal,lunas',
+        'payment_method' => 'required|string',
+        'description' => 'nullable|string',
+        'subtotal' => 'required|numeric|min:0',
+        'tax' => 'required|numeric|min:0',
+        'total' => 'required|numeric|min:0',
+        'order_number' => 'nullable|string', // Tambahkan ini
+    ]);
+
+    if ($validator->fails()) {
+        Log::error('Validation failed:', $validator->errors()->toArray());
+
+        if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        return redirect()->back()
+            ->withErrors($validator)
+            ->withInput();
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        Log::info('Store Invoice Request:', $request->all());
+    DB::beginTransaction();
+    try {
+        $validated = $validator->validated();
 
-        // Validasi dengan field baru
-        $validator = Validator::make($request->all(), [
-            'invoice_no' => 'required|string|unique:invoices,invoice_no',
-            'invoice_date' => 'required|date',
-            'company_name' => 'required|string|max:255',
-            'company_address' => 'required|string',
-            'client_name' => 'required|string|max:255',
-            'nama_layanan' => 'required|string|max:255', // Field baru
-            'status_pembayaran' => 'required|in:pembayaran awal,lunas', // Field baru
-            'payment_method' => 'required|string',
-            'description' => 'nullable|string',
-            'subtotal' => 'required|numeric|min:0',
-            'tax' => 'required|numeric|min:0',
-            'total' => 'required|numeric|min:0',
+        // Generate invoice number if not provided
+        if (empty($validated['invoice_no'])) {
+            $validated['invoice_no'] = 'INV-' . date('Ymd') . '-' . strtoupper(uniqid());
+        }
+
+        // Convert numeric values
+        $validated['subtotal'] = (float) $validated['subtotal'];
+        $validated['tax'] = (float) $validated['tax'];
+        $validated['total'] = (float) $validated['total'];
+
+        // Simpan jumlah kerjasama dari perusahaan
+        $perusahaan = Perusahaan::where('nama_perusahaan', $validated['company_name'])->first();
+        if ($perusahaan) {
+            // Update jumlah kerjasama perusahaan
+            $perusahaan->update([
+                'jumlah_kerjasama' => ($perusahaan->jumlah_kerjasama + 1)
+            ]);
+        }
+
+        Log::info('Creating invoice with data:', $validated);
+
+        $invoice = Invoice::create($validated);
+        Log::info('Invoice created successfully:', ['id' => $invoice->id]);
+
+        DB::commit();
+
+        // Untuk API/AJAX request
+        if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice berhasil dibuat',
+                'data' => $invoice
+            ], 201);
+        }
+
+        // Untuk web form request
+        $user = Auth::user();
+        return redirect()->route($user->role . '.invoice.index')
+            ->with('success', 'Invoice berhasil dibuat');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error creating invoice: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString()
         ]);
 
-        if ($validator->fails()) {
-            Log::error('Validation failed:', $validator->errors()->toArray());
-
-            // Untuk API/AJAX request
-            if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validasi gagal',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            // Untuk web form request
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+        // Untuk API/AJAX request
+        if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat invoice',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
         }
 
-        DB::beginTransaction();
-        try {
-            $validated = $validator->validated();
-
-            // Generate invoice number if not provided
-            if (empty($validated['invoice_no'])) {
-                $validated['invoice_no'] = 'INV-' . date('Ymd') . '-' . strtoupper(uniqid());
-            }
-
-            // Convert numeric values
-            $validated['subtotal'] = (float) $validated['subtotal'];
-            $validated['tax'] = (float) $validated['tax'];
-            $validated['total'] = (float) $validated['total'];
-
-            Log::info('Creating invoice with data:', $validated);
-
-            $invoice = Invoice::create($validated);
-            Log::info('Invoice created successfully:', ['id' => $invoice->id]);
-
-            DB::commit();
-
-            // Untuk API/AJAX request
-            if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Invoice berhasil dibuat',
-                    'data' => $invoice
-                ], 201);
-            }
-
-            // Untuk web form request
-            $user = Auth::user();
-            return redirect()->route($user->role . '.invoice.index')
-                ->with('success', 'Invoice berhasil dibuat');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error creating invoice: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            // Untuk API/AJAX request
-            if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Gagal membuat invoice',
-                    'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-                ], 500);
-            }
-
-            // Untuk web form request
-            return redirect()->back()
-                ->with('error', 'Gagal membuat invoice: ' . $e->getMessage())
-                ->withInput();
-        }
+        // Untuk web form request
+        return redirect()->back()
+            ->with('error', 'Gagal membuat invoice: ' . $e->getMessage())
+            ->withInput();
     }
+}
 
     /**
      * Display the specified resource.

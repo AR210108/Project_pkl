@@ -1099,4 +1099,64 @@ class PengumumanController extends Controller
             return response()->json(['message' => 'Server Error'], 500);
         }
     }
+
+    /**
+ * API: Mendapatkan pengumuman untuk Finance
+ * Hanya menampilkan pengumuman yang ditugaskan ke finance
+ */
+public function getAnnouncementsForFinance(): JsonResponse
+{
+    try {
+        // Cek authentication
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        $user = Auth::user();
+        if ($user->role !== 'finance') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied'
+            ], 403);
+        }
+
+        // Query untuk mendapatkan pengumuman yang ditugaskan ke finance
+        $announcements = Pengumuman::whereHas('users', function ($query) use ($user) {
+            $query->where('users.id', $user->id);
+        })
+            ->with(['creator:id,name'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $formattedAnnouncements = $announcements->map(function ($announcement) {
+            return [
+                'id' => $announcement->id,
+                'judul' => $announcement->judul,
+                'isi_pesan' => $announcement->isi_pesan,
+                'ringkasan' => substr(strip_tags($announcement->isi_pesan), 0, 100) . '...',
+                'tanggal' => $announcement->created_at->format('Y-m-d'),
+                'formatted_tanggal' => $announcement->created_at->translatedFormat('d F Y'),
+                'lampiran' => $announcement->lampiran,
+                'lampiran_url' => $announcement->lampiran ? asset('storage/' . $announcement->lampiran) : null,
+                'creator_name' => $announcement->creator ? $announcement->creator->name : 'System',
+                'created_at' => $announcement->created_at->format('Y-m-d H:i:s'),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $formattedAnnouncements
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error in getAnnouncementsForFinance: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Server Error'
+        ], 500);
+    }
+}
 }

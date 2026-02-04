@@ -5,18 +5,51 @@ namespace App\Http\Controllers;
 use App\Models\Absensi;
 use App\Models\User;
 use App\Models\Cuti;
+use App\Models\Setting; // Tambahkan ini
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB; // Tambahkan ini
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache; // Tambahkan ini
 use Carbon\Carbon;
 
 class AbsensiController extends Controller
 {
-    // Konstanta untuk batas waktu
-    private const LIMIT_HOUR = 9;
-    private const LIMIT_MINUTE = 5;
-    private const LIMIT_TIME = '09:05';
+    /* =====================================================
+     |  HELPER METHOD UNTUK MENDAPATKAN PENGATURAN JAM OPERASIONAL
+     ===================================================== */
+    
+    /**
+     * Mendapatkan pengaturan jam operasional dari cache atau database
+     */
+    private function getOperationalHours()
+    {
+        // Coba ambil dari cache dulu
+        $settings = Cache::get('operational_hours');
+        
+        // Jika tidak ada di cache, ambil dari database
+        if (!$settings) {
+            $setting = Setting::where('key', 'operational_hours')->first();
+            if ($setting) {
+                $settings = json_decode($setting->value, true);
+                // Simpan ke cache untuk akses cepat
+                Cache::forever('operational_hours', $settings);
+            }
+        }
+        
+        // Jika masih tidak ada, gunakan default value
+        if (!$settings) {
+            $settings = [
+                'start_time' => '08:00',
+                'end_time' => '17:00',
+                'late_limit_hour' => 9,
+                'late_limit_minute' => 5,
+                'late_tolerance_minutes' => 0,
+            ];
+        }
+        
+        return (object) $settings;
+    }
 
     /* =====================================================
      |  ADMIN VIEW
@@ -58,51 +91,88 @@ public function kelolaAbsenGeneral()
     try {
         $user = Auth::user();
         
-        // 1. AMBIL FILTER DARI URL
-        $startDate = request('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
-        $endDate = request('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
-        $selectedDivision = $user->divisi;
-        $statusFilter = request('status');
+        // Ambil tanggal filter (Default hari ini)
+        $selectedDate = request('date', Carbon::now()->format('Y-m-d'));
+        
+        // Ambil Divisi Manajer
+        // PERBAIKAN: Gunakan null coalescing operator untuk keamanan
+        $selectedDivision = $user->divisi ?? null;
 
-        // 2. QUERY UNTUK DATA ABSENSI (DENGAN PAGINATION)
-        $query = Absensi::with(['user:id,name,divisi', 'approver:id,name'])
-            ->join('users', 'absensis.user_id', '=', 'users.id')
-            ->whereBetween('absensis.tanggal', [$startDate, $endDate])
-            ->where('users.divisi', $selectedDivision)
-            ->select('absensis.*', 'users.name as user_name', 'users.divisi as user_divisi')
-            ->orderBy('absensis.tanggal', 'desc')
-            ->orderBy('absensis.created_at', 'desc');
+        // DEFINISI VARIABEL UNTUK COMPACT() (PREVENTS UNDEFINED VARIABLE)
+        $startDate = $selectedDate;
+        $endDate = $selectedDate;
 
-        // Filter status jika dipilih
-        if ($statusFilter && $statusFilter !== 'semua') {
-            if ($statusFilter === 'hadir') {
-                $query->whereNotNull('absensis.jam_masuk')
-                      ->whereNull('absensis.jenis_ketidakhadiran');
-            } elseif ($statusFilter === 'izin') {
-                $query->where('absensis.jenis_ketidakhadiran', 'izin');
-            } elseif ($statusFilter === 'sakit') {
-                $query->where('absensis.jenis_ketidakhadiran', 'sakit');
-            } elseif ($statusFilter === 'tidak-hadir') {
-                $query->whereNull('absensis.jam_masuk')
-                      ->whereNull('absensis.jenis_ketidakhadiran');
-            } elseif ($statusFilter === 'pending') {
-                $query->where('absensis.approval_status', 'pending');
-            } elseif ($statusFilter === 'approved') {
-                $query->where('absensis.approval_status', 'approved');
-            } elseif ($statusFilter === 'rejected') {
-                $query->where('absensis.approval_status', 'rejected');
-            }
+        // 1. DATA USER HANYA UNTUK FILTER
+        $usersQuery = User::where('role', 'karyawan');
+        
+        // PERBAIKAN: Cek apakah $selectedDivision ada isinya sebelum menambahkan where clause
+        // Ini mencegah error "Unknown column 'divisi'" jika kolom tidak ada di DB
+        if ($selectedDivision) {
+            $usersQuery->where('divisi', $selectedDivision);
+        }
+        
+        $users = $usersQuery->orderBy('name', 'asc')->get();
+        $userIds = $users->pluck('id');
+
+        // 2. DATA ABSENSI (TAB 1: DATA ABSENSI HARIAN)
+        // Hanya ambil yang SUDAH ABSEN (Jam Masuk Ada)
+        $queryAbsensi = Absensi::with(['user:id,name,divisi', 'approver:id,name'])
+            ->whereIn('user_id', $userIds)
+            ->whereDate('tanggal', $selectedDate)
+            ->whereNotNull('jam_masuk'); // Hanya yang sudah absen masuk
+
+        $attendances = $queryAbsensi->orderBy('jam_masuk', 'asc')->get();
+
+        // Ambil pengaturan jam operasional
+        $operationalHours = $this->getOperationalHours();
+        $limitTime = sprintf('%02d:%02d', $operationalHours->late_limit_hour, $operationalHours->late_limit_minute);
+
+        // Format Data Absensi (Untuk Tab 1)
+        $formattedAbsensi = collect();
+        foreach ($attendances as $absen) {
+            $status = $this->getStatusKehadiran($absen);
+            
+            $formattedAbsensi->push([
+                'id' => $absen->id,
+                'user_id' => $absen->user_id,
+                'user_name' => $absen->user->name,
+                'divisi' => $absen->user->divisi ?? '-',
+                'tanggal' => $absen->tanggal,
+                'jam_masuk' => substr($absen->jam_masuk, 0, 5),
+                'jam_pulang' => $absen->jam_pulang ? substr($absen->jam_pulang, 0, 5) : '-',
+                'jenis_ketidakhadiran' => $absen->jenis_ketidakhadiran,
+                'keterangan' => $absen->keterangan,
+                'approval_status' => $absen->approval_status,
+                'status_kehadiran' => $status['label'],
+                'status_class' => $status['class'],
+                'attendance' => $absen
+            ]);
         }
 
-        // Ambil data dengan pagination
-        $absensiPaginator = $query->paginate(15);
-        $absensiPaginator->appends([
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'status' => $statusFilter
-        ]);
+        // Pagination Manual untuk Tab 1
+        $page = \Illuminate\Pagination\Paginator::resolveCurrentPage();
+        $perPage = 15;
+        $currentPageItems = $formattedAbsensi->slice(($page - 1) * $perPage, $perPage)->values();
+        
+        $formattedAbsensi = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentPageItems,
+            $formattedAbsensi->count(),
+            $perPage,
+            $page,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+        );
 
-        // 3. HITUNG STATISTIK
+        // 3. DATA KETIDAKHADIRAN (TAB 2: DAFTAR KETIDAKHADIRAN)
+        // Kita ambil berdasarkan tanggal hari ini
+        // Disini kita ambil yang PUNYA JENIS KETIDAKHADIRAN (Sakit, Izin, Cuti, Dinas Luar)
+        $ketidakhadiran = Absensi::with(['user:id,name', 'approver:id,name'])
+            ->whereIn('user_id', $userIds)
+            ->whereDate('tanggal', $selectedDate) 
+            ->whereNotNull('jenis_ketidakhadiran') // FILTER KHUSUS: Hanya yang sakit/izin/cuti
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // 4. HITUNG STATISTIK
         $stats = [
             'total_tepat_waktu' => 0,
             'total_terlambat' => 0,
@@ -111,150 +181,72 @@ public function kelolaAbsenGeneral()
             'total_tidak_masuk' => 0,
             'total_cuti' => 0,
             'total_dinas_luar' => 0,
-            'total_semua' => $absensiPaginator->total(),
-            'periode' => Carbon::parse($startDate)->translatedFormat('d M Y') . 
-                        ' - ' . 
-                        Carbon::parse($endDate)->translatedFormat('d M Y'),
+            'total_semua' => $users->count(), 
+            'periode' => Carbon::parse($selectedDate)->translatedFormat('d M Y'),
             'start_date' => $startDate,
             'end_date' => $endDate,
         ];
 
-        // Hitung statistik berdasarkan data yang sudah diambil
-        foreach ($absensiPaginator as $absen) {
-            // Hitung berdasarkan jenis ketidakhadiran
-            if ($absen->jenis_ketidakhadiran == 'izin') {
-                $stats['total_izin']++;
-            } elseif ($absen->jenis_ketidakhadiran == 'sakit') {
-                $stats['total_sakit']++;
-            } elseif ($absen->jenis_ketidakhadiran == 'cuti') {
-                $stats['total_cuti']++;
-            } elseif ($absen->jenis_ketidakhadiran == 'dinas-luar') {
-                $stats['total_dinas_luar']++;
-            }
-            
-            // Hitung tepat waktu vs terlambat (hanya untuk yang hadir)
-            if ($absen->jam_masuk && !$absen->jenis_ketidakhadiran) {
-                $jamMasuk = strtotime($absen->jam_masuk);
-                $batasTerlambat = strtotime('09:00:00');
-                
-                if ($jamMasuk <= $batasTerlambat) {
-                    $stats['total_tepat_waktu']++;
-                } else {
-                    $stats['total_terlambat']++;
-                }
-            }
-            
-            // Hitung tidak masuk (tanpa jam masuk dan tanpa keterangan)
-            if (!$absen->jam_masuk && !$absen->jenis_ketidakhadiran) {
-                $stats['total_tidak_masuk']++;
-            }
+        // Hitung dari data Tab 1 (Absensi Masuk)
+        foreach ($formattedAbsensi as $item) {
+            if ($item['status_kehadiran'] === 'Tepat Waktu') $stats['total_tepat_waktu']++;
+            elseif ($item['status_kehadiran'] === 'Terlambat') $stats['total_terlambat']++;
         }
 
-        // 4. FORMAT DATA ABSENSI
-        $formattedAbsensi = $absensiPaginator->map(function($absen) {
-            $status = $this->getStatusKehadiran($absen);
-            
-            // Tentukan apakah ini data absensi atau ketidakhadiran
-            $type = 'absensi';
-            $alasan = null;
-            
-            if (in_array($absen->jenis_ketidakhadiran, ['izin', 'sakit', 'cuti', 'dinas-luar'])) {
-                $type = 'ketidakhadiran';
-                $alasan = $absen->keterangan ?? $absen->reason;
-            }
-            
-            return [
-                'id' => $absen->id,
-                'user_name' => $absen->user->name ?? $absen->user_name,
-                'divisi' => $absen->user->divisi ?? $absen->user_divisi,
-                'tanggal' => $absen->tanggal,
-                'jam_masuk' => $absen->jam_masuk ? substr($absen->jam_masuk, 0, 5) : '-',
-                'jam_pulang' => $absen->jam_pulang ? substr($absen->jam_pulang, 0, 5) : '-',
-                'jenis_ketidakhadiran' => $absen->jenis_ketidakhadiran,
-                'keterangan' => $absen->keterangan ?? $absen->reason,
-                'alasan' => $alasan,
-                'type' => $type,
-                'approval_status' => $absen->approval_status,
-                'rejection_reason' => $absen->rejection_reason,
-                'approved_by_name' => $absen->approver->name ?? null,
-                'status_kehadiran' => $status['label'],
-                'status_class' => $status['class'],
-                'tanggal_akhir' => $absen->tanggal_akhir,
-                'created_at' => $absen->created_at,
-            ];
-        });
+        // Hitung dari data Tab 2 (Ketidakhadiran)
+        foreach ($ketidakhadiran as $item) {
+            $label = strtolower($this->getStatusKehadiran($item)['label']);
+            if ($label === 'izin') $stats['total_izin']++;
+            elseif ($label === 'sakit') $stats['total_sakit']++;
+            elseif ($label === 'cuti') $stats['total_cuti']++;
+            elseif ($label === 'dinas luar') $stats['total_dinas_luar']++;
+        }
 
-        // 5. DATA KETIDAKHADIRAN (untuk tab ketidakhadiran) - PERBAIKAN DI SINI
-        $ketidakhadiran = Absensi::with(['user:id,name', 'approver:id,name'])
-            ->join('users', 'absensis.user_id', '=', 'users.id')
-            ->whereBetween('absensis.tanggal', [$startDate, $endDate])
-            ->where('users.divisi', $selectedDivision)
-            ->whereNotNull('absensis.jenis_ketidakhadiran') // PERBAIKAN: gunakan jenis_ketidakhadiran
-            ->select('absensis.*', 'users.name as user_name')
-            ->orderBy('absensis.tanggal', 'desc')
-            ->get();
+        // Hitung Tidak Masuk
+        $stats['total_tidak_masuk'] = max(0, $stats['total_semua'] - $formattedAbsensi->count() - $ketidakhadiran->count());
 
-        // 6. DATA USER (untuk dropdown di modal)
-        $users = User::where('divisi', $selectedDivision)
-            ->where('role', 'karyawan')
-            ->get();
-
-        $absenceCount = $ketidakhadiran->count();
+        // 5. DATA USER UNTUK DROPDOWN
+        $usersList = $users;
 
     } catch (\Exception $e) {
         \Log::error('Error in kelolaAbsensiGeneral: ' . $e->getMessage());
         
-        // Set default values jika terjadi error
+        // DEFINISI VARIABEL DEFAULT DI BLOK CATCH (PREVENTS COMPACT ERROR)
+        $startDate = Carbon::now()->format('Y-m-d');
+        $endDate = Carbon::now()->format('Y-m-d');
+        
         $stats = [
-            'total_tepat_waktu' => 0,
-            'total_terlambat' => 0,
-            'total_izin' => 0,
-            'total_sakit' => 0,
-            'total_cuti' => 0,
-            'total_dinas_luar' => 0,
-            'total_tidak_masuk' => 0,
-            'total_semua' => 0,
-            'periode' => Carbon::now()->translatedFormat('F Y'),
-            'start_date' => $startDate ?? Carbon::now()->startOfMonth()->format('Y-m-d'),
-            'end_date' => $endDate ?? Carbon::now()->endOfMonth()->format('Y-m-d'),
+            'total_tepat_waktu' => 0, 'total_terlambat' => 0, 'total_izin' => 0,
+            'total_sakit' => 0, 'total_cuti' => 0, 'total_dinas_luar' => 0,
+            'total_tidak_masuk' => 0, 'total_semua' => 0,
+            'periode' => Carbon::now()->translatedFormat('d M Y'),
+            'start_date' => $startDate,
+            'end_date' => $endDate,
         ];
         
+        $users = collect(); 
         $formattedAbsensi = collect();
         $ketidakhadiran = collect();
-        $users = collect();
-        $absensiPaginator = null;
-        $absenceCount = 0;
-        $selectedDivision = $user->divisi ?? null;
-        $statusFilter = request('status') ?? null;
-        $startDate = $startDate ?? Carbon::now()->startOfMonth()->format('Y-m-d');
-        $endDate = $endDate ?? Carbon::now()->endOfMonth()->format('Y-m-d');
+        $usersList = collect();
+        $selectedDivision = Auth::check() ? (Auth::user()->divisi ?? 'Umum') : null;
     }
 
     // KIRIM KE VIEW
     return view('general_manajer.kelola_absen', compact(
         'stats',
         'formattedAbsensi',
-        'absensiPaginator',
         'ketidakhadiran',
         'users',
+        'usersList',
         'selectedDivision',
-        'statusFilter',
         'startDate',
-        'endDate',
-        'absenceCount'
+        'endDate'
     ));
 }
 
 /**
- * Menampilkan halaman kelola absensi untuk General Manajer (Versi Sederhana)
- * 
- * @return \Illuminate\View\View
+ * Method untuk General Manager
  */
-
-
-    /**
-     * Method untuk General Manager
-     */
 public function kelolaAbsenManajer()
 {
     try {
@@ -309,10 +301,10 @@ public function kelolaAbsenManajer()
             'status' => $statusFilter
         ]);
 
-        // 4. HITUNG STATISTIK
-        $statsQuery = Absensi::join('users', 'absensis.user_id', '=', 'users.id')
-            ->whereBetween('absensis.tanggal', [$startDate, $endDate])
-            ->where('users.divisi', $selectedDivision);
+        // Ambil pengaturan jam operasional
+        $operationalHours = $this->getOperationalHours();
+        $limitTime = sprintf('%02d:%02d', $operationalHours->late_limit_hour, $operationalHours->late_limit_minute);
+        $limitTimeForQuery = $limitTime . ':00';
 
         // Inisialisasi semua statistik dengan nilai default 0
         $stats = [
@@ -347,7 +339,7 @@ public function kelolaAbsenManajer()
             // Hitung tepat waktu vs terlambat (hanya untuk yang hadir)
             if ($absen->jam_masuk && !$absen->jenis_ketidakhadiran) {
                 $jamMasuk = strtotime($absen->jam_masuk);
-                $batasTerlambat = strtotime('09:00:00');
+                $batasTerlambat = strtotime($limitTimeForQuery);
                 
                 if ($jamMasuk <= $batasTerlambat) {
                     $stats['total_tepat_waktu']++;
@@ -463,6 +455,10 @@ public function kelolaAbsenManajer()
  */
 private function getStatusKehadiran($absen)
 {
+    // Ambil pengaturan jam operasional
+    $operationalHours = $this->getOperationalHours();
+    $limitTime = sprintf('%02d:%02d', $operationalHours->late_limit_hour, $operationalHours->late_limit_minute);
+    
     if ($absen->jenis_ketidakhadiran) {
         switch ($absen->jenis_ketidakhadiran) {
             case 'izin':
@@ -476,7 +472,7 @@ private function getStatusKehadiran($absen)
     
     if ($absen->jam_masuk) {
         $jamMasuk = strtotime($absen->jam_masuk);
-        $batasTerlambat = strtotime('09:00:00');
+        $batasTerlambat = strtotime($limitTime . ':00');
         
         if ($jamMasuk <= $batasTerlambat) {
             return ['label' => 'Tepat Waktu', 'class' => 'status-hadir'];
@@ -520,7 +516,6 @@ private function getStatusKehadiran($absen)
             return back()->with('error', 'Gagal reject: ' . $e->getMessage());
         }
     }
-
 
    /**
  * Menampilkan halaman rekap absensi untuk General Manajer
@@ -669,17 +664,21 @@ private function getStatusKehadiran($absen)
                 ->whereDate('tanggal', $today)
                 ->first();
             
+            // Ambil pengaturan jam operasional
+            $operationalHours = $this->getOperationalHours();
+            $limitTime = sprintf('%02d:%02d', $operationalHours->late_limit_hour, $operationalHours->late_limit_minute);
+            
             $lateMinutes = 0;
             $isTerlambat = false;
 
             if ($attendance && $attendance->jam_masuk) {
                 $jamMasuk = Carbon::parse($attendance->jam_masuk);
-                $jamBatas = Carbon::parse(self::LIMIT_TIME);
+                $jamBatas = Carbon::parse($limitTime);
                 
                 if ($jamMasuk->gt($jamBatas)) {
                     $isTerlambat = true;
                     $lateMinutes = $jamMasuk->diffInMinutes($jamBatas);
-                    \Log::info("Karyawan {$user->id} terlambat {$lateMinutes} menit dari batas " . self::LIMIT_TIME);
+                    \Log::info("Karyawan {$user->id} terlambat {$lateMinutes} menit dari batas " . $limitTime);
                 }
             }
             
@@ -755,13 +754,17 @@ private function getStatusKehadiran($absen)
                 $query->whereDate('tanggal', '>=', $startOfYear);
             }
 
-            $attendanceData = $query->get()->map(function ($item) {
+            // Ambil pengaturan jam operasional
+            $operationalHours = $this->getOperationalHours();
+            $limitTime = sprintf('%02d:%02d', $operationalHours->late_limit_hour, $operationalHours->late_limit_minute);
+
+            $attendanceData = $query->get()->map(function ($item) use ($limitTime) {
                 $lateMinutes = 0;
                 $isTerlambat = false;
 
                 if ($item->jam_masuk) {
                     $jamMasuk = Carbon::parse($item->jam_masuk);
-                    $jamBatas = Carbon::parse(self::LIMIT_TIME);
+                    $jamBatas = Carbon::parse($limitTime);
                     
                     if ($jamMasuk->gt($jamBatas)) {
                         $isTerlambat = true;
@@ -855,9 +858,13 @@ private function getStatusKehadiran($absen)
                 ], 400);
             }
             
+            // Ambil pengaturan jam operasional
+            $operationalHours = $this->getOperationalHours();
+            $limitTime = sprintf('%02d:%02d', $operationalHours->late_limit_hour, $operationalHours->late_limit_minute);
+            
             $currentTime = Carbon::now();
             $jamMasuk = $currentTime->format('H:i:s');
-            $jamBatas = Carbon::parse(self::LIMIT_TIME);
+            $jamBatas = Carbon::parse($limitTime);
             
             $lateMinutes = 0;
             $keterangan = null;
@@ -865,7 +872,7 @@ private function getStatusKehadiran($absen)
             if ($currentTime->gt($jamBatas)) {
                 $lateMinutes = $currentTime->diffInMinutes($jamBatas);
                 $keterangan = 'Terlambat ' . $lateMinutes . ' menit';
-                \Log::info("User {$user->id} terlambat {$lateMinutes} menit dari batas " . self::LIMIT_TIME);
+                \Log::info("User {$user->id} terlambat {$lateMinutes} menit dari batas " . $limitTime);
             }
             
             if ($existing) {
@@ -963,12 +970,18 @@ private function getStatusKehadiran($absen)
                 ], 400);
             }
             
+            // Ambil pengaturan jam operasional
+            $operationalHours = $this->getOperationalHours();
+            $endTime = $operationalHours->end_time;
+            
             $currentTime = Carbon::now();
             $jamPulang = $currentTime->format('H:i:s');
 
             $attendance->jam_pulang = $jamPulang;
             
-            if ($currentTime->hour < 17) {
+            // Cek apakah pulang lebih awal (gunakan jam pulang dari pengaturan)
+            $endHour = (int)substr($endTime, 0, 2);
+            if ($currentTime->hour < $endHour) {
                 $attendance->is_early_checkout = true;
                 if ($request->has('early_checkout_reason')) {
                     $attendance->early_checkout_reason = $request->early_checkout_reason;
@@ -1007,148 +1020,137 @@ private function getStatusKehadiran($absen)
     }
 
     public function apiSubmitIzin(Request $request)
-    {
-        try {
-            $user = Auth::user();
+{
+    try {
+        $user = Auth::user();
 
-            \Log::info("API SubmitIzin diakses oleh user {$user->id}");
-            
-            $validator = Validator::make($request->all(), [
-                'tanggal' => 'required|date',
-                'tanggal_akhir' => 'required|date|after_or_equal:tanggal',
-                'keterangan' => 'required|string|max:1000',
-                'jenis' => 'required|in:sakit,izin'
-            ]);
+        // 1. VALIDASI LANGSUNG MENGHADAP INPUT FRONTEND
+        // Frontend mengirim: type, start_date, end_date, reason
+        $validator = Validator::make($request->all(), [
+            'type' => 'required|in:sakit,izin',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'reason' => 'required|string|max:1000'
+        ]);
 
-            if ($validator->fails()) {
-                \Log::warning("Validasi gagal untuk user {$user->id}: " . json_encode($validator->errors()));
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validasi gagal',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            $data = $validator->validated();
-            $startDate = $data['tanggal'];
-            $endDate = $data['tanggal_akhir'];
-            $jenis = $data['jenis'];
-            
-            if (!$this->isValidDate($startDate) || !$this->isValidDate($endDate)) {
-                \Log::warning("User {$user->id} mencoba submit dengan tanggal tidak valid: {$startDate} - {$endDate}");
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tanggal tidak valid. Maksimal 1 bulan di masa depan.'
-                ], 400);
-            }
-            
-            $leaveCheck = $this->checkLeaveInRange($user->id, $startDate, $endDate);
-            if ($leaveCheck['has_leave']) {
-                \Log::warning("User {$user->id} mencoba submit {$jenis} saat ada cuti pada: " . $leaveCheck['conflict_dates']);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda memiliki cuti yang disetujui pada tanggal ' . $leaveCheck['conflict_dates'] . '. Tidak dapat mengajukan ' . $jenis . '.'
-                ], 400);
-            }
-            
-            $today = Carbon::now()->format('Y-m-d');
-            if ($startDate < $today && $jenis === 'sakit') {
-                \Log::warning("User {$user->id} mencoba submit sakit untuk tanggal lewat: {$startDate}");
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Pengajuan sakit tidak boleh untuk tanggal yang sudah lewat'
-                ], 400);
-            }
-            
-            $existingAttendance = Absensi::where('user_id', $user->id)
-                ->whereBetween('tanggal', [$startDate, $endDate])
-                ->whereNotNull('jam_masuk')
-                ->exists();
-
-            if ($existingAttendance) {
-                \Log::warning("User {$user->id} sudah absen pada rentang tanggal {$startDate} - {$endDate}");
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sudah melakukan absen pada rentang tanggal tersebut'
-                ], 400);
-            }
-            
-            $existingRequest = Absensi::where('user_id', $user->id)
-                ->where(function ($query) use ($startDate, $endDate) {
-                    $query->whereBetween('tanggal', [$startDate, $endDate])
-                        ->orWhereBetween('tanggal_akhir', [$startDate, $endDate])
-                        ->orWhere(function ($q) use ($startDate, $endDate) {
-                            $q->where('tanggal', '<=', $startDate)
-                                ->where('tanggal_akhir', '>=', $endDate);
-                        });
-                })
-                ->whereNotNull('jenis_ketidakhadiran')
-                ->whereIn('approval_status', ['pending', 'approved'])
-                ->first();
-
-            if ($existingRequest) {
-                \Log::warning("User {$user->id} sudah memiliki pengajuan {$existingRequest->jenis_ketidakhadiran} pada rentang tersebut");
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sudah memiliki pengajuan ' . $existingRequest->jenis_ketidakhadiran . ' pada rentang tanggal tersebut'
-                ], 400);
-            }
-            
-            $start = Carbon::parse($startDate);
-            $end = Carbon::parse($endDate);
-
-            $createdRecords = [];
-
-            \Log::info("User {$user->id} membuat pengajuan {$jenis} dari {$startDate} sampai {$endDate}");
-
-            DB::beginTransaction();
-
-            for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
-                $record = Absensi::create([
-                    'user_id' => $user->id,
-                    'tanggal' => $date->format('Y-m-d'),
-                    'tanggal_akhir' => $end->format('Y-m-d'),
-                    'jenis_ketidakhadiran' => $jenis,
-                    'keterangan' => $data['keterangan'],
-                    'approval_status' => 'pending',
-                ]);
-
-                $createdRecords[] = $record;
-            }
-
-            DB::commit();
-            
-            $firstRecord = $createdRecords[0];
-            $lateMinutes = 0;
-
-            \Log::info("Pengajuan {$jenis} berhasil dibuat untuk user {$user->id}, " . count($createdRecords) . " record");
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengajuan ' . $jenis . ' berhasil dikirim',
-                'data' => [
-                    'tanggal' => $firstRecord->tanggal->format('Y-m-d'),
-                    'tanggal_akhir' => $firstRecord->tanggal_akhir->format('Y-m-d'),
-                    'jam_masuk' => null,
-                    'jam_pulang' => null,
-                    'late_minutes' => $lateMinutes,
-                    'is_terlambat' => false,
-                    'jenis_ketidakhadiran' => $firstRecord->jenis_ketidakhadiran,
-                    'jenis_ketidakhadiran_label' => $this->getJenisKetidakhadiranLabel($firstRecord->jenis_ketidakhadiran),
-                    'approval_status' => $firstRecord->approval_status,
-                    'keterangan' => $firstRecord->keterangan
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error("Error apiSubmitIzin: " . $e->getMessage());
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengirim pengajuan: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
         }
+
+        // 2. AMBIL DATA YANG SUDAH VALIDE
+        $data = $validator->validated();
+
+        // 3. PINDAHKAN KE NAMA KOLOM DATABASE
+        $startDate = $data['start_date'];
+        $endDate = $data['end_date'];
+        $keterangan = $data['reason'];
+        $jenis = $data['type']; // 'sakit' atau 'izin'
+
+        // 4. LOGIC BISNIS
+        if (!$this->isValidDate($startDate) || !$this->isValidDate($endDate)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tanggal tidak valid. Maksimal 1 bulan di masa depan.'
+            ], 400);
+        }
+        
+        $leaveCheck = $this->checkLeaveInRange($user->id, $startDate, $endDate);
+        if ($leaveCheck['has_leave']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda memiliki cuti yang disetujui pada tanggal ' . $leaveCheck['conflict_dates'] . '.'
+            ], 400);
+        }
+        
+        $today = Carbon::now()->format('Y-m-d');
+        if ($startDate < $today && $jenis === 'sakit') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pengajuan sakit tidak boleh untuk tanggal yang sudah lewat'
+            ], 400);
+        }
+        
+        $existingAttendance = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->whereNotNull('jam_masuk')
+            ->exists();
+
+        if ($existingAttendance) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda sudah melakukan absen pada rentang tanggal tersebut'
+            ], 400);
+        }
+        
+        $existingRequest = Absensi::where('user_id', $user->id)
+            ->where(function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('tanggal', [$startDate, $endDate])
+                    ->orWhereBetween('tanggal_akhir', [$startDate, $endDate])
+                    ->orWhere(function ($q) use ($startDate, $endDate) {
+                        $q->where('tanggal', '<=', $startDate)
+                            ->where('tanggal_akhir', '>=', $endDate);
+                    });
+            })
+            ->whereNotNull('jenis_ketidakhadiran')
+            ->whereIn('approval_status', ['pending', 'approved'])
+            ->first();
+
+        if ($existingRequest) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda sudah memiliki pengajuan ' . $existingRequest->jenis_ketidakhadiran . ' pada rentang tanggal tersebut'
+            ], 400);
+        }
+        
+        $start = Carbon::parse($startDate);
+        $end = Carbon::parse($endDate);
+        $createdRecords = [];
+
+        DB::beginTransaction();
+
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            $record = Absensi::create([
+                'user_id' => $user->id,
+                'tanggal' => $date->format('Y-m-d'),
+                'tanggal_akhir' => $end->format('Y-m-d'),
+                'jenis_ketidakhadiran' => $jenis,     // Disimpan 'sakit' / 'izin'
+                'keterangan' => $keterangan,          // Disimpan alasan
+                'approval_status' => 'pending',
+            ]);
+
+            $createdRecords[] = $record;
+        }
+
+        DB::commit();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengajuan ' . $jenis . ' berhasil dikirim',
+            'data' => [
+                'tanggal' => $startDate,
+                'tanggal_akhir' => $endDate,
+                'jam_masuk' => null,
+                'jam_pulang' => null,
+                'late_minutes' => 0,
+                'is_terlambat' => false,
+                'jenis_ketidakhadiran' => $jenis,
+                'approval_status' => 'pending',
+                'keterangan' => $keterangan
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengirim pengajuan: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     /* =====================================================
      |  HELPER FUNCTIONS UNTUK CUTI
@@ -1256,6 +1258,11 @@ private function getStatusKehadiran($absen)
 
             \Log::info("API Index absensi diakses dengan parameter: " . json_encode($request->all()));
 
+            // Ambil pengaturan jam operasional
+            $operationalHours = $this->getOperationalHours();
+            $limitTime = sprintf('%02d:%02d', $operationalHours->late_limit_hour, $operationalHours->late_limit_minute);
+            $limitTimeForQuery = $limitTime . ':00';
+
             $query = Absensi::with(['user:id,name,email,jabatan'])
                 ->where('approval_status', 'approved')
                 ->whereNotNull('jam_masuk')
@@ -1272,9 +1279,9 @@ private function getStatusKehadiran($absen)
             
             if ($jenis && $jenis !== 'all') {
                 if ($jenis === 'terlambat') {
-                    $query->whereTime('jam_masuk', '>', self::LIMIT_TIME . ':00');
+                    $query->whereTime('jam_masuk', '>', $limitTimeForQuery);
                 } elseif ($jenis === 'hadir') {
-                    $query->whereTime('jam_masuk', '<=', self::LIMIT_TIME . ':00');
+                    $query->whereTime('jam_masuk', '<=', $limitTimeForQuery);
                 }
             }
             
@@ -1288,13 +1295,13 @@ private function getStatusKehadiran($absen)
             
             $absensi = $query->paginate($perPage, ['*'], 'page', $page);
             
-            $formattedData = $absensi->map(function($item) {
+            $formattedData = $absensi->map(function($item) use ($limitTime) {
                 $isTerlambat = false;
                 $keterlambatan = 0;
 
                 if ($item->jam_masuk) {
                     $jamMasuk = Carbon::parse($item->jam_masuk);
-                    $jamBatas = Carbon::parse(self::LIMIT_TIME);
+                    $jamBatas = Carbon::parse($limitTime);
                     
                     if ($jamMasuk->gt($jamBatas)) {
                         $isTerlambat = true;
@@ -1367,10 +1374,10 @@ public function apiIndexKetidakhadiran(Request $request)
         \Log::info("API IndexKetidakhadiran diakses dengan parameter: " . json_encode($request->all()));
         
         $query = Absensi::with(['user:id,name,email,jabatan', 'approver:id,name'])
-            ->whereIn('status', ['Cuti', 'Sakit', 'Izin', 'Tidak Masuk']) // PERBAIKAN 1: Gunakan 'status'
+            ->whereNotNull('jenis_ketidakhadiran')
             ->orderBy('tanggal', 'desc');
         
-        // PERBAIKAN 4: Gunakan when() untuk filter yang lebih bersih
+        // Gunakan when() untuk filter yang lebih bersih
         $query->when($search, function ($q, $search) {
             $q->where(function($q) use ($search) {
                 $q->whereHas('user', function($userQuery) use ($search) {
@@ -1382,7 +1389,7 @@ public function apiIndexKetidakhadiran(Request $request)
             });
         })
         ->when($jenis && $jenis !== 'all', function ($q, $jenis) {
-            $q->where('status', $jenis); // PERBAIKAN 1: Gunakan 'status'
+            $q->where('jenis_ketidakhadiran', $jenis);
         })
         ->when($approvalStatus && $approvalStatus !== 'all', function ($q, $approvalStatus) {
             $q->where('approval_status', $approvalStatus);
@@ -1407,14 +1414,14 @@ public function apiIndexKetidakhadiran(Request $request)
                 'tanggal_formatted' => $item->tanggal->translatedFormat('d F Y'),
                 'tanggal_akhir' => $item->tanggal_akhir ? $item->tanggal_akhir->format('Y-m-d') : $item->tanggal->format('Y-m-d'),
                 'tanggal_akhir_formatted' => $item->tanggal_akhir ? $item->tanggal_akhir->translatedFormat('d F Y') : $item->tanggal->translatedFormat('d F Y'),
-                'status' => $item->status, // PERBAIKAN 1: Gunakan 'status'
-                'status_label' => $this->getStatusLabel($item->status), // PERBAIKAN 3: Panggil helper yang benar
+                'jenis_ketidakhadiran' => $item->jenis_ketidakhadiran,
+                'jenis_ketidakhadiran_label' => $this->getJenisKetidakhadiranLabel($item->jenis_ketidakhadiran),
                 'keterangan' => $item->keterangan,
                 'reason' => $item->reason,
                 'location' => $item->location,
                 'purpose' => $item->purpose,
                 'approval_status' => $item->approval_status,
-                'approval_status_label' => $this->getApprovalStatusLabel($item->approval_status), // PERBAIKAN 3
+                'approval_status_label' => $this->getApprovalStatusLabel($item->approval_status),
                 'rejection_reason' => $item->rejection_reason,
                 'approved_by_name' => $item->approver ? $item->approver->name : null,
                 'approved_at' => $item->approved_at ? $item->approved_at->format('d/m/Y H:i') : null,
@@ -1446,9 +1453,6 @@ public function apiIndexKetidakhadiran(Request $request)
         ], 500);
     }
 }
-
-// Jangan lupa tambahkan helper method ini di controller Anda
-private function getStatusLabel($status) { /* ... */ }
 
     public function apiStore(Request $request)
     {
@@ -1840,6 +1844,11 @@ private function getStatusLabel($status) { /* ... */ }
 
             \Log::info("API Statistics: {$startDate} sampai {$endDate}, divisi: {$divisi}");
 
+            // Ambil pengaturan jam operasional
+            $operationalHours = $this->getOperationalHours();
+            $limitTime = sprintf('%02d:%02d', $operationalHours->late_limit_hour, $operationalHours->late_limit_minute);
+            $limitTimeForQuery = $limitTime . ':00';
+
             $query = Absensi::whereBetween('tanggal', [$startDate, $endDate])
                 ->whereDate('tanggal', '<=', Carbon::now()->addMonth());
 
@@ -1850,13 +1859,21 @@ private function getStatusLabel($status) { /* ... */ }
             }
 
             $stats = [
-                'total_tepat_waktu' => (clone $query)->whereTime('jam_masuk', '<=', self::LIMIT_TIME . ':00')->count(),
-                'total_terlambat' => (clone $query)->whereTime('jam_masuk', '>', self::LIMIT_TIME . ':00')->count(),
+                'total_tepat_waktu' => (clone $query)->whereTime('jam_masuk', '<=', $limitTimeForQuery)->count(),
+                'total_terlambat' => (clone $query)->whereTime('jam_masuk', '>', $limitTimeForQuery)->count(),
                 'total_tidak_masuk' => (clone $query)->whereNull('jam_masuk')->whereNull('jenis_ketidakhadiran')->count(),
                 'total_cuti' => (clone $query)->where('jenis_ketidakhadiran', 'cuti')->count(),
                 'total_sakit' => (clone $query)->where('jenis_ketidakhadiran', 'sakit')->count(),
                 'total_izin' => (clone $query)->where('jenis_ketidakhadiran', 'izin')->count(),
                 'total_dinas_luar' => (clone $query)->where('jenis_ketidakhadiran', 'dinas-luar')->count(),
+            ];
+
+            // Tambahkan informasi jam operasional ke response
+            $stats['jam_operasional'] = [
+                'jam_masuk' => $operationalHours->start_time,
+                'jam_pulang' => $operationalHours->end_time,
+                'batas_terlambat' => $limitTime,
+                'toleransi_terlambat' => $operationalHours->late_tolerance_minutes,
             ];
 
             \Log::info("API Statistics result: " . json_encode($stats));
@@ -1932,6 +1949,27 @@ private function getStatusLabel($status) { /* ... */ }
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat mengambil data kehadiran per divisi.',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API untuk mendapatkan pengaturan jam operasional
+     */
+    public function apiGetOperationalHours()
+    {
+        try {
+            $operationalHours = $this->getOperationalHours();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $operationalHours
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error("Error apiGetOperationalHours: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
             ], 500);
         }
     }

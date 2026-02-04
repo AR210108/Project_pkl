@@ -552,23 +552,26 @@
                             <div class="desktop-table">
                                 <div class="scrollable-table-container table-shadow" id="scrollableTable">
                                     <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th style="min-width: 60px;">No</th>
-                                                <th style="min-width: 150px;">Invoice</th>
-                                                <th style="min-width: 200px;">Nama Project</th>
-                                                <th style="min-width: 200px;">Deskripsi</th>
-                                                <th style="min-width: 120px;">Harga</th>
-                                                <th style="min-width: 120px;">Mulai Pengerjaan</th>
-                                                <th style="min-width: 120px;">Selesai Pengerjaan</th>
-                                                <th style="min-width: 120px;">Mulai Kerjasama</th>
-                                                <th style="min-width: 120px;">Selesai Kerjasama</th>
-                                                <th style="min-width: 120px;">Status Pengerjaan</th>
-                                                <th style="min-width: 120px;">Status Kerjasama</th>
-                                                <th style="min-width: 150px;">Progres</th>
-                                                <th style="min-width: 180px; text-align: center;">Aksi</th>
-                                            </tr>
-                                        </thead>
+                                       <!-- Di bagian thead table -->
+<thead>
+    <tr>
+        <th style="min-width: 60px;">No</th>
+        <th style="min-width: 150px;">Invoice</th>
+        <th style="min-width: 200px;">Nama Project</th>
+        <th style="min-width: 200px;">Deskripsi</th>
+        <th style="min-width: 120px;">Harga</th>
+        <!-- Tambahkan ini di sini -->
+        <th style="min-width: 150px;">Penanggung Jawab</th>
+        <th style="min-width: 120px;">Mulai Pengerjaan</th>
+        <th style="min-width: 120px;">Selesai Pengerjaan</th>
+        <th style="min-width: 120px;">Mulai Kerjasama</th>
+        <th style="min-width: 120px;">Selesai Kerjasama</th>
+        <th style="min-width: 120px;">Status Pengerjaan</th>
+        <th style="min-width: 120px;">Status Kerjasama</th>
+        <th style="min-width: 150px;">Progres</th>
+        <th style="min-width: 180px; text-align: center;">Aksi</th>
+    </tr>
+</thead>
                                         <tbody id="desktopTableBody">
                                             @foreach ($project as $index => $item)
                                                 <tr>

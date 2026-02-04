@@ -86,6 +86,11 @@ class Invoice extends Model
         return $this->belongsTo(Layanan::class, 'nama_layanan', 'nama_layanan');
     }
 
+    public function perusahaan()
+{
+    return $this->belongsTo(Perusahaan::class, 'company_name', 'nama_perusahaan');
+}
+
     /**
      * Boot method untuk event listeners
      */
