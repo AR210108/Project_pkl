@@ -686,7 +686,7 @@
                         </div>
                     </div>
 
-                    <div class="panel">
+                    {{-- <div class="panel">
                         <div class="panel-header">
                             <h3 class="panel-title">
                                 <span class="material-icons-outlined text-primary">event</span>
@@ -772,7 +772,7 @@
                                 </table>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
 
                 <div class="tab-content" id="articles-tab">

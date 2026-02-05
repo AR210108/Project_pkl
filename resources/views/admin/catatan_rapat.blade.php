@@ -1133,6 +1133,26 @@
                 cachedUsers = [];
             }
         }
+
+        // Helper function to format date to YYYY-MM-DD for input type="date"
+        function formatDateValue(dateString) {
+            if (!dateString) return '';
+            
+            // If already in correct format (YYYY-MM-DD), return as is
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+                return dateString;
+            }
+
+            try {
+                const date = new Date(dateString);
+                // Adjust for timezone offset to ensure we get the correct calendar day
+                const offset = date.getTimezoneOffset();
+                const localDate = new Date(date.getTime() - (offset * 60 * 1000));
+                return localDate.toISOString().split('T')[0];
+            } catch (e) {
+                return '';
+            }
+        }
         
         // Modal functions
         function openCreateModal() {
@@ -1184,7 +1204,7 @@
                                 <span class="text-red-500">*</span> Tanggal Rapat
                             </label>
                             <input type="date" id="tanggalInput" name="tanggal"
-                                value="${data.tanggal || new Date().toISOString().split('T')[0]}"
+                                value="${formatDateValue(data.tanggal) || new Date().toISOString().split('T')[0]}"
                                 class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none"
                                 ${!isEdit ? 'required' : ''}>
                             <p class="mt-1 text-sm text-gray-500">Pilih tanggal rapat dilaksanakan</p>

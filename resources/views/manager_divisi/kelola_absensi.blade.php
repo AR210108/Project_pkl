@@ -110,6 +110,7 @@
         .scrollable-table-container {
             overflow-x: auto;
             margin-bottom: 1rem;
+            min-height: 200px; /* Prevent collapse when empty */
         }
         
         /* Improved Mobile View */
@@ -208,6 +209,17 @@
                 opacity: 1;
             }
         }
+
+        /* No Data State */
+        .no-data-row {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+        .no-data-row.visible {
+            display: table-row;
+        }
     </style>
 </head>
 
@@ -274,15 +286,7 @@
                         <p class="stats-label">Cuti</p>
                     </div>
 
-                    <!-- Dinas Luar Card -->
-                    <div class="card bg-white p-4 rounded-xl shadow-md stats-card">
-                        <div class="icon-container bg-purple-100">
-                            <span class="material-icons-outlined text-purple-600 text-xl">directions_car</span>
-                        </div>
-                        <p class="stats-value text-purple-600">{{ $stats['total_dinas_luar'] ?? 0 }}</p>
-                        <p class="stats-label">Dinas Luar</p>
-                    </div>
-
+                    
                     <!-- Sakit Card -->
                     <div class="card bg-white p-4 rounded-xl shadow-md stats-card">
                         <div class="icon-container bg-orange-100">
@@ -346,10 +350,6 @@
                                         <label for="filterCuti">Cuti</label>
                                     </div>
                                     <div class="filter-option">
-                                        <input type="checkbox" id="filterDinasLuar" value="dinas luar">
-                                        <label for="filterDinasLuar">Dinas Luar</label>
-                                    </div>
-                                    <div class="filter-option">
                                         <input type="checkbox" id="filterSakit" value="sakit">
                                         <label for="filterSakit">Sakit</label>
                                     </div>
@@ -395,40 +395,64 @@
                                         </tr>
                                     </thead>
                                     <tbody id="absensiTableBody">
-                                        @foreach ($formattedAbsensi as $i => $absen)
-                                            <tr class="absensi-row" data-id="{{ $absen['id'] ?? '' }}">
-                                                <td>{{ $i + 1 }}</td>
-                                                <td>{{ $absen['user_name'] ?? 'User tidak ditemukan' }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($absen['tanggal'] ?? now())->format('d/m/Y') }}</td>
-                                                <td>{{ $absen['jam_masuk'] ?? '-' }}</td>
-                                                <td>{{ $absen['jam_pulang'] ?? '-' }}</td>
-                                                <td>
-                                                    @php
-                                                        $status = 'Tepat Waktu';
-                                                        if (isset($absen['jam_masuk']) && $absen['jam_masuk']) {
-                                                            $jamMasuk = \Carbon\Carbon::parse($absen['jam_masuk']);
-                                                            $jamBatas = \Carbon\Carbon::parse('09:05');
-                                                            if ($jamMasuk->gt($jamBatas)) {
-                                                                $status = 'Terlambat';
+                                        @if($formattedAbsensi->count() > 0)
+                                            @foreach ($formattedAbsensi as $i => $absen)
+                                                <tr class="absensi-row" data-id="{{ $absen['id'] ?? '' }}">
+                                                    <td>{{ $i + 1 }}</td>
+                                                    <td>{{ $absen['user_name'] ?? 'User tidak ditemukan' }}</td>
+                                                    <!-- FIXED: Added ?: now() to handle '-' or empty strings safely -->
+                                                    <td>{{ \Carbon\Carbon::parse($absen['tanggal'] ?: now())->format('d/m/Y') }}</td>
+                                                    <td>{{ $absen['jam_masuk'] ?? '-' }}</td>
+                                                    <td>{{ $absen['jam_pulang'] ?? '-' }}</td>
+                                                    <td>
+                                                        @php
+                                                            // FIXED: Added explicit check for '-' and valid time format
+                                                            $status = 'Tepat Waktu';
+                                                            $jamMasukVal = $absen['jam_masuk'] ?? null;
+                                                            
+                                                            // Check: not null, not empty, not placeholder '-', and is valid time
+                                                            if ($jamMasukVal && $jamMasukVal !== '-' && strtotime($jamMasukVal)) {
+                                                                try {
+                                                                    $jamMasuk = \Carbon\Carbon::parse($jamMasukVal);
+                                                                    $jamBatas = \Carbon\Carbon::parse('09:05');
+                                                                    if ($jamMasuk->gt($jamBatas)) {
+                                                                        $status = 'Terlambat';
+                                                                    }
+                                                                } catch (\Exception $e) {
+                                                                    // Keep default status if parse fails
+                                                                }
                                                             }
-                                                        }
-                                                    @endphp
-                                                    <span class="status-badge status-{{ $status == 'Tepat Waktu' ? 'hadir' : 'terlambat' }}">
-                                                        {{ $status }}
-                                                    </span>
-                                                </td>
-                                                <td class="text-center">
-                                                    <button class="action-btn edit-absensi-btn edit mr-2" data-id="{{ $absen['id'] ?? '' }}" title="Edit">
-                                                        <span class="material-icons-outlined text-sm">edit</span>
-                                                    </button>
-                                                    <button class="action-btn delete-absensi-btn delete" data-id="{{ $absen['id'] ?? '' }}" title="Hapus">
-                                                        <span class="material-icons-outlined text-sm">delete</span>
-                                                    </button>
-                                                </td>
+                                                        @endphp
+                                                        <span class="status-badge status-{{ $status == 'Tepat Waktu' ? 'hadir' : 'terlambat' }}">
+                                                            {{ $status }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button class="action-btn edit-absensi-btn edit mr-2" data-id="{{ $absen['id'] ?? '' }}" title="Edit">
+                                                            <span class="material-icons-outlined text-sm">edit</span>
+                                                        </button>
+                                                        <button class="action-btn delete-absensi-btn delete" data-id="{{ $absen['id'] ?? '' }}" title="Hapus">
+                                                            <span class="material-icons-outlined text-sm">delete</span>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                            <tr>
+                                                <td colspan="7" class="text-center py-4 text-gray-500">Tidak ada data absensi</td>
                                             </tr>
-                                        @endforeach
+                                        @endif
                                     </tbody>
                                 </table>
+                                <!-- Row untuk pesan no data dari filter JS -->
+                                <tr id="absensiNoDataRow" class="no-data-row">
+                                    <td colspan="7" class="text-center py-8">
+                                        <div class="flex flex-col items-center justify-center text-gray-400">
+                                            <span class="material-icons-outlined text-4xl mb-2">filter_alt_off</span>
+                                            <p>Data tidak ditemukan berdasarkan filter pencarian</p>
+                                        </div>
+                                    </td>
+                                </tr>
                             </div>
 
                             <!-- Pagination -->
@@ -447,54 +471,69 @@
 
                         <!-- Mobile Card View -->
                         <div class="mobile-cards" id="absensiMobileCards">
-                            @foreach ($formattedAbsensi as $i => $absen)
-                                <div class="mobile-card absensi-card" data-id="{{ $absen['id'] ?? '' }}">
-                                    <div class="mobile-card-header">
-                                        <div class="mobile-card-title">{{ $absen['user_name'] ?? 'User tidak ditemukan' }}</div>
-                                        <div>
-                                            @php
-                                                $status = 'Tepat Waktu';
-                                                if (isset($absen['jam_masuk']) && $absen['jam_masuk']) {
-                                                    $jamMasuk = \Carbon\Carbon::parse($absen['jam_masuk']);
-                                                    $jamBatas = \Carbon\Carbon::parse('09:05');
-                                                    if ($jamMasuk->gt($jamBatas)) {
-                                                        $status = 'Terlambat';
+                            @if($formattedAbsensi->count() > 0)
+                                @foreach ($formattedAbsensi as $i => $absen)
+                                    <div class="mobile-card absensi-card" data-id="{{ $absen['id'] ?? '' }}">
+                                        <div class="mobile-card-header">
+                                            <div class="mobile-card-title">{{ $absen['user_name'] ?? 'User tidak ditemukan' }}</div>
+                                            <div>
+                                                @php
+                                                    // FIXED: Same status logic for mobile
+                                                    $status = 'Tepat Waktu';
+                                                    $jamMasukVal = $absen['jam_masuk'] ?? null;
+                                                    if ($jamMasukVal && $jamMasukVal !== '-' && strtotime($jamMasukVal)) {
+                                                        try {
+                                                            $jamMasuk = \Carbon\Carbon::parse($jamMasukVal);
+                                                            $jamBatas = \Carbon\Carbon::parse('09:05');
+                                                            if ($jamMasuk->gt($jamBatas)) {
+                                                                $status = 'Terlambat';
+                                                            }
+                                                        } catch (\Exception $e) { }
                                                     }
-                                                }
-                                            @endphp
-                                            <span class="status-badge status-{{ $status == 'Tepat Waktu' ? 'hadir' : 'terlambat' }}">
-                                                {{ $status }}
-                                            </span>
+                                                @endphp
+                                                <span class="status-badge status-{{ $status == 'Tepat Waktu' ? 'hadir' : 'terlambat' }}">
+                                                    {{ $status }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="mobile-card-body">
+                                            <div class="mobile-card-item">
+                                                <span class="mobile-card-label">No</span>
+                                                <span class="mobile-card-value">{{ $i + 1 }}</span>
+                                            </div>
+                                            <div class="mobile-card-item">
+                                                <span class="mobile-card-label">Tanggal</span>
+                                                <!-- FIXED: Date parsing safety -->
+                                                <span class="mobile-card-value">{{ \Carbon\Carbon::parse($absen['tanggal'] ?: now())->format('d/m/Y') }}</span>
+                                            </div>
+                                            <div class="mobile-card-item">
+                                                <span class="mobile-card-label">Jam Masuk</span>
+                                                <span class="mobile-card-value">{{ $absen['jam_masuk'] ?? '-' }}</span>
+                                            </div>
+                                            <div class="mobile-card-item">
+                                                <span class="mobile-card-label">Jam Keluar</span>
+                                                <span class="mobile-card-value">{{ $absen['jam_pulang'] ?? '-' }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-end space-x-2 mt-3">
+                                            <button class="action-btn edit-absensi-btn edit" data-id="{{ $absen['id'] ?? '' }}" title="Edit">
+                                                <span class="material-icons-outlined text-sm">edit</span>
+                                            </button>
+                                            <button class="action-btn delete-absensi-btn delete" data-id="{{ $absen['id'] ?? '' }}" title="Hapus">
+                                                <span class="material-icons-outlined text-sm">delete</span>
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="mobile-card-body">
-                                        <div class="mobile-card-item">
-                                            <span class="mobile-card-label">No</span>
-                                            <span class="mobile-card-value">{{ $i + 1 }}</span>
-                                        </div>
-                                        <div class="mobile-card-item">
-                                            <span class="mobile-card-label">Tanggal</span>
-                                            <span class="mobile-card-value">{{ \Carbon\Carbon::parse($absen['tanggal'] ?? now())->format('d/m/Y') }}</span>
-                                        </div>
-                                        <div class="mobile-card-item">
-                                            <span class="mobile-card-label">Jam Masuk</span>
-                                            <span class="mobile-card-value">{{ $absen['jam_masuk'] ?? '-' }}</span>
-                                        </div>
-                                        <div class="mobile-card-item">
-                                            <span class="mobile-card-label">Jam Keluar</span>
-                                            <span class="mobile-card-value">{{ $absen['jam_pulang'] ?? '-' }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex justify-end space-x-2 mt-3">
-                                        <button class="action-btn edit-absensi-btn edit" data-id="{{ $absen['id'] ?? '' }}" title="Edit">
-                                            <span class="material-icons-outlined text-sm">edit</span>
-                                        </button>
-                                        <button class="action-btn delete-absensi-btn delete" data-id="{{ $absen['id'] ?? '' }}" title="Hapus">
-                                            <span class="material-icons-outlined text-sm">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            @else
+                                <div class="text-center py-4 text-gray-500">Tidak ada data absensi</div>
+                            @endif
+                            
+                            <!-- Mobile No Data Message -->
+                            <div id="absensiMobileNoData" class="mobile-card hidden" style="display:none; text-align:center; padding: 2rem; color: #9ca3af;">
+                                <span class="material-icons-outlined text-4xl mb-2">filter_alt_off</span>
+                                <p>Data tidak ditemukan</p>
+                            </div>
                         </div>
 
                         <!-- Mobile Pagination -->
@@ -540,48 +579,64 @@
                                         </tr>
                                     </thead>
                                     <tbody id="ketidakhadiranTableBody">
-                                        @foreach ($ketidakhadiran as $index => $absen)
-                                            <tr class="ketidakhadiran-row" 
-                                                data-id="{{ $absen->id }}"
-                                                data-nama="{{ $absen->user->name ?? '-' }}"
-                                                data-tanggal="{{ $absen->tanggal }}"
-                                                data-tanggal-akhir="{{ $absen->tanggal_akhir }}"
-                                                data-alasan="{{ $absen->keterangan ?? '-' }}"
-                                                data-status="{{ $absen->approval_status }}">
+                                        @if($ketidakhadiran->count() > 0)
+                                            @foreach ($ketidakhadiran as $index => $absen)
+                                                <tr class="ketidakhadiran-row" 
+                                                    data-id="{{ $absen->id }}"
+                                                    data-nama="{{ $absen->user->name ?? '-' }}"
+                                                    data-tanggal="{{ $absen->tanggal ? \Carbon\Carbon::parse($absen->tanggal)->format('d/m/Y') : '-' }}"
+                                                    data-tanggal-akhir="{{ $absen->tanggal_akhir ? \Carbon\Carbon::parse($absen->tanggal_akhir)->format('d/m/Y') : '-' }}"
+                                                    data-alasan="{{ $absen->keterangan ?? '-' }}"
+                                                    data-status="{{ $absen->approval_status }}">
 
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>{{ $absen->user->name ?? '-' }}</td>
-                                                <td>{{ $absen->tanggal?->format('d/m/Y') }}</td>
-                                                <td>
-                                                    {{ $absen->tanggal_akhir ? $absen->tanggal_akhir->format('d/m/Y') : '-' }}
-                                                </td>
-                                                <td>
-                                                    {{ $absen->keterangan ?? '-' }}
-                                                </td>
-                                                <td>
-                                                    <span class="status-badge status-{{ strtolower($absen->approval_status) }}">
-                                                        {{ strtoupper($absen->approval_status) }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div class="flex justify-center space-x-2">
-                                                        <button class="action-btn edit-cuti-btn edit" data-id="{{ $absen->id }}" title="Edit">
-                                                            <span class="material-icons-outlined text-sm">edit</span>
-                                                        </button>
-                                                        @if ($absen->approval_status === 'pending')
-                                                            <button class="action-btn verify-btn verify" data-id="{{ $absen->id }}" title="Verifikasi">
-                                                                <span class="material-icons-outlined text-sm">check_circle</span>
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td>{{ $absen->user->name ?? '-' }}</td>
+                                                    <!-- FIXED: Safely parse dates assuming they might be string '-' from DB -->
+                                                    <td>{{ \Carbon\Carbon::parse($absen->tanggal ?: now())->format('d/m/Y') }}</td>
+                                                    <td>
+                                                        {{ $absen->tanggal_akhir ? \Carbon\Carbon::parse($absen->tanggal_akhir)->format('d/m/Y') : '-' }}
+                                                    </td>
+                                                    <td>
+                                                        {{ $absen->keterangan ?? '-' }}
+                                                    </td>
+                                                    <td>
+                                                        <span class="status-badge status-{{ strtolower($absen->approval_status) }}">
+                                                            {{ strtoupper($absen->approval_status) }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="flex justify-center space-x-2">
+                                                            <button class="action-btn edit-cuti-btn edit" data-id="{{ $absen->id }}" title="Edit">
+                                                                <span class="material-icons-outlined text-sm">edit</span>
                                                             </button>
-                                                        @endif
-                                                        <button class="action-btn delete-cuti-btn delete" data-id="{{ $absen->id }}" title="Hapus">
-                                                            <span class="material-icons-outlined text-sm">delete</span>
-                                                        </button>
-                                                    </div>
-                                                </td>
+                                                            @if ($absen->approval_status === 'pending')
+                                                                <button class="action-btn verify-btn verify" data-id="{{ $absen->id }}" title="Verifikasi">
+                                                                    <span class="material-icons-outlined text-sm">check_circle</span>
+                                                                </button>
+                                                            @endif
+                                                            <button class="action-btn delete-cuti-btn delete" data-id="{{ $absen->id }}" title="Hapus">
+                                                                <span class="material-icons-outlined text-sm">delete</span>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                            <tr>
+                                                <td colspan="7" class="text-center py-4 text-gray-500">Tidak ada data ketidakhadiran</td>
                                             </tr>
-                                        @endforeach
+                                        @endif
                                     </tbody>
                                 </table>
+                                <!-- Row untuk pesan no data dari filter JS -->
+                                <tr id="ketidakhadiranNoDataRow" class="no-data-row">
+                                    <td colspan="7" class="text-center py-8">
+                                        <div class="flex flex-col items-center justify-center text-gray-400">
+                                            <span class="material-icons-outlined text-4xl mb-2">filter_alt_off</span>
+                                            <p>Data tidak ditemukan berdasarkan filter pencarian</p>
+                                        </div>
+                                    </td>
+                                </tr>
                             </div>
 
                             <!-- Pagination -->
@@ -600,54 +655,65 @@
 
                         <!-- Mobile Card View -->
                         <div class="mobile-cards" id="ketidakhadiranMobileCards">
-                            @foreach ($ketidakhadiran as $index => $absen)
-                                <div class="mobile-card ketidakhadiran-card" data-id="{{ $absen->id }}">
-                                    <div class="mobile-card-header">
-                                        <div class="mobile-card-title">{{ $absen->user->name ?? '-' }}</div>
-                                        <div>
-                                            <span class="status-badge status-{{ strtolower($absen->approval_status) }}">
-                                                {{ strtoupper($absen->approval_status) }}
-                                            </span>
+                            @if($ketidakhadiran->count() > 0)
+                                @foreach ($ketidakhadiran as $index => $absen)
+                                    <div class="mobile-card ketidakhadiran-card" data-id="{{ $absen->id }}">
+                                        <div class="mobile-card-header">
+                                            <div class="mobile-card-title">{{ $absen->user->name ?? '-' }}</div>
+                                            <div>
+                                                <span class="status-badge status-{{ strtolower($absen->approval_status) }}">
+                                                    {{ strtoupper($absen->approval_status) }}
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="mobile-card-body">
-                                        <div class="mobile-card-item">
-                                            <span class="mobile-card-label">No</span>
-                                            <span class="mobile-card-value">{{ $index + 1 }}</span>
+                                        <div class="mobile-card-body">
+                                            <div class="mobile-card-item">
+                                                <span class="mobile-card-label">No</span>
+                                                <span class="mobile-card-value">{{ $index + 1 }}</span>
+                                            </div>
+                                            <div class="mobile-card-item">
+                                                <span class="mobile-card-label">Tanggal</span>
+                                                <span class="mobile-card-value">
+                                                    <!-- FIXED: Mobile date safety -->
+                                                    {{ \Carbon\Carbon::parse($absen->tanggal ?: now())->format('d/m/Y') }}
+                                                    @if ($absen->tanggal_akhir)
+                                                        - {{ \Carbon\Carbon::parse($absen->tanggal_akhir)->format('d/m/Y') }}
+                                                    @endif
+                                                </span>
+                                            </div>
+                                            <div class="mobile-card-item">
+                                                <span class="mobile-card-label">Alasan</span>
+                                                <span class="mobile-card-value">{{ $absen->keterangan ?? '-' }}</span>
+                                            </div>
+                                            <div class="mobile-card-item">
+                                                <span class="mobile-card-label">Status</span>
+                                                <span class="mobile-card-value">{{ strtoupper($absen->approval_status) }}</span>
+                                            </div>
                                         </div>
-                                        <div class="mobile-card-item">
-                                            <span class="mobile-card-label">Tanggal</span>
-                                            <span class="mobile-card-value">
-                                                {{ $absen->tanggal?->format('d/m/Y') }}
-                                                @if ($absen->tanggal_akhir)
-                                                    - {{ $absen->tanggal_akhir->format('d/m/Y') }}
-                                                @endif
-                                            </span>
-                                        </div>
-                                        <div class="mobile-card-item">
-                                            <span class="mobile-card-label">Alasan</span>
-                                            <span class="mobile-card-value">{{ $absen->keterangan ?? '-' }}</span>
-                                        </div>
-                                        <div class="mobile-card-item">
-                                            <span class="mobile-card-label">Status</span>
-                                            <span class="mobile-card-value">{{ strtoupper($absen->approval_status) }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex justify-end space-x-2 mt-3">
-                                        <button class="action-btn edit-cuti-btn edit" data-id="{{ $absen->id }}" title="Edit">
-                                            <span class="material-icons-outlined text-sm">edit</span>
-                                        </button>
-                                        @if ($absen->approval_status === 'pending')
-                                            <button class="action-btn verify-btn verify" data-id="{{ $absen->id }}" title="Verifikasi">
-                                                <span class="material-icons-outlined text-sm">check_circle</span>
+                                        <div class="flex justify-end space-x-2 mt-3">
+                                            <button class="action-btn edit-cuti-btn edit" data-id="{{ $absen->id }}" title="Edit">
+                                                <span class="material-icons-outlined text-sm">edit</span>
                                             </button>
-                                        @endif
-                                        <button class="action-btn delete-cuti-btn delete" data-id="{{ $absen->id }}" title="Hapus">
-                                            <span class="material-icons-outlined text-sm">delete</span>
-                                        </button>
+                                            @if ($absen->approval_status === 'pending')
+                                                <button class="action-btn verify-btn verify" data-id="{{ $absen->id }}" title="Verifikasi">
+                                                    <span class="material-icons-outlined text-sm">check_circle</span>
+                                                </button>
+                                            @endif
+                                            <button class="action-btn delete-cuti-btn delete" data-id="{{ $absen->id }}" title="Hapus">
+                                                <span class="material-icons-outlined text-sm">delete</span>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            @else
+                                <div class="text-center py-4 text-gray-500">Tidak ada data ketidakhadiran</div>
+                            @endif
+
+                            <!-- Mobile No Data Message -->
+                            <div id="ketidakhadiranMobileNoData" class="mobile-card hidden" style="display:none; text-align:center; padding: 2rem; color: #9ca3af;">
+                                <span class="material-icons-outlined text-4xl mb-2">filter_alt_off</span>
+                                <p>Data tidak ditemukan</p>
+                            </div>
                         </div>
 
                         <!-- Mobile Pagination -->
@@ -698,7 +764,6 @@
                             <option value="cuti">Cuti</option>
                             <option value="sakit">Sakit</option>
                             <option value="izin">Izin</option>
-                            <option value="dinas-luar">Dinas Luar</option>
                         </select>
                     </div>
                     <div>
@@ -1139,6 +1204,8 @@
             function updateVisibleItemsAbsensi() {
                 const visibleRows = getFilteredRowsAbsensi();
                 const visibleCards = getFilteredCardsAbsensi();
+                const noDataRow = document.getElementById('absensiNoDataRow');
+                const noDataMobile = document.getElementById('absensiMobileNoData');
 
                 const startIndex = (currentPageAbsensi - 1) * itemsPerPage;
                 const endIndex = startIndex + itemsPerPage;
@@ -1146,6 +1213,18 @@
                 // Hide all rows and cards first
                 absensiRows.forEach(row => row.style.display = 'none');
                 absensiCards.forEach(card => card.style.display = 'none');
+                
+                // Hide No Data rows initially
+                if (noDataRow) noDataRow.classList.remove('visible');
+                if (noDataMobile) noDataMobile.style.display = 'none';
+
+                // Check if there are results
+                if (visibleRows.length === 0) {
+                    if (noDataRow) noDataRow.classList.add('visible');
+                    if (noDataMobile) noDataMobile.style.display = 'block';
+                    document.getElementById('totalCount').textContent = 0;
+                    return;
+                }
 
                 // Show only the rows for current page
                 visibleRows.forEach((row, index) => {
@@ -1168,6 +1247,8 @@
             function updateVisibleItemsKetidakhadiran() {
                 const visibleRows = getFilteredRowsKetidakhadiran();
                 const visibleCards = getFilteredCardsKetidakhadiran();
+                const noDataRow = document.getElementById('ketidakhadiranNoDataRow');
+                const noDataMobile = document.getElementById('ketidakhadiranMobileNoData');
 
                 const startIndex = (currentPageKetidakhadiran - 1) * itemsPerPage;
                 const endIndex = startIndex + itemsPerPage;
@@ -1175,6 +1256,18 @@
                 // Hide all rows and cards first
                 ketidakhadiranRows.forEach(row => row.style.display = 'none');
                 ketidakhadiranCards.forEach(card => card.style.display = 'none');
+
+                // Hide No Data rows initially
+                if (noDataRow) noDataRow.classList.remove('visible');
+                if (noDataMobile) noDataMobile.style.display = 'none';
+
+                // Check if there are results
+                if (visibleRows.length === 0) {
+                    if (noDataRow) noDataRow.classList.add('visible');
+                    if (noDataMobile) noDataMobile.style.display = 'block';
+                    document.getElementById('totalCount2').textContent = 0;
+                    return;
+                }
 
                 // Show only the rows for current page
                 visibleRows.forEach((row, index) => {
@@ -1260,7 +1353,6 @@
                         if (filterTidakHadir.checked) activeFilters.push('tidak hadir');
                         if (filterIzin.checked) activeFilters.push('izin');
                         if (filterCuti.checked) activeFilters.push('cuti');
-                        if (filterDinasLuar.checked) activeFilters.push('dinas luar');
                         if (filterSakit.checked) activeFilters.push('sakit');
                     }
 
@@ -1410,7 +1502,6 @@
                             if (filter === 'izin' && alasan.includes('izin')) return true;
                             if (filter === 'sakit' && alasan.includes('sakit')) return true;
                             if (filter === 'cuti' && alasan.includes('cuti')) return true;
-                            if (filter === 'dinas luar' && alasan.includes('dinas')) return true;
                             if (filter === 'tidak hadir' && alasan.includes('tidak masuk')) return true;
                             return alasan.includes(filter.toLowerCase());
                         });
@@ -1454,7 +1545,6 @@
                             if (filter === 'izin' && alasan.includes('izin')) return true;
                             if (filter === 'sakit' && alasan.includes('sakit')) return true;
                             if (filter === 'cuti' && alasan.includes('cuti')) return true;
-                            if (filter === 'dinas luar' && alasan.includes('dinas')) return true;
                             if (filter === 'tidak hadir' && alasan.includes('tidak masuk')) return true;
                             return alasan.includes(filter.toLowerCase());
                         });
