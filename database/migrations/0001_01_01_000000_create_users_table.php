@@ -11,29 +11,31 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
 
+            // Data dasar
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-
+            
+            // Role dan status
+            $table->enum('role', ['owner', 'admin', 'general_manager', 'manager_divisi', 'finance', 'karyawan'])->default('karyawan');
+            $table->enum('status_kerja', ['aktif', 'resign', 'phk'])->default('aktif');
+            $table->enum('status_karyawan', ['tetap', 'kontrak', 'freelance'])->default('tetap');
+            
             // Relasi ke divisi
             $table->foreignId('divisi_id')->nullable()->constrained('divisi')->onDelete('set null');
-
             
-            // --- TAMBAHAN KOLOM YANG HILANG ---
+            // Data karyawan
+            $table->decimal('gaji', 15, 2)->nullable();
+            $table->text('alamat')->nullable();
+            $table->string('kontak', 20)->nullable();
+            $table->string('foto')->nullable();
             
-            // Kolom Role (Sesuai enum di error sebelumnya)
-            $table->enum('role', ['owner', 'admin', 'general_manager', 'manager_divisi', 'finance', 'karyawan'])->default('karyawan');
-            
-            
-            // Kolom Sisa Cuti (Default 12 hari, sesuai request terakhir)
+            // Manajemen cuti
             $table->integer('sisa_cuti')->default(12);
-            
-            // Kolom tambahan untuk manajemen cuti
             $table->integer('total_cuti_tahunan')->default(12)->comment('Total cuti tahunan');
             $table->date('cuti_reset_date')->nullable()->comment('Tanggal terakhir reset cuti');
             $table->integer('cuti_terpakai_tahun_ini')->default(0)->comment('Cuti terpakai tahun berjalan');
-            // ------------------------------------
             
             $table->rememberToken();
             $table->timestamps();

@@ -120,192 +120,197 @@ class LayananController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        // 1. Validasi input
-        $validator = Validator::make($request->all(), [
-            'nama_layanan' => 'required|string|max:255',
-            'harga'        => 'nullable|numeric|min:0',
-            'deskripsi'    => 'required|string',
-            'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+public function store(Request $request)
+{
+    // 1. Validasi input - Tambahkan HPP
+    $validator = Validator::make($request->all(), [
+        'nama_layanan' => 'required|string|max:255',
+        'harga'        => 'nullable|numeric|min:0',
+        'hpp'          => 'nullable|numeric|min:0',  // ✅ Validasi HPP
+        'deskripsi'    => 'required|string',
+        'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+    ]);
 
-        if ($validator->fails()) {
-            // Untuk API/AJAX request
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validasi gagal.',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-            
-            // Untuk web request
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+    if ($validator->fails()) {
+        // Untuk API/AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal.',
+                'errors' => $validator->errors()
+            ], 422);
         }
-
-        // 2. Proses data dan simpan
-        try {
-            $data = $request->only(['nama_layanan', 'harga', 'deskripsi']);
-
-            // ✅ Pastikan harga tidak null
-            $data['harga'] = $request->harga ?? 0;
-
-            // Handle foto upload
-            if ($request->hasFile('foto')) {
-                $foto = $request->file('foto');
-                $fotoName = time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
-                $foto->storeAs('public/layanan', $fotoName);
-                $data['foto'] = 'layanan/' . $fotoName;
-            }
-
-            $layanan = Layanan::create($data);
-            
-            // Untuk API/AJAX request
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Layanan berhasil ditambahkan!',
-                    'data' => $layanan
-                ], 201);
-            }
-            
-            // Untuk web request
-            return redirect()->back()
-                ->with('success', 'Layanan berhasil ditambahkan!');
-
-        } catch (\Exception $e) {
-            Log::error('Error storing layanan: ' . $e->getMessage());
-            
-            // Untuk API/AJAX request
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Terjadi kesalahan saat menyimpan data.',
-                    'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-                ], 500);
-            }
-            
-            // Untuk web request
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
-                ->withInput();
-        }
+        
+        // Untuk web request
+        return redirect()->back()
+            ->withErrors($validator)
+            ->withInput();
     }
+
+    // 2. Proses data dan simpan
+    try {
+        $data = $request->only(['nama_layanan', 'harga', 'hpp', 'deskripsi']); // ✅ Include HPP
+
+        // ✅ Pastikan harga dan hpp tidak null
+        $data['harga'] = $request->harga ?? 0;
+        $data['hpp'] = $request->hpp ?? 0;
+
+        // Handle foto upload
+        if ($request->hasFile('foto')) {
+            $foto = $request->file('foto');
+            $fotoName = time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
+            $foto->storeAs('public/layanan', $fotoName);
+            $data['foto'] = 'layanan/' . $fotoName;
+        }
+
+        $layanan = Layanan::create($data);
+        
+        // Untuk API/AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Layanan berhasil ditambahkan!',
+                'data' => $layanan
+            ], 201);
+        }
+        
+        // Untuk web request
+        return redirect()->back()
+            ->with('success', 'Layanan berhasil ditambahkan!');
+
+    } catch (\Exception $e) {
+        Log::error('Error storing layanan: ' . $e->getMessage());
+        
+        // Untuk API/AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan data.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+        
+        // Untuk web request
+        return redirect()->back()
+            ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+            ->withInput();
+    }
+}
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
-    {
-        // 1. Cari layanan
-        $layanan = Layanan::findOrFail($id);
+public function update(Request $request, $id)
+{
+    // 1. Cari layanan
+    $layanan = Layanan::findOrFail($id);
 
-        // 2. Validasi input
-        $validator = Validator::make($request->all(), [
-            'nama_layanan' => 'required|string|max:255',
-            'harga'        => 'nullable|numeric|min:0',
-            'deskripsi'    => 'required|string',
-            'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+    // 2. Validasi input - Tambahkan HPP
+    $validator = Validator::make($request->all(), [
+        'nama_layanan' => 'required|string|max:255',
+        'harga'        => 'nullable|numeric|min:0',
+        'hpp'          => 'nullable|numeric|min:0',  // ✅ Validasi HPP
+        'deskripsi'    => 'required|string',
+        'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
 
-        if ($validator->fails()) {
-            // Untuk API/AJAX request
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validasi gagal.',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-            
-            // Untuk web request
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+    if ($validator->fails()) {
+        // Untuk API/AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal.',
+                'errors' => $validator->errors()
+            ], 422);
         }
         
-        // 3. Proses data dan update
-        try {
-            // Mulai database transaction
-            \DB::beginTransaction();
-            
-            $data = $request->only(['nama_layanan', 'harga', 'deskripsi']);
-            
-            // Pastikan harga tidak null
-            $data['harga'] = $request->harga ?? 0;
-
-            // Handle foto upload
-            if ($request->hasFile('foto')) {
-                // Hapus foto lama jika ada
-                if ($layanan->foto) {
-                    Storage::delete('public/' . $layanan->foto);
-                }
-                
-                $foto = $request->file('foto');
-                $fotoName = time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
-                $foto->storeAs('public/layanan', $fotoName);
-                $data['foto'] = 'layanan/' . $fotoName;
-            }
-            
-            // Update layanan
-            $layanan->update($data);
-            
-            // 4. Update semua project yang terkait (jika ada relasi)
-            $updatedProjects = 0;
-            if (method_exists($layanan, 'projects') && $layanan->projects()->exists()) {
-                $updatedProjects = $layanan->projects()->update([
-                    'nama' => $layanan->nama_layanan,
-                    'deskripsi' => $layanan->deskripsi,
-                    'harga' => $layanan->harga,
-                ]);
-            }
-            
-            // Commit transaction
-            \DB::commit();
-            
-            // Untuk API/AJAX request
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Layanan berhasil diperbarui! ' . 
-                               ($updatedProjects ? "{$updatedProjects} project terkait juga diperbarui." : ''),
-                    'data' => $layanan,
-                    'updated_projects_count' => $updatedProjects
-                ]);
-            }
-            
-            // Untuk web request
-            $message = 'Layanan berhasil diperbarui!';
-            if ($updatedProjects) {
-                $message .= " {$updatedProjects} project terkait juga diperbarui.";
-            }
-            
-            return redirect()->back()
-                ->with('success', $message);
-
-        } catch (\Exception $e) {
-            // Rollback transaction jika error
-            \DB::rollBack();
-            Log::error('Error updating layanan: ' . $e->getMessage());
-            
-            // Untuk API/AJAX request
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Terjadi kesalahan saat memperbarui data.',
-                    'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-                ], 500);
-            }
-            
-            // Untuk web request
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
-                ->withInput();
-        }
+        // Untuk web request
+        return redirect()->back()
+            ->withErrors($validator)
+            ->withInput();
     }
+    
+    // 3. Proses data dan update
+    try {
+        // Mulai database transaction
+        \DB::beginTransaction();
+        
+        $data = $request->only(['nama_layanan', 'harga', 'hpp', 'deskripsi']); // ✅ Include HPP
+        
+        // Pastikan harga dan hpp tidak null
+        $data['harga'] = $request->harga ?? 0;
+        $data['hpp'] = $request->hpp ?? 0;
+
+        // Handle foto upload
+        if ($request->hasFile('foto')) {
+            // Hapus foto lama jika ada
+            if ($layanan->foto) {
+                Storage::delete('public/' . $layanan->foto);
+            }
+            
+            $foto = $request->file('foto');
+            $fotoName = time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
+            $foto->storeAs('public/layanan', $fotoName);
+            $data['foto'] = 'layanan/' . $fotoName;
+        }
+        
+        // Update layanan
+        $layanan->update($data);
+        
+        // 4. Update semua project yang terkait (jika ada relasi)
+        $updatedProjects = 0;
+        if (method_exists($layanan, 'projects') && $layanan->projects()->exists()) {
+            $updatedProjects = $layanan->projects()->update([
+                'nama' => $layanan->nama_layanan,
+                'deskripsi' => $layanan->deskripsi,
+                'harga' => $layanan->harga,
+                'hpp' => $layanan->hpp, // ✅ Update HPP di project
+            ]);
+        }
+        
+        // Commit transaction
+        \DB::commit();
+        
+        // Untuk API/AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Layanan berhasil diperbarui! ' . 
+                           ($updatedProjects ? "{$updatedProjects} project terkait juga diperbarui." : ''),
+                'data' => $layanan,
+                'updated_projects_count' => $updatedProjects
+            ]);
+        }
+        
+        // Untuk web request
+        $message = 'Layanan berhasil diperbarui!';
+        if ($updatedProjects) {
+            $message .= " {$updatedProjects} project terkait juga diperbarui.";
+        }
+        
+        return redirect()->back()
+            ->with('success', $message);
+
+    } catch (\Exception $e) {
+        // Rollback transaction jika error
+        \DB::rollBack();
+        Log::error('Error updating layanan: ' . $e->getMessage());
+        
+        // Untuk API/AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memperbarui data.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+        
+        // Untuk web request
+        return redirect()->back()
+            ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+            ->withInput();
+    }
+}
 
     /**
      * Update hanya harga untuk finance

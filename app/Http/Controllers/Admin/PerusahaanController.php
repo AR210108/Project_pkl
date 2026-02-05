@@ -156,4 +156,24 @@ class PerusahaanController extends Controller
             ], 500);
         }
     }
+
+    public function getDataForDropdown(Request $request)
+{
+    try {
+        $perusahaanList = Perusahaan::orderBy('nama_perusahaan', 'asc')
+            ->get(['id', 'nama_perusahaan', 'klien', 'alamat', 'jumlah_kerjasama']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data perusahaan berhasil diambil',
+            'data' => $perusahaanList
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengambil data perusahaan',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 }

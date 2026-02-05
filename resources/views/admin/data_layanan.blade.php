@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -1051,8 +1049,9 @@
                                             <th style="min-width: 80px;">Foto</th>
                                             <th style="min-width: 80px;">Nama Layanan</th>
                                             <th style="min-width: 80px;">Deskripsi</th>
+                                            <th style="min-width: 70px;">HPP</th>
                                             <th style="min-width: 70px;">Harga</th>
-                                            <th style="min-width: 10px; ">Aksi</th>
+                                            <th style="min-width: 100px; ">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="desktopTableBody">
@@ -1064,6 +1063,7 @@
                                                     data-nama="{{ $layanan->nama_layanan }}" 
                                                     data-deskripsi="{{ $layanan->deskripsi }}" 
                                                     data-harga="{{ $layanan->harga }}" 
+                                                    data-hpp="{{ $layanan->hpp }}" 
                                                     data-foto="{{ $layanan->foto }}">
                                                     <td style="min-width: 60px;">{{ $no++ }}</td>
                                                     <td style="min-width: 80px;">
@@ -1081,6 +1081,7 @@
                                                             {{ $layanan->deskripsi }}
                                                         </div>
                                                     </td>
+                                                    <td style="min-width: 150px;">Rp. {{ number_format($layanan->hpp, 0, ',', '.') }}</td>
                                                     <td style="min-width: 150px;">Rp. {{ number_format($layanan->harga, 0, ',', '.') }}</td>
                                                     <td style="min-width: 100px; text-align: center;">
                                                         <div class="flex justify-center gap-2">
@@ -1089,6 +1090,7 @@
                                                                     data-nama="{{ $layanan->nama_layanan }}"
                                                                     data-deskripsi="{{ $layanan->deskripsi }}"
                                                                     data-harga="{{ $layanan->harga }}"
+                                                                    data-hpp="{{ $layanan->hpp }}"
                                                                     data-foto="{{ $layanan->foto }}"
                                                                     title="Lihat Detail">
                                                                 <span class="material-icons-outlined">visibility</span>
@@ -1098,6 +1100,7 @@
                                                                     data-nama="{{ $layanan->nama_layanan }}"
                                                                     data-deskripsi="{{ $layanan->deskripsi }}"
                                                                     data-harga="{{ $layanan->harga }}"
+                                                                    data-hpp="{{ $layanan->hpp }}"
                                                                     data-foto="{{ $layanan->foto }}"
                                                                     title="Edit">
                                                                 <span class="material-icons-outlined">edit</span>
@@ -1113,7 +1116,7 @@
                                             @endforeach
                                         @else
                                             <tr>
-                                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                                                <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">
                                                     Tidak ada data layanan
                                                 </td>
                                             </tr>
@@ -1133,6 +1136,7 @@
                                          data-nama="{{ $layanan->nama_layanan }}" 
                                          data-deskripsi="{{ $layanan->deskripsi }}" 
                                          data-harga="{{ $layanan->harga }}" 
+                                         data-hpp="{{ $layanan->hpp }}" 
                                          data-foto="{{ $layanan->foto }}">
                                         <div class="mobile-card-header">
                                             @if($layanan->foto)
@@ -1144,7 +1148,10 @@
                                             @endif
                                             <div class="mobile-card-info">
                                                 <h4 class="mobile-card-title">{{ $layanan->nama_layanan }}</h4>
-                                                <p class="mobile-card-price">Rp. {{ number_format($layanan->harga, 0, ',', '.') }}</p>
+                                                <p class="mobile-card-price">
+                                                    HPP: Rp. {{ number_format($layanan->hpp, 0, ',', '.') }}<br>
+                                                    Harga: Rp. {{ number_format($layanan->harga, 0, ',', '.') }}
+                                                </p>
                                             </div>
                                             <div class="mobile-card-actions">
                                                 <button class="mobile-card-action-btn edit" 
@@ -1152,6 +1159,7 @@
                                                         data-nama="{{ $layanan->nama_layanan }}"
                                                         data-deskripsi="{{ $layanan->deskripsi }}"
                                                         data-harga="{{ $layanan->harga }}"
+                                                        data-hpp="{{ $layanan->hpp }}"
                                                         data-foto="{{ $layanan->foto }}"
                                                         title="Edit">
                                                     <span class="material-icons-outlined" style="font-size: 18px;">edit</span>
@@ -1219,10 +1227,22 @@
                 </div>
                 <form action="{{ route('admin.layanan.store') }}" method="POST" id="tambahLayananForm" class="space-y-4" enctype="multipart/form-data">
                     @csrf
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
+                        <input type="text" name="nama_layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama layanan" required>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
-                            <input type="text" name="nama_layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama layanan" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">HPP (Harga Pokok Produksi)</label>
+                            <input type="number" name="hpp" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan HPP" min="0" value="0">
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga Jual</label>
+                            <input type="number" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan harga jual" min="0" value="0">
+                        </div>
+                    </div>
+                    
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                         <textarea name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi layanan" required></textarea>
@@ -1234,7 +1254,7 @@
                             <div class="upload-placeholder">
                                 <span class="material-icons-outlined upload-icon">cloud_upload</span>
                                 <p class="upload-text">Klik untuk mengunggah foto</p>
-                                <p class="text-xs text-gray-400">JPG, PNG, GIF (Maks. 2MB)</p>
+                                <p class="text-xs text-gray-400">JPG, PNG (Maks. 5MB)</p>
                             </div>
                             <button type="button" class="remove-image" id="tambahRemoveFoto">
                                 <span class="material-icons-outlined text-sm">close</span>
@@ -1265,12 +1285,22 @@
                     @csrf
                     @method('PUT')
                     <input type="hidden" id="editId" name="id">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
-        <input type="text" id="editNamaLayanan" name="nama_layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama layanan" required>
-    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
+                            <input type="text" id="editNamaLayanan" name="nama_layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama layanan" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">HPP (Harga Pokok)</label>
+                            <input type="number" id="editHpp" name="hpp" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan HPP" min="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga Jual</label>
+                            <input type="number" id="editHarga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan harga jual" min="0">
+                        </div>
                     </div>
+                    
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                         <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi layanan" required></textarea>
@@ -1337,7 +1367,7 @@
         </div>
     </div>
 
-    <!-- Detail Modal -->
+    <!-- Detail Modal - Updated for HPP -->
     <div id="detailModal" class="detail-modal">
         <div class="detail-modal-content">
             <div class="detail-modal-header">
@@ -1354,7 +1384,10 @@
                     <div class="detail-label">Nama Layanan</div>
                     <div class="detail-value" id="detailNama"></div>
                     
-                    <div class="detail-label">Harga</div>
+                    <div class="detail-label">HPP (Harga Pokok)</div>
+                    <div class="detail-value" id="detailHpp"></div>
+                    
+                    <div class="detail-label">Harga Jual</div>
                     <div class="detail-value" id="detailHarga"></div>
                     
                     <div class="detail-label">Deskripsi</div>
@@ -1643,12 +1676,13 @@
             document.body.style.overflow = '';
         }
         
-        // === DETAIL MODAL ===
-        function showDetailModal(id, nama, deskripsi, harga, foto) {
+        // === DETAIL MODAL (UPDATED FOR HPP) ===
+        function showDetailModal(id, nama, deskripsi, harga, hpp, foto) {
             const detailModal = document.getElementById('detailModal');
             const detailNama = document.getElementById('detailNama');
             const detailDeskripsi = document.getElementById('detailDeskripsi');
             const detailHarga = document.getElementById('detailHarga');
+            const detailHpp = document.getElementById('detailHpp');
             const detailImage = document.getElementById('detailImage');
             const detailImageContainer = document.getElementById('detailImageContainer');
             
@@ -1656,6 +1690,7 @@
             detailNama.textContent = nama;
             detailDeskripsi.textContent = deskripsi;
             detailHarga.textContent = 'Rp. ' + Number(harga).toLocaleString('id-ID');
+            detailHpp.textContent = 'Rp. ' + Number(hpp).toLocaleString('id-ID');
             
             // Set image
             if (foto) {
@@ -1801,7 +1836,7 @@
         }
 
         // ============================
-        // HANDLE DETAIL BUTTON
+        // HANDLE DETAIL BUTTON (UPDATED FOR HPP)
         // ============================
         document.querySelectorAll('.detail-btn').forEach(button => {
             button.addEventListener('click', () => {
@@ -1809,38 +1844,41 @@
                 const nama = button.dataset.nama;
                 const deskripsi = button.dataset.deskripsi;
                 const harga = button.dataset.harga;
+                const hpp = button.dataset.hpp;
                 const foto = button.dataset.foto;
                 
-                showDetailModal(id, nama, deskripsi, harga, foto);
+                showDetailModal(id, nama, deskripsi, harga, hpp, foto);
             });
         });
 
-// ============================
-// HANDLE EDIT BUTTON
-// ============================
-document.querySelectorAll('.edit-btn').forEach(button => {
-    button.addEventListener('click', () => {
-        // SET VALUE
-        document.getElementById('editId').value = button.dataset.id;
-        document.getElementById('editNamaLayanan').value = button.dataset.nama;
-        document.getElementById('editDeskripsi').value = button.dataset.deskripsi;
-        document.getElementById('editCurrentFoto').value = button.dataset.foto;
-        
-        // SET FOTO
-        if (button.dataset.foto) {
-            document.getElementById('editFotoPreview').src = `/storage/${button.dataset.foto}`;
-            document.getElementById('editFotoContainer').classList.add('has-image');
-        } else {
-            document.getElementById('editFotoPreview').src = '';
-            document.getElementById('editFotoContainer').classList.remove('has-image');
-        }
+        // ============================
+        // HANDLE EDIT BUTTON (UPDATED FOR HPP)
+        // ============================
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // SET VALUE
+                document.getElementById('editId').value = button.dataset.id;
+                document.getElementById('editNamaLayanan').value = button.dataset.nama;
+                document.getElementById('editDeskripsi').value = button.dataset.deskripsi;
+                document.getElementById('editHarga').value = button.dataset.harga;
+                document.getElementById('editHpp').value = button.dataset.hpp;
+                document.getElementById('editCurrentFoto').value = button.dataset.foto;
+                
+                // SET FOTO
+                if (button.dataset.foto) {
+                    document.getElementById('editFotoPreview').src = `/storage/${button.dataset.foto}`;
+                    document.getElementById('editFotoContainer').classList.add('has-image');
+                } else {
+                    document.getElementById('editFotoPreview').src = '';
+                    document.getElementById('editFotoContainer').classList.remove('has-image');
+                }
 
-        // SET ACTION URL DINAMIS
-        editLayananForm.action = `/admin/layanan/${button.dataset.id}`;
+                // SET ACTION URL DINAMIS
+                editLayananForm.action = `/admin/layanan/${button.dataset.id}`;
 
-        editLayananModal.classList.remove('hidden');
-    });
-});
+                editLayananModal.classList.remove('hidden');
+            });
+        });
 
         // ============================
         // HANDLE DELETE BUTTON
@@ -1858,161 +1896,161 @@ document.querySelectorAll('.edit-btn').forEach(button => {
             });
         });
 
-// ============================
-// SUBMIT FORM TAMBAH - DENGAN DEBUGGING LEBIH BAIK
-// ============================
-tambahLayananForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    const submitButton = this.querySelector('button[type="submit"]');
-    const originalButtonText = submitButton.innerHTML;
-    
-    // Tampilkan loading state
-    submitButton.disabled = true;
-    submitButton.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span> Menyimpan...';
-    
-    fetch(this.action, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json'
-        }
-    })
-    .then(async response => {
-        const data = await response.json(); // Coba parse JSON dulu
-        
-        if (!response.ok) {
-            // Jika response tidak OK, lempar error dengan pesan dari server
-            throw new Error(data.message || `HTTP error! status: ${response.status}`);
-        }
-        
-        return data; // Jika OK, kembalikan data
-    })
-    .then(data => {
-        if (data.success) {
-            tambahLayananModal.classList.add('hidden');
-            resetTambahForm();
-            showMinimalPopup('Berhasil', data.message || 'Layanan berhasil ditambahkan', 'success');
-            setTimeout(() => window.location.reload(), 1500);
-        } else {
-            // Handle jika success: false dari server
-            showMinimalPopup('Gagal', data.message || 'Gagal menambah layanan.', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error Detail:', error); // Lihat console untuk detail lengkap
-        showMinimalPopup('Error', error.message, 'error'); // Tampilkan pesan error asli
-    })
-    .finally(() => {
-        // Kembalikan button ke semula
-        submitButton.disabled = false;
-        submitButton.innerHTML = originalButtonText;
-    });
-});
+        // ============================
+        // SUBMIT FORM TAMBAH - DENGAN DEBUGGING LEBIH BAIK
+        // ============================
+        tambahLayananForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            
+            // Tampilkan loading state
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span> Menyimpan...';
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(async response => {
+                const data = await response.json(); // Coba parse JSON dulu
+                
+                if (!response.ok) {
+                    // Jika response tidak OK, lempar error dengan pesan dari server
+                    throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                }
+                
+                return data; // Jika OK, kembalikan data
+            })
+            .then(data => {
+                if (data.success) {
+                    tambahLayananModal.classList.add('hidden');
+                    resetTambahForm();
+                    showMinimalPopup('Berhasil', data.message || 'Layanan berhasil ditambahkan', 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    // Handle jika success: false dari server
+                    showMinimalPopup('Gagal', data.message || 'Gagal menambah layanan.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error Detail:', error); // Lihat console untuk detail lengkap
+                showMinimalPopup('Error', error.message, 'error'); // Tampilkan pesan error asli
+            })
+            .finally(() => {
+                // Kembalikan button ke semula
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+            });
+        });
 
-// ============================
-// SUBMIT FORM EDIT - DENGAN DEBUGGING LEBIH BAIK
-// ============================
-editLayananForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const id = document.getElementById('editId').value;
-    const formData = new FormData(this);
-    const submitButton = this.querySelector('button[type="submit"]');
-    const originalButtonText = submitButton.innerHTML;
-    
-    // Tampilkan loading state
-    submitButton.disabled = true;
-    submitButton.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span> Memperbarui...';
+        // ============================
+        // SUBMIT FORM EDIT - DENGAN DEBUGGING LEBIH BAIK
+        // ============================
+        editLayananForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('editId').value;
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            
+            // Tampilkan loading state
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span> Memperbarui...';
 
-    fetch(`/admin/layanan/${id}`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json'
-        }
-    })
-    .then(async response => {
-        const data = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(data.message || `HTTP error! status: ${response.status}`);
-        }
-        
-        return data;
-    })
-    .then(data => {
-        if (data.success) {
-            editLayananModal.classList.add('hidden');
-            resetEditForm();
-            showMinimalPopup('Berhasil', data.message || 'Layanan berhasil diperbarui', 'success');
-            setTimeout(() => window.location.reload(), 1500);
-        } else {
-            showMinimalPopup('Gagal', data.message || 'Gagal memperbarui layanan.', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error Detail:', error);
-        showMinimalPopup('Error', error.message, 'error');
-    })
-    .finally(() => {
-        submitButton.disabled = false;
-        submitButton.innerHTML = originalButtonText;
-    });
-});
+            fetch(`/admin/layanan/${id}`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(async response => {
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                }
+                
+                return data;
+            })
+            .then(data => {
+                if (data.success) {
+                    editLayananModal.classList.add('hidden');
+                    resetEditForm();
+                    showMinimalPopup('Berhasil', data.message || 'Layanan berhasil diperbarui', 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showMinimalPopup('Gagal', data.message || 'Gagal memperbarui layanan.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error Detail:', error);
+                showMinimalPopup('Error', error.message, 'error');
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+            });
+        });
 
-       // ============================
-// SUBMIT FORM DELETE - DENGAN DEBUGGING LEBIH BAIK
-// ============================
-document.getElementById('deleteForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const id = document.getElementById('deleteId').value;
-    const formData = new FormData(this);
-    const submitButton = this.querySelector('button[type="submit"]');
-    const originalButtonText = submitButton.innerHTML;
-    
-    submitButton.disabled = true;
-    submitButton.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span> Menghapus...';
+        // ============================
+        // SUBMIT FORM DELETE - DENGAN DEBUGGING LEBIH BAIK
+        // ============================
+        document.getElementById('deleteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('deleteId').value;
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span> Menghapus...';
 
-    fetch(`/admin/layanan/${id}`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json'
-        }
-    })
-    .then(async response => {
-        const data = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(data.message || `HTTP error! status: ${response.status}`);
-        }
-        
-        return data;
-    })
-    .then(data => {
-        if (data.success) {
-            deleteModal.classList.add('hidden');
-            showMinimalPopup('Berhasil', data.message || 'Layanan berhasil dihapus', 'success');
-            setTimeout(() => window.location.reload(), 1500);
-        } else {
-            showMinimalPopup('Gagal', data.message || 'Gagal menghapus layanan.', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error Detail:', error);
-        showMinimalPopup('Error', error.message, 'error');
-    })
-    .finally(() => {
-        submitButton.disabled = false;
-        submitButton.innerHTML = originalButtonText;
-    });
-});
+            fetch(`/admin/layanan/${id}`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(async response => {
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                }
+                
+                return data;
+            })
+            .then(data => {
+                if (data.success) {
+                    deleteModal.classList.add('hidden');
+                    showMinimalPopup('Berhasil', data.message || 'Layanan berhasil dihapus', 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showMinimalPopup('Gagal', data.message || 'Gagal menghapus layanan.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error Detail:', error);
+                showMinimalPopup('Error', error.message, 'error');
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+            });
+        });
     </script>
 </body>
 

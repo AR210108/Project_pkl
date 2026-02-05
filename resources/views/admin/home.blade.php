@@ -731,7 +731,7 @@
                         <div class="card-content">
                             <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah Data Project</p>
                             <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">
-                                {{ $jumlahProject ?? 0 }}
+                                {{ $jumlahProject }}
                             </p>
                         </div>
                     </div>

@@ -9,6 +9,7 @@ class Layanan extends Model
     protected $fillable = [
         'nama_layanan',
         'deskripsi',
+        'hpp',
         'harga',
         'foto',
     ];
@@ -21,7 +22,7 @@ class Layanan extends Model
     /**
      * Event ketika layanan diupdate
      */
-    protected static function boot()
+   protected static function boot()
     {
         parent::boot();
         
@@ -40,6 +41,10 @@ class Layanan extends Model
             
             if ($layanan->isDirty('harga')) {
                 $changedFields['harga'] = $layanan->harga;
+            }
+            
+            if ($layanan->isDirty('hpp')) {
+                $changedFields['hpp'] = $layanan->hpp; // ✅ Sinkronisasi HPP ke project
             }
             
             // Update semua project yang terkait

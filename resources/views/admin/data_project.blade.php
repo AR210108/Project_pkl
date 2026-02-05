@@ -54,7 +54,6 @@
             vertical-align: middle;
         }
 
-        /* Card hover effects */
         .stat-card {
             transition: all 0.3s ease;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
@@ -65,7 +64,6 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        /* Table styles */
         .order-table {
             transition: all 0.2s ease;
         }
@@ -74,7 +72,6 @@
             background-color: rgba(59, 130, 246, 0.05);
         }
 
-        /* Button styles */
         .btn-primary {
             background-color: #3b82f6;
             color: white;
@@ -95,7 +92,6 @@
             background-color: #e2e8f0;
         }
 
-        /* Modal styles */
         .modal {
             transition: opacity 0.25s ease;
         }
@@ -114,37 +110,47 @@
             font-weight: 600;
         }
 
-        .status-todo {
+        /* Status Pengerjaan */
+        .status-pending {
             background-color: rgba(59, 130, 246, 0.15);
             color: #1e40af;
         }
 
-        .status-progress {
+        .status-dalam-pengerjaan {
             background-color: rgba(245, 158, 11, 0.15);
             color: #92400e;
         }
 
-        .status-done {
+        .status-selesai {
             background-color: rgba(16, 185, 129, 0.15);
             color: #065f46;
         }
 
-        .status-active {
+        .status-dibatalkan {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #991b1b;
+        }
+
+        /* Status Kerjasama */
+        .status-aktif {
             background-color: rgba(16, 185, 129, 0.15);
             color: #065f46;
         }
 
-        .status-inprogress {
+        .status-selesai-kerjasama {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #1e40af;
+        }
+
+        .status-ditangguhkan {
             background-color: rgba(245, 158, 11, 0.15);
             color: #92400e;
         }
 
-        /* Custom styles untuk transisi */
         .sidebar-transition {
             transition: transform 0.3s ease-in-out;
         }
 
-        /* Animasi hamburger */
         .hamburger-line {
             transition: all 0.3s ease-in-out;
         }
@@ -161,14 +167,11 @@
             transform: rotate(-45deg) translate(7px, -6px);
         }
 
-        /* Style untuk efek hover yang lebih menonjol */
         .nav-item {
             position: relative;
             overflow: hidden;
         }
 
-        /* Gaya untuk indikator aktif/hover */
-        /* Default untuk mobile: di sebelah kanan */
         .nav-item::before {
             content: '';
             position: absolute;
@@ -181,7 +184,6 @@
             transition: transform 0.3s ease;
         }
 
-        /* Override untuk desktop: di sebelah kiri */
         @media (min-width: 768px) {
             .nav-item::before {
                 right: auto;
@@ -195,7 +197,6 @@
             transform: translateX(0);
         }
 
-        /* Memastikan sidebar tetap di posisinya saat scroll */
         .sidebar-fixed {
             position: fixed;
             height: 100vh;
@@ -203,7 +204,6 @@
             z-index: 40;
         }
 
-        /* Menyesuaikan konten utama agar tidak tertutup sidebar */
         .main-content {
             margin-left: 0;
             transition: margin-left 0.3s ease-in-out;
@@ -212,11 +212,9 @@
         @media (min-width: 768px) {
             .main-content {
                 margin-left: 256px;
-                /* Lebar sidebar */
             }
         }
 
-        /* Scrollbar kustom untuk sidebar */
         .sidebar-fixed::-webkit-scrollbar {
             width: 6px;
         }
@@ -234,7 +232,6 @@
             background: #555;
         }
 
-        /* Table mobile adjustments */
         @media (max-width: 639px) {
             .desktop-table {
                 display: none;
@@ -244,7 +241,6 @@
                 display: block;
             }
 
-            /* Hide desktop pagination on mobile */
             .desktop-pagination {
                 display: none !important;
             }
@@ -259,13 +255,11 @@
                 display: none;
             }
 
-            /* Hide mobile pagination on desktop */
             .mobile-pagination {
                 display: none !important;
             }
         }
 
-        /* Form input styles */
         .form-input {
             border: 1px solid #e2e8f0;
             transition: all 0.2s ease;
@@ -276,7 +270,6 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        /* Pagination styles */
         .page-btn {
             transition: all 0.2s ease;
         }
@@ -290,7 +283,6 @@
             cursor: not-allowed;
         }
 
-        /* Desktop pagination styles */
         .desktop-pagination {
             display: flex;
             justify-content: center;
@@ -348,7 +340,6 @@
             cursor: not-allowed;
         }
 
-        /* Panel Styles */
         .panel {
             background: white;
             border-radius: 0.75rem;
@@ -380,7 +371,6 @@
             padding: 1.5rem;
         }
 
-        /* SCROLLABLE TABLE - TANPA TEKS SCROLL */
         .scrollable-table-container {
             width: 100%;
             overflow-x: auto;
@@ -390,7 +380,6 @@
             background: white;
         }
 
-        /* Force scrollbar to be visible */
         .scrollable-table-container {
             scrollbar-width: auto;
             -webkit-overflow-scrolling: touch;
@@ -416,11 +405,9 @@
             background: #94a3b8;
         }
 
-        /* Table with fixed width to ensure scrolling */
         .data-table {
             width: 100%;
-            min-width: 1400px;
-            /* Fixed minimum width */
+            min-width: 2000px;
             border-collapse: collapse;
         }
 
@@ -449,12 +436,10 @@
             background: #f3f4f6;
         }
 
-        /* Shadow effect */
         .table-shadow {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        /* Progress bar styles */
         .progress-bar {
             width: 100%;
             background-color: #e2e8f0;
@@ -467,9 +452,8 @@
             border-radius: 9999px;
         }
 
-        /* Truncate text style */
         .truncate-text {
-            max-width: 300px;
+            max-width: 200px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -486,31 +470,69 @@
         <div class="main-content flex-1 flex flex-col overflow-y-auto bg-background-light">
             <main class="flex-1 flex flex-col bg-background-light">
                 <div class="flex-1 p-3 sm:p-8">
-
                     <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Data Project</h2>
 
-                    <!-- Search and Filter Section -->
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <!-- Filter Form -->
+                    <form method="GET" action="{{ route('admin.data_project') }}"
+                          class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <!-- SEARCH -->
                         <div class="relative w-full md:w-1/3">
-                            <span
-                                class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                            <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                search
+                            </span>
                             <input
-                                class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input"
-                                placeholder="Search..." type="text" />
+                                name="q"
+                                value="{{ request('q') }}"
+                                class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg
+                                       focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="Cari nama / deskripsi project..."
+                                type="text">
                         </div>
+
+                        <!-- FILTER -->
                         <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                            <button
-                                class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
-                                Filter
+                            <!-- Filter Status Pengerjaan -->
+                            <select name="status_pengerjaan"
+                                class="px-3 py-2 bg-white border border-border-light rounded-lg">
+                                <option value="">Semua Status Pengerjaan</option>
+                                <option value="pending" {{ request('status_pengerjaan')=='pending'?'selected':'' }}>Pending</option>
+                                <option value="dalam_pengerjaan" {{ request('status_pengerjaan')=='dalam_pengerjaan'?'selected':'' }}>Dalam Pengerjaan</option>
+                                <option value="selesai" {{ request('status_pengerjaan')=='selesai'?'selected':'' }}>Selesai</option>
+                                <option value="dibatalkan" {{ request('status_pengerjaan')=='dibatalkan'?'selected':'' }}>Dibatalkan</option>
+                            </select>
+
+                            <!-- Filter Status Kerjasama -->
+                            <select name="status_kerjasama"
+                                class="px-3 py-2 bg-white border border-border-light rounded-lg">
+                                <option value="">Semua Status Kerjasama</option>
+                                <option value="aktif" {{ request('status_kerjasama')=='aktif'?'selected':'' }}>Aktif</option>
+                                <option value="selesai" {{ request('status_kerjasama')=='selesai'?'selected':'' }}>Selesai</option>
+                                <option value="ditangguhkan" {{ request('status_kerjasama')=='ditangguhkan'?'selected':'' }}>Ditangguhkan</option>
+                            </select>
+
+                            <!-- Filter Tanggal Mulai Pengerjaan -->
+                            <input type="date" name="tanggal_mulai_pengerjaan"
+                                value="{{ request('tanggal_mulai_pengerjaan') }}"
+                                class="px-3 py-2 bg-white border border-border-light rounded-lg"
+                                placeholder="Mulai Pengerjaan">
+
+                            <button type="submit"
+                                class="px-4 py-2 bg-primary text-white rounded-lg">
+                                Terapkan
                             </button>
-                            <button id="tambahProjectBtn"
-                                class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
+
+                            <a href="{{ route('admin.data_project') }}"
+                               class="px-4 py-2 bg-gray-200 rounded-lg">
+                                Reset
+                            </a>
+
+                            <button type="button" id="tambahProjectBtn"
+                                class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2">
                                 <span class="material-icons-outlined">add</span>
-                                <span class="hidden sm:inline">Tambah Project</span>
-                                <span class="sm:hidden">Tambah</span>
+                                Tambah Project
                             </button>
                         </div>
-                    </div>
+                    </form>
 
                     <!-- Data Table Panel -->
                     <div class="panel">
@@ -526,71 +548,129 @@
                             </div>
                         </div>
                         <div class="panel-body">
-                            <!-- SCROLLABLE TABLE - TANPA INDICATOR -->
+                            <!-- SCROLLABLE TABLE -->
                             <div class="desktop-table">
                                 <div class="scrollable-table-container table-shadow" id="scrollableTable">
                                     <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th style="min-width: 60px;">No</th>
-                                                <th style="min-width: 200px;">Nama Project</th>
-                                                <th style="min-width: 300px;">Deskripsi</th>
-                                                <th style="min-width: 120px;">Harga</th>
-                                                <th style="min-width: 120px;">Deadline</th>
-                                                <th style="min-width: 150px;">Progres</th>
-                                                <th style="min-width: 120px;">Status</th>
-                                                <th style="min-width: 180px; text-align: center;">Aksi</th>
-                                            </tr>
-                                        </thead>
+                                       <!-- Di bagian thead table -->
+<thead>
+    <tr>
+        <th style="min-width: 60px;">No</th>
+        <th style="min-width: 150px;">Invoice</th>
+        <th style="min-width: 200px;">Nama Project</th>
+        <th style="min-width: 200px;">Deskripsi</th>
+        <th style="min-width: 120px;">Harga</th>
+        <!-- Tambahkan ini di sini -->
+        <th style="min-width: 150px;">Penanggung Jawab</th>
+        <th style="min-width: 120px;">Mulai Pengerjaan</th>
+        <th style="min-width: 120px;">Selesai Pengerjaan</th>
+        <th style="min-width: 120px;">Mulai Kerjasama</th>
+        <th style="min-width: 120px;">Selesai Kerjasama</th>
+        <th style="min-width: 120px;">Status Pengerjaan</th>
+        <th style="min-width: 120px;">Status Kerjasama</th>
+        <th style="min-width: 150px;">Progres</th>
+        <th style="min-width: 180px; text-align: center;">Aksi</th>
+    </tr>
+</thead>
                                         <tbody id="desktopTableBody">
                                             @foreach ($project as $index => $item)
                                                 <tr>
                                                     <td style="min-width: 60px;">
                                                         {{ ($project->currentPage() - 1) * $project->perPage() + $index + 1 }}
                                                     </td>
+                                                    <td style="min-width: 150px;">
+                                                        @if($item->invoice)
+                                                            Invoice #{{ $item->invoice->id }}
+                                                        @else
+                                                            <span class="text-gray-400">-</span>
+                                                        @endif
+                                                    </td>
                                                     <td style="min-width: 200px;">{{ $item->nama }}</td>
-                                                    <td style="min-width: 300px;" class="truncate-text"
+                                                    <td style="min-width: 200px;" class="truncate-text"
                                                         title="{{ $item->deskripsi }}">
                                                         {{ Str::limit($item->deskripsi, 50) }}
                                                     </td>
-                                                    <td style="min-width: 120px;">{{ $item->harga }}</td>
-                                                    <td style="min-width: 120px;">{{ $item->deadline->format('Y-m-d') }}
+                                                    <td style="min-width: 120px;">Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
+                                                    <td style="min-width: 120px;">{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}</td>
+                                                    <td style="min-width: 120px;">
+                                                        @if($item->tanggal_selesai_pengerjaan)
+                                                            {{ $item->tanggal_selesai_pengerjaan->format('Y-m-d') }}
+                                                        @else
+                                                            <span class="text-gray-400">-</span>
+                                                        @endif
+                                                    </td>
+                                                    <td style="min-width: 120px;">
+                                                        @if($item->tanggal_mulai_kerjasama)
+                                                            {{ $item->tanggal_mulai_kerjasama->format('Y-m-d') }}
+                                                        @else
+                                                            <span class="text-gray-400">-</span>
+                                                        @endif
+                                                    </td>
+                                                    <td style="min-width: 120px;">
+                                                        @if($item->tanggal_selesai_kerjasama)
+                                                            {{ $item->tanggal_selesai_kerjasama->format('Y-m-d') }}
+                                                        @else
+                                                            <span class="text-gray-400">-</span>
+                                                        @endif
+                                                    </td>
+                                                    <td style="min-width: 120px;">
+                                                        <span class="status-badge status-{{ str_replace('_', '-', $item->status_pengerjaan) }}">
+                                                            {{ $item->status_pengerjaan_formatted }}
+                                                        </span>
+                                                    </td>
+                                                    <td style="min-width: 120px;">
+                                                        <span class="status-badge status-{{ $item->status_kerjasama }}">
+                                                            {{ $item->status_kerjasama_formatted }}
+                                                        </span>
                                                     </td>
                                                     <td style="min-width: 150px;">
                                                         <div class="progress-bar">
                                                             <div class="progress-fill {{ $item->progres < 50 ? 'bg-red-500' : ($item->progres < 80 ? 'bg-yellow-500' : 'bg-green-500') }}"
                                                                 style="width: {{ $item->progres }}%"></div>
                                                         </div>
-                                                        <span
-                                                            class="text-xs text-gray-600 dark:text-gray-400 mt-1 block">{{ $item->progres }}%</span>
-                                                    </td>
-                                                    <td style="min-width: 120px;">
-                                                        <span
-                                                            class="status-badge 
-                                                            @if ($item->status == 'In Progress') status-inprogress 
-                                                            @elseif($item->status == 'Active') status-active 
-                                                            @elseif($item->status == 'Completed') status-done 
-                                                            @else status-todo @endif">
-                                                            {{ $item->status }}
-                                                        </span>
+                                                        <span class="text-xs text-gray-600 dark:text-gray-400 mt-1 block">{{ $item->progres }}%</span>
                                                     </td>
                                                     <td style="min-width: 180px; text-align: center;">
                                                         <div class="flex justify-center gap-2">
                                                             <button
                                                                 class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                                onclick="openDetailModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
+                                                                onclick="openDetailModal(
+                                                                    {{ $item->id }}, 
+                                                                    '{{ addslashes($item->nama) }}', 
+                                                                    '{{ addslashes($item->deskripsi) }}', 
+                                                                    '{{ number_format($item->harga, 0, ',', '.') }}', 
+                                                                    '{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}', 
+                                                                    '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}', 
+                                                                    '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}', 
+                                                                    '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}', 
+                                                                    '{{ $item->status_pengerjaan }}', 
+                                                                    '{{ $item->status_kerjasama }}', 
+                                                                    {{ $item->progres }},
+                                                                    '{{ $item->invoice ? 'Invoice #' . $item->invoice->id : '' }}'
+                                                                )"
                                                                 title="Lihat Detail">
                                                                 <span class="material-icons-outlined">visibility</span>
                                                             </button>
                                                             <button
                                                                 class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                                onclick="openEditModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
+                                                                onclick="openEditModal(
+                                                                    {{ $item->id }}, 
+                                                                    '{{ addslashes($item->nama) }}', 
+                                                                    '{{ addslashes($item->deskripsi) }}', 
+                                                                    '{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}', 
+                                                                    '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}', 
+                                                                    '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}', 
+                                                                    '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}', 
+                                                                    '{{ $item->status_pengerjaan }}', 
+                                                                    '{{ $item->status_kerjasama }}', 
+                                                                    {{ $item->progres }}
+                                                                )"
                                                                 title="Edit">
                                                                 <span class="material-icons-outlined">edit</span>
                                                             </button>
                                                             <button
                                                                 class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                                                onclick="openDeleteModal({{ $item->id }}, '{{ $item->nama }}')"
+                                                                onclick="openDeleteModal({{ $item->id }}, '{{ addslashes($item->nama) }}')"
                                                                 title="Hapus">
                                                                 <span class="material-icons-outlined">delete</span>
                                                             </button>
@@ -610,60 +690,111 @@
                                         <div class="flex justify-between items-start mb-3">
                                             <div>
                                                 <h4 class="font-semibold text-base">{{ $item->nama }}</h4>
-                                                <p class="text-sm text-text-muted-light">Deadline:
-                                                    {{ $item->deadline->format('Y-m-d') }}</p>
+                                                <p class="text-sm text-text-muted-light">
+                                                    @if($item->invoice)
+                                                        <span>Invoice #{{ $item->invoice->id }}</span><br>
+                                                    @endif
+                                                    Mulai: {{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}
+                                                    @if($item->tanggal_selesai_pengerjaan)
+                                                        <br>Selesai: {{ $item->tanggal_selesai_pengerjaan->format('Y-m-d') }}
+                                                    @endif
+                                                </p>
                                             </div>
                                             <div class="flex gap-2">
                                                 <button
                                                     class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                    onclick="openDetailModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
+                                                    onclick="openDetailModal(
+                                                        {{ $item->id }}, 
+                                                        '{{ addslashes($item->nama) }}', 
+                                                        '{{ addslashes($item->deskripsi) }}', 
+                                                        '{{ number_format($item->harga, 0, ',', '.') }}', 
+                                                        '{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}', 
+                                                        '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}', 
+                                                        '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}', 
+                                                        '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}', 
+                                                        '{{ $item->status_pengerjaan }}', 
+                                                        '{{ $item->status_kerjasama }}', 
+                                                        {{ $item->progres }},
+                                                        '{{ $item->invoice ? 'Invoice #' . $item->invoice->id : '' }}'
+                                                    )"
                                                     title="Lihat Detail">
                                                     <span class="material-icons-outlined">visibility</span>
                                                 </button>
                                                 <button
                                                     class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                    onclick="openEditModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')"
+                                                    onclick="openEditModal(
+                                                        {{ $item->id }}, 
+                                                        '{{ addslashes($item->nama) }}', 
+                                                        '{{ addslashes($item->deskripsi) }}', 
+                                                        '{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}', 
+                                                        '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}', 
+                                                        '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}', 
+                                                        '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}', 
+                                                        '{{ $item->status_pengerjaan }}', 
+                                                        '{{ $item->status_kerjasama }}', 
+                                                        {{ $item->progres }}
+                                                    )"
                                                     title="Edit">
                                                     <span class="material-icons-outlined">edit</span>
                                                 </button>
                                                 <button
                                                     class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                                    onclick="openDeleteModal({{ $item->id }}, '{{ $item->nama }}')"
+                                                    onclick="openDeleteModal({{ $item->id }}, '{{ addslashes($item->nama) }}')"
                                                     title="Hapus">
                                                     <span class="material-icons-outlined">delete</span>
                                                 </button>
                                             </div>
                                         </div>
-                                        <div class="grid grid-cols-2 gap-2 text-sm">
+                                        <div class="grid grid-cols-2 gap-2 text-sm mb-3">
                                             <div>
-                                                <p class="text-text-muted-light">Status</p>
+                                                <p class="text-text-muted-light">Status Pengerjaan</p>
                                                 <p>
-                                                    <span
-                                                        class="status-badge 
-                                                        @if ($item->status == 'Pending') status-inprogress 
-                                                        @elseif($item->status == 'Active') status-active 
-                                                        @elseif($item->status == 'Completed') status-done 
-                                                        @else status-todo @endif">
-                                                        {{ $item->status }}
+                                                    <span class="status-badge status-{{ str_replace('_', '-', $item->status_pengerjaan) }}">
+                                                        {{ $item->status_pengerjaan_formatted }}
                                                     </span>
                                                 </p>
                                             </div>
-                                            <div class="col-span-2">
-                                                <p class="text-text-muted-light">Progres</p>
-                                                <div class="progress-bar mt-1">
-                                                    <div class="progress-fill {{ $item->progres < 50 ? 'bg-red-500' : ($item->progres < 80 ? 'bg-yellow-500' : 'bg-green-500') }}"
-                                                        style="width: {{ $item->progres }}%"></div>
-                                                </div>
-                                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                                    {{ $item->progres }}%</p>
+                                            <div>
+                                                <p class="text-text-muted-light">Status Kerjasama</p>
+                                                <p>
+                                                    <span class="status-badge status-{{ $item->status_kerjasama }}">
+                                                        {{ $item->status_kerjasama_formatted }}
+                                                    </span>
+                                                </p>
                                             </div>
+                                        </div>
+                                        <div class="col-span-2 mb-3">
+                                            <p class="text-text-muted-light">Progres</p>
+                                            <div class="progress-bar mt-1">
+                                                <div class="progress-fill {{ $item->progres < 50 ? 'bg-red-500' : ($item->progres < 80 ? 'bg-yellow-500' : 'bg-green-500') }}"
+                                                    style="width: {{ $item->progres }}%"></div>
+                                            </div>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                                {{ $item->progres }}%</p>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-text-muted-light">Harga</p>
+                                            <p class="font-medium">Rp {{ number_format($item->harga, 0, ',', '.') }}</p>
                                         </div>
                                         <div class="mt-3">
                                             <p class="text-text-muted-light">Deskripsi</p>
                                             <p class="font-medium">{{ Str::limit($item->deskripsi, 80) }}</p>
                                             @if (strlen($item->deskripsi) > 80)
                                                 <button class="text-primary text-sm mt-1"
-                                                    onclick="openDetailModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}')">
+                                                    onclick="openDetailModal(
+                                                        {{ $item->id }}, 
+                                                        '{{ addslashes($item->nama) }}', 
+                                                        '{{ addslashes($item->deskripsi) }}', 
+                                                        '{{ number_format($item->harga, 0, ',', '.') }}', 
+                                                        '{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}', 
+                                                        '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}', 
+                                                        '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}', 
+                                                        '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}', 
+                                                        '{{ $item->status_pengerjaan }}', 
+                                                        '{{ $item->status_kerjasama }}', 
+                                                        {{ $item->progres }},
+                                                        '{{ $item->invoice ? 'Invoice #' . $item->invoice->id : '' }}'
+                                                    )">
                                                     Lihat selengkapnya
                                                 </button>
                                             @endif
@@ -727,109 +858,157 @@
         </div>
     </div>
 
-<!-- Modal Tambah Orderan -->
-<div id="tambahModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Tambah Project Baru</h3>
-                <button class="close-modal text-gray-800 hover:text-gray-500">
-                    <span class="material-icons-outlined">close</span>
-                </button>
+    <!-- ============================ -->
+    <!-- MODAL TAMBAH PROJECT -->
+    <!-- ============================ -->
+    <div id="tambahModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Tambah Project Baru</h3>
+                    <button class="close-modal text-gray-800 hover:text-gray-500">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
+                </div>
+                <form id="tambahForm" action="{{ route('admin.project.store') }}" method="POST">
+                    @csrf
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Invoice</label>
+                            <select name="invoice_id" id="tambahInvoice"
+                                class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                                required>
+                                <option value="">-- Pilih Invoice --</option>
+                                @foreach ($invoices as $invoice)
+                                    <option value="{{ $invoice->id }}" 
+                                            data-nama="{{ $invoice->judul ?? 'Project dari Invoice #' . $invoice->id }}"
+                                            data-deskripsi="{{ $invoice->deskripsi ?? '' }}" 
+                                            data-harga="{{ $invoice->total ?? 0 }}"
+                                            data-tanggal-mulai="{{ $invoice->tanggal_mulai ? $invoice->tanggal_mulai->format('Y-m-d') : '' }}"
+                                            data-tanggal-selesai="{{ $invoice->tanggal_selesai ? $invoice->tanggal_selesai->format('Y-m-d') : '' }}">
+                                        Invoice #{{ $invoice->id }} - {{ $invoice->judul ?? 'Tanpa Judul' }} (Rp {{ number_format($invoice->total ?? 0, 0, ',', '.') }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
+                            <input type="text" name="nama" id="tambahNama"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                                readonly required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                            <textarea name="deskripsi" id="tambahDeskripsi" rows="3"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                                readonly required></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
+                            <input type="number" name="harga" id="tambahHarga"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                                readonly required>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai Pengerjaan</label>
+                                <input type="date" name="tanggal_mulai_pengerjaan" id="tambahTanggalMulaiPengerjaan"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                                    required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai Pengerjaan</label>
+                                <input type="date" name="tanggal_selesai_pengerjaan" id="tambahTanggalSelesaiPengerjaan"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai Kerjasama</label>
+                                <input type="date" name="tanggal_mulai_kerjasama" id="tambahTanggalMulaiKerjasama"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai Kerjasama</label>
+                                <input type="date" name="tanggal_selesai_kerjasama" id="tambahTanggalSelesaiKerjasama"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Status Pengerjaan</label>
+                                <select name="status_pengerjaan" id="tambahStatusPengerjaan"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <option value="pending" selected>Pending</option>
+                                    <option value="dalam_pengerjaan">Dalam Pengerjaan</option>
+                                    <option value="selesai">Selesai</option>
+                                    <option value="dibatalkan">Dibatalkan</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Status Kerjasama</label>
+                                <select name="status_kerjasama" id="tambahStatusKerjasama"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <option value="aktif" selected>Aktif</option>
+                                    <option value="selesai">Selesai</option>
+                                    <option value="ditangguhkan">Ditangguhkan</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
+                            <input type="range" name="progres" id="tambahProgres" min="0" max="100" value="0"
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                oninput="document.getElementById('tambahProgresValue').textContent = this.value + '%'">
+                            <div class="flex justify-between items-center mt-1">
+                                <span class="text-sm text-gray-600">0%</span>
+                                <span id="tambahProgresValue" class="text-sm font-medium">0%</span>
+                                <span class="text-sm text-gray-600">100%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan</button>
+                    </div>
+                </form>
             </div>
-            <form id="tambahForm" action="{{ route('admin.project.store') }}" method="POST">
-                @csrf
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Layanan</label>
-                    <select name="layanan_id" id="tambahLayanan"
-                        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                        required>
-                        <option value="">-- Pilih Layanan --</option>
-                        @foreach ($layanans as $layanan)
-                            <option value="{{ $layanan->id }}" data-nama="{{ $layanan->nama_layanan }}"
-                                data-deskripsi="{{ $layanan->deskripsi }}" data-harga="{{ $layanan->harga }}">
-                                {{ $layanan->nama_layanan }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
-                    <input type="text" name="nama" id="tambahNama"
-                        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                        readonly required>
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                    <textarea name="deskripsi" id="tambahDeskripsi"
-                        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                        rows="3" readonly required></textarea>
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                    <input type="number" name="harga" id="tambahHarga"
-                        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                        readonly required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                    <input type="date" name="deadline" id="tambahDeadline"
-                        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                        required>
-                    @error('deadline')
-                        <span class="text-red-500 text-xs">{{ $message }}</span>
-                    @enderror
-                </div>
-                <!-- Hanya input hidden untuk status default -->
-                <input type="hidden" name="status" value="Pending">
-                
-                <div class="flex justify-end gap-2">
-                    <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan</button>
-                </div>
-            </form>
         </div>
     </div>
-</div>
 
-
-    <!-- HAPUS atau KOMENTARI bagian ini dari modal tambah -->
-    <!--
-<div class="mb-6">
-    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-    <select name="status" id="tambahStatus"
-        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-        required>
-        <option value="Pending">Pending</option>
-        <option value="Dalam Pengerjaan">Dalam Pengerjaan</option>
-        <option value="Selesai">Selesai</option>
-        <option value="Dibatalkan">Dibatalkan</option>
-    </select>
-    @error('status')
-    <span class="text-red-500 text-xs">{{ $message }}</span>
-@enderror
-</div>
--->
-
-
-    <!-- GANTI dengan input hidden untuk status default -->
-    <input type="hidden" name="status" value="Pending">
-
-    <!-- Modal Detail Orderan -->
+    <!-- ============================ -->
+    <!-- MODAL DETAIL PROJECT -->
+    <!-- ============================ -->
     <div id="detailModal"
         class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold text-gray-800">Detail Project</h3>
+                    <button class="close-modal text-gray-800 hover:text-gray-500">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
                 </div>
-                <div class="space-y-4">
+                <div class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">ID Project</h4>
                             <p class="text-base font-medium" id="detailId"></p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Invoice</h4>
+                            <p class="text-base font-medium" id="detailInvoice"></p>
                         </div>
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">Nama Project</h4>
@@ -840,12 +1019,28 @@
                             <p class="text-base font-medium" id="detailHarga"></p>
                         </div>
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-1">Deadline</h4>
-                            <p class="text-base font-medium" id="detailDeadline"></p>
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Status Pengerjaan</h4>
+                            <p class="text-base" id="detailStatusPengerjaan"></p>
                         </div>
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-1">Status</h4>
-                            <p id="detailStatus"></p>
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Status Kerjasama</h4>
+                            <p class="text-base" id="detailStatusKerjasama"></p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Tanggal Mulai Pengerjaan</h4>
+                            <p class="text-base font-medium" id="detailTanggalMulaiPengerjaan"></p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Tanggal Selesai Pengerjaan</h4>
+                            <p class="text-base font-medium" id="detailTanggalSelesaiPengerjaan"></p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Tanggal Mulai Kerjasama</h4>
+                            <p class="text-base font-medium" id="detailTanggalMulaiKerjasama"></p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Tanggal Selesai Kerjasama</h4>
+                            <p class="text-base font-medium" id="detailTanggalSelesaiKerjasama"></p>
                         </div>
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">Progres</h4>
@@ -859,7 +1054,7 @@
                     </div>
                     <div>
                         <h4 class="text-sm font-medium text-gray-500 mb-1">Deskripsi</h4>
-                        <p class="text-base" id="detailDeskripsi"></p>
+                        <p class="text-base whitespace-pre-wrap" id="detailDeskripsi"></p>
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 mt-6">
@@ -869,10 +1064,12 @@
         </div>
     </div>
 
-    <!-- Modal Edit Orderan - PASTIKAN ID SESUAI -->
+    <!-- ============================ -->
+    <!-- MODAL EDIT PROJECT -->
+    <!-- ============================ -->
     <div id="editModal"
         class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold text-gray-800">Edit Project</h3>
@@ -880,33 +1077,92 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="editForm" method="POST"> <!-- ID: editForm -->
+                <form id="editForm" method="POST">
                     @csrf
                     @method('PUT')
-                    <input type="hidden" name="id" id="editId"> <!-- ID: editId -->
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
-                        <input type="text" name="nama" id="editNama"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                            required> <!-- ID: editNama -->
+                    <input type="hidden" name="id" id="editId">
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
+                            <input type="text" name="nama" id="editNama"
+                                class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                                required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                            <textarea name="deskripsi" id="editDeskripsi" rows="3"
+                                class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                                required></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai Pengerjaan</label>
+                                <input type="date" name="tanggal_mulai_pengerjaan" id="editTanggalMulaiPengerjaan"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                                    required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai Pengerjaan</label>
+                                <input type="date" name="tanggal_selesai_pengerjaan" id="editTanggalSelesaiPengerjaan"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai Kerjasama</label>
+                                <input type="date" name="tanggal_mulai_kerjasama" id="editTanggalMulaiKerjasama"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai Kerjasama</label>
+                                <input type="date" name="tanggal_selesai_kerjasama" id="editTanggalSelesaiKerjasama"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Status Pengerjaan</label>
+                                <select name="status_pengerjaan" id="editStatusPengerjaan"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <option value="pending">Pending</option>
+                                    <option value="dalam_pengerjaan">Dalam Pengerjaan</option>
+                                    <option value="selesai">Selesai</option>
+                                    <option value="dibatalkan">Dibatalkan</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Status Kerjasama</label>
+                                <select name="status_kerjasama" id="editStatusKerjasama"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <option value="aktif">Aktif</option>
+                                    <option value="selesai">Selesai</option>
+                                    <option value="ditangguhkan">Ditangguhkan</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
+                            <input type="range" name="progres" id="editProgres" min="0" max="100"
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                oninput="document.getElementById('editProgresValue').textContent = this.value + '%'">
+                            <div class="flex justify-between items-center mt-1">
+                                <span class="text-sm text-gray-600">0%</span>
+                                <span id="editProgresValue" class="text-sm font-medium">0%</span>
+                                <span class="text-sm text-gray-600">100%</span>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea name="deskripsi" id="editDeskripsi" rows="3"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                            required></textarea> <!-- ID: editDeskripsi -->
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                        <input type="date" name="deadline" id="editDeadline"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-                            required> <!-- ID: editDeadline -->
-                    </div>
-
-                    <div class="flex justify-end gap-2">
+                    
+                    <div class="flex justify-end gap-2 mt-6">
                         <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
                         <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update</button>
                     </div>
@@ -915,7 +1171,9 @@
         </div>
     </div>
 
-    <!-- Modal Hapus Orderan -->
+    <!-- ============================ -->
+    <!-- MODAL HAPUS PROJECT -->
+    <!-- ============================ -->
     <div id="deleteModal"
         class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
@@ -945,7 +1203,9 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
+    <!-- ============================ -->
+    <!-- TOAST NOTIFICATION -->
+    <!-- ============================ -->
     <div id="toast"
         class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center">
         <span id="toastMessage" class="mr-2"></span>
@@ -975,75 +1235,99 @@
         </div>
     @endif
 
-<script>
-    // ============================
-    // GLOBAL FUNCTIONS
-    // ============================
-    
-    // Function to show toast notification (moved outside DOMContentLoaded)
-    function showToast(message, type = 'success') {
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toastMessage');
+    <script>
+        // ============================
+        // GLOBAL FUNCTIONS
+        // ============================
         
-        if (toast && toastMessage) {
-            toastMessage.textContent = message;
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
             
-            // Set warna berdasarkan type
-            if (type === 'success') {
-                toast.style.backgroundColor = '#10b981'; // green
-            } else if (type === 'error') {
-                toast.style.backgroundColor = '#ef4444'; // red
-            } else if (type === 'warning') {
-                toast.style.backgroundColor = '#f59e0b'; // yellow
+            if (toast && toastMessage) {
+                toastMessage.textContent = message;
+                
+                if (type === 'success') {
+                    toast.style.backgroundColor = '#10b981';
+                } else if (type === 'error') {
+                    toast.style.backgroundColor = '#ef4444';
+                } else if (type === 'warning') {
+                    toast.style.backgroundColor = '#f59e0b';
+                }
+                
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                
+                setTimeout(() => {
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
             }
-            
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            
-            // Auto hide after 3 seconds
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
         }
-    }
 
-    // ============================
-    // OPEN DETAIL MODAL
-    // ============================
-    function openDetailModal(id, nama, deskripsi, harga, deadline, progres, status) {
-        const detailId = document.getElementById('detailId');
-        const detailNama = document.getElementById('detailNama');
-        const detailDeskripsi = document.getElementById('detailDeskripsi');
-        const detailHarga = document.getElementById('detailHarga');
-        const detailDeadline = document.getElementById('detailDeadline');
-        const detailProgres = document.getElementById('detailProgres');
-        const detailStatus = document.getElementById('detailStatus');
-        const detailProgressBar = document.getElementById('detailProgressBar');
-        const detailModal = document.getElementById('detailModal');
-        
-        if (detailId && detailNama && detailDeskripsi && detailHarga && detailDeadline && 
-            detailProgres && detailStatus && detailProgressBar && detailModal) {
+        function getStatusPengerjaanLabel(status) {
+            const statusMap = {
+                'pending': 'Pending',
+                'dalam_pengerjaan': 'Dalam Pengerjaan',
+                'selesai': 'Selesai',
+                'dibatalkan': 'Dibatalkan'
+            };
+            return statusMap[status] || status;
+        }
+
+        function getStatusKerjasamaLabel(status) {
+            const statusMap = {
+                'aktif': 'Aktif',
+                'selesai': 'Selesai',
+                'ditangguhkan': 'Ditangguhkan'
+            };
+            return statusMap[status] || status;
+        }
+
+        function getStatusPengerjaanClass(status) {
+            return `status-${status.replace('_', '-')}`;
+        }
+
+        function getStatusKerjasamaClass(status) {
+            return `status-${status}`;
+        }
+
+        // ============================
+        // OPEN DETAIL MODAL
+        // ============================
+        function openDetailModal(id, nama, deskripsi, harga, tanggalMulaiPengerjaan, tanggalSelesaiPengerjaan, 
+                                tanggalMulaiKerjasama, tanggalSelesaiKerjasama, statusPengerjaan, statusKerjasama, progres, invoice) {
             
-            detailId.textContent = '#' + id;
-            detailNama.textContent = nama;
-            detailDeskripsi.textContent = deskripsi;
-            detailHarga.textContent = harga;
-            detailDeadline.textContent = deadline;
-            detailProgres.textContent = progres + '%';
-
-            // Set status badge
-            let statusClass = '';
-            if (status === 'Pending') {
-                statusClass = 'status-todo';
-            } else if (status === 'Dalam Pengerjaan') {
-                statusClass = 'status-progress';
-            } else if (status === 'Selesai') {
-                statusClass = 'status-done';
-            } else if (status === 'Dibatalkan') {
-                statusClass = 'status-todo';
+            const detailModal = document.getElementById('detailModal');
+            if (!detailModal) {
+                console.error('Detail modal not found');
+                return;
             }
-            detailStatus.innerHTML = `<span class="status-badge ${statusClass}">${status}</span>`;
-
+            
+            // Set basic info
+            document.getElementById('detailId').textContent = '#' + id;
+            document.getElementById('detailNama').textContent = nama;
+            document.getElementById('detailDeskripsi').textContent = deskripsi;
+            document.getElementById('detailHarga').textContent = harga;
+            document.getElementById('detailInvoice').textContent = invoice || '-';
+            document.getElementById('detailTanggalMulaiPengerjaan').textContent = tanggalMulaiPengerjaan;
+            document.getElementById('detailTanggalSelesaiPengerjaan').textContent = tanggalSelesaiPengerjaan || '-';
+            document.getElementById('detailTanggalMulaiKerjasama').textContent = tanggalMulaiKerjasama || '-';
+            document.getElementById('detailTanggalSelesaiKerjasama').textContent = tanggalSelesaiKerjasama || '-';
+            document.getElementById('detailProgres').textContent = progres + '%';
+            
+            // Set status pengerjaan badge
+            const statusPengerjaanElement = document.getElementById('detailStatusPengerjaan');
+            const pengerjaanClass = getStatusPengerjaanClass(statusPengerjaan);
+            const pengerjaanLabel = getStatusPengerjaanLabel(statusPengerjaan);
+            statusPengerjaanElement.innerHTML = `<span class="status-badge ${pengerjaanClass}">${pengerjaanLabel}</span>`;
+            
+            // Set status kerjasama badge
+            const statusKerjasamaElement = document.getElementById('detailStatusKerjasama');
+            const kerjasamaClass = getStatusKerjasamaClass(statusKerjasama);
+            const kerjasamaLabel = getStatusKerjasamaLabel(statusKerjasama);
+            statusKerjasamaElement.innerHTML = `<span class="status-badge ${kerjasamaClass}">${kerjasamaLabel}</span>`;
+            
             // Set progress bar
+            const progressBar = document.getElementById('detailProgressBar');
             let progressColor = '';
             if (progres < 50) {
                 progressColor = 'bg-red-500';
@@ -1052,348 +1336,388 @@
             } else {
                 progressColor = 'bg-green-500';
             }
-            detailProgressBar.className = `progress-fill ${progressColor}`;
-            detailProgressBar.style.width = progres + '%';
-
-            detailModal.classList.remove('hidden');
-        } else {
-            console.error('One or more detail modal elements not found');
-            showToast('Error: Detail modal tidak ditemukan', 'error');
-        }
-    }
-
-    // ============================
-    // OPEN EDIT MODAL
-    // ============================
-    function openEditModal(id, nama, deskripsi, harga, deadline, progres, status) {
-        console.log('openEditModal called with:', { id, nama, harga, deadline });
-        
-        const editId = document.getElementById('editId');
-        const editNama = document.getElementById('editNama');
-        const editDeskripsi = document.getElementById('editDeskripsi');
-        const editDeadline = document.getElementById('editDeadline');
-        const editForm = document.getElementById('editForm');
-        const editModal = document.getElementById('editModal');
-        
-        console.log('Elements found:', {
-            editId: !!editId,
-            editNama: !!editNama,
-            editDeskripsi: !!editDeskripsi,
-            editDeadline: !!editDeadline,
-            editForm: !!editForm,
-            editModal: !!editModal
-        });
-        
-        if (editId && editNama && editDeskripsi && editDeadline && editForm && editModal) {
-            editId.value = id;
-            editNama.value = nama;
-            editDeskripsi.value = deskripsi;
-            editDeadline.value = deadline;
+            progressBar.className = `progress-fill ${progressColor}`;
+            progressBar.style.width = progres + '%';
             
-            // Update form action dengan route yang benar
+            detailModal.classList.remove('hidden');
+        }
+
+        // ============================
+        // OPEN EDIT MODAL
+        // ============================
+        function openEditModal(id, nama, deskripsi, tanggalMulaiPengerjaan, tanggalSelesaiPengerjaan,
+                              tanggalMulaiKerjasama, tanggalSelesaiKerjasama, statusPengerjaan, statusKerjasama, progres) {
+            
+            const editModal = document.getElementById('editModal');
+            if (!editModal) {
+                console.error('Edit modal not found');
+                return;
+            }
+            
+            // Set form values
+            document.getElementById('editId').value = id;
+            document.getElementById('editNama').value = nama;
+            document.getElementById('editDeskripsi').value = deskripsi;
+            document.getElementById('editTanggalMulaiPengerjaan').value = tanggalMulaiPengerjaan;
+            document.getElementById('editTanggalSelesaiPengerjaan').value = tanggalSelesaiPengerjaan || '';
+            document.getElementById('editTanggalMulaiKerjasama').value = tanggalMulaiKerjasama || '';
+            document.getElementById('editTanggalSelesaiKerjasama').value = tanggalSelesaiKerjasama || '';
+            document.getElementById('editStatusPengerjaan').value = statusPengerjaan || 'pending';
+            document.getElementById('editStatusKerjasama').value = statusKerjasama || 'aktif';
+            document.getElementById('editProgres').value = progres;
+            document.getElementById('editProgresValue').textContent = progres + '%';
+            
+            // Set form action
+            const editForm = document.getElementById('editForm');
             editForm.action = `/admin/project/${id}`;
             
             editModal.classList.remove('hidden');
-            console.log('Edit modal opened successfully');
-        } else {
-            console.error('One or more edit form elements not found');
-            showToast('Error: Form edit tidak ditemukan', 'error');
         }
-    }
 
-    // ============================
-    // OPEN DELETE MODAL
-    // ============================
-    function openDeleteModal(id, nama) {
-        const deleteId = document.getElementById('deleteId');
-        const deleteNama = document.getElementById('deleteNama');
-        const deleteForm = document.getElementById('deleteForm');
-        const deleteModal = document.getElementById('deleteModal');
-        
-        if (deleteId && deleteNama && deleteForm && deleteModal) {
-            deleteId.value = id;
-            deleteNama.textContent = nama;
+        // ============================
+        // OPEN DELETE MODAL
+        // ============================
+        function openDeleteModal(id, nama) {
+            const deleteModal = document.getElementById('deleteModal');
+            if (!deleteModal) {
+                console.error('Delete modal not found');
+                return;
+            }
             
-            // Update form action dengan route yang benar
+            document.getElementById('deleteId').value = id;
+            document.getElementById('deleteNama').textContent = nama;
+            
+            const deleteForm = document.getElementById('deleteForm');
             deleteForm.action = `/admin/project/${id}`;
             
             deleteModal.classList.remove('hidden');
-        } else {
-            console.error('One or more delete form elements not found');
-            showToast('Error: Form delete tidak ditemukan', 'error');
         }
-    }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM loaded - Data Project');
-        
-        // Debug: Cek elemen
-        console.log('editForm element:', document.getElementById('editForm'));
-        console.log('editModal element:', document.getElementById('editModal'));
-        
-        const tambahModal = document.getElementById('tambahModal');
-        const editModal = document.getElementById('editModal');
-        const detailModal = document.getElementById('detailModal');
-        const deleteModal = document.getElementById('deleteModal');
+        // ============================
+        // DOM READY
+        // ============================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded - Data Project');
+            
+            // Elements
+            const tambahModal = document.getElementById('tambahModal');
+            const editModal = document.getElementById('editModal');
+            const detailModal = document.getElementById('detailModal');
+            const deleteModal = document.getElementById('deleteModal');
+            
+            const tambahForm = document.getElementById('tambahForm');
+            const editForm = document.getElementById('editForm');
+            const deleteForm = document.getElementById('deleteForm');
+            
+            const tambahProjectBtn = document.getElementById('tambahProjectBtn');
+            const closeModals = document.querySelectorAll('.close-modal');
+            
+            const tambahInvoice = document.getElementById('tambahInvoice');
+            const tambahNama = document.getElementById('tambahNama');
+            const tambahDeskripsi = document.getElementById('tambahDeskripsi');
+            const tambahHarga = document.getElementById('tambahHarga');
+            const tambahTanggalMulaiKerjasama = document.getElementById('tambahTanggalMulaiKerjasama');
+            const tambahTanggalSelesaiKerjasama = document.getElementById('tambahTanggalSelesaiKerjasama');
+            
+            const toast = document.getElementById('toast');
+            const closeToastBtn = document.getElementById('closeToast');
 
-        const tambahForm = document.getElementById('tambahForm');
-        const editForm = document.getElementById('editForm');
-        const deleteForm = document.getElementById('deleteForm');
+            // Show tambah modal
+            if (tambahProjectBtn) {
+                tambahProjectBtn.addEventListener('click', function() {
+                    if (tambahModal) {
+                        tambahModal.classList.remove('hidden');
+                        if (tambahForm) {
+                            tambahForm.reset();
+                            
+                            // Set default values
+                            const today = new Date().toISOString().split('T')[0];
+                            document.getElementById('tambahTanggalMulaiPengerjaan').value = today;
+                            document.getElementById('tambahStatusPengerjaan').value = 'pending';
+                            document.getElementById('tambahStatusKerjasama').value = 'aktif';
+                            document.getElementById('tambahProgres').value = 0;
+                            document.getElementById('tambahProgresValue').textContent = '0%';
+                        }
+                        
+                        // Clear autofill fields
+                        if (tambahInvoice) tambahInvoice.value = '';
+                        if (tambahNama) tambahNama.value = '';
+                        if (tambahDeskripsi) tambahDeskripsi.value = '';
+                        if (tambahHarga) tambahHarga.value = '';
+                        if (tambahTanggalMulaiKerjasama) tambahTanggalMulaiKerjasama.value = '';
+                        if (tambahTanggalSelesaiKerjasama) tambahTanggalSelesaiKerjasama.value = '';
+                    }
+                });
+            }
 
-        const tambahProjectBtn = document.getElementById('tambahProjectBtn');
-        const closeModals = document.querySelectorAll('.close-modal');
+            // Auto-fill tambah form based on invoice selection
+            if (tambahInvoice) {
+                tambahInvoice.addEventListener('change', function() {
+                    const selected = this.options[this.selectedIndex];
+                    
+                    if (selected.value) {
+                        // Mengambil data dari atribut data
+                        const nama = selected.getAttribute('data-nama') || '';
+                        const deskripsi = selected.getAttribute('data-deskripsi') || '';
+                        const harga = selected.getAttribute('data-harga') || '';
+                        const tanggalMulai = selected.getAttribute('data-tanggal-mulai') || '';
+                        const tanggalSelesai = selected.getAttribute('data-tanggal-selesai') || '';
+                        
+                        if (tambahNama) tambahNama.value = nama;
+                        if (tambahDeskripsi) tambahDeskripsi.value = deskripsi;
+                        if (tambahHarga) tambahHarga.value = harga;
+                        if (tambahTanggalMulaiKerjasama && tanggalMulai) {
+                            tambahTanggalMulaiKerjasama.value = tanggalMulai;
+                        }
+                        if (tambahTanggalSelesaiKerjasama && tanggalSelesai) {
+                            tambahTanggalSelesaiKerjasama.value = tanggalSelesai;
+                        }
+                        
+                        // Atau gunakan AJAX untuk mengambil data lengkap
+                        fetch(`/admin/project/invoice/${selected.value}/details`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success && data.data) {
+                                    if (tambahNama && data.data.nama) tambahNama.value = data.data.nama;
+                                    if (tambahDeskripsi && data.data.deskripsi) tambahDeskripsi.value = data.data.deskripsi;
+                                    if (tambahHarga && data.data.harga) tambahHarga.value = data.data.harga;
+                                    if (tambahTanggalMulaiKerjasama && data.data.tanggal_mulai_kerjasama) {
+                                        tambahTanggalMulaiKerjasama.value = data.data.tanggal_mulai_kerjasama;
+                                    }
+                                    if (tambahTanggalSelesaiKerjasama && data.data.tanggal_selesai_kerjasama) {
+                                        tambahTanggalSelesaiKerjasama.value = data.data.tanggal_selesai_kerjasama;
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching invoice details:', error);
+                            });
+                    } else {
+                        // Kosongkan jika tidak ada invoice yang dipilih
+                        if (tambahNama) tambahNama.value = '';
+                        if (tambahDeskripsi) tambahDeskripsi.value = '';
+                        if (tambahHarga) tambahHarga.value = '';
+                        if (tambahTanggalMulaiKerjasama) tambahTanggalMulaiKerjasama.value = '';
+                        if (tambahTanggalSelesaiKerjasama) tambahTanggalSelesaiKerjasama.value = '';
+                    }
+                });
+            }
 
-        const tambahLayanan = document.getElementById('tambahLayanan');
-        const tambahNama = document.getElementById('tambahNama');
-        const tambahDeskripsi = document.getElementById('tambahDeskripsi');
-        const tambahHarga = document.getElementById('tambahHarga');
-
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toastMessage');
-        const closeToastBtn = document.getElementById('closeToast');
-
-        // Show tambah modal
-        if (tambahProjectBtn) {
-            tambahProjectBtn.addEventListener('click', function() {
-                tambahModal.classList.remove('hidden');
-                if (tambahForm) tambahForm.reset();
-                
-                // kosongkan field autofill
-                if (tambahLayanan) tambahLayanan.value = '';
-                if (tambahNama) tambahNama.value = '';
-                if (tambahDeskripsi) tambahDeskripsi.value = '';
-                if (tambahHarga) tambahHarga.value = '';
+            // Close modals
+            closeModals.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    [tambahModal, editModal, detailModal, deleteModal].forEach(modal => {
+                        if (modal) modal.classList.add('hidden');
+                    });
+                });
             });
-        }
-
-        // Auto-fill tambah form based on layanan selection
-        if (tambahLayanan) {
-            tambahLayanan.addEventListener('change', function() {
-                const selected = this.options[this.selectedIndex];
-                
-                if (tambahNama) tambahNama.value = selected.getAttribute('data-nama') || '';
-                if (tambahDeskripsi) tambahDeskripsi.value = selected.getAttribute('data-deskripsi') || '';
-                if (tambahHarga) tambahHarga.value = selected.getAttribute('data-harga') || '';
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === tambahModal) tambahModal.classList.add('hidden');
+                if (event.target === editModal) editModal.classList.add('hidden');
+                if (event.target === detailModal) detailModal.classList.add('hidden');
+                if (event.target === deleteModal) deleteModal.classList.add('hidden');
             });
-        }
+            
+            // Handle tambah form submission with AJAX
+            if (tambahForm) {
+                tambahForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(tambahForm);
+                    
+                    fetch(tambahForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(async response => {
+                        const responseText = await response.text();
+                        
+                        try {
+                            const data = JSON.parse(responseText);
+                            
+                            if (!response.ok) {
+                                if (response.status === 422) {
+                                    if (data.errors) {
+                                        const firstError = Object.values(data.errors)[0][0];
+                                        showToast(firstError, 'error');
+                                    } else {
+                                        showToast(data.message || 'Validasi gagal', 'error');
+                                    }
+                                } else {
+                                    showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
+                                }
+                                throw data;
+                            }
+                            
+                            return data;
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showToast('Terjadi kesalahan server. Silakan coba lagi.', 'error');
+                            throw new Error('Invalid JSON response');
+                        }
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            tambahModal.classList.add('hidden');
+                            tambahForm.reset();
+                            
+                            // Reload page to show new data
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
+            }
+            
+            // Handle edit form submission with AJAX
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(editForm);
+                    const id = document.getElementById('editId').value;
+                    
+                    fetch(`/admin/project/${id}`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(async response => {
+                        const responseText = await response.text();
+                        
+                        try {
+                            const data = JSON.parse(responseText);
+                            
+                            if (!response.ok) {
+                                if (response.status === 422) {
+                                    if (data.errors) {
+                                        const firstError = Object.values(data.errors)[0][0];
+                                        showToast(firstError, 'error');
+                                    } else {
+                                        showToast(data.message || 'Validasi gagal', 'error');
+                                    }
+                                } else {
+                                    showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
+                                }
+                                throw data;
+                            }
+                            
+                            return data;
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showToast('Terjadi kesalahan server. Silakan coba lagi.', 'error');
+                            throw new Error('Invalid JSON response');
+                        }
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            editModal.classList.add('hidden');
+                            // Reload page to show updated data
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
+            }
+            
+            // Handle delete form submission with AJAX
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
 
-        // Close modals
-        closeModals.forEach(btn => {
-            btn.addEventListener('click', function() {
-                if (tambahModal) tambahModal.classList.add('hidden');
-                if (editModal) editModal.classList.add('hidden');
-                if (detailModal) detailModal.classList.add('hidden');
-                if (deleteModal) deleteModal.classList.add('hidden');
+                    const formData = new FormData(deleteForm);
+                    const id = document.getElementById('deleteId').value;
+
+                    fetch(`/admin/project/${id}`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(async (response) => {
+                        const responseText = await response.text();
+                        
+                        try {
+                            const data = JSON.parse(responseText);
+                            
+                            if (!response.ok) {
+                                throw data;
+                            }
+                            
+                            return data;
+                        } catch (error) {
+                            console.error('Invalid JSON response:', responseText);
+                            throw new Error('Invalid server response');
+                        }
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            deleteModal.classList.add('hidden');
+
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        
+                        if (error.errors) {
+                            const firstError = Object.values(error.errors)[0][0];
+                            showToast(firstError, 'error');
+                        } else {
+                            showToast(error.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
+                        }
+                    });
+                });
+            }
+            
+            // Close toast notification
+            if (closeToastBtn) {
+                closeToastBtn.addEventListener('click', function() {
+                    if (toast) toast.classList.add('translate-y-20', 'opacity-0');
+                });
+            }
+            
+            // Auto-hide success/error toasts after 5 seconds
+            const autoHideToasts = document.querySelectorAll('#successToast, #errorToast');
+            autoHideToasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 5000);
             });
         });
-        
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            if (event.target === tambahModal) {
-                tambahModal.classList.add('hidden');
-            }
-            if (event.target === editModal) {
-                editModal.classList.add('hidden');
-            }
-            if (event.target === detailModal) {
-                detailModal.classList.add('hidden');
-            }
-            if (event.target === deleteModal) {
-                deleteModal.classList.add('hidden');
-            }
-        });
-        
-        // Handle tambah form submission with AJAX
-        if (tambahForm) {
-            tambahForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(tambahForm);
-                
-                fetch(tambahForm.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(async response => {
-                    const responseText = await response.text();
-                    
-                    try {
-                        const data = JSON.parse(responseText);
-                        
-                        if (!response.ok) {
-                            if (response.status === 422) {
-                                if (data.errors) {
-                                    const firstError = Object.values(data.errors)[0][0];
-                                    showToast(firstError, 'error');
-                                } else {
-                                    showToast(data.message || 'Validasi gagal', 'error');
-                                }
-                            } else {
-                                showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
-                            }
-                            throw data;
-                        }
-                        
-                        return data;
-                    } catch (error) {
-                        console.error('Error:', error);
-                        showToast('Terjadi kesalahan server. Silakan coba lagi.', 'error');
-                        throw new Error('Invalid JSON response');
-                    }
-                })
-                .then(data => {
-                    if (data.success) {
-                        showToast(data.message, 'success');
-                        tambahModal.classList.add('hidden');
-                        tambahForm.reset();
-                        
-                        // Reload page to show new data
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            });
-        }
-        
-        // Handle edit form submission with AJAX
-        if (editForm) {
-            editForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(editForm);
-                const id = document.getElementById('editId').value;
-                
-                fetch(`/admin/project/${id}`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(async response => {
-                    const responseText = await response.text();
-                    
-                    try {
-                        const data = JSON.parse(responseText);
-                        
-                        if (!response.ok) {
-                            if (response.status === 422) {
-                                if (data.errors) {
-                                    const firstError = Object.values(data.errors)[0][0];
-                                    showToast(firstError, 'error');
-                                } else {
-                                    showToast(data.message || 'Validasi gagal', 'error');
-                                }
-                            } else {
-                                showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
-                            }
-                            throw data;
-                        }
-                        
-                        return data;
-                    } catch (error) {
-                        console.error('Error:', error);
-                        showToast('Terjadi kesalahan server. Silakan coba lagi.', 'error');
-                        throw new Error('Invalid JSON response');
-                    }
-                })
-                .then(data => {
-                    if (data.success) {
-                        showToast(data.message, 'success');
-                        editModal.classList.add('hidden');
-                        // Reload page to show updated data
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            });
-        }
-        
-        // Handle delete form submission with AJAX
-        if (deleteForm) {
-            deleteForm.addEventListener('submit', function(e) {
-                e.preventDefault();
+    </script>
 
-                const formData = new FormData(deleteForm);
-                const id = document.getElementById('deleteId').value;
-
-                fetch(`/admin/project/${id}`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(async (response) => {
-                    const responseText = await response.text();
-                    
-                    try {
-                        const data = JSON.parse(responseText);
-                        
-                        if (!response.ok) {
-                            throw data;
-                        }
-                        
-                        return data;
-                    } catch (error) {
-                        console.error('Invalid JSON response:', responseText);
-                        throw new Error('Invalid server response');
-                    }
-                })
-                .then(data => {
-                    if (data.success) {
-                        showToast(data.message, 'success');
-                        deleteModal.classList.add('hidden');
-
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    
-                    if (error.errors) {
-                        const firstError = Object.values(error.errors)[0][0];
-                        showToast(firstError, 'error');
-                    } else {
-                        showToast(error.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
-                    }
-                });
-            });
-        }
-        
-        // Close toast notification
-        if (closeToastBtn) {
-            closeToastBtn.addEventListener('click', function() {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            });
-        }
-    });
-</script>
-
-    <!-- Add CSRF token meta tag -->
+    <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </body>
-
 </html>

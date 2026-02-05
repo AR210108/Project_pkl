@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('kwitansis', function (Blueprint $table) {
             $table->id();
+            $table->string('kwitansi_no')->unique(); // ✅ TAMBAHKAN INI
             $table->string('nama_perusahaan');
             $table->string('nomor_order');
             $table->date('tanggal');
@@ -19,11 +20,13 @@ return new class extends Migration
             $table->decimal('sub_total', 15, 2)->default(0);
             $table->decimal('fee_maintenance', 15, 2)->default(0);
             $table->decimal('total', 15, 2)->default(0);
-            $table->enum('status', ['Pembayawan Awal', 'Lunas'])->default('Pembayawan Awal');
-            
+            $table->enum('status', ['Pembayaran Awal', 'Lunas'])->default('Pembayaran Awal');
+            $table->string('bank')->nullable(); // ✅ Ditambahkan
+            $table->string('no_rekening')->nullable(); // ✅ Ditambahkan
+
             // Foreign key ke tabel invoices
             $table->foreignId('invoice_id')->nullable()->constrained('invoices');
-            
+
             // Timestamps
             $table->timestamps();
         });

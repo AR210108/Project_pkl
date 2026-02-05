@@ -9,6 +9,7 @@ use App\Models\Pengumuman;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\Absensi;
+use App\Models\Project;
 use App\Models\Task;
 
 class AdminController extends Controller
@@ -19,6 +20,7 @@ class AdminController extends Controller
         $jumlahKaryawan = User::where('role', 'karyawan')->count();
         $jumlahUser = User::count();
         $jumlahLayanan = Layanan::count();
+        $jumlahProject = Project::count();
         
         // Meeting notes
         $catatanRapat = CatatanRapat::with(['peserta', 'penugasan'])
@@ -56,6 +58,7 @@ class AdminController extends Controller
             'jumlahKaryawan',
             'jumlahUser',
             'jumlahLayanan',
+            'jumlahProject',
             'catatanRapat',
             'pengumumanTerbaru',
             'events',

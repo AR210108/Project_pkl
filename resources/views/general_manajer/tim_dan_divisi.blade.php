@@ -721,35 +721,6 @@
                                     placeholder="Cari nama tim atau divisi..." type="text" />
                             </div>
                             <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                                <div class="relative">
-                                    <button id="filterTimBtn"
-                                        class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
-                                        <span class="material-icons-outlined text-sm">filter_list</span>
-                                        Filter
-                                    </button>
-                                    <div id="filterTimDropdown" class="filter-dropdown">
-                                        <div class="filter-option">
-                                            <input type="checkbox" id="filterTimAll" value="all" checked>
-                                            <label for="filterTimAll">Semua Divisi</label>
-                                        </div>
-                                        <div class="filter-option">
-                                            <input type="checkbox" id="filterTimTI" value="1">
-                                            <label for="filterTimTI">Teknologi Informasi</label>
-                                        </div>
-                                        <div class="filter-option">
-                                            <input type="checkbox" id="filterTimSDM" value="2">
-                                            <label for="filterTimSDM">Sumber Daya Manusia</label>
-                                        </div>
-                                        <div class="filter-option">
-                                            <input type="checkbox" id="filterTimPemasaran" value="3">
-                                            <label for="filterTimPemasaran">Pemasaran</label>
-                                        </div>
-                                        <div class="filter-actions">
-                                            <button id="applyTimFilter" class="filter-apply">Terapkan</button>
-                                            <button id="resetTimFilter" class="filter-reset">Reset</button>
-                                        </div>
-                                    </div>
-                                </div>
                                 <button id="tambahTimBtn"
                                     class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
                                     <span class="material-icons-outlined">add</span>
