@@ -813,7 +813,6 @@
                                             <th style="min-width: 200px;">Email</th>
                                             <th style="min-width: 150px;">Role</th>
                                             <th style="min-width: 150px;">Divisi</th>
-                                            <th style="min-width: 150px;">Gaji</th>
                                             <th style="min-width: 250px;">Alamat</th>
                                             <th style="min-width: 150px;">Kontak</th>
                                             <th style="min-width: 100px;">Foto</th>
@@ -831,7 +830,6 @@
                                                 <tr class="karyawan-row" data-id="{{ $item->id }}"
                                                     data-nama="{{ $item->nama }}" data-email="{{ $item->email }}"
                                                     data-role="{{ $item->role }}" data-divisi="{{ $item->divisi }}"
-                                                    data-gaji="{{ $item->gaji ?? 'Belum diatur' }}"
                                                     data-alamat="{{ $item->alamat }}" data-kontak="{{ $item->kontak }}"
                                                     data-foto="{{ $item->foto ?? '' }}">
                                                     <td style="min-width: 60px;">{{ $no++ }}</td>
@@ -875,23 +873,6 @@
                                                         </span>
                                                     </td>
                                                     <td style="min-width: 150px;">{{ $item->divisi ?? '-' }}</td>
-                                                    <td style="min-width: 150px;">
-                                                        @if ($item->gaji)
-                                                            <div class="flex items-center justify-between">
-                                                                <span>{{ $item->gaji }}</span>
-                                                                @if(!$isFinance)
-                                                                    <span class="material-icons-outlined text-gray-400 text-sm ml-2" title="Hanya finance yang bisa mengedit">lock</span>
-                                                                @endif
-                                                            </div>
-                                                        @else
-                                                            <span class="text-gray-500 italic">Belum diatur</span>
-                                                            @if(!$isFinance)
-                                                                <div class="text-xs text-gray-500 mt-1">
-                                                                    Hubungi finance untuk pengaturan gaji
-                                                                </div>
-                                                            @endif
-                                                        @endif
-                                                    </td>
                                                     <td style="min-width: 250px;">{{ $item->alamat }}</td>
                                                     <td style="min-width: 150px;">{{ $item->kontak }}</td>
                                                     <td style="min-width: 100px;">

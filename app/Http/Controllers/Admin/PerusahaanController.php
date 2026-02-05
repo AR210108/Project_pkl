@@ -161,7 +161,7 @@ class PerusahaanController extends Controller
 {
     try {
         $perusahaanList = Perusahaan::orderBy('nama_perusahaan', 'asc')
-            ->get(['id', 'nama_perusahaan', 'klien', 'alamat', 'jumlah_kerjasama']);
+            ->get(['id', 'nama_perusahaan', 'klien', 'alamat', 'kontak']);
 
         return response()->json([
             'success' => true,

@@ -1271,64 +1271,64 @@
         </div>
     </div>
 
-    <!-- Modal Edit Layanan -->
-    <div id="editLayananModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Layanan</h3>
-                    <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form method="POST" action="{{ route('admin.layanan.update', '') }}" id="editLayananForm" class="space-y-4" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" id="editId" name="id">
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
-                            <input type="text" id="editNamaLayanan" name="nama_layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama layanan" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">HPP (Harga Pokok)</label>
-                            <input type="number" id="editHpp" name="hpp" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan HPP" min="0">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga Jual</label>
-                            <input type="number" id="editHarga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan harga jual" min="0">
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi layanan" required></textarea>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
-                        <div class="image-upload-container" id="editFotoContainer">
-                            <img src="" alt="Preview" class="image-preview" id="editFotoPreview">
-                            <div class="upload-placeholder">
-                                <span class="material-icons-outlined upload-icon">cloud_upload</span>
-                                <p class="upload-text">Klik untuk mengunggah foto</p>
-                                <p class="text-xs text-gray-400">JPG, PNG, GIF (Maks. 2MB)</p>
-                            </div>
-                            <button type="button" class="remove-image" id="editRemoveFoto">
-                                <span class="material-icons-outlined text-sm">close</span>
-                            </button>
-                        </div>
-                        <input type="file" name="foto" id="editFotoInput" class="hidden" accept="image/*">
-                        <input type="hidden" id="editCurrentFoto" name="current_foto">
-                    </div>
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" id="batalEditBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Data</button>
-                    </div>
-                </form>
+<!-- Modal Edit Layanan -->
+<div id="editLayananModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Edit Layanan</h3>
+                <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
+                    <span class="material-icons-outlined">close</span>
+                </button>
             </div>
+            <form method="POST" id="editLayananForm" class="space-y-4" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <input type="hidden" id="editId" name="id">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
+                        <input type="text" id="editNamaLayanan" name="nama_layanan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan nama layanan" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">HPP (Harga Pokok)</label>
+                        <input type="number" id="editHpp" name="hpp" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan HPP" min="0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Harga Jual</label>
+                        <input type="number" id="editHarga" name="harga" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan harga jual" min="0">
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                    <textarea id="editDeskripsi" name="deskripsi" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Masukkan deskripsi layanan" required></textarea>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
+                    <div class="image-upload-container" id="editFotoContainer">
+                        <img src="" alt="Preview" class="image-preview" id="editFotoPreview">
+                        <div class="upload-placeholder">
+                            <span class="material-icons-outlined upload-icon">cloud_upload</span>
+                            <p class="upload-text">Klik untuk mengunggah foto</p>
+                            <p class="text-xs text-gray-400">JPG, PNG, GIF (Maks. 2MB)</p>
+                        </div>
+                        <button type="button" class="remove-image" id="editRemoveFoto">
+                            <span class="material-icons-outlined text-sm">close</span>
+                        </button>
+                    </div>
+                    <input type="file" name="foto" id="editFotoInput" class="hidden" accept="image/*">
+                    <input type="hidden" id="editCurrentFoto" name="current_foto">
+                </div>
+                <div class="flex justify-end gap-2 mt-6">
+                    <button type="button" id="batalEditBtn" class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
+                    <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update Data</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
     <!-- Modal Delete Konfirmasi -->
     <div id="deleteModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
@@ -1851,39 +1851,106 @@
             });
         });
 
-        // ============================
-        // HANDLE EDIT BUTTON (UPDATED FOR HPP)
-        // ============================
-        document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                // SET VALUE
-                document.getElementById('editId').value = button.dataset.id;
-                document.getElementById('editNamaLayanan').value = button.dataset.nama;
-                document.getElementById('editDeskripsi').value = button.dataset.deskripsi;
-                document.getElementById('editHarga').value = button.dataset.harga;
-                document.getElementById('editHpp').value = button.dataset.hpp;
-                document.getElementById('editCurrentFoto').value = button.dataset.foto;
-                
-                // SET FOTO
-                if (button.dataset.foto) {
-                    document.getElementById('editFotoPreview').src = `/storage/${button.dataset.foto}`;
-                    document.getElementById('editFotoContainer').classList.add('has-image');
-                } else {
-                    document.getElementById('editFotoPreview').src = '';
-                    document.getElementById('editFotoContainer').classList.remove('has-image');
-                }
+// ============================
+// HANDLE EDIT BUTTON (UPDATED FOR HPP) - FIXED
+// ============================
+document.querySelectorAll('.edit-btn, .mobile-card-action-btn.edit').forEach(button => {
+    button.addEventListener('click', () => {
+        // SET VALUE
+        document.getElementById('editId').value = button.dataset.id;
+        document.getElementById('editNamaLayanan').value = button.dataset.nama;
+        document.getElementById('editDeskripsi').value = button.dataset.deskripsi;
+        document.getElementById('editHarga').value = button.dataset.harga;
+        document.getElementById('editHpp').value = button.dataset.hpp;
+        document.getElementById('editCurrentFoto').value = button.dataset.foto;
+        
+        // SET FOTO PREVIEW
+        if (button.dataset.foto) {
+            const fotoUrl = `/storage/${button.dataset.foto}`;
+            document.getElementById('editFotoPreview').src = fotoUrl;
+            document.getElementById('editFotoContainer').classList.add('has-image');
+        } else {
+            document.getElementById('editFotoPreview').src = '';
+            document.getElementById('editFotoContainer').classList.remove('has-image');
+        }
 
-                // SET ACTION URL DINAMIS
-                editLayananForm.action = `/admin/layanan/${button.dataset.id}`;
+        // SET ACTION URL DINAMIS - PERBAIKAN UTAMA
+        const editForm = document.getElementById('editLayananForm');
+        const baseUrl = window.location.origin;
+        editForm.action = `${baseUrl}/admin/layanan/${button.dataset.id}`;
 
-                editLayananModal.classList.remove('hidden');
-            });
+        editLayananModal.classList.remove('hidden');
+    });
+});
+
+// ============================
+// SUBMIT FORM EDIT - FIXED VERSION
+// ============================
+editLayananForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const id = document.getElementById('editId').value;
+    const formData = new FormData(this);
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.innerHTML;
+    
+    // Tampilkan loading state
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span> Memperbarui...';
+
+    try {
+        // Debug: Tampilkan data FormData
+        console.log('=== DEBUG EDIT DATA ===');
+        console.log('ID:', id);
+        console.log('URL:', this.action);
+        for (let [key, value] of formData.entries()) {
+            console.log(key + ':', value);
+        }
+
+        const response = await fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
         });
+
+        console.log('Response status:', response.status);
+        
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        if (data.success) {
+            editLayananModal.classList.add('hidden');
+            resetEditForm();
+            showMinimalPopup('Berhasil', data.message || 'Layanan berhasil diperbarui', 'success');
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showMinimalPopup('Gagal', data.message || 'Gagal memperbarui layanan.', 'error');
+        }
+    } catch (error) {
+        console.error('Error Detail:', error);
+        console.error('Error stack:', error.stack);
+        
+        let errorMessage = 'Terjadi kesalahan saat memperbarui data.';
+        if (error.message.includes('NetworkError')) {
+            errorMessage = 'Koneksi jaringan bermasalah. Periksa koneksi internet Anda.';
+        } else if (error.message.includes('JSON')) {
+            errorMessage = 'Server mengembalikan response yang tidak valid.';
+        }
+        
+        showMinimalPopup('Error', errorMessage, 'error');
+    } finally {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonText;
+    }
+});
 
         // ============================
         // HANDLE DELETE BUTTON
         // ============================
-        document.querySelectorAll('.delete-btn').forEach(button => {
+        document.querySelectorAll('.delete-btn, .mobile-card-action-btn.delete').forEach(button => {
             button.addEventListener('click', () => {
                 const id = button.dataset.id;
 
@@ -1897,9 +1964,9 @@
         });
 
         // ============================
-        // SUBMIT FORM TAMBAH - DENGAN DEBUGGING LEBIH BAIK
+        // SUBMIT FORM TAMBAH - FIXED
         // ============================
-        tambahLayananForm.addEventListener('submit', function(e) {
+        tambahLayananForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = new FormData(this);
@@ -1910,102 +1977,39 @@
             submitButton.disabled = true;
             submitButton.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span> Menyimpan...';
             
-            fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                }
-            })
-            .then(async response => {
-                const data = await response.json(); // Coba parse JSON dulu
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
                 
-                if (!response.ok) {
-                    // Jika response tidak OK, lempar error dengan pesan dari server
-                    throw new Error(data.message || `HTTP error! status: ${response.status}`);
-                }
-                
-                return data; // Jika OK, kembalikan data
-            })
-            .then(data => {
                 if (data.success) {
                     tambahLayananModal.classList.add('hidden');
                     resetTambahForm();
                     showMinimalPopup('Berhasil', data.message || 'Layanan berhasil ditambahkan', 'success');
                     setTimeout(() => window.location.reload(), 1500);
                 } else {
-                    // Handle jika success: false dari server
                     showMinimalPopup('Gagal', data.message || 'Gagal menambah layanan.', 'error');
                 }
-            })
-            .catch(error => {
-                console.error('Error Detail:', error); // Lihat console untuk detail lengkap
-                showMinimalPopup('Error', error.message, 'error'); // Tampilkan pesan error asli
-            })
-            .finally(() => {
-                // Kembalikan button ke semula
-                submitButton.disabled = false;
-                submitButton.innerHTML = originalButtonText;
-            });
-        });
-
-        // ============================
-        // SUBMIT FORM EDIT - DENGAN DEBUGGING LEBIH BAIK
-        // ============================
-        editLayananForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const id = document.getElementById('editId').value;
-            const formData = new FormData(this);
-            const submitButton = this.querySelector('button[type="submit"]');
-            const originalButtonText = submitButton.innerHTML;
-            
-            // Tampilkan loading state
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span> Memperbarui...';
-
-            fetch(`/admin/layanan/${id}`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                }
-            })
-            .then(async response => {
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.message || `HTTP error! status: ${response.status}`);
-                }
-                
-                return data;
-            })
-            .then(data => {
-                if (data.success) {
-                    editLayananModal.classList.add('hidden');
-                    resetEditForm();
-                    showMinimalPopup('Berhasil', data.message || 'Layanan berhasil diperbarui', 'success');
-                    setTimeout(() => window.location.reload(), 1500);
-                } else {
-                    showMinimalPopup('Gagal', data.message || 'Gagal memperbarui layanan.', 'error');
-                }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error Detail:', error);
                 showMinimalPopup('Error', error.message, 'error');
-            })
-            .finally(() => {
+            } finally {
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonText;
-            });
+            }
         });
 
         // ============================
-        // SUBMIT FORM DELETE - DENGAN DEBUGGING LEBIH BAIK
+        // SUBMIT FORM DELETE - FIXED
         // ============================
-        document.getElementById('deleteForm').addEventListener('submit', function(e) {
+        document.getElementById('deleteForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const id = document.getElementById('deleteId').value;
@@ -2016,24 +2020,18 @@
             submitButton.disabled = true;
             submitButton.innerHTML = '<span class="material-icons-outlined animate-spin">refresh</span> Menghapus...';
 
-            fetch(`/admin/layanan/${id}`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                }
-            })
-            .then(async response => {
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    }
+                });
+
                 const data = await response.json();
                 
-                if (!response.ok) {
-                    throw new Error(data.message || `HTTP error! status: ${response.status}`);
-                }
-                
-                return data;
-            })
-            .then(data => {
                 if (data.success) {
                     deleteModal.classList.add('hidden');
                     showMinimalPopup('Berhasil', data.message || 'Layanan berhasil dihapus', 'success');
@@ -2041,17 +2039,14 @@
                 } else {
                     showMinimalPopup('Gagal', data.message || 'Gagal menghapus layanan.', 'error');
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error Detail:', error);
                 showMinimalPopup('Error', error.message, 'error');
-            })
-            .finally(() => {
+            } finally {
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonText;
-            });
+            }
         });
     </script>
 </body>
-
 </html>

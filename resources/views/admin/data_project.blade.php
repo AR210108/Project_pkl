@@ -474,19 +474,17 @@
 
                     <!-- Filter Form -->
                     <form method="GET" action="{{ route('admin.data_project') }}"
-                          class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                         <!-- SEARCH -->
                         <div class="relative w-full md:w-1/3">
-                            <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <span
+                                class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                                 search
                             </span>
-                            <input
-                                name="q"
-                                value="{{ request('q') }}"
+                            <input name="q" value="{{ request('q') }}"
                                 class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg
                                        focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Cari nama / deskripsi project..."
-                                type="text">
+                                placeholder="Cari nama / deskripsi project..." type="text">
                         </div>
 
                         <!-- FILTER -->
@@ -494,42 +492,32 @@
                             <!-- Filter Status Pengerjaan -->
                             <select name="status_pengerjaan"
                                 class="px-3 py-2 bg-white border border-border-light rounded-lg">
-                                <option value="">Semua Status Pengerjaan</option>
-                                <option value="pending" {{ request('status_pengerjaan')=='pending'?'selected':'' }}>Pending</option>
-                                <option value="dalam_pengerjaan" {{ request('status_pengerjaan')=='dalam_pengerjaan'?'selected':'' }}>Dalam Pengerjaan</option>
-                                <option value="selesai" {{ request('status_pengerjaan')=='selesai'?'selected':'' }}>Selesai</option>
-                                <option value="dibatalkan" {{ request('status_pengerjaan')=='dibatalkan'?'selected':'' }}>Dibatalkan</option>
+                                
+                                <option value="pending" {{ request('status_pengerjaan') == 'pending' ? 'selected' : '' }}>
+                                    Pending</option>
+                                <option value="dalam_pengerjaan"
+                                    {{ request('status_pengerjaan') == 'dalam_pengerjaan' ? 'selected' : '' }}>Dalam
+                                    Pengerjaan</option>
+                                <option value="selesai" {{ request('status_pengerjaan') == 'selesai' ? 'selected' : '' }}>
+                                    Selesai</option>
+                                <option value="dibatalkan"
+                                    {{ request('status_pengerjaan') == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
                             </select>
 
                             <!-- Filter Status Kerjasama -->
                             <select name="status_kerjasama"
                                 class="px-3 py-2 bg-white border border-border-light rounded-lg">
-                                <option value="">Semua Status Kerjasama</option>
-                                <option value="aktif" {{ request('status_kerjasama')=='aktif'?'selected':'' }}>Aktif</option>
-                                <option value="selesai" {{ request('status_kerjasama')=='selesai'?'selected':'' }}>Selesai</option>
-                                <option value="ditangguhkan" {{ request('status_kerjasama')=='ditangguhkan'?'selected':'' }}>Ditangguhkan</option>
+                                
+                                <option value="aktif" {{ request('status_kerjasama') == 'aktif' ? 'selected' : '' }}>Aktif
+                                </option>
+                                <option value="selesai" {{ request('status_kerjasama') == 'selesai' ? 'selected' : '' }}>
+                                    Selesai</option>
+                                <option value="ditangguhkan"
+                                    {{ request('status_kerjasama') == 'ditangguhkan' ? 'selected' : '' }}>Ditangguhkan
+                                </option>
                             </select>
-
-                            <!-- Filter Tanggal Mulai Pengerjaan -->
-                            <input type="date" name="tanggal_mulai_pengerjaan"
-                                value="{{ request('tanggal_mulai_pengerjaan') }}"
-                                class="px-3 py-2 bg-white border border-border-light rounded-lg"
-                                placeholder="Mulai Pengerjaan">
-
-                            <button type="submit"
-                                class="px-4 py-2 bg-primary text-white rounded-lg">
-                                Terapkan
-                            </button>
-
-                            <a href="{{ route('admin.data_project') }}"
-                               class="px-4 py-2 bg-gray-200 rounded-lg">
-                                Reset
-                            </a>
-
-                            <button type="button" id="tambahProjectBtn"
-                                class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2">
-                                <span class="material-icons-outlined">add</span>
-                                Tambah Project
+                            <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg">
+                                Filter
                             </button>
                         </div>
                     </form>
@@ -552,15 +540,15 @@
                             <div class="desktop-table">
                                 <div class="scrollable-table-container table-shadow" id="scrollableTable">
                                     <table class="data-table">
-                                       <!-- Di bagian thead table -->
-<thead>
+                                        <!-- Di bagian thead table -->
+                                        <thead>
     <tr>
         <th style="min-width: 60px;">No</th>
         <th style="min-width: 150px;">Invoice</th>
         <th style="min-width: 200px;">Nama Project</th>
         <th style="min-width: 200px;">Deskripsi</th>
         <th style="min-width: 120px;">Harga</th>
-        <!-- Tambahkan ini di sini -->
+        <!-- Kolom Penanggung Jawab -->
         <th style="min-width: 150px;">Penanggung Jawab</th>
         <th style="min-width: 120px;">Mulai Pengerjaan</th>
         <th style="min-width: 120px;">Selesai Pengerjaan</th>
@@ -572,54 +560,70 @@
         <th style="min-width: 180px; text-align: center;">Aksi</th>
     </tr>
 </thead>
-                                        <tbody id="desktopTableBody">
-                                            @foreach ($project as $index => $item)
-                                                <tr>
-                                                    <td style="min-width: 60px;">
-                                                        {{ ($project->currentPage() - 1) * $project->perPage() + $index + 1 }}
-                                                    </td>
-                                                    <td style="min-width: 150px;">
-                                                        @if($item->invoice)
-                                                            Invoice #{{ $item->invoice->id }}
-                                                        @else
-                                                            <span class="text-gray-400">-</span>
-                                                        @endif
-                                                    </td>
-                                                    <td style="min-width: 200px;">{{ $item->nama }}</td>
-                                                    <td style="min-width: 200px;" class="truncate-text"
-                                                        title="{{ $item->deskripsi }}">
-                                                        {{ Str::limit($item->deskripsi, 50) }}
-                                                    </td>
-                                                    <td style="min-width: 120px;">Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
-                                                    <td style="min-width: 120px;">{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}</td>
+<tbody id="desktopTableBody">
+    @foreach ($project as $index => $item)
+        <tr>
+            <td style="min-width: 60px;">
+                {{ ($project->currentPage() - 1) * $project->perPage() + $index + 1 }}
+            </td>
+            <td style="min-width: 150px;">
+                @if ($item->invoice)
+                    Invoice #{{ $item->invoice->id }}
+                @else
+                    <span class="text-gray-400">-</span>
+                @endif
+            </td>
+            <td style="min-width: 200px;">{{ $item->nama }}</td>
+            <td style="min-width: 200px;" class="truncate-text"
+                title="{{ $item->deskripsi }}">
+                {{ Str::limit($item->deskripsi, 50) }}
+            </td>
+            <td style="min-width: 120px;">Rp
+                {{ number_format($item->harga, 0, ',', '.') }}</td>
+            <!-- Kolom Penanggung Jawab -->
+            <td style="min-width: 150px;">
+                @if ($item->penanggung_jawab)
+                    <!-- Asumsikan penanggung_jawab adalah relasi ke model User -->
+                    {{ $item->penanggung_jawab->name }}
+                @elseif ($item->penanggung_jawab_name)
+                    <!-- Atau jika disimpan sebagai string langsung -->
+                    {{ $item->penanggung_jawab_name }}
+                @else
+                    <span class="text-gray-400">-</span>
+                @endif
+            </td>
                                                     <td style="min-width: 120px;">
-                                                        @if($item->tanggal_selesai_pengerjaan)
+                                                        {{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}</td>
+                                                    <td style="min-width: 120px;">
+                                                        @if ($item->tanggal_selesai_pengerjaan)
                                                             {{ $item->tanggal_selesai_pengerjaan->format('Y-m-d') }}
                                                         @else
                                                             <span class="text-gray-400">-</span>
                                                         @endif
                                                     </td>
                                                     <td style="min-width: 120px;">
-                                                        @if($item->tanggal_mulai_kerjasama)
+                                                        @if ($item->tanggal_mulai_kerjasama)
                                                             {{ $item->tanggal_mulai_kerjasama->format('Y-m-d') }}
                                                         @else
                                                             <span class="text-gray-400">-</span>
                                                         @endif
                                                     </td>
                                                     <td style="min-width: 120px;">
-                                                        @if($item->tanggal_selesai_kerjasama)
+                                                        @if ($item->tanggal_selesai_kerjasama)
                                                             {{ $item->tanggal_selesai_kerjasama->format('Y-m-d') }}
                                                         @else
                                                             <span class="text-gray-400">-</span>
                                                         @endif
                                                     </td>
                                                     <td style="min-width: 120px;">
-                                                        <span class="status-badge status-{{ str_replace('_', '-', $item->status_pengerjaan) }}">
+                                                        <span
+                                                            class="status-badge status-{{ str_replace('_', '-', $item->status_pengerjaan) }}">
                                                             {{ $item->status_pengerjaan_formatted }}
                                                         </span>
                                                     </td>
                                                     <td style="min-width: 120px;">
-                                                        <span class="status-badge status-{{ $item->status_kerjasama }}">
+                                                        <span
+                                                            class="status-badge status-{{ $item->status_kerjasama }}">
                                                             {{ $item->status_kerjasama_formatted }}
                                                         </span>
                                                     </td>
@@ -628,7 +632,8 @@
                                                             <div class="progress-fill {{ $item->progres < 50 ? 'bg-red-500' : ($item->progres < 80 ? 'bg-yellow-500' : 'bg-green-500') }}"
                                                                 style="width: {{ $item->progres }}%"></div>
                                                         </div>
-                                                        <span class="text-xs text-gray-600 dark:text-gray-400 mt-1 block">{{ $item->progres }}%</span>
+                                                        <span
+                                                            class="text-xs text-gray-600 dark:text-gray-400 mt-1 block">{{ $item->progres }}%</span>
                                                     </td>
                                                     <td style="min-width: 180px; text-align: center;">
                                                         <div class="flex justify-center gap-2">
@@ -691,12 +696,13 @@
                                             <div>
                                                 <h4 class="font-semibold text-base">{{ $item->nama }}</h4>
                                                 <p class="text-sm text-text-muted-light">
-                                                    @if($item->invoice)
+                                                    @if ($item->invoice)
                                                         <span>Invoice #{{ $item->invoice->id }}</span><br>
                                                     @endif
                                                     Mulai: {{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}
-                                                    @if($item->tanggal_selesai_pengerjaan)
-                                                        <br>Selesai: {{ $item->tanggal_selesai_pengerjaan->format('Y-m-d') }}
+                                                    @if ($item->tanggal_selesai_pengerjaan)
+                                                        <br>Selesai:
+                                                        {{ $item->tanggal_selesai_pengerjaan->format('Y-m-d') }}
                                                     @endif
                                                 </p>
                                             </div>
@@ -749,7 +755,8 @@
                                             <div>
                                                 <p class="text-text-muted-light">Status Pengerjaan</p>
                                                 <p>
-                                                    <span class="status-badge status-{{ str_replace('_', '-', $item->status_pengerjaan) }}">
+                                                    <span
+                                                        class="status-badge status-{{ str_replace('_', '-', $item->status_pengerjaan) }}">
                                                         {{ $item->status_pengerjaan_formatted }}
                                                     </span>
                                                 </p>
@@ -774,7 +781,8 @@
                                         </div>
                                         <div class="mt-3">
                                             <p class="text-text-muted-light">Harga</p>
-                                            <p class="font-medium">Rp {{ number_format($item->harga, 0, ',', '.') }}</p>
+                                            <p class="font-medium">Rp {{ number_format($item->harga, 0, ',', '.') }}
+                                            </p>
                                         </div>
                                         <div class="mt-3">
                                             <p class="text-text-muted-light">Deskripsi</p>
@@ -861,7 +869,8 @@
     <!-- ============================ -->
     <!-- MODAL TAMBAH PROJECT -->
     <!-- ============================ -->
-    <div id="tambahModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div id="tambahModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
@@ -880,68 +889,76 @@
                                 required>
                                 <option value="">-- Pilih Invoice --</option>
                                 @foreach ($invoices as $invoice)
-                                    <option value="{{ $invoice->id }}" 
-                                            data-nama="{{ $invoice->judul ?? 'Project dari Invoice #' . $invoice->id }}"
-                                            data-deskripsi="{{ $invoice->deskripsi ?? '' }}" 
-                                            data-harga="{{ $invoice->total ?? 0 }}"
-                                            data-tanggal-mulai="{{ $invoice->tanggal_mulai ? $invoice->tanggal_mulai->format('Y-m-d') : '' }}"
-                                            data-tanggal-selesai="{{ $invoice->tanggal_selesai ? $invoice->tanggal_selesai->format('Y-m-d') : '' }}">
-                                        Invoice #{{ $invoice->id }} - {{ $invoice->judul ?? 'Tanpa Judul' }} (Rp {{ number_format($invoice->total ?? 0, 0, ',', '.') }})
+                                    <option value="{{ $invoice->id }}"
+                                        data-nama="{{ $invoice->judul ?? 'Project dari Invoice #' . $invoice->id }}"
+                                        data-deskripsi="{{ $invoice->deskripsi ?? '' }}"
+                                        data-harga="{{ $invoice->total ?? 0 }}"
+                                        data-tanggal-mulai="{{ $invoice->tanggal_mulai ? $invoice->tanggal_mulai->format('Y-m-d') : '' }}"
+                                        data-tanggal-selesai="{{ $invoice->tanggal_selesai ? $invoice->tanggal_selesai->format('Y-m-d') : '' }}">
+                                        Invoice #{{ $invoice->id }} - {{ $invoice->judul ?? 'Tanpa Judul' }} (Rp
+                                        {{ number_format($invoice->total ?? 0, 0, ',', '.') }})
                                     </option>
                                 @endforeach
                             </select>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
                             <input type="text" name="nama" id="tambahNama"
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                                 readonly required>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                             <textarea name="deskripsi" id="tambahDeskripsi" rows="3"
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                                 readonly required></textarea>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
                             <input type="number" name="harga" id="tambahHarga"
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                                 readonly required>
                         </div>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai Pengerjaan</label>
-                                <input type="date" name="tanggal_mulai_pengerjaan" id="tambahTanggalMulaiPengerjaan"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai
+                                    Pengerjaan</label>
+                                <input type="date" name="tanggal_mulai_pengerjaan"
+                                    id="tambahTanggalMulaiPengerjaan"
                                     class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                                     required>
                             </div>
-                            
+
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai Pengerjaan</label>
-                                <input type="date" name="tanggal_selesai_pengerjaan" id="tambahTanggalSelesaiPengerjaan"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai
+                                    Pengerjaan</label>
+                                <input type="date" name="tanggal_selesai_pengerjaan"
+                                    id="tambahTanggalSelesaiPengerjaan"
                                     class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                             </div>
                         </div>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai Kerjasama</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai
+                                    Kerjasama</label>
                                 <input type="date" name="tanggal_mulai_kerjasama" id="tambahTanggalMulaiKerjasama"
                                     class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                             </div>
-                            
+
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai Kerjasama</label>
-                                <input type="date" name="tanggal_selesai_kerjasama" id="tambahTanggalSelesaiKerjasama"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai
+                                    Kerjasama</label>
+                                <input type="date" name="tanggal_selesai_kerjasama"
+                                    id="tambahTanggalSelesaiKerjasama"
                                     class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                             </div>
                         </div>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Status Pengerjaan</label>
@@ -953,7 +970,7 @@
                                     <option value="dibatalkan">Dibatalkan</option>
                                 </select>
                             </div>
-                            
+
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Status Kerjasama</label>
                                 <select name="status_kerjasama" id="tambahStatusKerjasama"
@@ -964,10 +981,11 @@
                                 </select>
                             </div>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
-                            <input type="range" name="progres" id="tambahProgres" min="0" max="100" value="0"
+                            <input type="range" name="progres" id="tambahProgres" min="0" max="100"
+                                value="0"
                                 class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                                 oninput="document.getElementById('tambahProgresValue').textContent = this.value + '%'">
                             <div class="flex justify-between items-center mt-1">
@@ -977,7 +995,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
                         <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan</button>
@@ -1081,7 +1099,7 @@
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="id" id="editId">
-                    
+
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
@@ -1089,43 +1107,49 @@
                                 class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                                 required>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                             <textarea name="deskripsi" id="editDeskripsi" rows="3"
                                 class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                                 required></textarea>
                         </div>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai Pengerjaan</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai
+                                    Pengerjaan</label>
                                 <input type="date" name="tanggal_mulai_pengerjaan" id="editTanggalMulaiPengerjaan"
                                     class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                                     required>
                             </div>
-                            
+
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai Pengerjaan</label>
-                                <input type="date" name="tanggal_selesai_pengerjaan" id="editTanggalSelesaiPengerjaan"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai
+                                    Pengerjaan</label>
+                                <input type="date" name="tanggal_selesai_pengerjaan"
+                                    id="editTanggalSelesaiPengerjaan"
                                     class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                             </div>
                         </div>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai Kerjasama</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai
+                                    Kerjasama</label>
                                 <input type="date" name="tanggal_mulai_kerjasama" id="editTanggalMulaiKerjasama"
                                     class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                             </div>
-                            
+
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai Kerjasama</label>
-                                <input type="date" name="tanggal_selesai_kerjasama" id="editTanggalSelesaiKerjasama"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai
+                                    Kerjasama</label>
+                                <input type="date" name="tanggal_selesai_kerjasama"
+                                    id="editTanggalSelesaiKerjasama"
                                     class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                             </div>
                         </div>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Status Pengerjaan</label>
@@ -1137,7 +1161,7 @@
                                     <option value="dibatalkan">Dibatalkan</option>
                                 </select>
                             </div>
-                            
+
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Status Kerjasama</label>
                                 <select name="status_kerjasama" id="editStatusKerjasama"
@@ -1148,7 +1172,7 @@
                                 </select>
                             </div>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
                             <input type="range" name="progres" id="editProgres" min="0" max="100"
@@ -1161,7 +1185,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
                         <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Update</button>
@@ -1239,14 +1263,14 @@
         // ============================
         // GLOBAL FUNCTIONS
         // ============================
-        
+
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
-            
+
             if (toast && toastMessage) {
                 toastMessage.textContent = message;
-                
+
                 if (type === 'success') {
                     toast.style.backgroundColor = '#10b981';
                 } else if (type === 'error') {
@@ -1254,9 +1278,9 @@
                 } else if (type === 'warning') {
                     toast.style.backgroundColor = '#f59e0b';
                 }
-                
+
                 toast.classList.remove('translate-y-20', 'opacity-0');
-                
+
                 setTimeout(() => {
                     toast.classList.add('translate-y-20', 'opacity-0');
                 }, 3000);
@@ -1293,15 +1317,15 @@
         // ============================
         // OPEN DETAIL MODAL
         // ============================
-        function openDetailModal(id, nama, deskripsi, harga, tanggalMulaiPengerjaan, tanggalSelesaiPengerjaan, 
-                                tanggalMulaiKerjasama, tanggalSelesaiKerjasama, statusPengerjaan, statusKerjasama, progres, invoice) {
-            
+        function openDetailModal(id, nama, deskripsi, harga, tanggalMulaiPengerjaan, tanggalSelesaiPengerjaan,
+            tanggalMulaiKerjasama, tanggalSelesaiKerjasama, statusPengerjaan, statusKerjasama, progres, invoice) {
+
             const detailModal = document.getElementById('detailModal');
             if (!detailModal) {
                 console.error('Detail modal not found');
                 return;
             }
-            
+
             // Set basic info
             document.getElementById('detailId').textContent = '#' + id;
             document.getElementById('detailNama').textContent = nama;
@@ -1313,19 +1337,19 @@
             document.getElementById('detailTanggalMulaiKerjasama').textContent = tanggalMulaiKerjasama || '-';
             document.getElementById('detailTanggalSelesaiKerjasama').textContent = tanggalSelesaiKerjasama || '-';
             document.getElementById('detailProgres').textContent = progres + '%';
-            
+
             // Set status pengerjaan badge
             const statusPengerjaanElement = document.getElementById('detailStatusPengerjaan');
             const pengerjaanClass = getStatusPengerjaanClass(statusPengerjaan);
             const pengerjaanLabel = getStatusPengerjaanLabel(statusPengerjaan);
             statusPengerjaanElement.innerHTML = `<span class="status-badge ${pengerjaanClass}">${pengerjaanLabel}</span>`;
-            
+
             // Set status kerjasama badge
             const statusKerjasamaElement = document.getElementById('detailStatusKerjasama');
             const kerjasamaClass = getStatusKerjasamaClass(statusKerjasama);
             const kerjasamaLabel = getStatusKerjasamaLabel(statusKerjasama);
             statusKerjasamaElement.innerHTML = `<span class="status-badge ${kerjasamaClass}">${kerjasamaLabel}</span>`;
-            
+
             // Set progress bar
             const progressBar = document.getElementById('detailProgressBar');
             let progressColor = '';
@@ -1338,7 +1362,7 @@
             }
             progressBar.className = `progress-fill ${progressColor}`;
             progressBar.style.width = progres + '%';
-            
+
             detailModal.classList.remove('hidden');
         }
 
@@ -1346,14 +1370,14 @@
         // OPEN EDIT MODAL
         // ============================
         function openEditModal(id, nama, deskripsi, tanggalMulaiPengerjaan, tanggalSelesaiPengerjaan,
-                              tanggalMulaiKerjasama, tanggalSelesaiKerjasama, statusPengerjaan, statusKerjasama, progres) {
-            
+            tanggalMulaiKerjasama, tanggalSelesaiKerjasama, statusPengerjaan, statusKerjasama, progres) {
+
             const editModal = document.getElementById('editModal');
             if (!editModal) {
                 console.error('Edit modal not found');
                 return;
             }
-            
+
             // Set form values
             document.getElementById('editId').value = id;
             document.getElementById('editNama').value = nama;
@@ -1366,11 +1390,11 @@
             document.getElementById('editStatusKerjasama').value = statusKerjasama || 'aktif';
             document.getElementById('editProgres').value = progres;
             document.getElementById('editProgresValue').textContent = progres + '%';
-            
+
             // Set form action
             const editForm = document.getElementById('editForm');
             editForm.action = `/admin/project/${id}`;
-            
+
             editModal.classList.remove('hidden');
         }
 
@@ -1383,13 +1407,13 @@
                 console.error('Delete modal not found');
                 return;
             }
-            
+
             document.getElementById('deleteId').value = id;
             document.getElementById('deleteNama').textContent = nama;
-            
+
             const deleteForm = document.getElementById('deleteForm');
             deleteForm.action = `/admin/project/${id}`;
-            
+
             deleteModal.classList.remove('hidden');
         }
 
@@ -1398,27 +1422,27 @@
         // ============================
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded - Data Project');
-            
+
             // Elements
             const tambahModal = document.getElementById('tambahModal');
             const editModal = document.getElementById('editModal');
             const detailModal = document.getElementById('detailModal');
             const deleteModal = document.getElementById('deleteModal');
-            
+
             const tambahForm = document.getElementById('tambahForm');
             const editForm = document.getElementById('editForm');
             const deleteForm = document.getElementById('deleteForm');
-            
+
             const tambahProjectBtn = document.getElementById('tambahProjectBtn');
             const closeModals = document.querySelectorAll('.close-modal');
-            
+
             const tambahInvoice = document.getElementById('tambahInvoice');
             const tambahNama = document.getElementById('tambahNama');
             const tambahDeskripsi = document.getElementById('tambahDeskripsi');
             const tambahHarga = document.getElementById('tambahHarga');
             const tambahTanggalMulaiKerjasama = document.getElementById('tambahTanggalMulaiKerjasama');
             const tambahTanggalSelesaiKerjasama = document.getElementById('tambahTanggalSelesaiKerjasama');
-            
+
             const toast = document.getElementById('toast');
             const closeToastBtn = document.getElementById('closeToast');
 
@@ -1429,7 +1453,7 @@
                         tambahModal.classList.remove('hidden');
                         if (tambahForm) {
                             tambahForm.reset();
-                            
+
                             // Set default values
                             const today = new Date().toISOString().split('T')[0];
                             document.getElementById('tambahTanggalMulaiPengerjaan').value = today;
@@ -1438,7 +1462,7 @@
                             document.getElementById('tambahProgres').value = 0;
                             document.getElementById('tambahProgresValue').textContent = '0%';
                         }
-                        
+
                         // Clear autofill fields
                         if (tambahInvoice) tambahInvoice.value = '';
                         if (tambahNama) tambahNama.value = '';
@@ -1454,7 +1478,7 @@
             if (tambahInvoice) {
                 tambahInvoice.addEventListener('change', function() {
                     const selected = this.options[this.selectedIndex];
-                    
+
                     if (selected.value) {
                         // Mengambil data dari atribut data
                         const nama = selected.getAttribute('data-nama') || '';
@@ -1462,7 +1486,7 @@
                         const harga = selected.getAttribute('data-harga') || '';
                         const tanggalMulai = selected.getAttribute('data-tanggal-mulai') || '';
                         const tanggalSelesai = selected.getAttribute('data-tanggal-selesai') || '';
-                        
+
                         if (tambahNama) tambahNama.value = nama;
                         if (tambahDeskripsi) tambahDeskripsi.value = deskripsi;
                         if (tambahHarga) tambahHarga.value = harga;
@@ -1472,20 +1496,26 @@
                         if (tambahTanggalSelesaiKerjasama && tanggalSelesai) {
                             tambahTanggalSelesaiKerjasama.value = tanggalSelesai;
                         }
-                        
+
                         // Atau gunakan AJAX untuk mengambil data lengkap
                         fetch(`/admin/project/invoice/${selected.value}/details`)
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success && data.data) {
                                     if (tambahNama && data.data.nama) tambahNama.value = data.data.nama;
-                                    if (tambahDeskripsi && data.data.deskripsi) tambahDeskripsi.value = data.data.deskripsi;
-                                    if (tambahHarga && data.data.harga) tambahHarga.value = data.data.harga;
-                                    if (tambahTanggalMulaiKerjasama && data.data.tanggal_mulai_kerjasama) {
-                                        tambahTanggalMulaiKerjasama.value = data.data.tanggal_mulai_kerjasama;
+                                    if (tambahDeskripsi && data.data.deskripsi) tambahDeskripsi.value =
+                                        data.data.deskripsi;
+                                    if (tambahHarga && data.data.harga) tambahHarga.value = data.data
+                                        .harga;
+                                    if (tambahTanggalMulaiKerjasama && data.data
+                                        .tanggal_mulai_kerjasama) {
+                                        tambahTanggalMulaiKerjasama.value = data.data
+                                            .tanggal_mulai_kerjasama;
                                     }
-                                    if (tambahTanggalSelesaiKerjasama && data.data.tanggal_selesai_kerjasama) {
-                                        tambahTanggalSelesaiKerjasama.value = data.data.tanggal_selesai_kerjasama;
+                                    if (tambahTanggalSelesaiKerjasama && data.data
+                                        .tanggal_selesai_kerjasama) {
+                                        tambahTanggalSelesaiKerjasama.value = data.data
+                                            .tanggal_selesai_kerjasama;
                                     }
                                 }
                             })
@@ -1511,7 +1541,7 @@
                     });
                 });
             });
-            
+
             // Close modal when clicking outside
             window.addEventListener('click', function(event) {
                 if (event.target === tambahModal) tambahModal.classList.add('hidden');
@@ -1519,130 +1549,136 @@
                 if (event.target === detailModal) detailModal.classList.add('hidden');
                 if (event.target === deleteModal) deleteModal.classList.add('hidden');
             });
-            
+
             // Handle tambah form submission with AJAX
             if (tambahForm) {
                 tambahForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     const formData = new FormData(tambahForm);
-                    
+
                     fetch(tambahForm.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(async response => {
-                        const responseText = await response.text();
-                        
-                        try {
-                            const data = JSON.parse(responseText);
-                            
-                            if (!response.ok) {
-                                if (response.status === 422) {
-                                    if (data.errors) {
-                                        const firstError = Object.values(data.errors)[0][0];
-                                        showToast(firstError, 'error');
-                                    } else {
-                                        showToast(data.message || 'Validasi gagal', 'error');
-                                    }
-                                } else {
-                                    showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
-                                }
-                                throw data;
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .getAttribute('content'),
+                                'Accept': 'application/json'
                             }
-                            
-                            return data;
-                        } catch (error) {
+                        })
+                        .then(async response => {
+                            const responseText = await response.text();
+
+                            try {
+                                const data = JSON.parse(responseText);
+
+                                if (!response.ok) {
+                                    if (response.status === 422) {
+                                        if (data.errors) {
+                                            const firstError = Object.values(data.errors)[0][0];
+                                            showToast(firstError, 'error');
+                                        } else {
+                                            showToast(data.message || 'Validasi gagal', 'error');
+                                        }
+                                    } else {
+                                        showToast(data.message ||
+                                            'Terjadi kesalahan. Silakan coba lagi.', 'error');
+                                    }
+                                    throw data;
+                                }
+
+                                return data;
+                            } catch (error) {
+                                console.error('Error:', error);
+                                showToast('Terjadi kesalahan server. Silakan coba lagi.', 'error');
+                                throw new Error('Invalid JSON response');
+                            }
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                showToast(data.message, 'success');
+                                tambahModal.classList.add('hidden');
+                                tambahForm.reset();
+
+                                // Reload page to show new data
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1500);
+                            } else {
+                                showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.',
+                                    'error');
+                            }
+                        })
+                        .catch(error => {
                             console.error('Error:', error);
-                            showToast('Terjadi kesalahan server. Silakan coba lagi.', 'error');
-                            throw new Error('Invalid JSON response');
-                        }
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            showToast(data.message, 'success');
-                            tambahModal.classList.add('hidden');
-                            tambahForm.reset();
-                            
-                            // Reload page to show new data
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1500);
-                        } else {
-                            showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
+                        });
                 });
             }
-            
+
             // Handle edit form submission with AJAX
             if (editForm) {
                 editForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     const formData = new FormData(editForm);
                     const id = document.getElementById('editId').value;
-                    
+
                     fetch(`/admin/project/${id}`, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(async response => {
-                        const responseText = await response.text();
-                        
-                        try {
-                            const data = JSON.parse(responseText);
-                            
-                            if (!response.ok) {
-                                if (response.status === 422) {
-                                    if (data.errors) {
-                                        const firstError = Object.values(data.errors)[0][0];
-                                        showToast(firstError, 'error');
-                                    } else {
-                                        showToast(data.message || 'Validasi gagal', 'error');
-                                    }
-                                } else {
-                                    showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
-                                }
-                                throw data;
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .getAttribute('content'),
+                                'Accept': 'application/json'
                             }
-                            
-                            return data;
-                        } catch (error) {
+                        })
+                        .then(async response => {
+                            const responseText = await response.text();
+
+                            try {
+                                const data = JSON.parse(responseText);
+
+                                if (!response.ok) {
+                                    if (response.status === 422) {
+                                        if (data.errors) {
+                                            const firstError = Object.values(data.errors)[0][0];
+                                            showToast(firstError, 'error');
+                                        } else {
+                                            showToast(data.message || 'Validasi gagal', 'error');
+                                        }
+                                    } else {
+                                        showToast(data.message ||
+                                            'Terjadi kesalahan. Silakan coba lagi.', 'error');
+                                    }
+                                    throw data;
+                                }
+
+                                return data;
+                            } catch (error) {
+                                console.error('Error:', error);
+                                showToast('Terjadi kesalahan server. Silakan coba lagi.', 'error');
+                                throw new Error('Invalid JSON response');
+                            }
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                showToast(data.message, 'success');
+                                editModal.classList.add('hidden');
+                                // Reload page to show updated data
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1500);
+                            } else {
+                                showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.',
+                                    'error');
+                            }
+                        })
+                        .catch(error => {
                             console.error('Error:', error);
-                            showToast('Terjadi kesalahan server. Silakan coba lagi.', 'error');
-                            throw new Error('Invalid JSON response');
-                        }
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            showToast(data.message, 'success');
-                            editModal.classList.add('hidden');
-                            // Reload page to show updated data
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1500);
-                        } else {
-                            showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
+                        });
                 });
             }
-            
+
             // Handle delete form submission with AJAX
             if (deleteForm) {
                 deleteForm.addEventListener('submit', function(e) {
@@ -1652,61 +1688,64 @@
                     const id = document.getElementById('deleteId').value;
 
                     fetch(`/admin/project/${id}`, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(async (response) => {
-                        const responseText = await response.text();
-                        
-                        try {
-                            const data = JSON.parse(responseText);
-                            
-                            if (!response.ok) {
-                                throw data;
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .getAttribute('content'),
+                                'Accept': 'application/json'
                             }
-                            
-                            return data;
-                        } catch (error) {
-                            console.error('Invalid JSON response:', responseText);
-                            throw new Error('Invalid server response');
-                        }
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            showToast(data.message, 'success');
-                            deleteModal.classList.add('hidden');
+                        })
+                        .then(async (response) => {
+                            const responseText = await response.text();
 
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1500);
-                        } else {
-                            showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        
-                        if (error.errors) {
-                            const firstError = Object.values(error.errors)[0][0];
-                            showToast(firstError, 'error');
-                        } else {
-                            showToast(error.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
-                        }
-                    });
+                            try {
+                                const data = JSON.parse(responseText);
+
+                                if (!response.ok) {
+                                    throw data;
+                                }
+
+                                return data;
+                            } catch (error) {
+                                console.error('Invalid JSON response:', responseText);
+                                throw new Error('Invalid server response');
+                            }
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                showToast(data.message, 'success');
+                                deleteModal.classList.add('hidden');
+
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1500);
+                            } else {
+                                showToast(data.message || 'Terjadi kesalahan. Silakan coba lagi.',
+                                    'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+
+                            if (error.errors) {
+                                const firstError = Object.values(error.errors)[0][0];
+                                showToast(firstError, 'error');
+                            } else {
+                                showToast(error.message || 'Terjadi kesalahan. Silakan coba lagi.',
+                                    'error');
+                            }
+                        });
                 });
             }
-            
+
             // Close toast notification
             if (closeToastBtn) {
                 closeToastBtn.addEventListener('click', function() {
                     if (toast) toast.classList.add('translate-y-20', 'opacity-0');
                 });
             }
-            
+
             // Auto-hide success/error toasts after 5 seconds
             const autoHideToasts = document.querySelectorAll('#successToast, #errorToast');
             autoHideToasts.forEach(toast => {
@@ -1720,4 +1759,5 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </body>
+
 </html>

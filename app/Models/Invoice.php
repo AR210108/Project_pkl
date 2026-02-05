@@ -17,6 +17,7 @@ class Invoice extends Model
         'invoice_date',
         'company_name',
         'company_address',
+        'kontak',
         'client_name',
         'order_number',
         'payment_method',
@@ -270,4 +271,32 @@ class Invoice extends Model
         }
         return null;
     }
+
+    // Di App\Models\Invoice.php
+public function getDescriptionAttribute($value)
+{
+    // Jika description kosong, ambil dari layanan terkait
+    if (empty($value) && $this->layanan) {
+        return $this->layanan->deskripsi;
+    }
+    
+    return $value;
+}
+
+// Atau tambahkan attribute casting untuk memastikan deskripsi selalu ada
+public function getDeskripsiAttribute()
+{
+    // Prioritas 1: description dari invoice
+    if (!empty($this->attributes['description'])) {
+        return $this->attributes['description'];
+    }
+    
+    // Prioritas 2: deskripsi dari layanan
+    if ($this->layanan && !empty($this->layanan->deskripsi)) {
+        return $this->layanan->deskripsi;
+    }
+    
+    // Default: nama layanan
+    return $this->nama_layanan ? 'Layanan: ' . $this->nama_layanan : 'Tidak ada deskripsi';
+}
 }
