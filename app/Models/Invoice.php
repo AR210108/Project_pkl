@@ -102,6 +102,8 @@ class Invoice extends Model
         // Event ketika invoice dibuat
         static::created(function ($invoice) {
             $invoice->createProjectFromInvoice();
+            // Juga buat order otomatis agar invoice muncul di Data Orderan
+            $invoice->createOrderFromInvoice();
         });
 
         // Event ketika invoice diupdate
@@ -181,6 +183,48 @@ class Invoice extends Model
                 'invoice_id' => $this->id,
                 'error' => $e->getTraceAsString()
             ]);
+            return null;
+        }
+    }
+
+    /**
+     * Create an Order when an Invoice is created so it appears in Data Orderan
+     */
+    public function createOrderFromInvoice()
+    {
+        try {
+            // Avoid duplicating orders
+            $existingOrder = \App\Models\Order::where('invoice_id', $this->id)->first();
+            if ($existingOrder) return $existingOrder;
+
+            $order = \App\Models\Order::create([
+                'order_no' => 'ORD-' . $this->id . '-' . time(),
+                'layanan' => $this->nama_layanan ?? null,
+                'kategori' => $this->nama_layanan ?? null,
+                'price' => (int) ($this->subtotal ?? 0),
+                'price_formatted' => number_format($this->subtotal ?? 0, 0, ',', '.'),
+                'klien' => $this->client_name ?? null,
+                'company_name' => $this->company_name ?? null,
+                'order_date' => $this->invoice_date ?? null,
+                'invoice_no' => $this->invoice_no,
+                'company_address' => $this->company_address ?? null,
+                'description' => $this->description ?? null,
+                'subtotal' => $this->subtotal ?? 0,
+                'tax' => $this->tax ?? 0,
+                'total' => $this->total ?? 0,
+                'payment_method' => $this->payment_method ?? null,
+                'deposit' => 0,
+                'paid' => 0,
+                'status' => 'pending',
+                'work_status' => 'planning',
+                'invoice_id' => $this->id,
+            ]);
+
+            \Log::info('Order created from invoice (model)', ['order_id' => $order->id, 'invoice_id' => $this->id]);
+
+            return $order;
+        } catch (\Exception $e) {
+            \Log::error('Failed to create order from invoice (model): ' . $e->getMessage(), ['invoice_id' => $this->id]);
             return null;
         }
     }

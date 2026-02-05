@@ -891,7 +891,12 @@
                                 required>
                                 <option value="">Pilih Tipe Transaksi Terlebih Dahulu</option>
                             </select>
-                        </div>
+                            <!-- Subkategori khusus untuk tipe Pengeluaran -->
+                            <select name="subkategori" id="transaction-subcategory"
+                                class="w-full px-3 py-2 bg-gray-50 border border-border-light rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary mt-2 hidden">
+                                <option value="">Pilih Subkategori</option>
+                            </select>
+                        </div>    
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
@@ -1212,21 +1217,106 @@
         function updateCategoryOptions() {
             const typeSelect = document.getElementById('transaction-type');
             const categorySelect = document.getElementById('transaction-category');
+            const subcategorySelect = document.getElementById('transaction-subcategory');
             const selectedType = typeSelect.value;
 
-            // Clear current options
+            // Reset category and subcategory
             categorySelect.innerHTML = '<option value="">Pilih Kategori</option>';
+            // Reset to default name and required state
+            categorySelect.name = 'kategori_id';
+            categorySelect.setAttribute('required', 'required');
+
+            if (subcategorySelect) {
+                subcategorySelect.innerHTML = '<option value="">Pilih Subkategori</option>';
+                subcategorySelect.classList.add('hidden');
+                subcategorySelect.removeAttribute('required');
+                subcategorySelect.name = 'subkategori';
+            }
 
             if (selectedType) {
-                const tipeDatabase = selectedType === 'income' ? 'pemasukan' : 'pengeluaran';
-                const filteredKategori = allKategori.filter(k => k.tipe_kategori === tipeDatabase);
+                if (selectedType === 'expense') {
+                    // Populate main groups for Pengeluaran
+                    const groups = [
+                        { key: 'biaya_operasional', label: 'Biaya Operasional' },
+                        { key: 'biaya_karyawan', label: 'Biaya Karyawan' },
+                        { key: 'biaya_pemasaran', label: 'Biaya Pemasaran dan Teknologi' },
+                        { key: 'biaya_proyek', label: 'Biaya Proyek & Variabel' },
+                        { key: 'biaya_administrasi', label: 'Biaya Administrasi & Legal' },
+                        { key: 'giving', label: 'Giving' }
+                    ];
 
-                filteredKategori.forEach(kategori => {
+                    // Change the select 'name' so kategori_id is NOT submitted for expense
+                    categorySelect.name = 'kategori_group';
+                    categorySelect.removeAttribute('required');
+
+                    groups.forEach(g => {
+                        const option = document.createElement('option');
+                        option.value = g.key;
+                        option.textContent = g.label;
+                        categorySelect.appendChild(option);
+                    });
+
+                    // Attach handler to populate subcategories when a group is selected
+                    categorySelect.onchange = function () {
+                        populateSubcategoriesForGroup(categorySelect.value);
+                    };
+
+                    // Make subcategory required and visible
+                    if (subcategorySelect) {
+                        subcategorySelect.classList.remove('hidden');
+                        subcategorySelect.setAttribute('required', 'required');
+                        subcategorySelect.name = 'subkategori';
+                    }
+                } else {
+                    // income: gunakan kategori dari database seperti sebelumnya
+                    const tipeDatabase = selectedType === 'income' ? 'pemasukan' : 'pengeluaran';
+                    const filteredKategori = allKategori.filter(k => k.tipe_kategori === tipeDatabase);
+
+                    filteredKategori.forEach(kategori => {
+                        const option = document.createElement('option');
+                        option.value = kategori.id; // Simpan ID kategori
+                        option.textContent = kategori.nama_kategori; // Tampilkan nama kategori
+                        categorySelect.appendChild(option);
+                    });
+
+                    categorySelect.onchange = null;
+
+                    // ensure subcategory is hidden and not required
+                    if (subcategorySelect) {
+                        subcategorySelect.classList.add('hidden');
+                        subcategorySelect.removeAttribute('required');
+                        subcategorySelect.name = 'subkategori';
+                    }
+                }
+            } else {
+                categorySelect.onchange = null;
+            }
+        }
+
+        // Populate subcategories for each expense group
+        function populateSubcategoriesForGroup(groupKey) {
+            const subcategorySelect = document.getElementById('transaction-subcategory');
+            if (!subcategorySelect) return;
+            const mapping = {
+                'biaya_operasional': ['Sewa kantor', 'Listrik', 'Internet', 'Air', 'Biaya perawatan'],
+                'biaya_karyawan': ['Gaji', 'Bonus', 'Tunjangan', 'Asuransi', 'Biaya pelatihan'],
+                'biaya_pemasaran': ['Iklan', 'Langganan Software/Tools', 'Infrastuktur IT'],
+                'biaya_proyek': ['Biaya Proyek & Variabel'],
+                'biaya_administrasi': ['Biaya Administrasi & Legal'],
+                'giving': ['Zakat', 'Infaq', 'Sedekah', 'Wakaf']
+            };
+
+            subcategorySelect.innerHTML = '<option value="">Pilih Subkategori</option>';
+            if (groupKey && mapping[groupKey]) {
+                mapping[groupKey].forEach(item => {
                     const option = document.createElement('option');
-                    option.value = kategori.id; // Simpan ID kategori
-                    option.textContent = kategori.nama_kategori; // Tampilkan nama kategori
-                    categorySelect.appendChild(option);
+                    option.value = item;
+                    option.textContent = item;
+                    subcategorySelect.appendChild(option);
                 });
+                subcategorySelect.classList.remove('hidden');
+            } else {
+                subcategorySelect.classList.add('hidden');
             }
         }
 
@@ -1235,8 +1325,20 @@
             document.getElementById('addModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             // Reset form saat modal dibuka
-            document.querySelector('#addModal form').reset();
-            document.getElementById('transaction-category').innerHTML = '<option value="">Pilih Tipe Transaksi Terlebih Dahulu</option>';
+            const form = document.querySelector('#addModal form');
+            form.reset();
+            const category = document.getElementById('transaction-category');
+            category.innerHTML = '<option value="">Pilih Tipe Transaksi Terlebih Dahulu</option>';
+            category.name = 'kategori_id';
+            category.setAttribute('required', 'required');
+
+            const subcat = document.getElementById('transaction-subcategory');
+            if (subcat) {
+                subcat.innerHTML = '<option value="">Pilih Subkategori</option>';
+                subcat.classList.add('hidden');
+                subcat.removeAttribute('required');
+                subcat.name = 'subkategori';
+            }
         }
 
         function closeAddModal() {

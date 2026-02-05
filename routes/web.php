@@ -31,6 +31,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\BerandaFinanceController;
 use App\Http\Controllers\CutiController;
+use App\Http\Controllers\GMPerusahaanController;
+use App\Http\Controllers\ManagerDivisi\MDPerusahaanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -157,6 +159,10 @@ Route::middleware('auth')->group(function () {
         return redirect('/');
     })->name('logout.get');
 
+
+    // Route agar finance bisa akses data perusahaan
+    Route::get('/perusahaan/data', [\App\Http\Controllers\Admin\PerusahaanController::class, 'getDataForDropdown'])->name('perusahaan.data');
+
     // Orders & Invoices
     Route::resource('orders', OrderController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
     Route::get('invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
@@ -267,6 +273,17 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/home', function () {
             return redirect()->route('admin.beranda');
         });
+
+
+        // Di dalam Route::group(['prefix' => 'admin', ...])
+
+Route::get('/perusahaan', [PerusahaanController::class, 'index'])->name('perusahaan.index');
+Route::get('/perusahaan/create', [PerusahaanController::class, 'create'])->name('perusahaan.create');
+Route::post('/perusahaan', [PerusahaanController::class, 'store'])->name('perusahaan.store');
+Route::get('/perusahaan/{perusahaan}/edit', [PerusahaanController::class, 'edit'])->name('perusahaan.edit');
+Route::put('/perusahaan/{perusahaan}', [PerusahaanController::class, 'update'])->name('perusahaan.update'); // INI YANG PENTING
+Route::delete('/perusahaan/{perusahaan}', [PerusahaanController::class, 'destroy'])->name('perusahaan.delete'); // Nama route 'delete' atau 'destroy' harus konsisten
+
 
         // API untuk data
         Route::get('/catatan_rapat/data', [CatatanRapatController::class, 'getData'])->name('catatan_rapat.data');
@@ -580,6 +597,12 @@ Route::middleware(['auth', 'role:general_manager'])
         Route::put('/data_project/{id}', [DataProjectController::class, 'updategeneral'])->name('data_project.update');
         Route::delete('/data_project/{id}', [DataProjectController::class, 'destroy'])->name('data_project.destroy');
 
+        // === DATA PERUSAHAAN (DITAMBAHKAN) ===
+        Route::get('/perusahaan', [GMPerusahaanController::class, 'index'])->name('perusahaan.index');
+        Route::post('/perusahaan', [GMPerusahaanController::class, 'store'])->name('perusahaan.store');
+        Route::put('/perusahaan/{id}', [GMPerusahaanController::class, 'update'])->name('perusahaan.update');
+        Route::delete('/perusahaan/{id}', [GMPerusahaanController::class, 'destroy'])->name('perusahaan.delete');
+
         // CUTI MANAGEMENT
         Route::prefix('cuti')->name('cuti.')->group(function () {
             Route::get('/', [CutiController::class, 'index'])->name('index');
@@ -632,6 +655,7 @@ Route::middleware(['auth', 'role:general_manager'])
 
         Route::post('/general-manajer/absensi/{id}/reject', [AbsensiController::class, 'rejectAbsensi'])
             ->name('general_manajer.absensi.reject');
+        
         Route::get('/tim_dan_divisi', function () {
             return view('general_manajer.tim_dan_divisi');
         })->name('tim_dan_divisi');
@@ -776,6 +800,9 @@ Route::middleware(['auth', 'role:finance'])
         });
     });
 
+// Pastikan import ini ada di paling atas file:
+// use App\Http\Controllers\ManagerDivisi\MDPerusahaanController;
+
 /*
 |--------------------------------------------------------------------------
 | Role: MANAGER DIVISI Routes - PERBAIKAN
@@ -789,7 +816,17 @@ Route::middleware(['auth', 'role:manager_divisi'])
         Route::get('/home', function () {
             return view('manager_divisi.home');
         })->name('home');
+
         Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsenManajer'])->name('kelola_absensi');
+
+        // === DATA PERUSAHAAN (BARU) ===
+        Route::prefix('perusahaan')->name('perusahaan.')->group(function () {
+            Route::get('/', [MDPerusahaanController::class, 'index'])->name('index');
+            Route::post('/', [MDPerusahaanController::class, 'store'])->name('store');
+            Route::put('/{id}', [MDPerusahaanController::class, 'update'])->name('update');
+            Route::delete('/{id}', [MDPerusahaanController::class, 'destroy'])->name('destroy');
+        });
+
         // CUTI MANAGEMENT
         Route::prefix('cuti')->name('cuti.')->group(function () {
             Route::get('/', [CutiController::class, 'index'])->name('index');
@@ -813,16 +850,10 @@ Route::middleware(['auth', 'role:manager_divisi'])
 
         // API untuk manager divisi
         Route::prefix('api')->name('api.')->group(function () {
-            Route::get('/tasks', [ManagerDivisiTaskController::class, 'getTasksApi'])
-                ->name('tasks');
-
-            Route::get('/tasks/statistics', [ManagerDivisiTaskController::class, 'getStatistics'])
-                ->name('tasks.statistics');
-
-            Route::get('/karyawan-by-divisi/{divisi}', [ManagerDivisiTaskController::class, 'getKaryawanByDivisi'])
-                ->name('karyawan.by_divisi');
-            Route::get('/daftar_karyawan/{divisi}', [AdminKaryawanController::class, 'karyawanDivisi'])
-                ->name('karyawan.divisi');
+            Route::get('/tasks', [ManagerDivisiTaskController::class, 'getTasksApi'])->name('tasks');
+            Route::get('/tasks/statistics', [ManagerDivisiTaskController::class, 'getStatistics'])->name('tasks.statistics');
+            Route::get('/karyawan-by-divisi/{divisi}', [ManagerDivisiTaskController::class, 'getKaryawanByDivisi'])->name('karyawan.by_divisi');
+            Route::get('/daftar_karyawan/{divisi}', [AdminKaryawanController::class, 'karyawanDivisi'])->name('karyawan.divisi');
         });
 
         // Task management

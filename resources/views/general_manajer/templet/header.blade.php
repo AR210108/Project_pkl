@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sidebar General Manager</title>
-    
+
     <!-- Meta tag CSRF untuk keamanan form (sangat penting di Laravel) -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
@@ -258,7 +258,8 @@
 
             <!-- Menu Data Karyawan -->
             <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="{{ route('general_manajer.data_karyawan') }}" data-page="data_karyawan" data-path="general_manajer/data_karyawan">
+                href="{{ route('general_manajer.data_karyawan') }}" data-page="data_karyawan"
+                data-path="general_manajer/data_karyawan">
                 <span class="material-icons sidebar-icon">group</span>
                 <span class="sidebar-text">Data Karyawan</span>
             </a>
@@ -272,35 +273,48 @@
 
             <!-- Menu Data Project -->
             <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="{{ route('general_manajer.data_project') }}" data-page="data_project" data-path="general_manajer/data_project">
+                href="{{ route('general_manajer.data_project') }}" data-page="data_project"
+                data-path="general_manajer/data_project">
                 <span class="material-icons sidebar-icon">dashboard</span>
                 <span class="sidebar-text">Data Project</span>
             </a>
 
+            <!-- Menu Data Perusahaan (DITAMBAHKAN) -->
+            <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="{{ route('general_manajer.perusahaan.index') }}" data-page="perusahaan"
+                data-path="general_manajer/perusahaan">
+                <span class="material-icons sidebar-icon">business</span>
+                <span class="sidebar-text">Data Perusahaan</span>
+            </a>
+
             <!-- Menu Kelola Tugas -->
             <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="{{ route('general_manajer.kelola_tugas') }}" data-page="kelola_tugas" data-path="general_manajer/kelola_tugas">
+                href="{{ route('general_manajer.kelola_tugas') }}" data-page="kelola_tugas"
+                data-path="general_manajer/kelola_tugas">
                 <span class="material-icons sidebar-icon">assignment</span>
                 <span class="sidebar-text">Kelola Tugas</span>
             </a>
 
-            <!-- Menu Tim dan Divisi -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/general_manajer/tim_divisi" data-page="tim_divisi">
+            <!-- Menu Tim dan Divisi (DIPERBAIKI) -->
+            <!-- Ditambahkan class allowed-active dan atribut data-path -->
+            <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="/general_manajer/tim_divisi" data-page="tim_divisi" data-path="general_manajer/tim_divisi">
                 <span class="material-icons sidebar-icon">groups</span>
                 <span class="sidebar-text">Tim dan Divisi</span>
             </a>
 
             <!-- Menu Kelola Absen -->
             <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="{{ route('general_manajer.kelola_absen') }}" data-page="kelola_absen" data-path="general_manajer/kelola_absen">
+                href="{{ route('general_manajer.kelola_absen') }}" data-page="kelola_absen"
+                data-path="general_manajer/kelola_absen">
                 <span class="material-icons sidebar-icon">manage_accounts</span>
                 <span class="sidebar-text">Kelola Absen</span>
             </a>
 
-            <!-- Menu Acc Cuti (baru) -->
+            <!-- Menu Kelola Cuti (DIPERBAIKI) -->
+            <!-- href diubah ke /general_manajer/cuti dan data-path disesuaikan -->
             <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/general_manajer/acc_cuti" data-page="acc_cuti" data-path="general_manajer/acc_cuti">
+                href="/general_manajer/cuti" data-page="cuti" data-path="general_manajer/cuti">
                 <span class="material-icons sidebar-icon">event_available</span>
                 <span class="sidebar-text">Kelola Cuti</span>
             </a>
@@ -319,227 +333,227 @@
     </aside>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // --- ELEMEN DOM ---
-        const hamburger = document.getElementById('hamburger');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- ELEMEN DOM ---
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
 
-        // --- CEK ELEMEN PENTING ---
-        // Jika salah satu elemen utama tidak ditemukan, hentikan eksekusi
-        if (!hamburger || !sidebar || !overlay) {
-            console.error('Error: Elemen hamburger, sidebar, atau overlay tidak ditemukan.');
-            return;
-        }
-
-        // --- FUNGSI SIDEBAR ---
-        function openSidebar() {
-            sidebar.classList.remove('translate-x-full');
-            overlay.classList.remove('hidden');
-            hamburger.classList.add('hamburger-active');
-            document.body.style.overflow = 'hidden'; // Mencegah scroll background
-        }
-
-        function closeSidebar() {
-            sidebar.classList.add('translate-x-full');
-            overlay.classList.add('hidden');
-            hamburger.classList.remove('hamburger-active');
-            document.body.style.overflow = ''; // Kembalikan scroll
-        }
-
-        // --- EVENT LISTENER UNTUK HAMBURGER ---
-        hamburger.addEventListener('click', () => {
-            // Cek apakah sidebar sedang tersembunyi (memiliki class translate-x-full)
-            if (sidebar.classList.contains('translate-x-full')) {
-                openSidebar();
-            } else {
-                closeSidebar();
+            // --- CEK ELEMEN PENTING ---
+            // Jika salah satu elemen utama tidak ditemukan, hentikan eksekusi
+            if (!hamburger || !sidebar || !overlay) {
+                console.error('Error: Elemen hamburger, sidebar, atau overlay tidak ditemukan.');
+                return;
             }
-        });
 
-        // --- EVENT LISTENER UNTUK OVERLAY ---
-        overlay.addEventListener('click', closeSidebar);
-
-        // --- TUTUP SIDEBAR DENGAN TOMBOL ESC ---
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !sidebar.classList.contains('translate-x-full')) {
-                closeSidebar();
+            // --- FUNGSI SIDEBAR ---
+            function openSidebar() {
+                sidebar.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                hamburger.classList.add('hamburger-active');
+                document.body.style.overflow = 'hidden'; // Mencegah scroll background
             }
-        });
 
-        // --- FUNGSI UNTUK MENU AKTIF (BERSIH DARI DEBUG) ---
-        function setActiveNavItem() {
-            const currentPath = window.location.pathname;
-            
-            // Hapus class 'active' dari semua item
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
+            function closeSidebar() {
+                sidebar.classList.add('translate-x-full');
+                overlay.classList.add('hidden');
+                hamburger.classList.remove('hamburger-active');
+                document.body.style.overflow = ''; // Kembalikan scroll
+            }
+
+            // --- EVENT LISTENER UNTUK HAMBURGER ---
+            hamburger.addEventListener('click', () => {
+                // Cek apakah sidebar sedang tersembunyi (memiliki class translate-x-full)
+                if (sidebar.classList.contains('translate-x-full')) {
+                    openSidebar();
+                } else {
+                    closeSidebar();
+                }
             });
 
-            // Tambahkan class 'active' ke item yang sesuai dengan URL saat ini
+            // --- EVENT LISTENER UNTUK OVERLAY ---
+            overlay.addEventListener('click', closeSidebar);
+
+            // --- TUTUP SIDEBAR DENGAN TOMBOL ESC ---
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('translate-x-full')) {
+                    closeSidebar();
+                }
+            });
+
+            // --- FUNGSI UNTUK MENU AKTIF (BERSIH DARI DEBUG) ---
+            function setActiveNavItem() {
+                const currentPath = window.location.pathname;
+
+                // Hapus class 'active' dari semua item
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Tambahkan class 'active' ke item yang sesuai dengan URL saat ini
+                document.querySelectorAll('.nav-item.allowed-active').forEach(item => {
+                    const dataPath = item.getAttribute('data-path');
+                    const href = item.getAttribute('href');
+                    const pageName = item.getAttribute('data-page');
+
+                    // Normalisasi path untuk perbandingan
+                    const normalizedCurrentPath = currentPath.replace(/^\//, '').toLowerCase();
+
+                    let isActive = false;
+
+                    // Cek berdasarkan data-path terlebih dahulu
+                    if (dataPath) {
+                        const normalizedDataPath = dataPath.replace(/^\//, '').toLowerCase();
+
+                        // Cocokkan eksak atau dengan sub-path
+                        if (normalizedCurrentPath === normalizedDataPath ||
+                            normalizedCurrentPath.startsWith(normalizedDataPath + '/')) {
+                            isActive = true;
+                        }
+                    }
+
+                    // Fallback ke href jika data-path tidak cocok
+                    if (!isActive && href) {
+                        const normalizedHref = href.replace(/^\//, '').toLowerCase();
+
+                        if (normalizedCurrentPath === normalizedHref ||
+                            normalizedCurrentPath.startsWith(normalizedHref + '/')) {
+                            isActive = true;
+                        }
+                    }
+
+                    // Pencocokan khusus untuk kasus yang sulit
+                    if (!isActive) {
+                        // Khusus untuk kelola_tugas
+                        if (pageName === 'kelola_tugas' &&
+                            (normalizedCurrentPath.includes('kelola_tugas') ||
+                                normalizedCurrentPath.includes('tugas'))) {
+                            isActive = true;
+                        }
+
+                        // Khusus untuk kelola_absen
+                        if (pageName === 'kelola_absen' &&
+                            (normalizedCurrentPath.includes('kelola_absen') ||
+                                normalizedCurrentPath.includes('absen'))) {
+                            isActive = true;
+                        }
+                    }
+
+                    if (isActive) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+
+            // --- EVENT LISTENER UNTUK SETIAP ITEM NAVIGASI ---
             document.querySelectorAll('.nav-item.allowed-active').forEach(item => {
-                const dataPath = item.getAttribute('data-path');
-                const href = item.getAttribute('href');
-                const pageName = item.getAttribute('data-page');
-                
-                // Normalisasi path untuk perbandingan
-                const normalizedCurrentPath = currentPath.replace(/^\//, '').toLowerCase();
-                
-                let isActive = false;
-                
-                // Cek berdasarkan data-path terlebih dahulu
-                if (dataPath) {
-                    const normalizedDataPath = dataPath.replace(/^\//, '').toLowerCase();
-                    
-                    // Cocokkan eksak atau dengan sub-path
-                    if (normalizedCurrentPath === normalizedDataPath || 
-                        normalizedCurrentPath.startsWith(normalizedDataPath + '/')) {
-                        isActive = true;
-                    }
-                }
-                
-                // Fallback ke href jika data-path tidak cocok
-                if (!isActive && href) {
-                    const normalizedHref = href.replace(/^\//, '').toLowerCase();
-                    
-                    if (normalizedCurrentPath === normalizedHref || 
-                        normalizedCurrentPath.startsWith(normalizedHref + '/')) {
-                        isActive = true;
-                    }
-                }
-                
-                // Pencocokan khusus untuk kasus yang sulit
-                if (!isActive) {
-                    // Khusus untuk kelola_tugas
-                    if (pageName === 'kelola_tugas' && 
-                        (normalizedCurrentPath.includes('kelola_tugas') || 
-                         normalizedCurrentPath.includes('tugas'))) {
-                        isActive = true;
-                    }
-                    
-                    // Khusus untuk kelola_absen
-                    if (pageName === 'kelola_absen' && 
-                        (normalizedCurrentPath.includes('kelola_absen') || 
-                         normalizedCurrentPath.includes('absen'))) {
-                        isActive = true;
-                    }
-                }
-                
-                if (isActive) {
-                    item.classList.add('active');
-                }
-            });
-        }
+                item.addEventListener('click', function (e) {
+                    // Simpan halaman yang diklik ke sessionStorage
+                    const page = this.getAttribute('data-page');
+                    const path = this.getAttribute('data-path');
 
-        // --- EVENT LISTENER UNTUK SETIAP ITEM NAVIGASI ---
-        document.querySelectorAll('.nav-item.allowed-active').forEach(item => {
-            item.addEventListener('click', function(e) {
-                // Simpan halaman yang diklik ke sessionStorage
-                const page = this.getAttribute('data-page');
-                const path = this.getAttribute('data-path');
-                
-                if (page) {
-                    sessionStorage.setItem('lastClickedPage', page);
-                    sessionStorage.setItem('lastClickedPath', path);
-                }
-                
-                // Force update active state immediately
-                setTimeout(() => {
-                    setActiveNavItem();
-                }, 10);
-                
-                // Biarkan navigasi default berlanjut
-            });
-        });
-
-        // --- INISIALISASI ---
-        setActiveNavItem();
-
-        // --- UPDATE ACTIVE STATE SAAT PAGE DIMUAT ULANG ---
-        // Cek apakah ada halaman yang tersimpan di sessionStorage
-        const lastClickedPage = sessionStorage.getItem('lastClickedPage');
-        const lastClickedPath = sessionStorage.getItem('lastClickedPath');
-        
-        if (lastClickedPath) {
-            // Verifikasi apakah kita masih di halaman yang sama
-            const currentPath = window.location.pathname.replace(/^\//, '');
-            const normalizedStoredPath = lastClickedPath.replace(/^\//, '');
-            
-            if (currentPath === normalizedStoredPath || currentPath.startsWith(normalizedStoredPath + '/')) {
-                setActiveNavItem();
-            }
-        }
-
-        // --- HANDLER LOGOUT YANG LEBIH AMAN ---
-        const logoutForm = document.querySelector('form[action*="logout"]');
-        if (logoutForm) {
-            logoutForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-                
-                // Hapus sessionStorage saat logout
-                sessionStorage.removeItem('lastClickedPage');
-                sessionStorage.removeItem('lastClickedPath');
-                
-                // Cek keberadaan meta tag CSRF
-                const csrfToken = document.querySelector('meta[name="csrf-token"]');
-                if (!csrfToken) {
-                    console.error('Meta tag CSRF-Token tidak ditemukan!');
-                    alert('Terjadi kesalahan konfigurasi. Logout tidak dapat diproses.');
-                    return;
-                }
-
-                // Kirim form menggunakan fetch
-                fetch(this.action, {
-                    method: 'POST',
-                    body: new FormData(this),
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
-                        'Accept': 'application/json',
+                    if (page) {
+                        sessionStorage.setItem('lastClickedPage', page);
+                        sessionStorage.setItem('lastClickedPath', path);
                     }
-                })
-                .then(response => {
-                    // Jika response adalah redirect (bukan JSON), arahkan saja
-                    if (response.redirected) {
-                        window.location.href = response.url;
-                        return;
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Ini hanya dijalankan jika response adalah JSON
-                    if (data && data.success) {
-                        window.location.href = data.redirect_to || '/login';
-                    } else if (data && data.message) {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Logout Error:', error);
-                    alert('Terjadi kesalahan saat mencoba logout.');
+
+                    // Force update active state immediately
+                    setTimeout(() => {
+                        setActiveNavItem();
+                    }, 10);
+
+                    // Biarkan navigasi default berlanjut
                 });
             });
-        }
 
-        // --- MONITOR PERUBAHAN URL (UNTUK SPA) ---
-        // Jika menggunakan Single Page Application, monitor perubahan URL
-        let currentUrl = window.location.href;
-        setInterval(() => {
-            if (window.location.href !== currentUrl) {
-                currentUrl = window.location.href;
+            // --- INISIALISASI ---
+            setActiveNavItem();
+
+            // --- UPDATE ACTIVE STATE SAAT PAGE DIMUAT ULANG ---
+            // Cek apakah ada halaman yang tersimpan di sessionStorage
+            const lastClickedPage = sessionStorage.getItem('lastClickedPage');
+            const lastClickedPath = sessionStorage.getItem('lastClickedPath');
+
+            if (lastClickedPath) {
+                // Verifikasi apakah kita masih di halaman yang sama
+                const currentPath = window.location.pathname.replace(/^\//, '');
+                const normalizedStoredPath = lastClickedPath.replace(/^\//, '');
+
+                if (currentPath === normalizedStoredPath || currentPath.startsWith(normalizedStoredPath + '/')) {
+                    setActiveNavItem();
+                }
+            }
+
+            // --- HANDLER LOGOUT YANG LEBIH AMAN ---
+            const logoutForm = document.querySelector('form[action*="logout"]');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    // Hapus sessionStorage saat logout
+                    sessionStorage.removeItem('lastClickedPage');
+                    sessionStorage.removeItem('lastClickedPath');
+
+                    // Cek keberadaan meta tag CSRF
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                    if (!csrfToken) {
+                        console.error('Meta tag CSRF-Token tidak ditemukan!');
+                        alert('Terjadi kesalahan konfigurasi. Logout tidak dapat diproses.');
+                        return;
+                    }
+
+                    // Kirim form menggunakan fetch
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: new FormData(this),
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                            'Accept': 'application/json',
+                        }
+                    })
+                        .then(response => {
+                            // Jika response adalah redirect (bukan JSON), arahkan saja
+                            if (response.redirected) {
+                                window.location.href = response.url;
+                                return;
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Ini hanya dijalankan jika response adalah JSON
+                            if (data && data.success) {
+                                window.location.href = data.redirect_to || '/login';
+                            } else if (data && data.message) {
+                                alert(data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Logout Error:', error);
+                            alert('Terjadi kesalahan saat mencoba logout.');
+                        });
+                });
+            }
+
+            // --- MONITOR PERUBAHAN URL (UNTUK SPA) ---
+            // Jika menggunakan Single Page Application, monitor perubahan URL
+            let currentUrl = window.location.href;
+            setInterval(() => {
+                if (window.location.href !== currentUrl) {
+                    currentUrl = window.location.href;
+                    setTimeout(() => {
+                        setActiveNavItem();
+                    }, 100); // Delay kecil untuk memastikan DOM sudah update
+                }
+            }, 500);
+
+            // --- FORCE UPDATE ON PAGE LOAD ---
+            // Pastikan active state diupdate saat halaman selesai dimuat
+            window.addEventListener('load', function () {
                 setTimeout(() => {
                     setActiveNavItem();
-                }, 100); // Delay kecil untuk memastikan DOM sudah update
-            }
-        }, 500);
-
-        // --- FORCE UPDATE ON PAGE LOAD ---
-        // Pastikan active state diupdate saat halaman selesai dimuat
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                setActiveNavItem();
-            }, 100);
+                }, 100);
+            });
         });
-    });
     </script>
 
 </body>

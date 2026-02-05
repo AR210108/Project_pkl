@@ -1307,6 +1307,15 @@
                                 placeholder="Masukkan nomor telepon">
                         </div>
 
+<<<<<<< HEAD
+                    <!-- Alamat -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
+                        <textarea id="editAlamat" name="alamat" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            rows="3" placeholder="Masukkan alamat lengkap"></textarea>
+                    </div>
+=======
                         <!-- Status Kerja (DROPDOWN) -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status Kerja</label>
@@ -1328,6 +1337,7 @@
                                 <option value="freelance">Freelance</option>
                             </select>
                         </div>
+>>>>>>> d6cdcc4e6ebe230f12f21ae40cd3228027c7c501
 
                         <!-- Alamat (TEXTAREA) -->
                         <div class="md:col-span-2">

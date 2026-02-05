@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Order;
 
 class InvoiceController extends Controller
 {
@@ -207,6 +208,18 @@ class InvoiceController extends Controller
 
         $invoice = Invoice::create($validated);
         Log::info('Invoice created successfully:', ['id' => $invoice->id]);
+
+        // The Invoice model's created event will create the Order. Try to fetch it for logging.
+        try {
+            $order = Order::where('invoice_id', $invoice->id)->first();
+            if ($order) {
+                Log::info('Order exists for invoice', ['order_id' => $order->id, 'invoice_id' => $invoice->id]);
+            } else {
+                Log::warning('Order not found immediately after invoice creation', ['invoice_id' => $invoice->id]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed while checking for order after invoice creation: ' . $e->getMessage());
+        }
 
         DB::commit();
         } catch (\Exception $e) {
