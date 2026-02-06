@@ -634,37 +634,13 @@
                                                         <div class="flex justify-center gap-2">
                                                             <button
                                                                 class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                                onclick="openDetailModal(
-                                                                    {{ $item->id }}, 
-                                                                    '{{ addslashes($item->nama) }}', 
-                                                                    '{{ addslashes($item->deskripsi) }}', 
-                                                                    '{{ number_format($item->harga, 0, ',', '.') }}', 
-                                                                    '{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}', 
-                                                                    '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}', 
-                                                                    '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}', 
-                                                                    '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}', 
-                                                                    '{{ $item->status_pengerjaan }}', 
-                                                                    '{{ $item->status_kerjasama }}', 
-                                                                    {{ $item->progres }},
-                                                                    '{{ $item->invoice ? 'Invoice #' . $item->invoice->id : '' }}'
-                                                                )"
+                                                                onclick="openDetailModal({{ $item->id }})"
                                                                 title="Lihat Detail">
                                                                 <span class="material-icons-outlined">visibility</span>
                                                             </button>
                                                             <button
                                                                 class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                                onclick="openEditModal(
-                                                                    {{ $item->id }}, 
-                                                                    '{{ addslashes($item->nama) }}', 
-                                                                    '{{ addslashes($item->deskripsi) }}', 
-                                                                    '{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}', 
-                                                                    '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}', 
-                                                                    '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}', 
-                                                                    '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}', 
-                                                                    '{{ $item->status_pengerjaan }}', 
-                                                                    '{{ $item->status_kerjasama }}', 
-                                                                    {{ $item->progres }}
-                                                                )"
+                                                                onclick="openEditModal({{ $item->id }})"
                                                                 title="Edit">
                                                                 <span class="material-icons-outlined">edit</span>
                                                             </button>
@@ -703,37 +679,13 @@
                                             <div class="flex gap-2">
                                                 <button
                                                     class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                    onclick="openDetailModal(
-                                                        {{ $item->id }}, 
-                                                        '{{ addslashes($item->nama) }}', 
-                                                        '{{ addslashes($item->deskripsi) }}', 
-                                                        '{{ number_format($item->harga, 0, ',', '.') }}', 
-                                                        '{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}', 
-                                                        '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}', 
-                                                        '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}', 
-                                                        '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}', 
-                                                        '{{ $item->status_pengerjaan }}', 
-                                                        '{{ $item->status_kerjasama }}', 
-                                                        {{ $item->progres }},
-                                                        '{{ $item->invoice ? 'Invoice #' . $item->invoice->id : '' }}'
-                                                    )"
+                                                    onclick="openDetailModal({{ $item->id }})"
                                                     title="Lihat Detail">
                                                     <span class="material-icons-outlined">visibility</span>
                                                 </button>
                                                 <button
                                                     class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                    onclick="openEditModal(
-                                                        {{ $item->id }}, 
-                                                        '{{ addslashes($item->nama) }}', 
-                                                        '{{ addslashes($item->deskripsi) }}', 
-                                                        '{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}', 
-                                                        '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}', 
-                                                        '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}', 
-                                                        '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}', 
-                                                        '{{ $item->status_pengerjaan }}', 
-                                                        '{{ $item->status_kerjasama }}', 
-                                                        {{ $item->progres }}
-                                                    )"
+                                                    onclick="openEditModal({{ $item->id }})"
                                                     title="Edit">
                                                     <span class="material-icons-outlined">edit</span>
                                                 </button>
@@ -1293,85 +1245,104 @@
         // ============================
         // OPEN DETAIL MODAL
         // ============================
-        function openDetailModal(id, nama, deskripsi, harga, tanggalMulaiPengerjaan, tanggalSelesaiPengerjaan, 
-                                tanggalMulaiKerjasama, tanggalSelesaiKerjasama, statusPengerjaan, statusKerjasama, progres, invoice) {
-            
+        function openDetailModal(id) {
             const detailModal = document.getElementById('detailModal');
             if (!detailModal) {
                 console.error('Detail modal not found');
                 return;
             }
-            
-            // Set basic info
-            document.getElementById('detailId').textContent = '#' + id;
-            document.getElementById('detailNama').textContent = nama;
-            document.getElementById('detailDeskripsi').textContent = deskripsi;
-            document.getElementById('detailHarga').textContent = harga;
-            document.getElementById('detailInvoice').textContent = invoice || '-';
-            document.getElementById('detailTanggalMulaiPengerjaan').textContent = tanggalMulaiPengerjaan;
-            document.getElementById('detailTanggalSelesaiPengerjaan').textContent = tanggalSelesaiPengerjaan || '-';
-            document.getElementById('detailTanggalMulaiKerjasama').textContent = tanggalMulaiKerjasama || '-';
-            document.getElementById('detailTanggalSelesaiKerjasama').textContent = tanggalSelesaiKerjasama || '-';
-            document.getElementById('detailProgres').textContent = progres + '%';
-            
-            // Set status pengerjaan badge
-            const statusPengerjaanElement = document.getElementById('detailStatusPengerjaan');
-            const pengerjaanClass = getStatusPengerjaanClass(statusPengerjaan);
-            const pengerjaanLabel = getStatusPengerjaanLabel(statusPengerjaan);
-            statusPengerjaanElement.innerHTML = `<span class="status-badge ${pengerjaanClass}">${pengerjaanLabel}</span>`;
-            
-            // Set status kerjasama badge
-            const statusKerjasamaElement = document.getElementById('detailStatusKerjasama');
-            const kerjasamaClass = getStatusKerjasamaClass(statusKerjasama);
-            const kerjasamaLabel = getStatusKerjasamaLabel(statusKerjasama);
-            statusKerjasamaElement.innerHTML = `<span class="status-badge ${kerjasamaClass}">${kerjasamaLabel}</span>`;
-            
-            // Set progress bar
-            const progressBar = document.getElementById('detailProgressBar');
-            let progressColor = '';
-            if (progres < 50) {
-                progressColor = 'bg-red-500';
-            } else if (progres < 80) {
-                progressColor = 'bg-yellow-500';
-            } else {
-                progressColor = 'bg-green-500';
-            }
-            progressBar.className = `progress-fill ${progressColor}`;
-            progressBar.style.width = progres + '%';
-            
-            detailModal.classList.remove('hidden');
+
+            // Fetch latest project data from server
+            fetch(`/admin/project/${id}`)
+                .then(res => res.json())
+                .then(json => {
+                    if (!json.success || !json.data) {
+                        showToast(json.message || 'Gagal mengambil data project', 'error');
+                        return;
+                    }
+
+                    const p = json.data;
+                    document.getElementById('detailId').textContent = '#' + p.id;
+                    document.getElementById('detailNama').textContent = p.nama || '-';
+                    document.getElementById('detailDeskripsi').textContent = p.deskripsi || '-';
+                    document.getElementById('detailHarga').textContent = p.harga ? p.harga : '-';
+                    document.getElementById('detailInvoice').textContent = p.invoice ? ('Invoice #' + p.invoice.id) : '-';
+                    document.getElementById('detailTanggalMulaiPengerjaan').textContent = p.tanggal_mulai_pengerjaan || '-';
+                    document.getElementById('detailTanggalSelesaiPengerjaan').textContent = p.tanggal_selesai_pengerjaan || '-';
+                    document.getElementById('detailTanggalMulaiKerjasama').textContent = p.tanggal_mulai_kerjasama || '-';
+                    document.getElementById('detailTanggalSelesaiKerjasama').textContent = p.tanggal_selesai_kerjasama || '-';
+                    document.getElementById('detailProgres').textContent = (p.progres || 0) + '%';
+
+                    const statusPengerjaanElement = document.getElementById('detailStatusPengerjaan');
+                    const pengerjaanClass = getStatusPengerjaanClass(p.status_pengerjaan || 'pending');
+                    const pengerjaanLabel = getStatusPengerjaanLabel(p.status_pengerjaan || 'pending');
+                    statusPengerjaanElement.innerHTML = `<span class="status-badge ${pengerjaanClass}">${pengerjaanLabel}</span>`;
+
+                    const statusKerjasamaElement = document.getElementById('detailStatusKerjasama');
+                    const kerjasamaClass = getStatusKerjasamaClass(p.status_kerjasama || 'aktif');
+                    const kerjasamaLabel = getStatusKerjasamaLabel(p.status_kerjasama || 'aktif');
+                    statusKerjasamaElement.innerHTML = `<span class="status-badge ${kerjasamaClass}">${kerjasamaLabel}</span>`;
+
+                    const progressBar = document.getElementById('detailProgressBar');
+                    let progressColor = '';
+                    const prog = Number(p.progres || 0);
+                    if (prog < 50) progressColor = 'bg-red-500';
+                    else if (prog < 80) progressColor = 'bg-yellow-500';
+                    else progressColor = 'bg-green-500';
+                    if (progressBar) {
+                        progressBar.className = `progress-fill ${progressColor}`;
+                        progressBar.style.width = prog + '%';
+                    }
+
+                    detailModal.classList.remove('hidden');
+                })
+                .catch(err => {
+                    console.error('Error fetching project:', err);
+                    showToast('Gagal mengambil data project', 'error');
+                });
         }
 
         // ============================
         // OPEN EDIT MODAL
         // ============================
-        function openEditModal(id, nama, deskripsi, tanggalMulaiPengerjaan, tanggalSelesaiPengerjaan,
-                              tanggalMulaiKerjasama, tanggalSelesaiKerjasama, statusPengerjaan, statusKerjasama, progres) {
-            
+        function openEditModal(id) {
             const editModal = document.getElementById('editModal');
             if (!editModal) {
                 console.error('Edit modal not found');
                 return;
             }
-            
-            // Set form values
-            document.getElementById('editId').value = id;
-            document.getElementById('editNama').value = nama;
-            document.getElementById('editDeskripsi').value = deskripsi;
-            document.getElementById('editTanggalMulaiPengerjaan').value = tanggalMulaiPengerjaan;
-            document.getElementById('editTanggalSelesaiPengerjaan').value = tanggalSelesaiPengerjaan || '';
-            document.getElementById('editTanggalMulaiKerjasama').value = tanggalMulaiKerjasama || '';
-            document.getElementById('editTanggalSelesaiKerjasama').value = tanggalSelesaiKerjasama || '';
-            document.getElementById('editStatusPengerjaan').value = statusPengerjaan || 'pending';
-            document.getElementById('editStatusKerjasama').value = statusKerjasama || 'aktif';
-            document.getElementById('editProgres').value = progres;
-            document.getElementById('editProgresValue').textContent = progres + '%';
-            
-            // Set form action
-            const editForm = document.getElementById('editForm');
-            editForm.action = `/admin/project/${id}`;
-            
-            editModal.classList.remove('hidden');
+
+            // Fetch project data and populate form
+            fetch(`/admin/project/${id}`)
+                .then(res => res.json())
+                .then(json => {
+                    if (!json.success || !json.data) {
+                        showToast(json.message || 'Gagal mengambil data project', 'error');
+                        return;
+                    }
+
+                    const p = json.data;
+                    document.getElementById('editId').value = p.id;
+                    document.getElementById('editNama').value = p.nama || '';
+                    document.getElementById('editDeskripsi').value = p.deskripsi || '';
+                    document.getElementById('editTanggalMulaiPengerjaan').value = p.tanggal_mulai_pengerjaan || '';
+                    document.getElementById('editTanggalSelesaiPengerjaan').value = p.tanggal_selesai_pengerjaan || '';
+                    document.getElementById('editTanggalMulaiKerjasama').value = p.tanggal_mulai_kerjasama || '';
+                    document.getElementById('editTanggalSelesaiKerjasama').value = p.tanggal_selesai_kerjasama || '';
+                    document.getElementById('editStatusPengerjaan').value = p.status_pengerjaan || 'pending';
+                    document.getElementById('editStatusKerjasama').value = p.status_kerjasama || 'aktif';
+                    document.getElementById('editProgres').value = p.progres || 0;
+                    document.getElementById('editProgresValue').textContent = (p.progres || 0) + '%';
+
+                    const editForm = document.getElementById('editForm');
+                    editForm.action = `/admin/project/${p.id}`;
+
+                    editModal.classList.remove('hidden');
+                })
+                .catch(err => {
+                    console.error('Error fetching project for edit:', err);
+                    showToast('Gagal mengambil data project', 'error');
+                });
         }
 
         // ============================
