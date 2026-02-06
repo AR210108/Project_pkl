@@ -639,37 +639,13 @@
                                                         <div class="flex justify-center gap-2">
                                                             <button
                                                                 class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                                onclick="openDetailModal(
-                                                                    {{ $item->id }}, 
-                                                                    '{{ addslashes($item->nama) }}', 
-                                                                    '{{ addslashes($item->deskripsi) }}', 
-                                                                    '{{ number_format($item->harga, 0, ',', '.') }}', 
-                                                                    '{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}', 
-                                                                    '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}', 
-                                                                    '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}', 
-                                                                    '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}', 
-                                                                    '{{ $item->status_pengerjaan }}', 
-                                                                    '{{ $item->status_kerjasama }}', 
-                                                                    {{ $item->progres }},
-                                                                    '{{ $item->invoice ? 'Invoice #' . $item->invoice->id : '' }}'
-                                                                )"
+                                                                onclick="openDetailModal({{ $item->id }})"
                                                                 title="Lihat Detail">
                                                                 <span class="material-icons-outlined">visibility</span>
                                                             </button>
                                                             <button
                                                                 class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                                onclick="openEditModal(
-                                                                    {{ $item->id }}, 
-                                                                    '{{ addslashes($item->nama) }}', 
-                                                                    '{{ addslashes($item->deskripsi) }}', 
-                                                                    '{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}', 
-                                                                    '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}', 
-                                                                    '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}', 
-                                                                    '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}', 
-                                                                    '{{ $item->status_pengerjaan }}', 
-                                                                    '{{ $item->status_kerjasama }}', 
-                                                                    {{ $item->progres }}
-                                                                )"
+                                                                onclick="openEditModal({{ $item->id }})"
                                                                 title="Edit">
                                                                 <span class="material-icons-outlined">edit</span>
                                                             </button>
@@ -709,37 +685,13 @@
                                             <div class="flex gap-2">
                                                 <button
                                                     class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                    onclick="openDetailModal(
-                                                        {{ $item->id }}, 
-                                                        '{{ addslashes($item->nama) }}', 
-                                                        '{{ addslashes($item->deskripsi) }}', 
-                                                        '{{ number_format($item->harga, 0, ',', '.') }}', 
-                                                        '{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}', 
-                                                        '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}', 
-                                                        '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}', 
-                                                        '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}', 
-                                                        '{{ $item->status_pengerjaan }}', 
-                                                        '{{ $item->status_kerjasama }}', 
-                                                        {{ $item->progres }},
-                                                        '{{ $item->invoice ? 'Invoice #' . $item->invoice->id : '' }}'
-                                                    )"
+                                                    onclick="openDetailModal({{ $item->id }})"
                                                     title="Lihat Detail">
                                                     <span class="material-icons-outlined">visibility</span>
                                                 </button>
                                                 <button
                                                     class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                    onclick="openEditModal(
-                                                        {{ $item->id }}, 
-                                                        '{{ addslashes($item->nama) }}', 
-                                                        '{{ addslashes($item->deskripsi) }}', 
-                                                        '{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}', 
-                                                        '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}', 
-                                                        '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}', 
-                                                        '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}', 
-                                                        '{{ $item->status_pengerjaan }}', 
-                                                        '{{ $item->status_kerjasama }}', 
-                                                        {{ $item->progres }}
-                                                    )"
+                                                    onclick="openEditModal({{ $item->id }})"
                                                     title="Edit">
                                                     <span class="material-icons-outlined">edit</span>
                                                 </button>

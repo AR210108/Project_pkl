@@ -656,7 +656,6 @@
                                             <th style="min-width: 150px;">Nama Klien</th>
                                             <th style="min-width: 150px;">Nama Layanan</th>
                                             <th style="min-width: 200px;">Alamat</th>
-                                            <th style="min-width: 200px;">Deskripsi</th>
                                             <th style="min-width: 120px;">Subtotal</th>
                                             <th style="min-width: 100px;">Pajak (%)</th>
                                             <th style="min-width: 120px;">Jumlah Pajak</th>
@@ -668,7 +667,7 @@
                                     </thead>
                                     <tbody id="desktopTableBody">
                                         <tr id="loadingRow">
-                                            <td colspan="15" class="px-6 py-4 text-center">
+                                            <td colspan="14" class="px-6 py-4 text-center">
                                                 <div class="flex justify-center items-center">
                                                     <div class="spinner"></div>
                                                     <span class="ml-2">Memuat data...</span>
@@ -676,7 +675,7 @@
                                             </td>
                                         </tr>
                                         <tr id="noDataRow" class="hidden">
-                                            <td colspan="15" class="px-6 py-4 text-center text-sm text-gray-500">
+                                            <td colspan="14" class="px-6 py-4 text-center text-sm text-gray-500">
                                                 Tidak ada data invoice
                                             </td>
                                         </tr>
@@ -807,7 +806,7 @@
                             <span class="material-icons-outlined text-purple-500">receipt</span>
                             Informasi Invoice
                         </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Invoice *</label>
                                 <input type="text" id="invoice_no" name="invoice_no"
@@ -1889,6 +1888,15 @@ async function loadDataLayanan() {
 
         function formatNumber(value) {
             return new Intl.NumberFormat('id-ID').format(value);
+        }
+
+        // Function untuk mendapatkan tanggal hari ini dalam format YYYY-MM-DD
+        function getTodayDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
 
         // ==================== EVENT LISTENERS ====================
