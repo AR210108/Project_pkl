@@ -277,12 +277,12 @@ Route::middleware(['auth', 'role:admin'])
 
         // Di dalam Route::group(['prefix' => 'admin', ...])
 
-Route::get('/perusahaan', [PerusahaanController::class, 'index'])->name('perusahaan.index');
-Route::get('/perusahaan/create', [PerusahaanController::class, 'create'])->name('perusahaan.create');
-Route::post('/perusahaan', [PerusahaanController::class, 'store'])->name('perusahaan.store');
-Route::get('/perusahaan/{perusahaan}/edit', [PerusahaanController::class, 'edit'])->name('perusahaan.edit');
-Route::put('/perusahaan/{perusahaan}', [PerusahaanController::class, 'update'])->name('perusahaan.update'); // INI YANG PENTING
-Route::delete('/perusahaan/{perusahaan}', [PerusahaanController::class, 'destroy'])->name('perusahaan.delete'); // Nama route 'delete' atau 'destroy' harus konsisten
+        Route::get('/perusahaan', [PerusahaanController::class, 'index'])->name('perusahaan.index');
+        Route::get('/perusahaan/create', [PerusahaanController::class, 'create'])->name('perusahaan.create');
+        Route::post('/perusahaan', [PerusahaanController::class, 'store'])->name('perusahaan.store');
+        Route::get('/perusahaan/{perusahaan}/edit', [PerusahaanController::class, 'edit'])->name('perusahaan.edit');
+        Route::put('/perusahaan/{perusahaan}', [PerusahaanController::class, 'update'])->name('perusahaan.update'); // INI YANG PENTING
+        Route::delete('/perusahaan/{perusahaan}', [PerusahaanController::class, 'destroy'])->name('perusahaan.delete'); // Nama route 'delete' atau 'destroy' harus konsisten
 
 
         // API untuk data
@@ -299,25 +299,25 @@ Route::delete('/perusahaan/{perusahaan}', [PerusahaanController::class, 'destroy
         });
 
         Route::get('/perusahaan', [PerusahaanController::class, 'index'])->name('perusahaan.index');
-Route::get('/perusahaan/create', [PerusahaanController::class, 'create'])->name('perusahaan.create');
-Route::post('/perusahaan', [PerusahaanController::class, 'store'])->name('perusahaan.store');
-Route::get('/perusahaan/{perusahaan}/edit', [PerusahaanController::class, 'edit'])->name('perusahaan.edit');
-Route::put('/perusahaan/{perusahaan}', [PerusahaanController::class, 'update'])->name('perusahaan.update'); // INI YANG PENTING
-Route::delete('/perusahaan/{perusahaan}', [PerusahaanController::class, 'destroy'])->name('perusahaan.delete'); // Nama route 'delete' atau 'destroy' harus konsisten
+        Route::get('/perusahaan/create', [PerusahaanController::class, 'create'])->name('perusahaan.create');
+        Route::post('/perusahaan', [PerusahaanController::class, 'store'])->name('perusahaan.store');
+        Route::get('/perusahaan/{perusahaan}/edit', [PerusahaanController::class, 'edit'])->name('perusahaan.edit');
+        Route::put('/perusahaan/{perusahaan}', [PerusahaanController::class, 'update'])->name('perusahaan.update'); // INI YANG PENTING
+        Route::delete('/perusahaan/{perusahaan}', [PerusahaanController::class, 'destroy'])->name('perusahaan.delete'); // Nama route 'delete' atau 'destroy' harus konsisten
         Route::get('/perusahaan/data', [PerusahaanController::class, 'getDataForDropdown'])
             ->name('perusahaan.data');
 
-// KARYAWAN MANAGEMENT - ROUTE YANG DIPERBAIKI
+        // KARYAWAN MANAGEMENT - ROUTE YANG DIPERBAIKI
         Route::get('/data_karyawan', [AdminKaryawanController::class, 'index'])->name('karyawan.index');
         Route::post('/karyawan/store', [AdminKaryawanController::class, 'store'])->name('karyawan.store');
-        
+
         // Untuk update gunakan PUT dan POST untuk fallback
         Route::put('/karyawan/update/{id}', [AdminKaryawanController::class, 'update'])->name('karyawan.update');
         Route::post('/karyawan/update/{id}', [AdminKaryawanController::class, 'update'])->name('karyawan.update.post');
-        
+
         // Untuk delete
         Route::delete('/karyawan/delete/{id}', [AdminKaryawanController::class, 'destroy'])->name('karyawan.delete');
-        
+
         // Untuk get data
         Route::get('/karyawan/get/{id}', [AdminKaryawanController::class, 'getKaryawanData'])->name('karyawan.get.data');
         Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
@@ -359,7 +359,6 @@ Route::delete('/perusahaan/{perusahaan}', [PerusahaanController::class, 'destroy
             Route::delete('/{id}', [LayananController::class, 'destroy'])->name('delete');
             Route::get('/dropdown', [LayananController::class, 'getForInvoiceDropdown'])->name('dropdown');
             Route::get('/{id}', [LayananController::class, 'show'])->name('show');
-            Route::post('/{id}/update-harga', [LayananController::class, 'updateHarga'])->name('update.harga');
         });
 
         // Surat Kerjasama
@@ -383,9 +382,9 @@ Route::delete('/perusahaan/{perusahaan}', [PerusahaanController::class, 'destroy
         Route::post('/project', [DataProjectController::class, 'store'])->name('project.store');
         Route::put('/project/{id}', [DataProjectController::class, 'update'])->name('project.update');
         Route::delete('/project/{id}', [DataProjectController::class, 'destroy'])->name('project.destroy');
-            Route::post('/project/sync-from-invoice/{id}', [DataProjectController::class, 'syncFromInvoice'])
+        Route::post('/project/sync-from-invoice/{id}', [DataProjectController::class, 'syncFromInvoice'])
             ->name('admin.project.sync');
-                Route::get('/project/invoice/{id}/details', [DataProjectController::class, 'getInvoiceDetails']);
+        Route::get('/project/invoice/{id}/details', [DataProjectController::class, 'getInvoiceDetails']);
 
         Route::get('/surat_kerjasama', function () {
             return redirect()->route('admin.surat_kerjasama.index');
@@ -406,11 +405,11 @@ Route::delete('/perusahaan/{perusahaan}', [PerusahaanController::class, 'destroy
             Route::delete('/{id}', [InvoiceController::class, 'destroy'])->name('destroy');
             Route::get('/{id}/print', [InvoiceController::class, 'print'])->name('print');
         });
-            Route::get('/invoice/perusahaan-data', [InvoiceController::class, 'getPerusahaanData'])
-        ->name('invoice.perusahaan.data');
-    Route::get('/invoice/layanan-data', [InvoiceController::class, 'getLayananData'])
-        ->name('invoice.layanan.data');
-        
+        Route::get('/layanan-data', [InvoiceController::class, 'getLayananForDropdown'])
+            ->name('layanan-data');
+        Route::get('/invoice/perusahaan-data', [InvoiceController::class, 'getPerusahaanData'])
+            ->name('invoice.perusahaan.data');
+
 
         // ================= KWITANSI WEB =================
         Route::get('/kwitansi', [KwitansiController::class, 'index'])
@@ -657,7 +656,7 @@ Route::middleware(['auth', 'role:general_manager'])
 
         Route::post('/general-manajer/absensi/{id}/reject', [AbsensiController::class, 'rejectAbsensi'])
             ->name('general_manajer.absensi.reject');
-        
+
         Route::get('/tim_dan_divisi', function () {
             return view('general_manajer.tim_dan_divisi');
         })->name('tim_dan_divisi');

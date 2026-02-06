@@ -707,9 +707,9 @@
                             <span class="material-symbols-rounded text-green-600">person_check</span>
                         </div>
                         <div class="card-content">
-                            <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah User</p>
+                            <p class="text-xs sm:text-sm text-gray-500 label-text">Jumlah Perusahaan</p>
                             <p class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 value-text">
-                                {{ $jumlahUser }}
+                                {{ $jumlahPerusahaan }}
                             </p>
                         </div>
                     </div>

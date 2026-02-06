@@ -63,37 +63,39 @@ class AdminKaryawanController extends Controller
         }
     }
 
-    public function karyawanGeneral(Request $request)
-    {
-        try {
-            $query = Karyawan::query();
+public function karyawanGeneral(Request $request)
+{
+    try {
+        $query = Karyawan::query();
 
-            if ($request->has('search')) {
-                $searchTerm = $request->get('search');
-                $query->where('nama', 'LIKE', "%{$searchTerm}%")
+        if ($request->has('search')) {
+            $searchTerm = $request->get('search');
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('nama', 'LIKE', "%{$searchTerm}%")
                     ->orWhere('role', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('alamat', 'LIKE', "%{$searchTerm}%");
-            }
-
-            $karyawan = $query->paginate(10);
-
-            $users = User::with(['divisi' => function ($query) {
-                $query->select('id', 'divisi');
-            }])
-                ->whereNotIn('id', function ($query) {
-                    $query->select('user_id')
-                        ->from('karyawan')
-                        ->whereNotNull('user_id');
-                })
-                ->get(['id', 'name', 'divisi_id', 'role']);
-
-            return view('general_manajer.data_karyawan', compact('karyawan', 'users'));
-
-        } catch (\Exception $e) {
-            \Log::error('Karyawan general error:', ['error' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengambil data.');
+                    ->orWhere('email', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('divisi', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('alamat', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('kontak', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('status_kerja', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('status_karyawan', 'LIKE', "%{$searchTerm}%");
+            });
         }
+
+        // Filter divisi
+        if ($request->has('divisi') && $request->get('divisi') != '') {
+            $query->where('divisi', $request->get('divisi'));
+        }
+
+        $karyawan = $query->orderBy('nama', 'asc')->paginate(10);
+
+        return view('general_manajer.data_karyawan', compact('karyawan'));
+
+    } catch (\Exception $e) {
+        \Log::error('Karyawan general error:', ['error' => $e->getMessage()]);
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengambil data.');
     }
+}
 
     public function karyawanFinance(Request $request)
     {
@@ -141,58 +143,66 @@ class AdminKaryawanController extends Controller
         }
     }
 
-    public function karyawanDivisi(Request $request)
-    {
-        try {
-            $user = auth::user();
+public function karyawanDivisi(Request $request)
+{
+    try {
+        $user = auth::user();
 
-            if ($user->role !== 'manager_divisi') {
-                abort(403, 'Unauthorized');
-            }
-
-            $divisiManager = $user->divisi;
-
-            $query = Karyawan::query();
-
-            if ($divisiManager) {
-                $query->where('divisi', $divisiManager->divisi);
-            }
-
-            if ($request->has('search')) {
-                $searchTerm = $request->get('search');
-                $query->where(function ($q) use ($searchTerm) {
-                    $q->where('nama', 'LIKE', "%{$searchTerm}%")
-                        ->orWhere('role', 'LIKE', "%{$searchTerm}%")
-                        ->orWhere('email', 'LIKE', "%{$searchTerm}%")
-                        ->orWhere('alamat', 'LIKE', "%{$searchTerm}%");
-                });
-            }
-
-            $karyawan = $query->orderBy('nama', 'asc')->get();
-
-            $usersQuery = User::where('role', 'karyawan')
-                ->whereNotIn('id', function ($query) {
-                    $query->select('user_id')
-                        ->from('karyawan')
-                        ->whereNotNull('user_id');
-                });
-
-            if ($divisiManager) {
-                $usersQuery->where('divisi_id', $divisiManager->id);
-            }
-
-            $users = $usersQuery->orderBy('name', 'asc')
-                ->get(['id', 'name', 'email', 'divisi_id']);
-
-            $namaDivisiManager = $divisiManager ? $divisiManager->divisi : 'Tidak ada divisi';
-
-            return view('manager_divisi.daftar_karyawan', compact('karyawan', 'users', 'namaDivisiManager'));
-
-        } catch (\Exception $e) {
-            \Log::error('Karyawan divisi error:', ['error' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengambil data.');
+        if ($user->role !== 'manager_divisi') {
+            abort(403, 'Unauthorized');
         }
+
+        $divisiManager = $user->divisi;
+
+        $query = Karyawan::query();
+
+        // Filter berdasarkan divisi manager
+        if ($divisiManager) {
+            $query->where('divisi', $divisiManager->divisi);
+        }
+
+        // Search filter untuk semua field baru
+        if ($request->has('search')) {
+            $searchTerm = $request->get('search');
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('nama', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('role', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('email', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('divisi', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('alamat', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('kontak', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('status_kerja', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('status_karyawan', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
+        // ORDER BY nama secara ascending
+        $karyawan = $query->orderBy('nama', 'asc')->get();
+
+        // Ambil users yang belum menjadi karyawan untuk modal (jika dibutuhkan)
+        $usersQuery = User::where('role', 'karyawan')
+            ->whereNotIn('id', function ($query) {
+                $query->select('user_id')
+                    ->from('karyawan')
+                    ->whereNotNull('user_id');
+            });
+
+        if ($divisiManager) {
+            $usersQuery->where('divisi_id', $divisiManager->id);
+        }
+
+        $users = $usersQuery->orderBy('name', 'asc')
+            ->get(['id', 'name', 'email', 'divisi_id']);
+
+        $namaDivisiManager = $divisiManager ? $divisiManager->divisi : 'Tidak ada divisi';
+
+        return view('manager_divisi.daftar_karyawan', compact('karyawan', 'users', 'namaDivisiManager'));
+
+    } catch (\Exception $e) {
+        \Log::error('Karyawan divisi error:', ['error' => $e->getMessage()]);
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengambil data.');
     }
+}
 
     /**
      * Store a newly created resource in storage.
