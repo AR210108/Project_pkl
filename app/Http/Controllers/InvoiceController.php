@@ -99,53 +99,52 @@ class InvoiceController extends Controller
      */
 
 
-public function create()
-{
-    $user = Auth::user();
+    public function create()
+    {
+        $user = Auth::user();
 
-    try {
-        // Ambil data layanan untuk dropdown
-        $layanan = Layanan::orderBy('nama_layanan', 'asc')
-            ->get(['id', 'nama_layanan', 'harga', 'deskripsi']);
+        try {
+            // Ambil data layanan untuk dropdown
+            $layanan = Layanan::orderBy('nama_layanan', 'asc')
+                ->get(['id', 'nama_layanan', 'harga', 'deskripsi']);
 
-        // Ambil data perusahaan untuk dropdown
-        $perusahaanList = Perusahaan::orderBy('nama_perusahaan', 'asc')
-            ->get(['id', 'nama_perusahaan', 'klien', 'alamat', 'jumlah_kerjasama']);
+            // Ambil data perusahaan untuk dropdown
+            $perusahaanList = Perusahaan::orderBy('nama_perusahaan', 'asc')
+                ->get(['id', 'nama_perusahaan', 'klien', 'alamat', 'kontak']);
 
-        if ($user && $user->role == 'finance') {
-            $viewName = 'finance.invoice_create';
-        } else {
-            $viewName = 'admin.invoice_create';
+            if ($user && $user->role == 'finance') {
+                $viewName = 'finance.invoice_create';
+            } else {
+                $viewName = 'admin.invoice_create';
+            }
+
+            return view($viewName, compact('layanan', 'perusahaanList'));
+        } catch (\Exception $e) {
+            Log::error('Error getting data for create form: ' . $e->getMessage());
+
+            $layanan = collect();
+            $perusahaanList = collect();
+
+            if ($user && $user->role == 'finance') {
+                $viewName = 'finance.invoice_create';
+            } else {
+                $viewName = 'admin.invoice_create';
+            }
+
+            return view($viewName, compact('layanan', 'perusahaanList'));
         }
-
-        return view($viewName, compact('layanan', 'perusahaanList'));
-    } catch (\Exception $e) {
-        Log::error('Error getting data for create form: ' . $e->getMessage());
-
-        $layanan = collect();
-        $perusahaanList = collect();
-
-        if ($user && $user->role == 'finance') {
-            $viewName = 'finance.invoice_create';
-        } else {
-            $viewName = 'admin.invoice_create';
-        }
-
-        return view($viewName, compact('layanan', 'perusahaanList'));
     }
-}
-
 
 public function store(Request $request)
 {
     Log::info('Store Invoice Request:', $request->all());
 
-    // Validasi dengan field baru
     $validator = Validator::make($request->all(), [
         'invoice_no' => 'required|string|unique:invoices,invoice_no',
         'invoice_date' => 'required|date',
         'company_name' => 'required|string|max:255',
         'company_address' => 'required|string',
+        'kontak' => 'nullable|string|max:255', // Pastikan field ini divalidasi
         'client_name' => 'required|string|max:255',
         'nama_layanan' => 'required|string|max:255',
         'status_pembayaran' => 'required|in:pembayaran awal,lunas',
@@ -154,7 +153,7 @@ public function store(Request $request)
         'subtotal' => 'required|numeric|min:0',
         'tax' => 'required|numeric|min:0',
         'total' => 'required|numeric|min:0',
-        'order_number' => 'nullable|string', // Tambahkan ini
+        'order_number' => 'nullable|string',
     ]);
 
     if ($validator->fails()) {
@@ -177,6 +176,37 @@ public function store(Request $request)
     try {
         $validated = $validator->validated();
 
+        // TAMBAHKAN LOGIKA INI: Ambil data kontak dari perusahaan jika kosong
+        if (empty($validated['kontak']) && !empty($validated['company_name'])) {
+            $perusahaan = Perusahaan::where('nama_perusahaan', $validated['company_name'])->first();
+            if ($perusahaan) {
+                // Ambil kontak dari berbagai kemungkinan field
+                if (!empty($perusahaan->kontak)) {
+                    $validated['kontak'] = $perusahaan->kontak;
+                } elseif (!empty($perusahaan->telepon)) {
+                    $validated['kontak'] = $perusahaan->telepon;
+                } elseif (!empty($perusahaan->no_telp)) {
+                    $validated['kontak'] = $perusahaan->no_telp;
+                } elseif (!empty($perusahaan->phone)) {
+                    $validated['kontak'] = $perusahaan->phone;
+                } elseif (!empty($perusahaan->no_hp)) {
+                    $validated['kontak'] = $perusahaan->no_hp;
+                } elseif (!empty($perusahaan->telephone)) {
+                    $validated['kontak'] = $perusahaan->telephone;
+                }
+                Log::info('Auto-filled kontak from perusahaan:', ['kontak' => $validated['kontak'] ?? '']);
+            }
+        }
+
+        // TAMBAHKAN INI: Jika deskripsi kosong, ambil dari layanan
+        if (empty($validated['description']) && !empty($validated['nama_layanan'])) {
+            $layanan = Layanan::where('nama_layanan', $validated['nama_layanan'])->first();
+            if ($layanan && !empty($layanan->deskripsi)) {
+                $validated['description'] = $layanan->deskripsi;
+                Log::info('Auto-filled description from layanan:', ['deskripsi' => $layanan->deskripsi]);
+            }
+        }
+
         // Generate invoice number if not provided
         if (empty($validated['invoice_no'])) {
             $validated['invoice_no'] = 'INV-' . date('Ymd') . '-' . strtoupper(uniqid());
@@ -187,12 +217,13 @@ public function store(Request $request)
         $validated['tax'] = (float) $validated['tax'];
         $validated['total'] = (float) $validated['total'];
 
-        // Simpan jumlah kerjasama dari perusahaan
+        // Simpan dari perusahaan (update kontak counter)
         $perusahaan = Perusahaan::where('nama_perusahaan', $validated['company_name'])->first();
         if ($perusahaan) {
-            // Update jumlah kerjasama perusahaan
+            // Update perusahaan - pastikan kontak adalah integer untuk increment
+            $currentKontak = (int) ($perusahaan->kontak ?? 0);
             $perusahaan->update([
-                'jumlah_kerjasama' => ($perusahaan->jumlah_kerjasama + 1)
+                'kontak' => $currentKontak + 1
             ]);
         }
 
@@ -225,9 +256,9 @@ public function store(Request $request)
         }
 
         // Untuk web form request
-        $user = Auth::user();
-        return redirect()->route($user->role . '.invoice.index')
+        return redirect()->route('admin.invoice.index')
             ->with('success', 'Invoice berhasil dibuat');
+
     } catch (\Exception $e) {
         DB::rollBack();
         Log::error('Error creating invoice: ' . $e->getMessage(), [
@@ -249,7 +280,6 @@ public function store(Request $request)
             ->withInput();
     }
 }
-
     /**
      * Display the specified resource.
      */
@@ -339,9 +369,10 @@ public function store(Request $request)
                 'invoice_date' => 'required|date',
                 'company_name' => 'required|string|max:255',
                 'company_address' => 'required|string',
+                'kontak' => 'nullable|string|max:255', // Tambahkan validasi kontak
                 'client_name' => 'required|string|max:255',
-                'nama_layanan' => 'required|string|max:255', // Field baru
-                'status_pembayaran' => 'required|in:pembayaran awal,lunas', // Field baru
+                'nama_layanan' => 'required|string|max:255',
+                'status_pembayaran' => 'required|in:pembayaran awal,lunas',
                 'payment_method' => 'required|string',
                 'description' => 'nullable|string',
                 'subtotal' => 'required|numeric|min:0',
@@ -582,18 +613,18 @@ public function store(Request $request)
      * Get invoices for kwitansi
      */
     // InvoiceController.php - Method getInvoicesForKwitansi
-        public function getInvoicesForKwitansi(Request $request)
+    public function getInvoicesForKwitansi(Request $request)
     {
         try {
             Log::info('Admin API: getInvoicesForKwitansi called', [
                 'user_id' => Auth::id(),
                 'user_role' => Auth::user()->role ?? 'guest'
             ]);
-            
+
             // Query semua invoice (bisa difilter nanti)
             $query = Invoice::select('invoices.*')
                 ->orderBy('created_at', 'desc');
-            
+
             // Filter pencarian
             if ($request->filled('search')) {
                 $search = $request->search;
@@ -604,12 +635,12 @@ public function store(Request $request)
                         ->orWhere('order_number', 'like', "%{$search}%");
                 });
             }
-            
+
             // Filter hanya invoice yang belum memiliki kwitansi (opsional)
             if ($request->input('unpaid_only', false)) {
                 $query->whereDoesntHave('kwitansi'); // Asumsi ada relationship
             }
-            
+
             $invoices = $query->get()->map(function ($invoice) {
                 return [
                     'id' => $invoice->id,
@@ -628,19 +659,18 @@ public function store(Request $request)
                     'tax' => $invoice->tax,
                 ];
             });
-            
+
             Log::info('Admin API: Invoices data returned', ['count' => $invoices->count()]);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data invoice untuk kwitansi berhasil diambil',
                 'data' => $invoices,
                 'total' => $invoices->count()
             ]);
-            
         } catch (\Exception $e) {
             Log::error('Error in getInvoicesForKwitansi: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal mengambil data invoice untuk kwitansi',
@@ -650,16 +680,16 @@ public function store(Request $request)
     }
 
     // Method getInvoiceDetailForKwitansi - PERBAIKAN
-     public function getInvoiceDetailForKwitansi($id)
+    public function getInvoiceDetailForKwitansi($id)
     {
         try {
             Log::info('Admin API: getInvoiceDetailForKwitansi called', [
                 'invoice_id' => $id,
                 'user_id' => Auth::id()
             ]);
-            
+
             $invoice = Invoice::findOrFail($id);
-            
+
             // Format data untuk form kwitansi
             $invoiceData = [
                 'id' => $invoice->id,
@@ -677,26 +707,24 @@ public function store(Request $request)
                 'company_address' => $invoice->company_address,
                 'payment_method' => $invoice->payment_method,
             ];
-            
+
             Log::info('Admin API: Invoice detail returned', ['invoice_id' => $id]);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data invoice berhasil diambil',
                 'data' => $invoiceData
             ]);
-            
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             Log::error('Admin API: Invoice not found: ' . $id);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Invoice tidak ditemukan'
             ], 404);
-            
         } catch (\Exception $e) {
             Log::error('Error in getInvoiceDetailForKwitansi: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal mengambil detail invoice',
@@ -707,11 +735,11 @@ public function store(Request $request)
     /**
      * Get all invoices (API) - untuk kwitansi dropdown
      */
-  public function getAllInvoicesApi(Request $request)
+    public function getAllInvoicesApi(Request $request)
     {
         try {
             $query = Invoice::orderBy('created_at', 'desc');
-            
+
             // Filter
             if ($request->filled('search')) {
                 $search = $request->search;
@@ -721,18 +749,17 @@ public function store(Request $request)
                         ->orWhere('invoice_no', 'like', "%{$search}%");
                 });
             }
-            
+
             $invoices = $query->get(['id', 'invoice_no', 'company_name', 'client_name', 'order_number', 'total', 'status_pembayaran']);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data semua invoice berhasil diambil',
                 'data' => $invoices
             ]);
-            
         } catch (\Exception $e) {
             Log::error('Error in getAllInvoicesApi: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal mengambil data invoice',
@@ -742,125 +769,147 @@ public function store(Request $request)
     }
 
     /**
- * Create project from invoice manually
- */
-public function createProjectFromInvoice($id)
-{
-    try {
-        $invoice = Invoice::findOrFail($id);
-        
-        // Cek apakah sudah ada project
-        if ($invoice->hasProject()) {
+     * Create project from invoice manually
+     */
+    public function createProjectFromInvoice($id)
+    {
+        try {
+            $invoice = Invoice::findOrFail($id);
+
+            // Cek apakah sudah ada project
+            if ($invoice->hasProject()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Invoice sudah memiliki project',
+                    'data' => [
+                        'invoice' => $invoice,
+                        'project' => $invoice->project,
+                        'project_link' => $invoice->project_link
+                    ]
+                ]);
+            }
+
+            // Buat project dari invoice
+            $project = $invoice->createProjectFromInvoice();
+
+            if ($project) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Project berhasil dibuat dari invoice',
+                    'data' => [
+                        'invoice' => $invoice,
+                        'project' => $project,
+                        'project_link' => $invoice->project_link
+                    ]
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal membuat project dari invoice'
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error creating project from invoice: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat project: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Sync project with invoice
+     */
+    public function syncProjectWithInvoice($id)
+    {
+        try {
+            $invoice = Invoice::findOrFail($id);
+
+            if (!$invoice->hasProject()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invoice belum memiliki project'
+                ], 404);
+            }
+
+            $result = $invoice->syncProjectWithInvoice();
+
+            if ($result) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Project berhasil disinkronisasi dengan invoice',
+                    'data' => [
+                        'invoice' => $invoice,
+                        'project' => $invoice->project
+                    ]
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menyinkronisasi project'
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error syncing project with invoice: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal sinkronisasi: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get project info for invoice
+     */
+    public function getInvoiceProjectInfo($id)
+    {
+        try {
+            $invoice = Invoice::findOrFail($id);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Invoice sudah memiliki project',
+                'message' => 'Informasi project berhasil diambil',
                 'data' => [
-                    'invoice' => $invoice,
+                    'has_project' => $invoice->hasProject(),
                     'project' => $invoice->project,
+                    'project_status' => $invoice->project_status,
                     'project_link' => $invoice->project_link
                 ]
             ]);
-        }
-        
-        // Buat project dari invoice
-        $project = $invoice->createProjectFromInvoice();
-        
-        if ($project) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Project berhasil dibuat dari invoice',
-                'data' => [
-                    'invoice' => $invoice,
-                    'project' => $project,
-                    'project_link' => $invoice->project_link
-                ]
-            ]);
-        } else {
+        } catch (\Exception $e) {
+            \Log::error('Error getting invoice project info: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal membuat project dari invoice'
+                'message' => 'Gagal mengambil informasi project: ' . $e->getMessage()
             ], 500);
         }
-        
-    } catch (\Exception $e) {
-        \Log::error('Error creating project from invoice: ' . $e->getMessage());
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal membuat project: ' . $e->getMessage()
-        ], 500);
     }
-}
+    public function getLayananForDropdown(Request $request)
+    {
+        try {
+            Log::info('Getting layanan data for dropdown');
 
-/**
- * Sync project with invoice
- */
-public function syncProjectWithInvoice($id)
-{
-    try {
-        $invoice = Invoice::findOrFail($id);
-        
-        if (!$invoice->hasProject()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invoice belum memiliki project'
-            ], 404);
-        }
-        
-        $result = $invoice->syncProjectWithInvoice();
-        
-        if ($result) {
+            $layanan = Layanan::orderBy('nama_layanan', 'asc')
+                ->get(['id', 'nama_layanan', 'deskripsi', 'harga', 'hpp']);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Project berhasil disinkronisasi dengan invoice',
-                'data' => [
-                    'invoice' => $invoice,
-                    'project' => $invoice->project
-                ]
+                'message' => 'Data layanan berhasil diambil',
+                'data' => $layanan
             ]);
-        } else {
+        } catch (\Exception $e) {
+            Log::error('Error getting layanan data for dropdown: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menyinkronisasi project'
+                'message' => 'Gagal mengambil data layanan',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
             ], 500);
         }
-        
-    } catch (\Exception $e) {
-        \Log::error('Error syncing project with invoice: ' . $e->getMessage());
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal sinkronisasi: ' . $e->getMessage()
-        ], 500);
     }
-}
-
-/**
- * Get project info for invoice
- */
-public function getInvoiceProjectInfo($id)
-{
-    try {
-        $invoice = Invoice::findOrFail($id);
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Informasi project berhasil diambil',
-            'data' => [
-                'has_project' => $invoice->hasProject(),
-                'project' => $invoice->project,
-                'project_status' => $invoice->project_status,
-                'project_link' => $invoice->project_link
-            ]
-        ]);
-        
-    } catch (\Exception $e) {
-        \Log::error('Error getting invoice project info: ' . $e->getMessage());
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal mengambil informasi project: ' . $e->getMessage()
-        ], 500);
-    }
-}
 }

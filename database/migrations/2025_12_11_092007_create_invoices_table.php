@@ -18,11 +18,11 @@ return new class extends Migration
 
             $table->string('company_name');
             $table->text('company_address');
+            $table->string('kontak')->nullable(); // TAMBAHKAN FIELD KONTAK DI SINI
 
             $table->string('client_name');
             $table->string('order_number')->nullable();
 
-            // TAMBAHKAN FIELD BARU DI SINI
             $table->string('nama_layanan')->nullable();
             $table->enum('status_pembayaran', ['pembayaran awal', 'lunas'])->default('pembayaran awal');
 
@@ -39,8 +39,9 @@ return new class extends Migration
             $table->index('company_name');
             $table->index('client_name');
             $table->index('invoice_date');
-            $table->index('nama_layanan'); // Tambah index
-            $table->index('status_pembayaran'); // Tambah index
+            $table->index('nama_layanan');
+            $table->index('status_pembayaran');
+            $table->index('kontak'); // Tambah index untuk kontak
         });
     }
 
