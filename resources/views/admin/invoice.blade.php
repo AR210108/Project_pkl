@@ -530,6 +530,32 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
         }
 
+        /* CSS untuk Select2 Layanan */
+        .select2-layanan + .select2-container .select2-selection--single {
+            height: 42px !important;
+            padding: 8px !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 0.5rem !important;
+        }
+
+        .select2-layanan + .select2-container .select2-selection__rendered {
+            line-height: 26px !important;
+            padding-left: 0 !important;
+        }
+
+        .select2-layanan + .select2-container .select2-selection__arrow {
+            height: 40px !important;
+        }
+
+        .select2-layanan + .select2-container .select2-results__option {
+            padding: 8px 12px !important;
+        }
+
+        .select2-layanan + .select2-container .select2-results__option--highlighted {
+            background-color: #3b82f6 !important;
+            color: white !important;
+        }
+
         /* Loading overlay */
         .loading-overlay {
             position: fixed;
@@ -694,11 +720,12 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="buatInvoiceForm" class="space-y-4">
-                    @csrf
-                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+<form id="buatInvoiceForm" class="space-y-4">
+    @csrf
+    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+    <!-- TAMBAHKAN INI -->
+    <input type="hidden" name="kontak" id="kontakHidden">
 
-                    <!-- Informasi Perusahaan -->
                     <!-- Informasi Perusahaan -->
                     <div class="border-b pb-4">
                         <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
@@ -750,24 +777,28 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Layanan *</label>
                                 <select id="selectLayanan" name="nama_layanan"
-                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input select2-layanan"
                                     required>
                                     <option value="">Pilih Layanan</option>
+                                    <!-- Options akan diisi oleh JavaScript -->
                                 </select>
                                 <span class="error-message" id="nama_layanan_error"></span>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Harga Layanan</label>
-                                <input type="text" id="hargaLayanan"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Harga Layanan (Rp)</label>
+                                <input type="text" id="hargaLayanan" name="hargaLayananDisplay"
                                     class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700"
                                     readonly>
                             </div>
                         </div>
                         <div class="mt-3">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Layanan</label>
-                            <textarea id="deskripsiLayanan" rows="2"
+                            <textarea id="deskripsiLayanan" name="deskripsiLayanan" rows="2"
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700" readonly></textarea>
                         </div>
+                        <!-- Tambahkan input hidden untuk menyimpan data asli -->
+                        <input type="hidden" id="hargaHidden" name="harga">
+                        <input type="hidden" id="hppHidden" name="hpp">
                     </div>
 
                     <!-- Informasi Invoice -->
@@ -790,6 +821,11 @@
                                     class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                                     required>
                                 <span class="error-message" id="invoice_date_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                                <textarea id="description" name="description" rows="2"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"></textarea>
                             </div>
                         </div>
                     </div>
@@ -949,23 +985,27 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan *</label>
                                 <select id="editNamaLayanan" name="nama_layanan"
-                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input select2-layanan"
                                     required>
                                     <option value="">Pilih Layanan</option>
                                 </select>
                                 <span class="error-message" id="edit_nama_layanan_error"></span>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Status Pembayaran *</label>
-                                <select id="editStatusPembayaran" name="status_pembayaran"
-                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                    required>
-                                    <option value="pembayaran awal">Pembayaran Awal</option>
-                                    <option value="lunas">Lunas</option>
-                                </select>
-                                <span class="error-message" id="edit_status_pembayaran_error"></span>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Harga Layanan (Rp)</label>
+                                <input type="text" id="editHargaLayanan" name="editHargaLayananDisplay"
+                                    class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700"
+                                    readonly>
                             </div>
                         </div>
+                        <div class="mt-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Layanan</label>
+                            <textarea id="editDeskripsiLayanan" name="editDeskripsiLayanan" rows="2"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700" readonly></textarea>
+                        </div>
+                        <!-- Hidden fields untuk edit -->
+                        <input type="hidden" id="editHargaHidden" name="harga">
+                        <input type="hidden" id="editHppHidden" name="hpp">
                     </div>
 
                     <!-- Perhitungan Harga -->
@@ -974,7 +1014,7 @@
                             <span class="material-icons-outlined text-red-500">calculate</span>
                             Perhitungan Harga
                         </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Subtotal (Rp) *</label>
                                 <input type="number" id="editSubtotal" name="subtotal" min="0"
@@ -1011,6 +1051,16 @@
                     <!-- Informasi Pembayaran & Deskripsi -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Pembayaran *</label>
+                            <select id="editStatusPembayaran" name="status_pembayaran"
+                                class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
+                                <option value="pembayaran awal">Pembayaran Awal</option>
+                                <option value="lunas">Lunas</option>
+                            </select>
+                            <span class="error-message" id="edit_status_pembayaran_error"></span>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran *</label>
                             <select id="editPaymentMethod" name="payment_method"
                                 class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
@@ -1022,12 +1072,12 @@
                             </select>
                             <span class="error-message" id="edit_payment_method_error"></span>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                            <textarea id="editDescription" name="description" rows="3"
-                                class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"></textarea>
-                            <span class="error-message" id="edit_description_error"></span>
-                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Tambahan</label>
+                        <textarea id="editDescription" name="description" rows="3"
+                            class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"></textarea>
+                        <span class="error-message" id="edit_description_error"></span>
                     </div>
 
                     <div class="flex justify-end gap-2 mt-6">
@@ -1403,7 +1453,6 @@
                 const data = await response.json();
                 console.log('Response data perusahaan:', data);
 
-                // Parse data perusahaan dengan berbagai format
                 if (data && Array.isArray(data)) {
                     dataPerusahaan = data;
                 } else if (data && data.success && Array.isArray(data.data)) {
@@ -1412,7 +1461,6 @@
                     dataPerusahaan = data.perusahaan;
                 } else {
                     console.warn('Format data perusahaan tidak dikenali:', data);
-                  
                     return;
                 }
 
@@ -1420,11 +1468,8 @@
                 populatePerusahaanOptions();
             } catch (error) {
                 console.error('Error loading perusahaan data:', error);
-                
             }
         }
-
-
 
         // Fungsi untuk mengisi dropdown perusahaan
         function populatePerusahaanOptions() {
@@ -1526,75 +1571,91 @@
         }
 
         // ==================== FUNGSI UNTUK MENGAMBIL DATA LAYANAN ====================
-        async function loadDataLayanan() {
-            try {
-                console.log('Memuat data layanan dari endpoint...');
+// GANTI DI FUNGSI loadDataLayanan():
+async function loadDataLayanan() {
+    try {
+        console.log('Memuat data layanan dari endpoint...');
 
-                // Coba beberapa endpoint yang mungkin
-                const endpoints = [
-                    '/admin/layanan/data?ajax=1&for_dropdown=true',
-                    '/api/layanan?for_dropdown=true'
-                ];
+        // GUNAKAN URL LANGSUNG:
+        const response = await fetch('{{ route("admin.surat_kerjasama.data.layanan") }}', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'include'
+        });
 
-                let response = null;
-
-                for (const endpoint of endpoints) {
-                    try {
-                        console.log('Mencoba endpoint:', endpoint);
-                        response = await fetch(endpoint, {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            },
-                            credentials: 'include'
-                        });
-
-                        if (response.ok) {
-                            console.log('Endpoint berhasil:', endpoint);
-                            break;
-                        }
-                    } catch (err) {
-                        console.log('Endpoint gagal:', endpoint, err);
-                    }
-                }
-
-                if (!response || !response.ok) {
-                    console.warn('Semua endpoint layanan gagal');
-                    return;
-                }
-
-                const data = await response.json();
-                console.log('Response data layanan:', data);
-
-                if (data && Array.isArray(data)) {
-                    dataLayanan = data;
-                } else if (data && data.success && Array.isArray(data.data)) {
-                    dataLayanan = data.data;
-                } else if (data && Array.isArray(data.layanan)) {
-                    dataLayanan = data.layanan;
-                } else {
-                    console.warn('Format data layanan tidak dikenali:', data);
-                    return;
-                }
-
-                console.log(`Berhasil memuat ${dataLayanan.length} data layanan`);
-                populateLayananOptions();
-            } catch (error) {
-                console.error('Error loading layanan data:', error);
-            }
+        // Atau gunakan route yang sudah ada di Surat Kerjasama:
+        // const response = await fetch('{{ route("admin.surat_kerjasama.data.layanan") }}', {
+        
+        if (checkSessionError(response)) {
+            return;
         }
 
+        if (!response.ok) {
+            console.warn('Response layanan tidak OK:', response.status);
+            // Fallback ke data dummy jika endpoint tidak tersedia
+            useDummyLayananData();
+            return;
+        }
 
+        const data = await response.json();
+        console.log('Response data layanan:', data);
 
+        if (data && data.success && Array.isArray(data.data)) {
+            dataLayanan = data.data;
+            console.log(`Berhasil memuat ${dataLayanan.length} data layanan`);
+            populateLayananOptions();
+        } else {
+            console.warn('Format data layanan tidak dikenali:', data);
+            useDummyLayananData();
+        }
+    } catch (error) {
+        console.error('Error loading layanan data:', error);
+        useDummyLayananData();
+    }
+}
+
+        function useDummyLayananData() {
+            dataLayanan = [
+                {
+                    id: 1,
+                    nama_layanan: 'Web Development',
+                    deskripsi: 'Pembuatan website perusahaan',
+                    harga: 5000000,
+                    hpp: 2000000
+                },
+                {
+                    id: 2,
+                    nama_layanan: 'Mobile App',
+                    deskripsi: 'Pembuatan aplikasi mobile',
+                    harga: 8000000,
+                    hpp: 3000000
+                },
+                {
+                    id: 3,
+                    nama_layanan: 'Digital Marketing',
+                    deskripsi: 'Kampanye pemasaran digital',
+                    harga: 3000000,
+                    hpp: 1000000
+                }
+            ];
+            console.log('Menggunakan data layanan dummy:', dataLayanan.length);
+            populateLayananOptions();
+        }
+
+        // Fungsi untuk mengisi dropdown layanan
         function populateLayananOptions() {
+            console.log('Populating layanan options with', dataLayanan.length, 'items');
+            
             const layananSelect = document.getElementById('selectLayanan');
             const editLayananSelect = document.getElementById('editNamaLayanan');
             
-            function createOptions(selectElement) {
+            function createOptions(selectElement, isEditForm = false) {
                 if (!selectElement) {
-                    console.warn('Element select tidak ditemukan untuk createOptions');
+                    console.warn('Element select tidak ditemukan');
                     return;
                 }
 
@@ -1605,9 +1666,8 @@
                 selectElement.innerHTML = '<option value="">Pilih Layanan</option>';
 
                 if (dataLayanan.length === 0) {
-                    console.warn('Data layanan kosong, menambahkan option default');
                     const option = document.createElement('option');
-                    option.value = 'data_kosong';
+                    option.value = '';
                     option.textContent = 'Tidak ada data layanan';
                     option.disabled = true;
                     selectElement.appendChild(option);
@@ -1616,71 +1676,166 @@
 
                 dataLayanan.forEach(layanan => {
                     const option = document.createElement('option');
-
-                    const nama = layanan.nama_layanan || layanan.nama || `Layanan ${layanan.id}`;
-                    const harga = layanan.harga || 0;
-                    const deskripsi = layanan.deskripsi || '';
-
-                    option.value = nama;
-                    option.textContent = nama;
-                    option.setAttribute('data-harga', harga);
-                    option.setAttribute('data-deskripsi', deskripsi);
-
-                    if (harga > 0) {
-                        option.textContent += ` (Rp ${formatNumber(harga)})`;
-                    }
-
+                    option.value = layanan.nama_layanan;
+                    
+                    // Format tampilan: Nama Layanan (Rp harga)
+                    const hargaFormatted = formatCurrency(layanan.harga || 0);
+                    option.textContent = `${layanan.nama_layanan} - ${hargaFormatted}`;
+                    
+                    // Simpan data tambahan sebagai atribut
+                    option.setAttribute('data-id', layanan.id);
+                    option.setAttribute('data-harga', layanan.harga || 0);
+                    option.setAttribute('data-hpp', layanan.hpp || 0);
+                    option.setAttribute('data-deskripsi', layanan.deskripsi || '');
+                    
                     selectElement.appendChild(option);
                 });
 
                 // Restore previous value
                 if (currentValue) {
                     selectElement.value = currentValue;
+                    // Trigger change untuk mengisi data lainnya
+                    setTimeout(() => {
+                        triggerLayananChange(selectElement, isEditForm);
+                    }, 100);
                 }
             }
 
-            createOptions(layananSelect);
-            createOptions(editLayananSelect);
+            createOptions(layananSelect, false);
+            
+            if (editLayananSelect) {
+                createOptions(editLayananSelect, true);
+            }
 
-            // Initialize Select2 for create form
-            if (layananSelect) {
-                // Destroy existing Select2 if already initialized
-                if ($(layananSelect).hasClass('select2-hidden-accessible')) {
-                    $(layananSelect).select2('destroy');
+            // Initialize Select2
+            initializeLayananSelect2();
+        }
+
+        // Fungsi untuk trigger perubahan layanan
+        function triggerLayananChange(selectElement, isEditForm = false) {
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            
+            if (selectedOption && selectedOption.value) {
+                const harga = selectedOption.getAttribute('data-harga') || 0;
+                const deskripsi = selectedOption.getAttribute('data-deskripsi') || '';
+                const hpp = selectedOption.getAttribute('data-hpp') || 0;
+                
+                if (isEditForm) {
+                    // Untuk form edit
+                    const hargaDisplay = document.getElementById('editHargaLayanan');
+                    const deskripsiDisplay = document.getElementById('editDeskripsiLayanan');
+                    const subtotalInput = document.getElementById('editSubtotal');
+                    const descriptionInput = document.getElementById('editDescription');
+                    
+                    if (hargaDisplay) {
+                        hargaDisplay.value = formatCurrency(parseFloat(harga));
+                    }
+                    if (deskripsiDisplay) {
+                        deskripsiDisplay.value = deskripsi;
+                    }
+                    if (subtotalInput) {
+                        subtotalInput.value = harga;
+                        subtotalInput.dispatchEvent(new Event('input'));
+                    }
+                    if (descriptionInput && !descriptionInput.value) {
+                        descriptionInput.value = deskripsi;
+                    }
+                    
+                    // Set hidden fields untuk edit
+                    const hargaHidden = document.getElementById('editHargaHidden');
+                    const hppHidden = document.getElementById('editHppHidden');
+                    if (hargaHidden) hargaHidden.value = harga;
+                    if (hppHidden) hppHidden.value = hpp;
+                } else {
+                    // Untuk form create
+                    const hargaDisplay = document.getElementById('hargaLayanan');
+                    const deskripsiDisplay = document.getElementById('deskripsiLayanan');
+                    const subtotalInput = document.getElementById('subtotal');
+                    const descriptionInput = document.getElementById('description');
+                    
+                    if (hargaDisplay) {
+                        hargaDisplay.value = formatCurrency(parseFloat(harga));
+                    }
+                    if (deskripsiDisplay) {
+                        deskripsiDisplay.value = deskripsi;
+                    }
+                    if (subtotalInput) {
+                        subtotalInput.value = harga;
+                        subtotalInput.dispatchEvent(new Event('input'));
+                    }
+                    if (descriptionInput && !descriptionInput.value) {
+                        descriptionInput.value = deskripsi;
+                    }
+                    
+                    // Set hidden fields untuk create
+                    const hargaHidden = document.getElementById('hargaHidden');
+                    const hppHidden = document.getElementById('hppHidden');
+                    if (hargaHidden) hargaHidden.value = harga;
+                    if (hppHidden) hppHidden.value = hpp;
                 }
+            }
+        }
 
-                $(layananSelect).select2({
+        // Initialize Select2 untuk layanan
+        function initializeLayananSelect2() {
+            // Untuk form create
+            const layananSelect = $('#selectLayanan');
+            if (layananSelect.length) {
+                layananSelect.select2({
                     placeholder: 'Pilih Layanan',
                     allowClear: true,
                     dropdownParent: $('#buatInvoiceModal'),
-                    width: '100%'
+                    width: '100%',
+                    templateResult: formatLayananOption,
+                    templateSelection: formatLayananSelection
+                }).on('change', function() {
+                    triggerLayananChange(this, false);
                 });
-                console.log('Select2 layanan diinisialisasi');
             }
-
-            // Initialize Select2 for edit form
-            if (editLayananSelect) {
-                // Destroy existing Select2 if already initialized
-                if ($(editLayananSelect).hasClass('select2-hidden-accessible')) {
-                    $(editLayananSelect).select2('destroy');
-                }
-
-                $(editLayananSelect).select2({
+            
+            // Untuk form edit
+            const editLayananSelect = $('#editNamaLayanan');
+            if (editLayananSelect.length) {
+                editLayananSelect.select2({
                     placeholder: 'Pilih Layanan',
                     allowClear: true,
                     dropdownParent: $('#editInvoiceModal'),
-                    width: '100%'
+                    width: '100%',
+                    templateResult: formatLayananOption,
+                    templateSelection: formatLayananSelection
+                }).on('change', function() {
+                    triggerLayananChange(this, true);
                 });
             }
+        }
 
-            // Tambah event listener untuk edit layanan
-            if (editLayananSelect) {
-                editLayananSelect.addEventListener('change', function() {
-                    const selectedOption = this.options[this.selectedIndex];
-                    const deskripsiLayanan = selectedOption.getAttribute('data-deskripsi') || '';
-                    // Tambahkan logika untuk menangani perubahan di form edit jika diperlukan
-                });
-            }
+        // Format tampilan option di Select2
+        function formatLayananOption(layanan) {
+            if (!layanan.id) return layanan.text;
+            
+            const harga = layanan.element.getAttribute('data-harga') || 0;
+            const deskripsi = layanan.element.getAttribute('data-deskripsi') || '';
+            const hargaFormatted = formatCurrency(parseFloat(harga));
+            
+            const $container = $(
+                `<div class="flex flex-col">
+                    <div class="font-medium">${layanan.text}</div>
+                    <div class="text-sm text-gray-600">${deskripsi}</div>
+                    <div class="text-sm text-green-600 font-semibold">${hargaFormatted}</div>
+                </div>`
+            );
+            
+            return $container;
+        }
+
+        // Format tampilan selection di Select2
+        function formatLayananSelection(layanan) {
+            if (!layanan.id) return layanan.text;
+            
+            const harga = layanan.element.getAttribute('data-harga') || 0;
+            const hargaFormatted = formatCurrency(parseFloat(harga));
+            
+            return `${layanan.text} - ${hargaFormatted}`;
         }
 
         // ==================== SESSION HANDLING ====================
@@ -1739,9 +1894,6 @@
         // ==================== EVENT LISTENERS ====================
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing invoice management system...');
-
-            // Initialize Select2 dropdowns
-            initializeSelect2();
 
             // Event listeners untuk perhitungan otomatis CREATE form
             const subtotalInput = document.getElementById('subtotal');
@@ -2003,7 +2155,7 @@
                 });
             }
 
-            // Perusahaan dropdown (initialize empty dulu)
+            // Perusahaan dropdown
             const perusahaanSelect = document.getElementById('selectPerusahaan');
             if (perusahaanSelect) {
                 $(perusahaanSelect).select2({
@@ -2014,58 +2166,66 @@
                 });
                 console.log('Select2 perusahaan initialized');
             }
-
-            // Layanan dropdown (initialize empty dulu)
-            const layananSelect = document.getElementById('selectLayanan');
-            if (layananSelect) {
-                $(layananSelect).select2({
-                    placeholder: 'Pilih Layanan',
-                    allowClear: true,
-                    dropdownParent: $('#buatInvoiceModal'),
-                    width: '100%'
-                });
-                console.log('Select2 layanan initialized');
-            }
         }
 
         // Load data for create form
-        async function loadDataForCreateForm() {
-            console.log('Loading data for create form...');
+async function loadDataForCreateForm() {
+    console.log('Loading data for create form...');
 
-            try {
-                // Cek apakah form sudah ada di DOM
-                const formModal = document.getElementById('buatInvoiceModal');
-                if (!formModal) {
-                    console.error('Modal create form tidak ditemukan!');
-                    return;
-                }
-
-                // Load perusahaan data if empty
-                if (dataPerusahaan.length === 0) {
-                    console.log('Memuat data perusahaan...');
-                    await loadDataPerusahaan();
-                } else {
-                    console.log('Menggunakan data perusahaan yang sudah dimuat:', dataPerusahaan.length);
-                    populatePerusahaanOptions();
-                }
-
-                // Load layanan data if empty
-                if (dataLayanan.length === 0) {
-                    console.log('Memuat data layanan...');
-                    await loadDataLayanan();
-                } else {
-                    console.log('Menggunakan data layanan yang sudah dimuat:', dataLayanan.length);
-                    populateLayananOptions();
-                }
-
-                // Setup event listeners for select changes
-                setupSelectListeners();
-
-                console.log('Data for create form loaded successfully');
-            } catch (error) {
-                console.error('Error loading data for create form:', error);
-            }
+    try {
+        // Cek apakah form sudah ada di DOM
+        const formModal = document.getElementById('buatInvoiceModal');
+        if (!formModal) {
+            console.error('Modal create form tidak ditemukan!');
+            return;
         }
+
+        // Set tanggal default ke hari ini
+        const today = new Date().toISOString().split('T')[0];
+        const invoiceDateInput = document.getElementById('invoice_date');
+        if (invoiceDateInput) {
+            invoiceDateInput.value = today;
+        }
+
+        // Generate invoice number
+        const invoiceNo = 'INV-' + new Date().getTime();
+        const invoiceNoInput = document.getElementById('invoice_no');
+        if (invoiceNoInput) {
+            invoiceNoInput.value = invoiceNo;
+        }
+
+        // Load perusahaan data if empty
+        if (dataPerusahaan.length === 0) {
+            console.log('Memuat data perusahaan...');
+            await loadDataPerusahaan();
+        } else {
+            console.log('Menggunakan data perusahaan yang sudah dimuat:', dataPerusahaan.length);
+            populatePerusahaanOptions();
+        }
+
+        // Load layanan data if empty
+        if (dataLayanan.length === 0) {
+            console.log('Memuat data layanan...');
+            await loadDataLayanan();
+        } else {
+            console.log('Menggunakan data layanan yang sudah dimuat:', dataLayanan.length);
+            populateLayananOptions();
+        }
+
+        // Setup event listeners for select changes
+        setupSelectListeners();
+
+        // Inisialisasi Select2 dengan benar
+        initializeSelect2();
+        
+        // Inisialisasi Select2 untuk layanan (khusus)
+        initializeLayananSelect2();
+
+        console.log('Data for create form loaded successfully');
+    } catch (error) {
+        console.error('Error loading data for create form:', error);
+    }
+}
 
         function setupSelectListeners() {
             console.log('Setting up select listeners...');
@@ -2086,152 +2246,119 @@
                 });
             }
 
-            function handlePerusahaanChange(selectElement) {
-                const selectedOption = selectElement.options[selectElement.selectedIndex];
+function handlePerusahaanChange(selectElement) {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
 
-                if (selectedOption && selectedOption.value && selectedOption.value !== 'data_kosong') {
-                    const klien = selectedOption.getAttribute('data-klien') || '';
-                    const alamat = selectedOption.getAttribute('data-alamat') || '';
-                    const kontak = selectedOption.getAttribute('data-kontak') || '';
-                    const deskripsi = selectedOption.getAttribute('data-deskripsi') || '';
+    if (selectedOption && selectedOption.value && selectedOption.value !== 'data_kosong') {
+        const klien = selectedOption.getAttribute('data-klien') || '';
+        const alamat = selectedOption.getAttribute('data-alamat') || '';
+        const kontak = selectedOption.getAttribute('data-kontak') || '';
+        const deskripsi = selectedOption.getAttribute('data-deskripsi') || '';
 
-                    if (clientNameInput) {
-                        clientNameInput.value = klien;
-                    }
-                    if (companyAddressInput) {
-                        companyAddressInput.value = alamat;
-                    }
-                    if (kontakInput) {
-                        kontakInput.value = kontak;
-                    }
-                    if (descriptionInput) {
-                        descriptionInput.value = deskripsi;
-                    }
+        if (clientNameInput) {
+            clientNameInput.value = klien;
+        }
+        if (companyAddressInput) {
+            companyAddressInput.value = alamat;
+        }
+        if (kontakInput) {
+            kontakInput.value = kontak;
+        }
+        if (descriptionInput && !descriptionInput.value) {
+            descriptionInput.value = deskripsi;
+        }
 
-                    // Auto-fill hidden company name field
-                    const companyNameInput = document.getElementById('company_name');
-                    if (companyNameInput) {
-                        companyNameInput.value = selectedOption.value;
-                    }
-                } else {
-                    if (clientNameInput) clientNameInput.value = '';
-                    if (companyAddressInput) companyAddressInput.value = '';
-                    if (kontakInput) kontakInput.value = '';
-                    if (descriptionInput) descriptionInput.value = '';
-
-                    const companyNameInput = document.getElementById('company_name');
-                    if (companyNameInput) companyNameInput.value = '';
-                }
+        // Auto-fill hidden company name field
+        const companyNameInput = document.getElementById('company_name');
+        if (companyNameInput) {
+            companyNameInput.value = selectedOption.value;
+        }
+        
+        // TAMBAHKAN: Update hidden field untuk kontak
+        const kontakHidden = document.getElementById('kontakHidden');
+        if (kontakHidden) {
+            kontakHidden.value = kontak;
+        } else {
+            // Buat jika belum ada
+            const newKontakHidden = document.createElement('input');
+            newKontakHidden.type = 'hidden';
+            newKontakHidden.id = 'kontakHidden';
+            newKontakHidden.name = 'kontak';
+            newKontakHidden.value = kontak;
+            
+            const form = document.getElementById('buatInvoiceForm');
+            if (form) {
+                form.appendChild(newKontakHidden);
             }
-
-            // Event listener untuk pilih layanan
-            const layananSelect = document.getElementById('selectLayanan');
-            const hargaInput = document.getElementById('hargaLayanan');
-            const deskripsiTextarea = document.getElementById('deskripsiLayanan');
-            const subtotalInput = document.getElementById('subtotal');
-
-            if (layananSelect) {
-                // Hapus event listener sebelumnya jika ada
-                $(layananSelect).off('change.select2');
-
-                $(layananSelect).on('change.select2', function() {
-                    handleLayananChange(this);
-                });
-            }
-
-            function handleLayananChange(selectElement) {
-                const selectedOption = selectElement.options[selectElement.selectedIndex];
-
-                if (selectedOption && selectedOption.value && selectedOption.value !== 'data_kosong') {
-                    const harga = selectedOption.getAttribute('data-harga') || '0';
-                    const deskripsi = selectedOption.getAttribute('data-deskripsi') || '';
-
-                    if (hargaInput) {
-                        const hargaFormatted = formatCurrency(parseFloat(harga));
-                        hargaInput.value = hargaFormatted;
-                    }
-                    if (deskripsiTextarea) {
-                        deskripsiTextarea.value = deskripsi;
-                    }
-                    if (subtotalInput) {
-                        subtotalInput.value = harga;
-                        subtotalInput.dispatchEvent(new Event('input'));
-                    }
-
-                    // Salin deskripsi ke field description di form
-                    if (descriptionInput && deskripsi) {
-                        descriptionInput.value = deskripsi;
-                    }
-
-                    // Auto-fill nama layanan field
-                    const namaLayananInput = document.getElementById('nama_layanan');
-                    if (namaLayananInput) {
-                        namaLayananInput.value = selectedOption.value;
-                    }
-                } else {
-                    if (hargaInput) hargaInput.value = '';
-                    if (deskripsiTextarea) deskripsiTextarea.value = '';
-                    if (subtotalInput) {
-                        subtotalInput.value = '';
-                        subtotalInput.dispatchEvent(new Event('input'));
-                    }
-
-                    if (descriptionInput) descriptionInput.value = '';
-
-                    const namaLayananInput = document.getElementById('nama_layanan');
-                    if (namaLayananInput) namaLayananInput.value = '';
-                }
-            }
+        }
+        
+        console.log('Perusahaan selected - kontak:', kontak);
+    } else {
+        // Reset semua field jika tidak ada perusahaan yang dipilih
+        if (clientNameInput) clientNameInput.value = '';
+        if (companyAddressInput) companyAddressInput.value = '';
+        if (kontakInput) kontakInput.value = '';
+        if (descriptionInput && descriptionInput.value === '') {
+            descriptionInput.value = '';
+        }
+        
+        const companyNameInput = document.getElementById('company_name');
+        if (companyNameInput) companyNameInput.value = '';
+        
+        const kontakHidden = document.getElementById('kontakHidden');
+        if (kontakHidden) kontakHidden.value = '';
+    }
+}
 
             console.log('Select listeners setup completed');
         }
 
-        // Reset create form
-        function resetCreateForm() {
-            console.log('Reset create form...');
+function resetCreateForm() {
+    console.log('Reset create form...');
 
-            // Reset text inputs
-            const fieldsToReset = [
-                'client_name', 'company_address', 'kontakPerusahaan',
-                'hargaLayanan', 'deskripsiLayanan', 'subtotal',
-                'invoice_no', 'order_number', 'description'
-            ];
+    // Reset text inputs
+    const fieldsToReset = [
+        'client_name', 'company_address', 'kontakPerusahaan',
+        'hargaLayanan', 'deskripsiLayanan', 'subtotal',
+        'invoice_no', 'description', 'hargaHidden', 'hppHidden',
+        'kontakHidden' // TAMBAHKAN INI
+    ];
 
-            fieldsToReset.forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-                        element.value = '';
-                    }
-                }
-            });
-
-            // Set default values
-            const taxPercentage = document.getElementById('tax_percentage');
-            if (taxPercentage) taxPercentage.value = '11';
-
-            // Reset Select2 dropdowns dengan benar
-            const select2Ids = ['selectPerusahaan', 'selectLayanan', 'payment_method', 'status_pembayaran'];
-
-            select2Ids.forEach(id => {
-                const selectElement = $(`#${id}`);
-                if (selectElement.length) {
-                    if (id === 'status_pembayaran') {
-                        selectElement.val('pembayaran awal').trigger('change');
-                    } else {
-                        selectElement.val(null).trigger('change');
-                    }
-                }
-            });
-
-            // Hitung ulang total
-            calculateTotal();
-
-            // Clear validation errors
-            clearValidationErrors('create');
-
-            console.log('Create form reset completed');
+    fieldsToReset.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                element.value = '';
+            }
         }
+    });
+
+    // Set default values
+    const taxPercentage = document.getElementById('tax_percentage');
+    if (taxPercentage) taxPercentage.value = '11';
+
+    // Reset Select2 dropdowns dengan benar
+    const select2Ids = ['selectPerusahaan', 'selectLayanan', 'payment_method', 'status_pembayaran'];
+
+    select2Ids.forEach(id => {
+        const selectElement = $(`#${id}`);
+        if (selectElement.length) {
+            if (id === 'status_pembayaran') {
+                selectElement.val('pembayaran awal').trigger('change');
+            } else {
+                selectElement.val(null).trigger('change');
+            }
+        }
+    });
+
+    // Hitung ulang total
+    calculateTotal();
+
+    // Clear validation errors
+    clearValidationErrors('create');
+
+    console.log('Create form reset completed');
+}
 
         // ==================== MODAL FUNCTIONS ====================
         function showModal(modal) {
@@ -2789,11 +2916,18 @@
                     document.getElementById('editPaymentMethod').value = invoice.payment_method || invoice
                         .metode_pembayaran || 'Bank Transfer';
 
-                    // Set nilai untuk field baru
+                    // Set nilai untuk field layanan
                     const namaLayananSelect = document.getElementById('editNamaLayanan');
                     if (namaLayananSelect) {
                         namaLayananSelect.value = invoice.nama_layanan || '';
-                        $(namaLayananSelect).trigger('change');
+                        // Trigger change untuk mengisi data lainnya
+                        setTimeout(() => {
+                            if ($('#editNamaLayanan').hasClass('select2-hidden-accessible')) {
+                                $('#editNamaLayanan').trigger('change');
+                            } else {
+                                triggerLayananChange(namaLayananSelect, true);
+                            }
+                        }, 100);
                     }
 
                     const statusPembayaranSelect = document.getElementById('editStatusPembayaran');
@@ -2836,11 +2970,13 @@
                         document.getElementById('editPaymentMethod').value = invoice.payment_method || invoice
                             .metode_pembayaran || 'Bank Transfer';
 
-                        // Set nilai untuk field baru dari cache
+                        // Set nilai untuk field layanan dari cache
                         const namaLayananSelect = document.getElementById('editNamaLayanan');
                         if (namaLayananSelect) {
                             namaLayananSelect.value = invoice.nama_layanan || '';
-                            $(namaLayananSelect).trigger('change');
+                            setTimeout(() => {
+                                triggerLayananChange(namaLayananSelect, true);
+                            }, 100);
                         }
 
                         const statusPembayaranSelect = document.getElementById('editStatusPembayaran');

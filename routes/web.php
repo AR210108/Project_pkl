@@ -277,12 +277,12 @@ Route::middleware(['auth', 'role:admin'])
 
         // Di dalam Route::group(['prefix' => 'admin', ...])
 
-Route::get('/perusahaan', [PerusahaanController::class, 'index'])->name('perusahaan.index');
-Route::get('/perusahaan/create', [PerusahaanController::class, 'create'])->name('perusahaan.create');
-Route::post('/perusahaan', [PerusahaanController::class, 'store'])->name('perusahaan.store');
-Route::get('/perusahaan/{perusahaan}/edit', [PerusahaanController::class, 'edit'])->name('perusahaan.edit');
-Route::put('/perusahaan/{perusahaan}', [PerusahaanController::class, 'update'])->name('perusahaan.update'); // INI YANG PENTING
-Route::delete('/perusahaan/{perusahaan}', [PerusahaanController::class, 'destroy'])->name('perusahaan.delete'); // Nama route 'delete' atau 'destroy' harus konsisten
+        Route::get('/perusahaan', [PerusahaanController::class, 'index'])->name('perusahaan.index');
+        Route::get('/perusahaan/create', [PerusahaanController::class, 'create'])->name('perusahaan.create');
+        Route::post('/perusahaan', [PerusahaanController::class, 'store'])->name('perusahaan.store');
+        Route::get('/perusahaan/{perusahaan}/edit', [PerusahaanController::class, 'edit'])->name('perusahaan.edit');
+        Route::put('/perusahaan/{perusahaan}', [PerusahaanController::class, 'update'])->name('perusahaan.update'); // INI YANG PENTING
+        Route::delete('/perusahaan/{perusahaan}', [PerusahaanController::class, 'destroy'])->name('perusahaan.delete'); // Nama route 'delete' atau 'destroy' harus konsisten
 
 
         // API untuk data
@@ -404,10 +404,10 @@ Route::delete('/perusahaan/{perusahaan}', [PerusahaanController::class, 'destroy
             Route::delete('/{id}', [InvoiceController::class, 'destroy'])->name('destroy');
             Route::get('/{id}/print', [InvoiceController::class, 'print'])->name('print');
         });
+        Route::get('/layanan-data', [InvoiceController::class, 'getLayananForDropdown'])
+            ->name('layanan-data');
         Route::get('/invoice/perusahaan-data', [InvoiceController::class, 'getPerusahaanData'])
             ->name('invoice.perusahaan.data');
-        Route::get('/invoice/layanan-data', [InvoiceController::class, 'getLayananData'])
-            ->name('invoice.layanan.data');
 
 
         // ================= KWITANSI WEB =================
@@ -655,7 +655,7 @@ Route::middleware(['auth', 'role:general_manager'])
 
         Route::post('/general-manajer/absensi/{id}/reject', [AbsensiController::class, 'rejectAbsensi'])
             ->name('general_manajer.absensi.reject');
-        
+
         Route::get('/tim_dan_divisi', function () {
             return view('general_manajer.tim_dan_divisi');
         })->name('tim_dan_divisi');

@@ -135,16 +135,16 @@ class InvoiceController extends Controller
         }
     }
 
-    public function store(Request $request)
-    {
-        Log::info('Store Invoice Request:', $request->all());
+public function store(Request $request)
+{
+    Log::info('Store Invoice Request:', $request->all());
 
     $validator = Validator::make($request->all(), [
         'invoice_no' => 'required|string|unique:invoices,invoice_no',
         'invoice_date' => 'required|date',
         'company_name' => 'required|string|max:255',
         'company_address' => 'required|string',
-        'kontak' => 'nullable|string|max:255', // Tambahkan validasi kontak
+        'kontak' => 'nullable|string|max:255', // Pastikan field ini divalidasi
         'client_name' => 'required|string|max:255',
         'nama_layanan' => 'required|string|max:255',
         'status_pembayaran' => 'required|in:pembayaran awal,lunas',
@@ -156,25 +156,47 @@ class InvoiceController extends Controller
         'order_number' => 'nullable|string',
     ]);
 
-        if ($validator->fails()) {
-            Log::error('Validation failed:', $validator->errors()->toArray());
+    if ($validator->fails()) {
+        Log::error('Validation failed:', $validator->errors()->toArray());
 
-            if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validasi gagal',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+        if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-            DB::beginTransaction();
+        return redirect()->back()
+            ->withErrors($validator)
+            ->withInput();
+    }
+
+    DB::beginTransaction();
     try {
         $validated = $validator->validated();
+
+        // TAMBAHKAN LOGIKA INI: Ambil data kontak dari perusahaan jika kosong
+        if (empty($validated['kontak']) && !empty($validated['company_name'])) {
+            $perusahaan = Perusahaan::where('nama_perusahaan', $validated['company_name'])->first();
+            if ($perusahaan) {
+                // Ambil kontak dari berbagai kemungkinan field
+                if (!empty($perusahaan->kontak)) {
+                    $validated['kontak'] = $perusahaan->kontak;
+                } elseif (!empty($perusahaan->telepon)) {
+                    $validated['kontak'] = $perusahaan->telepon;
+                } elseif (!empty($perusahaan->no_telp)) {
+                    $validated['kontak'] = $perusahaan->no_telp;
+                } elseif (!empty($perusahaan->phone)) {
+                    $validated['kontak'] = $perusahaan->phone;
+                } elseif (!empty($perusahaan->no_hp)) {
+                    $validated['kontak'] = $perusahaan->no_hp;
+                } elseif (!empty($perusahaan->telephone)) {
+                    $validated['kontak'] = $perusahaan->telephone;
+                }
+                Log::info('Auto-filled kontak from perusahaan:', ['kontak' => $validated['kontak'] ?? '']);
+            }
+        }
 
         // TAMBAHKAN INI: Jika deskripsi kosong, ambil dari layanan
         if (empty($validated['description']) && !empty($validated['nama_layanan'])) {
@@ -195,12 +217,13 @@ class InvoiceController extends Controller
         $validated['tax'] = (float) $validated['tax'];
         $validated['total'] = (float) $validated['total'];
 
-        // Simpan dari perusahaan
+        // Simpan dari perusahaan (update kontak counter)
         $perusahaan = Perusahaan::where('nama_perusahaan', $validated['company_name'])->first();
         if ($perusahaan) {
-            // Update perusahaan
+            // Update perusahaan - pastikan kontak adalah integer untuk increment
+            $currentKontak = (int) ($perusahaan->kontak ?? 0);
             $perusahaan->update([
-                'kontak' => ($perusahaan->kontak + 1)
+                'kontak' => $currentKontak + 1
             ]);
         }
 
@@ -222,28 +245,41 @@ class InvoiceController extends Controller
         }
 
         DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error creating invoice: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
 
-            // Untuk API/AJAX request
-            if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Gagal membuat invoice',
-                    'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-                ], 500);
-            }
-
-            // Untuk web form request
-            return redirect()->back()
-                ->with('error', 'Gagal membuat invoice: ' . $e->getMessage())
-                ->withInput();
+        // Untuk API/AJAX request
+        if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice berhasil dibuat',
+                'data' => $invoice
+            ], 201);
         }
-    }
 
+        // Untuk web form request
+        return redirect()->route('admin.invoice.index')
+            ->with('success', 'Invoice berhasil dibuat');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error creating invoice: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        // Untuk API/AJAX request
+        if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat invoice',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+
+        // Untuk web form request
+        return redirect()->back()
+            ->with('error', 'Gagal membuat invoice: ' . $e->getMessage())
+            ->withInput();
+    }
+}
     /**
      * Display the specified resource.
      */
@@ -328,21 +364,21 @@ class InvoiceController extends Controller
                 'data' => $request->all()
             ]);
 
-                    $validator = Validator::make($request->all(), [
-            'invoice_no' => 'required|string|unique:invoices,invoice_no,' . $id,
-            'invoice_date' => 'required|date',
-            'company_name' => 'required|string|max:255',
-            'company_address' => 'required|string',
-            'kontak' => 'nullable|string|max:255', // Tambahkan validasi kontak
-            'client_name' => 'required|string|max:255',
-            'nama_layanan' => 'required|string|max:255',
-            'status_pembayaran' => 'required|in:pembayaran awal,lunas',
-            'payment_method' => 'required|string',
-            'description' => 'nullable|string',
-            'subtotal' => 'required|numeric|min:0',
-            'tax' => 'required|numeric|min:0',
-            'total' => 'required|numeric|min:0',
-        ]);
+            $validator = Validator::make($request->all(), [
+                'invoice_no' => 'required|string|unique:invoices,invoice_no,' . $id,
+                'invoice_date' => 'required|date',
+                'company_name' => 'required|string|max:255',
+                'company_address' => 'required|string',
+                'kontak' => 'nullable|string|max:255', // Tambahkan validasi kontak
+                'client_name' => 'required|string|max:255',
+                'nama_layanan' => 'required|string|max:255',
+                'status_pembayaran' => 'required|in:pembayaran awal,lunas',
+                'payment_method' => 'required|string',
+                'description' => 'nullable|string',
+                'subtotal' => 'required|numeric|min:0',
+                'tax' => 'required|numeric|min:0',
+                'total' => 'required|numeric|min:0',
+            ]);
 
             if ($validator->fails()) {
                 Log::error('Validation failed:', $validator->errors()->toArray());
@@ -852,24 +888,28 @@ class InvoiceController extends Controller
         }
     }
     public function getLayananForDropdown(Request $request)
-{
-    try {
-        $layanan = Layanan::orderBy('nama_layanan', 'asc')
-            ->get(['id', 'nama_layanan', 'deskripsi', 'harga', 'hpp']);
+    {
+        try {
+            Log::info('Getting layanan data for dropdown');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Data layanan berhasil diambil',
-            'data' => $layanan
-        ]);
-    } catch (\Exception $e) {
-        Log::error('Error getting layanan data for dropdown: ' . $e->getMessage());
+            $layanan = Layanan::orderBy('nama_layanan', 'asc')
+                ->get(['id', 'nama_layanan', 'deskripsi', 'harga', 'hpp']);
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal mengambil data layanan',
-            'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'message' => 'Data layanan berhasil diambil',
+                'data' => $layanan
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting layanan data for dropdown: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data layanan',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
-}
 }
