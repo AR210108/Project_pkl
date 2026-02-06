@@ -627,7 +627,6 @@
                                             <th style="min-width: 150px;">Nama Klien</th>
                                             <th style="min-width: 150px;">Nama Layanan</th>
                                             <th style="min-width: 200px;">Alamat</th>
-                                            <th style="min-width: 200px;">Deskripsi</th>
                                             <th style="min-width: 120px;">Subtotal</th>
                                             <th style="min-width: 100px;">Pajak (%)</th>
                                             <th style="min-width: 120px;">Jumlah Pajak</th>
@@ -639,7 +638,7 @@
                                     </thead>
                                     <tbody id="desktopTableBody">
                                         <tr id="loadingRow">
-                                            <td colspan="15" class="px-6 py-4 text-center">
+                                            <td colspan="14" class="px-6 py-4 text-center">
                                                 <div class="flex justify-center items-center">
                                                     <div class="spinner"></div>
                                                     <span class="ml-2">Memuat data...</span>
@@ -647,7 +646,7 @@
                                             </td>
                                         </tr>
                                         <tr id="noDataRow" class="hidden">
-                                            <td colspan="15" class="px-6 py-4 text-center text-sm text-gray-500">
+                                            <td colspan="14" class="px-6 py-4 text-center text-sm text-gray-500">
                                                 Tidak ada data invoice
                                             </td>
                                         </tr>
@@ -773,7 +772,7 @@
                             <span class="material-icons-outlined text-purple-500">receipt</span>
                             Informasi Invoice
                         </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Invoice *</label>
                                 <input type="text" id="invoice_no" name="invoice_no"
@@ -787,11 +786,6 @@
                                     class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                                     required>
                                 <span class="error-message" id="invoice_date_error"></span>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Order</label>
-                                <input type="text" id="order_number" name="order_number"
-                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input">
                             </div>
                         </div>
                     </div>
@@ -864,21 +858,6 @@
                                     readonly required>
                                 <span class="error-message" id="total_error"></span>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Deskripsi Tambahan -->
-                    <div>
-                        <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                            <span class="material-icons-outlined text-gray-500">notes</span>
-                            Deskripsi Tambahan
-                        </h4>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi / Catatan</label>
-                            <textarea id="description" name="description" rows="3"
-                                class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                placeholder="Tambahkan deskripsi atau catatan jika diperlukan..."></textarea>
-                            <span class="error-message" id="description_error"></span>
                         </div>
                     </div>
 
@@ -1022,26 +1001,18 @@
                         </div>
                     </div>
 
-                    <!-- Informasi Pembayaran & Deskripsi -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran *</label>
-                            <select id="editPaymentMethod" name="payment_method"
-                                class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                                <option value="Bank Transfer">Bank Transfer</option>
-                                <option value="E-Wallet">E-Wallet</option>
-                                <option value="Credit Card">Credit Card</option>
-                                <option value="Cash">Cash</option>
-                            </select>
-                            <span class="error-message" id="edit_payment_method_error"></span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                            <textarea id="editDescription" name="description" rows="3"
-                                class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"></textarea>
-                            <span class="error-message" id="edit_description_error"></span>
-                        </div>
+                    <!-- Informasi Pembayaran -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran *</label>
+                        <select id="editPaymentMethod" name="payment_method"
+                            class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                            required>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="E-Wallet">E-Wallet</option>
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Cash">Cash</option>
+                        </select>
+                        <span class="error-message" id="edit_payment_method_error"></span>
                     </div>
 
                     <div class="flex justify-end gap-2 mt-6">
@@ -1732,6 +1703,15 @@ function populateLayananOptions() {
             return new Intl.NumberFormat('id-ID').format(value);
         }
 
+        // Function untuk mendapatkan tanggal hari ini dalam format YYYY-MM-DD
+        function getTodayDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         // ==================== EVENT LISTENERS ====================
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing...');
@@ -1764,10 +1744,9 @@ if (buatInvoiceBtn) {
         
         try {
             // Set tanggal default ke hari ini
-            const today = new Date().toISOString().split('T')[0];
             const invoiceDateInput = document.getElementById('invoice_date');
-            if (invoiceDateInput) {
-                invoiceDateInput.value = today;
+            if (invoiceDateInput && !invoiceDateInput.value) {
+                invoiceDateInput.value = getTodayDate();
             }
             
             // Generate invoice number
@@ -2155,7 +2134,7 @@ function resetCreateForm() {
     const fieldsToReset = [
         'client_name', 'company_address', 'jumlahKerjasama',
         'hargaLayanan', 'deskripsiLayanan', 'subtotal',
-        'invoice_no', 'order_number', 'description'
+        'invoice_no'
     ];
     
     fieldsToReset.forEach(id => {
@@ -2739,7 +2718,6 @@ function showModal(modal) {
                     document.getElementById('editInvoiceNo').value = invoice.invoice_no || invoice.nomor_order || '';
                     document.getElementById('editClientName').value = invoice.client_name || invoice.nama_klien || '';
                     document.getElementById('editCompanyAddress').value = invoice.company_address || invoice.alamat || '';
-                    document.getElementById('editDescription').value = invoice.description || invoice.deskripsi || '';
                     document.getElementById('editSubtotal').value = invoice.subtotal || 0;
                     document.getElementById('editTaxPercentage').value = invoice.tax_percentage || 0;
                     document.getElementById('editTotal').value = invoice.total || 0;
@@ -2779,7 +2757,6 @@ function showModal(modal) {
                         document.getElementById('editInvoiceNo').value = invoice.invoice_no || invoice.nomor_order || '';
                         document.getElementById('editClientName').value = invoice.client_name || invoice.nama_klien || '';
                         document.getElementById('editCompanyAddress').value = invoice.company_address || invoice.alamat || '';
-                        document.getElementById('editDescription').value = invoice.description || invoice.deskripsi || '';
                         document.getElementById('editSubtotal').value = invoice.subtotal || 0;
                         document.getElementById('editTaxPercentage').value = invoice.tax_percentage || 0;
                         document.getElementById('editTotal').value = invoice.total || 0;
@@ -3069,7 +3046,6 @@ function showModal(modal) {
             <td>${namaKlien}</td>
             <td>${namaLayanan}</td>
             <td class="max-w-xs truncate">${alamat}</td>
-            <td class="max-w-xs truncate">${deskripsi}</td>
             <td>${formatCurrency(subtotal)}</td>
             <td>${taxPercentage.toFixed(2)}%</td>
             <td>${formatCurrency(taxAmount)}</td>

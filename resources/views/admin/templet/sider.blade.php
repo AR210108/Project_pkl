@@ -279,11 +279,6 @@
             <!-- ============================================ -->
             <!-- DITAMBAHKAN: Menu Data Perusahaan -->
             <!-- ============================================ -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/admin/perusahaan" data-page="perusahaan">
-                <span class="material-icons sidebar-icon">business</span>
-                <span class="sidebar-text">Data Perusahaan</span>
-            </a>
             <!-- ============================================ -->
 
             <!-- Menu Surat Kerjasama (Dropdown) -->

@@ -379,6 +379,7 @@ Route::delete('/perusahaan/{perusahaan}', [PerusahaanController::class, 'destroy
 
         // Data Project
         Route::get('/data_project', [DataProjectController::class, 'admin'])->name('data_project');
+        Route::get('/project/{id}', [DataProjectController::class, 'show'])->name('project.show');
         Route::post('/project', [DataProjectController::class, 'store'])->name('project.store');
         Route::put('/project/{id}', [DataProjectController::class, 'update'])->name('project.update');
         Route::delete('/project/{id}', [DataProjectController::class, 'destroy'])->name('project.destroy');
@@ -781,7 +782,7 @@ Route::middleware(['auth', 'role:finance'])
 
         // KWITANSI MANAGEMENT - FINANCE
         Route::prefix('kwitansi')->name('kwitansi.')->group(function () {
-            Route::get('/kwitansi', [KwitansiController::class, 'financeIndex'])->name('finance.kwitansi.index');
+            Route::get('/', [KwitansiController::class, 'financeIndex'])->name('finance.kwitansi.index');
             Route::post('/', [KwitansiController::class, 'store'])->name('store');
             Route::put('/{id}', [KwitansiController::class, 'update'])->name('update');
             Route::delete('/{id}', [KwitansiController::class, 'destroy'])->name('destroy');

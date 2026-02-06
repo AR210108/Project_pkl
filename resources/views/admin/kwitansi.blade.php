@@ -1503,8 +1503,8 @@
         function cetakKwitansi(id) {
             openPrintModal(id);
         }
-        // Deklarasi konstanta route untuk cetak
-        const CETAK_ROUTE = "{{ route('kwitansi.cetak.data', ['id' => 'ID']) }}";
+        // Deklarasi konstanta route untuk cetak (gunakan URL langsung untuk menghindari error route name)
+        const CETAK_ROUTE = "{{ url('/kwitansi/ID/cetak-data') }}";
         // ===========================================
 
         // Declare all global variables at the top level
