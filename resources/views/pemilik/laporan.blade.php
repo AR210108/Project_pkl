@@ -65,9 +65,31 @@
             background-color: #3b82f6;
             color: white;
         }
-        .pagination-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        
+        /* Toggle Button Styles */
+        .toggle-btn {
+            background-color: #f1f5f9;
+            color: #64748b;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .toggle-btn:hover {
+            background-color: #e2e8f0;
+        }
+
+        .toggle-btn.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .toggle-btn.income.active {
+            background-color: #10b981;
+        }
+
+        .toggle-btn.expense.active {
+            background-color: #ef4444;
         }
     </style>
 </head>
@@ -82,7 +104,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">Total Pemasukan</p>
-                            <p class="text-xl sm:text-2xl md:text-3xl font-bold text-green-600 dark:text-green-500 mt-1">1.000.000</p>
+                            <p class="text-xl sm:text-2xl md:text-3xl font-bold text-green-600 dark:text-green-500 mt-1">Rp {{ number_format($totalPemasukan ?? 0, 0, ',', '.') }}</p>
                         </div>
                         <div class="bg-green-100 dark:bg-green-900/30 p-3 rounded-full">
                             <i class='bx bx-trending-up text-2xl text-green-600 dark:text-green-500'></i>
@@ -93,7 +115,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">Total Pengeluaran</p>
-                            <p class="text-xl sm:text-2xl md:text-3xl font-bold text-red-600 dark:text-red-500 mt-1">500.000</p>
+                            <p class="text-xl sm:text-2xl md:text-3xl font-bold text-red-600 dark:text-red-500 mt-1">Rp {{ number_format($totalPengeluaran ?? 0, 0, ',', '.') }}</p>
                         </div>
                         <div class="bg-red-100 dark:bg-red-900/30 p-3 rounded-full">
                             <i class='bx bx-trending-down text-2xl text-red-600 dark:text-red-500'></i>
@@ -104,7 +126,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">Total Keuntungan</p>
-                            <p class="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-500 mt-1">500.000</p>
+                            <p class="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-500 mt-1">Rp {{ number_format($totalKeuntungan ?? 0, 0, ',', '.') }}</p>
                         </div>
                         <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-full">
                             <i class='bx bx-wallet text-2xl text-blue-600 dark:text-blue-500'></i>
@@ -123,68 +145,109 @@
                     </button>
                     <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
                         <div class="relative w-full sm:w-auto">
-                            <select
-                                class="w-full bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 pl-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-offset-2 focus:ring-offset-background-light dark:focus:ring-offset-background-dark focus:ring-primary text-sm sm:text-base">
-                                <option>Semua Kategori</option>
-                                <option>Web Design</option>
-                                <option>SEO</option>
-                                <option>Marketing</option>
-                                <option>Mobile App</option>
-                            </select>
-                        </div>
-                        <div class="relative w-full sm:w-auto">
-                            <select
-                                class="w-full bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 pl-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-offset-2 focus:ring-offset-background-light dark:focus:ring-offset-background-dark focus:ring-primary text-sm sm:text-base">
-                                <option>Semua Bulan</option>
-                                <option>Januari</option>
-                                <option>Februari</option>
-                                <option>Maret</option>
-                                <option>April</option>
-                                <option>Mei</option>
-                                <option>Juni</option>
-                            </select>
+                            <button id="filterBtn" class="w-full bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 pl-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-offset-2 focus:ring-offset-background-light dark:focus:ring-offset-background-dark focus:ring-primary text-sm sm:text-base flex items-center justify-between gap-2">
+                                <span><i class='bx bx-filter text-lg'></i> Filter Kategori</span>
+                                <i class='bx bx-chevron-down text-lg'></i>
+                            </button>
+                            <div id="filterDropdown" class="filter-dropdown absolute top-full right-0 mt-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50" style="display: none; min-width: 250px;">
+                                <!-- Filter options will be populated by JavaScript -->
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
+
+                <!-- Recent Transactions -->
+                @if(count($pemasukan ?? []) > 0)
+                    <div>
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Transaksi Terbaru</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-gray-300 dark:border-gray-600">
+                                        <th class="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Tanggal</th>
+                                        <th class="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Kategori</th>
+                                        <th class="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Deskripsi</th>
+                                        <th class="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Jumlah</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($pemasukan->take(5) as $transaksi)
+                                        <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <td class="py-3 px-2 text-gray-700 dark:text-gray-300">
+                                                {{ \Carbon\Carbon::parse($transaksi->tanggal)->format('d M Y') }}
+                                            </td>
+                                            <td class="py-3 px-2">
+                                                <span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-medium">
+                                                    {{ $transaksi->kategori }}
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-2 text-gray-700 dark:text-gray-300">{{ $transaksi->nama }}</td>
+                                            <td class="py-3 px-2 text-right font-bold text-green-600 dark:text-green-400">
+                                                Rp {{ number_format($transaksi->jumlah, 0, ',', '.') }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+            </section>
             
-            <!-- Order List Section -->
+            <!-- Data Keuangan Section -->
             <section class="bg-white dark:bg-card-dark p-4 sm:p-6 md:p-8 rounded-xl shadow-md">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
-                    <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Daftar Pesanan</h2>
-                    <div class="relative w-full sm:w-auto">
-                        <input
-                            class="w-full py-2 pl-10 pr-4 text-sm rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-primary focus:border-primary"
-                            placeholder="Cari pesanan..." type="text" id="orderSearch" />
-                        <i class='bx bx-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400'></i>
+                    <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Data Keuangan</h2>
+                </div>
+
+                <!-- Toggle Buttons and Search Section -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div class="flex flex-wrap gap-2">
+                        <button id="toggleAll" class="toggle-btn active px-4 py-2 rounded-lg flex items-center gap-2">
+                            <i class='bx bx-layer text-lg'></i>
+                            <span>Semua</span>
+                        </button>
+                        <button id="toggleIncome" class="toggle-btn income px-4 py-2 rounded-lg flex items-center gap-2">
+                            <i class='bx bx-trending-down text-lg'></i>
+                            <span>Pemasukan</span>
+                        </button>
+                        <button id="toggleExpense" class="toggle-btn expense px-4 py-2 rounded-lg flex items-center gap-2">
+                            <i class='bx bx-trending-up text-lg'></i>
+                            <span>Pengeluaran</span>
+                        </button>
+                    </div>
+
+                    <div class="w-full md:w-auto">
+                        <input id="financeSearch" type="text" placeholder="Cari data keuangan..."
+                            class="w-full py-2 pl-10 pr-4 text-sm rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-primary focus:border-primary relative" />
                     </div>
                 </div>
-                
+
+                <!-- Data Table -->
                 <div class="overflow-x-auto">
-                    <div class="min-w-[900px] sm:min-w-[1000px]">
-                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div
-                                class="grid grid-cols-7 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider p-4 gap-4">
-                                <div class="col-span-1 px-3">No</div>
-                                <div class="col-span-1 px-3">Layanan</div>
-                                <div class="col-span-1 px-3">Harga</div>
-                                <div class="col-span-1 px-3">Klien</div>
-                                <div class="col-span-1 px-3">Pembayaran Awal</div>
-                                <div class="col-span-1 px-3">Pelunasan</div>
-                                <div class="col-span-1 px-3">Status</div>
-                            </div>
-                        </div>
-                        <div id="orderTableBody" class="mt-4 space-y-4">
-                            <!-- Table content will be populated by JavaScript -->
-                        </div>
-                    </div>
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b-2 border-gray-300 dark:border-gray-600">
+                                <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">No</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Tanggal</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Kategori</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Deskripsi</th>
+                                <th class="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Jumlah</th>
+                                <th class="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Tipe</th>
+                            </tr>
+                        </thead>
+                        <tbody id="financeTableBody">
+                            <!-- Data akan diisi oleh JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
-                
+
                 <!-- Pagination -->
                 <div class="flex justify-between items-center mt-6">
-                    <p id="orderInfo" class="text-sm text-gray-600 dark:text-gray-400">Showing 1-5 of 15 entries</p>
-                    <div id="orderPagination" class="flex space-x-1">
-                        <!-- Pagination buttons will be populated by JavaScript -->
+                    <p id="financeInfo" class="text-sm text-gray-600 dark:text-gray-400">Menampilkan 0 data</p>
+                    <div id="financePagination" class="flex space-x-1">
+                        <!-- Pagination buttons akan diisi oleh JavaScript -->
                     </div>
                 </div>
             </section>
@@ -195,201 +258,263 @@
     </div>
 
     <script>
-        // Sample data for demonstration
-        const orderData = [
-            { id: 1, service: "Web Design", price: 500000, client: "Client A", dp: 250000, remaining: 250000, status: "Lunas" },
-            { id: 2, service: "SEO", price: 300000, client: "Client B", dp: 150000, remaining: 0, status: "DP" },
-            { id: 3, service: "Marketing", price: 200000, client: "Client C", dp: 0, remaining: 0, status: "Belum Bayar" },
-            { id: 4, service: "Mobile App", price: 750000, client: "Client D", dp: 375000, remaining: 375000, status: "Lunas" },
-            { id: 5, service: "Web Development", price: 600000, client: "Client E", dp: 300000, remaining: 0, status: "DP" },
-            { id: 6, service: "Content Creation", price: 250000, client: "Client F", dp: 0, remaining: 0, status: "Belum Bayar" },
-            { id: 7, service: "Social Media Management", price: 350000, client: "Client G", dp: 175000, remaining: 175000, status: "Lunas" },
-            { id: 8, service: "UI/UX Design", price: 400000, client: "Client H", dp: 200000, remaining: 0, status: "DP" },
-            { id: 9, service: "E-commerce Development", price: 800000, client: "Client I", dp: 400000, remaining: 400000, status: "Lunas" },
-            { id: 10, service: "Digital Marketing", price: 300000, client: "Client J", dp: 0, remaining: 0, status: "Belum Bayar" },
-            { id: 11, service: "Branding", price: 450000, client: "Client K", dp: 225000, remaining: 225000, status: "Lunas" },
-            { id: 12, service: "Video Production", price: 550000, client: "Client L", dp: 275000, remaining: 0, status: "DP" },
-            { id: 13, service: "Photography", price: 200000, client: "Client M", dp: 0, remaining: 0, status: "Belum Bayar" },
-            { id: 14, service: "Copywriting", price: 150000, client: "Client N", dp: 75000, remaining: 75000, status: "Lunas" },
-            { id: 15, service: "Graphic Design", price: 350000, client: "Client O", dp: 175000, remaining: 0, status: "DP" }
-        ];
+        // Finance Data dari Controller
+        const allFinanceData = @json($financeData ?? []);
+        const allKategori = @json($allKategori ?? []);
         
-        // Pagination configuration
-        const itemsPerPage = 5;
+        // Pagination variables
         let currentPage = 1;
-        let filteredData = [...orderData];
+        const itemsPerPage = 5;
+        let filteredData = [...allFinanceData];
+        let activeType = 'all'; // 'all', 'pemasukan', 'pengeluaran'
+        let activeFilters = new Set(['all']); // Filter kategori
         
         // Function to format currency
         function formatCurrency(amount) {
             return new Intl.NumberFormat('id-ID').format(amount);
         }
-        
-        // Function to get status styling
-        function getStatusClass(status) {
-            switch(status) {
-                case "Lunas": return "text-green-500";
-                case "DP": return "text-yellow-500";
-                case "Belum Bayar": return "text-red-500";
-                default: return "text-gray-500";
-            }
+
+        // Function to format date
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
         }
-        
-        // Function to render table rows
-        function renderTableRows(data, page) {
-            const startIndex = (page - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const pageData = data.slice(startIndex, endIndex);
-            
-            const tableBody = document.getElementById('orderTableBody');
-            tableBody.innerHTML = '';
-            
-            pageData.forEach((item, index) => {
-                const isLastRow = index === pageData.length - 1;
-                const row = document.createElement('div');
-                row.className = `grid grid-cols-7 items-center py-4 ${isLastRow ? '' : 'border-b border-gray-200 dark:border-gray-700'} text-sm gap-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors`;
-                
-                row.innerHTML = `
-                    <div class="col-span-1 text-gray-800 dark:text-gray-200 px-3">${startIndex + index + 1}</div>
-                    <div class="col-span-1 text-gray-800 dark:text-gray-200 px-3 truncate" title="${item.service}">${item.service}</div>
-                    <div class="col-span-1 text-gray-800 dark:text-gray-200 px-3">Rp. ${formatCurrency(item.price)}</div>
-                    <div class="col-span-1 text-gray-800 dark:text-gray-200 px-3 truncate" title="${item.client}">${item.client}</div>
-                    <div class="col-span-1 text-gray-800 dark:text-gray-200 px-3">${item.dp > 0 ? `Rp. ${formatCurrency(item.dp)}` : '-'}</div>
-                    <div class="col-span-1 text-gray-800 dark:text-gray-200 px-3">${item.remaining > 0 ? `Rp. ${formatCurrency(item.remaining)}` : '-'}</div>
-                    <div class="col-span-1 ${getStatusClass(item.status)} px-3 font-medium">${item.status}</div>
-                `;
-                
-                tableBody.appendChild(row);
+
+        // Toggle buttons
+        function initializeToggleButtons() {
+            document.getElementById('toggleAll').addEventListener('click', function() {
+                setActiveType('all');
+            });
+            document.getElementById('toggleIncome').addEventListener('click', function() {
+                setActiveType('pemasukan');
+            });
+            document.getElementById('toggleExpense').addEventListener('click', function() {
+                setActiveType('pengeluaran');
             });
         }
-        
-        // Function to render pagination buttons
-        function renderPagination(totalItems, page) {
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
-            const pagination = document.getElementById('orderPagination');
-            const info = document.getElementById('orderInfo');
+
+        function setActiveType(type) {
+            activeType = type;
+            currentPage = 1;
+            updateToggleButtons();
+            applyFilters();
+        }
+
+        function updateToggleButtons() {
+            document.getElementById('toggleAll').classList.remove('active');
+            document.getElementById('toggleIncome').classList.remove('active');
+            document.getElementById('toggleExpense').classList.remove('active');
+
+            if (activeType === 'all') {
+                document.getElementById('toggleAll').classList.add('active');
+            } else if (activeType === 'pemasukan') {
+                document.getElementById('toggleIncome').classList.add('active');
+            } else if (activeType === 'pengeluaran') {
+                document.getElementById('toggleExpense').classList.add('active');
+            }
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const searchTerm = document.getElementById('financeSearch').value.toLowerCase();
             
-            // Update info text
-            const startItem = (page - 1) * itemsPerPage + 1;
-            const endItem = Math.min(page * itemsPerPage, totalItems);
-            info.textContent = `Showing ${startItem}-${endItem} of ${totalItems} entries`;
-            
-            // Clear pagination
+            filteredData = allFinanceData.filter(item => {
+                let typeMatch = true;
+                if (activeType === 'pemasukan') {
+                    typeMatch = item.tipe_transaksi === 'pemasukan';
+                } else if (activeType === 'pengeluaran') {
+                    typeMatch = item.tipe_transaksi === 'pengeluaran';
+                }
+
+                // Filter kategori
+                let categoryMatch = true;
+                if (!activeFilters.has('all')) {
+                    categoryMatch = activeFilters.has(item.kategori);
+                }
+
+                const searchMatch = !searchTerm || 
+                    item.kategori.toLowerCase().includes(searchTerm) ||
+                    item.deskripsi.toLowerCase().includes(searchTerm);
+
+                return typeMatch && categoryMatch && searchMatch;
+            });
+
+            currentPage = 1;
+            renderTable();
+            renderPagination();
+        }
+
+        // Render table
+        function renderTable() {
+            const tableBody = document.getElementById('financeTableBody');
+            tableBody.innerHTML = '';
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
+
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-gray-500">Tidak ada data</td></tr>';
+                return;
+            }
+
+            for (let i = startIndex; i < endIndex; i++) {
+                const item = filteredData[i];
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700';
+
+                const typeColor = item.tipe_transaksi === 'pemasukan' ? 'text-green-600' : 'text-red-600';
+                const typeLabel = item.tipe_transaksi === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran';
+
+                row.innerHTML = `
+                    <td class="py-3 px-4 text-gray-800 dark:text-gray-200">${startIndex + i + 1}</td>
+                    <td class="py-3 px-4 text-gray-800 dark:text-gray-200">${formatDate(item.tanggal_transaksi)}</td>
+                    <td class="py-3 px-4">
+                        <span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-medium">
+                            ${item.kategori}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-gray-800 dark:text-gray-200">${item.deskripsi || '-'}</td>
+                    <td class="py-3 px-4 text-right font-bold text-gray-900 dark:text-white">
+                        Rp ${formatCurrency(item.jumlah)}
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-medium ${typeColor}">
+                            ${typeLabel}
+                        </span>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            }
+
+            // Update info
+            document.getElementById('financeInfo').textContent = `Menampilkan ${startIndex + 1}-${endIndex} dari ${filteredData.length} data`;
+        }
+
+        // Render pagination
+        function renderPagination() {
+            const pagination = document.getElementById('financePagination');
             pagination.innerHTML = '';
-            
+
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
             // Previous button
             const prevBtn = document.createElement('button');
             prevBtn.className = 'pagination-btn px-3 py-1 rounded-md border border-gray-300 text-sm';
-            prevBtn.innerHTML = '<i class=\'bx bx-chevron-left\'></i>';
-            prevBtn.disabled = page === 1;
-            prevBtn.addEventListener('click', () => {
-                if (page > 1) {
-                    changePage(page - 1);
-                }
-            });
+            prevBtn.innerHTML = '<i class="bx bx-chevron-left"></i>';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.addEventListener('click', () => changePage(currentPage - 1));
             pagination.appendChild(prevBtn);
-            
-            // Dynamic pagination logic with only 2 pages in the middle
-            if (totalPages <= 5) {
-                // If total pages is 5 or less, show all pages
-                for (let i = 1; i <= totalPages; i++) {
-                    addPageButton(i, page);
-                }
-            } else {
-                // Always show page 1
-                addPageButton(1, page);
-                
-                if (page === 1) {
-                    // Show pages 2 and 3
-                    addPageButton(2, page);
-                    addPageButton(3, page);
-                    addEllipsis();
-                    addPageButton(totalPages, page);
-                } else if (page === 2) {
-                    // Show pages 2 and 3
-                    addPageButton(2, page);
-                    addPageButton(3, page);
-                    addEllipsis();
-                    addPageButton(totalPages, page);
-                } else if (page === totalPages - 1) {
-                    // Show pages totalPages-2 and totalPages-1
-                    addEllipsis();
-                    addPageButton(totalPages - 2, page);
-                    addPageButton(totalPages - 1, page);
-                    addPageButton(totalPages, page);
-                } else if (page === totalPages) {
-                    // Show pages totalPages-2 and totalPages-1
-                    addEllipsis();
-                    addPageButton(totalPages - 2, page);
-                    addPageButton(totalPages - 1, page);
-                    addPageButton(totalPages, page);
-                } else {
-                    // Show pages page and page+1
-                    addEllipsis();
-                    addPageButton(page, page);
-                    addPageButton(page + 1, page);
-                    addEllipsis();
-                    addPageButton(totalPages, page);
-                }
+
+            // Page numbers
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `pagination-btn px-3 py-1 rounded-md border text-sm ${i === currentPage ? 'active bg-blue-500 text-white border-blue-500' : 'border-gray-300'}`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => changePage(i));
+                pagination.appendChild(pageBtn);
             }
-            
+
+            if (totalPages > 5) {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'px-2 py-1 text-gray-500';
+                ellipsis.textContent = '...';
+                pagination.appendChild(ellipsis);
+            }
+
             // Next button
             const nextBtn = document.createElement('button');
             nextBtn.className = 'pagination-btn px-3 py-1 rounded-md border border-gray-300 text-sm';
-            nextBtn.innerHTML = '<i class=\'bx bx-chevron-right\'></i>';
-            nextBtn.disabled = page === totalPages;
-            nextBtn.addEventListener('click', () => {
-                if (page < totalPages) {
-                    changePage(page + 1);
-                }
-            });
+            nextBtn.innerHTML = '<i class="bx bx-chevron-right"></i>';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.addEventListener('click', () => changePage(currentPage + 1));
             pagination.appendChild(nextBtn);
         }
-        
-        // Helper function to add page button
-        function addPageButton(pageNum, currentPage) {
-            const pageBtn = document.createElement('button');
-            pageBtn.className = `pagination-btn px-3 py-1 rounded-md border border-gray-300 text-sm ${pageNum === currentPage ? 'active' : ''}`;
-            pageBtn.textContent = pageNum;
-            pageBtn.addEventListener('click', () => {
-                changePage(pageNum);
-            });
-            document.getElementById('orderPagination').appendChild(pageBtn);
-        }
-        
-        // Helper function to add ellipsis
-        function addEllipsis() {
-            const ellipsis = document.createElement('span');
-            ellipsis.className = 'px-2 py-1 text-gray-500';
-            ellipsis.textContent = '...';
-            document.getElementById('orderPagination').appendChild(ellipsis);
-        }
-        
-        // Function to change page
+
         function changePage(page) {
             currentPage = page;
-            renderTableRows(filteredData, currentPage);
-            renderPagination(filteredData.length, currentPage);
+            renderTable();
+            renderPagination();
         }
-        
-        // Search functionality
-        document.getElementById('orderSearch').addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            
-            filteredData = orderData.filter(item => 
-                item.service.toLowerCase().includes(searchTerm) || 
-                item.client.toLowerCase().includes(searchTerm) ||
-                item.status.toLowerCase().includes(searchTerm)
-            );
-            
-            currentPage = 1;
-            renderTableRows(filteredData, currentPage);
-            renderPagination(filteredData.length, currentPage);
-        });
-        
-        // Initialize table on page load
+
+        // Initialize filter dropdown
+        function initializeFilter() {
+            const filterBtn = document.getElementById('filterBtn');
+            const filterDropdown = document.getElementById('filterDropdown');
+            const filterContainer = filterDropdown;
+
+            // Buat daftar kategori unik untuk filter
+            const uniqueCategories = [...new Set(allKategori.map(k => k.nama_kategori))];
+            let filterHTML = `
+                <div class="filter-option">
+                    <input type="checkbox" id="filterAll" value="all" checked>
+                    <label for="filterAll">Semua Kategori</label>
+                </div>
+            `;
+            uniqueCategories.forEach(cat => {
+                const isChecked = activeFilters.has(cat) ? 'checked' : '';
+                filterHTML += `
+                    <div class="filter-option">
+                        <input type="checkbox" id="filter${cat.replace(/\s+/g, '')}" value="${cat}" ${isChecked}>
+                        <label for="filter${cat.replace(/\s+/g, '')}">${cat}</label>
+                    </div>
+                `;
+            });
+            filterHTML += `
+                <div class="filter-actions">
+                    <button id="applyFilter" class="filter-apply">Terapkan</button>
+                    <button id="resetFilter" class="filter-reset">Reset</button>
+                </div>
+            `;
+            filterContainer.innerHTML = filterHTML;
+
+            // Toggle filter dropdown
+            filterBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                filterDropdown.style.display = filterDropdown.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function () {
+                filterDropdown.style.display = 'none';
+            });
+
+            // Prevent dropdown from closing when clicking inside
+            filterDropdown.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+
+            // Apply filter
+            document.getElementById('applyFilter').addEventListener('click', function () {
+                activeFilters.clear();
+                const checkboxes = filterContainer.querySelectorAll('input[type="checkbox"]:checked');
+                checkboxes.forEach(cb => {
+                    activeFilters.add(cb.value);
+                });
+                applyFilters();
+                filterDropdown.style.display = 'none';
+            });
+
+            // Reset filter
+            document.getElementById('resetFilter').addEventListener('click', function () {
+                activeFilters.clear();
+                activeFilters.add('all');
+                document.getElementById('filterAll').checked = true;
+                filterContainer.querySelectorAll('input[type="checkbox"]:not(#filterAll)').forEach(cb => {
+                    cb.checked = false;
+                });
+                applyFilters();
+                filterDropdown.style.display = 'none';
+            });
+        }
+
+        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            renderTableRows(filteredData, currentPage);
-            renderPagination(filteredData.length, currentPage);
+            initializeToggleButtons();
+            initializeFilter();
+            document.getElementById('financeSearch').addEventListener('input', applyFilters);
+            renderTable();
+            renderPagination();
         });
     </script>
 </body>
