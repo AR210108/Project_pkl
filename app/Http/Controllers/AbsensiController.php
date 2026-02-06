@@ -393,8 +393,9 @@ public function rekapAbsensi()
     // KIRIM KE VIEW
     return view('pemilik.rekap_absensi', compact(
         'stats',
-        'formattedAbsensi',
+        'attendances',
         'ketidakhadiran',
+        'formattedAbsensi',
         'users',
         'usersList',
         'selectedDivision',
@@ -677,96 +678,6 @@ private function getStatusKehadiran($absen)
     }
 
    /**
- * Menampilkan halaman rekap absensi untuk General Manajer
- * 
- * @return \Illuminate\View\View
- */
-
-    /**
-     * Menampilkan halaman rekap absensi untuk Pemilik (Owner)
-     * Route: GET /rekap_absensi
-     */
-    public function rekapAbsensi(Request $request)
-    {
-        $tanggalMulai = $request->get('tanggal_mulai', Carbon::now()->format('Y-m-d'));
-        $tanggalAkhir = $request->get('tanggal_akhir', Carbon::now()->format('Y-m-d'));
-        $divisiFilter = $request->get('divisi', '');
-
-        \Log::info("rekapAbsensi called - tanggalMulai: $tanggalMulai, tanggalAkhir: $tanggalAkhir, divisi: $divisiFilter");
-
-        // Ambil daftar divisi unik dari tabel users yang memiliki divisi_id
-        $divisions = User::with('divisi')
-            ->whereNotNull('divisi_id')
-            ->distinct()
-            ->get()
-            ->pluck('divisi.divisi')
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
-
-        // Query absensi (hadir) dan ketidakhadiran berdasarkan filter
-        $attendancesQuery = Absensi::with('user.divisi')
-            ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir]);
-
-        $ketidakhadiranQuery = Absensi::with('user.divisi')
-            ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
-            ->whereNotNull('jenis_ketidakhadiran');
-
-        if (!empty($divisiFilter)) {
-            $attendancesQuery->whereHas('user', function ($q) use ($divisiFilter) {
-                $q->whereHas('divisi', function ($q2) use ($divisiFilter) {
-                    $q2->where('divisi', $divisiFilter);
-                });
-            });
-
-            $ketidakhadiranQuery->whereHas('user', function ($q) use ($divisiFilter) {
-                $q->whereHas('divisi', function ($q2) use ($divisiFilter) {
-                    $q2->where('divisi', $divisiFilter);
-                });
-            });
-        }
-
-        $attendances = $attendancesQuery->whereNotNull('jam_masuk')->orderBy('tanggal', 'desc')->get();
-        $ketidakhadiran = $ketidakhadiranQuery->orderBy('tanggal', 'desc')->get();
-
-        \Log::info("rekapAbsensi - Found " . $attendances->count() . " attendances, " . $ketidakhadiran->count() . " ketidakhadiran");
-        \Log::info("rekapAbsensi - Divisions available: " . json_encode($divisions));
-
-        // Hitung statistik sederhana
-        $stats = [
-            'total_tepat_waktu' => 0,
-            'total_terlambat' => 0,
-            'total_izin' => 0,
-            'total_sakit' => 0,
-            'total_tidak_masuk' => 0,
-            'total_cuti' => 0,
-            'total_dinas_luar' => 0,
-            'total_semua' => User::where('role', 'karyawan')->count(),
-        ];
-
-        foreach ($attendances as $a) {
-            $status = $this->getStatusKehadiran($a);
-            if ($status['label'] === 'Tepat Waktu') $stats['total_tepat_waktu']++;
-            if ($status['label'] === 'Terlambat') $stats['total_terlambat']++;
-        }
-
-        foreach ($ketidakhadiran as $k) {
-            $label = strtolower($this->getStatusKehadiran($k)['label']);
-            if ($label === 'izin') $stats['total_izin']++;
-            if ($label === 'sakit') $stats['total_sakit']++;
-            if ($label === 'cuti') $stats['total_cuti']++;
-            if ($label === 'dinas luar' || $label === 'dinas-luar') $stats['total_dinas_luar']++;
-        }
-
-        // Perkiraan tidak masuk
-        $stats['total_tidak_masuk'] = max(0, $stats['total_semua'] - $attendances->count() - $ketidakhadiran->count());
-
-        return view('pemilik.rekap_absensi', compact(
-            'stats', 'attendances', 'ketidakhadiran', 'divisions', 'divisiFilter', 'tanggalMulai', 'tanggalAkhir'
-        ));
-    }
-
     private function markAbsentEmployees($date)
     {
         if (!$this->isValidDate($date)) {

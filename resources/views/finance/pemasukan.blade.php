@@ -1097,8 +1097,17 @@
             const filterDropdown = document.getElementById('filterDropdown');
             const filterContainer = document.getElementById('filterDropdown');
 
-            // Buat daftar kategori unik untuk filter
-            const uniqueCategories = [...new Set(allKategori.map(k => k.nama_kategori))];
+            // Buat daftar kategori unik dari allKategori yang dikirim dari controller
+            let uniqueCategories = [];
+            if (allKategori && allKategori.length > 0) {
+                uniqueCategories = allKategori.map(k => k.nama_kategori);
+            } else {
+                // Fallback: extract dari financeData jika allKategori kosong
+                uniqueCategories = [...new Set(allFinanceData.map(item => item.kategori))];
+            }
+            
+            console.log('Categories:', uniqueCategories); // Debug log
+            
             let filterHTML = `
                 <div class="filter-option">
                     <input type="checkbox" id="filterAll" value="all" ${activeFilters.has('all') ? 'checked' : ''}>
@@ -1106,11 +1115,12 @@
                 </div>
             `;
             uniqueCategories.forEach(cat => {
+                const safeId = 'filter' + cat.replace(/[^a-zA-Z0-9]/g, '');
                 const isChecked = activeFilters.has(cat) ? 'checked' : '';
                 filterHTML += `
                     <div class="filter-option">
-                        <input type="checkbox" id="filter${cat.replace(/\s+/g, '')}" value="${cat}" ${isChecked}>
-                        <label for="filter${cat.replace(/\s+/g, '')}">${cat}</label>
+                        <input type="checkbox" id="${safeId}" value="${cat}" ${isChecked}>
+                        <label for="${safeId}">${cat}</label>
                     </div>
                 `;
             });

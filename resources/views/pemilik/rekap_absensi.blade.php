@@ -600,13 +600,13 @@
                     <!-- Tanggal Mulai -->
                     <div>
                         <label for="tanggal_mulai" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</label>
-                        <input type="date" id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai', $tanggalMulai) }}" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                        <input type="date" id="tanggal_mulai" name="date" value="{{ old('date', $startDate ?? now()->format('Y-m-d')) }}" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
                     </div>
 
                     <!-- Tanggal Akhir -->
                     <div>
                         <label for="tanggal_akhir" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Akhir</label>
-                        <input type="date" id="tanggal_akhir" name="tanggal_akhir" value="{{ old('tanggal_akhir', $tanggalAkhir) }}" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                        <input type="date" id="tanggal_akhir" name="tanggal_akhir" value="{{ old('tanggal_akhir', $endDate ?? now()->format('Y-m-d')) }}" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" disabled>
                     </div>
 
                     <!-- Divisi -->
@@ -618,7 +618,7 @@
                                 $divisionsDropdown = \App\Models\Divisi::orderBy('divisi')->pluck('divisi');
                             @endphp
                             @foreach($divisionsDropdown as $div)
-                                <option value="{{ $div }}" {{ old('divisi', $divisiFilter) == $div ? 'selected' : '' }}>
+                                <option value="{{ $div }}" {{ old('divisi', $selectedDivision ?? '') == $div ? 'selected' : '' }}>
                                     {{ $div }}
                                 </option>
                             @endforeach
@@ -993,8 +993,8 @@
                 const absensi = absensiData[i];
                 console.log('Processing row:', i, absensi);
 
-                const nama = absensi.user?.name || absensi.name || '-';
-                const divisi = absensi.user?.divisi?.divisi || absensi.user?.divisi || '-';
+                const nama = absensi.user?.name || '-';
+                const divisi = absensi.user?.divisi || '-';
                 const tanggal = absensi.tanggal ? new Date(absensi.tanggal).toLocaleDateString('id-ID') : '-';
                 const jamMasuk = absensi.jam_masuk ? absensi.jam_masuk.substring(0, 5) : '-';
                 const jamKeluar = absensi.jam_pulang ? absensi.jam_pulang.substring(0, 5) : '-';

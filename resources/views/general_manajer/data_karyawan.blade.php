@@ -333,9 +333,10 @@
                             <input type="hidden" name="search" value="{{ request('search') }}">
                             <select name="divisi" class="px-3 py-2 bg-white border border-border-light text-text-muted-light rounded-lg form-input">
                                 <option value="">Semua Divisi</option>
-                                @foreach(
-                                    \App\Models\Karyawan::select('divisi')->distinct()->orderBy('divisi')->pluck('divisi')
-                                    as $d)
+                                @php
+                                    $divisionsDropdown = \App\Models\Divisi::orderBy('divisi')->pluck('divisi');
+                                @endphp
+                                @foreach($divisionsDropdown as $d)
                                 <option value="{{ $d }}" {{ request('divisi') == $d ? 'selected' : '' }}>{{ $d }}</option>
                                 @endforeach
                             </select>
