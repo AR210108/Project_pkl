@@ -41,10 +41,10 @@ Route::middleware(['web', 'auth'])->group(function () {
     });
 });
 
-// API routes untuk kwitansi - WITHOUT AUTH (Debug)
-Route::prefix('kwitansi')->group(function () {
-    // GET /api/kwitansi
-    Route::get('/', [KwitansiController::class, 'index'])->name('api.kwitansi.index');
+// API routes untuk kwitansi - WITH AUTH (for session-based fetch from finance page)
+Route::middleware(['web', 'auth'])->prefix('kwitansi')->group(function () {
+    // GET /api/kwitansi - return JSON data
+    Route::get('/', [KwitansiController::class, 'getKwitansiData'])->name('api.kwitansi.index');
     
     // POST /api/kwitansi
     Route::post('/', [KwitansiController::class, 'store'])->name('api.kwitansi.store');

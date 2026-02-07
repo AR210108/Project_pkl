@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
         tailwind.config = {
@@ -441,6 +441,134 @@
             z-index: 9999 !important;
             background-color: rgba(0, 0, 0, 0.7) !important;
         }
+
+        /* CSS untuk modal detail */
+        .detail-status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .detail-status-lunas {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .detail-status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .detail-status-pembayaran-awal {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .detail-amount {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .invoice-detail-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .invoice-detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .invoice-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-buttons button {
+                width: 100%;
+            }
+        }
+
+        /* Select2 custom styling */
+        .select2-container--default .select2-selection--single {
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 0.5rem !important;
+            height: 42px !important;
+            padding: 0.5rem !important;
+        }
+
+        .select2-container--default .select2-selection--single:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 1.5 !important;
+            padding-left: 0 !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px !important;
+            right: 8px !important;
+        }
+
+        .select2-dropdown {
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 0.5rem !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* CSS untuk Select2 Layanan */
+        .select2-layanan + .select2-container .select2-selection--single {
+            height: 42px !important;
+            padding: 8px !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 0.5rem !important;
+        }
+
+        .select2-layanan + .select2-container .select2-selection__rendered {
+            line-height: 26px !important;
+            padding-left: 0 !important;
+        }
+
+        .select2-layanan + .select2-container .select2-selection__arrow {
+            height: 40px !important;
+        }
+
+        .select2-layanan + .select2-container .select2-results__option {
+            padding: 8px 12px !important;
+        }
+
+        .select2-layanan + .select2-container .select2-results__option--highlighted {
+            background-color: #3b82f6 !important;
+            color: white !important;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
     </style>
 </head>
 
@@ -472,22 +600,24 @@
                             <div id="filterDropdown" class="filter-dropdown">
                                 <div class="mb-3">
                                     <h4 class="font-semibold text-sm mb-2">Status Pembayaran</h4>
-                                    <div class="filter-option">
+                                    <div class="filter-option flex items-center gap-2 mb-1">
                                         <input type="checkbox" id="filterAllStatus" value="all" checked>
-                                        <label for="filterAllStatus">Semua Status</label>
+                                        <label for="filterAllStatus" class="text-sm">Semua Status</label>
                                     </div>
-                                    <div class="filter-option">
+                                    <div class="filter-option flex items-center gap-2 mb-1">
                                         <input type="checkbox" id="filterPembayaranAwal" value="pembayaran awal">
-                                        <label for="filterPembayaranAwal">Pembayaran Awal</label>
+                                        <label for="filterPembayaranAwal" class="text-sm">Down Payment</label>
                                     </div>
-                                    <div class="filter-option">
+                                    <div class="filter-option flex items-center gap-2">
                                         <input type="checkbox" id="filterLunas" value="lunas">
-                                        <label for="filterLunas">Lunas</label>
+                                        <label for="filterLunas" class="text-sm">Lunas</label>
                                     </div>
                                 </div>
                                 <div class="filter-actions mt-4 pt-3 border-t">
-                                    <button id="applyFilter" class="filter-apply bg-primary text-white px-3 py-1 rounded text-sm hover:bg-blue-700">Terapkan</button>
-                                    <button id="resetFilter" class="filter-reset bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-300 ml-2">Reset</button>
+                                    <button id="applyFilter"
+                                        class="filter-apply bg-primary text-white px-3 py-1 rounded text-sm hover:bg-blue-700">Terapkan</button>
+                                    <button id="resetFilter"
+                                        class="filter-reset bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-300 ml-2">Reset</button>
                                 </div>
                             </div>
                         </div>
@@ -526,19 +656,18 @@
                                             <th style="min-width: 150px;">Nama Klien</th>
                                             <th style="min-width: 150px;">Nama Layanan</th>
                                             <th style="min-width: 200px;">Alamat</th>
-                                            <th style="min-width: 200px;">Deskripsi</th>
                                             <th style="min-width: 120px;">Subtotal</th>
                                             <th style="min-width: 100px;">Pajak (%)</th>
                                             <th style="min-width: 120px;">Jumlah Pajak</th>
                                             <th style="min-width: 120px;">Total</th>
                                             <th style="min-width: 150px;">Metode Pembayaran</th>
                                             <th style="min-width: 120px;">Status Pembayaran</th>
-                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
+                                            <th style="min-width: 150px; text-align: center;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="desktopTableBody">
                                         <tr id="loadingRow">
-                                            <td colspan="15" class="px-6 py-4 text-center">
+                                            <td colspan="14" class="px-6 py-4 text-center">
                                                 <div class="flex justify-center items-center">
                                                     <div class="spinner"></div>
                                                     <span class="ml-2">Memuat data...</span>
@@ -546,7 +675,7 @@
                                             </td>
                                         </tr>
                                         <tr id="noDataRow" class="hidden">
-                                            <td colspan="15" class="px-6 py-4 text-center text-sm text-gray-500">
+                                            <td colspan="14" class="px-6 py-4 text-center text-sm text-gray-500">
                                                 Tidak ada data invoice
                                             </td>
                                         </tr>
@@ -590,122 +719,188 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="buatInvoiceForm" class="space-y-4">
-                    @csrf
-                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Perusahaan *</label>
-                            <input type="text" id="company_name" name="company_name"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                            <span class="error-message" id="company_name_error"></span>
+<form id="buatInvoiceForm" class="space-y-4">
+    @csrf
+    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+    <!-- TAMBAHKAN INI -->
+    <input type="hidden" name="kontak" id="kontakHidden">
+
+                    <!-- Informasi Perusahaan -->
+                    <div class="border-b pb-4">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="material-icons-outlined text-blue-500">business</span>
+                            Informasi Perusahaan
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Perusahaan *</label>
+                                <select id="selectPerusahaan" name="company_name"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required>
+                                    <option value="">Pilih Perusahaan</option>
+                                </select>
+                                <span class="error-message" id="company_name_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kontak Perusahaan</label>
+                                <input type="text" id="kontakPerusahaan"
+                                    class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700"
+                                    readonly>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Invoice *</label>
-                            <input type="date" id="invoice_date" name="invoice_date"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                            <span class="error-message" id="invoice_date_error"></span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Invoice *</label>
-                            <input type="text" id="invoice_no" name="invoice_no"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                            <span class="error-message" id="invoice_no_error"></span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Klien *</label>
-                            <input type="text" id="client_name" name="client_name"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                            <span class="error-message" id="client_name_error"></span>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Perusahaan *</label>
-                        <input type="text" id="company_address" name="company_address"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                            required>
-                        <span class="error-message" id="company_address_error"></span>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="description" name="description" rows="3"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"></textarea>
-                        <span class="error-message" id="description_error"></span>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan *</label>
-                            <select id="nama_layanan" name="nama_layanan"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                                <option value="">Pilih Layanan</option>
-                                <!-- Options akan diisi via JavaScript -->
-                            </select>
-                            <span class="error-message" id="nama_layanan_error"></span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Pembayaran *</label>
-                            <select id="status_pembayaran" name="status_pembayaran"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                                <option value="pembayaran awal">Pembayaran Awal</option>
-                                <option value="lunas">Lunas</option>
-                            </select>
-                            <span class="error-message" id="status_pembayaran_error"></span>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Klien *</label>
+                                <input type="text" id="client_name" name="client_name"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required>
+                                <span class="error-message" id="client_name_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Perusahaan *</label>
+                                <input type="text" id="company_address" name="company_address"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required>
+                                <span class="error-message" id="company_address_error"></span>
+                            </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Subtotal (Rp) *</label>
-                            <input type="number" id="subtotal" name="subtotal" min="0" step="1"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                            <span class="error-message" id="subtotal_error"></span>
+
+                    <!-- Informasi Layanan -->
+                    <div class="border-b pb-4">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="material-icons-outlined text-green-500">description</span>
+                            Informasi Layanan
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Layanan *</label>
+                                <select id="selectLayanan" name="nama_layanan"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input select2-layanan"
+                                    required>
+                                    <option value="">Pilih Layanan</option>
+                                    <!-- Options akan diisi oleh JavaScript -->
+                                </select>
+                                <span class="error-message" id="nama_layanan_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Harga Layanan (Rp)</label>
+                                <input type="text" id="hargaLayanan" name="hargaLayananDisplay"
+                                    class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700"
+                                    readonly>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pajak (%) *</label>
-                            <input type="number" id="tax_percentage" name="tax_percentage" min="0"
-                                max="100" step="0.01"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                            <span class="error-message" id="tax_percentage_error"></span>
+                        <div class="mt-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Layanan</label>
+                            <textarea id="deskripsiLayanan" name="deskripsiLayanan" rows="2"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700" readonly></textarea>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Pajak (Rp) *</label>
-                            <input type="number" id="tax" name="tax" min="0" step="1"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                readonly required>
-                            <span class="error-message" id="tax_error"></span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp) *</label>
-                            <input type="number" id="total" name="total" min="0" step="1"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                readonly required>
-                            <span class="error-message" id="total_error"></span>
+                        <!-- Tambahkan input hidden untuk menyimpan data asli -->
+                        <input type="hidden" id="hargaHidden" name="harga">
+                        <input type="hidden" id="hppHidden" name="hpp">
+                    </div>
+
+                    <!-- Informasi Invoice -->
+                    <div class="border-b pb-4">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="material-icons-outlined text-purple-500">receipt</span>
+                            Informasi Invoice
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Invoice *</label>
+                                <input type="text" id="invoice_no" name="invoice_no"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required>
+                                <span class="error-message" id="invoice_no_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Invoice *</label>
+                                <input type="date" id="invoice_date" name="invoice_date"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required>
+                                <span class="error-message" id="invoice_date_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                                <textarea id="description" name="description" rows="2"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"></textarea>
+                            </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran *</label>
-                            <select id="payment_method" name="payment_method"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                                <option value="">Pilih Metode Pembayaran</option>
-                                <option value="Bank Transfer">Bank Transfer</option>
-                                <option value="E-Wallet">E-Wallet</option>
-                                <option value="Credit Card">Credit Card</option>
-                                <option value="Cash">Cash</option>
-                            </select>
-                            <span class="error-message" id="payment_method_error"></span>
+
+                    <!-- Informasi Pembayaran -->
+                    <div class="border-b pb-4">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="material-icons-outlined text-yellow-500">payments</span>
+                            Informasi Pembayaran
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran *</label>
+                                <select id="payment_method" name="payment_method"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required>
+                                    <option value="">Pilih Metode</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                    <option value="E-Wallet">E-Wallet</option>
+                                    <option value="Credit Card">Credit Card</option>
+                                    <option value="Cash">Cash</option>
+                                </select>
+                                <span class="error-message" id="payment_method_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Status Pembayaran *</label>
+                                <select id="status_pembayaran" name="status_pembayaran"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required>
+                                    <option value="pembayaran awal">Pembayaran Awal</option>
+                                    <option value="lunas">Lunas</option>
+                                </select>
+                                <span class="error-message" id="status_pembayaran_error"></span>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Perhitungan Harga -->
+                    <div class="border-b pb-4">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="material-icons-outlined text-red-500">calculate</span>
+                            Perhitungan Harga
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Subtotal (Rp) *</label>
+                                <input type="number" id="subtotal" name="subtotal" min="0" step="1"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required>
+                                <span class="error-message" id="subtotal_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Pajak (%) *</label>
+                                <input type="number" id="tax_percentage" name="tax_percentage" min="0"
+                                    max="100" step="0.01"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required value="11">
+                                <span class="error-message" id="tax_percentage_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Pajak (Rp) *</label>
+                                <input type="number" id="tax" name="tax" min="0" step="1"
+                                    class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700"
+                                    readonly required>
+                                <span class="error-message" id="tax_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp) *</label>
+                                <input type="number" id="total" name="total" min="0" step="1"
+                                    class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700"
+                                    readonly required>
+                                <span class="error-message" id="total_error"></span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" id="cancelBtn"
                             class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -731,109 +926,143 @@
                     @csrf
                     <input type="hidden" id="editInvoiceId" name="id">
                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
+
+                    <!-- Informasi Perusahaan -->
+                    <div class="border-b pb-4">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="material-icons-outlined text-blue-500">business</span>
+                            Informasi Perusahaan
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Perusahaan *</label>
+                                <input type="text" id="editCompanyName" name="company_name"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required>
+                                <span class="error-message" id="edit_company_name_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Invoice *</label>
+                                <input type="date" id="editInvoiceDate" name="invoice_date"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required>
+                                <span class="error-message" id="edit_invoice_date_error"></span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Invoice *</label>
+                                <input type="text" id="editInvoiceNo" name="invoice_no"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required>
+                                <span class="error-message" id="edit_invoice_no_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Klien *</label>
+                                <input type="text" id="editClientName" name="client_name"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required>
+                                <span class="error-message" id="edit_client_name_error"></span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Perusahaan *</label>
+                            <input type="text" id="editCompanyAddress" name="company_address"
+                                class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                required>
+                            <span class="error-message" id="edit_company_address_error"></span>
+                        </div>
+                    </div>
+
+                    <!-- Informasi Layanan -->
+                    <div class="border-b pb-4">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="material-icons-outlined text-green-500">description</span>
+                            Informasi Layanan
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan *</label>
+                                <select id="editNamaLayanan" name="nama_layanan"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input select2-layanan"
+                                    required>
+                                    <option value="">Pilih Layanan</option>
+                                </select>
+                                <span class="error-message" id="edit_nama_layanan_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Harga Layanan (Rp)</label>
+                                <input type="text" id="editHargaLayanan" name="editHargaLayananDisplay"
+                                    class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700"
+                                    readonly>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Layanan</label>
+                            <textarea id="editDeskripsiLayanan" name="editDeskripsiLayanan" rows="2"
+                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700" readonly></textarea>
+                        </div>
+                        <!-- Hidden fields untuk edit -->
+                        <input type="hidden" id="editHargaHidden" name="harga">
+                        <input type="hidden" id="editHppHidden" name="hpp">
+                    </div>
+
+                    <!-- Perhitungan Harga -->
+                    <div class="border-b pb-4">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="material-icons-outlined text-red-500">calculate</span>
+                            Perhitungan Harga
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Subtotal (Rp) *</label>
+                                <input type="number" id="editSubtotal" name="subtotal" min="0"
+                                    step="1"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required>
+                                <span class="error-message" id="edit_subtotal_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Pajak (%) *</label>
+                                <input type="number" id="editTaxPercentage" name="tax_percentage" min="0"
+                                    max="100" step="0.01"
+                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                    required>
+                                <span class="error-message" id="edit_tax_percentage_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Pajak (Rp) *</label>
+                                <input type="number" id="editTax" name="tax" min="0" step="1"
+                                    class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700"
+                                    readonly required>
+                                <span class="error-message" id="edit_tax_error"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp) *</label>
+                                <input type="number" id="editTotal" name="total" min="0" step="1"
+                                    class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700"
+                                    readonly required>
+                                <span class="error-message" id="edit_total_error"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informasi Pembayaran & Deskripsi -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Perusahaan *</label>
-                            <input type="text" id="editCompanyName" name="company_name"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                            <span class="error-message" id="edit_company_name_error"></span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Invoice *</label>
-                            <input type="date" id="editInvoiceDate" name="invoice_date"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                            <span class="error-message" id="edit_invoice_date_error"></span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Invoice *</label>
-                            <input type="text" id="editInvoiceNo" name="invoice_no"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                            <span class="error-message" id="edit_invoice_no_error"></span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Klien *</label>
-                            <input type="text" id="editClientName" name="client_name"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                            <span class="error-message" id="edit_client_name_error"></span>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Perusahaan *</label>
-                        <input type="text" id="editCompanyAddress" name="company_address"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                            required>
-                        <span class="error-message" id="edit_company_address_error"></span>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="editDescription" name="description" rows="3"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"></textarea>
-                        <span class="error-message" id="edit_description_error"></span>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Layanan *</label>
-                            <select id="editNamaLayanan" name="nama_layanan"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                                <option value="">Pilih Layanan</option>
-                                <!-- Options akan diisi via JavaScript -->
-                            </select>
-                            <span class="error-message" id="edit_nama_layanan_error"></span>
-                        </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status Pembayaran *</label>
                             <select id="editStatusPembayaran" name="status_pembayaran"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                                 required>
                                 <option value="pembayaran awal">Pembayaran Awal</option>
                                 <option value="lunas">Lunas</option>
                             </select>
                             <span class="error-message" id="edit_status_pembayaran_error"></span>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Subtotal (Rp) *</label>
-                            <input type="number" id="editSubtotal" name="subtotal" min="0" step="1"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                            <span class="error-message" id="edit_subtotal_error"></span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pajak (%) *</label>
-                            <input type="number" id="editTaxPercentage" name="tax_percentage" min="0"
-                                max="100" step="0.01"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                required>
-                            <span class="error-message" id="edit_tax_percentage_error"></span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Pajak (Rp) *</label>
-                            <input type="number" id="editTax" name="tax" min="0" step="1"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                readonly required>
-                            <span class="error-message" id="edit_tax_error"></span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Total (Rp) *</label>
-                            <input type="number" id="editTotal" name="total" min="0" step="1"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                                readonly required>
-                            <span class="error-message" id="edit_total_error"></span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran *</label>
                             <select id="editPaymentMethod" name="payment_method"
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
+                                class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                                 required>
                                 <option value="Bank Transfer">Bank Transfer</option>
                                 <option value="E-Wallet">E-Wallet</option>
@@ -843,6 +1072,13 @@
                             <span class="error-message" id="edit_payment_method_error"></span>
                         </div>
                     </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Tambahan</label>
+                        <textarea id="editDescription" name="description" rows="3"
+                            class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"></textarea>
+                        <span class="error-message" id="edit_description_error"></span>
+                    </div>
+
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" id="cancelEditBtn"
                             class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -877,6 +1113,198 @@
                             class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
                         <button type="button" id="confirmDeleteBtn"
                             class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detail Invoice -->
+    <div id="detailInvoiceModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span class="material-icons-outlined text-blue-600 text-2xl">receipt_long</span>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Detail Invoice</h3>
+                            <p class="text-gray-600" id="detailInvoiceSubtitle">Informasi lengkap invoice</p>
+                        </div>
+                    </div>
+                    <button id="closeDetailModalBtn"
+                        class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
+                        <span class="material-icons-outlined text-2xl">close</span>
+                    </button>
+                </div>
+
+                <!-- Invoice Header -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 border border-blue-100">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="material-icons-outlined text-blue-600">business</span>
+                                <h4 class="font-semibold text-blue-700">Perusahaan</h4>
+                            </div>
+                            <p id="detailCompanyName" class="text-xl font-bold text-gray-800 truncate"></p>
+                            <p id="detailCompanyAddress" class="text-gray-600 text-sm"></p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="material-icons-outlined text-green-600">person</span>
+                                <h4 class="font-semibold text-green-700">Klien</h4>
+                            </div>
+                            <p id="detailClientName" class="text-xl font-bold text-gray-800"></p>
+                            <div class="flex items-center gap-2">
+                                <span class="material-icons-outlined text-gray-400 text-sm">date_range</span>
+                                <span id="detailInvoiceDate" class="text-gray-600 text-sm"></span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="material-icons-outlined text-purple-600">tag</span>
+                                <h4 class="font-semibold text-purple-700">Invoice Info</h4>
+                            </div>
+                            <p id="detailInvoiceNo" class="text-xl font-bold text-gray-800 font-mono"></p>
+                            <div id="detailStatusBadge" class="inline-block mt-1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Invoice Details -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Left Column - Service & Payment Info -->
+                    <div class="space-y-6">
+                        <!-- Service Information -->
+                        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                            <h4 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <span class="material-icons-outlined text-blue-500">description</span>
+                                Informasi Layanan
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center invoice-detail-item">
+                                    <span class="text-gray-600 font-medium">Nama Layanan</span>
+                                    <span id="detailNamaLayanan" class="font-semibold text-gray-800"></span>
+                                </div>
+                                <div class="flex justify-between items-center invoice-detail-item">
+                                    <span class="text-gray-600 font-medium">Metode Pembayaran</span>
+                                    <span id="detailPaymentMethod" class="font-semibold text-gray-800"></span>
+                                </div>
+                                <div class="flex justify-between items-center invoice-detail-item">
+                                    <span class="text-gray-600 font-medium">Deskripsi</span>
+                                    <span id="detailDescription"
+                                        class="font-semibold text-gray-800 text-right max-w-xs"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Timeline -->
+                        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                            <h4 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <span class="material-icons-outlined text-green-500">history</span>
+                                Riwayat Status
+                            </h4>
+                            <div class="relative pl-8">
+                                <!-- Timeline line -->
+                                <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+
+                                <!-- Created -->
+                                <div class="relative mb-6">
+                                    <div
+                                        class="absolute left-[-20px] top-0 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                                        <span class="material-icons-outlined text-white text-sm">check</span>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="font-medium text-gray-800">Invoice Dibuat</p>
+                                        <p id="detailCreatedAt" class="text-sm text-gray-500 mt-1"></p>
+                                    </div>
+                                </div>
+
+                                <!-- Status Update -->
+                                <div class="relative">
+                                    <div id="detailStatusIcon"
+                                        class="absolute left-[-20px] top-0 w-8 h-8 rounded-full flex items-center justify-center">
+                                        <!-- Icon akan diisi berdasarkan status -->
+                                    </div>
+                                    <div class="ml-4">
+                                        <p id="detailStatusText" class="font-medium text-gray-800">Status Pembayaran
+                                        </p>
+                                        <p id="detailUpdatedAt" class="text-sm text-gray-500 mt-1"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Financial Summary -->
+                    <div
+                        class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-5 shadow-sm">
+                        <h4 class="font-semibold text-gray-800 mb-6 flex items-center gap-2">
+                            <span class="material-icons-outlined text-purple-500">payments</span>
+                            Ringkasan Keuangan
+                        </h4>
+                        <div class="space-y-4">
+                            <div
+                                class="flex justify-between items-center py-3 px-4 bg-white rounded-lg border border-gray-200">
+                                <div>
+                                    <span class="text-gray-600">Subtotal</span>
+                                    <p class="text-xs text-gray-500 mt-1">Sebelum pajak</p>
+                                </div>
+                                <span id="detailSubtotal"
+                                    class="text-lg font-bold text-gray-800 detail-amount"></span>
+                            </div>
+
+                            <div
+                                class="flex justify-between items-center py-3 px-4 bg-white rounded-lg border border-gray-200">
+                                <div>
+                                    <span class="text-gray-600">Pajak</span>
+                                    <p id="detailTaxPercentageText" class="text-xs text-gray-500 mt-1"></p>
+                                </div>
+                                <span id="detailTax" class="text-lg font-bold text-gray-800 detail-amount"></span>
+                            </div>
+
+                            <div class="mt-6 pt-6 border-t border-gray-300">
+                                <div
+                                    class="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                                    <div>
+                                        <span class="text-lg font-bold text-gray-800">Total</span>
+                                        <p class="text-sm text-gray-600 mt-1">Jumlah yang harus dibayar</p>
+                                    </div>
+                                    <span id="detailTotal"
+                                        class="text-2xl font-bold text-blue-600 detail-amount"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t border-gray-200">
+                    <div class="text-sm text-gray-500">
+                        <p>Invoice ID: <span id="detailInvoiceId" class="font-mono font-medium"></span></p>
+                        <p class="mt-1">Terakhir diupdate: <span id="detailLastUpdated" class="font-medium"></span>
+                        </p>
+                    </div>
+                    <div class="action-buttons">
+                        <button onclick="closeDetailModal()"
+                            class="px-5 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
+                            <span class="material-icons-outlined">close</span>
+                            Tutup
+                        </button>
+                        <button onclick="printInvoiceModalFromDetail()"
+                            class="px-5 py-2.5 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
+                            <span class="material-icons-outlined">print</span>
+                            Cetak
+                        </button>
+                        <button onclick="editInvoiceFromDetail()"
+                            class="px-5 py-2.5 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2">
+                            <span class="material-icons-outlined">edit</span>
+                            Edit
+                        </button>
                     </div>
                 </div>
             </div>
@@ -946,14 +1374,26 @@
         </button>
     </div>
 
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="flex flex-col items-center">
+            <div class="spinner"></div>
+            <p class="mt-3 text-gray-600">Memuat data...</p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
     <script>
         // ==================== GLOBAL VARIABLES ====================
         let allInvoices = [];
         let filteredInvoices = [];
         let currentPage = 1;
         const perPage = 10;
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         let dataLayanan = [];
+        let dataPerusahaan = [];
+        let currentDetailInvoiceId = null;
 
         // ==================== DOM ELEMENTS ====================
         const buatInvoiceBtn = document.getElementById('buatInvoiceBtn');
@@ -973,6 +1413,7 @@
         const editInvoiceForm = document.getElementById('editInvoiceForm');
         const cancelEditBtn = document.getElementById('cancelEditBtn');
         const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+        const closeDetailModalBtn = document.getElementById('closeDetailModalBtn');
         const sessionExpiredModal = document.getElementById('sessionExpiredModal');
         const reloadPageBtn = document.getElementById('reloadPageBtn');
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
@@ -982,129 +1423,418 @@
         const filterDropdown = document.getElementById('filterDropdown');
         const applyFilterBtn = document.getElementById('applyFilter');
         const resetFilterBtn = document.getElementById('resetFilter');
+        const loadingOverlay = document.getElementById('loadingOverlay');
 
-        // ==================== FUNGSI UNTUK MENGAMBIL DATA LAYANAN ====================
-        function loadDataLayanan() {
-            console.log('Memuat data layanan dari endpoint...');
-            
-            fetch('/admin/layanan?ajax=1&for_dropdown=true', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                credentials: 'include'
-            })
-            .then(response => {
-                console.log('Response status layanan:', response.status);
-                
+        // ==================== FUNGSI UNTUK MENGAMBIL DATA PERUSAHAAN ====================
+        async function loadDataPerusahaan() {
+            try {
+                console.log('Memuat data perusahaan dari endpoint...');
+
+                const response = await fetch('/admin/perusahaan/data?ajax=1&for_dropdown=true', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'include'
+                });
+
                 if (checkSessionError(response)) {
-                    return Promise.reject('Session expired');
-                }
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                return response.json();
-            })
-            .then(data => {
-                console.log('Data layanan diterima:', data);
-                
-                if (data && data.success) {
-                    dataLayanan = data.data || [];
-                    console.log(`Berhasil memuat ${dataLayanan.length} data layanan`);
-                } else if (Array.isArray(data)) {
-                    dataLayanan = data;
-                    console.log(`Berhasil memuat ${dataLayanan.length} data layanan (array langsung)`);
-                } else if (data && data.data) {
-                    dataLayanan = data.data;
-                    console.log(`Berhasil memuat ${dataLayanan.length} data layanan (pagination)`);
-                } else {
-                    console.warn('Format data tidak dikenali, menggunakan data dummy');
-                    useDummyLayananData();
                     return;
                 }
-                
-                populateLayananOptions();
-            })
-            .catch(error => {
-                console.error('Error loading layanan data:', error);
-                if (error.message !== 'Session expired') {
-                    console.log('Menggunakan data dummy...');
-                    useDummyLayananData();
+
+                if (!response.ok) {
+                    console.warn('Response perusahaan tidak OK:', response.status);
+                    return;
                 }
-            });
+
+                const data = await response.json();
+                console.log('Response data perusahaan:', data);
+
+                if (data && Array.isArray(data)) {
+                    dataPerusahaan = data;
+                } else if (data && data.success && Array.isArray(data.data)) {
+                    dataPerusahaan = data.data;
+                } else if (data && Array.isArray(data.perusahaan)) {
+                    dataPerusahaan = data.perusahaan;
+                } else {
+                    console.warn('Format data perusahaan tidak dikenali:', data);
+                    return;
+                }
+
+                console.log(`Berhasil memuat ${dataPerusahaan.length} data perusahaan`);
+                populatePerusahaanOptions();
+            } catch (error) {
+                console.error('Error loading perusahaan data:', error);
+            }
         }
 
-        // Fungsi untuk data dummy jika API gagal
+        // Fungsi untuk mengisi dropdown perusahaan
+        function populatePerusahaanOptions() {
+            const perusahaanSelect = document.getElementById('selectPerusahaan');
+            const kontakInput = document.getElementById('kontakPerusahaan');
+
+            if (!perusahaanSelect) {
+                console.error('Element selectPerusahaan tidak ditemukan!');
+                return;
+            }
+
+            // Simpan value yang dipilih sebelumnya (jika ada)
+            const currentValue = perusahaanSelect.value;
+
+            // Clear existing options except first one
+            perusahaanSelect.innerHTML = '<option value="">Pilih Perusahaan</option>';
+
+            if (dataPerusahaan.length === 0) {
+                console.warn('Data perusahaan kosong, menambahkan option default');
+                const option = document.createElement('option');
+                option.value = 'data_kosong';
+                option.textContent = 'Tidak ada data perusahaan';
+                option.disabled = true;
+                perusahaanSelect.appendChild(option);
+                return;
+            }
+
+            console.log(`Menambahkan ${dataPerusahaan.length} perusahaan ke dropdown`);
+
+            dataPerusahaan.forEach((perusahaan) => {
+                const option = document.createElement('option');
+
+                // Ambil data dengan berbagai kemungkinan nama field
+                const nama = perusahaan.nama_perusahaan || perusahaan.nama || `Perusahaan ${perusahaan.id}`;
+                const klien = perusahaan.klien || '';
+                const alamat = perusahaan.alamat || '';
+
+                // Cari kontak dari berbagai kemungkinan field
+                let kontak = '';
+                if (perusahaan.kontak) {
+                    kontak = perusahaan.kontak;
+                } else if (perusahaan.telepon) {
+                    kontak = perusahaan.telepon;
+                } else if (perusahaan.phone) {
+                    kontak = perusahaan.phone;
+                } else if (perusahaan.no_telp) {
+                    kontak = perusahaan.no_telp;
+                } else if (perusahaan.hp) {
+                    kontak = perusahaan.hp;
+                } else if (perusahaan.no_hp) {
+                    kontak = perusahaan.no_hp;
+                } else if (perusahaan.telephone) {
+                    kontak = perusahaan.telephone;
+                }
+
+                // Cari deskripsi dari berbagai kemungkinan field
+                let deskripsi = '';
+                if (perusahaan.deskripsi) {
+                    deskripsi = perusahaan.deskripsi;
+                } else if (perusahaan.description) {
+                    deskripsi = perusahaan.description;
+                } else if (perusahaan.deskripsi_perusahaan) {
+                    deskripsi = perusahaan.deskripsi_perusahaan;
+                } else if (perusahaan.tentang) {
+                    deskripsi = perusahaan.tentang;
+                } else if (perusahaan.profil) {
+                    deskripsi = perusahaan.profil;
+                }
+
+                option.value = nama;
+                option.textContent = nama;
+                option.setAttribute('data-klien', klien);
+                option.setAttribute('data-alamat', alamat);
+                option.setAttribute('data-kontak', kontak);
+                option.setAttribute('data-deskripsi', deskripsi);
+
+                perusahaanSelect.appendChild(option);
+            });
+
+            // Restore previous value
+            if (currentValue) {
+                perusahaanSelect.value = currentValue;
+            }
+
+            // Re-initialize Select2 jika sudah diinisialisasi sebelumnya
+            if ($(perusahaanSelect).hasClass('select2-hidden-accessible')) {
+                $(perusahaanSelect).select2('destroy');
+            }
+
+            // Initialize Select2 dengan proper configuration
+            $(perusahaanSelect).select2({
+                placeholder: 'Pilih Perusahaan',
+                allowClear: true,
+                dropdownParent: $('#buatInvoiceModal'),
+                width: '100%'
+            });
+
+            console.log('Select2 perusahaan diinisialisasi dengan', dataPerusahaan.length, 'options');
+        }
+
+        // ==================== FUNGSI UNTUK MENGAMBIL DATA LAYANAN ====================
+// GANTI DI FUNGSI loadDataLayanan():
+async function loadDataLayanan() {
+    try {
+        console.log('Memuat data layanan dari endpoint...');
+
+        // GUNAKAN URL LANGSUNG:
+        const response = await fetch('{{ route("admin.surat_kerjasama.data.layanan") }}', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'include'
+        });
+
+        // Atau gunakan route yang sudah ada di Surat Kerjasama:
+        // const response = await fetch('{{ route("admin.surat_kerjasama.data.layanan") }}', {
+        
+        if (checkSessionError(response)) {
+            return;
+        }
+
+        if (!response.ok) {
+            console.warn('Response layanan tidak OK:', response.status);
+            // Fallback ke data dummy jika endpoint tidak tersedia
+            useDummyLayananData();
+            return;
+        }
+
+        const data = await response.json();
+        console.log('Response data layanan:', data);
+
+        if (data && data.success && Array.isArray(data.data)) {
+            dataLayanan = data.data;
+            console.log(`Berhasil memuat ${dataLayanan.length} data layanan`);
+            populateLayananOptions();
+        } else {
+            console.warn('Format data layanan tidak dikenali:', data);
+            useDummyLayananData();
+        }
+    } catch (error) {
+        console.error('Error loading layanan data:', error);
+        useDummyLayananData();
+    }
+}
+
         function useDummyLayananData() {
-            console.log('Menggunakan data dummy untuk layanan');
-            
             dataLayanan = [
-                { id: 1, nama_layanan: 'Web Development' },
-                { id: 2, nama_layanan: 'Mobile App Development' },
-                { id: 3, nama_layanan: 'SEO Optimization' },
-                { id: 4, nama_layanan: 'Digital Marketing' },
-                { id: 5, nama_layanan: 'UI/UX Design' },
-                { id: 6, nama_layanan: 'Social Media Management' },
-                { id: 7, nama_layanan: 'Content Writing' },
-                { id: 8, nama_layanan: 'Graphic Design' }
+                {
+                    id: 1,
+                    nama_layanan: 'Web Development',
+                    deskripsi: 'Pembuatan website perusahaan',
+                    harga: 5000000,
+                    hpp: 2000000
+                },
+                {
+                    id: 2,
+                    nama_layanan: 'Mobile App',
+                    deskripsi: 'Pembuatan aplikasi mobile',
+                    harga: 8000000,
+                    hpp: 3000000
+                },
+                {
+                    id: 3,
+                    nama_layanan: 'Digital Marketing',
+                    deskripsi: 'Kampanye pemasaran digital',
+                    harga: 3000000,
+                    hpp: 1000000
+                }
             ];
-            
+            console.log('Menggunakan data layanan dummy:', dataLayanan.length);
             populateLayananOptions();
         }
 
         // Fungsi untuk mengisi dropdown layanan
         function populateLayananOptions() {
-            const namaLayananSelect = document.getElementById('nama_layanan');
-            const editNamaLayananSelect = document.getElementById('editNamaLayanan');
+            console.log('Populating layanan options with', dataLayanan.length, 'items');
             
-            function createOptions(selectElement) {
-                if (!selectElement) return;
-                
+            const layananSelect = document.getElementById('selectLayanan');
+            const editLayananSelect = document.getElementById('editNamaLayanan');
+            
+            function createOptions(selectElement, isEditForm = false) {
+                if (!selectElement) {
+                    console.warn('Element select tidak ditemukan');
+                    return;
+                }
+
+                // Simpan value yang dipilih sebelumnya
                 const currentValue = selectElement.value;
-                const firstOption = selectElement.options[0];
-                
-                selectElement.innerHTML = '';
-                if (firstOption) selectElement.appendChild(firstOption);
-                
+
+                // Clear existing options except first one
+                selectElement.innerHTML = '<option value="">Pilih Layanan</option>';
+
+                if (dataLayanan.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'Tidak ada data layanan';
+                    option.disabled = true;
+                    selectElement.appendChild(option);
+                    return;
+                }
+
                 dataLayanan.forEach(layanan => {
                     const option = document.createElement('option');
+                    option.value = layanan.nama_layanan;
                     
-                    const nama = layanan.nama_layanan || layanan.nama || layanan.title || 
-                                `Layanan ${layanan.id}`;
+                    // Format tampilan: Nama Layanan (Rp harga)
+                    const hargaFormatted = formatCurrency(layanan.harga || 0);
+                    option.textContent = `${layanan.nama_layanan} - ${hargaFormatted}`;
                     
-                    const value = layanan.nama_layanan || layanan.nama || layanan.id;
-                    
-                    option.value = value;
-                    option.textContent = nama;
-                    
-                    if (layanan.harga) {
-                        option.setAttribute('data-harga', layanan.harga);
-                        option.textContent += ` (Rp ${formatCurrency(layanan.harga)})`;
-                    }
+                    // Simpan data tambahan sebagai atribut
+                    option.setAttribute('data-id', layanan.id);
+                    option.setAttribute('data-harga', layanan.harga || 0);
+                    option.setAttribute('data-hpp', layanan.hpp || 0);
+                    option.setAttribute('data-deskripsi', layanan.deskripsi || '');
                     
                     selectElement.appendChild(option);
                 });
-                
+
+                // Restore previous value
                 if (currentValue) {
                     selectElement.value = currentValue;
+                    // Trigger change untuk mengisi data lainnya
+                    setTimeout(() => {
+                        triggerLayananChange(selectElement, isEditForm);
+                    }, 100);
                 }
             }
+
+            createOptions(layananSelect, false);
             
-            createOptions(namaLayananSelect);
-            createOptions(editNamaLayananSelect);
-            
-            if (dataLayanan.length === 0) {
-                const noDataOption = document.createElement('option');
-                noDataOption.textContent = 'Tidak ada data layanan';
-                noDataOption.disabled = true;
-                
-                if (namaLayananSelect) namaLayananSelect.appendChild(noDataOption);
-                if (editNamaLayananSelect) editNamaLayananSelect.appendChild(noDataOption);
+            if (editLayananSelect) {
+                createOptions(editLayananSelect, true);
             }
+
+            // Initialize Select2
+            initializeLayananSelect2();
+        }
+
+        // Fungsi untuk trigger perubahan layanan
+        function triggerLayananChange(selectElement, isEditForm = false) {
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            
+            if (selectedOption && selectedOption.value) {
+                const harga = selectedOption.getAttribute('data-harga') || 0;
+                const deskripsi = selectedOption.getAttribute('data-deskripsi') || '';
+                const hpp = selectedOption.getAttribute('data-hpp') || 0;
+                
+                if (isEditForm) {
+                    // Untuk form edit
+                    const hargaDisplay = document.getElementById('editHargaLayanan');
+                    const deskripsiDisplay = document.getElementById('editDeskripsiLayanan');
+                    const subtotalInput = document.getElementById('editSubtotal');
+                    const descriptionInput = document.getElementById('editDescription');
+                    
+                    if (hargaDisplay) {
+                        hargaDisplay.value = formatCurrency(parseFloat(harga));
+                    }
+                    if (deskripsiDisplay) {
+                        deskripsiDisplay.value = deskripsi;
+                    }
+                    if (subtotalInput) {
+                        subtotalInput.value = harga;
+                        subtotalInput.dispatchEvent(new Event('input'));
+                    }
+                    if (descriptionInput && !descriptionInput.value) {
+                        descriptionInput.value = deskripsi;
+                    }
+                    
+                    // Set hidden fields untuk edit
+                    const hargaHidden = document.getElementById('editHargaHidden');
+                    const hppHidden = document.getElementById('editHppHidden');
+                    if (hargaHidden) hargaHidden.value = harga;
+                    if (hppHidden) hppHidden.value = hpp;
+                } else {
+                    // Untuk form create
+                    const hargaDisplay = document.getElementById('hargaLayanan');
+                    const deskripsiDisplay = document.getElementById('deskripsiLayanan');
+                    const subtotalInput = document.getElementById('subtotal');
+                    const descriptionInput = document.getElementById('description');
+                    
+                    if (hargaDisplay) {
+                        hargaDisplay.value = formatCurrency(parseFloat(harga));
+                    }
+                    if (deskripsiDisplay) {
+                        deskripsiDisplay.value = deskripsi;
+                    }
+                    if (subtotalInput) {
+                        subtotalInput.value = harga;
+                        subtotalInput.dispatchEvent(new Event('input'));
+                    }
+                    if (descriptionInput && !descriptionInput.value) {
+                        descriptionInput.value = deskripsi;
+                    }
+                    
+                    // Set hidden fields untuk create
+                    const hargaHidden = document.getElementById('hargaHidden');
+                    const hppHidden = document.getElementById('hppHidden');
+                    if (hargaHidden) hargaHidden.value = harga;
+                    if (hppHidden) hppHidden.value = hpp;
+                }
+            }
+        }
+
+        // Initialize Select2 untuk layanan
+        function initializeLayananSelect2() {
+            // Untuk form create
+            const layananSelect = $('#selectLayanan');
+            if (layananSelect.length) {
+                layananSelect.select2({
+                    placeholder: 'Pilih Layanan',
+                    allowClear: true,
+                    dropdownParent: $('#buatInvoiceModal'),
+                    width: '100%',
+                    templateResult: formatLayananOption,
+                    templateSelection: formatLayananSelection
+                }).on('change', function() {
+                    triggerLayananChange(this, false);
+                });
+            }
+            
+            // Untuk form edit
+            const editLayananSelect = $('#editNamaLayanan');
+            if (editLayananSelect.length) {
+                editLayananSelect.select2({
+                    placeholder: 'Pilih Layanan',
+                    allowClear: true,
+                    dropdownParent: $('#editInvoiceModal'),
+                    width: '100%',
+                    templateResult: formatLayananOption,
+                    templateSelection: formatLayananSelection
+                }).on('change', function() {
+                    triggerLayananChange(this, true);
+                });
+            }
+        }
+
+        // Format tampilan option di Select2
+        function formatLayananOption(layanan) {
+            if (!layanan.id) return layanan.text;
+            
+            const harga = layanan.element.getAttribute('data-harga') || 0;
+            const deskripsi = layanan.element.getAttribute('data-deskripsi') || '';
+            const hargaFormatted = formatCurrency(parseFloat(harga));
+            
+            const $container = $(
+                `<div class="flex flex-col">
+                    <div class="font-medium">${layanan.text}</div>
+                    <div class="text-sm text-gray-600">${deskripsi}</div>
+                    <div class="text-sm text-green-600 font-semibold">${hargaFormatted}</div>
+                </div>`
+            );
+            
+            return $container;
+        }
+
+        // Format tampilan selection di Select2
+        function formatLayananSelection(layanan) {
+            if (!layanan.id) return layanan.text;
+            
+            const harga = layanan.element.getAttribute('data-harga') || 0;
+            const hargaFormatted = formatCurrency(parseFloat(harga));
+            
+            return `${layanan.text} - ${hargaFormatted}`;
         }
 
         // ==================== SESSION HANDLING ====================
@@ -1156,9 +1886,22 @@
             }).format(value);
         }
 
+        function formatNumber(value) {
+            return new Intl.NumberFormat('id-ID').format(value);
+        }
+
+        // Function untuk mendapatkan tanggal hari ini dalam format YYYY-MM-DD
+        function getTodayDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         // ==================== EVENT LISTENERS ====================
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing...');
+            console.log('DOM loaded, initializing invoice management system...');
 
             // Event listeners untuk perhitungan otomatis CREATE form
             const subtotalInput = document.getElementById('subtotal');
@@ -1178,22 +1921,55 @@
                 editTaxPercentageInput.addEventListener('input', calculateTotalEdit);
             }
 
-            // Event untuk tombol Buat Invoice
+            // Event listener untuk tombol Buat Invoice
             if (buatInvoiceBtn) {
-                buatInvoiceBtn.addEventListener('click', function() {
+                buatInvoiceBtn.addEventListener('click', async function() {
                     console.log('Tombol Buat Invoice diklik');
-                    setTimeout(() => {
-                        calculateTotal();
-                    }, 100);
-                    showModal(buatModal);
+
+                    try {
+                        // Set tanggal default ke hari ini
+                        const today = new Date().toISOString().split('T')[0];
+                        const invoiceDateInput = document.getElementById('invoice_date');
+                        if (invoiceDateInput) {
+                            invoiceDateInput.value = today;
+                        }
+
+                        // Generate invoice number
+                        const invoiceNo = 'INV-' + new Date().getTime();
+                        const invoiceNoInput = document.getElementById('invoice_no');
+                        if (invoiceNoInput) {
+                            invoiceNoInput.value = invoiceNo;
+                        }
+
+                        // Tampilkan modal
+                        console.log('Menampilkan modal...');
+                        showModal(buatModal);
+
+                        // Tunggu agar modal benar-benar tampil
+                        await new Promise(resolve => setTimeout(resolve, 100));
+
+                        // Reset form
+                        resetCreateForm();
+
+                        // Load data perusahaan dan layanan
+                        console.log('Memulai load data untuk form...');
+                        await loadDataForCreateForm();
+
+                        console.log('Modal dan form siap digunakan');
+                    } catch (error) {
+                        console.error('Error dalam handle klik Buat Invoice:', error);
+                        showModal(buatModal);
+                    }
                 });
+            } else {
+                console.error('Tombol Buat Invoice tidak ditemukan di DOM!');
             }
 
             // Event untuk close modal create
             if (closeModalBtn) {
                 closeModalBtn.addEventListener('click', function() {
                     hideModal(buatModal);
-                    buatInvoiceForm.reset();
+                    resetCreateForm();
                     clearValidationErrors('create');
                 });
             }
@@ -1202,7 +1978,7 @@
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', function() {
                     hideModal(buatModal);
-                    buatInvoiceForm.reset();
+                    resetCreateForm();
                     clearValidationErrors('create');
                 });
             }
@@ -1213,19 +1989,18 @@
             }
 
             // Event untuk close modal edit
-            if (closeEditModalBtn) {
+            const editModal = document.getElementById('editInvoiceModal');
+            if (closeEditModalBtn && editModal) {
                 closeEditModalBtn.addEventListener('click', function() {
-                    hideModal(document.getElementById('editInvoiceModal'));
-                    editInvoiceForm.reset();
+                    hideModal(editModal);
                     clearValidationErrors('edit');
                 });
             }
 
             // Event untuk cancel button edit
-            if (cancelEditBtn) {
+            if (cancelEditBtn && editModal) {
                 cancelEditBtn.addEventListener('click', function() {
-                    hideModal(document.getElementById('editInvoiceModal'));
-                    editInvoiceForm.reset();
+                    hideModal(editModal);
                     clearValidationErrors('edit');
                 });
             }
@@ -1257,24 +2032,25 @@
             }
 
             // Event untuk delete
-            if (confirmDeleteBtn) {
+            const deleteModal = document.getElementById('deleteInvoiceModal');
+            if (confirmDeleteBtn && deleteModal) {
                 confirmDeleteBtn.addEventListener('click', handleDeleteInvoice);
             }
 
-            if (cancelDeleteBtn) {
+            if (cancelDeleteBtn && deleteModal) {
                 cancelDeleteBtn.addEventListener('click', function() {
-                    hideModal(document.getElementById('deleteInvoiceModal'));
+                    hideModal(deleteModal);
                 });
             }
 
-            if (closeDeleteModalBtn) {
+            if (closeDeleteModalBtn && deleteModal) {
                 closeDeleteModalBtn.addEventListener('click', function() {
-                    hideModal(document.getElementById('deleteInvoiceModal'));
+                    hideModal(deleteModal);
                 });
             }
 
             // Event untuk filter dropdown
-            if (filterBtn) {
+            if (filterBtn && filterDropdown) {
                 filterBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     filterDropdown.classList.toggle('show');
@@ -1283,7 +2059,7 @@
 
             if (applyFilterBtn) {
                 applyFilterBtn.addEventListener('click', function() {
-                    filterDropdown.classList.remove('show');
+                    if (filterDropdown) filterDropdown.classList.remove('show');
                     filterInvoices();
                 });
             }
@@ -1291,32 +2067,315 @@
             if (resetFilterBtn) {
                 resetFilterBtn.addEventListener('click', function() {
                     // Reset semua checkbox
-                    document.querySelectorAll('#filterDropdown input[type="checkbox"]').forEach(checkbox => {
+                    const checkboxes = document.querySelectorAll('#filterDropdown input[type="checkbox"]');
+                    checkboxes.forEach(checkbox => {
                         checkbox.checked = checkbox.id === 'filterAllStatus';
                     });
-                    filterDropdown.classList.remove('show');
+                    if (filterDropdown) filterDropdown.classList.remove('show');
                     filterInvoices();
                 });
             }
 
             // Close filter dropdown ketika klik di luar
-            document.addEventListener('click', function(e) {
-                if (!filterDropdown.contains(e.target) && !filterBtn.contains(e.target)) {
-                    filterDropdown.classList.remove('show');
+            if (filterDropdown && filterBtn) {
+                document.addEventListener('click', function(e) {
+                    if (!filterDropdown.contains(e.target) && !filterBtn.contains(e.target)) {
+                        filterDropdown.classList.remove('show');
+                    }
+                });
+            }
+
+            // Event untuk close modal detail
+            const detailModal = document.getElementById('detailInvoiceModal');
+            if (closeDetailModalBtn && detailModal) {
+                closeDetailModalBtn.addEventListener('click', closeDetailModal);
+            }
+
+            // Close modal detail dengan ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (detailModal && !detailModal.classList.contains('hidden')) {
+                        closeDetailModal();
+                    }
                 }
             });
 
+            // Close modal detail ketika klik di luar
+            if (detailModal) {
+                detailModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeDetailModal();
+                    }
+                });
+            }
+
             // Load data awal
             loadInvoices();
+            loadDataPerusahaan();
             loadDataLayanan();
         });
+
+        // Initialize Select2
+        function initializeSelect2() {
+            console.log('Initializing Select2...');
+
+            // Payment method dropdown
+            const paymentMethod = document.getElementById('payment_method');
+            if (paymentMethod) {
+                $('#payment_method').select2({
+                    placeholder: 'Pilih Metode Pembayaran',
+                    minimumResultsForSearch: -1,
+                    dropdownParent: $('#buatInvoiceModal'),
+                    width: '100%'
+                });
+                console.log('Select2 payment_method initialized');
+            }
+
+            const editPaymentMethod = document.getElementById('editPaymentMethod');
+            if (editPaymentMethod) {
+                $('#editPaymentMethod').select2({
+                    placeholder: 'Pilih Metode Pembayaran',
+                    minimumResultsForSearch: -1,
+                    dropdownParent: $('#editInvoiceModal'),
+                    width: '100%'
+                });
+            }
+
+            // Status pembayaran dropdown
+            const statusPembayaran = document.getElementById('status_pembayaran');
+            if (statusPembayaran) {
+                $('#status_pembayaran').select2({
+                    placeholder: 'Pilih Status',
+                    minimumResultsForSearch: -1,
+                    dropdownParent: $('#buatInvoiceModal'),
+                    width: '100%'
+                });
+                console.log('Select2 status_pembayaran initialized');
+            }
+
+            const editStatusPembayaran = document.getElementById('editStatusPembayaran');
+            if (editStatusPembayaran) {
+                $('#editStatusPembayaran').select2({
+                    placeholder: 'Pilih Status',
+                    minimumResultsForSearch: -1,
+                    dropdownParent: $('#editInvoiceModal'),
+                    width: '100%'
+                });
+            }
+
+            // Perusahaan dropdown
+            const perusahaanSelect = document.getElementById('selectPerusahaan');
+            if (perusahaanSelect) {
+                $(perusahaanSelect).select2({
+                    placeholder: 'Pilih Perusahaan',
+                    allowClear: true,
+                    dropdownParent: $('#buatInvoiceModal'),
+                    width: '100%'
+                });
+                console.log('Select2 perusahaan initialized');
+            }
+        }
+
+        // Load data for create form
+async function loadDataForCreateForm() {
+    console.log('Loading data for create form...');
+
+    try {
+        // Cek apakah form sudah ada di DOM
+        const formModal = document.getElementById('buatInvoiceModal');
+        if (!formModal) {
+            console.error('Modal create form tidak ditemukan!');
+            return;
+        }
+
+        // Set tanggal default ke hari ini
+        const today = new Date().toISOString().split('T')[0];
+        const invoiceDateInput = document.getElementById('invoice_date');
+        if (invoiceDateInput) {
+            invoiceDateInput.value = today;
+        }
+
+        // Generate invoice number
+        const invoiceNo = 'INV-' + new Date().getTime();
+        const invoiceNoInput = document.getElementById('invoice_no');
+        if (invoiceNoInput) {
+            invoiceNoInput.value = invoiceNo;
+        }
+
+        // Load perusahaan data if empty
+        if (dataPerusahaan.length === 0) {
+            console.log('Memuat data perusahaan...');
+            await loadDataPerusahaan();
+        } else {
+            console.log('Menggunakan data perusahaan yang sudah dimuat:', dataPerusahaan.length);
+            populatePerusahaanOptions();
+        }
+
+        // Load layanan data if empty
+        if (dataLayanan.length === 0) {
+            console.log('Memuat data layanan...');
+            await loadDataLayanan();
+        } else {
+            console.log('Menggunakan data layanan yang sudah dimuat:', dataLayanan.length);
+            populateLayananOptions();
+        }
+
+        // Setup event listeners for select changes
+        setupSelectListeners();
+
+        // Inisialisasi Select2 dengan benar
+        initializeSelect2();
+        
+        // Inisialisasi Select2 untuk layanan (khusus)
+        initializeLayananSelect2();
+
+        console.log('Data for create form loaded successfully');
+    } catch (error) {
+        console.error('Error loading data for create form:', error);
+    }
+}
+
+        function setupSelectListeners() {
+            console.log('Setting up select listeners...');
+
+            // Event listener untuk pilih perusahaan
+            const perusahaanSelect = document.getElementById('selectPerusahaan');
+            const clientNameInput = document.getElementById('client_name');
+            const companyAddressInput = document.getElementById('company_address');
+            const kontakInput = document.getElementById('kontakPerusahaan');
+            const descriptionInput = document.getElementById('description');
+
+            if (perusahaanSelect) {
+                // Hapus event listener sebelumnya jika ada
+                $(perusahaanSelect).off('change.select2');
+
+                $(perusahaanSelect).on('change.select2', function() {
+                    handlePerusahaanChange(this);
+                });
+            }
+
+function handlePerusahaanChange(selectElement) {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+
+    if (selectedOption && selectedOption.value && selectedOption.value !== 'data_kosong') {
+        const klien = selectedOption.getAttribute('data-klien') || '';
+        const alamat = selectedOption.getAttribute('data-alamat') || '';
+        const kontak = selectedOption.getAttribute('data-kontak') || '';
+        const deskripsi = selectedOption.getAttribute('data-deskripsi') || '';
+
+        if (clientNameInput) {
+            clientNameInput.value = klien;
+        }
+        if (companyAddressInput) {
+            companyAddressInput.value = alamat;
+        }
+        if (kontakInput) {
+            kontakInput.value = kontak;
+        }
+        if (descriptionInput && !descriptionInput.value) {
+            descriptionInput.value = deskripsi;
+        }
+
+        // Auto-fill hidden company name field
+        const companyNameInput = document.getElementById('company_name');
+        if (companyNameInput) {
+            companyNameInput.value = selectedOption.value;
+        }
+        
+        // TAMBAHKAN: Update hidden field untuk kontak
+        const kontakHidden = document.getElementById('kontakHidden');
+        if (kontakHidden) {
+            kontakHidden.value = kontak;
+        } else {
+            // Buat jika belum ada
+            const newKontakHidden = document.createElement('input');
+            newKontakHidden.type = 'hidden';
+            newKontakHidden.id = 'kontakHidden';
+            newKontakHidden.name = 'kontak';
+            newKontakHidden.value = kontak;
+            
+            const form = document.getElementById('buatInvoiceForm');
+            if (form) {
+                form.appendChild(newKontakHidden);
+            }
+        }
+        
+        console.log('Perusahaan selected - kontak:', kontak);
+    } else {
+        // Reset semua field jika tidak ada perusahaan yang dipilih
+        if (clientNameInput) clientNameInput.value = '';
+        if (companyAddressInput) companyAddressInput.value = '';
+        if (kontakInput) kontakInput.value = '';
+        if (descriptionInput && descriptionInput.value === '') {
+            descriptionInput.value = '';
+        }
+        
+        const companyNameInput = document.getElementById('company_name');
+        if (companyNameInput) companyNameInput.value = '';
+        
+        const kontakHidden = document.getElementById('kontakHidden');
+        if (kontakHidden) kontakHidden.value = '';
+    }
+}
+
+            console.log('Select listeners setup completed');
+        }
+
+function resetCreateForm() {
+    console.log('Reset create form...');
+
+    // Reset text inputs
+    const fieldsToReset = [
+        'client_name', 'company_address', 'kontakPerusahaan',
+        'hargaLayanan', 'deskripsiLayanan', 'subtotal',
+        'invoice_no', 'description', 'hargaHidden', 'hppHidden',
+        'kontakHidden' // TAMBAHKAN INI
+    ];
+
+    fieldsToReset.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                element.value = '';
+            }
+        }
+    });
+
+    // Set default values
+    const taxPercentage = document.getElementById('tax_percentage');
+    if (taxPercentage) taxPercentage.value = '11';
+
+    // Reset Select2 dropdowns dengan benar
+    const select2Ids = ['selectPerusahaan', 'selectLayanan', 'payment_method', 'status_pembayaran'];
+
+    select2Ids.forEach(id => {
+        const selectElement = $(`#${id}`);
+        if (selectElement.length) {
+            if (id === 'status_pembayaran') {
+                selectElement.val('pembayaran awal').trigger('change');
+            } else {
+                selectElement.val(null).trigger('change');
+            }
+        }
+    });
+
+    // Hitung ulang total
+    calculateTotal();
+
+    // Clear validation errors
+    clearValidationErrors('create');
+
+    console.log('Create form reset completed');
+}
 
         // ==================== MODAL FUNCTIONS ====================
         function showModal(modal) {
             if (modal) {
+                console.log(`Menampilkan modal: ${modal.id}`);
                 modal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
-                console.log('Modal ditampilkan:', modal.id);
+            } else {
+                console.error('Modal tidak ditemukan!');
             }
         }
 
@@ -1324,7 +2383,229 @@
             if (modal) {
                 modal.classList.add('hidden');
                 document.body.style.overflow = 'auto';
-                console.log('Modal disembunyikan:', modal.id);
+            }
+        }
+
+        // ==================== LOADING OVERLAY FUNCTIONS ====================
+        function showLoadingOverlay() {
+            if (loadingOverlay) {
+                loadingOverlay.classList.remove('hidden');
+            }
+        }
+
+        function hideLoadingOverlay() {
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('hidden');
+            }
+        }
+
+        // ==================== DETAIL INVOICE FUNCTIONS ====================
+        function showDetailModal(id) {
+            console.log('Showing detail for invoice:', id);
+            currentDetailInvoiceId = id;
+
+            // Tampilkan loading
+            showPopup('info', 'Memuat', 'Memuat detail invoice...');
+
+            // Cari invoice dari data yang sudah dimuat
+            const invoice = allInvoices.find(inv => inv.id == id);
+            if (invoice) {
+                populateDetailModal(invoice);
+                showModal(document.getElementById('detailInvoiceModal'));
+            } else {
+                // Jika tidak ada di cache, fetch dari server
+                fetchInvoiceDetail(id);
+            }
+        }
+
+        function fetchInvoiceDetail(id) {
+            fetch(`{{ route('admin.invoice.show', ':id') }}`.replace(':id', id), {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'include'
+                })
+                .then(response => {
+                    if (checkSessionError(response)) {
+                        return Promise.reject('Session expired');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let invoice;
+                    if (data.success) {
+                        invoice = data.data || data.invoice;
+                    } else if (data.invoice) {
+                        invoice = data.invoice;
+                    } else {
+                        invoice = data;
+                    }
+
+                    if (invoice) {
+                        populateDetailModal(invoice);
+                        showModal(document.getElementById('detailInvoiceModal'));
+                    } else {
+                        throw new Error('Data invoice tidak ditemukan');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading invoice detail:', error);
+                    if (error.message !== 'Session expired') {
+                        showPopup('error', 'Gagal', 'Gagal memuat detail invoice');
+                    }
+                });
+        }
+
+        function populateDetailModal(invoice) {
+            console.log('Populating detail modal with:', invoice);
+
+            // Format tanggal
+            const formatDate = (dateString) => {
+                if (!dateString) return '-';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            };
+
+            const formatDateTime = (dateString) => {
+                if (!dateString) return '-';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('id-ID', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            };
+
+            // Basic Information
+            document.getElementById('detailCompanyName').textContent =
+                invoice.company_name || invoice.nama_perusahaan || '-';
+            document.getElementById('detailCompanyAddress').textContent =
+                invoice.company_address || invoice.alamat || '-';
+            document.getElementById('detailClientName').textContent =
+                invoice.client_name || invoice.nama_klien || '-';
+            document.getElementById('detailInvoiceNo').textContent =
+                invoice.invoice_no || invoice.nomor_order || '-';
+            document.getElementById('detailInvoiceDate').textContent =
+                formatDate(invoice.invoice_date || invoice.tanggal);
+            document.getElementById('detailInvoiceSubtitle').textContent =
+                `Invoice #${invoice.invoice_no || invoice.nomor_order || ''}`;
+            document.getElementById('detailInvoiceId').textContent = invoice.id || '-';
+
+            // Service Information
+            document.getElementById('detailNamaLayanan').textContent =
+                invoice.nama_layanan || '-';
+            document.getElementById('detailPaymentMethod').textContent =
+                invoice.payment_method || invoice.metode_pembayaran || '-';
+
+            // Description
+            const description = invoice.description || invoice.deskripsi || 'Tidak ada deskripsi';
+            document.getElementById('detailDescription').textContent = description;
+
+            // Status dengan styling
+            const status = invoice.status_pembayaran || 'pembayaran awal';
+            const statusElement = document.getElementById('detailStatusBadge');
+            const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+
+            let statusClass = '';
+            let statusIcon = '';
+
+            if (status === 'lunas') {
+                statusClass = 'detail-status-lunas';
+                statusIcon = '<span class="material-icons-outlined text-sm">check_circle</span>';
+            } else if (status === 'pembayaran awal') {
+                statusClass = 'detail-status-pembayaran-awal';
+                statusIcon = '<span class="material-icons-outlined text-sm">payments</span>';
+            } else {
+                statusClass = 'detail-status-pending';
+                statusIcon = '<span class="material-icons-outlined text-sm">pending</span>';
+            }
+
+            if (statusElement) {
+                statusElement.innerHTML = `
+                    <span class="detail-status-badge ${statusClass} flex items-center gap-1">
+                        ${statusIcon}
+                        ${statusText}
+                    </span>
+                `;
+            }
+
+            // Financial Information
+            const subtotal = invoice.subtotal || 0;
+            const taxAmount = invoice.tax || 0;
+            const total = invoice.total || 0;
+            const taxPercentage = invoice.tax_percentage || (subtotal > 0 ? ((taxAmount / subtotal) * 100) : 0);
+
+            document.getElementById('detailSubtotal').textContent = formatCurrency(subtotal);
+            document.getElementById('detailTax').textContent = formatCurrency(taxAmount);
+            document.getElementById('detailTotal').textContent = formatCurrency(total);
+            document.getElementById('detailTaxPercentageText').textContent =
+                `Pajak ${taxPercentage.toFixed(2)}%`;
+
+            // Timeline/History
+            document.getElementById('detailCreatedAt').textContent =
+                formatDateTime(invoice.created_at || new Date().toISOString());
+            document.getElementById('detailUpdatedAt').textContent =
+                formatDateTime(invoice.updated_at || invoice.created_at || new Date().toISOString());
+            document.getElementById('detailLastUpdated').textContent =
+                formatDateTime(invoice.updated_at || invoice.created_at || new Date().toISOString());
+
+            // Status Icon
+            const statusIconElement = document.getElementById('detailStatusIcon');
+            if (statusIconElement) {
+                statusIconElement.innerHTML = '';
+                statusIconElement.className =
+                    'absolute left-[-20px] top-0 w-8 h-8 rounded-full flex items-center justify-center ';
+
+                const icon = document.createElement('span');
+                icon.className = 'material-icons-outlined text-white text-sm';
+
+                if (status === 'lunas') {
+                    statusIconElement.classList.add('bg-green-500');
+                    icon.textContent = 'check_circle';
+                    document.getElementById('detailStatusText').textContent = 'Lunas';
+                } else if (status === 'pembayaran awal') {
+                    statusIconElement.classList.add('bg-blue-500');
+                    icon.textContent = 'payments';
+                    document.getElementById('detailStatusText').textContent = 'Pembayaran Awal';
+                } else {
+                    statusIconElement.classList.add('bg-yellow-500');
+                    icon.textContent = 'pending';
+                    document.getElementById('detailStatusText').textContent = 'Menunggu Pembayaran';
+                }
+
+                statusIconElement.appendChild(icon);
+            }
+        }
+
+        function closeDetailModal() {
+            hideModal(document.getElementById('detailInvoiceModal'));
+            currentDetailInvoiceId = null;
+        }
+
+        function printInvoiceModalFromDetail() {
+            if (currentDetailInvoiceId) {
+                closeDetailModal();
+                setTimeout(() => {
+                    printInvoiceModal(currentDetailInvoiceId);
+                }, 300);
+            }
+        }
+
+        function editInvoiceFromDetail() {
+            if (currentDetailInvoiceId) {
+                closeDetailModal();
+                setTimeout(() => {
+                    editInvoice(currentDetailInvoiceId);
+                }, 300);
             }
         }
 
@@ -1333,7 +2614,7 @@
             console.log('Memuat data invoice...');
             showLoading(true);
 
-            fetch('/admin/invoice', {
+            fetch('{{ route('admin.invoice.index') }}?ajax=1', {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
@@ -1357,7 +2638,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Data diterima:', data);
+                    console.log('Data invoice diterima:', data);
 
                     if (data.error) {
                         console.error('Error dalam response:', data.error);
@@ -1382,18 +2663,20 @@
                     showLoading(false);
 
                     desktopTableBody.innerHTML = `
-                        <tr id="noDataRow">
-                            <td colspan="15" class="px-6 py-4 text-center text-sm text-gray-500">
-                                <div class="flex flex-col items-center">
-                                    <span class="material-icons-outlined text-red-500 mb-2">error</span>
-                                    <p>Gagal memuat data: ${error.message}</p>
-                                    <button onclick="loadInvoices()" class="mt-2 px-4 py-2 btn-primary rounded-lg text-sm">
-                                        Coba Lagi
-                                    </button>
-                                </div>
-                            </td>
+                    <tr id="noDataRow">
+                        <td colspan="15" class="px-6 py-4 text-center text-sm text-gray-500">
+                            <div class="flex flex-col items-center">
+                                <span class="material-icons-outlined text-red-500 mb-2">error</span>
+                                <p>Gagal memuat data: ${error.message}</p>
+                                <p class="text-xs text-gray-400 mt-1">Periksa koneksi internet atau coba refresh halaman</p>
+                                <button onclick="loadInvoices()" class="mt-3 px-4 py-2 btn-primary rounded-lg text-sm">
+                                    <span class="material-icons-outlined text-sm mr-2">refresh</span>
+                                    Coba Lagi
+                                </button>
+                            </div>
+                        </td>
                         </tr>
-                    `;
+                `;
                     noDataRow.classList.remove('hidden');
                 });
         }
@@ -1404,53 +2687,29 @@
 
             clearValidationErrors('create');
 
-            const subtotal = parseFloat(document.getElementById('subtotal').value) || 0;
-            const taxPercentage = parseFloat(document.getElementById('tax_percentage').value) || 0;
-            const taxAmount = Math.round(subtotal * (taxPercentage / 100));
-            const total = subtotal + taxAmount;
+            // Get form values
+            const formData = new FormData(buatInvoiceForm);
+            const data = Object.fromEntries(formData.entries());
 
-            const invoiceNo = document.getElementById('invoice_no').value.trim();
-            const invoiceDate = document.getElementById('invoice_date').value;
-            const companyName = document.getElementById('company_name').value.trim();
-            const companyAddress = document.getElementById('company_address').value.trim();
-            const clientName = document.getElementById('client_name').value.trim();
-            const namaLayanan = document.getElementById('nama_layanan').value.trim();
-            const statusPembayaran = document.getElementById('status_pembayaran').value;
-            const paymentMethod = document.getElementById('payment_method').value;
+            // Validasi required fields
+            const requiredFields = ['company_name', 'invoice_date', 'invoice_no', 'client_name', 'company_address',
+                'nama_layanan', 'status_pembayaran', 'payment_method', 'subtotal', 'tax_percentage'
+            ];
 
-            // Validasi field baru
-            if (!namaLayanan) {
-                showPopup('error', 'Validasi Gagal', 'Harap pilih nama layanan');
-                return;
+            for (const field of requiredFields) {
+                if (!data[field]) {
+                    showPopup('error', 'Validasi Gagal', `Harap isi field ${field}`);
+                    return;
+                }
             }
 
-            if (!statusPembayaran) {
-                showPopup('error', 'Validasi Gagal', 'Harap pilih status pembayaran');
-                return;
-            }
+            // Convert numeric values
+            data.subtotal = parseFloat(data.subtotal) || 0;
+            data.tax_percentage = parseFloat(data.tax_percentage) || 0;
+            data.tax = Math.round(data.subtotal * (data.tax_percentage / 100));
+            data.total = data.subtotal + data.tax;
 
-            if (!invoiceNo || !invoiceDate || !companyName || !companyAddress || !clientName || !paymentMethod) {
-                showPopup('error', 'Validasi Gagal', 'Harap lengkapi semua field yang wajib diisi');
-                return;
-            }
-
-            const formData = {
-                invoice_no: invoiceNo,
-                invoice_date: invoiceDate,
-                company_name: companyName,
-                company_address: companyAddress,
-                client_name: clientName,
-                nama_layanan: namaLayanan,
-                status_pembayaran: statusPembayaran,
-                payment_method: paymentMethod,
-                description: document.getElementById('description').value.trim(),
-                subtotal: Math.round(subtotal),
-                tax: taxAmount,
-                tax_percentage: taxPercentage,
-                total: Math.round(total)
-            };
-
-            console.log('Data yang akan dikirim:', JSON.stringify(formData));
+            console.log('Data yang akan dikirim:', data);
 
             const submitBtn = buatInvoiceForm.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn.textContent;
@@ -1458,7 +2717,7 @@
             submitBtn.textContent = 'Menyimpan...';
             submitBtn.classList.add('opacity-50');
 
-            fetch('/admin/invoice', {
+            fetch('{{ route('admin.invoice.store') }}', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
@@ -1466,7 +2725,7 @@
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify(formData),
+                    body: JSON.stringify(data),
                     credentials: 'include'
                 })
                 .then(async response => {
@@ -1474,27 +2733,28 @@
                         return Promise.reject('Session expired');
                     }
 
-                    const data = await response.json();
-                    console.log('Response dari server:', data);
+                    const responseData = await response.json();
+                    console.log('Response dari server:', responseData);
 
                     if (!response.ok) {
-                        if (response.status === 422 && data.errors) {
-                            showValidationErrorsFromServer(data.errors, 'create');
+                        if (response.status === 422 && responseData.errors) {
+                            showValidationErrorsFromServer(responseData.errors, 'create');
                             throw new Error('Validasi gagal');
                         } else if (response.status === 500) {
-                            throw new Error(data.message || 'Terjadi kesalahan server. Silakan coba lagi.');
+                            throw new Error(responseData.message || 'Terjadi kesalahan server. Silakan coba lagi.');
                         } else {
-                            throw new Error(data.message || `Gagal membuat invoice (Status: ${response.status})`);
+                            throw new Error(responseData.message ||
+                                `Gagal membuat invoice (Status: ${response.status})`);
                         }
                     }
 
-                    return data;
+                    return responseData;
                 })
-                .then(data => {
-                    console.log('Invoice berhasil dibuat:', data);
+                .then(responseData => {
+                    console.log('Invoice berhasil dibuat:', responseData);
                     showPopup('success', 'Berhasil', 'Invoice berhasil dibuat');
                     hideModal(buatModal);
-                    buatInvoiceForm.reset();
+                    resetCreateForm();
                     loadInvoices();
                 })
                 .catch(error => {
@@ -1521,54 +2781,30 @@
 
             const id = document.getElementById('editInvoiceId').value;
 
-            const subtotal = parseFloat(document.getElementById('editSubtotal').value) || 0;
-            const taxPercentage = parseFloat(document.getElementById('editTaxPercentage').value) || 0;
-            const taxAmount = Math.round(subtotal * (taxPercentage / 100));
-            const total = subtotal + taxAmount;
+            // Get form values
+            const formData = new FormData(editInvoiceForm);
+            const data = Object.fromEntries(formData.entries());
 
-            const invoiceNo = document.getElementById('editInvoiceNo').value.trim();
-            const invoiceDate = document.getElementById('editInvoiceDate').value;
-            const companyName = document.getElementById('editCompanyName').value.trim();
-            const companyAddress = document.getElementById('editCompanyAddress').value.trim();
-            const clientName = document.getElementById('editClientName').value.trim();
-            const namaLayanan = document.getElementById('editNamaLayanan').value.trim();
-            const statusPembayaran = document.getElementById('editStatusPembayaran').value;
-            const paymentMethod = document.getElementById('editPaymentMethod').value;
+            // Validasi required fields
+            const requiredFields = ['company_name', 'invoice_date', 'invoice_no', 'client_name', 'company_address',
+                'nama_layanan', 'status_pembayaran', 'payment_method', 'subtotal', 'tax_percentage'
+            ];
 
-            // Validasi field baru
-            if (!namaLayanan) {
-                showPopup('error', 'Validasi Gagal', 'Harap pilih nama layanan');
-                return;
+            for (const field of requiredFields) {
+                if (!data[field]) {
+                    showPopup('error', 'Validasi Gagal', `Harap isi field ${field}`);
+                    return;
+                }
             }
 
-            if (!statusPembayaran) {
-                showPopup('error', 'Validasi Gagal', 'Harap pilih status pembayaran');
-                return;
-            }
+            // Convert numeric values
+            data.subtotal = parseFloat(data.subtotal) || 0;
+            data.tax_percentage = parseFloat(data.tax_percentage) || 0;
+            data.tax = Math.round(data.subtotal * (data.tax_percentage / 100));
+            data.total = data.subtotal + data.tax;
+            data._method = 'PUT';
 
-            if (!invoiceNo || !invoiceDate || !companyName || !companyAddress || !clientName || !paymentMethod) {
-                showPopup('error', 'Validasi Gagal', 'Harap lengkapi semua field yang wajib diisi');
-                return;
-            }
-
-            const formData = {
-                invoice_no: invoiceNo,
-                invoice_date: invoiceDate,
-                company_name: companyName,
-                company_address: companyAddress,
-                client_name: clientName,
-                nama_layanan: namaLayanan,
-                status_pembayaran: statusPembayaran,
-                payment_method: paymentMethod,
-                description: document.getElementById('editDescription').value.trim(),
-                subtotal: Math.round(subtotal),
-                tax: taxAmount,
-                tax_percentage: taxPercentage,
-                total: Math.round(total),
-                _method: 'PUT'
-            };
-
-            console.log('Updating invoice:', id, JSON.stringify(formData));
+            console.log('Updating invoice:', id, data);
 
             const submitBtn = editInvoiceForm.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn.textContent;
@@ -1576,7 +2812,7 @@
             submitBtn.textContent = 'Memperbarui...';
             submitBtn.classList.add('opacity-50');
 
-            fetch(`/admin/invoice/${id}`, {
+            fetch(`{{ route('admin.invoice.update', ':id') }}`.replace(':id', id), {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
@@ -1584,7 +2820,7 @@
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify(formData),
+                    body: JSON.stringify(data),
                     credentials: 'include'
                 })
                 .then(async response => {
@@ -1592,19 +2828,19 @@
                         return Promise.reject('Session expired');
                     }
 
-                    const data = await response.json();
+                    const responseData = await response.json();
 
                     if (!response.ok) {
-                        if (response.status === 422 && data.errors) {
-                            showValidationErrorsFromServer(data.errors, 'edit');
+                        if (response.status === 422 && responseData.errors) {
+                            showValidationErrorsFromServer(responseData.errors, 'edit');
                             throw new Error('Validasi gagal');
                         }
-                        throw new Error(data.message || 'Gagal update invoice');
+                        throw new Error(responseData.message || 'Gagal update invoice');
                     }
 
-                    return data;
+                    return responseData;
                 })
-                .then(data => {
+                .then(responseData => {
                     showPopup('success', 'Berhasil', 'Invoice berhasil diperbarui');
                     hideModal(document.getElementById('editInvoiceModal'));
                     loadInvoices();
@@ -1632,7 +2868,7 @@
 
             showPopup('info', 'Memuat', 'Memuat data invoice...');
 
-            fetch(`/admin/invoice/${id}`, {
+            fetch(`{{ route('admin.invoice.show', ':id') }}`.replace(':id', id), {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
@@ -1670,28 +2906,42 @@
 
                     console.log('Invoice data to edit:', invoice);
 
+                    // Populate form fields
                     document.getElementById('editInvoiceId').value = invoice.id;
-                    document.getElementById('editCompanyName').value = invoice.company_name || invoice.nama_perusahaan || '';
+                    document.getElementById('editCompanyName').value = invoice.company_name || invoice
+                        .nama_perusahaan || '';
                     document.getElementById('editInvoiceDate').value = invoice.invoice_date ?
-                        (invoice.invoice_date.includes('T') ? invoice.invoice_date.split('T')[0] : invoice.invoice_date) : '';
+                        (invoice.invoice_date.includes('T') ? invoice.invoice_date.split('T')[0] : invoice
+                            .invoice_date) : '';
                     document.getElementById('editInvoiceNo').value = invoice.invoice_no || invoice.nomor_order || '';
                     document.getElementById('editClientName').value = invoice.client_name || invoice.nama_klien || '';
-                    document.getElementById('editCompanyAddress').value = invoice.company_address || invoice.alamat || '';
+                    document.getElementById('editCompanyAddress').value = invoice.company_address || invoice.alamat ||
+                        '';
                     document.getElementById('editDescription').value = invoice.description || invoice.deskripsi || '';
                     document.getElementById('editSubtotal').value = invoice.subtotal || 0;
                     document.getElementById('editTaxPercentage').value = invoice.tax_percentage || 0;
                     document.getElementById('editTotal').value = invoice.total || 0;
-                    document.getElementById('editPaymentMethod').value = invoice.payment_method || invoice.metode_pembayaran || 'Bank Transfer';
-                    
-                    // Set nilai untuk field baru
+                    document.getElementById('editPaymentMethod').value = invoice.payment_method || invoice
+                        .metode_pembayaran || 'Bank Transfer';
+
+                    // Set nilai untuk field layanan
                     const namaLayananSelect = document.getElementById('editNamaLayanan');
                     if (namaLayananSelect) {
                         namaLayananSelect.value = invoice.nama_layanan || '';
+                        // Trigger change untuk mengisi data lainnya
+                        setTimeout(() => {
+                            if ($('#editNamaLayanan').hasClass('select2-hidden-accessible')) {
+                                $('#editNamaLayanan').trigger('change');
+                            } else {
+                                triggerLayananChange(namaLayananSelect, true);
+                            }
+                        }, 100);
                     }
-                    
+
                     const statusPembayaranSelect = document.getElementById('editStatusPembayaran');
                     if (statusPembayaranSelect) {
                         statusPembayaranSelect.value = invoice.status_pembayaran || 'pembayaran awal';
+                        $(statusPembayaranSelect).trigger('change');
                     }
 
                     calculateTotalEdit();
@@ -1709,27 +2959,38 @@
                         console.log('Using cached invoice data:', invoice);
 
                         document.getElementById('editInvoiceId').value = invoice.id;
-                        document.getElementById('editCompanyName').value = invoice.company_name || invoice.nama_perusahaan || '';
+                        document.getElementById('editCompanyName').value = invoice.company_name || invoice
+                            .nama_perusahaan || '';
                         document.getElementById('editInvoiceDate').value = invoice.invoice_date ?
-                            (invoice.invoice_date.includes('T') ? invoice.invoice_date.split('T')[0] : invoice.invoice_date) : '';
-                        document.getElementById('editInvoiceNo').value = invoice.invoice_no || invoice.nomor_order || '';
-                        document.getElementById('editClientName').value = invoice.client_name || invoice.nama_klien || '';
-                        document.getElementById('editCompanyAddress').value = invoice.company_address || invoice.alamat || '';
-                        document.getElementById('editDescription').value = invoice.description || invoice.deskripsi || '';
+                            (invoice.invoice_date.includes('T') ? invoice.invoice_date.split('T')[0] : invoice
+                                .invoice_date) : '';
+                        document.getElementById('editInvoiceNo').value = invoice.invoice_no || invoice.nomor_order ||
+                            '';
+                        document.getElementById('editClientName').value = invoice.client_name || invoice.nama_klien ||
+                            '';
+                        document.getElementById('editCompanyAddress').value = invoice.company_address || invoice
+                            .alamat || '';
+                        document.getElementById('editDescription').value = invoice.description || invoice.deskripsi ||
+                            '';
                         document.getElementById('editSubtotal').value = invoice.subtotal || 0;
                         document.getElementById('editTaxPercentage').value = invoice.tax_percentage || 0;
                         document.getElementById('editTotal').value = invoice.total || 0;
-                        document.getElementById('editPaymentMethod').value = invoice.payment_method || invoice.metode_pembayaran || 'Bank Transfer';
-                        
-                        // Set nilai untuk field baru dari cache
+                        document.getElementById('editPaymentMethod').value = invoice.payment_method || invoice
+                            .metode_pembayaran || 'Bank Transfer';
+
+                        // Set nilai untuk field layanan dari cache
                         const namaLayananSelect = document.getElementById('editNamaLayanan');
                         if (namaLayananSelect) {
                             namaLayananSelect.value = invoice.nama_layanan || '';
+                            setTimeout(() => {
+                                triggerLayananChange(namaLayananSelect, true);
+                            }, 100);
                         }
-                        
+
                         const statusPembayaranSelect = document.getElementById('editStatusPembayaran');
                         if (statusPembayaranSelect) {
                             statusPembayaranSelect.value = invoice.status_pembayaran || 'pembayaran awal';
+                            $(statusPembayaranSelect).trigger('change');
                         }
 
                         calculateTotalEdit();
@@ -1745,7 +3006,8 @@
             if (!invoice) return;
 
             document.getElementById('deleteInvoiceId').value = id;
-            document.getElementById('deleteInvoiceNama').textContent = invoice.company_name || invoice.nama_perusahaan || '';
+            document.getElementById('deleteInvoiceNama').textContent = invoice.company_name || invoice.nama_perusahaan ||
+                '';
             document.getElementById('deleteInvoiceNomor').textContent = invoice.invoice_no || invoice.nomor_order || '';
 
             showModal(document.getElementById('deleteInvoiceModal'));
@@ -1761,7 +3023,7 @@
             deleteBtn.textContent = 'Menghapus...';
             deleteBtn.classList.add('opacity-50');
 
-            fetch(`/admin/invoice/${id}`, {
+            fetch(`{{ route('admin.invoice.destroy', ':id') }}`.replace(':id', id), {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
@@ -1800,7 +3062,7 @@
                     formData.append('_method', 'DELETE');
                     formData.append('_token', csrfToken);
 
-                    fetch(`/admin/invoice/${id}`, {
+                    fetch(`{{ route('admin.invoice.destroy', ':id') }}`.replace(':id', id), {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': csrfToken,
@@ -1862,73 +3124,73 @@
                 const statusPembayaran = invoice.status_pembayaran || 'pembayaran awal';
 
                 document.getElementById('printInvoiceContent').innerHTML = `
-            <div style="padding: 30px; background: white; max-width: 800px; margin: 0 auto; font-family: 'Poppins', sans-serif;">
-                <div style="border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px;">
-                    <h2 style="font-size: 28px; font-weight: bold; margin: 0 0 10px 0;">${namaPerusahaan}</h2>
-                    <p style="margin: 5px 0; color: #666;">Invoice #${nomorOrder}</p>
-                    <p style="margin: 5px 0; color: #666;">Tanggal: ${tanggal}</p>
-                    <p style="margin: 5px 0; color: #666;">Status Pembayaran: <strong>${statusPembayaran.toUpperCase()}</strong></p>
+        <div style="padding: 30px; background: white; max-width: 800px; margin: 0 auto; font-family: 'Poppins', sans-serif;">
+            <div style="border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px;">
+                <h2 style="font-size: 28px; font-weight: bold; margin: 0 0 10px 0;">${namaPerusahaan}</h2>
+                <p style="margin: 5px 0; color: #666;">Invoice #${nomorOrder}</p>
+                <p style="margin: 5px 0; color: #666;">Tanggal: ${tanggal}</p>
+                <p style="margin: 5px 0; color: #666;">Status Pembayaran: <strong>${statusPembayaran.toUpperCase()}</strong></p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px;">
+                <div>
+                    <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Bill To:</h3>
+                    <p style="margin: 5px 0;"><strong>Nama Klien:</strong> ${namaKlien}</p>
+                    <p style="margin: 5px 0;"><strong>Alamat:</strong> ${alamat}</p>
+                    <p style="margin: 5px 0;"><strong>Layanan:</strong> ${namaLayanan}</p>
                 </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px;">
-                    <div>
-                        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Bill To:</h3>
-                        <p style="margin: 5px 0;"><strong>Nama Klien:</strong> ${namaKlien}</p>
-                        <p style="margin: 5px 0;"><strong>Alamat:</strong> ${alamat}</p>
-                        <p style="margin: 5px 0;"><strong>Layanan:</strong> ${namaLayanan}</p>
-                    </div>
-                    <div>
-                        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Payment Details:</h3>
-                        <p style="margin: 5px 0;"><strong>Metode Pembayaran:</strong> ${metodePembayaran}</p>
-                        <p style="margin: 5px 0;"><strong>Status:</strong> ${statusPembayaran}</p>
-                    </div>
-                </div>
-                
-                <table style="width: 100%; border-collapse: collapse; margin: 30px 0;">
-                    <thead>
-                        <tr style="background-color: #f2f2f2;">
-                            <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Deskripsi</th>
-                            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Subtotal</th>
-                            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Pajak (${taxPercentage.toFixed(2)}%)</th>
-                            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Jumlah Pajak</th>
-                            <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style="border: 1px solid #ddd; padding: 12px;">${deskripsi}</td>
-                            <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${formatCurrency(subtotal)}</td>
-                            <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${taxPercentage.toFixed(2)}%</td>
-                            <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${formatCurrency(taxAmount)}</td>
-                            <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${formatCurrency(total)}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <div style="text-align: right; margin-top: 30px;">
-                    <table style="width: 300px; margin-left: auto; border-collapse: collapse;">
-                        <tr>
-                            <td style="padding: 8px; text-align: right;"><strong>Subtotal:</strong></td>
-                            <td style="padding: 8px; text-align: right;">${formatCurrency(subtotal)}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; text-align: right;"><strong>Pajak (${taxPercentage.toFixed(2)}%):</strong></td>
-                            <td style="padding: 8px; text-align: right;">${formatCurrency(taxAmount)}</td>
-                        </tr>
-                        <tr style="font-size: 18px; font-weight: bold;">
-                            <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;"><strong>Total:</strong></td>
-                            <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;">${formatCurrency(total)}</td>
-                        </tr>
-                    </table>
-                </div>
-                
-                <div style="border-top: 2px solid #333; padding-top: 20px; margin-top: 40px;">
-                    <p style="margin: 10px 0;"><strong>Catatan:</strong></p>
-                    <p style="margin: 5px 0; color: #666;">Silakan transfer ke rekening yang tertera atau bayar sesuai metode pembayaran di atas.</p>
-                    <p style="margin: 30px 0 10px 0; font-style: italic;">Terima kasih atas kerjasamanya.</p>
+                <div>
+                    <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Payment Details:</h3>
+                    <p style="margin: 5px 0;"><strong>Metode Pembayaran:</strong> ${metodePembayaran}</p>
+                    <p style="margin: 5px 0;"><strong>Status:</strong> ${statusPembayaran}</p>
                 </div>
             </div>
-        `;
+            
+            <table style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                <thead>
+                    <tr style="background-color: #f2f2f2;">
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Deskripsi</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Subtotal</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Pajak (${taxPercentage.toFixed(2)}%)</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Jumlah Pajak</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">${deskripsi}</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${formatCurrency(subtotal)}</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${taxPercentage.toFixed(2)}%</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${formatCurrency(taxAmount)}</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${formatCurrency(total)}</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div style="text-align: right; margin-top: 30px;">
+                <table style="width: 300px; margin-left: auto; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 8px; text-align: right;"><strong>Subtotal:</strong></td>
+                        <td style="padding: 8px; text-align: right;">${formatCurrency(subtotal)}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; text-align: right;"><strong>Pajak (${taxPercentage.toFixed(2)}%):</strong></td>
+                        <td style="padding: 8px; text-align: right;">${formatCurrency(taxAmount)}</td>
+                    </tr>
+                    <tr style="font-size: 18px; font-weight: bold;">
+                        <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;"><strong>Total:</strong></td>
+                        <td style="padding: 12px 8px; text-align: right; border-top: 2px solid #333;">${formatCurrency(total)}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div style="border-top: 2px solid #333; padding-top: 20px; margin-top: 40px;">
+                <p style="margin: 10px 0;"><strong>Catatan:</strong></p>
+                <p style="margin: 5px 0; color: #666;">Silakan transfer ke rekening yang tertera atau bayar sesuai metode pembayaran di atas.</p>
+                <p style="margin: 30px 0 10px 0; font-style: italic;">Terima kasih atas kerjasamanya.</p>
+            </div>
+        </div>
+    `;
 
                 showModal(document.getElementById('printInvoiceModal'));
             } else {
@@ -1954,15 +3216,17 @@
         }
 
         function renderInvoices() {
+            if (!desktopTableBody || !mobileCards) return;
+
             desktopTableBody.innerHTML = '';
             mobileCards.innerHTML = '';
 
             if (filteredInvoices.length === 0) {
-                noDataRow.classList.remove('hidden');
+                if (noDataRow) noDataRow.classList.remove('hidden');
                 return;
             }
 
-            noDataRow.classList.add('hidden');
+            if (noDataRow) noDataRow.classList.add('hidden');
 
             const startIndex = (currentPage - 1) * perPage;
             const endIndex = Math.min(startIndex + perPage, filteredInvoices.length);
@@ -1975,7 +3239,8 @@
                 const nomorOrder = invoice.invoice_no || invoice.nomor_order;
                 const namaKlien = invoice.client_name || invoice.nama_klien;
                 const alamat = invoice.company_address || invoice.alamat;
-                const deskripsi = invoice.description || invoice.deskripsi;
+                const deskripsi = invoice.description || invoice.deskripsi || invoice.nama_layanan ||
+                    'Tidak ada deskripsi';
                 const metodePembayaran = invoice.payment_method || invoice.metode_pembayaran;
                 const tanggal = formatTanggal(invoice.invoice_date || invoice.tanggal);
                 const subtotal = invoice.subtotal || 0;
@@ -1987,25 +3252,36 @@
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-            <td>${rowNumber}</td>
-            <td>${tanggal}</td>
-            <td>${namaPerusahaan}</td>
-            <td>${nomorOrder}</td>
-            <td>${namaKlien}</td>
-            <td>${namaLayanan}</td>
-            <td>${alamat}</td>
-            <td>${deskripsi}</td>
-            <td>${formatCurrency(subtotal)}</td>
-            <td>${taxPercentage.toFixed(2)}%</td>
-            <td>${formatCurrency(taxAmount)}</td>
-            <td>${formatCurrency(total)}</td>
-            <td>${metodePembayaran}</td>
-            <td>${getStatusBadge(statusPembayaran)}</td>
-            <td class="text-center">
-                <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700 mx-1">Edit</button>
-                <button onclick="deleteInvoice(${invoice.id})" class="text-red-500 hover:text-red-700 mx-1">Hapus</button>
-                <button onclick="printInvoiceModal(${invoice.id})" class="text-green-500 hover:text-green-700 mx-1">Print</button>
-            </td>
+        <td>${rowNumber}</td>
+        <td>${tanggal}</td>
+        <td>${namaPerusahaan}</td>
+        <td>${nomorOrder}</td>
+        <td>${namaKlien}</td>
+        <td>${namaLayanan}</td>
+        <td class="max-w-xs truncate">${alamat}</td>
+        <td class="max-w-xs truncate" title="${deskripsi}">${deskripsi}</td>
+        <td>${formatCurrency(subtotal)}</td>
+        <td>${taxPercentage.toFixed(2)}%</td>
+        <td>${formatCurrency(taxAmount)}</td>
+        <td>${formatCurrency(total)}</td>
+        <td>${metodePembayaran}</td>
+        <td>${getStatusBadge(statusPembayaran)}</td>
+        <td class="text-center">
+            <div class="flex items-center justify-center gap-2">
+                <button onclick="showDetailModal(${invoice.id})" class="text-purple-500 hover:text-purple-700 p-1 rounded-full hover:bg-purple-50" title="Detail">
+                    <span class="material-icons-outlined text-sm">visibility</span>
+                </button>
+                <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-50" title="Edit">
+                    <span class="material-icons-outlined text-sm">edit</span>
+                </button>
+                <button onclick="deleteInvoice(${invoice.id})" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50" title="Hapus">
+                    <span class="material-icons-outlined text-sm">delete</span>
+                </button>
+                <button onclick="printInvoiceModal(${invoice.id})" class="text-green-500 hover:text-green-700 p-1 rounded-full hover:bg-green-50" title="Print">
+                    <span class="material-icons-outlined text-sm">print</span>
+                </button>
+            </div>
+        </td>
         `;
                 desktopTableBody.appendChild(row);
             });
@@ -2023,66 +3299,72 @@
                 const taxPercentage = invoice.tax_percentage || (subtotal > 0 ? ((taxAmount / subtotal) * 100) : 0);
                 const namaLayanan = invoice.nama_layanan || '';
                 const statusPembayaran = invoice.status_pembayaran || 'pembayaran awal';
+                const deskripsi = invoice.description || invoice.deskripsi || invoice.nama_layanan ||
+                    'Tidak ada deskripsi';
 
                 const card = document.createElement('div');
                 card.className = 'bg-white border rounded-lg p-4 shadow';
                 card.innerHTML = `
-            <div class="flex justify-between items-start mb-2">
-                <div>
-                    <h4 class="font-semibold">${namaPerusahaan}</h4>
-                    <p class="text-sm text-gray-500">${nomorOrder}</p>
-                </div>
-                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">#${rowNumber}</span>
+        <div class="flex justify-between items-start mb-2">
+            <div>
+                <h4 class="font-semibold">${namaPerusahaan}</h4>
+                <p class="text-sm text-gray-500">${nomorOrder}</p>
             </div>
-            <p class="text-sm mb-1"><span class="font-medium">Klien:</span> ${namaKlien}</p>
-            <p class="text-sm mb-1"><span class="font-medium">Layanan:</span> ${namaLayanan}</p>
-            <p class="text-sm mb-1"><span class="font-medium">Tanggal:</span> ${tanggal}</p>
-            <p class="text-sm mb-1"><span class="font-medium">Status:</span> ${getStatusBadge(statusPembayaran)}</p>
-            <p class="text-sm mb-1"><span class="font-medium">Subtotal:</span> ${formatCurrency(subtotal)}</p>
-            <p class="text-sm mb-1"><span class="font-medium">Pajak (${taxPercentage.toFixed(2)}%):</span> ${formatCurrency(taxAmount)}</p>
-            <p class="text-sm mb-2"><span class="font-medium">Total:</span> <b>${formatCurrency(total)}</b></p>
-            <div class="flex justify-between mt-3">
-                <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700">Edit</button>
-                <button onclick="deleteInvoice(${invoice.id})" class="text-red-500 hover:text-red-700">Hapus</button>
-                <button onclick="printInvoiceModal(${invoice.id})" class="text-green-500 hover:text-green-700">Print</button>
-            </div>
+            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">#${rowNumber}</span>
+        </div>
+        <p class="text-sm mb-1"><span class="font-medium">Klien:</span> ${namaKlien}</p>
+        <p class="text-sm mb-1"><span class="font-medium">Layanan:</span> ${namaLayanan}</p>
+        <p class="text-sm mb-1"><span class="font-medium">Deskripsi:</span> ${deskripsi}</p>
+        <p class="text-sm mb-1"><span class="font-medium">Tanggal:</span> ${tanggal}</p>
+        <p class="text-sm mb-1"><span class="font-medium">Status:</span> ${getStatusBadge(statusPembayaran)}</p>
+        <p class="text-sm mb-1"><span class="font-medium">Subtotal:</span> ${formatCurrency(subtotal)}</p>
+        <p class="text-sm mb-1"><span class="font-medium">Pajak (${taxPercentage.toFixed(2)}%):</span> ${formatCurrency(taxAmount)}</p>
+        <p class="text-sm mb-2"><span class="font-medium">Total:</span> <b>${formatCurrency(total)}</b></p>
+        <div class="flex justify-between mt-3">
+            <button onclick="showDetailModal(${invoice.id})" class="text-purple-500 hover:text-purple-700 p-1 rounded-full hover:bg-purple-50" title="Detail">
+                <span class="material-icons-outlined text-sm">visibility</span>
+            </button>
+            <button onclick="editInvoice(${invoice.id})" class="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-50" title="Edit">
+                <span class="material-icons-outlined text-sm">edit</span>
+            </button>
+            <button onclick="deleteInvoice(${invoice.id})" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50" title="Hapus">
+                <span class="material-icons-outlined text-sm">delete</span>
+            </button>
+            <button onclick="printInvoiceModal(${invoice.id})" class="text-green-500 hover:text-green-700 p-1 rounded-full hover:bg-green-50" title="Print">
+                <span class="material-icons-outlined text-sm">print</span>
+            </button>
+        </div>
         `;
                 mobileCards.appendChild(card);
             });
         }
 
         function filterInvoices() {
-            const searchTerm = searchInput.value.toLowerCase();
-
-            if (searchTerm === '') {
-                filteredInvoices = [...allInvoices];
-            } else {
-                filteredInvoices = allInvoices.filter(invoice => {
-                    const companyName = invoice.company_name || invoice.nama_perusahaan || '';
-                    const invoiceNo = invoice.invoice_no || invoice.nomor_order || '';
-                    const clientName = invoice.client_name || invoice.nama_klien || '';
-                    const namaLayanan = invoice.nama_layanan || '';
-                    const alamat = invoice.company_address || invoice.alamat || '';
-                    const deskripsi = invoice.description || invoice.deskripsi || '';
-
-                    return (
-                        companyName.toLowerCase().includes(searchTerm) ||
-                        invoiceNo.toLowerCase().includes(searchTerm) ||
-                        clientName.toLowerCase().includes(searchTerm) ||
-                        namaLayanan.toLowerCase().includes(searchTerm) ||
-                        alamat.toLowerCase().includes(searchTerm) ||
-                        deskripsi.toLowerCase().includes(searchTerm)
-                    );
-                });
-            }
+            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            // Filter berdasarkan pencarian
+            filteredInvoices = allInvoices.filter(invoice => {
+                const searchableFields = [
+                    invoice.company_name || invoice.nama_perusahaan || '',
+                    invoice.invoice_no || invoice.nomor_order || '',
+                    invoice.client_name || invoice.nama_klien || '',
+                    invoice.description || invoice.deskripsi || '',
+                    invoice.nama_layanan || '',
+                    invoice.company_address || invoice.alamat || ''
+                ];
+                
+                return searchableFields.some(field => 
+                    field.toLowerCase().includes(searchTerm)
+                );
+            });
 
             // Filter berdasarkan status pembayaran
             const selectedStatus = [];
-            if (!document.getElementById('filterAllStatus').checked) {
-                if (document.getElementById('filterPembayaranAwal').checked) {
+            if (!document.getElementById('filterAllStatus')?.checked) {
+                if (document.getElementById('filterPembayaranAwal')?.checked) {
                     selectedStatus.push('pembayaran awal');
                 }
-                if (document.getElementById('filterLunas').checked) {
+                if (document.getElementById('filterLunas')?.checked) {
                     selectedStatus.push('lunas');
                 }
             }
@@ -2222,6 +3504,8 @@
             const prefix = formType === 'create' ? '' : 'edit_';
             const form = formType === 'create' ? buatInvoiceForm : editInvoiceForm;
 
+            if (!form) return;
+
             const inputs = form.querySelectorAll('.form-input');
             inputs.forEach(input => {
                 input.classList.remove('error-input');
@@ -2249,6 +3533,43 @@
                 }
             }
         }
+
+        // ==================== DEBUG FUNCTIONS ====================
+        window.testKontakSystem = function() {
+            console.log('=== TEST KONTAK SYSTEM ===');
+
+            // 1. Cek elemen
+            const kontakInput = document.getElementById('kontakPerusahaan');
+            console.log('1. Input kontakPerusahaan:', kontakInput);
+
+            // 2. Cek data perusahaan
+            console.log('2. Data perusahaan loaded:', dataPerusahaan.length);
+            console.log('Data perusahaan pertama:', dataPerusahaan[0]);
+
+            // 3. Cek dropdown
+            const perusahaanSelect = document.getElementById('selectPerusahaan');
+            if (perusahaanSelect) {
+                console.log('3. Dropdown options:', perusahaanSelect.options.length);
+                for (let i = 0; i < Math.min(3, perusahaanSelect.options.length); i++) {
+                    const option = perusahaanSelect.options[i];
+                    console.log(`   Option ${i}: "${option.text}"`, {
+                        klien: option.getAttribute('data-klien'),
+                        alamat: option.getAttribute('data-alamat'),
+                        kontak: option.getAttribute('data-kontak')
+                    });
+                }
+            }
+
+            // 4. Test auto-fill
+            if (perusahaanSelect && perusahaanSelect.options.length > 1) {
+                console.log('4. Testing auto-fill...');
+                perusahaanSelect.selectedIndex = 1;
+                const event = new Event('change');
+                perusahaanSelect.dispatchEvent(event);
+            }
+
+            console.log('=== END TEST ===');
+        };
     </script>
 </body>
 

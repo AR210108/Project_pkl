@@ -40,8 +40,8 @@ class DataProjectController extends Controller
 
         // Ambil daftar manager divisi untuk dropdown filter
         $managers = User::where('role', 'manager_divisi')
-            ->orderBy('name')
-            ->get();
+            ->orderBy('name', 'asc')
+            ->get(['id', 'name', 'email', 'divisi_id']);
 
         return view('general_manajer.data_project', compact('projects', 'managers'));
     }
@@ -63,7 +63,49 @@ class DataProjectController extends Controller
         
         $layanans = Layanan::orderBy('id', 'desc')->get();
 
-        return view('admin.data_project', compact('project', 'layanans'));
+    public function admin(Request $request)
+    {
+        $query = Project::query();
+
+        // SEARCH (nama & deskripsi)
+        if ($request->filled('q')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nama', 'like', '%' . $request->q . '%')
+                  ->orWhere('deskripsi', 'like', '%' . $request->q . '%');
+            });
+        }
+
+        // FILTER STATUS PENGERJAAN
+        if ($request->filled('status_pengerjaan')) {
+            $query->where('status_pengerjaan', $request->status_pengerjaan);
+        }
+
+        // FILTER STATUS KERJASAMA
+        if ($request->filled('status_kerjasama')) {
+            $query->where('status_kerjasama', $request->status_kerjasama);
+        }
+
+        // FILTER TANGGAL MULAI PENGERJAAN
+        if ($request->filled('tanggal_mulai_pengerjaan')) {
+            $query->whereDate('tanggal_mulai_pengerjaan', $request->tanggal_mulai_pengerjaan);
+        }
+
+        // FILTER TANGGAL SELESAI PENGERJAAN
+        if ($request->filled('tanggal_selesai_pengerjaan')) {
+            $query->whereDate('tanggal_selesai_pengerjaan', $request->tanggal_selesai_pengerjaan);
+        }
+
+        $project = $query
+            ->with(['invoice', 'penanggungJawab'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+    $invoices = Invoice::query();
+
+    $invoices = $invoices->orderBy('id', 'desc')->get();
+
+        return view('admin.data_project', compact('project', 'invoices'));
     }
 
     /**

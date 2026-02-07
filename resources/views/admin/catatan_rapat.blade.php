@@ -813,34 +813,6 @@
                         <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari topik, peserta, atau hasil diskusi..." type="text" />
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                        <div class="relative">
-                            <button id="filterBtn" class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
-                                <span class="material-icons-outlined text-sm">filter_list</span>
-                                Filter
-                            </button>
-                            <div id="filterDropdown" class="filter-dropdown">
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterAll" value="all" checked>
-                                    <label for="filterAll">Semua Kategori</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterManagement" value="management">
-                                    <label for="filterManagement">Management</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterTeknis" value="teknis">
-                                    <label for="filterTeknis">Teknis</label>
-                                </div>
-                                <div class="filter-option">
-                                    <input type="checkbox" id="filterInternal" value="internal">
-                                    <label for="filterInternal">Internal</label>
-                                </div>
-                                <div class="filter-actions">
-                                    <button id="applyFilter" class="filter-apply">Terapkan</button>
-                                    <button id="resetFilter" class="filter-reset">Reset</button>
-                                </div>
-                            </div>
-                        </div>
                         <button id="createBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
                             <span class="material-icons-outlined">add</span>
                             <span class="hidden sm:inline">Buat Catatan Rapat</span>
@@ -1133,6 +1105,26 @@
                 cachedUsers = [];
             }
         }
+
+        // Helper function to format date to YYYY-MM-DD for input type="date"
+        function formatDateValue(dateString) {
+            if (!dateString) return '';
+            
+            // If already in correct format (YYYY-MM-DD), return as is
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+                return dateString;
+            }
+
+            try {
+                const date = new Date(dateString);
+                // Adjust for timezone offset to ensure we get the correct calendar day
+                const offset = date.getTimezoneOffset();
+                const localDate = new Date(date.getTime() - (offset * 60 * 1000));
+                return localDate.toISOString().split('T')[0];
+            } catch (e) {
+                return '';
+            }
+        }
         
         // Modal functions
         function openCreateModal() {
@@ -1184,7 +1176,7 @@
                                 <span class="text-red-500">*</span> Tanggal Rapat
                             </label>
                             <input type="date" id="tanggalInput" name="tanggal"
-                                value="${data.tanggal || new Date().toISOString().split('T')[0]}"
+                                value="${formatDateValue(data.tanggal) || new Date().toISOString().split('T')[0]}"
                                 class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none"
                                 ${!isEdit ? 'required' : ''}>
                             <p class="mt-1 text-sm text-gray-500">Pilih tanggal rapat dilaksanakan</p>

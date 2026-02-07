@@ -9,19 +9,14 @@ class Kwitansi extends Model
 {
     use HasFactory;
 
-    /**
-     * Nama tabel yang terkait dengan model.
-     */
     protected $table = 'kwitansis';
 
-    /**
-     * Atribut yang dapat diisi secara massal (mass assignment).
-     */
     protected $fillable = [
-        'invoice_id',           // ID invoice yang terkait
+        'invoice_id',
+        'kwitansi_no',
+        'tanggal',
         'nama_perusahaan',
         'nomor_order',
-        'tanggal',
         'nama_klien',
         'deskripsi',
         'harga',
@@ -29,6 +24,8 @@ class Kwitansi extends Model
         'fee_maintenance',
         'total',
         'status',
+        'bank',
+        'no_rekening'
     ];
 
     /**
@@ -36,10 +33,10 @@ class Kwitansi extends Model
      */
     protected $casts = [
         'tanggal' => 'date',
-        'harga' => 'decimal:2',
-        'sub_total' => 'decimal:2',
-        'fee_maintenance' => 'decimal:2',
-        'total' => 'decimal:2',
+        'harga' => 'decimal:2',      // Ubah dari integer ke decimal
+        'sub_total' => 'decimal:2',  // Ubah dari integer ke decimal  
+        'fee_maintenance' => 'decimal:2', // Ubah dari integer ke decimal
+        'total' => 'decimal:2'       // Ubah dari integer ke decimal
     ];
 
     /**
@@ -50,7 +47,12 @@ class Kwitansi extends Model
     {
         return $this->belongsTo(Invoice::class, 'invoice_id');
     }
-    
+    // Format kwitansi number
+    public function getKwitansiNoFormattedAttribute()
+    {
+        return '#2023_KWT_' . str_pad($this->kwitansi_no, 5, '0', STR_PAD_LEFT);
+    }
+
     /**
      * Get formatted harga attribute.
      * 
@@ -60,7 +62,7 @@ class Kwitansi extends Model
     {
         return 'Rp ' . number_format($this->harga, 0, ',', '.');
     }
-    
+
     /**
      * Get formatted sub_total attribute.
      * 
@@ -70,7 +72,7 @@ class Kwitansi extends Model
     {
         return 'Rp ' . number_format($this->sub_total, 0, ',', '.');
     }
-    
+
     /**
      * Get formatted fee_maintenance attribute.
      * 
@@ -80,7 +82,7 @@ class Kwitansi extends Model
     {
         return 'Rp ' . number_format($this->fee_maintenance, 0, ',', '.');
     }
-    
+
     /**
      * Get formatted total attribute.
      * 
@@ -90,24 +92,24 @@ class Kwitansi extends Model
     {
         return 'Rp ' . number_format($this->total, 0, ',', '.');
     }
-    
+
     /**
      * Get formatted tanggal attribute.
      * 
      * @return string
      */
-    public function getFormattedTanggalAttribute()
+    public function getTanggalIndoAttribute()
     {
-        return $this->tanggal ? $this->tanggal->format('d M Y') : '';
+        return \Carbon\Carbon::parse($this->tanggal)->locale('id')->isoFormat('DD/MM/YY');
     }
-    
+
     /**
      * Boot model untuk menghitung total otomatis.
      */
     protected static function boot()
     {
         parent::boot();
-        
+
         // Calculate total before saving
         static::saving(function ($kwitansi) {
             // Jika sub_total dan fee_maintenance ada, hitung total

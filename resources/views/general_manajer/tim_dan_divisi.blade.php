@@ -543,57 +543,53 @@
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
                     <div class="stat-card bg-white p-4 md:p-6 rounded-xl">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-3 md:mr-4">
-                                <span class="material-icons-outlined text-blue-600 text-lg md:text-xl">groups</span>
-                            </div>
+                        <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-xs md:text-sm text-gray-500">Total Tim</p>
+                                <p class="text-xs md:text-sm text-gray-500 mb-1">Total Tim</p>
                                 <p class="text-xl md:text-2xl font-bold text-blue-600" id="stat-total-tim">
                                     {{ $totalTim }}</p>
                             </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <span class="material-icons-outlined text-blue-600 text-lg md:text-xl">groups</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="stat-card bg-white p-4 md:p-6 rounded-xl">
-                        <div class="flex items-center">
-                            <div
-                                class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-3 md:mr-4">
-                                <span class="material-icons-outlined text-green-600 text-lg md:text-xl">business</span>
-                            </div>
+                        <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-xs md:text-sm text-gray-500">Total Divisi</p>
+                                <p class="text-xs md:text-sm text-gray-500 mb-1">Total Divisi</p>
                                 <p class="text-xl md:text-2xl font-bold text-green-600" id="stat-total-divisi">
                                     {{ $totalDivisi }}</p>
                             </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <span class="material-icons-outlined text-green-600 text-lg md:text-xl">business</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="stat-card bg-white p-4 md:p-6 rounded-xl">
-                        <div class="flex items-center">
-                            <div
-                                class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-3 md:mr-4">
-                                <span
-                                    class="material-icons-outlined text-purple-600 text-lg md:text-xl">group_work</span>
-                            </div>
+                        <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-xs md:text-sm text-gray-500">Tim Aktif</p>
+                                <p class="text-xs md:text-sm text-gray-500 mb-1">Tim Aktif</p>
                                 <p class="text-xl md:text-2xl font-bold text-purple-600" id="stat-tim-aktif">
                                     {{ $timAktif }}</p>
                             </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <span class="material-icons-outlined text-purple-600 text-lg md:text-xl">group_work</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="stat-card bg-white p-4 md:p-6 rounded-xl">
-                        <div class="flex items-center">
-                            <div
-                                class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-3 md:mr-4">
-                                <span class="material-icons-outlined text-orange-600 text-lg md:text-xl">people</span>
-                            </div>
+                        <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-xs md:text-sm text-gray-500">Total Anggota</p>
+                                <p class="text-xs md:text-sm text-gray-500 mb-1">Total Anggota</p>
                                 <p class="text-xl md:text-2xl font-bold text-orange-600" id="stat-total-anggota">
                                     {{ $totalAnggota }}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                <span class="material-icons-outlined text-orange-600 text-lg md:text-xl">people</span>
                             </div>
                         </div>
                     </div>
@@ -658,7 +654,7 @@
                                     </thead>
                                     <tbody id="divisiTableBody">
                                         @foreach ($divisis as $item)
-                                            <tr>
+                                            <tr data-id="{{ $item->id }}" data-nama="{{ $item->divisi }}">
                                                 <td style="min-width: 60px;">{{ $loop->iteration }}</td>
                                                 <td style="min-width: 200px;">{{ $item->divisi }}</td>
                                                 <td style="min-width: 150px;">{{ $item->jumlah_tim }}</td>
@@ -666,7 +662,7 @@
                                                     <div class="flex justify-center gap-2">
                                                         <button
                                                             class="edit-divisi-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                            data-id='{{ $item->id }}'>
+                                                            data-id='{{ $item->id }}' data-nama='{{ $item->divisi }}'>
                                                             <span class="material-icons-outlined">edit</span>
                                                         </button>
                                                         <button
@@ -725,35 +721,6 @@
                                     placeholder="Cari nama tim atau divisi..." type="text" />
                             </div>
                             <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                                <div class="relative">
-                                    <button id="filterTimBtn"
-                                        class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
-                                        <span class="material-icons-outlined text-sm">filter_list</span>
-                                        Filter
-                                    </button>
-                                    <div id="filterTimDropdown" class="filter-dropdown">
-                                        <div class="filter-option">
-                                            <input type="checkbox" id="filterTimAll" value="all" checked>
-                                            <label for="filterTimAll">Semua Divisi</label>
-                                        </div>
-                                        <div class="filter-option">
-                                            <input type="checkbox" id="filterTimTI" value="1">
-                                            <label for="filterTimTI">Teknologi Informasi</label>
-                                        </div>
-                                        <div class="filter-option">
-                                            <input type="checkbox" id="filterTimSDM" value="2">
-                                            <label for="filterTimSDM">Sumber Daya Manusia</label>
-                                        </div>
-                                        <div class="filter-option">
-                                            <input type="checkbox" id="filterTimPemasaran" value="3">
-                                            <label for="filterTimPemasaran">Pemasaran</label>
-                                        </div>
-                                        <div class="filter-actions">
-                                            <button id="applyTimFilter" class="filter-apply">Terapkan</button>
-                                            <button id="resetTimFilter" class="filter-reset">Reset</button>
-                                        </div>
-                                    </div>
-                                </div>
                                 <button id="tambahTimBtn"
                                     class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
                                     <span class="material-icons-outlined">add</span>
@@ -778,7 +745,7 @@
                                     </thead>
                                     <tbody id="timTableBody">
                                         @foreach ($tims as $index => $item)
-                                            <tr>
+                                            <tr data-id="{{ $item->id }}" data-nama="{{ $item->tim }}" data-divisi="{{ $item->divisi }}" data-anggota="{{ $item->jumlah_anggota }}">
                                                 <td style="min-width: 60px;">{{ $loop->iteration }}</td>
                                                 <td style="min-width: 200px;">{{ $item->tim }}</td>
                                                 <td style="min-width: 200px;">{{ $item->divisi }}</td>
@@ -787,7 +754,7 @@
                                                     <div class="flex justify-center gap-2">
                                                         <button
                                                             class="edit-tim-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                            data-id='{{ $item->id }}'>
+                                                            data-id='{{ $item->id }}' data-nama='{{ $item->tim }}' data-divisi='{{ $item->divisi }}' data-anggota='{{ $item->jumlah_anggota }}'>
                                                             <span class="material-icons-outlined">edit</span>
                                                         </button>
                                                         <button
@@ -834,7 +801,6 @@
     </div>
 
     <!-- Tambah Tim Modal -->
-    <!-- Tambah Tim Modal -->
     <div id="tambahTimModal"
         class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -846,7 +812,7 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-<form action="{{ url('/general_manajer/tim') }}" method="POST" id="tambahTimForm" class="space-y-4">
+                <form id="tambahTimForm" class="space-y-4">
                     @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -893,11 +859,13 @@
                     </button>
                 </div>
                 <form id="editTimForm" class="space-y-4">
+                    @csrf
+                    <input type="hidden" name="_method" value="PUT">
                     <input type="hidden" id="editTimId" name="id">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Tim</label>
-                            <input type="text" id="editNamaTim" name="nama_tim" required
+                            <input type="text" id="editNamaTim" name="tim" required
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                                 placeholder="Masukkan nama tim">
                         </div>
@@ -909,20 +877,12 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
-                            <select id="editDivisiSelect" name="divisi_id" required
+                            <select id="editDivisiSelect" name="divisi" required
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <option value="">Pilih Divisi</option>
-                                <option value="1">Teknologi Informasi</option>
-                                <option value="2">Sumber Daya Manusia</option>
-                                <option value="3">Pemasaran</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <select id="editStatusTimSelect" name="status" required
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="aktif">Aktif</option>
-                                <option value="tidak_aktif">Tidak Aktif</option>
+                                @foreach ($divisis as $divisi)
+                                    <option value="{{ $divisi->divisi }}">{{ $divisi->divisi }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -936,7 +896,7 @@
         </div>
     </div>
 
-<!-- Ganti bagian tambahDivisiModal dengan ini: -->
+<!-- Tambah Divisi Modal -->
 <div id="tambahDivisiModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div class="p-6">
@@ -979,31 +939,15 @@
                     </button>
                 </div>
                 <form id="editDivisiForm" class="space-y-4">
+                    @csrf
+                    <input type="hidden" name="_method" value="PUT">
                     <input type="hidden" id="editDivisiId" name="id">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Divisi</label>
-                            <input type="text" id="editNamaDivisi" name="nama_divisi" required
+                            <input type="text" id="editNamaDivisi" name="divisi" required
                                 class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                                 placeholder="Masukkan nama divisi">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Kepala Divisi</label>
-                            <select id="editKepalaDivisiSelect" name="kepala_divisi" required
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">Pilih Kepala Divisi</option>
-                                <option value="Eko Rahardjo">Eko Rahardjo</option>
-                                <option value="Fajar Kusumo">Fajar Kusumo</option>
-                                <option value="Gina Permata">Gina Permata</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <select id="editStatusDivisiSelect" name="status" required
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="aktif">Aktif</option>
-                                <option value="tidak_aktif">Tidak Aktif</option>
-                            </select>
                         </div>
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
@@ -1028,10 +972,12 @@
                     </button>
                 </div>
                 <form id="deleteTimForm">
+                    @csrf
+                    <input type="hidden" name="_method" value="DELETE">
                     <div class="mb-6">
                         <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus data tim ini?</p>
                         <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
-                        <input type="hidden" id="deleteTimId">
+                        <input type="hidden" id="deleteTimId" name="id">
                     </div>
                     <div class="flex justify-end gap-2">
                         <button type="button" class="cancel-modal px-4 py-2 btn-secondary rounded-lg"
@@ -1056,10 +1002,12 @@
                     </button>
                 </div>
                 <form id="deleteDivisiForm">
+                    @csrf
+                    <input type="hidden" name="_method" value="DELETE">
                     <div class="mb-6">
                         <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus data divisi ini?</p>
                         <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
-                        <input type="hidden" id="deleteDivisiId">
+                        <input type="hidden" id="deleteDivisiId" name="id">
                     </div>
                     <div class="flex justify-end gap-2">
                         <button type="button" class="cancel-modal px-4 py-2 btn-secondary rounded-lg"
@@ -1181,136 +1129,81 @@
         // Implementation for searching divisi
     }
 
-    function openEditTimModal(id) {
-        console.log('Opening edit tim modal for id:', id);
-        // Fetch tim data and open modal
-        fetch(`/general_manajer/tim/${id}/edit`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('editTimId').value = data.data.id;
-                    document.getElementById('editNamaTim').value = data.data.nama_tim;
-                    document.getElementById('editJumlahAnggota').value = data.data.jumlah_anggota;
-                    document.getElementById('editDivisiSelect').value = data.data.divisi_id;
-                    document.getElementById('editStatusTimSelect').value = data.data.status;
-                    openModal('editTimModal');
-                } else {
-                    showMinimalPopup('Error', 'Gagal memuat data tim', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMinimalPopup('Error', 'Terjadi kesalahan saat memuat data', 'error');
-            });
-    }
-
-    function openEditDivisiModal(id) {
-        console.log('Opening edit divisi modal for id:', id);
-        // Fetch divisi data and open modal
-        fetch(`/general_manajer/divisi/${id}/edit`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('editDivisiId').value = data.data.id;
-                    document.getElementById('editNamaDivisi').value = data.data.nama_divisi;
-                    document.getElementById('editKepalaDivisiSelect').value = data.data.kepala_divisi;
-                    document.getElementById('editStatusDivisiSelect').value = data.data.status;
-                    openModal('editDivisiModal');
-                } else {
-                    showMinimalPopup('Error', 'Gagal memuat data divisi', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMinimalPopup('Error', 'Terjadi kesalahan saat memuat data', 'error');
-            });
-    }
-
-    function openDeleteModal(type, id) {
-        if (type === 'tim') {
-            document.getElementById('deleteTimId').value = id;
-            openModal('deleteTimModal');
-        } else if (type === 'divisi') {
-            document.getElementById('deleteDivisiId').value = id;
-            openModal('deleteDivisiModal');
-        }
-    }
-
     // ==================== CRUD HANDLERS ====================
-function handleAddTim(e) {
-    e.preventDefault();
-    console.log('handleAddTim called');
+    function handleAddTim(e) {
+        e.preventDefault();
+        console.log('handleAddTim called');
 
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData);
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
-    console.log('Data to send:', data);
+        console.log('Data to send:', data);
 
-    // Disable submit button
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    const originalText = submitBtn?.textContent;
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Menyimpan...';
-    }
-
-    // TAMBAHKAN validasi client-side
-    if (!data.tim || !data.divisi || !data.jumlah_anggota) {
-        showMinimalPopup('Error', 'Semua field harus diisi', 'error');
+        // Disable submit button
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn?.textContent;
         if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Menyimpan...';
         }
-        return;
-    }
 
-    fetch('/general_manajer/tim', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => {
-            console.log('Response status:', response.status);
-            if (!response.ok) {
-                // Coba parse sebagai JSON, jika gagal tampilkan text
-                return response.json().catch(() => {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Success response:', data);
-            if (data.success) {
-                showMinimalPopup('Berhasil', data.message || 'Tim berhasil ditambahkan', 'success');
-                e.target.reset();
-                closeModal('tambahTimModal');
-                
-                // Reload page after 1 second
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
-            } else {
-                showMinimalPopup('Error', data.message || 'Terjadi kesalahan', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Full error details:', error);
-            showMinimalPopup('Error', 'Gagal menambahkan tim. Error: ' + error.message, 'error');
-        })
-        .finally(() => {
-            // Re-enable submit button
+        // TAMBAHKAN validasi client-side
+        if (!data.tim || !data.divisi || !data.jumlah_anggota) {
+            showMinimalPopup('Error', 'Semua field harus diisi', 'error');
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
             }
-        });
-}
+            return;
+        }
+
+        fetch('/general_manajer/tim', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    // Coba parse sebagai JSON, jika gagal tampilkan text
+                    return response.json().catch(() => {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success response:', data);
+                if (data.success) {
+                    showMinimalPopup('Berhasil', data.message || 'Tim berhasil ditambahkan', 'success');
+                    e.target.reset();
+                    closeModal('tambahTimModal');
+                    
+                    // Reload page after 1 second
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    showMinimalPopup('Error', data.message || 'Terjadi kesalahan', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Full error details:', error);
+                showMinimalPopup('Error', 'Gagal menambahkan tim. Error: ' + error.message, 'error');
+            })
+            .finally(() => {
+                // Re-enable submit button
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            });
+    }
 
     function handleEditTim(e) {
         e.preventDefault();
@@ -1327,15 +1220,25 @@ function handleAddTim(e) {
             submitBtn.textContent = 'Memperbarui...';
         }
 
+        // Use POST with _method: PUT for Laravel
         fetch(`/general_manajer/tim/${id}`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    return response.json().catch(() => {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     closeModal('editTimModal');
@@ -1349,7 +1252,8 @@ function handleAddTim(e) {
                 }
             })
             .catch(error => {
-                showMinimalPopup('Error', 'Terjadi kesalahan pada server', 'error');
+                console.error('Error:', error);
+                showMinimalPopup('Error', 'Terjadi kesalahan pada server: ' + error.message, 'error');
             })
             .finally(() => {
                 // Re-enable submit button
@@ -1363,6 +1267,8 @@ function handleAddTim(e) {
     function handleDeleteTim(e) {
         e.preventDefault();
         const id = document.getElementById('deleteTimId').value;
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
         // Disable submit button
@@ -1373,13 +1279,25 @@ function handleAddTim(e) {
             submitBtn.textContent = 'Menghapus...';
         }
 
+        // Use POST with _method: DELETE for Laravel
         fetch(`/general_manajer/tim/${id}`, {
-                method: 'DELETE',
+                method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                }
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    return response.json().catch(() => {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     closeModal('deleteTimModal');
@@ -1393,7 +1311,8 @@ function handleAddTim(e) {
                 }
             })
             .catch(error => {
-                showMinimalPopup('Error', 'Terjadi kesalahan pada server', 'error');
+                console.error('Error:', error);
+                showMinimalPopup('Error', 'Terjadi kesalahan pada server: ' + error.message, 'error');
             })
             .finally(() => {
                 // Re-enable submit button
@@ -1487,15 +1406,25 @@ function handleAddTim(e) {
             submitBtn.textContent = 'Memperbarui...';
         }
 
+        // Use POST with _method: PUT for Laravel
         fetch(`/general_manajer/divisi/${id}`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    return response.json().catch(() => {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     closeModal('editDivisiModal');
@@ -1509,7 +1438,8 @@ function handleAddTim(e) {
                 }
             })
             .catch(error => {
-                showMinimalPopup('Error', 'Terjadi kesalahan pada server', 'error');
+                console.error('Error:', error);
+                showMinimalPopup('Error', 'Terjadi kesalahan pada server: ' + error.message, 'error');
             })
             .finally(() => {
                 // Re-enable submit button
@@ -1523,6 +1453,8 @@ function handleAddTim(e) {
     function handleDeleteDivisi(e) {
         e.preventDefault();
         const id = document.getElementById('deleteDivisiId').value;
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
         // Disable submit button
@@ -1533,13 +1465,25 @@ function handleAddTim(e) {
             submitBtn.textContent = 'Menghapus...';
         }
 
+        // Use POST with _method: DELETE for Laravel
         fetch(`/general_manajer/divisi/${id}`, {
-                method: 'DELETE',
+                method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                }
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    return response.json().catch(() => {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     closeModal('deleteDivisiModal');
@@ -1553,7 +1497,8 @@ function handleAddTim(e) {
                 }
             })
             .catch(error => {
-                showMinimalPopup('Error', 'Terjadi kesalahan pada server', 'error');
+                console.error('Error:', error);
+                showMinimalPopup('Error', 'Terjadi kesalahan pada server: ' + error.message, 'error');
             })
             .finally(() => {
                 // Re-enable submit button
@@ -1670,20 +1615,45 @@ function handleAddTim(e) {
         // Dynamic Button Handlers (Edit/Delete buttons in tables)
         document.body.addEventListener('click', function(e) {
             if (e.target.closest('.edit-tim-btn')) {
-                const id = parseInt(e.target.closest('.edit-tim-btn').dataset.id);
-                openEditTimModal(id);
+                const btn = e.target.closest('.edit-tim-btn');
+                const id = btn.dataset.id;
+                const nama = btn.dataset.nama;
+                const divisi = btn.dataset.divisi;
+                const anggota = btn.dataset.anggota;
+                
+                // Populate the form with data
+                document.getElementById('editTimId').value = id;
+                document.getElementById('editNamaTim').value = nama;
+                document.getElementById('editJumlahAnggota').value = anggota;
+                document.getElementById('editDivisiSelect').value = divisi;
+                
+                // Open the modal
+                openModal('editTimModal');
             }
+            
             if (e.target.closest('.delete-tim-btn')) {
                 const id = parseInt(e.target.closest('.delete-tim-btn').dataset.id);
-                openDeleteModal('tim', id);
+                document.getElementById('deleteTimId').value = id;
+                openModal('deleteTimModal');
             }
+            
             if (e.target.closest('.edit-divisi-btn')) {
-                const id = parseInt(e.target.closest('.edit-divisi-btn').dataset.id);
-                openEditDivisiModal(id);
+                const btn = e.target.closest('.edit-divisi-btn');
+                const id = btn.dataset.id;
+                const nama = btn.dataset.nama;
+                
+                // Populate the form with data
+                document.getElementById('editDivisiId').value = id;
+                document.getElementById('editNamaDivisi').value = nama;
+                
+                // Open the modal
+                openModal('editDivisiModal');
             }
+            
             if (e.target.closest('.delete-divisi-btn')) {
                 const id = parseInt(e.target.closest('.delete-divisi-btn').dataset.id);
-                openDeleteModal('divisi', id);
+                document.getElementById('deleteDivisiId').value = id;
+                openModal('deleteDivisiModal');
             }
         });
 

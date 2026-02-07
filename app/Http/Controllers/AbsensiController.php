@@ -244,6 +244,165 @@ public function kelolaAbsenGeneral()
     ));
 }
 
+
+public function rekapAbsensi()
+{
+    try {
+        $user = Auth::user();
+        
+        // Ambil tanggal filter (Default hari ini)
+        $selectedDate = request('date', Carbon::now()->format('Y-m-d'));
+        
+        // Ambil Divisi Manajer
+        // PERBAIKAN: Gunakan null coalescing operator untuk keamanan
+        $selectedDivision = $user->divisi ?? null;
+
+        // DEFINISI VARIABEL UNTUK COMPACT() (PREVENTS UNDEFINED VARIABLE)
+        $startDate = $selectedDate;
+        $endDate = $selectedDate;
+
+        // 1. DATA USER HANYA UNTUK FILTER
+        $usersQuery = User::where('role', 'karyawan');
+        
+        // PERBAIKAN: Cek apakah $selectedDivision ada isinya sebelum menambahkan where clause
+        // Ini mencegah error "Unknown column 'divisi'" jika kolom tidak ada di DB
+        if ($selectedDivision) {
+            $usersQuery->where('divisi', $selectedDivision);
+        }
+        
+        $users = $usersQuery->orderBy('name', 'asc')->get();
+        $userIds = $users->pluck('id');
+
+        // 2. DATA ABSENSI (TAB 1: DATA ABSENSI HARIAN)
+        // Hanya ambil yang SUDAH ABSEN (Jam Masuk Ada)
+        $queryAbsensi = Absensi::with(['user:id,name,divisi', 'approver:id,name'])
+            ->whereIn('user_id', $userIds)
+            ->whereDate('tanggal', $selectedDate)
+            ->whereNotNull('jam_masuk'); // Hanya yang sudah absen masuk
+
+        $attendances = $queryAbsensi->orderBy('jam_masuk', 'asc')->get();
+
+        // Ambil pengaturan jam operasional
+        $operationalHours = $this->getOperationalHours();
+        $limitTime = sprintf('%02d:%02d', $operationalHours->late_limit_hour, $operationalHours->late_limit_minute);
+
+        // Format Data Absensi (Untuk Tab 1)
+        $formattedAbsensi = collect();
+        foreach ($attendances as $absen) {
+            $status = $this->getStatusKehadiran($absen);
+            
+            $formattedAbsensi->push([
+                'id' => $absen->id,
+                'user_id' => $absen->user_id,
+                'user_name' => $absen->user->name,
+                'divisi' => $absen->user->divisi ?? '-',
+                'tanggal' => $absen->tanggal,
+                'jam_masuk' => substr($absen->jam_masuk, 0, 5),
+                'jam_pulang' => $absen->jam_pulang ? substr($absen->jam_pulang, 0, 5) : '-',
+                'jenis_ketidakhadiran' => $absen->jenis_ketidakhadiran,
+                'keterangan' => $absen->keterangan,
+                'approval_status' => $absen->approval_status,
+                'status_kehadiran' => $status['label'],
+                'status_class' => $status['class'],
+                'attendance' => $absen
+            ]);
+        }
+
+        // Pagination Manual untuk Tab 1
+        $page = \Illuminate\Pagination\Paginator::resolveCurrentPage();
+        $perPage = 15;
+        $currentPageItems = $formattedAbsensi->slice(($page - 1) * $perPage, $perPage)->values();
+        
+        $formattedAbsensi = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentPageItems,
+            $formattedAbsensi->count(),
+            $perPage,
+            $page,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+        );
+
+        // 3. DATA KETIDAKHADIRAN (TAB 2: DAFTAR KETIDAKHADIRAN)
+        // Kita ambil berdasarkan tanggal hari ini
+        // Disini kita ambil yang PUNYA JENIS KETIDAKHADIRAN (Sakit, Izin, Cuti, Dinas Luar)
+        $ketidakhadiran = Absensi::with(['user:id,name', 'approver:id,name'])
+            ->whereIn('user_id', $userIds)
+            ->whereDate('tanggal', $selectedDate) 
+            ->whereNotNull('jenis_ketidakhadiran') // FILTER KHUSUS: Hanya yang sakit/izin/cuti
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // 4. HITUNG STATISTIK
+        $stats = [
+            'total_tepat_waktu' => 0,
+            'total_terlambat' => 0,
+            'total_izin' => 0,
+            'total_sakit' => 0,
+            'total_tidak_masuk' => 0,
+            'total_cuti' => 0,
+            'total_dinas_luar' => 0,
+            'total_semua' => $users->count(), 
+            'periode' => Carbon::parse($selectedDate)->translatedFormat('d M Y'),
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+        ];
+
+        // Hitung dari data Tab 1 (Absensi Masuk)
+        foreach ($formattedAbsensi as $item) {
+            if ($item['status_kehadiran'] === 'Tepat Waktu') $stats['total_tepat_waktu']++;
+            elseif ($item['status_kehadiran'] === 'Terlambat') $stats['total_terlambat']++;
+        }
+
+        // Hitung dari data Tab 2 (Ketidakhadiran)
+        foreach ($ketidakhadiran as $item) {
+            $label = strtolower($this->getStatusKehadiran($item)['label']);
+            if ($label === 'izin') $stats['total_izin']++;
+            elseif ($label === 'sakit') $stats['total_sakit']++;
+            elseif ($label === 'cuti') $stats['total_cuti']++;
+            elseif ($label === 'dinas luar') $stats['total_dinas_luar']++;
+        }
+
+        // Hitung Tidak Masuk
+        $stats['total_tidak_masuk'] = max(0, $stats['total_semua'] - $formattedAbsensi->count() - $ketidakhadiran->count());
+
+        // 5. DATA USER UNTUK DROPDOWN
+        $usersList = $users;
+
+    } catch (\Exception $e) {
+        \Log::error('Error in kelolaAbsensiGeneral: ' . $e->getMessage());
+        
+        // DEFINISI VARIABEL DEFAULT DI BLOK CATCH (PREVENTS COMPACT ERROR)
+        $startDate = Carbon::now()->format('Y-m-d');
+        $endDate = Carbon::now()->format('Y-m-d');
+        
+        $stats = [
+            'total_tepat_waktu' => 0, 'total_terlambat' => 0, 'total_izin' => 0,
+            'total_sakit' => 0, 'total_cuti' => 0, 'total_dinas_luar' => 0,
+            'total_tidak_masuk' => 0, 'total_semua' => 0,
+            'periode' => Carbon::now()->translatedFormat('d M Y'),
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+        ];
+        
+        $users = collect(); 
+        $formattedAbsensi = collect();
+        $ketidakhadiran = collect();
+        $usersList = collect();
+        $selectedDivision = Auth::check() ? (Auth::user()->divisi ?? 'Umum') : null;
+    }
+
+    // KIRIM KE VIEW
+    return view('pemilik.rekap_absensi', compact(
+        'stats',
+        'formattedAbsensi',
+        'ketidakhadiran',
+        'users',
+        'usersList',
+        'selectedDivision',
+        'startDate',
+        'endDate'
+    ));
+}
+
 /**
  * Method untuk General Manager
  */

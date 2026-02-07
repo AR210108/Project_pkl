@@ -462,12 +462,7 @@
                             placeholder="Search..." 
                             type="text" 
                         />
-                    </form>
-                    <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                        <button class="px-4 py-2 bg-white border border-border-light text-text-muted-light rounded-lg hover:bg-gray-50 transition-colors flex-1 md:flex-none">
-                            Filter
-                        </button>
-                    </div>
+                    </form>  
                 </div>
                 
                 <!-- Data Table Panel -->
@@ -496,7 +491,6 @@
                             <th style="min-width: 100px;">Nama Layanan</th>
                             <th style="min-width: 120px;">Harga</th>
                             <th style="min-width: 100px;">Deskripsi</th>
-                            <th style="min-width: 150px; text-align: center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -507,30 +501,6 @@
                                 <td style="min-width: 120px;">Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
                                 <td style="min-width: 100px;" class="truncate-text" title="{{ $item->deskripsi }}">
                                     {{ \Illuminate\Support\Str::limit($item->deskripsi, 50) }}
-                                </td>
-                                <td style="min-width: 150px; text-align: center;">
-                                    <div class="flex justify-center gap-2">
-                                        <button class="detail-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                            onclick="openDetailModal('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->harga }}', '{{ $item->durasi }}', '{{ $item->deskripsi }}', '{{ $item->kategori }}')"
-                                            title="Lihat Detail">
-                                            <span class="material-icons-outlined">visibility</span>
-                                        </button>
-
-                                        <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                            onclick="openEditModal('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->harga }}', '{{ $item->durasi }}', '{{ $item->deskripsi }}', '{{ $item->kategori }}')"
-                                            title="Edit">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-
-                                        <form action="/layanan/{{ $item->id }}" method="POST"
-                                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus ini?');" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" title="Hapus">
-                                                <span class="material-icons-outlined">delete</span>
-                                            </button>
-                                        </form>
-                                    </div>
                                 </td>
                             </tr>
                         @empty

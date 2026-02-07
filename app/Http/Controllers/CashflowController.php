@@ -28,7 +28,8 @@ class CashflowController extends Controller
                 'nomor_transaksi' => $item->nomor_transaksi, // Tampilkan nomor transaksi
                 'tanggal_transaksi' => $item->tanggal_transaksi->format('Y-m-d'),
                 'nama_transaksi' => $item->nama_transaksi,
-                'kategori' => $item->kategori ? $item->kategori->nama_kategori : 'Tidak Diketahui',
+                // Jika subkategori ada (pengeluaran), tampilkan subkategori; jika tidak, tampilkan nama kategori dari DB
+                'kategori' => $item->subkategori ?? ($item->kategori ? $item->kategori->nama_kategori : 'Tidak Diketahui'),
                 'deskripsi' => $item->deskripsi,
                 'jumlah' => $item->jumlah, // Kirim sebagai angka, format di JavaScript
                 'tipe_transaksi' => $item->tipe_transaksi,
@@ -52,7 +53,9 @@ class CashflowController extends Controller
         $validated = $request->validate([
             'tanggal' => 'required|date',
             'tipe' => 'required|in:income,expense',
-            'kategori_id' => 'required|exists:kategori_cashflow,id', // Pastikan kategori ada di DB
+            // Untuk tipe income: kategori_id harus ada di DB. Untuk expense: subkategori wajib.
+            'kategori_id' => 'required_if:tipe,income|nullable|exists:kategori_cashflow,id',
+            'subkategori' => 'required_if:tipe,expense|nullable|string|max:255',
             'nama' => 'required|string|max:255',
             'jumlah' => 'required|numeric|min:0',
             'deskripsi' => 'nullable|string',
@@ -62,12 +65,20 @@ class CashflowController extends Controller
         $dataToStore = [
             'tanggal_transaksi' => $validated['tanggal'],
             'tipe_transaksi' => $validated['tipe'] === 'income' ? 'pemasukan' : 'pengeluaran',
-            'kategori_id' => $validated['kategori_id'],
             'nama_transaksi' => $validated['nama'],
             'jumlah' => $validated['jumlah'],
             'deskripsi' => $validated['deskripsi'],
             // 'nomor_transaksi' akan diisi otomatis oleh model event
         ];
+
+        // Untuk pemasukan, simpan kategori_id dari DB. Untuk pengeluaran, simpan subkategori teks.
+        if ($validated['tipe'] === 'income') {
+            $dataToStore['kategori_id'] = $validated['kategori_id'];
+            $dataToStore['subkategori'] = null;
+        } else {
+            $dataToStore['kategori_id'] = null;
+            $dataToStore['subkategori'] = $validated['subkategori'] ?? null;
+        }
 
         // Simpan ke database
         Cashflow::create($dataToStore);

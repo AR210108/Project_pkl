@@ -28,7 +28,12 @@ class Project extends Model
         'nama',
         'deskripsi',
         'harga',
-        'deadline',
+        'tanggal_mulai_pengerjaan',
+        'tanggal_selesai_pengerjaan',
+        'tanggal_mulai_kerjasama',
+        'tanggal_selesai_kerjasama',
+        'status_kerjasama',
+        'status_pengerjaan',
         'progres',
         'status',
     ];
@@ -54,7 +59,7 @@ class Project extends Model
      */
     public function layanan()
     {
-        return $this->belongsTo(Layanan::class, 'layanan_id');
+        return $this->belongsTo(Invoice::class, 'invoice_id');
     }
 
     /**
@@ -131,6 +136,24 @@ class Project extends Model
                     $project->deskripsi = $layanan->deskripsi ?? null;
                     $project->harga = $layanan->harga ?? 0;
                 }
+            }
+            
+            // Set tanggal mulai kerjasama ke tanggal sekarang jika tidak diisi
+            if (!$project->tanggal_mulai_kerjasama) {
+                $project->tanggal_mulai_kerjasama = now();
+            }
+            
+            // Set default status
+            if (!$project->status_kerjasama) {
+                $project->status_kerjasama = 'aktif';
+            }
+            
+            if (!$project->status_pengerjaan) {
+                $project->status_pengerjaan = 'pending';
+            }
+            
+            if (!$project->progres) {
+                $project->progres = 0;
             }
         });
     }

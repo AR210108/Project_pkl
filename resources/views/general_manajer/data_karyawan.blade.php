@@ -145,72 +145,6 @@
             transform: rotate(-45deg) translate(7px, -6px);
         }
         
-        /* Gaya untuk indikator aktif/hover */
-        /* Default untuk mobile: di sebelah kanan */
-        .nav-item::before {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 0;
-            height: 100%;
-            width: 3px;
-            background-color: #3b82f6;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-        }
-        
-        /* Override untuk desktop: di sebelah kiri */
-        @media (min-width: 768px) {
-            .nav-item::before {
-                right: auto;
-                left: 0;
-                transform: translateX(-100%);
-            }
-        }
-        
-        .nav-item:hover::before,
-        .nav-item.active::before {
-            transform: translateX(0);
-        }
-        
-        /* Memastikan sidebar tetap di posisinya saat scroll */
-        .sidebar-fixed {
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 40;
-        }
-        
-        /* Menyesuaikan konten utama agar tidak tertutup sidebar */
-        .main-content {
-            margin-left: 0;
-            transition: margin-left 0.3s ease-in-out;
-        }
-        
-        @media (min-width: 768px) {
-            .main-content {
-                margin-left: 256px; /* Lebar sidebar */
-            }
-        }
-        
-        /* Scrollbar kustom untuk sidebar */
-        .sidebar-fixed::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .sidebar-fixed::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        
-        .sidebar-fixed::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
-        }
-        
-        .sidebar-fixed::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
         /* Table mobile adjustments */
         @media (max-width: 639px) {
             .desktop-table {
@@ -432,11 +366,14 @@
                                         <tr>
                                             <th style="min-width: 60px;">No</th>
                                             <th style="min-width: 200px;">Nama Lengkap</th>
+                                            <th style="min-width: 100px;">Role</th>
+                                            <th style="min-width: 200px;">Email</th>
+                                            <th style="min-width: 150px;">Divisi</th>
                                             <th style="min-width: 350px;">Alamat Lengkap</th>
                                             <th style="min-width: 150px;">Nomor Kontak</th>
-                                            <th style="min-width: 180px;">Jabatan</th>
-                                            <th style="min-width: 150px;">Divisi</th>
-                                            <th style="min-width: 100px; text-align: center;">Aksi</th>
+                                            <th style="min-width: 120px;">Status Kerja</th>
+                                            <th style="min-width: 120px;">Status Karyawan</th>
+                                            <!-- PERUBAHAN: Kolom aksi dihapus -->
                                         </tr>
                                     </thead>
                                     <!-- PERUBAHAN: Loop data dari database -->
@@ -445,28 +382,34 @@
                                         <tr>
                                             <td style="min-width: 60px;">{{ ($karyawan->currentPage()-1) * $karyawan->perPage() + $index + 1 }}</td>
                                             <td style="min-width: 200px;">{{ $item->nama }}</td>
+                                            <td style="min-width: 100px;">
+                                                <span class="status-badge {{ $item->role == 'karyawan' ? 'status-intern' : 'status-permanent' }}">
+                                                    {{ $item->role }}
+                                                </span>
+                                            </td>
+                                            <td style="min-width: 200px;">{{ $item->email }}</td>
+                                            <td style="min-width: 150px;">{{ $item->divisi ?? '-' }}</td>
                                             <td style="min-width: 350px;">{{ $item->alamat }}</td>
                                             <td style="min-width: 150px;">{{ $item->kontak }}</td>
-                                            <td style="min-width: 180px;">{{ $item->jabatan }}</td>
-                                            <td style="min-width: 150px;">{{ $item->divisi }}</td>
-                                            <td style="min-width: 100px; text-align: center;">
-                                                <div class="flex justify-center gap-2">
-                                                    <button data-id="{{ $item->id }}" class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700" title="Edit">
-                                                        <span class="material-icons-outlined">edit</span>
-                                                    </button>
-                                                    <form method="POST" action="{{ route('pegawai.destroy', $item->id) }}" onsubmit="return confirm('Hapus karyawan ini?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="p-1 rounded-full hover:bg-red-500/20 text-gray-700" title="Hapus">
-                                                            <span class="material-icons-outlined">delete</span>
-                                                        </button>
-                                                    </form>
-                                                </div>
+                                            <td style="min-width: 120px;">
+                                                <span class="status-badge 
+                                                    {{ $item->status_kerja == 'aktif' ? 'bg-green-100 text-green-800' : 
+                                                       ($item->status_kerja == 'resign' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
+                                                    {{ $item->status_kerja }}
+                                                </span>
                                             </td>
+                                            <td style="min-width: 120px;">
+                                                <span class="status-badge 
+                                                    {{ $item->status_karyawan == 'tetap' ? 'bg-blue-100 text-blue-800' : 
+                                                       ($item->status_karyawan == 'kontrak' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800') }}">
+                                                    {{ $item->status_karyawan }}
+                                                </span>
+                                            </td>
+                                            <!-- PERUBAHAN: Tombol aksi dihapus -->
                                         </tr>
                                         @empty
                                         <tr>
-                                            <td colspan="7" class="text-center py-4 text-gray-500">Belum ada data karyawan.</td>
+                                            <td colspan="10" class="text-center py-4 text-gray-500">Belum ada data karyawan.</td>
                                         </tr>
                                         @endforelse
                                     </tbody>
@@ -482,25 +425,18 @@
                                 <div class="flex justify-between items-start mb-3">
                                     <div>
                                         <h4 class="font-semibold text-base">{{ $item->nama }}</h4>
-                                        <p class="text-sm text-text-muted-light">{{ $item->jabatan }}</p>
+                                        <p class="text-sm text-text-muted-light">{{ $item->role }}</p>
                                     </div>
-                                    <div class="flex gap-2">
-                                        <button data-id="{{ $item->id }}" class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700">
-                                            <span class="material-icons-outlined">edit</span>
-                                        </button>
-                                        <form method="POST" action="{{ route('pegawai.destroy', $item->id) }}" onsubmit="return confirm('Hapus karyawan ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="p-1 rounded-full hover:bg-red-500/20 text-gray-700">
-                                                <span class="material-icons-outlined">delete</span>
-                                            </button>
-                                        </form>
-                                    </div>
+                                    <!-- PERUBAHAN: Tombol aksi dihapus -->
                                 </div>
                                 <div class="grid grid-cols-2 gap-2 text-sm">
                                     <div>
+                                        <p class="text-text-muted-light">Email</p>
+                                        <p class="font-medium">{{ $item->email }}</p>
+                                    </div>
+                                    <div>
                                         <p class="text-text-muted-light">Divisi</p>
-                                        <p class="font-medium">{{ $item->divisi }}</p>
+                                        <p class="font-medium">{{ $item->divisi ?? '-' }}</p>
                                     </div>
                                     <div>
                                         <p class="text-text-muted-light">No. Kontak</p>
@@ -510,6 +446,24 @@
                                 <div class="mt-3">
                                     <p class="text-text-muted-light">Alamat</p>
                                     <p class="font-medium">{{ $item->alamat }}</p>
+                                </div>
+                                <div class="mt-3 grid grid-cols-2 gap-2">
+                                    <div>
+                                        <p class="text-text-muted-light">Status Kerja</p>
+                                        <span class="status-badge 
+                                            {{ $item->status_kerja == 'aktif' ? 'bg-green-100 text-green-800' : 
+                                               ($item->status_kerja == 'resign' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
+                                            {{ $item->status_kerja }}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <p class="text-text-muted-light">Status Karyawan</p>
+                                        <span class="status-badge 
+                                            {{ $item->status_karyawan == 'tetap' ? 'bg-blue-100 text-blue-800' : 
+                                               ($item->status_karyawan == 'kontrak' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800') }}">
+                                            {{ $item->status_karyawan }}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             @empty
@@ -529,95 +483,11 @@
         </main>
     </div>
 
-    <!-- Modal Edit Karyawan -->
-    <div id="editModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Edit Karyawan</h3>
-                    <button id="closeEditModal" class="close-modal text-gray-800 hover:text-gray-500">
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-                <form id="editForm" method="POST" action="">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" name="id" id="edit_id">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
-                        <input type="text" name="nama" id="edit_nama" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
-                        <textarea name="alamat" id="edit_alamat" rows="3" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required></textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Kontak</label>
-                        <input type="tel" name="kontak" id="edit_kontak" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
-                        <input type="text" name="jabatan" id="edit_jabatan" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
-                        <input type="text" name="divisi" id="edit_divisi" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" id="cancelEdit" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit" class="px-4 py-2 btn-primary rounded-lg">Simpan Perubahan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- PERUBAHAN: JavaScript disederhanakan, hanya untuk modal -->
+    <!-- PERUBAHAN: Modal edit dihapus karena tidak diperlukan lagi -->
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const closeModals = document.querySelectorAll('.close-modal');
-
-            // Edit modal logic: fetch data and fill form
-            const editModal = document.getElementById('editModal');
-            const editForm = document.getElementById('editForm');
-            const closeEditModalBtn = document.getElementById('closeEditModal');
-            const cancelEdit = document.getElementById('cancelEdit');
-
-            function openEditModal() {
-                editModal.classList.remove('hidden');
-            }
-
-            function closeEditModal() {
-                editModal.classList.add('hidden');
-            }
-
-            closeEditModalBtn.addEventListener('click', closeEditModal);
-            cancelEdit.addEventListener('click', closeEditModal);
-
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    fetch(`{{ url('/pegawai') }}/${id}/edit`)
-                        .then(res => res.json())
-                        .then(data => {
-                            document.getElementById('edit_id').value = data.id;
-                            document.getElementById('edit_nama').value = data.nama;
-                            document.getElementById('edit_alamat').value = data.alamat;
-                            document.getElementById('edit_kontak').value = data.kontak;
-                            document.getElementById('edit_jabatan').value = data.jabatan;
-                            document.getElementById('edit_divisi').value = data.divisi;
-                            editForm.action = `{{ url('/pegawai') }}/${id}`;
-                            openEditModal();
-                        }).catch(err => alert('Gagal mengambil data.'));
-                });
-            });
-
-            // HAPUS SEMUA KODE YANG BERHUBUNGAN DENGAN:
-            // - karyawanData array
-            // - Pagination
-            // - Fetch API
-            // - renderDesktopTable, renderMobileCards
-            // - Event listener submit form yang menggunakan fetch
+            // Tidak ada lagi fungsi untuk modal edit karena tombol edit dihapus
         });
     </script>
 </body>

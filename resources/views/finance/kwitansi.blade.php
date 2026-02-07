@@ -970,6 +970,27 @@
         let searchTerm = '';
         let allKwitansi = []; // Store all kwitansi data
 
+        // Small helper to safely add event listeners or query elements
+        function addListener(selector, event, handler) {
+            const el = document.querySelector(selector);
+            if (el) el.addEventListener(event, handler);
+        }
+
+        // Helper to safely parse fetch responses and produce useful errors
+        function parseJsonResponse(response) {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    try {
+                        const js = JSON.parse(text || '{}');
+                        throw new Error(js.message || JSON.stringify(js) || response.statusText);
+                    } catch (e) {
+                        throw new Error(text || response.statusText || 'Server error');
+                    }
+                });
+            }
+            return response.json();
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Set today's date as default for the date input
             const today = new Date().toISOString().split('T')[0];
@@ -984,109 +1005,78 @@
             // Load kwitansi data on page load
             loadKwitansiData();
             
-            // Event listener for search input
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.addEventListener('input', function() {
-                    clearTimeout(this.searchTimeout);
-                    this.searchTimeout = setTimeout(() => {
-                        searchTerm = this.value.trim();
-                        currentPage = 1; // Reset to first page on search
-                        applyFilters();
-                    }, 300); // Debounce search
-                });
-            }
-            
+            // Event listener for search input (safe attach)
+            addListener('#searchInput', 'input', function() {
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                    searchTerm = this.value.trim();
+                    currentPage = 1; // Reset to first page on search
+                    applyFilters();
+                }, 300); // Debounce search
+            });
+
             // Event listener for filter button
-            const filterBtn = document.getElementById('filterBtn');
-            if (filterBtn) {
-                filterBtn.addEventListener('click', function() {
-                    document.getElementById('filterDropdown').classList.toggle('show');
-                });
-            }
-            
-            // Close filter dropdown when clicking outside
+            addListener('#filterBtn', 'click', function() {
+                const fd = document.getElementById('filterDropdown');
+                if (fd) fd.classList.toggle('show');
+            });
+
+            // Close filter dropdown when clicking outside (safe)
             document.addEventListener('click', function() {
-                document.getElementById('filterDropdown').classList.remove('show');
+                const fd = document.getElementById('filterDropdown');
+                if (fd) fd.classList.remove('show');
             });
-            
+
             // Prevent dropdown from closing when clicking inside
-            document.getElementById('filterDropdown').addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-            
+            const fd = document.getElementById('filterDropdown');
+            if (fd) fd.addEventListener('click', function(e) { e.stopPropagation(); });
+
             // Event listener for Buat Kwitansi button
-            const buatKwitansiBtn = document.getElementById('buatKwitansiBtn');
-            if (buatKwitansiBtn) {
-                buatKwitansiBtn.addEventListener('click', function() {
-                    document.getElementById('buatKwitansiModal').classList.remove('hidden');
+            addListener('#buatKwitansiBtn', 'click', function() {
+                const modal = document.getElementById('buatKwitansiModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
-                });
-            }
-            
-            // Close modal when clicking outside
-            document.getElementById('buatKwitansiModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeBuatKwitansiModal();
                 }
             });
-            
-            document.getElementById('editKwitansiModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeEditKwitansiModal();
-                }
-            });
-            
-            document.getElementById('deleteKwitansiModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeDeleteKwitansiModal();
-                }
-            });
-            
-            // Close modal with Escape key
+
+            // Close modal when clicking outside (safe attach)
+            const buatModal = document.getElementById('buatKwitansiModal');
+            if (buatModal) buatModal.addEventListener('click', function(e) { if (e.target === this) closeBuatKwitansiModal(); });
+
+            const editModal = document.getElementById('editKwitansiModal');
+            if (editModal) editModal.addEventListener('click', function(e) { if (e.target === this) closeEditKwitansiModal(); });
+
+            const delModal = document.getElementById('deleteKwitansiModal');
+            if (delModal) delModal.addEventListener('click', function(e) { if (e.target === this) closeDeleteKwitansiModal(); });
+
+            // Close modal with Escape key (safe checks)
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
-                    if (!document.getElementById('buatKwitansiModal').classList.contains('hidden')) {
-                        closeBuatKwitansiModal();
-                    }
-                    if (!document.getElementById('editKwitansiModal').classList.contains('hidden')) {
-                        closeEditKwitansiModal();
-                    }
-                    if (!document.getElementById('deleteKwitansiModal').classList.contains('hidden')) {
-                        closeDeleteKwitansiModal();
-                    }
+                    const bm = document.getElementById('buatKwitansiModal');
+                    if (bm && !bm.classList.contains('hidden')) closeBuatKwitansiModal();
+                    const em = document.getElementById('editKwitansiModal');
+                    if (em && !em.classList.contains('hidden')) closeEditKwitansiModal();
+                    const dm = document.getElementById('deleteKwitansiModal');
+                    if (dm && !dm.classList.contains('hidden')) closeDeleteKwitansiModal();
                 }
             });
-            
-            // Close popup when clicking the close button
-            document.querySelector('.minimal-popup-close').addEventListener('click', function() {
-                document.getElementById('minimalPopup').classList.remove('show');
-            });
-            
-            // Modal close buttons
-            document.getElementById('closeModalBtn').addEventListener('click', closeBuatKwitansiModal);
-            document.getElementById('cancelBtn').addEventListener('click', closeBuatKwitansiModal);
-            document.getElementById('closeEditModalBtn').addEventListener('click', closeEditKwitansiModal);
-            document.getElementById('cancelEditBtn').addEventListener('click', closeEditKwitansiModal);
-            document.getElementById('closeDeleteModalBtn').addEventListener('click', closeDeleteKwitansiModal);
-            document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteKwitansiModal);
-            
-            // Form submissions
-            document.getElementById('buatKwitansiForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                submitBuatKwitansi();
-            });
-            
-            document.getElementById('editKwitansiForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                submitEditKwitansi();
-            });
-            
-            document.getElementById('deleteKwitansiForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const id = document.getElementById('deleteKwitansiId').value;
-                deleteKwitansi(id);
-            });
+
+            // Close popup when clicking the close button (safe)
+            addListener('.minimal-popup-close', 'click', function() { const mp = document.getElementById('minimalPopup'); if (mp) mp.classList.remove('show'); });
+
+            // Modal close buttons (safe attach)
+            addListener('#closeModalBtn', 'click', closeBuatKwitansiModal);
+            addListener('#cancelBtn', 'click', closeBuatKwitansiModal);
+            addListener('#closeEditModalBtn', 'click', closeEditKwitansiModal);
+            addListener('#cancelEditBtn', 'click', closeEditKwitansiModal);
+            addListener('#closeDeleteModalBtn', 'click', closeDeleteKwitansiModal);
+            addListener('#cancelDeleteBtn', 'click', closeDeleteKwitansiModal);
+
+            // Form submissions (safe attach)
+            addListener('#buatKwitansiForm', 'submit', function(e) { e.preventDefault(); submitBuatKwitansi(); });
+            addListener('#editKwitansiForm', 'submit', function(e) { e.preventDefault(); submitEditKwitansi(); });
+            addListener('#deleteKwitansiForm', 'submit', function(e) { e.preventDefault(); const idEl = document.getElementById('deleteKwitansiId'); if (idEl) deleteKwitansi(idEl.value); });
             
             // Initialize filter
             initializeFilter();
@@ -1103,28 +1093,24 @@
                         // Fetch invoice details and populate form
                         fetch(`/api/invoices/${invoiceId}`, {
                             method: 'GET',
+                            credentials: 'same-origin',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                                 'Accept': 'application/json'
                             }
                         })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`Server error: ${response.status} ${response.statusText}`);
-                            }
-                            return response.json();
-                        })
+                        .then(parseJsonResponse)
                         .then(data => {
                             if (data.success) {
-                                document.getElementById('namaPerusahaan').value = data.data.nama_perusahaan;
-                                document.getElementById('nomorOrder').value = data.data.nomor_order;
-                                document.getElementById('namaKlien').value = data.data.nama_klien;
-                                document.getElementById('harga').value = data.data.harga;
+                                const np = document.getElementById('namaPerusahaan'); if (np) np.value = data.data.nama_perusahaan || '';
+                                const no = document.getElementById('nomorOrder'); if (no) no.value = data.data.nomor_order || '';
+                                const nk = document.getElementById('namaKlien'); if (nk) nk.value = data.data.nama_klien || '';
+                                const hEl = document.getElementById('harga'); if (hEl) hEl.value = data.data.harga || 0;
                                 // Calculate sub_total and fee_maintenance based on harga
-                                const harga = parseFloat(data.data.harga);
-                                document.getElementById('subTotal').value = harga;
-                                document.getElementById('feeMaintenance').value = 0;
+                                const harga = parseFloat(data.data.harga) || 0;
+                                const st = document.getElementById('subTotal'); if (st) st.value = harga;
+                                const fm = document.getElementById('feeMaintenance'); if (fm) fm.value = 0;
                                 
                                 // Calculate total
                                 calculateTotal();
@@ -1176,21 +1162,17 @@
                 return;
             }
             
-            // Fetch invoices from API
+            // Fetch invoices from API (include credentials for session-auth)
             fetch('/api/invoices', {
                 method: 'GET',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 }
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
-                }
-                return response.json();
-            })
+            .then(parseJsonResponse)
             .then(data => {
                 // Clear existing options except first one
                 select.innerHTML = '<option value="">-- Pilih Invoice --</option>';
@@ -1218,34 +1200,33 @@
             const tableBody = document.getElementById('desktopTableBody');
             const mobileCards = document.getElementById('mobile-cards');
             
-            // Show loading
-            loadingRow.classList.remove('hidden');
-            noDataRow.classList.add('hidden');
+            // Show loading (guard elements)
+            if (loadingRow) loadingRow.classList.remove('hidden');
+            if (noDataRow) noDataRow.classList.add('hidden');
             
-            // Remove existing kwitansi rows and cards
-            const existingRows = tableBody.querySelectorAll('.kwitansi-row');
-            existingRows.forEach(row => row.remove());
-            
-            const existingCards = mobileCards.querySelectorAll('.kwitansi-card');
-            existingCards.forEach(card => card.remove());
+            // Remove existing kwitansi rows and cards (guard containers)
+            if (tableBody) {
+                const existingRows = tableBody.querySelectorAll('.kwitansi-row');
+                existingRows.forEach(row => row.remove());
+            }
+            if (mobileCards) {
+                const existingCards = mobileCards.querySelectorAll('.kwitansi-card');
+                existingCards.forEach(card => card.remove());
+            }
             
             // Fetch data from API
             fetch('/api/kwitansi', {
                 method: 'GET',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 }
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
-                }
-                return response.json();
-            })
+            .then(parseJsonResponse)
             .then(data => {
-                loadingRow.classList.add('hidden');
+                if (loadingRow) loadingRow.classList.add('hidden');
                 
                 if (data.data && data.data.length > 0) {
                     // Store all kwitansi data
@@ -1411,7 +1392,7 @@
                             const feeMaintenance = this.getAttribute('data-fee-maintenance');
                             const total = this.getAttribute('data-total');
                             
-                            document.getElementById('editKwitansiId').value = id;
+                            const editIdEl = document.getElementById('editKwitansiId'); if (editIdEl) editIdEl.value = id;
                             
                             // Format date for input field (YYYY-MM-DD)
                             let tanggalValue = tanggal;
@@ -1419,22 +1400,21 @@
                                 const date = new Date(tanggalValue);
                                 tanggalValue = date.toISOString().split('T')[0];
                             }
-                            document.getElementById('editTanggal').value = tanggalValue;
-                            
-                            document.getElementById('editNamaPerusahaan').value = namaPerusahaan;
-                            document.getElementById('editNomorOrder').value = nomorOrder;
-                            document.getElementById('editNamaKlien').value = namaKlien;
-                            document.getElementById('editDeskripsi').value = deskripsi;
-                            document.getElementById('editHarga').value = harga;
-                            document.getElementById('editSubTotal').value = subTotal;
-                            document.getElementById('editFeeMaintenance').value = feeMaintenance;
+                            const editTanggalEl = document.getElementById('editTanggal'); if (editTanggalEl) editTanggalEl.value = tanggalValue;
+
+                            const enp = document.getElementById('editNamaPerusahaan'); if (enp) enp.value = namaPerusahaan || '';
+                            const eno = document.getElementById('editNomorOrder'); if (eno) eno.value = nomorOrder || '';
+                            const enk = document.getElementById('editNamaKlien'); if (enk) enk.value = namaKlien || '';
+                            const ed = document.getElementById('editDeskripsi'); if (ed) ed.value = deskripsi || '';
+                            const eh = document.getElementById('editHarga'); if (eh) eh.value = harga || 0;
+                            const est = document.getElementById('editSubTotal'); if (est) est.value = subTotal || 0;
+                            const efm = document.getElementById('editFeeMaintenance'); if (efm) efm.value = feeMaintenance || 0;
                             
                             // Set both the display and the actual value for total
-                            document.getElementById('editTotal').value = parseFloat(total).toLocaleString('id-ID');
-                            document.getElementById('editTotalValue').value = total;
-                            
-                            document.getElementById('editKwitansiModal').classList.remove('hidden');
-                            document.body.style.overflow = 'hidden';
+                            const et = document.getElementById('editTotal'); if (et) et.value = parseFloat(total || 0).toLocaleString('id-ID');
+                            const etv = document.getElementById('editTotalValue'); if (etv) etv.value = total || 0;
+
+                            const editModalEl = document.getElementById('editKwitansiModal'); if (editModalEl) { editModalEl.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
                         });
                     });
                     
@@ -1453,12 +1433,10 @@
                             const namaPerusahaan = this.getAttribute('data-nama-perusahaan');
                             const nomorOrder = this.getAttribute('data-nomor-order');
                             
-                            document.getElementById('deleteKwitansiId').value = id;
-                            document.getElementById('deleteKwitansiNama').textContent = namaPerusahaan;
-                            document.getElementById('deleteKwitansiNomor').textContent = nomorOrder;
-                            
-                            document.getElementById('deleteKwitansiModal').classList.remove('hidden');
-                            document.body.style.overflow = 'hidden';
+                            const delIdEl = document.getElementById('deleteKwitansiId'); if (delIdEl) delIdEl.value = id;
+                            const delNameEl = document.getElementById('deleteKwitansiNama'); if (delNameEl) delNameEl.textContent = namaPerusahaan || '';
+                            const delNumEl = document.getElementById('deleteKwitansiNomor'); if (delNumEl) delNumEl.textContent = nomorOrder || '';
+                            const delModalEl = document.getElementById('deleteKwitansiModal'); if (delModalEl) { delModalEl.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
                         });
                     });
                     
@@ -1466,22 +1444,25 @@
                     applyFilters();
                 } else {
                     // Show no data message
-                    noDataRow.classList.remove('hidden');
+                    if (noDataRow) noDataRow.classList.remove('hidden');
                     
                     // Update total count
-                    document.getElementById('totalCount').textContent = '0';
+                    const totalCountEl = document.getElementById('totalCount'); if (totalCountEl) totalCountEl.textContent = '0';
                 }
             })
             .catch(error => {
-                loadingRow.classList.add('hidden');
+                if (loadingRow) loadingRow.classList.add('hidden');
                 console.error('Error loading kwitansi data:', error);
-                showMinimalPopup('Error', 'Gagal memuat data kwitansi: ' + error.message, 'error');
+                console.error('Full error:', error.stack);
+                // Log detailed error for debugging
+                console.warn('Network error details - Check browser Network tab for /api/kwitansi response');
+                showMinimalPopup('Error', 'Gagal memuat data: ' + error.message + '. Lihat Console untuk detail.', 'error');
             });
         }
         
-        // Function to print kwitansi
+        // Function to print kwitansi (use finance print route)
         function cetakKwitansi(id) {
-            window.open(`/admin/kwitansi/${id}/cetak`, '_blank');
+            window.open(`/finance/kwitansi/${id}/cetak`, '_blank');
         }
         
         // Function to create a new kwitansi
@@ -1500,24 +1481,14 @@
             // Send data to web route
             fetch('/finance/kwitansi', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 },
                 body: formData
             })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        if (data.errors) {
-                            const firstErrorKey = Object.keys(data.errors)[0];
-                            throw new Error(data.errors[firstErrorKey][0]);
-                        }
-                        throw new Error(data.message || 'Unknown error');
-                    });
-                }
-                return response.json();
-            })
+            .then(parseJsonResponse)
             .then(data => {
                 if (data.success) {
                     showMinimalPopup('Berhasil', 'Kwitansi berhasil dibuat!', 'success');
@@ -1555,24 +1526,14 @@
             // Send data to web route
             fetch(`/finance/kwitansi/${id}`, {
                 method: 'PUT',
+                credentials: 'same-origin',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 },
                 body: formData
             })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        if (data.errors) {
-                            const firstErrorKey = Object.keys(data.errors)[0];
-                            throw new Error(data.errors[firstErrorKey][0]);
-                        }
-                        throw new Error(data.message || 'Unknown error');
-                    });
-                }
-                return response.json();
-            })
+            .then(parseJsonResponse)
             .then(data => {
                 if (data.success) {
                     showMinimalPopup('Berhasil', 'Kwitansi berhasil diperbarui!', 'success');
@@ -1604,20 +1565,14 @@
             // Send delete request to web route
             fetch(`/finance/kwitansi/${id}`, {
                 method: 'DELETE',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 }
             })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.message || 'Unknown error');
-                    });
-                }
-                return response.json();
-            })
+            .then(parseJsonResponse)
             .then(data => {
                 if (data.success) {
                     showMinimalPopup('Berhasil', 'Kwitansi berhasil dihapus!', 'success');
@@ -1922,7 +1877,7 @@
             updateVisibleItems();
             
             // Update total count
-            document.getElementById('totalCount').textContent = getFilteredRows().length;
+            const totalCountEl = document.getElementById('totalCount'); if (totalCountEl) totalCountEl.textContent = getFilteredRows().length;
         }
         
         // Initialize scroll detection for table

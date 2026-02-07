@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sidebar Component</title>
-    
+
     <!-- DITAMBAHKAN: Meta tag CSRF untuk keamanan form (sangat penting di Laravel) -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
@@ -255,13 +255,6 @@
                 <span class="sidebar-text">Beranda</span>
             </a>
 
-            <!-- Menu Data User -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/admin/data_user" data-page="data_user">
-                <span class="material-icons sidebar-icon">person</span>
-                <span class="sidebar-text">Data User</span>
-            </a>
-
             <!-- Menu Data Karyawan -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 href="/admin/data_karyawan" data-page="data_karyawan">
@@ -283,6 +276,11 @@
                 <span class="sidebar-text">Data Project</span>
             </a>
 
+            <!-- ============================================ -->
+            <!-- DITAMBAHKAN: Menu Data Perusahaan -->
+            <!-- ============================================ -->
+            <!-- ============================================ -->
+
             <!-- Menu Surat Kerjasama (Dropdown) -->
             <div class="relative">
                 <button
@@ -303,12 +301,18 @@
                     </a>
 
                     <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        href="/admin/kwitansi" data-page="list_surat">
+                        href="{{ route('admin.kwitansi.index') }}" data-page="list_surat">
                         <span class="material-icons sidebar-icon">list_alt</span>
                         <span class="sidebar-text">Kwitansi</span>
                     </a>
                 </div>
             </div>
+
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="/admin/perusahaan" data-page="perusahaan">
+                <span class="material-icons sidebar-icon">business</span>
+                <span class="sidebar-text">Data Perusahaan</span>
+            </a>
 
             <!-- Catatan Rapat -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
@@ -468,42 +472,42 @@
             if (logoutForm) {
                 logoutForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     // Ambil CSRF token dari meta tag
                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-                    
+
                     if (!csrfToken) {
                         console.error('CSRF token tidak ditemukan');
                         // Fallback: submit form biasa
                         this.submit();
                         return;
                     }
-                    
+
                     // Kirim request logout dengan fetch
                     fetch(this.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({})
-                    })
-                    .then(response => {
-                        if (response.ok || response.redirected) {
-                            // Redirect ke halaman login
-                            window.location.href = '/login';
-                        } else {
-                            console.error('Logout gagal');
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': csrfToken,
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({})
+                        })
+                        .then(response => {
+                            if (response.ok || response.redirected) {
+                                // Redirect ke halaman login
+                                window.location.href = '/login';
+                            } else {
+                                console.error('Logout gagal');
+                                // Fallback: submit form biasa
+                                this.submit();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
                             // Fallback: submit form biasa
                             this.submit();
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        // Fallback: submit form biasa
-                        this.submit();
-                    });
+                        });
                 });
             }
         });

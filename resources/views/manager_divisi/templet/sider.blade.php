@@ -57,12 +57,13 @@
             }
         }
 
+        /* Hover & Active State Logic */
         .nav-item:hover::before,
         .nav-item.active::before {
             transform: translateX(0);
         }
 
-        /* Gaya untuk item navigasi yang sedang aktif */
+        /* Tampilan Menu Aktif (Background Abu-abu, Teks Hitam Tebal) */
         .nav-item.active {
             background-color: #e5e7eb;
             color: #111827 !important;
@@ -221,12 +222,12 @@
                 <!-- BERANDA -->
                 <a href="/manager_divisi/home"
                     class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    :class="window.location.pathname === '/manager_divisi/home ' ? 'active' : ''">
+                    :class="window.location.pathname === '/manager_divisi/home' ? 'active' : ''">
                     <span class="material-symbols-outlined sidebar-icon">home</span>
                     <span class="sidebar-text">Beranda</span>
                 </a>
 
-                <!-- DATA ORDERAN -->
+                <!-- DATA PROJECT -->
                 <a href="/manager_divisi/data_project"
                     class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                     :class="window.location.pathname === '/manager_divisi/data_project' ? 'active' : ''">
@@ -242,21 +243,30 @@
                     <span class="sidebar-text">Kelola Tugas</span>
                 </a>
 
+                <!-- DATA PERUSAHAAN (BARU) -->
+                <!-- Jika URL sama dengan '/manager_divisi/perusahaan', maka kelas 'active' akan ditambahkan -->
+                <a href="{{ route('manager_divisi.perusahaan.index') }}"
+                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    :class="window.location.pathname === '/manager_divisi/perusahaan' ? 'active' : ''">
+                    <span class="material-symbols-outlined sidebar-icon">business</span>
+                    <span class="sidebar-text">Data Perusahaan</span>
+                </a>
+
                 <!-- DATA KARYAWAN -->
                 <a href="/manager_divisi/daftar_karyawan"
                     class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                     :class="window.location.pathname === '/manager_divisi/daftar_karyawan' ? 'active' : ''">
                     <span class="material-symbols-outlined sidebar-icon">groups</span>
                     <span class="sidebar-text">Data Karyawan</span>
-            </a>
+                </a>
 
-                    <!-- LAPORAN ABSENSI -->
-                    <a href="/manager_divisi/kelola_absensi"
-                        class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        :class="window.location.pathname === '/manager_divisi/kelola_absensi' ? 'active' : ''">
-                        <span class="material-symbols-outlined sidebar-icon">fact_check</span>
-                        <span class="sidebar-text">Laporan Absensi</span>
-                    </a>
+                <!-- LAPORAN ABSENSI -->
+                <a href="/manager_divisi/kelola_absensi"
+                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    :class="window.location.pathname === '/manager_divisi/kelola_absensi' ? 'active' : ''">
+                    <span class="material-symbols-outlined sidebar-icon">fact_check</span>
+                    <span class="sidebar-text">Laporan Absensi</span>
+                </a>
 
             </nav>
 

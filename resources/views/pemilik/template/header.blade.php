@@ -270,7 +270,7 @@
                 <nav
                     class="hidden md:flex items-center space-x-4 lg:space-x-8 absolute left-1/2 transform -translate-x-1/2">
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="home" href="/owner/home">Beranda</a>
-                    <a class="nav-link text-sm font-medium text-gray-700" data-page="rekap" href="/owner/rekap_absensi">Rekap
+                    <a class="nav-link text-sm font-medium text-gray-700" data-page="rekap" href="/owner/rekap_absen">Rekap
                         Absensi</a>
                     <a class="nav-link text-sm font-medium text-gray-700" data-page="laporan"
                         href="/owner/laporan">Laporan</a>

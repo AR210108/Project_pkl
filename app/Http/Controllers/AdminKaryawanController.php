@@ -5,179 +5,188 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Karyawan;
 use App\Models\User;
-use App\Models\Divisi; // JANGAN LUPA IMPORT MODEL DIVISI
+use App\Models\Divisi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 class AdminKaryawanController extends Controller
 {
     /**
      * Display a listing of the resource.
-     * Menampilkan daftar karyawan dengan fitur pencarian dan paginasi.
      */
     public function index(Request $request)
     {
-        // Query karyawan dengan relasi user
-        $query = Karyawan::with(['user' => function ($query) {
-            $query->select('id', 'name', 'email', 'role', 'divisi_id');
-        }, 'user.divisi']);
+        try {
+            // Query karyawan dengan relasi user
+            $query = Karyawan::with(['user' => function ($query) {
+                $query->select('id', 'name', 'email', 'role', 'divisi_id');
+            }, 'user.divisi']);
 
-        // Search filter
+            // Search filter
+            if ($request->has('search')) {
+                $searchTerm = $request->get('search');
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('nama', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('email', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('role', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('divisi', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('alamat', 'LIKE', "%{$searchTerm}%")
+                        ->orWhereHas('user', function ($q) use ($searchTerm) {
+                            $q->where('name', 'LIKE', "%{$searchTerm}%")
+                                ->orWhere('email', 'LIKE', "%{$searchTerm}%");
+                        });
+                });
+            }
+
+            // Ambil data dengan pagination
+            $karyawan = $query->orderBy('created_at', 'desc')->paginate(10);
+
+            // Ambil users yang BELUM menjadi karyawan
+            $users = User::with('divisi')
+                ->whereNotIn('id', function ($query) {
+                    $query->select('user_id')
+                        ->from('karyawan')
+                        ->whereNotNull('user_id');
+                })
+                ->orderBy('name', 'asc')
+                ->get(['id', 'name', 'email', 'role', 'divisi_id']);
+
+            $divisis = Divisi::orderBy('divisi', 'asc')->get();
+
+            return view('admin.data_karyawan', compact('karyawan', 'users', 'divisis'));
+
+        } catch (\Exception $e) {
+            \Log::error('Index karyawan error:', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengambil data karyawan.');
+        }
+    }
+
+public function karyawanGeneral(Request $request)
+{
+    try {
+        $query = Karyawan::query();
+
         if ($request->has('search')) {
             $searchTerm = $request->get('search');
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('nama', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('role', 'LIKE', "%{$searchTerm}%")
                     ->orWhere('email', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('jabatan', 'LIKE', "%{$searchTerm}%")
                     ->orWhere('divisi', 'LIKE', "%{$searchTerm}%")
                     ->orWhere('alamat', 'LIKE', "%{$searchTerm}%")
-                    ->orWhereHas('user', function ($q) use ($searchTerm) {
-                        $q->where('name', 'LIKE', "%{$searchTerm}%")
-                            ->orWhere('email', 'LIKE', "%{$searchTerm}%");
-                    });
+                    ->orWhere('kontak', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('status_kerja', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('status_karyawan', 'LIKE', "%{$searchTerm}%");
             });
         }
 
-        // Ambil data dengan pagination
-        $karyawan = $query->orderBy('created_at', 'desc')->paginate(10);
-
-        // Ambil users yang BELUM menjadi karyawan
-        $users = User::with('divisi')
-            ->whereNotIn('id', function ($query) {
-                $query->select('user_id')
-                    ->from('karyawan')
-                    ->whereNotNull('user_id');
-            })
-            ->orderBy('name', 'asc')
-            ->get(['id', 'name', 'email', 'role', 'divisi_id']);
-
-        return view('admin.data_karyawan', compact('karyawan', 'users'));
-    }
-
-    public function karyawanGeneral(Request $request)
-    {
-        // Mulai dengan query builder untuk model Karyawan
-        $query = Karyawan::query();
-
-        // Jika ada input pencarian di URL (misal: ?search=John)
-        if ($request->has('search')) {
-            $searchTerm = $request->get('search');
-            // Cari di kolom 'nama', 'jabatan', dan 'alamat'
-            $query->where('nama', 'LIKE', "%{$searchTerm}%")
-                ->orWhere('jabatan', 'LIKE', "%{$searchTerm}%")
-                ->orWhere('alamat', 'LIKE', "%{$searchTerm}%");
+        // Filter divisi
+        if ($request->has('divisi') && $request->get('divisi') != '') {
+            $query->where('divisi', $request->get('divisi'));
         }
 
-        // Ambil data dengan paginasi (10 data per halaman)
-        $karyawan = $query->paginate(10);
+        $karyawan = $query->orderBy('nama', 'asc')->paginate(10);
 
-        // AMBIL DATA USERS YANG BELUM MENJADI KARYAWAN DENGAN EAGER LOADING DIVISI
-        $users = User::with(['divisi' => function ($query) {
-            $query->select('id', 'divisi');
-        }])
-            ->whereNotIn('id', function ($query) {
-                $query->select('user_id')
-                    ->from('karyawan')
-                    ->whereNotNull('user_id');
-            })
-            ->get(['id', 'name', 'divisi_id', 'role']);
+        return view('general_manajer.data_karyawan', compact('karyawan'));
 
-        // Tampilkan ke view dengan data yang sudah dipaginasi
-        return view('general_manajer.data_karyawan', compact('karyawan', 'users'));
+    } catch (\Exception $e) {
+        \Log::error('Karyawan general error:', ['error' => $e->getMessage()]);
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengambil data.');
     }
+}
 
     public function karyawanFinance(Request $request)
     {
-        // Mulai dengan query builder untuk model Karyawan
-        $query = Karyawan::query();
+        try {
+            $query = Karyawan::query();
 
-        // Jika ada input pencarian di URL (misal: ?search=John)
-        if ($request->has('search')) {
-            $searchTerm = $request->get('search');
-            // Cari di kolom 'nama', 'jabatan', dan 'alamat'
-            $query->where('nama', 'LIKE', "%{$searchTerm}%")
-                ->orWhere('jabatan', 'LIKE', "%{$searchTerm}%")
-                ->orWhere('alamat', 'LIKE', "%{$searchTerm}%");
+            if ($request->has('search')) {
+                $searchTerm = $request->get('search');
+                $query->where('nama', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('role', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('alamat', 'LIKE', "%{$searchTerm}%");
+            }
+
+            $karyawans = $query->paginate(10);
+
+            $users = User::with(['divisi' => function ($query) {
+                $query->select('id', 'divisi');
+            }])
+                ->whereNotIn('id', function ($query) {
+                    $query->select('user_id')
+                        ->from('karyawan')
+                        ->whereNotNull('user_id');
+                })
+                ->get(['id', 'name', 'divisi_id', 'role']);
+
+            $karyawanJson = $karyawans->getCollection()->map(function ($k) {
+                return [
+                    'id' => $k->id,
+                    'nama' => $k->nama,
+                    'email' => $k->email,
+                    'role' => $k->role,
+                    'divisi' => $k->divisi,
+                    'gaji' => $k->gaji,
+                    'alamat' => $k->alamat,
+                    'kontak' => $k->kontak,
+                    'foto' => $k->foto ? asset('storage/' . $k->foto) : ''
+                ];
+            });
+
+            return view('finance.daftar_karyawan', compact('karyawans', 'users', 'karyawanJson'));
+
+        } catch (\Exception $e) {
+            \Log::error('Karyawan finance error:', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengambil data.');
         }
-
-        // Ambil data dengan paginasi (10 data per halaman)
-        $karyawans = $query->paginate(10);
-
-        // AMBIL DATA USERS YANG BELUM MENJADI KARYAWAN DENGAN EAGER LOADING DIVISI
-        $users = User::with(['divisi' => function ($query) {
-            $query->select('id', 'divisi');
-        }])
-            ->whereNotIn('id', function ($query) {
-                $query->select('user_id')
-                    ->from('karyawan')
-                    ->whereNotNull('user_id');
-            })
-            ->get(['id', 'name', 'divisi_id', 'role']);
-
-        $karyawanJson = $karyawans->getCollection()->map(function ($k) {
-            return [
-                'id' => $k->id,
-                'nama' => $k->nama,
-                'email' => $k->email,
-                'jabatan' => $k->jabatan,
-                'divisi' => $k->divisi,
-                'gaji' => $k->gaji,
-                'alamat' => $k->alamat,
-                'kontak' => $k->kontak,
-                'foto' => $k->foto ? asset('storage/' . $k->foto) : ''
-            ];
-        });
-
-        // Tampilkan ke view dengan data yang sudah dipaginasi
-        return view('finance.daftar_karyawan', compact('karyawans', 'users', 'karyawanJson'));
     }
 
-    public function karyawanDivisi(Request $request)
-    {
-        // Dapatkan user yang sedang login
+public function karyawanDivisi(Request $request)
+{
+    try {
         $user = auth::user();
 
-        // Cek apakah user adalah manager divisi
         if ($user->role !== 'manager_divisi') {
             abort(403, 'Unauthorized');
         }
 
-        // Dapatkan divisi manager dari relationship
-        $divisiManager = $user->divisi; // Ini menggunakan relationship divisi()
+        $divisiManager = $user->divisi;
 
-        // Query karyawan berdasarkan divisi manager
         $query = Karyawan::query();
 
-        // Filter berdasarkan divisi yang sama dengan manager
+        // Filter berdasarkan divisi manager
         if ($divisiManager) {
-            // $divisiManager adalah object Divisi, ambil nama divisinya
             $query->where('divisi', $divisiManager->divisi);
         }
 
-        // Search filter jika ada
+        // Search filter untuk semua field baru
         if ($request->has('search')) {
             $searchTerm = $request->get('search');
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('nama', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('jabatan', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('role', 'LIKE', "%{$searchTerm}%")
                     ->orWhere('email', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('alamat', 'LIKE', "%{$searchTerm}%");
+                    ->orWhere('divisi', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('alamat', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('kontak', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('status_kerja', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('status_karyawan', 'LIKE', "%{$searchTerm}%");
             });
         }
 
-        // Ambil data karyawan
+        // ORDER BY nama secara ascending
         $karyawan = $query->orderBy('nama', 'asc')->get();
 
-        // Ambil users yang belum menjadi karyawan DAN sama divisinya dengan manager
-        $usersQuery = User::where('role', 'karyawan') // Hanya karyawan
+        // Ambil users yang belum menjadi karyawan untuk modal (jika dibutuhkan)
+        $usersQuery = User::where('role', 'karyawan')
             ->whereNotIn('id', function ($query) {
                 $query->select('user_id')
                     ->from('karyawan')
                     ->whereNotNull('user_id');
             });
 
-        // Filter users berdasarkan divisi yang sama
         if ($divisiManager) {
             $usersQuery->where('divisi_id', $divisiManager->id);
         }
@@ -185,249 +194,255 @@ class AdminKaryawanController extends Controller
         $users = $usersQuery->orderBy('name', 'asc')
             ->get(['id', 'name', 'email', 'divisi_id']);
 
-        // Kirim nama divisi ke view
         $namaDivisiManager = $divisiManager ? $divisiManager->divisi : 'Tidak ada divisi';
 
         return view('manager_divisi.daftar_karyawan', compact('karyawan', 'users', 'namaDivisiManager'));
+
+    } catch (\Exception $e) {
+        \Log::error('Karyawan divisi error:', ['error' => $e->getMessage()]);
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengambil data.');
     }
+}
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'user_id' => 'required|exists:users,id|unique:karyawan,user_id',
-                'nama'    => 'required|string|max:255',
-                'email'   => 'required|email|max:255',
-                'jabatan' => 'nullable|string|max:100',
-                'divisi'  => 'nullable|string|max:100',
-                'gaji'    => 'nullable|string|max:100',
-                'alamat'  => 'required|string',
-                'kontak'  => 'required|string|max:20',
-                'foto'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            ]);
+public function store(Request $request)
+{
+    try {
+        $userRole = auth()->user()->role;
+        
+        // Aturan validasi dasar
+        $validationRules = [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+            'role' => 'required|in:owner,admin,general_manager,manager_divisi,finance,karyawan',
+            'divisi_id' => 'nullable|exists:divisi,id',
+            'alamat' => 'required|string',
+            'kontak' => 'required|string|max:20',
+            'status_kerja' => 'required|in:aktif,resign,phk',
+            'status_karyawan' => 'required|in:tetap,kontrak,freelance',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+        ];
 
-            // Ambil data user untuk verifikasi
-            $user = User::with('divisi')->findOrFail($validated['user_id']);
-
-            // Verifikasi bahwa nama dan email sesuai dengan user yang dipilih
-            if ($user->name !== $validated['nama']) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Nama tidak sesuai dengan user yang dipilih'
-                ], 400);
-            }
-
-            if ($user->email !== $validated['email']) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Email tidak sesuai dengan user yang dipilih'
-                ], 400);
-            }
-
-            // Cek apakah user sudah menjadi karyawan
-            $existingKaryawan = Karyawan::where('user_id', $user->id)->first();
-            if ($existingKaryawan) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'User ini sudah terdaftar sebagai karyawan'
-                ], 400);
-            }
-
-            // Buat data karyawan
-            $karyawanData = [
-                'user_id' => $user->id,
-                'nama'    => $validated['nama'],
-                'email'   => $validated['email'],
-                'jabatan' => $validated['jabatan'] ?: $user->role, // Jika jabatan kosong, ambil dari role
-                'divisi'  => $validated['divisi'] ?: ($user->divisi ? $user->divisi->divisi : ''),
-                'gaji'    => $validated['gaji'] ?? null,
-                'alamat'  => $validated['alamat'],
-                'kontak'  => $validated['kontak'],
-            ];
-
-            // Handle upload foto
-            if ($request->hasFile('foto')) {
-                $foto = $request->file('foto');
-                $nama_foto = time() . '_' . $foto->getClientOriginalName();
-                $foto->move(public_path('karyawan'), $nama_foto);
-                $karyawanData['foto'] = $nama_foto;
-            }
-
-            // Simpan karyawan
-            $karyawan = Karyawan::create($karyawanData);
-
-            if ($user->divisi_id === null && $karyawan->divisi) {
-                $divisi = Divisi::where('divisi', $karyawan->divisi)->first();
-                if ($divisi) {
-                    $user->divisi_id = $divisi->id;
-                    $user->save();
-                }
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Karyawan berhasil ditambahkan',
-                'data' => $karyawan
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors'  => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            \Log::error('Store karyawan error:', ['error' => $e->getMessage()]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+        // Hanya finance dan admin yang bisa mengisi gaji
+        if ($userRole === 'finance' || $userRole === 'admin') {
+            $validationRules['gaji'] = 'nullable|numeric';
+        } else {
+            // Untuk non-finance, set gaji ke null
+            $request->merge(['gaji' => null]);
         }
-    }
 
-/**
- * Update the specified resource in storage.
- */
+        $validated = $request->validate($validationRules);
+
+        DB::beginTransaction();
+
+        // 1. Buat user baru
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => $validated['role'],
+            'divisi_id' => $validated['divisi_id'],
+            'status_kerja' => $validated['status_kerja'],
+            'status_karyawan' => $validated['status_karyawan'],
+            'alamat' => $validated['alamat'],
+            'kontak' => $validated['kontak'],
+            'gaji' => $validated['gaji'] ?? null, // Gunakan null jika tidak diisi
+            'sisa_cuti' => 12
+        ]);
+
+        // 2. Simpan foto user jika ada
+        if ($request->hasFile('foto')) {
+            $path = $request->file('foto')->store('users', 'public');
+            $user->foto = $path;
+            $user->save();
+        }
+
+        // 3. Buat record karyawan
+        $divisi = Divisi::find($validated['divisi_id']);
+        
+        $karyawan = Karyawan::create([
+            'user_id' => $user->id,
+            'nama' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'divisi' => $divisi ? $divisi->divisi : '',
+            'gaji' => $validated['gaji'] ?? null, // Gunakan null jika tidak diisi
+            'alamat' => $validated['alamat'],
+            'kontak' => $validated['kontak'],
+            'status_kerja' => $validated['status_kerja'],
+            'status_karyawan' => $validated['status_karyawan'],
+            'foto' => $user->foto
+        ]);
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Karyawan berhasil ditambahkan',
+            'data' => $karyawan
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Validasi gagal',
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Store karyawan error:', ['error' => $e->getMessage()]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+    /**
+     * Update the specified resource in storage.
+     */
 public function update(Request $request, $id)
 {
     try {
-        $karyawan = Karyawan::with('user.divisi')->findOrFail($id);
+        // Validasi ID
+        if (!is_numeric($id) || $id <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ID karyawan tidak valid'
+            ], 400);
+        }
+        
+        // Cari karyawan
+        $karyawan = Karyawan::find($id);
+        
+        if (!$karyawan) {
+            \Log::warning('Karyawan not found for update', ['id' => $id]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Karyawan dengan ID ' . $id . ' tidak ditemukan'
+            ], 404);
+        }
 
-        // Validasi data
-        $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'jabatan' => 'required|string|max:255',
-            'divisi' => 'nullable|string|max:255',
-            'gaji' => 'nullable|string|max:100',
+        $userRole = auth()->user()->role;
+        
+        // Aturan validasi dasar
+        $validationRules = [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $karyawan->user_id,
+            'role' => 'required|in:owner,admin,general_manager,manager_divisi,finance,karyawan',
+            'divisi_id' => 'nullable|exists:divisi,id',
             'alamat' => 'required|string',
-            'kontak' => 'required|string|max:255',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
+            'kontak' => 'required|string|max:20',
+            'status_kerja' => 'required|in:aktif,resign,phk',
+            'status_karyawan' => 'required|in:tetap,kontrak,freelance',
+            'password' => 'nullable|min:6',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+        ];
 
-        \Log::info('Validation passed', ['validated' => $validated]);
+        // Hanya finance dan admin yang bisa mengubah gaji
+        if ($userRole === 'finance' || $userRole === 'admin') {
+            $validationRules['gaji'] = 'nullable|numeric';
+        } else {
+            // Untuk non-finance, tetap gunakan gaji yang lama
+            $request->merge(['gaji' => $karyawan->gaji]);
+        }
+
+        $validated = $request->validate($validationRules);
+
         DB::beginTransaction();
 
-        // Update data karyawan
-        $karyawan->nama = $validated['nama'];
-        $karyawan->email = $validated['email'];
-        $karyawan->jabatan = $validated['jabatan'];
-        $karyawan->divisi = $validated['divisi'] ?? null;
-        $karyawan->alamat = $validated['alamat'];
-        $karyawan->kontak = $validated['kontak'];
+        // Update data user
+        $user = User::find($karyawan->user_id);
         
-        // PERBAIKAN DI SINI: Hanya update gaji jika user adalah finance
-        $user = auth()->user();
+        if (!$user) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'User terkait tidak ditemukan'
+            ], 404);
+        }
         
-        if ($user && $user->role === 'finance') {
-            // Hanya finance yang bisa update gaji
-            if (isset($validated['gaji']) && $validated['gaji'] !== 'Belum diatur') {
-                $karyawan->gaji = $validated['gaji'];
-            }
-        } else {
-            // Untuk non-finance (admin), jangan update gaji
-            // Tetap gunakan nilai gaji yang sudah ada
-            \Log::info('Non-finance user attempted to update gaji, keeping existing value');
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->role = $validated['role'];
+        $user->divisi_id = $validated['divisi_id'];
+        $user->alamat = $validated['alamat'];
+        $user->kontak = $validated['kontak'];
+        $user->status_kerja = $validated['status_kerja'];
+        $user->status_karyawan = $validated['status_karyawan'];
+
+        // Hanya update gaji jika user adalah finance/admin
+        if ($userRole === 'finance' || $userRole === 'admin') {
+            $user->gaji = $validated['gaji'] ?? $user->gaji;
         }
 
-        // Jika ada upload foto baru
+        if (!empty($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+
         if ($request->hasFile('foto')) {
-            \Log::info('Foto uploaded', ['filename' => $request->file('foto')->getClientOriginalName()]);
-            
-            // Hapus foto lama dari folder public/karyawan
-            if ($karyawan->foto && file_exists(public_path('karyawan/' . $karyawan->foto))) {
-                unlink(public_path('karyawan/' . $karyawan->foto));
+            if ($user->foto) {
+                Storage::delete('public/' . $user->foto);
             }
-
-            // Upload foto baru
-            $file = $request->file('foto');
-            $fotoName = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('karyawan'), $fotoName);
-            $karyawan->foto = $fotoName;
+            
+            $path = $request->file('foto')->store('users', 'public');
+            $user->foto = $path;
         }
 
-        $karyawan->save();
+        $user->save();
 
-        // **SINKRONKAN KE USER JIKA ADA RELASI**
-        if ($karyawan->user_id && $karyawan->user) {
-            $user = $karyawan->user;
-            $userUpdated = false;
-            
-            // Update nama user
-            if ($user->name !== $karyawan->nama) {
-                $user->name = $karyawan->nama;
-                $userUpdated = true;
-            }
-            
-            // Update email user
-            if ($user->email !== $karyawan->email) {
-                $user->email = $karyawan->email;
-                $userUpdated = true;
-            }
-            
-            // **PERBAIKAN: Update divisi_id di user berdasarkan divisi string di karyawan**
-            if ($karyawan->divisi) {
-                $divisi = Divisi::where('divisi', $karyawan->divisi)->first();
-                if ($divisi) {
-                    if ($user->divisi_id !== $divisi->id) {
-                        $user->divisi_id = $divisi->id;
-                        $userUpdated = true;
-                    }
-                } else {
-                    // Jika divisi tidak ditemukan, set ke null
-                    if ($user->divisi_id !== null) {
-                        $user->divisi_id = null;
-                        $userUpdated = true;
-                    }
-                }
-            } else {
-                // Jika divisi kosong di karyawan
-                if ($user->divisi_id !== null) {
-                    $user->divisi_id = null;
-                    $userUpdated = true;
-                }
-            }
-            
-            if ($userUpdated) {
-                $user->save();
-                \Log::info('User updated from karyawan sync', [
-                    'user_id' => $user->id,
-                    'karyawan_id' => $karyawan->id,
-                    'changes' => [
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'divisi_id' => $user->divisi_id
-                    ]
-                ]);
-            }
+        // Update data karyawan
+        $divisi = Divisi::find($validated['divisi_id']);
+        
+        $karyawan->update([
+            'nama' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'divisi' => $divisi ? $divisi->divisi : '',
+            'alamat' => $validated['alamat'],
+            'kontak' => $validated['kontak'],
+            'status_kerja' => $validated['status_kerja'],
+            'status_karyawan' => $validated['status_karyawan'],
+            'foto' => $user->foto
+        ]);
+
+        // Hanya update gaji karyawan jika user adalah finance/admin
+        if ($userRole === 'finance' || $userRole === 'admin') {
+            $karyawan->update([
+                'gaji' => $validated['gaji'] ?? $karyawan->gaji
+            ]);
         }
 
         DB::commit();
 
         return response()->json([
-            'success' => true, 
-            'message' => 'Data Karyawan dan User Berhasil Diupdate!',
-            'data' => $karyawan->load('user')
+            'success' => true,
+            'message' => 'Data karyawan berhasil diperbarui',
+            'data' => $karyawan
         ]);
+
     } catch (\Illuminate\Validation\ValidationException $e) {
-        \Log::error('Validation error in update:', ['errors' => $e->errors()]);
+        DB::rollBack();
         return response()->json([
-            'success' => false, 
+            'success' => false,
             'message' => 'Validasi gagal',
             'errors' => $e->errors()
         ], 422);
     } catch (\Exception $e) {
+        DB::rollBack();
         \Log::error('Update karyawan error:', [
             'error' => $e->getMessage(),
+            'id' => $id,
             'trace' => $e->getTraceAsString()
         ]);
-        DB::rollBack();
-        \Log::error('Update karyawan error:', ['error' => $e->getMessage()]);
         return response()->json([
-            'success' => false, 
-            'message' => 'Gagal mengupdate data: ' . $e->getMessage()
+            'success' => false,
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
         ], 500);
     }
 }
@@ -435,23 +450,61 @@ public function update(Request $request, $id)
     /**
      * Remove the specified resource from storage.
      */
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         try {
-            $karyawan = Karyawan::findOrFail($id);
+            // Validasi ID
+            if (!is_numeric($id) || $id <= 0) {
+                if (request()->expectsJson() || request()->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'ID karyawan tidak valid'
+                    ], 400);
+                }
+                return redirect()->back()->with('error', 'ID karyawan tidak valid');
+            }
+            
+            DB::beginTransaction();
 
-            // hapus foto
-            if ($karyawan->foto && file_exists(public_path('karyawan/' . $karyawan->foto))) {
-                unlink(public_path('karyawan/' . $karyawan->foto));
+            $karyawan = Karyawan::find($id);
+            
+            if (!$karyawan) {
+                DB::rollBack();
+                if (request()->expectsJson() || request()->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Karyawan dengan ID ' . $id . ' tidak ditemukan'
+                    ], 404);
+                }
+                return redirect()->back()->with('error', 'Karyawan tidak ditemukan');
+            }
+            
+            // Hapus user terkait jika ada
+            if ($karyawan->user) {
+                // Hapus foto user jika ada
+                if ($karyawan->user->foto) {
+                    Storage::delete('public/' . $karyawan->user->foto);
+                }
+                $karyawan->user->delete();
+            }
+
+            // Hapus foto karyawan jika ada
+            if ($karyawan->foto) {
+                // Periksa apakah file ada di storage karyawan
+                if (Storage::exists('karyawan/' . $karyawan->foto)) {
+                    Storage::delete('karyawan/' . $karyawan->foto);
+                }
+                // Juga periksa di public path
+                if (file_exists(public_path('karyawan/' . $karyawan->foto))) {
+                    unlink(public_path('karyawan/' . $karyawan->foto));
+                }
             }
 
             $karyawanName = $karyawan->nama;
             $karyawan->delete();
 
-            // Support AJAX request
+            DB::commit();
+
             if (request()->expectsJson() || request()->ajax()) {
                 return response()->json([
                     'success' => true,
@@ -459,12 +512,17 @@ public function update(Request $request, $id)
                 ]);
             }
 
-            // Support form submission
             return redirect()
                 ->route('admin.karyawan')
                 ->with('success', "Data karyawan '{$karyawanName}' berhasil dihapus");
+
         } catch (\Exception $e) {
-            \Log::error('Delete karyawan error:', ['error' => $e->getMessage(), 'id' => $id]);
+            DB::rollBack();
+            \Log::error('Delete karyawan error:', [
+                'error' => $e->getMessage(),
+                'id' => $id,
+                'trace' => $e->getTraceAsString()
+            ]);
 
             if (request()->expectsJson() || request()->ajax()) {
                 return response()->json([
@@ -479,9 +537,67 @@ public function update(Request $request, $id)
         }
     }
 
+    public function getKaryawanData($id)
+    {
+        try {
+            // Validasi ID
+            if (!is_numeric($id) || $id <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'ID karyawan tidak valid'
+                ], 400);
+            }
+            
+            $karyawan = Karyawan::with('user.divisi')->find($id);
+            
+            if (!$karyawan) {
+                \Log::warning('Karyawan not found for get data', ['id' => $id]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Karyawan dengan ID ' . $id . ' tidak ditemukan'
+                ], 404);
+            }
+            
+            if (!$karyawan->user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User tidak ditemukan untuk karyawan ini'
+                ], 404);
+            }
+
+            $data = [
+                'id' => $karyawan->id,
+                'user_id' => $karyawan->user->id,
+                'name' => $karyawan->user->name,
+                'email' => $karyawan->user->email,
+                'role' => $karyawan->user->role,
+                'divisi_id' => $karyawan->user->divisi_id,
+                'gaji' => $karyawan->user->gaji,
+                'alamat' => $karyawan->user->alamat,
+                'kontak' => $karyawan->user->kontak,
+                'status_kerja' => $karyawan->user->status_kerja,
+                'status_karyawan' => $karyawan->user->status_karyawan,
+                'foto' => $karyawan->user->foto ? asset('storage/' . $karyawan->user->foto) : null
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Get karyawan data error:', [
+                'error' => $e->getMessage(),
+                'id' => $id
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Method untuk mendapatkan nama divisi dari user
-     * Bisa dipakai di blade atau API
      */
     public function getDivisiName($divisi_id)
     {
@@ -492,10 +608,26 @@ public function update(Request $request, $id)
         $divisi = Divisi::find($divisi_id);
         return $divisi ? $divisi->divisi : '';
     }
+
     public function getUserData($id)
     {
         try {
-            $karyawan = Karyawan::with('user.divisi')->findOrFail($id);
+            // Validasi ID
+            if (!is_numeric($id) || $id <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'ID karyawan tidak valid'
+                ], 400);
+            }
+            
+            $karyawan = Karyawan::with('user.divisi')->find($id);
+            
+            if (!$karyawan) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Karyawan dengan ID ' . $id . ' tidak ditemukan'
+                ], 404);
+            }
 
             $userData = null;
             if ($karyawan->user) {
@@ -514,10 +646,39 @@ public function update(Request $request, $id)
                 'data' => $userData
             ]);
         } catch (\Exception $e) {
+            \Log::error('Get user data error:', [
+                'error' => $e->getMessage(),
+                'id' => $id
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
             ], 500);
+        }
+    }
+    
+    /**
+     * Menampilkan detail karyawan berdasarkan ID
+     */
+    public function show($id)
+    {
+        try {
+            // Validasi ID
+            if (!is_numeric($id) || $id <= 0) {
+                abort(400, 'ID karyawan tidak valid');
+            }
+            
+            $karyawan = Karyawan::with('user.divisi')->find($id);
+            
+            if (!$karyawan) {
+                abort(404, 'Karyawan tidak ditemukan');
+            }
+            
+            return view('admin.detail_karyawan', compact('karyawan'));
+            
+        } catch (\Exception $e) {
+            \Log::error('Show karyawan error:', ['error' => $e->getMessage(), 'id' => $id]);
+            abort(500, 'Terjadi kesalahan saat mengambil data karyawan');
         }
     }
 }

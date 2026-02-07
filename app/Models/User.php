@@ -29,7 +29,14 @@ class User extends Authenticatable
         'password',
         'role',
         'divisi_id',
-        'sisa_cuti',
+        'gaji',
+        'alamat',
+        'kontak',
+        'status_kerja',
+        'status_karyawan',
+        'foto',
+        'email_verified_at',
+        'sisa_cuti'
     ];
 
     /**
@@ -50,6 +57,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'gaji' => 'decimal:2'
     ];
 
     // ============================================
@@ -228,8 +236,8 @@ class User extends Authenticatable
                 $karyawan->divisi = $this->divisi->divisi;
             }
             
-            if (!$karyawan->jabatan || $karyawan->jabatan === '') {
-                $karyawan->jabatan = $this->role;
+            if (!$karyawan->role || $karyawan->role === '') {
+                $karyawan->role = $this->role;
             }
             
             $karyawan->save();

@@ -145,8 +145,11 @@
                             <span class="material-icons-outlined text-green-600 text-xl">check_circle</span>
                         </div>
                         <div>
-                            <p class="text-xs md:text-sm text-gray-500">Total Kehadiran</p>
-                            <p class="text-xl font-bold text-green-600">{{ $stats['total_tepat_waktu'] ?? 0 }}</p>
+                            <p class="text-xs md:text-sm text-gray-500 mb-1">Total Kehadiran</p>
+                            <p class="text-xl md:text-2xl font-bold text-green-600" id="totalKehadiran">0</p>
+                        </div>
+                        <div class="icon-container bg-green-100">
+                            <span class="material-icons-outlined text-green-600 text-xl">check_circle</span>
                         </div>
                     </div>
                 </div>
@@ -158,8 +161,11 @@
                             <span class="material-icons-outlined text-red-600 text-xl">cancel</span>
                         </div>
                         <div>
-                            <p class="text-xs md:text-sm text-gray-500">Tidak Hadir</p>
-                            <p class="text-xl md:text-2xl font-bold text-red-600">{{ $stats['total_tidak_masuk'] ?? 0 }}</p>
+                            <p class="text-xs md:text-sm text-gray-500 mb-1">Tidak Hadir</p>
+                            <p class="text-xl md:text-2xl font-bold text-red-600" id="totalTidakHadir">0</p>
+                        </div>
+                        <div class="icon-container bg-red-100">
+                            <span class="material-icons-outlined text-red-600 text-xl">cancel</span>
                         </div>
                     </div>
                 </div>
@@ -171,8 +177,11 @@
                             <span class="material-icons-outlined text-blue-600 text-xl">error</span>
                         </div>
                         <div>
-                            <p class="text-xs md:text-sm text-gray-500">Izin</p>
-                            <p class="text-xl md:text-2xl font-bold text-blue-600">{{ $stats['total_izin'] ?? 0 }}</p>
+                            <p class="text-xs md:text-sm text-gray-500 mb-1">Izin</p>
+                            <p class="text-xl md:text-2xl font-bold text-blue-600" id="totalIzin">0</p>
+                        </div>
+                        <div class="icon-container bg-blue-100">
+                            <span class="material-icons-outlined text-blue-600 text-xl">error</span>
                         </div>
                     </div>
                 </div>
@@ -184,8 +193,11 @@
                             <span class="material-icons-outlined text-yellow-600 text-xl">event_busy</span>
                         </div>
                         <div>
-                            <p class="text-xs md:text-sm text-gray-500">Cuti</p>
-                            <p class="text-xl md:text-2xl font-bold text-yellow-600">{{ $stats['total_cuti'] ?? 0 }}</p>
+                            <p class="text-xs md:text-sm text-gray-500 mb-1">Cuti</p>
+                            <p class="text-xl md:text-2xl font-bold text-yellow-600" id="totalCuti">0</p>
+                        </div>
+                        <div class="icon-container bg-yellow-100">
+                            <span class="material-icons-outlined text-yellow-600 text-xl">event_busy</span>
                         </div>
                     </div>
                 </div>
@@ -197,8 +209,11 @@
                             <span class="material-icons-outlined text-orange-600 text-xl">healing</span>
                         </div>
                         <div>
-                            <p class="text-xs md:text-sm text-gray-500">Sakit</p>
-                            <p class="text-xl md:text-2xl font-bold text-orange-600">{{ $stats['total_sakit'] ?? 0 }}</p>
+                            <p class="text-xs md:text-sm text-gray-500 mb-1">Sakit</p>
+                            <p class="text-xl md:text-2xl font-bold text-orange-600" id="totalSakit">0</p>
+                        </div>
+                        <div class="icon-container bg-orange-100">
+                            <span class="material-icons-outlined text-orange-600 text-xl">healing</span>
                         </div>
                     </div>
                 </div>
@@ -687,9 +702,57 @@
             const ketidakhadiranRows = document.querySelectorAll('.ketidakhadiran-row');
             const ketidakhadiranCards = document.querySelectorAll('.ketidakhadiran-card');
 
+            // Hitung statistik dari data yang ada
+            calculateStatistics();
             initializePagination();
             initializeFilter();
             initializeSearch();
+
+            function calculateStatistics() {
+                let totalKehadiran = 0;
+                let totalTidakHadir = 0;
+                let totalIzin = 0;
+                let totalCuti = 0;
+                let totalSakit = 0;
+
+                // Hitung dari data absensi
+                absensiRows.forEach(row => {
+                    const status = row.getAttribute('data-status')?.toLowerCase() || '';
+                    // Hitung hadir dan terlambat sebagai kehadiran
+                    if (status.includes('tepat waktu') || status.includes('hadir') || status.includes('terlambat')) {
+                        totalKehadiran++;
+                    } else if (status.includes('tidak hadir')) {
+                        totalTidakHadir++;
+                    } else if (status.includes('izin')) {
+                        totalIzin++;
+                    } else if (status.includes('cuti')) {
+                        totalCuti++;
+                    } else if (status.includes('sakit')) {
+                        totalSakit++;
+                    }
+                });
+
+                // Hitung dari data ketidakhadiran
+                ketidakhadiranRows.forEach(row => {
+                    const alasan = row.querySelector('td:nth-child(5)')?.textContent?.toLowerCase() || '';
+                    if (alasan.includes('izin')) {
+                        totalIzin++;
+                    } else if (alasan.includes('cuti')) {
+                        totalCuti++;
+                    } else if (alasan.includes('sakit')) {
+                        totalSakit++;
+                    } else if (alasan.includes('tidak masuk')) {
+                        totalTidakHadir++;
+                    }
+                });
+
+                // Update tampilan statistik
+                document.getElementById('totalKehadiran').textContent = totalKehadiran;
+                document.getElementById('totalTidakHadir').textContent = totalTidakHadir;
+                document.getElementById('totalIzin').textContent = totalIzin;
+                document.getElementById('totalCuti').textContent = totalCuti;
+                document.getElementById('totalSakit').textContent = totalSakit;
+            }
 
             function showNotification(message, type = 'success') {
                 const container = document.getElementById('notificationContainer');

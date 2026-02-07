@@ -486,21 +486,21 @@
 
                     <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Data Project - Penetapan Penanggung Jawab</h2>
                     
-                    <!-- Search Section (HAPUS TOMBOL TAMBAH) -->
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                        <div class="relative w-full md:w-1/3">
-                            <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                            <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input" placeholder="Cari nama project, penanggung jawab..." type="text" />
-                        </div>
-                        <!-- HAPUS TOMBOL TAMBAH -->
-                        <!-- <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                            <button id="tambahProjectBtn" class="px-4 py-2 btn-primary rounded-lg flex items-center gap-2 flex-1 md:flex-none">
-                                <span class="material-icons-outlined">add</span>
-                                <span class="hidden sm:inline">Tambah Project</span>
-                                <span class="sm:hidden">Tambah</span>
-                            </button>
-                        </div> -->
-                    </div>
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <form method="GET" action="{{ route('general_manajer.data_project') }}" class="relative w-full md:w-1/3">
+        <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            search
+        </span>
+        <input
+            id="searchInput"
+            name="search"
+            value="{{ request('search') }}"
+            class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input"
+            placeholder="Cari nama project, penanggung jawab..."
+            type="text"
+        />
+    </form>
+</div>
                     
                     <!-- Data Table Panel -->
                     <div class="panel">
@@ -563,7 +563,7 @@
                                                                 </div>
                                                                 <div>
                                                                     <div class="font-medium text-sm">{{ $item->penanggungJawab->name }}</div>
-                                                                    <div class="text-xs text-gray-500">{{ $item->penanggungJawab->divisi ?? '-' }}</div>
+                                                                    <div class="text-xs text-gray-500">{{ $item->penanggungJawab->divisi_id ?? '-' }}</div>
                                                                 </div>
                                                             </div>
                                                         @else
@@ -657,23 +657,29 @@
                     </div>
                     
                     <!-- Field untuk mengubah penanggung jawab -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Penanggung Jawab (Manager Divisi) *</label>
-                        <select name="penanggung_jawab_id" id="editPenanggungJawab" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required>
-                            <option value="">Pilih Manager Divisi</option>
-                            @foreach($managers as $manager)
-                                <option value="{{ $manager->id }}">
-                                    {{ $manager->name }} 
-                                    @if($manager->divisi)
-                                        - {{ $manager->divisi }}
-                                    @endif
-                                    ({{ $manager->email }})
-                                </option>
-                            @endforeach
-                        </select>
-                        <p class="text-xs text-gray-500 mt-1">Project akan masuk ke dashboard manager divisi yang dipilih</p>
-                    </div>
+<select name="penanggung_jawab_id" id="editPenanggungJawab" 
+    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required>
+    <option value="">Pilih Manager Divisi</option>
+    @foreach($managers as $manager)
+        @php
+            // Gunakan data() untuk akses aman
+            $id = data_get($manager, 'id', '');
+            $name = data_get($manager, 'name', 'Nama tidak tersedia');
+            $email = data_get($manager, 'email', 'Email tidak tersedia');
+            $divisi_id = data_get($manager, 'divisi_id', '');
+        @endphp
+        
+        @if($id && $name)
+            <option value="{{ $id }}">
+                {{ $name }} 
+                @if($divisi_id)
+                    - Divisi {{ $divisi_id }}
+                @endif
+                ({{ $email }})
+            </option>
+        @endif
+    @endforeach
+</select>
                     
                     <!-- Fields hidden lainnya (tetap dikirim tapi tidak bisa diubah) -->
                     <input type="hidden" name="deskripsi" id="editDeskripsi">

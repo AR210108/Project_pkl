@@ -266,12 +266,13 @@
         }
 
         .input-readonly {
-        background-color: #f3f4f6 !important;
-        color: #6b7280 !important;
-        cursor: not-allowed !important;
-        border-color: #d1d5db !important;
+            background-color: #f3f4f6 !important;
+            color: #6b7280 !important;
+            cursor: not-allowed !important;
+            border-color: #d1d5db !important;
+            opacity: 0.7;
         }
-        
+
         /* Pagination styles */
         .page-btn {
             transition: all 0.2s ease;
@@ -692,8 +693,39 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Gaji field disabled style */
+        .gaji-disabled {
+            position: relative;
+        }
+        
+        .gaji-disabled .lock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(249, 250, 251, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .gaji-disabled .lock-overlay .material-icons-outlined {
+            font-size: 18px;
+            margin-right: 6px;
         }
     </style>
     <!-- Add CSRF token meta tag -->
@@ -712,10 +744,11 @@
                 <!-- Search and Filter Section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div class="relative w-full md:w-1/3">
-                        <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                        <span
+                            class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
                         <input id="searchInput"
                             class="w-full pl-10 pr-4 py-2 bg-white border border-border-light rounded-lg focus:ring-2 focus:ring-primary focus:border-primary form-input"
-                            placeholder="Cari nama, jabatan, atau alamat..." type="text" />
+                            placeholder="Cari nama, role, atau alamat..." type="text" />
                     </div>
                     <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <div class="relative">
@@ -727,7 +760,7 @@
                             <div id="filterDropdown" class="filter-dropdown">
                                 <div class="filter-option">
                                     <input type="checkbox" id="filterAll" value="all" checked>
-                                    <label for="filterAll">Semua Jabatan</label>
+                                    <label for="filterAll">Semua Role</label>
                                 </div>
                                 <div class="filter-option">
                                     <input type="checkbox" id="filterManager" value="manager">
@@ -778,9 +811,8 @@
                                             <th style="min-width: 60px;">No</th>
                                             <th style="min-width: 200px;">Nama</th>
                                             <th style="min-width: 200px;">Email</th>
-                                            <th style="min-width: 150px;">Jabatan</th>
+                                            <th style="min-width: 150px;">Role</th>
                                             <th style="min-width: 150px;">Divisi</th>
-                                            <th style="min-width: 150px;">Gaji</th>
                                             <th style="min-width: 250px;">Alamat</th>
                                             <th style="min-width: 150px;">Kontak</th>
                                             <th style="min-width: 100px;">Foto</th>
@@ -789,89 +821,91 @@
                                     </thead>
                                     <tbody id="desktopTableBody">
                                         @if (isset($karyawan) && count($karyawan) > 0)
-                                            @php $no = 1; @endphp
+                                            @php 
+                                                $no = 1; 
+                                                $currentUserRole = auth()->user()->role;
+                                                $isFinance = $currentUserRole === 'finance';
+                                            @endphp
                                             @foreach ($karyawan as $item)
                                                 <tr class="karyawan-row" data-id="{{ $item->id }}"
-                                                    data-nama="{{ $item->nama }}"
-                                                    data-email="{{ $item->email }}"
-                                                    data-jabatan="{{ $item->jabatan }}"
-                                                    data-divisi="{{ $item->divisi }}"
-                                                    data-gaji="{{ $item->gaji ?? 'Belum diatur' }}"
-                                                    data-alamat="{{ $item->alamat }}" 
-                                                    data-kontak="{{ $item->kontak }}"
+                                                    data-nama="{{ $item->nama }}" data-email="{{ $item->email }}"
+                                                    data-role="{{ $item->role }}" data-divisi="{{ $item->divisi }}"
+                                                    data-alamat="{{ $item->alamat }}" data-kontak="{{ $item->kontak }}"
                                                     data-foto="{{ $item->foto ?? '' }}">
                                                     <td style="min-width: 60px;">{{ $no++ }}</td>
                                                     <td style="min-width: 200px;">
                                                         <div class="flex items-center gap-2">
                                                             @if ($item->foto)
-                                                                <img src="{{ asset('karyawan/' . $item->foto) }}" 
+                                                                <img src="{{ asset('karyawan/' . $item->foto) }}"
                                                                     alt="{{ $item->nama }}"
                                                                     class="h-8 w-8 rounded-full object-cover">
                                                             @else
-                                                                <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
-                                                                    <span class="material-icons-outlined text-gray-500 text-sm">person</span>
+                                                                <div
+                                                                    class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
+                                                                    <span
+                                                                        class="material-icons-outlined text-gray-500 text-sm">person</span>
                                                                 </div>
                                                             @endif
                                                             <div>
                                                                 <div class="font-medium">{{ $item->nama }}</div>
-                                                                @if($item->user)
-                                                                    <div class="text-xs text-gray-500">User ID: {{ $item->user->id }}</div>
+                                                                @if ($item->user)
+                                                                    <div class="text-xs text-gray-500">User ID:
+                                                                        {{ $item->user->id }}</div>
                                                                 @endif
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td style="min-width: 200px;">
                                                         <div class="text-sm">{{ $item->email }}</div>
-                                                        @if($item->user)
-                                                            <div class="text-xs text-gray-500">Role: {{ $item->user->role }}</div>
+                                                        @if ($item->user)
+                                                            <div class="text-xs text-gray-500">Role:
+                                                                {{ $item->user->role }}</div>
                                                         @endif
                                                     </td>
                                                     <td style="min-width: 150px;">
-                                                        <span class="status-badge 
-                                                            @if (in_array(strtolower($item->jabatan), ['manager', 'general_manager', 'manager_divisi', 'admin', 'owner'])) status-manager
-                                                            @elseif(strtolower($item->jabatan) == 'staff' || $item->jabatan == 'karyawan') status-staff
-                                                            @elseif(strtolower($item->jabatan) == 'intern' || $item->jabatan == 'magang') status-intern
+                                                        <span
+                                                            class="status-badge 
+                                                            @if (in_array(strtolower($item->role), ['manager', 'general_manager', 'manager_divisi', 'admin', 'owner'])) status-manager
+                                                            @elseif(strtolower($item->role) == 'staff' || $item->role == 'karyawan') status-staff
+                                                            @elseif(strtolower($item->role) == 'intern' || $item->role == 'magang') status-intern
                                                             @else status-staff @endif">
-                                                            {{ $item->jabatan }}
+                                                            {{ $item->role }}
                                                         </span>
                                                     </td>
                                                     <td style="min-width: 150px;">{{ $item->divisi ?? '-' }}</td>
-                                                                    <td style="min-width: 150px;">
-                                                    @if($item->gaji)
-                                                    {{ $item->gaji }}
-                                                    @else
-                                                    <span class="text-gray-500 italic">Belum diatur</span>
-                                                    @endif
-                                                    </td>
                                                     <td style="min-width: 250px;">{{ $item->alamat }}</td>
                                                     <td style="min-width: 150px;">{{ $item->kontak }}</td>
                                                     <td style="min-width: 100px;">
                                                         @if ($item->foto)
-                                                            <img src="{{ asset('karyawan/' . $item->foto) }}" 
+                                                            <img src="{{ asset('karyawan/' . $item->foto) }}"
                                                                 alt="{{ $item->nama }}"
                                                                 class="h-10 w-10 rounded-full object-cover mx-auto">
                                                         @else
-                                                            <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center mx-auto">
-                                                                <span class="material-icons-outlined text-gray-500">person</span>
+                                                            <div
+                                                                class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center mx-auto">
+                                                                <span
+                                                                    class="material-icons-outlined text-gray-500">person</span>
                                                             </div>
                                                         @endif
                                                     </td>
                                                     <td style="min-width: 100px; text-align: center;">
                                                         <div class="flex justify-center gap-2">
-                                                            <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                                    data-id="{{ $item->id }}"
-                                                                    data-nama="{{ $item->nama }}"
-                                                                    data-email="{{ $item->email }}"
-                                                                    data-jabatan="{{ $item->jabatan }}"
-                                                                    data-divisi="{{ $item->divisi }}"
-                                                                    data-alamat="{{ $item->alamat }}"
-                                                                    data-kontak="{{ $item->kontak }}"
-                                                                    data-foto="{{ $item->foto ?? '' }}">
+                                                            <button
+                                                                class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
+                                                                data-id="{{ $item->id }}"
+                                                                data-nama="{{ $item->nama }}"
+                                                                data-email="{{ $item->email }}"
+                                                                data-role="{{ $item->role }}"
+                                                                data-divisi="{{ $item->divisi }}"
+                                                                data-alamat="{{ $item->alamat }}"
+                                                                data-kontak="{{ $item->kontak }}"
+                                                                data-foto="{{ $item->foto ?? '' }}">
                                                                 <span class="material-icons-outlined">edit</span>
                                                             </button>
-                                                            <button class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                                                    data-id="{{ $item->id }}"
-                                                                    data-nama="{{ $item->nama }}">
+                                                            <button
+                                                                class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
+                                                                data-id="{{ $item->id }}"
+                                                                data-nama="{{ $item->nama }}">
                                                                 <span class="material-icons-outlined">delete</span>
                                                             </button>
                                                         </div>
@@ -880,7 +914,8 @@
                                             @endforeach
                                         @else
                                             <tr>
-                                                <td colspan="10" class="px-6 py-4 text-center text-sm text-gray-500">
+                                                <td colspan="10"
+                                                    class="px-6 py-4 text-center text-sm text-gray-500">
                                                     Tidak ada data karyawan
                                                 </td>
                                             </tr>
@@ -893,11 +928,15 @@
                         <!-- Mobile Card View -->
                         <div class="mobile-cards space-y-4" id="mobile-cards">
                             @if (isset($karyawan) && count($karyawan) > 0)
-                                @php $no = 1; @endphp
+                                @php 
+                                    $no = 1; 
+                                    $currentUserRole = auth()->user()->role;
+                                    $isFinance = $currentUserRole === 'finance';
+                                @endphp
                                 @foreach ($karyawan as $item)
                                     <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card"
                                         data-id="{{ $item->id }}" data-nama="{{ $item->nama }}"
-                                        data-jabatan="{{ $item->jabatan }}" data-divisi="{{ $item->divisi }}"
+                                        data-role="{{ $item->role }}" data-divisi="{{ $item->divisi }}"
                                         data-alamat="{{ $item->alamat }}" data-kontak="{{ $item->kontak }}"
                                         data-foto="{{ $item->foto ?? '' }}">
                                         <div class="flex justify-between items-start mb-3">
@@ -921,13 +960,12 @@
                                             <div class="flex gap-2">
                                                 <button
                                                     class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                    data-karyawan='{"id": "{{ $item->id }}", "nama": "{{ $item->nama }}", "jabatan": "{{ $item->jabatan }}", "divisi": "{{ $item->divisi }}", "alamat": "{{ $item->alamat }}", "kontak": "{{ $item->kontak }}", "foto": "{{ $item->foto ?? '' }}" }'>
+                                                    data-karyawan='{"id": "{{ $item->id }}", "nama": "{{ $item->nama }}", "role": "{{ $item->role }}", "divisi": "{{ $item->divisi }}", "alamat": "{{ $item->alamat }}", "kontak": "{{ $item->kontak }}", "foto": "{{ $item->foto ?? '' }}" }'>
                                                     <span class="material-icons-outlined">edit</span>
                                                 </button>
                                                 <button
                                                     class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                                    data-id="{{ $item->id }}"
-                                                    data-nama="{{ $item->nama }}">
+                                                    data-id="{{ $item->id }}" data-nama="{{ $item->nama }}">
                                                     <span class="material-icons-outlined">delete</span>
                                                 </button>
                                             </div>
@@ -938,14 +976,14 @@
                                                 <p class="font-medium">{{ $no++ }}</p>
                                             </div>
                                             <div>
-                                                <p class="text-text-muted-light">Jabatan</p>
+                                                <p class="text-text-muted-light">Role</p>
                                                 <p>
                                                     <span
                                                         class="status-badge 
-                                                            @if (strtolower($item->jabatan) == 'manager') status-manager
-                                                            @elseif(strtolower($item->jabatan) == 'staff') status-staff
+                                                            @if (strtolower($item->role) == 'manager') status-manager
+                                                            @elseif(strtolower($item->role) == 'staff') status-staff
                                                             @else status-intern @endif">
-                                                        {{ $item->jabatan }}
+                                                        {{ $item->role }}
                                                     </span>
                                                 </p>
                                             </div>
@@ -958,6 +996,17 @@
                                                 <p class="font-medium truncate">{{ $item->alamat }}</p>
                                             </div>
                                         </div>
+                                        @if($item->gaji)
+                                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                                <p class="text-text-muted-light">Gaji</p>
+                                                <div class="flex items-center justify-between">
+                                                    <p class="font-medium">{{ $item->gaji }}</p>
+                                                    @if(!$isFinance)
+                                                        <span class="material-icons-outlined text-gray-400 text-sm" title="Hanya finance yang bisa mengedit">lock</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                 @endforeach
                             @else
@@ -1002,75 +1051,90 @@
                 </div>
                 <form id="tambahKaryawanForm" class="space-y-4" enctype="multipart/form-data">
                     @csrf
+                    @php
+                        $currentUserRole = auth()->user()->role;
+                        $isFinance = $currentUserRole === 'finance';
+                    @endphp
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- User Selection -->
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pilih User *</label>
-                            <select name="user_id" id="userSelect" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                                <option value="">Pilih User dari Daftar</option>
-                                @foreach ($users as $user)
-                                    <option value="{{ $user->id }}" 
-                                            data-nama="{{ $user->name }}"
-                                            data-email="{{ $user->email }}"
-                                            data-role="{{ $user->role }}"
-                                            data-divisi="{{ $user->divisi ? $user->divisi->divisi : '' }}">
-                                        {{ $user->name }} 
-                                        ({{ $user->email }} - {{ $user->role }}
-                                        @if($user->divisi)
-                                            - {{ $user->divisi->divisi }}
-                                        @endif
-                                        )
-                                    </option>
-                                @endforeach
-                            </select>
-                            <p class="text-xs text-gray-500 mt-1">Pilih user yang akan dijadikan karyawan</p>
-                        </div>
-
-                        <!-- Nama (auto-filled) -->
+                        <!-- Nama (INPUT TEXT) -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama *</label>
-                            <input type="text" name="nama" id="namaInput" required readonly
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700"
-                                placeholder="Akan terisi otomatis dari user">
+                            <input type="text" name="name" id="namaInput" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="Masukkan nama karyawan">
                         </div>
 
-                        <!-- Email (auto-filled) -->
+                        <!-- Email (INPUT TEXT) -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                            <input type="email" name="email" id="emailInput" required readonly
-                                class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700"
-                                placeholder="Akan terisi otomatis dari user">
-                        </div>
-
-                        <!-- Jabatan (dari role) -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan *</label>
-                            <input type="text" name="jabatan" id="jabatanInput" required
+                            <input type="email" name="email" id="emailInput" required
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Contoh: Staff, Manager">
-                            <p class="text-xs text-gray-500 mt-1">Akan terisi otomatis dari role user</p>
+                                placeholder="Masukkan email">
                         </div>
 
-                        <!-- Divisi (auto-filled tapi bisa diubah) -->
+                        <!-- Password (INPUT PASSWORD) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+                            <input type="password" name="password" id="passwordInput" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="Masukkan password">
+                            <p class="text-xs text-gray-500 mt-1">Minimal 6 karakter</p>
+                        </div>
+
+                        <!-- Role (DROPDOWN) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+                            <select name="role" id="roleSelect" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                                <option value="">Pilih Role</option>
+                                <option value="general_manager">General Manager</option>
+                                <option value="manager_divisi">Manager Divisi</option>
+                                <option value="karyawan">Karyawan</option>
+                                <option value="finance">Finance</option>
+                            </select>
+                        </div>
+
+                        <!-- Divisi (DROPDOWN dari database) -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
-                            <input type="text" name="divisi" id="divisiInput"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                placeholder="Contoh: IT, HRD">
-                            <p class="text-xs text-gray-500 mt-1">Akan terisi otomatis dari divisi user</p>
+                            <select name="divisi_id" id="divisiSelect"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                                <option value="">Pilih Divisi</option>
+                                @if (isset($divisis) && count($divisis) > 0)
+                                    @foreach ($divisis as $divisi)
+                                        <option value="{{ $divisi->id }}">{{ $divisi->divisi }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
                         </div>
 
-                        <!-- Gaji -->
-<div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Gaji</label>
-    <input type="text" name="gaji" id="gajiInput" readonly
-        class="w-full px-3 py-2 bg-gray-200 border border-gray-300 rounded-lg text-gray-500 cursor-not-allowed"
-        placeholder="Hanya finance yang dapat mengisi gaji">
-    <p class="text-xs text-gray-500 mt-1">Silakan hubungi finance untuk pengisian gaji</p>
-</div>
+                        <!-- Gaji (INPUT NUMBER) - Hanya bisa diisi oleh finance -->
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Gaji</label>
+                            <input type="number" name="gaji" id="gajiInput" 
+                                @if(!$isFinance)
+                                    readonly 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary input-readonly"
+                                @else
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                @endif
+                                placeholder="{{ $isFinance ? 'Masukkan gaji' : 'Kosongkan - hanya finance' }}">
+                            @if(!$isFinance)
+                                <div class="lock-overlay">
+                                    <span class="material-icons-outlined">lock</span>
+                                    <span>Hanya finance</span>
+                                </div>
+                            @endif
+                            <p class="text-xs text-gray-500 mt-1">
+                                @if(!$isFinance)
+                                    <span class="text-orange-500 font-medium">⚠️ Gaji hanya dapat diatur oleh finance</span>
+                                @else
+                                    Isi dalam angka tanpa titik/koma
+                                @endif
+                            </p>
+                        </div>
 
-                        <!-- Kontak -->
+                        <!-- Kontak (INPUT TEXT) -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Kontak *</label>
                             <input type="text" name="kontak" id="kontakInput" required
@@ -1078,7 +1142,29 @@
                                 placeholder="Masukkan nomor telepon">
                         </div>
 
-                        <!-- Alamat -->
+                        <!-- Status Kerja (DROPDOWN) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Kerja</label>
+                            <select name="status_kerja" id="statusKerjaSelect"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                                <option value="aktif" selected>Aktif</option>
+                                <option value="resign">Resign</option>
+                                <option value="phk">PHK</option>
+                            </select>
+                        </div>
+
+                        <!-- Status Karyawan (DROPDOWN) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Karyawan</label>
+                            <select name="status_karyawan" id="statusKaryawanSelect"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                                <option value="tetap" selected>Tetap</option>
+                                <option value="kontrak">Kontrak</option>
+                                <option value="freelance">Freelance</option>
+                            </select>
+                        </div>
+
+                        <!-- Alamat (TEXTAREA) -->
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
                             <textarea name="alamat" id="alamatInput" rows="3" required
@@ -1120,68 +1206,100 @@
     </div>
 
     <!-- Popup Modal untuk Edit Karyawan -->
-<!-- Popup Modal untuk Edit Karyawan -->
-<div id="editKaryawanModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Edit Karyawan</h3>
-                <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
-                    <span class="material-icons-outlined">close</span>
-                </button>
-            </div>
-            <form id="editKaryawanForm" class="space-y-4" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-                <input type="hidden" id="editId" name="id">
-                <input type="hidden" id="editUserId" name="user_id">
+    <div id="editKaryawanModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Edit Karyawan</h3>
+                    <button id="closeEditModalBtn" class="text-gray-800 hover:text-gray-500">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
+                </div>
+                <form id="editKaryawanForm" class="space-y-4" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    @php
+                        $currentUserRole = auth()->user()->role;
+                        $isFinance = $currentUserRole === 'finance';
+                    @endphp
+                    <input type="hidden" id="editId" name="id">
+                    <!-- Perhatikan bahwa form update menggunakan user_id, bukan karyawan_id -->
+                    <input type="hidden" id="editUserId" name="user_id">
+                    <!-- Simpan nilai gaji asli untuk validasi -->
+                    <input type="hidden" id="editGajiOriginal" name="gaji_original">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Nama -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
-                        <input type="text" id="editNama" name="nama" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                            placeholder="Masukkan nama karyawan">
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Nama (INPUT TEXT - bisa diedit) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
+                            <input type="text" id="editNama" name="name" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="Masukkan nama karyawan">
+                        </div>
 
-                    <!-- Email -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                        <input type="email" id="editEmail" name="email" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                            placeholder="Masukkan email">
-                    </div>
+                        <!-- Email (INPUT TEXT - bisa diedit) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                            <input type="email" id="editEmail" name="email" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="Masukkan email">
+                        </div>
 
-                    <!-- Jabatan (DISABLED - dari role user) -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan *</label>
-                        <input type="text" id="editJabatan" name="jabatan" required readonly
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 cursor-not-allowed"
-                            placeholder="Diambil dari role user">
-                        <p class="text-xs text-gray-500 mt-1">Jabatan diambil dari role user</p>
-                    </div>
+                        <!-- Role (DROPDOWN - bisa dipilih) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+                            <select name="role" id="editRoleSelect" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                                <option value="">Pilih Role</option>
+                                <option value="general_manager">General Manager</option>
+                                <option value="kepala_divisi">Manager Divisi</option>
+                                <option value="admin">Karyawan</option>
+                                <option value="finance">Finance</option>
+                            </select>
+                        </div>
 
-                    <!-- Divisi (Dropdown dari tabel divisi) -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
-                        <select name="divisi" id="editDivisiSelect"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                            <option value="">Pilih Divisi</option>
-                            <!-- Options akan diisi oleh JavaScript -->
-                        </select>
-                    </div>
+                        <!-- Divisi (DROPDOWN dari database) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Divisi</label>
+                            <select name="divisi_id" id="editDivisiSelect"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                                <option value="">Pilih Divisi</option>
+                                @if (isset($divisis) && count($divisis) > 0)
+                                    @foreach ($divisis as $divisi)
+                                        <option value="{{ $divisi->id }}">{{ $divisi->divisi }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
 
-                        <!-- Gaji -->
-<div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Gaji</label>
-    <input type="text" id="editGaji" name="gaji" readonly
-        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 cursor-not-allowed"
-        placeholder="Hanya finance yang dapat mengedit gaji">
-    <p class="text-xs text-gray-500 mt-1">Silakan hubungi finance untuk perubahan gaji</p>
-</div>
+                        <!-- Gaji (INPUT NUMBER) - Hanya bisa diedit oleh finance -->
+                        <div class="relative gaji-disabled">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Gaji</label>
+                            <input type="number" id="editGaji" name="gaji"
+                                @if(!$isFinance)
+                                    readonly 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary input-readonly"
+                                @else
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                @endif
+                                placeholder="{{ $isFinance ? 'Masukkan gaji' : 'Tidak dapat diedit' }}">
+                            @if(!$isFinance)
+                                <div class="lock-overlay">
+                                    <span class="material-icons-outlined">lock</span>
+                                    <span>Hanya finance yang bisa mengedit</span>
+                                </div>
+                            @endif
+                            <p class="text-xs text-gray-500 mt-1">
+                                @if(!$isFinance)
+                                    <span class="text-orange-500 font-medium">⚠️ Hanya dapat diubah oleh finance</span>
+                                @else
+                                    Isi dalam angka tanpa titik/koma
+                                @endif
+                            </p>
+                        </div>
 
-                        <!-- Kontak -->
+                        <!-- Kontak (INPUT TEXT) -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Kontak *</label>
                             <input type="text" id="editKontak" name="kontak" required
@@ -1189,14 +1307,7 @@
                                 placeholder="Masukkan nomor telepon">
                         </div>
 
-                    <!-- Kontak -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Kontak *</label>
-                        <input type="text" id="editKontak" name="kontak" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                            placeholder="Masukkan nomor telepon">
-                    </div>
-
+<<<<<<< HEAD
                     <!-- Alamat -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
@@ -1204,38 +1315,81 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                             rows="3" placeholder="Masukkan alamat lengkap"></textarea>
                     </div>
+=======
+                        <!-- Status Kerja (DROPDOWN) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Kerja</label>
+                            <select name="status_kerja" id="editStatusKerja"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                                <option value="aktif">Aktif</option>
+                                <option value="resign">Resign</option>
+                                <option value="phk">PHK</option>
+                            </select>
+                        </div>
 
-                    <!-- Foto -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
-                        <div class="flex items-center space-x-4">
-                            <div id="editFotoPreview"
-                                class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
-                                <span class="material-icons-outlined text-gray-500 text-2xl">person</span>
+                        <!-- Status Karyawan (DROPDOWN) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Karyawan</label>
+                            <select name="status_karyawan" id="editStatusKaryawan"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                                <option value="tetap">Tetap</option>
+                                <option value="kontrak">Kontrak</option>
+                                <option value="freelance">Freelance</option>
+                            </select>
+                        </div>
+>>>>>>> d6cdcc4e6ebe230f12f21ae40cd3228027c7c501
+
+                        <!-- Alamat (TEXTAREA) -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
+                            <textarea id="editAlamat" name="alamat" required rows="3"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="Masukkan alamat lengkap"></textarea>
+                        </div>
+
+                        <!-- Foto -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
+                            <div class="flex items-center space-x-4">
+                                <div id="editFotoPreview"
+                                    class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
+                                    <span class="material-icons-outlined text-gray-500 text-2xl">person</span>
+                                </div>
+                                <div>
+                                    <input type="file" name="foto" id="editFotoInput" class="hidden"
+                                        accept="image/*">
+                                    <button type="button" id="pilihEditFotoBtn"
+                                        class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                        Pilih Foto
+                                    </button>
+                                    <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG maks. 2MB</p>
+                                </div>
                             </div>
-                            <div>
-                                <input type="file" name="foto" id="editFotoInput" class="hidden"
-                                    accept="image/*">
-                                <button type="button" id="pilihEditFotoBtn"
-                                    class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                                    Pilih Foto
-                                </button>
-                                <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG maks. 2MB</p>
-                            </div>
+                            <!-- Input hidden untuk menyimpan foto lama -->
+                            <input type="hidden" id="editFotoLama" name="foto_lama">
+                        </div>
+
+                        <!-- Password (Opsional) -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="editPassword" name="password"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="Kosongkan jika tidak ingin mengubah password">
+                            <p class="text-xs text-gray-500 mt-1">Minimal 6 karakter</p>
                         </div>
                     </div>
-                </div>
 
-                <div class="flex justify-end gap-2 mt-6">
-                    <button type="button" id="cancelEditBtn"
-                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
-                    <button type="submit"
-                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">Update Data</button>
-                </div>
-            </form>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" id="cancelEditBtn"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">Update
+                            Data</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Popup Modal untuk Konfirmasi Hapus -->
     <div id="deleteKaryawanModal"
@@ -1248,19 +1402,20 @@
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                
+
                 <div class="mb-6 text-center">
                     <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <span class="material-icons-outlined text-red-500 text-3xl">warning</span>
                     </div>
-                    
+
                     <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus data karyawan ini?</p>
                     <p class="text-sm text-gray-500 mb-4" id="deleteKaryawanName"></p>
-                    <p class="text-xs text-gray-400">Tindakan ini tidak dapat dibatalkan dan data akan dihapus permanen.</p>
-                    
+                    <p class="text-xs text-gray-400">Tindakan ini tidak dapat dibatalkan dan data akan dihapus
+                        permanen.</p>
+
                     <input type="hidden" id="deleteId" name="id">
                 </div>
-                
+
                 <div class="flex justify-center gap-3">
                     <button type="button" id="cancelDeleteBtn"
                         class="px-5 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
@@ -1327,7 +1482,7 @@
             console.log(`${title}: ${message}`);
             return;
         }
-        
+
         const popupTitle = popup.querySelector('.minimal-popup-title');
         const popupMessage = popup.querySelector('.minimal-popup-message');
         const popupIcon = popup.querySelector('.minimal-popup-icon span');
@@ -1511,12 +1666,12 @@
                 const filterManager = document.getElementById('filterManager');
                 const filterStaff = document.getElementById('filterStaff');
                 const filterIntern = document.getElementById('filterIntern');
-                
+
                 if (filterAll) filterAll.checked = true;
                 if (filterManager) filterManager.checked = false;
                 if (filterStaff) filterStaff.checked = false;
                 if (filterIntern) filterIntern.checked = false;
-                
+
                 activeFilters = ['all'];
                 applyFilters();
                 filterDropdown.classList.remove('show');
@@ -1530,15 +1685,15 @@
         currentPage = 1;
 
         karyawanRows.forEach(row => {
-            const jabatan = row.getAttribute('data-jabatan').toLowerCase();
+            const role = row.getAttribute('data-role').toLowerCase();
             const nama = row.getAttribute('data-nama').toLowerCase();
             const alamat = row.getAttribute('data-alamat').toLowerCase();
 
-            let jabatanMatches = false;
+            let roleMatches = false;
             if (activeFilters.includes('all')) {
-                jabatanMatches = true;
+                roleMatches = true;
             } else {
-                jabatanMatches = activeFilters.some(filter => jabatan.includes(filter.toLowerCase()));
+                roleMatches = activeFilters.some(filter => role.includes(filter.toLowerCase()));
             }
 
             let searchMatches = true;
@@ -1546,10 +1701,10 @@
                 const searchLower = searchTerm.toLowerCase();
                 searchMatches = nama.includes(searchLower) ||
                     alamat.includes(searchLower) ||
-                    jabatan.includes(searchLower);
+                    role.includes(searchLower);
             }
 
-            if (jabatanMatches && searchMatches) {
+            if (roleMatches && searchMatches) {
                 row.classList.remove('hidden-by-filter');
             } else {
                 row.classList.add('hidden-by-filter');
@@ -1557,15 +1712,15 @@
         });
 
         karyawanCards.forEach(card => {
-            const jabatan = card.getAttribute('data-jabatan').toLowerCase();
+            const role = card.getAttribute('data-role').toLowerCase();
             const nama = card.getAttribute('data-nama').toLowerCase();
             const alamat = card.getAttribute('data-alamat').toLowerCase();
 
-            let jabatanMatches = false;
+            let roleMatches = false;
             if (activeFilters.includes('all')) {
-                jabatanMatches = true;
+                roleMatches = true;
             } else {
-                jabatanMatches = activeFilters.some(filter => jabatan.includes(filter.toLowerCase()));
+                roleMatches = activeFilters.some(filter => role.includes(filter.toLowerCase()));
             }
 
             let searchMatches = true;
@@ -1573,10 +1728,10 @@
                 const searchLower = searchTerm.toLowerCase();
                 searchMatches = nama.includes(searchLower) ||
                     alamat.includes(searchLower) ||
-                    jabatan.includes(searchLower);
+                    role.includes(searchLower);
             }
 
-            if (jabatanMatches && searchMatches) {
+            if (roleMatches && searchMatches) {
                 card.classList.remove('hidden-by-filter');
             } else {
                 card.classList.add('hidden-by-filter');
@@ -1591,7 +1746,7 @@
     function initializeSearch() {
         const searchInput = document.getElementById('searchInput');
         if (!searchInput) return;
-        
+
         let searchTimeout;
 
         searchInput.addEventListener('input', function() {
@@ -1610,7 +1765,7 @@
 
         userSelect.addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
-            
+
             if (selectedOption.value) {
                 const nama = selectedOption.getAttribute('data-nama');
                 const role = selectedOption.getAttribute('data-role');
@@ -1619,12 +1774,12 @@
 
                 const namaInput = document.getElementById('namaInput');
                 const emailInput = document.getElementById('emailInput');
-                const jabatanInput = document.getElementById('jabatanInput');
+                const roleInput = document.getElementById('roleInput');
                 const divisiInput = document.getElementById('divisiInput');
-                
+
                 if (namaInput) namaInput.value = nama || '';
                 if (emailInput) emailInput.value = email || '';
-                if (jabatanInput && !jabatanInput.value.trim()) jabatanInput.value = role || '';
+                if (roleInput && !roleInput.value.trim()) roleInput.value = role || '';
                 if (divisiInput && !divisiInput.value.trim()) divisiInput.value = divisi || '';
             } else {
                 clearAutoFillFields();
@@ -1633,8 +1788,8 @@
     }
 
     function clearAutoFillFields() {
-        const inputs = ['namaInput', 'emailInput', 'jabatanInput', 'divisiInput'];
-        
+        const inputs = ['namaInput', 'emailInput', 'roleInput', 'divisiInput'];
+
         inputs.forEach(id => {
             const input = document.getElementById(id);
             if (input) {
@@ -1643,93 +1798,168 @@
         });
     }
 
-    // === MODAL FUNCTIONS ===
-    // Modal Edit
-// Modal Edit
-// Modal Edit
-function openEditModal(data) {
-    console.log('Opening edit modal with data:', data);
-    
-    if (!data || !data.id) {
-        showMinimalPopup('Error', 'Data karyawan tidak valid', 'error');
-        return;
-    }
+    // Fungsi untuk mengambil data karyawan saat edit
+    async function fetchKaryawanData(id) {
+        try {
+            showLoading(true);
+            const response = await fetch(`/admin/karyawan/get/${id}`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                }
+            });
 
-    const editId = document.getElementById('editId');
-    const editNama = document.getElementById('editNama');
-    const editEmail = document.getElementById('editEmail');
-    const editJabatan = document.getElementById('editJabatan');
-    const editDivisi = document.getElementById('editDivisi');
-    const editGaji = document.getElementById('editGaji');
-    const editKontak = document.getElementById('editKontak');
-    const editAlamat = document.getElementById('editAlamat');
-    const editFotoPreview = document.getElementById('editFotoPreview');
-    const editKaryawanForm = document.getElementById('editKaryawanForm');
-    const editKaryawanModal = document.getElementById('editKaryawanModal');
+            const data = await response.json();
 
-    if (!editId || !editNama || !editKaryawanForm || !editKaryawanModal) {
-        console.error('Required modal elements not found');
-        return;
-    }
-
-    // Set nilai form
-    editId.value = data.id;
-    editNama.value = data.nama || '';
-    if (editEmail) editEmail.value = data.email || '';
-    if (editJabatan) editJabatan.value = data.jabatan || '';
-    if (editDivisi) editDivisi.value = data.divisi || '';
-    if (editKontak) editKontak.value = data.kontak || '';
-    if (editAlamat) editAlamat.value = data.alamat || '';
-    
-    // PERBAIKAN DI SINI: Set gaji dengan cara yang benar
-    if (editGaji) {
-        if (data.gaji && data.gaji !== 'Belum diatur') {
-            editGaji.value = data.gaji;
-        } else {
-            editGaji.value = 'Belum diatur';
+            if (data.success) {
+                return data.data;
+            } else {
+                showMinimalPopup('Error', data.message || 'Gagal mengambil data karyawan', 'error');
+                return null;
+            }
+        } catch (error) {
+            console.error('Fetch karyawan error:', error);
+            showMinimalPopup('Error', 'Terjadi kesalahan saat mengambil data', 'error');
+            return null;
+        } finally {
+            showLoading(false);
         }
-        
-        // SELALU set gaji sebagai readonly untuk admin
-        editGaji.readOnly = true;
-        editGaji.classList.add('bg-gray-100', 'text-gray-700', 'cursor-not-allowed');
-        editGaji.classList.remove('border-gray-300', 'focus:ring-primary', 'focus:border-primary');
     }
 
-    // Tampilkan foto karyawan jika ada
-    if (editFotoPreview) {
-        if (data.foto) {
-            let fotoUrl = data.foto;
-            if (!data.foto.startsWith('http') && !data.foto.startsWith('/') && !data.foto.includes('karyawan/')) {
-                fotoUrl = `/karyawan/${data.foto}`;
-            } else if (data.foto.startsWith('karyawan/')) {
-                fotoUrl = `/${data.foto}`;
+    // Cek apakah user adalah finance
+    const isFinance = {{ auth()->user()->role === 'finance' ? 'true' : 'false' }};
+
+    // Modal Edit
+    async function openEditModal(data) {
+        console.log('Opening edit modal with data:', data);
+
+        if (!data || !data.id) {
+            showMinimalPopup('Error', 'Data karyawan tidak valid', 'error');
+            return;
+        }
+
+        showLoading(true);
+
+        // Ambil data terbaru dari server
+        const karyawanData = await fetchKaryawanData(data.id);
+
+        if (!karyawanData) {
+            showLoading(false);
+            return;
+        }
+
+        // Set nilai form
+        const editId = document.getElementById('editId');
+        const editUserId = document.getElementById('editUserId');
+        const editNama = document.getElementById('editNama');
+        const editEmail = document.getElementById('editEmail');
+        const editRoleSelect = document.getElementById('editRoleSelect');
+        const editDivisiSelect = document.getElementById('editDivisiSelect');
+        const editGaji = document.getElementById('editGaji');
+        const editKontak = document.getElementById('editKontak');
+        const editAlamat = document.getElementById('editAlamat');
+        const editStatusKerja = document.getElementById('editStatusKerja');
+        const editStatusKaryawan = document.getElementById('editStatusKaryawan');
+        const editFotoPreview = document.getElementById('editFotoPreview');
+        const editFotoLama = document.getElementById('editFotoLama');
+        const editKaryawanForm = document.getElementById('editKaryawanForm');
+        const editKaryawanModal = document.getElementById('editKaryawanModal');
+        const editGajiOriginal = document.getElementById('editGajiOriginal');
+
+        if (!editId || !editNama || !editKaryawanForm || !editKaryawanModal) {
+            console.error('Required modal elements not found');
+            showLoading(false);
+            return;
+        }
+
+        console.log('Karyawan data from API:', karyawanData);
+
+        // Set nilai form
+        editId.value = karyawanData.id; // ID karyawan
+        if (editUserId) {
+            editUserId.value = karyawanData.user_id || '';
+        }
+        editNama.value = karyawanData.name || '';
+        editEmail.value = karyawanData.email || '';
+
+        // Set role dropdown (dari database)
+        if (editRoleSelect) {
+            editRoleSelect.value = karyawanData.role || '';
+        }
+
+        // Set divisi dropdown
+        if (editDivisiSelect) {
+            editDivisiSelect.value = karyawanData.divisi_id || '';
+        }
+
+        // Set gaji dan simpan nilai asli
+        if (editGaji) {
+            editGaji.value = karyawanData.gaji || '';
+            // Simpan nilai gaji asli untuk validasi
+            if (editGajiOriginal) {
+                editGajiOriginal.value = karyawanData.gaji || '';
             }
             
-            editFotoPreview.innerHTML = 
-                `<img src="${fotoUrl}" alt="${data.nama}" class="h-16 w-16 rounded-full object-cover">`;
-        } else {
-            editFotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
+            // Jika bukan finance, tambahkan pesan khusus
+            if (!isFinance) {
+                editGaji.title = "Gaji hanya dapat diubah oleh finance";
+            }
         }
+
+        // Set kontak
+        if (editKontak) editKontak.value = karyawanData.kontak || '';
+
+        // Set alamat
+        if (editAlamat) editAlamat.value = karyawanData.alamat || '';
+
+        // Set status kerja dropdown
+        if (editStatusKerja) {
+            editStatusKerja.value = karyawanData.status_kerja || 'aktif';
+        }
+
+        // Set status karyawan dropdown
+        if (editStatusKaryawan) {
+            editStatusKaryawan.value = karyawanData.status_karyawan || 'tetap';
+        }
+
+        // Tampilkan foto karyawan jika ada
+        if (editFotoPreview) {
+            if (karyawanData.foto) {
+                editFotoPreview.innerHTML =
+                    `<img src="${karyawanData.foto}" alt="${karyawanData.name}" class="h-16 w-16 rounded-full object-cover">`;
+            } else {
+                editFotoPreview.innerHTML =
+                    '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
+            }
+        }
+
+        // PERBAIKAN PENTING: Gunakan ID karyawan untuk update URL
+        editKaryawanForm.action = `/admin/karyawan/update/${karyawanData.id}`;
+        
+        console.log('Form action updated to:', editKaryawanForm.action);
+        console.log('Karyawan ID:', karyawanData.id);
+        console.log('User ID:', karyawanData.user_id);
+
+        // Tampilkan modal
+        editKaryawanModal.classList.remove('hidden');
+        showLoading(false);
     }
 
-    // PERBAIKAN DI SINI: Gunakan URL hardcoded
-    const karyawanId = data.id;
-    editKaryawanForm.action = `/admin/karyawan/update/${karyawanId}`;
-    console.log('Form action updated to:', editKaryawanForm.action);
-
-    // Tampilkan modal
-    editKaryawanModal.classList.remove('hidden');
-}
     function closeEditModal() {
         const modal = document.getElementById('editKaryawanModal');
         const form = document.getElementById('editKaryawanForm');
         const fotoPreview = document.getElementById('editFotoPreview');
-        
+
         if (modal) modal.classList.add('hidden');
         if (form) {
             form.reset();
             const editId = document.getElementById('editId');
             if (editId) editId.value = '';
+            const editUserId = document.getElementById('editUserId');
+            if (editUserId) editUserId.value = '';
+            const editGajiOriginal = document.getElementById('editGajiOriginal');
+            if (editGajiOriginal) editGajiOriginal.value = '';
         }
         if (fotoPreview) {
             fotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
@@ -1742,7 +1972,7 @@ function openEditModal(data) {
         if (modal) {
             modal.classList.remove('hidden');
             clearAutoFillFields();
-            
+
             const userSelect = document.getElementById('userSelect');
             if (userSelect) userSelect.selectedIndex = 0;
         }
@@ -1752,15 +1982,15 @@ function openEditModal(data) {
         const modal = document.getElementById('tambahKaryawanModal');
         const form = document.getElementById('tambahKaryawanForm');
         const fotoPreview = document.getElementById('fotoPreview');
-        
+
         if (modal) modal.classList.add('hidden');
         if (form) form.reset();
         if (fotoPreview) {
             fotoPreview.innerHTML = '<span class="material-icons-outlined text-gray-500 text-2xl">person</span>';
         }
-        
+
         clearAutoFillFields();
-        
+
         const userSelect = document.getElementById('userSelect');
         if (userSelect) userSelect.selectedIndex = 0;
     }
@@ -1788,15 +2018,15 @@ function openEditModal(data) {
     // === FORM VALIDATION ===
     function validateForm(form) {
         if (!form) return false;
-        
+
         const requiredFields = form.querySelectorAll('[required]');
         let isValid = true;
-        
+
         requiredFields.forEach(field => {
             if (!field.value.trim()) {
                 field.classList.add('input-error');
                 isValid = false;
-                
+
                 const errorMsg = field.parentElement.querySelector('.error-message');
                 if (errorMsg) {
                     errorMsg.textContent = 'Field ini wajib diisi';
@@ -1804,14 +2034,14 @@ function openEditModal(data) {
                 }
             } else {
                 field.classList.remove('input-error');
-                
+
                 const errorMsg = field.parentElement.querySelector('.error-message');
                 if (errorMsg) {
                     errorMsg.classList.remove('show');
                 }
             }
         });
-        
+
         const emailField = form.querySelector('input[type="email"]');
         if (emailField && emailField.value) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -1820,8 +2050,49 @@ function openEditModal(data) {
                 isValid = false;
             }
         }
-        
+
         return isValid;
+    }
+
+    // === VALIDASI GAJI KHUSUS ===
+    function validateGajiPermissions(form, isEdit = false) {
+        if (isFinance) {
+            return true; // Finance bisa melakukan apa saja
+        }
+
+        const gajiInput = form.querySelector('#gajiInput') || form.querySelector('#editGaji');
+        
+        if (!gajiInput) {
+            return true;
+        }
+
+        // Untuk form tambah: non-finance tidak boleh mengisi gaji
+        if (!isEdit) {
+            if (gajiInput.value.trim() !== '') {
+                showMinimalPopup(
+                    'Akses Ditolak', 
+                    'Anda tidak memiliki izin untuk mengatur gaji. Biarkan kosong atau hubungi finance.', 
+                    'warning'
+                );
+                gajiInput.value = ''; // Reset nilai gaji
+                return false;
+            }
+        } 
+        // Untuk form edit: non-finance tidak boleh mengubah gaji yang sudah ada
+        else {
+            const originalGaji = document.getElementById('editGajiOriginal');
+            if (originalGaji && originalGaji.value && gajiInput.value !== originalGaji.value) {
+                showMinimalPopup(
+                    'Akses Ditolak', 
+                    'Anda tidak memiliki izin untuk mengubah gaji. Hubungi finance untuk perubahan gaji.', 
+                    'error'
+                );
+                gajiInput.value = originalGaji.value; // Kembalikan ke nilai asli
+                return false;
+            }
+        }
+
+        return true;
     }
 
     // === FORM SUBMISSION ===
@@ -1835,6 +2106,11 @@ function openEditModal(data) {
 
             if (!validateForm(this)) {
                 showMinimalPopup('Validasi Gagal', 'Harap periksa kembali form yang diisi', 'warning');
+                return;
+            }
+
+            // Validasi permission gaji
+            if (!validateGajiPermissions(this, false)) {
                 return;
             }
 
@@ -1877,7 +2153,7 @@ function openEditModal(data) {
 
                 showMinimalPopup('Berhasil', res.message, 'success');
                 closeTambahModal();
-                
+
                 setTimeout(() => {
                     window.location.reload();
                 }, 1500);
@@ -1895,103 +2171,105 @@ function openEditModal(data) {
         });
     }
 
-    // UPDATE (PUT/POST) - PERBAIKI BAGIAN INI
-// UPDATE (PUT/POST) - PERBAIKI BAGIAN INI
-function initializeUpdateForm() {
-    const editKaryawanForm = document.getElementById('editKaryawanForm');
-    if (!editKaryawanForm) return;
+    // UPDATE (PUT/POST)
+    function initializeUpdateForm() {
+        const editKaryawanForm = document.getElementById('editKaryawanForm');
+        if (!editKaryawanForm) return;
 
-    editKaryawanForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+        editKaryawanForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-        if (!validateForm(this)) {
-            showMinimalPopup('Validasi Gagal', 'Harap periksa kembali form yang diisi', 'warning');
-            return;
-        }
-
-        const submitBtn = editKaryawanForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn?.textContent || 'Update';
-        
-        if (submitBtn) {
-            submitBtn.textContent = 'Memperbarui...';
-            submitBtn.disabled = true;
-        }
-        showLoading(true);
-
-        const formData = new FormData(editKaryawanForm);
-        const id = document.getElementById("editId").value;
-
-        if (!id) {
-            showMinimalPopup('Error', 'ID karyawan tidak ditemukan', 'error');
-            if (submitBtn) {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
+            if (!validateForm(this)) {
+                showMinimalPopup('Validasi Gagal', 'Harap periksa kembali form yang diisi', 'warning');
+                return;
             }
-            showLoading(false);
-            return;
-        }
 
-        // Gunakan URL yang benar - ambil dari form action
-        const updateUrl = editKaryawanForm.action;
-        console.log('Sending request to:', updateUrl);
+            // Validasi permission gaji
+            if (!validateGajiPermissions(this, true)) {
+                return;
+            }
 
-        try {
-            // Coba dengan method PUT
-            const response = await fetch(updateUrl, {
-                method: "PUT",
-                headers: {
-                    "X-CSRF-TOKEN": getCsrfToken(),
-                    "Accept": "application/json"
-                },
-                body: formData
-            });
+            const submitBtn = editKaryawanForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn?.textContent || 'Update';
 
-            let data;
+            if (submitBtn) {
+                submitBtn.textContent = 'Memperbarui...';
+                submitBtn.disabled = true;
+            }
+            showLoading(true);
+
+            const formData = new FormData(editKaryawanForm);
+            const id = document.getElementById("editId").value;
+
+            console.log('Submitting update for karyawan ID:', id);
+            
+            if (!id) {
+                showMinimalPopup('Error', 'ID karyawan tidak ditemukan di form', 'error');
+                if (submitBtn) {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+                showLoading(false);
+                return;
+            }
+
+            // Gunakan URL yang benar dengan ID karyawan
+            const updateUrl = `/admin/karyawan/update/${id}`;
+            console.log('Sending update request to:', updateUrl);
+
             try {
-                data = await response.json();
-            } catch (jsonError) {
-                console.error('JSON parse error:', jsonError);
-                
-                // Jika PUT gagal, coba dengan POST
-                console.log('PUT failed, trying POST method...');
-                const postResponse = await fetch(updateUrl, {
-                    method: "POST",
+                // Coba dengan method PUT terlebih dahulu
+                let response = await fetch(updateUrl, {
+                    method: "PUT",
                     headers: {
                         "X-CSRF-TOKEN": getCsrfToken(),
-                        "Accept": "application/json",
-                        "X-HTTP-Method-Override": "PUT"
+                        "Accept": "application/json"
                     },
                     body: formData
                 });
-                
-                data = await postResponse.json();
-            }
 
-            if (data && data.success) {
-                showMinimalPopup('Berhasil', data.message || 'Data karyawan berhasil diperbarui', 'success');
-                closeEditModal();
-                
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-            } else {
-                const errorMessage = data && data.message ? data.message : 
-                                   data && data.errors ? Object.values(data.errors)[0] : 
-                                   'Terjadi kesalahan saat memperbarui data';
-                showMinimalPopup('Error', errorMessage, 'error');
+                // Jika PUT gagal (misalnya 405), coba dengan POST
+                if (response.status === 405) {
+                    console.log('PUT method not allowed, trying POST...');
+                    response = await fetch(updateUrl, {
+                        method: "POST",
+                        headers: {
+                            "X-CSRF-TOKEN": getCsrfToken(),
+                            "Accept": "application/json",
+                            "X-HTTP-Method-Override": "PUT"
+                        },
+                        body: formData
+                    });
+                }
+
+                const data = await response.json();
+
+                if (data && data.success) {
+                    showMinimalPopup('Berhasil', data.message || 'Data karyawan berhasil diperbarui', 'success');
+                    closeEditModal();
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    const errorMessage = data && data.message ? data.message :
+                        data && data.errors ? Object.values(data.errors)[0] :
+                        'Terjadi kesalahan saat memperbarui data';
+                    showMinimalPopup('Error', errorMessage, 'error');
+                }
+            } catch (error) {
+                console.error('Edit error:', error);
+                showMinimalPopup('Error', error.message || 'Terjadi kesalahan saat memperbarui data', 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+                showLoading(false);
             }
-        } catch (error) {
-            console.error('Edit error:', error);
-            showMinimalPopup('Error', error.message || 'Terjadi kesalahan saat memperbarui data', 'error');
-        } finally {
-            if (submitBtn) {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
-            showLoading(false);
-        }
-    });
-}
+        });
+    }
+
     // DELETE HANDLER
     async function handleDeleteKaryawan(id) {
         if (!id) {
@@ -2000,10 +2278,10 @@ function initializeUpdateForm() {
         }
 
         showLoading(true);
-        
+
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         const originalText = confirmDeleteBtn?.textContent || 'Hapus';
-        
+
         if (confirmDeleteBtn) {
             confirmDeleteBtn.disabled = true;
             confirmDeleteBtn.textContent = 'Menghapus...';
@@ -2023,21 +2301,21 @@ function initializeUpdateForm() {
 
             if (data.success) {
                 showMinimalPopup('Berhasil', data.message, 'success');
-                
+
                 // Hapus row dari table
                 const row = document.querySelector(`.karyawan-row[data-id="${id}"]`);
                 const card = document.querySelector(`.karyawan-card[data-id="${id}"]`);
-                
+
                 if (row) row.remove();
                 if (card) card.remove();
-                
+
                 // Update total count
                 const totalCountElement = document.getElementById('totalCount');
                 if (totalCountElement) {
                     const currentCount = parseInt(totalCountElement.textContent) || 0;
                     totalCountElement.textContent = Math.max(0, currentCount - 1);
                 }
-                
+
                 closeDeleteModal();
             } else {
                 showMinimalPopup('Error', data.message, 'error');
@@ -2152,9 +2430,9 @@ function initializeUpdateForm() {
             // Edit button
             if (e.target.closest('.edit-btn')) {
                 const button = e.target.closest('.edit-btn');
-                
+
                 let data;
-                
+
                 if (button.hasAttribute('data-karyawan')) {
                     // Untuk mobile cards
                     try {
@@ -2168,12 +2446,12 @@ function initializeUpdateForm() {
                     // Untuk desktop table - ambil dari parent row
                     const row = button.closest('tr');
                     if (!row) return;
-                    
+
                     data = {
                         id: row.getAttribute('data-id'),
                         nama: row.getAttribute('data-nama'),
                         email: row.getAttribute('data-email'),
-                        jabatan: row.getAttribute('data-jabatan'),
+                        role: row.getAttribute('data-role'),
                         divisi: row.getAttribute('data-divisi'),
                         alamat: row.getAttribute('data-alamat'),
                         kontak: row.getAttribute('data-kontak'),
@@ -2181,10 +2459,11 @@ function initializeUpdateForm() {
                         gaji: row.getAttribute('data-gaji')
                     };
                 }
-                
+
+                console.log('Edit button clicked with data:', data);
                 openEditModal(data);
             }
-            
+
             // Delete button
             if (e.target.closest('.delete-btn')) {
                 const button = e.target.closest('.delete-btn');
@@ -2224,7 +2503,8 @@ function initializeUpdateForm() {
     // === INITIALIZE ALL ===
     document.addEventListener('DOMContentLoaded', function() {
         console.log('Data karyawan page loaded');
-        
+        console.log('Is user finance?', isFinance);
+
         // Initialize pagination, filter, search
         initializePagination();
         initializeFilter();
