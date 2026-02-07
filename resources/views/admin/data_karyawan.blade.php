@@ -836,9 +836,10 @@
                                                     <td style="min-width: 200px;">
                                                         <div class="flex items-center gap-2">
                                                             @if ($item->foto)
-                                                                <img src="{{ asset('karyawan/' . $item->foto) }}"
+                                                                <img src="{{ asset('storage/' . $item->foto) }}"
                                                                     alt="{{ $item->nama }}"
-                                                                    class="h-8 w-8 rounded-full object-cover">
+                                                                    class="h-8 w-8 rounded-full object-cover"
+                                                                    onerror="this.src='{{ asset('images/default-avatar.png') }}'">
                                                             @else
                                                                 <div
                                                                     class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
@@ -877,9 +878,10 @@
                                                     <td style="min-width: 150px;">{{ $item->kontak }}</td>
                                                     <td style="min-width: 100px;">
                                                         @if ($item->foto)
-                                                            <img src="{{ asset('karyawan/' . $item->foto) }}"
+                                                            <img src="{{ asset('storage/' . $item->foto) }}"
                                                                 alt="{{ $item->nama }}"
-                                                                class="h-10 w-10 rounded-full object-cover mx-auto">
+                                                                class="h-10 w-10 rounded-full object-cover mx-auto"
+                                                                onerror="this.src='{{ asset('images/default-avatar.png') }}'">
                                                         @else
                                                             <div
                                                                 class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center mx-auto">
@@ -942,9 +944,10 @@
                                         <div class="flex justify-between items-start mb-3">
                                             <div class="flex items-center gap-3">
                                                 @if ($item->foto)
-                                                    <img src="{{ asset('karyawan/' . $item->foto) }}"
+                                                    <img src="{{ asset('storage/' . $item->foto) }}"
                                                         alt="{{ $item->nama }}"
-                                                        class="h-12 w-12 rounded-full object-cover">
+                                                        class="h-12 w-12 rounded-full object-cover"
+                                                        onerror="this.src='{{ asset('images/default-avatar.png') }}'">
                                                 @else
                                                     <div
                                                         class="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
@@ -1253,8 +1256,8 @@
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
                                 <option value="">Pilih Role</option>
                                 <option value="general_manager">General Manager</option>
-                                <option value="kepala_divisi">Manager Divisi</option>
-                                <option value="admin">Karyawan</option>
+                                <option value="manager_divisi">Manager Divisi</option>
+                                <option value="karyawan">Karyawan</option>
                                 <option value="finance">Finance</option>
                             </select>
                         </div>
@@ -1307,15 +1310,6 @@
                                 placeholder="Masukkan nomor telepon">
                         </div>
 
-<<<<<<< HEAD
-                    <!-- Alamat -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
-                        <textarea id="editAlamat" name="alamat" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                            rows="3" placeholder="Masukkan alamat lengkap"></textarea>
-                    </div>
-=======
                         <!-- Status Kerja (DROPDOWN) -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status Kerja</label>
@@ -1337,7 +1331,6 @@
                                 <option value="freelance">Freelance</option>
                             </select>
                         </div>
->>>>>>> d6cdcc4e6ebe230f12f21ae40cd3228027c7c501
 
                         <!-- Alamat (TEXTAREA) -->
                         <div class="md:col-span-2">
@@ -1457,8 +1450,8 @@
     let searchTerm = '';
 
     // Dapatkan semua elemen karyawan
-    const karyawanRows = document.querySelectorAll('.karyawan-row');
-    const karyawanCards = document.querySelectorAll('.karyawan-card');
+    let karyawanRows = document.querySelectorAll('.karyawan-row');
+    let karyawanCards = document.querySelectorAll('.karyawan-card');
 
     // === UTILITY FUNCTIONS ===
     function getCsrfToken() {
@@ -1577,15 +1570,29 @@
         karyawanRows.forEach(row => row.style.display = 'none');
         karyawanCards.forEach(card => card.style.display = 'none');
 
+        let displayNumber = 1;
         visibleRows.forEach((row, index) => {
             if (index >= startIndex && index < endIndex) {
                 row.style.display = '';
+                // Update nomor di kolom pertama
+                const noCell = row.querySelector('td:first-child');
+                if (noCell) {
+                    noCell.textContent = displayNumber;
+                }
+                displayNumber++;
             }
         });
 
+        let cardNumber = 1;
         visibleCards.forEach((card, index) => {
             if (index >= startIndex && index < endIndex) {
                 card.style.display = 'block';
+                // Update nomor di card mobile
+                const noElement = card.querySelector('.grid > div:first-child p:last-child');
+                if (noElement) {
+                    noElement.textContent = cardNumber;
+                }
+                cardNumber++;
             }
         });
 
@@ -2315,6 +2322,23 @@
                     const currentCount = parseInt(totalCountElement.textContent) || 0;
                     totalCountElement.textContent = Math.max(0, currentCount - 1);
                 }
+
+                // Re-query karyawanRows dan karyawanCards dari DOM terbaru
+                karyawanRows = document.querySelectorAll('.karyawan-row');
+                karyawanCards = document.querySelectorAll('.karyawan-card');
+
+                // Reset pagination jika halaman saat ini kosong
+                const visibleRows = getFilteredRows();
+                const totalPages = Math.ceil(visibleRows.length / itemsPerPage);
+                if (currentPage > totalPages && totalPages > 0) {
+                    currentPage = totalPages;
+                } else if (totalPages === 0) {
+                    currentPage = 1;
+                }
+
+                // Reload pagination dan tampilkan data
+                initializePagination();
+                updateVisibleItems();
 
                 closeDeleteModal();
             } else {

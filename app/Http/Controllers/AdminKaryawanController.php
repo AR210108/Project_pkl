@@ -260,29 +260,15 @@ public function store(Request $request)
             $user->save();
         }
 
-        // 3. Buat record karyawan
-        $divisi = Divisi::find($validated['divisi_id']);
-        
-        $karyawan = Karyawan::create([
-            'user_id' => $user->id,
-            'nama' => $validated['name'],
-            'email' => $validated['email'],
-            'role' => $validated['role'],
-            'divisi' => $divisi ? $divisi->divisi : '',
-            'gaji' => $validated['gaji'] ?? null, // Gunakan null jika tidak diisi
-            'alamat' => $validated['alamat'],
-            'kontak' => $validated['kontak'],
-            'status_kerja' => $validated['status_kerja'],
-            'status_karyawan' => $validated['status_karyawan'],
-            'foto' => $user->foto
-        ]);
+        // 3. Load karyawan yang sudah dibuat otomatis oleh User boot() event
+        $user->load('karyawan');
 
         DB::commit();
 
         return response()->json([
             'success' => true,
             'message' => 'Karyawan berhasil ditambahkan',
-            'data' => $karyawan
+            'data' => $user->karyawan
         ]);
 
     } catch (\Illuminate\Validation\ValidationException $e) {

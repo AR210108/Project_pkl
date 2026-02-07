@@ -593,7 +593,7 @@
                 @endif
             </td>
                                                     <td style="min-width: 120px;">
-                                                        {{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}</td>
+                                                        {{ optional($item->tanggal_mulai_pengerjaan)->format('Y-m-d') ?? '-' }}</td>
                                                     <td style="min-width: 120px;">
                                                         @if ($item->tanggal_selesai_pengerjaan)
                                                             {{ $item->tanggal_selesai_pengerjaan->format('Y-m-d') }}
@@ -663,8 +663,8 @@
                                     </table>
                                 </div>
                             </div>
-
-                            <!-- Mobile Card View -->
+                                                    
+                                                    <!-- Mobile Card View -->
                             <div class="mobile-cards space-y-4" id="mobile-cards">
                                 @foreach ($project as $item)
                                     <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm">
@@ -675,7 +675,7 @@
                                                     @if ($item->invoice)
                                                         <span>Invoice #{{ $item->invoice->id }}</span><br>
                                                     @endif
-                                                    Mulai: {{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}
+                                                    Mulai: {{ optional($item->tanggal_mulai_pengerjaan)->format('Y-m-d') ?? '-' }}
                                                     @if ($item->tanggal_selesai_pengerjaan)
                                                         <br>Selesai:
                                                         {{ $item->tanggal_selesai_pengerjaan->format('Y-m-d') }}
@@ -746,7 +746,7 @@
                                                         '{{ addslashes($item->nama) }}', 
                                                         '{{ addslashes($item->deskripsi) }}', 
                                                         '{{ number_format($item->harga, 0, ',', '.') }}', 
-                                                        '{{ $item->tanggal_mulai_pengerjaan->format('Y-m-d') }}', 
+                                                        '{{ $item->tanggal_mulai_pengerjaan ? $item->tanggal_mulai_pengerjaan->format("Y-m-d") : '' }}', 
                                                         '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}', 
                                                         '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}', 
                                                         '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}', 
@@ -1102,39 +1102,14 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Status Pengerjaan</label>
-                                <select name="status_pengerjaan" id="editStatusPengerjaan"
-                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                    <option value="pending">Pending</option>
-                                    <option value="dalam_pengerjaan">Dalam Pengerjaan</option>
-                                    <option value="selesai">Selesai</option>
-                                    <option value="dibatalkan">Dibatalkan</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Status Kerjasama</label>
-                                <select name="status_kerjasama" id="editStatusKerjasama"
-                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
-                                    <option value="aktif">Aktif</option>
-                                    <option value="selesai">Selesai</option>
-                                    <option value="ditangguhkan">Ditangguhkan</option>
-                                </select>
-                            </div>
-                        </div>
-
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Progres (%)</label>
-                            <input type="range" name="progres" id="editProgres" min="0" max="100"
-                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                oninput="document.getElementById('editProgresValue').textContent = this.value + '%'">
-                            <div class="flex justify-between items-center mt-1">
-                                <span class="text-sm text-gray-600">0%</span>
-                                <span id="editProgresValue" class="text-sm font-medium">0%</span>
-                                <span class="text-sm text-gray-600">100%</span>
-                            </div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Kerjasama</label>
+                            <select name="status_kerjasama" id="editStatusKerjasama"
+                                class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="aktif">Aktif</option>
+                                <option value="selesai">Selesai</option>
+                                <option value="ditangguhkan">Ditangguhkan</option>
+                            </select>
                         </div>
                     </div>
 
@@ -1321,33 +1296,45 @@
         // ============================
         // OPEN EDIT MODAL
         // ============================
-        function openEditModal(id, nama, deskripsi, tanggalMulaiPengerjaan, tanggalSelesaiPengerjaan,
-            tanggalMulaiKerjasama, tanggalSelesaiKerjasama, statusPengerjaan, statusKerjasama, progres) {
-
+        function openEditModal(id) {
             const editModal = document.getElementById('editModal');
             if (!editModal) {
                 console.error('Edit modal not found');
                 return;
             }
 
-            // Set form values
-            document.getElementById('editId').value = id;
-            document.getElementById('editNama').value = nama;
-            document.getElementById('editDeskripsi').value = deskripsi;
-            document.getElementById('editTanggalMulaiPengerjaan').value = tanggalMulaiPengerjaan;
-            document.getElementById('editTanggalSelesaiPengerjaan').value = tanggalSelesaiPengerjaan || '';
-            document.getElementById('editTanggalMulaiKerjasama').value = tanggalMulaiKerjasama || '';
-            document.getElementById('editTanggalSelesaiKerjasama').value = tanggalSelesaiKerjasama || '';
-            document.getElementById('editStatusPengerjaan').value = statusPengerjaan || 'pending';
-            document.getElementById('editStatusKerjasama').value = statusKerjasama || 'aktif';
-            document.getElementById('editProgres').value = progres;
-            document.getElementById('editProgresValue').textContent = progres + '%';
-
-            // Set form action
+            // Reset form while fetching
             const editForm = document.getElementById('editForm');
-            editForm.action = `/admin/project/${id}`;
+            editForm.reset();
+            document.getElementById('editId').value = id;
 
-            editModal.classList.remove('hidden');
+            // Fetch project data and populate the form (excluding progres and status_pengerjaan)
+            fetch(`/admin/project/${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.success && data.data) {
+                        const p = data.data;
+                        document.getElementById('editNama').value = p.nama || '';
+                        document.getElementById('editDeskripsi').value = p.deskripsi || '';
+                        document.getElementById('editTanggalMulaiPengerjaan').value = p.tanggal_mulai_pengerjaan ? p.tanggal_mulai_pengerjaan.split('T')[0] : '';
+                        document.getElementById('editTanggalSelesaiPengerjaan').value = p.tanggal_selesai_pengerjaan ? p.tanggal_selesai_pengerjaan.split('T')[0] : '';
+                        document.getElementById('editTanggalMulaiKerjasama').value = p.tanggal_mulai_kerjasama ? p.tanggal_mulai_kerjasama.split('T')[0] : '';
+                        document.getElementById('editTanggalSelesaiKerjasama').value = p.tanggal_selesai_kerjasama ? p.tanggal_selesai_kerjasama.split('T')[0] : '';
+                        document.getElementById('editStatusKerjasama').value = p.status_kerjasama || 'aktif';
+
+                        // Set form action
+                        editForm.action = `/admin/project/${id}`;
+
+                        editModal.classList.remove('hidden');
+                    } else {
+                        console.error('Failed to load project data for edit', data);
+                        showToast('Gagal mengambil data project untuk diedit', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching project:', err);
+                    showToast('Gagal mengambil data project untuk diedit', 'error');
+                });
         }
 
         // ============================

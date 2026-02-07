@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('order_number')->nullable();
 
             $table->string('nama_layanan')->nullable();
-            $table->enum('status_pembayaran', ['pembayaran awal', 'lunas'])->default('pembayaran awal');
+            $table->enum('status_pembayaran', ['down payment', 'lunas'])->default('down payment');
 
             $table->string('payment_method');
             $table->text('description')->nullable();

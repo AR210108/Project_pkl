@@ -172,7 +172,7 @@ class User extends Authenticatable
 
         static::created(function ($user) {
             // Buat record karyawan otomatis jika user baru dibuat
-            if (in_array($user->role, ['karyawan', 'staff', 'manager', 'supervisor', 'admin', 'finance', 'hrd'])) {
+            if (in_array($user->role, ['owner', 'admin', 'general_manager', 'manager_divisi', 'finance', 'karyawan'])) {
                 $karyawanData = [
                     'user_id' => $user->id,
                     'nama' => $user->name,

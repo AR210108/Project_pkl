@@ -128,46 +128,14 @@ class Invoice extends Model
                 return $existingProject;
             }
 
-            // Buat nama project
-            $projectName = $this->nama_layanan 
-                ? "Project: " . $this->nama_layanan . " - " . $this->company_name
-                : "Project dari Invoice #" . $this->invoice_no;
-
-            // Buat deskripsi project
-            $projectDescription = "Project berdasarkan Invoice #" . $this->invoice_no . "\n\n";
-            $projectDescription .= "Klien: " . $this->client_name . "\n";
-            $projectDescription .= "Perusahaan: " . $this->company_name . "\n";
-            $projectDescription .= "Layanan: " . $this->nama_layanan . "\n";
-            $projectDescription .= "Deskripsi Invoice: " . $this->description;
-
-            // Tentukan tanggal mulai pengerjaan (default: 3 hari setelah invoice dibuat)
-            $tanggalMulaiPengerjaan = now()->addDays(3);
-            
-            // Tentukan tanggal selesai pengerjaan (default: 30 hari setelah tanggal mulai)
-            $tanggalSelesaiPengerjaan = $tanggalMulaiPengerjaan->copy()->addDays(30);
-            
-            // Tentukan tanggal kerjasama
-            $tanggalMulaiKerjasama = $this->invoice_date;
-            $tanggalSelesaiKerjasama = $tanggalMulaiKerjasama->copy()->addMonths(6); // Default 6 bulan
-
-            // Tentukan status berdasarkan status pembayaran invoice
-            $statusPengerjaan = 'pending';
-            $statusKerjasama = $this->status_pembayaran == 'lunas' ? 'aktif' : 'aktif';
-
-            // Buat project baru
+            // Buat project baru dengan data minimal
             $project = Project::create([
                 'invoice_id' => $this->id,
-                'nama' => $projectName,
-                'deskripsi' => $projectDescription,
+                'nama' => $this->nama_layanan ?? 'Project dari Invoice #' . $this->invoice_no,
+                'deskripsi' => $this->description ?? '',
                 'harga' => $this->total,
-                'tanggal_mulai_pengerjaan' => $tanggalMulaiPengerjaan,
-                'tanggal_selesai_pengerjaan' => $tanggalSelesaiPengerjaan,
-                'tanggal_mulai_kerjasama' => $tanggalMulaiKerjasama,
-                'tanggal_selesai_kerjasama' => $tanggalSelesaiKerjasama,
-                'status_pengerjaan' => $statusPengerjaan,
-                'status_kerjasama' => $statusKerjasama,
-                'progres' => 0,
-                'penanggung_jawab_id' => null, // Bisa diisi nanti oleh admin
+                // Tanggal dibiarkan kosong (null)
+                // Status dan progres akan diisi oleh model boot dengan default value
             ]);
 
             \Log::info('Project berhasil dibuat dari invoice', [
@@ -243,7 +211,7 @@ class Invoice extends Model
 
             // Update nama project jika layanan berubah
             if ($this->nama_layanan && $project->nama != $this->nama_layanan) {
-                $project->nama = "Project: " . $this->nama_layanan . " - " . $this->company_name;
+                $project->nama = $this->nama_layanan;
             }
 
             // Update harga jika berubah
@@ -251,15 +219,9 @@ class Invoice extends Model
                 $project->harga = $this->total;
             }
 
-            // Update deskripsi
-            $newDescription = "Project berdasarkan Invoice #" . $this->invoice_no . "\n\n";
-            $newDescription .= "Klien: " . $this->client_name . "\n";
-            $newDescription .= "Perusahaan: " . $this->company_name . "\n";
-            $newDescription .= "Layanan: " . $this->nama_layanan . "\n";
-            $newDescription .= "Deskripsi Invoice: " . $this->description;
-            
-            if ($project->deskripsi != $newDescription) {
-                $project->deskripsi = $newDescription;
+            // Update deskripsi jika berubah
+            if ($project->deskripsi != $this->description) {
+                $project->deskripsi = $this->description ?? '';
             }
 
             // Simpan perubahan

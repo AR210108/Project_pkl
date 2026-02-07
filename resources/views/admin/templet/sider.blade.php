@@ -268,13 +268,14 @@
                 <span class="material-icons sidebar-icon">handshake</span>
                 <span class="sidebar-text">Data Layanan</span>
             </a>
-
-            <!-- Menu Data Project -->
+            
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/admin/data_project" data-page="data_project">
-                <span class="material-icons sidebar-icon">dashboard</span>
-                <span class="sidebar-text">Data Project</span>
+                href="/admin/perusahaan" data-page="perusahaan">
+                <span class="material-icons sidebar-icon">business</span>
+                <span class="sidebar-text">Data Perusahaan</span>
             </a>
+
+
 
             <!-- ============================================ -->
             <!-- DITAMBAHKAN: Menu Data Perusahaan -->
@@ -308,11 +309,13 @@
                 </div>
             </div>
 
+                        <!-- Menu Data Project -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/admin/perusahaan" data-page="perusahaan">
-                <span class="material-icons sidebar-icon">business</span>
-                <span class="sidebar-text">Data Perusahaan</span>
+                href="/admin/data_project" data-page="data_project">
+                <span class="material-icons sidebar-icon">dashboard</span>
+                <span class="sidebar-text">Data Project</span>
             </a>
+
 
             <!-- Catatan Rapat -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"

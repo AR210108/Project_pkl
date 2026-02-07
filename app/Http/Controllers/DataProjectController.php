@@ -103,10 +103,11 @@ class DataProjectController extends Controller
             'nama' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'harga' => 'required|numeric|min:0',
-            'tanggal_mulai_pengerjaan' => 'required|date',
-            'tanggal_selesai_pengerjaan' => 'nullable|date|after:tanggal_mulai_pengerjaan',
+            // Biarkan tanggal pengerjaan/kerjasama kosong saat pembuatan; diisi lewat edit
+            'tanggal_mulai_pengerjaan' => 'nullable|date',
+            'tanggal_selesai_pengerjaan' => 'nullable|date',
             'tanggal_mulai_kerjasama' => 'nullable|date',
-            'tanggal_selesai_kerjasama' => 'nullable|date|after:tanggal_mulai_kerjasama',
+            'tanggal_selesai_kerjasama' => 'nullable|date',
             'status_pengerjaan' => 'required|in:pending,dalam_pengerjaan,selesai,dibatalkan',
             'status_kerjasama' => 'required|in:aktif,selesai,ditangguhkan',
             'progres' => 'required|integer|min:0|max:100',
@@ -165,9 +166,8 @@ class DataProjectController extends Controller
             'tanggal_selesai_pengerjaan' => 'nullable|date|after:tanggal_mulai_pengerjaan',
             'tanggal_mulai_kerjasama' => 'nullable|date',
             'tanggal_selesai_kerjasama' => 'nullable|date|after:tanggal_mulai_kerjasama',
-            'status_pengerjaan' => 'required|in:pending,dalam_pengerjaan,selesai,dibatalkan',
+            // Hapus pengeditan langsung untuk progres dan status_pengerjaan dari admin update
             'status_kerjasama' => 'required|in:aktif,selesai,ditangguhkan',
-            'progres' => 'required|integer|min:0|max:100',
         ]);
 
         if ($validator->fails()) {
@@ -184,6 +184,7 @@ class DataProjectController extends Controller
         try {
             $project = Project::findOrFail($id);
             
+            // Hanya perbolehkan admin mengubah field non-progres dan non-status_pengerjaan
             $project->update([
                 'nama' => $request->nama,
                 'deskripsi' => $request->deskripsi,
@@ -191,9 +192,7 @@ class DataProjectController extends Controller
                 'tanggal_selesai_pengerjaan' => $request->tanggal_selesai_pengerjaan,
                 'tanggal_mulai_kerjasama' => $request->tanggal_mulai_kerjasama,
                 'tanggal_selesai_kerjasama' => $request->tanggal_selesai_kerjasama,
-                'status_pengerjaan' => $request->status_pengerjaan,
                 'status_kerjasama' => $request->status_kerjasama,
-                'progres' => $request->progres,
             ]);
             
             return response()->json([

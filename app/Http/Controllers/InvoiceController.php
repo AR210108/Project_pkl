@@ -147,7 +147,7 @@ public function store(Request $request)
         'kontak' => 'nullable|string|max:255', // Pastikan field ini divalidasi
         'client_name' => 'required|string|max:255',
         'nama_layanan' => 'required|string|max:255',
-        'status_pembayaran' => 'required|in:pembayaran awal,lunas',
+        'status_pembayaran' => 'required|in:down payment,lunas',
         'payment_method' => 'required|string',
         'description' => 'nullable|string',
         'subtotal' => 'required|numeric|min:0',
@@ -372,7 +372,7 @@ public function store(Request $request)
                 'kontak' => 'nullable|string|max:255', // Tambahkan validasi kontak
                 'client_name' => 'required|string|max:255',
                 'nama_layanan' => 'required|string|max:255',
-                'status_pembayaran' => 'required|in:pembayaran awal,lunas',
+                'status_pembayaran' => 'required|in:down payment,lunas',
                 'payment_method' => 'required|string',
                 'description' => 'nullable|string',
                 'subtotal' => 'required|numeric|min:0',

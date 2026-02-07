@@ -108,41 +108,20 @@ class Project extends Model
     {
         parent::boot();
 
-        // Ketika project dibuat, ambil data dari invoice
+        // Ketika project dibuat dari invoice, Invoice model sudah menghandle data
+        // Method boot ini hanya untuk fallback atau ketika project dibuat manual
         static::creating(function ($project) {
-            if ($project->invoice_id && !$project->nama) {
-                $invoice = Invoice::find($project->invoice_id);
-                if ($invoice) {
-                    $project->nama = $invoice->judul ?? 'Project dari Invoice #' . $invoice->id;
-                    $project->deskripsi = $invoice->deskripsi ?? '';
-                    $project->harga = $invoice->total ?? 0;
-                    
-                    // Ambil tanggal dari invoice jika ada
-                    if ($invoice->tanggal_mulai && !$project->tanggal_mulai_kerjasama) {
-                        $project->tanggal_mulai_kerjasama = $invoice->tanggal_mulai;
-                    }
-                    
-                    if ($invoice->tanggal_selesai && !$project->tanggal_selesai_kerjasama) {
-                        $project->tanggal_selesai_kerjasama = $invoice->tanggal_selesai;
-                    }
-                }
-            }
-            
-            // Set tanggal mulai kerjasama ke tanggal sekarang jika tidak diisi
-            if (!$project->tanggal_mulai_kerjasama) {
-                $project->tanggal_mulai_kerjasama = now();
-            }
-            
-            // Set default status
+            // Jika status tidak diset, gunakan default
             if (!$project->status_kerjasama) {
                 $project->status_kerjasama = 'aktif';
             }
-            
+
             if (!$project->status_pengerjaan) {
                 $project->status_pengerjaan = 'pending';
             }
-            
-            if (!$project->progres) {
+
+            // Progres default 0 jika tidak diset
+            if (!isset($project->progres) || $project->progres === null) {
                 $project->progres = 0;
             }
         });

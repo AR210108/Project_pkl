@@ -605,7 +605,7 @@
                                         <label for="filterAllStatus" class="text-sm">Semua Status</label>
                                     </div>
                                     <div class="filter-option flex items-center gap-2 mb-1">
-                                        <input type="checkbox" id="filterPembayaranAwal" value="pembayaran awal">
+                                        <input type="checkbox" id="filterPembayaranAwal" value="down payment">
                                         <label for="filterPembayaranAwal" class="text-sm">Down Payment</label>
                                     </div>
                                     <div class="filter-option flex items-center gap-2">
@@ -652,10 +652,12 @@
                                             <th style="min-width: 60px;">No</th>
                                             <th style="min-width: 120px;">Tanggal</th>
                                             <th style="min-width: 180px;">Nama Perusahaan</th>
+                                            <th style="min-width: 120px;">Nomor Perusahaan</th>
                                             <th style="min-width: 150px;">Nomor Invoice</th>
                                             <th style="min-width: 150px;">Nama Klien</th>
                                             <th style="min-width: 150px;">Nama Layanan</th>
                                             <th style="min-width: 200px;">Alamat</th>
+                                            <th style="min-width: 200px;">Deskripsi
                                             <th style="min-width: 120px;">Subtotal</th>
                                             <th style="min-width: 100px;">Pajak (%)</th>
                                             <th style="min-width: 120px;">Jumlah Pajak</th>
@@ -667,7 +669,7 @@
                                     </thead>
                                     <tbody id="desktopTableBody">
                                         <tr id="loadingRow">
-                                            <td colspan="14" class="px-6 py-4 text-center">
+                                            <td colspan="15" class="px-6 py-4 text-center">
                                                 <div class="flex justify-center items-center">
                                                     <div class="spinner"></div>
                                                     <span class="ml-2">Memuat data...</span>
@@ -675,7 +677,7 @@
                                             </td>
                                         </tr>
                                         <tr id="noDataRow" class="hidden">
-                                            <td colspan="14" class="px-6 py-4 text-center text-sm text-gray-500">
+                                            <td colspan="15" class="px-6 py-4 text-center text-sm text-gray-500">
                                                 Tidak ada data invoice
                                             </td>
                                         </tr>
@@ -821,11 +823,7 @@
                                     required>
                                 <span class="error-message" id="invoice_date_error"></span>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                                <textarea id="description" name="description" rows="2"
-                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"></textarea>
-                            </div>
+
                         </div>
                     </div>
 
@@ -854,7 +852,7 @@
                                 <select id="status_pembayaran" name="status_pembayaran"
                                     class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                                     required>
-                                    <option value="pembayaran awal">Pembayaran Awal</option>
+                                    <option value="down payment">Down Payment</option>
                                     <option value="lunas">Lunas</option>
                                 </select>
                                 <span class="error-message" id="status_pembayaran_error"></span>
@@ -1054,7 +1052,7 @@
                             <select id="editStatusPembayaran" name="status_pembayaran"
                                 class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
                                 required>
-                                <option value="pembayaran awal">Pembayaran Awal</option>
+                                <option value="down payment">Down Payment</option>
                                 <option value="lunas">Lunas</option>
                             </select>
                             <span class="error-message" id="edit_status_pembayaran_error"></span>
@@ -1295,16 +1293,6 @@
                             <span class="material-icons-outlined">close</span>
                             Tutup
                         </button>
-                        <button onclick="printInvoiceModalFromDetail()"
-                            class="px-5 py-2.5 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
-                            <span class="material-icons-outlined">print</span>
-                            Cetak
-                        </button>
-                        <button onclick="editInvoiceFromDetail()"
-                            class="px-5 py-2.5 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2">
-                            <span class="material-icons-outlined">edit</span>
-                            Edit
-                        </button>
                     </div>
                 </div>
             </div>
@@ -1430,7 +1418,7 @@
             try {
                 console.log('Memuat data perusahaan dari endpoint...');
 
-                const response = await fetch('/admin/perusahaan/data?ajax=1&for_dropdown=true', {
+                const response = await fetch('/perusahaan/data?ajax=1&for_dropdown=true', {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
@@ -1562,8 +1550,13 @@
             $(perusahaanSelect).select2({
                 placeholder: 'Pilih Perusahaan',
                 allowClear: true,
-                dropdownParent: $('#buatInvoiceModal'),
                 width: '100%'
+            });
+
+            // Setup change event listener SETELAH Select2 diinisialisasi
+            $(perusahaanSelect).off('change').on('change', function() {
+                console.log('Perusahaan dropdown changed - calling handlePerusahaanChange');
+                handlePerusahaanChange(this);
             });
 
             console.log('Select2 perusahaan diinisialisasi dengan', dataPerusahaan.length, 'options');
@@ -1783,7 +1776,6 @@ async function loadDataLayanan() {
                 layananSelect.select2({
                     placeholder: 'Pilih Layanan',
                     allowClear: true,
-                    dropdownParent: $('#buatInvoiceModal'),
                     width: '100%',
                     templateResult: formatLayananOption,
                     templateSelection: formatLayananSelection
@@ -1798,7 +1790,6 @@ async function loadDataLayanan() {
                 editLayananSelect.select2({
                     placeholder: 'Pilih Layanan',
                     allowClear: true,
-                    dropdownParent: $('#editInvoiceModal'),
                     width: '100%',
                     templateResult: formatLayananOption,
                     templateSelection: formatLayananSelection
@@ -2125,7 +2116,6 @@ async function loadDataLayanan() {
                 $('#payment_method').select2({
                     placeholder: 'Pilih Metode Pembayaran',
                     minimumResultsForSearch: -1,
-                    dropdownParent: $('#buatInvoiceModal'),
                     width: '100%'
                 });
                 console.log('Select2 payment_method initialized');
@@ -2136,7 +2126,6 @@ async function loadDataLayanan() {
                 $('#editPaymentMethod').select2({
                     placeholder: 'Pilih Metode Pembayaran',
                     minimumResultsForSearch: -1,
-                    dropdownParent: $('#editInvoiceModal'),
                     width: '100%'
                 });
             }
@@ -2147,7 +2136,6 @@ async function loadDataLayanan() {
                 $('#status_pembayaran').select2({
                     placeholder: 'Pilih Status',
                     minimumResultsForSearch: -1,
-                    dropdownParent: $('#buatInvoiceModal'),
                     width: '100%'
                 });
                 console.log('Select2 status_pembayaran initialized');
@@ -2158,7 +2146,6 @@ async function loadDataLayanan() {
                 $('#editStatusPembayaran').select2({
                     placeholder: 'Pilih Status',
                     minimumResultsForSearch: -1,
-                    dropdownParent: $('#editInvoiceModal'),
                     width: '100%'
                 });
             }
@@ -2169,7 +2156,6 @@ async function loadDataLayanan() {
                 $(perusahaanSelect).select2({
                     placeholder: 'Pilih Perusahaan',
                     allowClear: true,
-                    dropdownParent: $('#buatInvoiceModal'),
                     width: '100%'
                 });
                 console.log('Select2 perusahaan initialized');
@@ -2238,23 +2224,17 @@ async function loadDataForCreateForm() {
         function setupSelectListeners() {
             console.log('Setting up select listeners...');
 
-            // Event listener untuk pilih perusahaan
-            const perusahaanSelect = document.getElementById('selectPerusahaan');
-            const clientNameInput = document.getElementById('client_name');
-            const companyAddressInput = document.getElementById('company_address');
-            const kontakInput = document.getElementById('kontakPerusahaan');
-            const descriptionInput = document.getElementById('description');
-
-            if (perusahaanSelect) {
-                // Hapus event listener sebelumnya jika ada
-                $(perusahaanSelect).off('change.select2');
-
-                $(perusahaanSelect).on('change.select2', function() {
-                    handlePerusahaanChange(this);
-                });
-            }
+            // Event listener untuk pilih perusahaan sudah di-setup di populatePerusahaanOptions
+            // Jadi setupSelectListeners hanya perlu untuk handler lainnya jika ada
+            console.log('Select listeners setup completed');
+        }
 
 function handlePerusahaanChange(selectElement) {
+    // Deklarasi elemen input di sini supaya bisa diakses
+    const clientNameInput = document.getElementById('client_name');
+    const companyAddressInput = document.getElementById('company_address');
+    const kontakInput = document.getElementById('kontakPerusahaan');
+    const descriptionInput = document.getElementById('description');
     const selectedOption = selectElement.options[selectElement.selectedIndex];
 
     if (selectedOption && selectedOption.value && selectedOption.value !== 'data_kosong') {
@@ -2318,9 +2298,6 @@ function handlePerusahaanChange(selectElement) {
     }
 }
 
-            console.log('Select listeners setup completed');
-        }
-
 function resetCreateForm() {
     console.log('Reset create form...');
 
@@ -2332,15 +2309,14 @@ function resetCreateForm() {
         'kontakHidden' // TAMBAHKAN INI
     ];
 
-    fieldsToReset.forEach(id => {
+    fieldsToReset.forEach(id => { 
         const element = document.getElementById(id);
         if (element) {
             if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
                 element.value = '';
             }
-        }
-    });
-
+        }        });
+''
     // Set default values
     const taxPercentage = document.getElementById('tax_percentage');
     if (taxPercentage) taxPercentage.value = '11';
@@ -2352,7 +2328,7 @@ function resetCreateForm() {
         const selectElement = $(`#${id}`);
         if (selectElement.length) {
             if (id === 'status_pembayaran') {
-                selectElement.val('pembayaran awal').trigger('change');
+                selectElement.val('down payment').trigger('change');
             } else {
                 selectElement.val(null).trigger('change');
             }
@@ -2511,7 +2487,7 @@ function resetCreateForm() {
             document.getElementById('detailDescription').textContent = description;
 
             // Status dengan styling
-            const status = invoice.status_pembayaran || 'pembayaran awal';
+            const status = invoice.status_pembayaran || 'down payment';
             const statusElement = document.getElementById('detailStatusBadge');
             const statusText = status.charAt(0).toUpperCase() + status.slice(1);
 
@@ -2521,7 +2497,7 @@ function resetCreateForm() {
             if (status === 'lunas') {
                 statusClass = 'detail-status-lunas';
                 statusIcon = '<span class="material-icons-outlined text-sm">check_circle</span>';
-            } else if (status === 'pembayaran awal') {
+            } else if (status === 'down payment') {
                 statusClass = 'detail-status-pembayaran-awal';
                 statusIcon = '<span class="material-icons-outlined text-sm">payments</span>';
             } else {
@@ -2572,10 +2548,10 @@ function resetCreateForm() {
                     statusIconElement.classList.add('bg-green-500');
                     icon.textContent = 'check_circle';
                     document.getElementById('detailStatusText').textContent = 'Lunas';
-                } else if (status === 'pembayaran awal') {
+                } else if (status === 'down payment') {
                     statusIconElement.classList.add('bg-blue-500');
                     icon.textContent = 'payments';
-                    document.getElementById('detailStatusText').textContent = 'Pembayaran Awal';
+                    document.getElementById('detailStatusText').textContent = 'Down Payment';
                 } else {
                     statusIconElement.classList.add('bg-yellow-500');
                     icon.textContent = 'pending';
@@ -2940,7 +2916,7 @@ function resetCreateForm() {
 
                     const statusPembayaranSelect = document.getElementById('editStatusPembayaran');
                     if (statusPembayaranSelect) {
-                        statusPembayaranSelect.value = invoice.status_pembayaran || 'pembayaran awal';
+                        statusPembayaranSelect.value = invoice.status_pembayaran || 'down payment';
                         $(statusPembayaranSelect).trigger('change');
                     }
 
@@ -2989,7 +2965,7 @@ function resetCreateForm() {
 
                         const statusPembayaranSelect = document.getElementById('editStatusPembayaran');
                         if (statusPembayaranSelect) {
-                            statusPembayaranSelect.value = invoice.status_pembayaran || 'pembayaran awal';
+                            statusPembayaranSelect.value = invoice.status_pembayaran || 'down payment';
                             $(statusPembayaranSelect).trigger('change');
                         }
 
@@ -3121,7 +3097,7 @@ function resetCreateForm() {
                 const total = invoice.total || 0;
                 const taxPercentage = invoice.tax_percentage || (subtotal > 0 ? ((taxAmount / subtotal) * 100) : 0);
                 const namaLayanan = invoice.nama_layanan || '';
-                const statusPembayaran = invoice.status_pembayaran || 'pembayaran awal';
+                const statusPembayaran = invoice.status_pembayaran || 'down payment';
 
                 document.getElementById('printInvoiceContent').innerHTML = `
         <div style="padding: 30px; background: white; max-width: 800px; margin: 0 auto; font-family: 'Poppins', sans-serif;">
@@ -3211,7 +3187,7 @@ function resetCreateForm() {
             if (status === 'lunas') {
                 return '<span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Lunas</span>';
             } else {
-                return '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">Pembayaran Awal</span>';
+                return '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">Down Payment</span>';
             }
         }
 
@@ -3236,6 +3212,7 @@ function resetCreateForm() {
             currentPageInvoices.forEach((invoice, index) => {
                 const rowNumber = startIndex + index + 1;
                 const namaPerusahaan = invoice.company_name || invoice.nama_perusahaan;
+                const kontak = invoice.kontak || '-';
                 const nomorOrder = invoice.invoice_no || invoice.nomor_order;
                 const namaKlien = invoice.client_name || invoice.nama_klien;
                 const alamat = invoice.company_address || invoice.alamat;
@@ -3248,13 +3225,14 @@ function resetCreateForm() {
                 const total = invoice.total || 0;
                 const taxPercentage = invoice.tax_percentage || (subtotal > 0 ? ((taxAmount / subtotal) * 100) : 0);
                 const namaLayanan = invoice.nama_layanan || '';
-                const statusPembayaran = invoice.status_pembayaran || 'pembayaran awal';
+                const statusPembayaran = invoice.status_pembayaran || 'down payment';
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
         <td>${rowNumber}</td>
         <td>${tanggal}</td>
         <td>${namaPerusahaan}</td>
+        <td>${kontak}</td>
         <td>${nomorOrder}</td>
         <td>${namaKlien}</td>
         <td>${namaLayanan}</td>
@@ -3298,7 +3276,7 @@ function resetCreateForm() {
                 const total = invoice.total || 0;
                 const taxPercentage = invoice.tax_percentage || (subtotal > 0 ? ((taxAmount / subtotal) * 100) : 0);
                 const namaLayanan = invoice.nama_layanan || '';
-                const statusPembayaran = invoice.status_pembayaran || 'pembayaran awal';
+                const statusPembayaran = invoice.status_pembayaran || 'down payment';
                 const deskripsi = invoice.description || invoice.deskripsi || invoice.nama_layanan ||
                     'Tidak ada deskripsi';
 
@@ -3362,7 +3340,7 @@ function resetCreateForm() {
             const selectedStatus = [];
             if (!document.getElementById('filterAllStatus')?.checked) {
                 if (document.getElementById('filterPembayaranAwal')?.checked) {
-                    selectedStatus.push('pembayaran awal');
+                    selectedStatus.push('down payment');
                 }
                 if (document.getElementById('filterLunas')?.checked) {
                     selectedStatus.push('lunas');

@@ -138,6 +138,21 @@
             color: #92400e;
         }
         
+        .status-Pending {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #1e40af;
+        }
+        
+        .status-DalamPengerjaan {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #92400e;
+        }
+        
+        .status-Selesai {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #065f46;
+        }
+        
         /* Custom styles untuk transisi */
         .sidebar-transition {
             transition: transform 0.3s ease-in-out;
@@ -554,7 +569,7 @@
                                                         {{ Str::limit($item->deskripsi, 40) }}
                                                     </td>
                                                     <td style="min-width: 120px;">{{ $item->harga }}</td>
-                                                    <td style="min-width: 120px;">{{ $item->deadline->format('Y-m-d') }}</td>
+                                                    <td style="min-width: 120px;">{{ $item->deadline ? $item->deadline->format('Y-m-d') : '-' }}</td>
                                                     <td style="min-width: 180px;">
                                                         @if($item->penanggungJawab)
                                                             <div class="flex items-center gap-2">
@@ -579,7 +594,7 @@
                                                     <td style="min-width: 120px;">
                                                         <span class="status-badge 
                                                             @if($item->status == 'Pending') status-Pending 
-                                                            @elseif($item->status == 'Dalam Pengerjaan ') status-Dalam Pengerjaan 
+                                                            @elseif($item->status == 'Dalam Pengerjaan') status-DalamPengerjaan 
                                                             @elseif($item->status == 'Selesai') status-Selesai 
                                                             @else status-todo @endif">
                                                             {{ $item->status }}
@@ -588,7 +603,16 @@
                                                     <td style="min-width: 120px; text-align: center;">
                                                         <div class="flex justify-center gap-2">
                                                             <button class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                                onclick="openEditModal({{ $item->id }}, '{{ $item->nama }}', '{{ $item->deskripsi }}', '{{ $item->harga }}', '{{ $item->deadline->format('Y-m-d') }}', {{ $item->progres }}, '{{ $item->status }}', {{ $item->penanggung_jawab_id ?? 'null' }})"
+                                                                onclick="openEditModal(
+                                                                    {{ $item->id }}, 
+                                                                    '{{ addslashes($item->nama) }}', 
+                                                                    '{{ addslashes($item->deskripsi) }}', 
+                                                                    '{{ $item->harga }}', 
+                                                                    '{{ $item->deadline ? $item->deadline->format('Y-m-d') : '' }}', 
+                                                                    {{ $item->progres }}, 
+                                                                    '{{ $item->status }}', 
+                                                                    {{ $item->penanggung_jawab_id ?? 'null' }}
+                                                                )"
                                                                 title="Tentukan Penanggung Jawab">
                                                                 <span class="material-icons-outlined">edit</span>
                                                             </button>
@@ -602,6 +626,7 @@
                             </div>
                             
                             <!-- Desktop Pagination -->
+                            @if($project->lastPage() > 1)
                             <div class="desktop-pagination">
                                 <button class="desktop-nav-btn" @if($project->currentPage() == 1) disabled @endif onclick="window.location.href='{{ $project->previousPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_left</span>
@@ -618,6 +643,7 @@
                                     <span class="material-icons-outlined text-sm">chevron_right</span>
                                 </button>
                             </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -657,29 +683,31 @@
                     </div>
                     
                     <!-- Field untuk mengubah penanggung jawab -->
-<select name="penanggung_jawab_id" id="editPenanggungJawab" 
-    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required>
-    <option value="">Pilih Manager Divisi</option>
-    @foreach($managers as $manager)
-        @php
-            // Gunakan data() untuk akses aman
-            $id = data_get($manager, 'id', '');
-            $name = data_get($manager, 'name', 'Nama tidak tersedia');
-            $email = data_get($manager, 'email', 'Email tidak tersedia');
-            $divisi_id = data_get($manager, 'divisi_id', '');
-        @endphp
-        
-        @if($id && $name)
-            <option value="{{ $id }}">
-                {{ $name }} 
-                @if($divisi_id)
-                    - Divisi {{ $divisi_id }}
-                @endif
-                ({{ $email }})
-            </option>
-        @endif
-    @endforeach
-</select>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-500 mb-2">Pilih Manager Divisi</label>
+                        <select name="penanggung_jawab_id" id="editPenanggungJawab" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <option value="">Pilih Manager Divisi</option>
+                            @foreach($managers as $manager)
+                                @php
+                                    $id = data_get($manager, 'id', '');
+                                    $name = data_get($manager, 'name', 'Nama tidak tersedia');
+                                    $email = data_get($manager, 'email', 'Email tidak tersedia');
+                                    $divisi_id = data_get($manager, 'divisi_id', '');
+                                @endphp
+                                
+                                @if($id && $name)
+                                    <option value="{{ $id }}">
+                                        {{ $name }} 
+                                        @if($divisi_id)
+                                            - Divisi {{ $divisi_id }}
+                                        @endif
+                                        ({{ $email }})
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
                     
                     <!-- Fields hidden lainnya (tetap dikirim tapi tidak bisa diubah) -->
                     <input type="hidden" name="deskripsi" id="editDeskripsi">
@@ -704,7 +732,7 @@
         </button>
     </div>
 
-   <script>
+    <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Modal elements
         const editModal = document.getElementById('editModal');
@@ -837,43 +865,42 @@
         }
     });
 
-    // Open edit modal with data - HANYA UNTUK MENETAPKAN PENANGGUNG JAWAB
-// Open edit modal with data - untuk menetapkan penanggung jawab
-function openEditModal(id, nama, deskripsi, harga, deadline, progres, status, penanggungJawabId) {
-    document.getElementById('editId').value = id;
-    
-    // Tampilkan info project (readonly)
-    document.getElementById('editNamaDisplay').value = nama;
-    document.getElementById('editNama').value = nama;
-    
-    document.getElementById('editDeadlineDisplay').value = deadline;
-    document.getElementById('editDeadline').value = deadline;
-    
-    // Set hidden fields lainnya
-    document.getElementById('editDeskripsi').value = deskripsi;
-    document.getElementById('editHarga').value = harga;
-    document.getElementById('editProgres').value = progres;
-    document.getElementById('editStatus').value = status;
-    
-    // Set penanggung jawab dropdown (focus utama)
-    const penanggungJawabSelect = document.getElementById('editPenanggungJawab');
-    if (penanggungJawabId && penanggungJawabId !== 'null') {
-        penanggungJawabSelect.value = penanggungJawabId;
-    } else {
-        penanggungJawabSelect.value = '';
+    // Open edit modal with data - untuk menetapkan penanggung jawab
+    function openEditModal(id, nama, deskripsi, harga, deadline, progres, status, penanggungJawabId) {
+        document.getElementById('editId').value = id;
+        
+        // Tampilkan info project (readonly)
+        document.getElementById('editNamaDisplay').value = nama;
+        document.getElementById('editNama').value = nama;
+        
+        document.getElementById('editDeadlineDisplay').value = deadline;
+        document.getElementById('editDeadline').value = deadline;
+        
+        // Set hidden fields lainnya
+        document.getElementById('editDeskripsi').value = deskripsi;
+        document.getElementById('editHarga').value = harga;
+        document.getElementById('editProgres').value = progres;
+        document.getElementById('editStatus').value = status;
+        
+        // Set penanggung jawab dropdown (focus utama)
+        const penanggungJawabSelect = document.getElementById('editPenanggungJawab');
+        if (penanggungJawabId && penanggungJawabId !== 'null') {
+            penanggungJawabSelect.value = penanggungJawabId;
+        } else {
+            penanggungJawabSelect.value = '';
+        }
+        
+        // Update form action
+        const editForm = document.getElementById('editForm');
+        editForm.action = `/general_manajer/data_project/${id}`;
+        
+        // Focus ke dropdown saat modal terbuka
+        document.getElementById('editModal').classList.remove('hidden');
+        setTimeout(() => {
+            penanggungJawabSelect.focus();
+        }, 100);
     }
-    
-    // Update form action
-    const editForm = document.getElementById('editForm');
-    editForm.action = `/general_manajer/data_project/${id}`;
-    
-    // Focus ke dropdown saat modal terbuka
-    document.getElementById('editModal').classList.remove('hidden');
-    setTimeout(() => {
-        penanggungJawabSelect.focus();
-    }, 100);
-}
-</script>
+    </script>
     
     <!-- Add CSRF token meta tag -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
