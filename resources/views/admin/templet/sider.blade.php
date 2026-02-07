@@ -302,7 +302,7 @@
                     </a>
 
                     <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        href="{{ route('admin.kwitansi.index') }}" data-page="list_surat">
+                        href="/admin/kwitansi/index" data-page="list_surat">
                         <span class="material-icons sidebar-icon">list_alt</span>
                         <span class="sidebar-text">Kwitansi</span>
                     </a>

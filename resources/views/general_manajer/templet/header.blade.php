@@ -273,27 +273,12 @@
 
             <!-- Menu Data Project -->
             <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="{{ route('general_manajer.data_project') }}" data-page="data_project"
-                data-path="general_manajer/data_project">
+                href="{{ route('general_manajer.data_project.index') }}" data-page="data_project" data-path="general_manajer/data_project">
                 <span class="material-icons sidebar-icon">dashboard</span>
                 <span class="sidebar-text">Data Project</span>
             </a>
 
-            <!-- Menu Data Perusahaan (DITAMBAHKAN) -->
-            <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="{{ route('general_manajer.perusahaan.index') }}" data-page="perusahaan"
-                data-path="general_manajer/perusahaan">
-                <span class="material-icons sidebar-icon">business</span>
-                <span class="sidebar-text">Data Perusahaan</span>
-            </a>
-
-            <!-- Menu Kelola Tugas -->
-            <a class="nav-item allowed-active flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="{{ route('general_manajer.kelola_tugas') }}" data-page="kelola_tugas"
-                data-path="general_manajer/kelola_tugas">
-                <span class="material-icons sidebar-icon">assignment</span>
-                <span class="sidebar-text">Kelola Tugas</span>
-            </a>
+         
 
             <!-- Menu Tim dan Divisi (DIPERBAIKI) -->
             <!-- Ditambahkan class allowed-active dan atribut data-path -->

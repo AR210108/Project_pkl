@@ -1418,7 +1418,7 @@
             try {
                 console.log('Memuat data perusahaan dari endpoint...');
 
-                const response = await fetch('/perusahaan/data?ajax=1&for_dropdown=true', {
+                const response = await fetch('/admin/perusahaan/data', {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',

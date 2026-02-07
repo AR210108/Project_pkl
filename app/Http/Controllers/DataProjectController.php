@@ -2,38 +2,49 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Invoice;
 use App\Models\Project;
 use App\Models\User;
-use App\Models\Invoice; // Changed from Layanan
+use App\Models\Layanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class DataProjectController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource for General Manager.
      */
     public function index(Request $request)
     {
-        $search = $request->query('search');
+        $query = Project::with(['layanan', 'penanggungJawab']);
 
-        $project = Project::with(['invoice', 'penanggungJawab'])
-            ->when($search, function ($query, $search) {
-                $query->where('nama', 'like', "%{$search}%")
-                      ->orWhere('deskripsi', 'like', "%{$search}%")
-                      ->orWhereHas('penanggungJawab', function ($q) use ($search) {
-                          $q->where('name', 'like', "%{$search}%");
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->paginate(3)
-            ->withQueryString();
+        // Search Logic (Search by Nama Project atau Nama Penanggung Jawab)
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('nama', 'like', '%' . $searchTerm . '%')
+                  ->orWhereHas('penanggungJawab', function($subQ) use ($searchTerm) {
+                      $subQ->where('name', 'like', '%' . $searchTerm . '%');
+                  });
+            });
+        }
 
+        // Filter by Penanggung Jawab
+        if ($request->has('penanggung_jawab_id') && $request->penanggung_jawab_id != '') {
+            $query->where('penanggung_jawab_id', $request->penanggung_jawab_id);
+        }
+
+        $projects = $query->orderBy('id', 'desc')->paginate(3)->withQueryString();
+
+        // Ambil daftar manager divisi untuk dropdown filter
         $managers = User::where('role', 'manager_divisi')
             ->orderBy('name', 'asc')
             ->get(['id', 'name', 'email', 'divisi_id']);
 
-        return view('general_manajer.data_project', compact('project', 'managers', 'search'));
+        return view('general_manajer.data_project', compact('projects', 'managers'));
     }
 
     public function admin(Request $request)
@@ -81,16 +92,68 @@ class DataProjectController extends Controller
         return view('admin.data_project', compact('project', 'invoices'));
     }
 
+    /**
+     * Display a listing of the resource for Manager Divisi.
+     * PERBAIKAN: Menggunakan $projects (plural) bukan $project
+     */
     public function managerDivisi(Request $request)
     {
         $user = auth()->user();
 
-        $projects = Project::with(['invoice', 'penanggungJawab'])
-            ->where('penanggung_jawab_id', $user->id)
-            ->orderBy('id', 'desc')
-            ->paginate(3);
+        // Log untuk debugging
+        Log::info('Manager Divisi accessing projects', [
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'user_role' => $user->role,
+            'user_divisi' => $user->divisi,
+            'user_divisi_id' => $user->divisi_id
+        ]);
 
+        $query = Project::with(['layanan', 'penanggungJawab'])
+            ->where('penanggung_jawab_id', $user->id);
+
+        if ($request->has('search') && $request->search != '') {
+            $query->where('nama', 'like', '%' . $request->search . '%');
+        }
+
+        // PERBAIKAN: Gunakan $projects (plural) untuk konsistensi
+        $projects = $query->orderBy('id', 'desc')->paginate(10)->withQueryString();
+
+        // Log hasil query
+        Log::info('Projects found for manager divisi', [
+            'count' => $projects->count(),
+            'user_id' => $user->id,
+            'query' => $query->toSql()
+        ]);
+
+        // Jika tidak ada project, log warning
+        if ($projects->count() === 0) {
+            Log::warning('No projects found for manager divisi', [
+                'user_id' => $user->id,
+                'user_name' => $user->name
+            ]);
+        }
+
+        // PERBAIKAN: Kirim $projects (plural) ke view
         return view('manager_divisi.data_project', compact('projects'));
+    }
+
+    /**
+     * API: Get Projects Dropdown untuk Manager Divisi
+     */
+    public function getManagerProjectsDropdown()
+    {
+        $user = auth()->user();
+        
+        $projects = Project::where('penanggung_jawab_id', $user->id)
+            ->select(['id', 'nama', 'status', 'deadline'])
+            ->orderBy('nama', 'asc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $projects
+        ]);
     }
 
     /**
@@ -99,7 +162,7 @@ class DataProjectController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'invoice_id' => 'required|exists:invoices,id',
+            'layanan_id' => 'required|exists:layanans,id',
             'nama' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'harga' => 'required|numeric|min:0',
@@ -116,23 +179,23 @@ class DataProjectController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation error',
+                'message' => 'Validasi gagal',
                 'errors' => $validator->errors()
             ], 422);
         }
 
+        $deadline = $request->deadline . ' 23:59:59';
+
         $project = Project::create([
-            'invoice_id' => $request->invoice_id,
+            'layanan_id' => $request->layanan_id,
             'nama' => $request->nama,
             'deskripsi' => $request->deskripsi,
             'harga' => $request->harga,
-            'tanggal_mulai_pengerjaan' => $request->tanggal_mulai_pengerjaan,
-            'tanggal_selesai_pengerjaan' => $request->tanggal_selesai_pengerjaan,
-            'tanggal_mulai_kerjasama' => $request->tanggal_mulai_kerjasama,
-            'tanggal_selesai_kerjasama' => $request->tanggal_selesai_kerjasama,
-            'status_pengerjaan' => $request->status_pengerjaan,
-            'status_kerjasama' => $request->status_kerjasama,
-            'progres' => $request->progres,
+            'deadline' => $deadline,
+            'progres' => 0,
+            'status' => 'Pending',
+            'penanggung_jawab_id' => $request->penanggung_jawab_id ?? auth()->id(),
+            'created_by' => auth()->id(),
         ]);
         
         return response()->json([
@@ -147,7 +210,8 @@ class DataProjectController extends Controller
      */
     public function show(string $id)
     {
-        $project = Project::with(['invoice', 'penanggungJawab'])->findOrFail($id);
+        $project = Project::with(['layanan', 'penanggungJawab', 'tasks'])->findOrFail($id);
+        
         return response()->json([
             'success' => true,
             'data' => $project
@@ -156,9 +220,20 @@ class DataProjectController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * Untuk General Manager: update semua field termasuk penanggung jawab
      */
     public function update(Request $request, string $id)
     {
+        Log::info('DataProjectController update method called', [
+            'id' => $id, 
+            'request_data' => $request->all(),
+            'method' => $request->method()
+        ]);
+        
+        // Debug: log semua data yang diterima
+        Log::info('All request data:', $request->all());
+        
+        // Validasi untuk semua field yang dikirim dari form edit General Manager
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'deskripsi' => 'required|string',
@@ -171,12 +246,185 @@ class DataProjectController extends Controller
         ]);
 
         if ($validator->fails()) {
-            \Log::error('Update Validation Error:', $validator->errors()->toArray());
-            \Log::error('Request Data:', $request->all());
+            Log::error('Validation failed in update method', [
+                'errors' => $validator->errors()->toArray(),
+                'input' => $request->all()
+            ]);
             
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi gagal',
+                'errors' => $validator->errors(),
+                'input_received' => $request->all()
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+            
+            $project = Project::findOrFail($id);
+            
+            Log::info('Project found for update', [
+                'project_id' => $project->id,
+                'current_data' => [
+                    'nama' => $project->nama,
+                    'penanggung_jawab_id' => $project->penanggung_jawab_id,
+                    'status' => $project->status,
+                    'progres' => $project->progres,
+                    'harga' => $project->harga
+                ]
+            ]);
+            
+            // Debug: log data sebelum update
+            Log::info('Data before update:', [
+                'old_penanggung_jawab_id' => $project->penanggung_jawab_id,
+                'new_penanggung_jawab_id' => $request->penanggung_jawab_id
+            ]);
+            
+            $updateData = [
+                'nama' => $request->nama,
+                'deskripsi' => $request->deskripsi,
+                'harga' => $request->harga,
+                'deadline' => $request->deadline,
+                'progres' => $request->progres,
+                'status' => $request->status,
+                'penanggung_jawab_id' => $request->penanggung_jawab_id ?: null,
+            ];
+            
+            Log::info('Updating project with data', $updateData);
+            
+            $project->update($updateData);
+            
+            DB::commit();
+            
+            Log::info('Project updated successfully', [
+                'project_id' => $project->id,
+                'updated_data' => $project->fresh()->toArray()
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Project berhasil diupdate!',
+                'data' => $project->fresh(['layanan', 'penanggungJawab'])
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            DB::rollBack();
+            Log::error('Project not found: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Project tidak ditemukan!'
+            ], 404);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Update Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'id' => $id,
+                'request' => $request->all()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengupdate project: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update Progress & Status dari Manager Divisi.
+     */
+    public function updateManager(Request $request, string $id)
+    {
+        Log::info('UpdateManager method called', [
+            'id' => $id,
+            'user_id' => auth()->id(),
+            'request_data' => $request->all()
+        ]);
+
+        $project = Project::where('id', $id)
+                        ->where('penanggung_jawab_id', auth()->id())
+                        ->firstOrFail();
+
+        $validator = Validator::make($request->all(), [
+            'progres' => 'required|integer|min:0|max:100',
+            'status' => 'required|string', 
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+        
+        $statusRaw = $request->status;
+        $statusMap = [
+            'pending' => 'Pending',
+            'proses'  => 'Proses',
+            'selesai' => 'Selesai'
+        ];
+        
+        $statusFinal = $statusMap[strtolower($statusRaw)] ?? ucfirst(strtolower($statusRaw));
+        
+        $allowedStatus = ['Pending', 'Proses', 'Selesai'];
+        if (!in_array($statusFinal, $allowedStatus)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Status tidak valid. Pilihan: Pending, Proses, Selesai'
+            ], 422);
+        }
+
+        $progres = (int) $request->progres;
+        
+        if ($progres == 100) {
+            $statusFinal = 'Selesai';
+        } elseif ($progres > 0 && $statusFinal === 'Pending') {
+            $statusFinal = 'Proses';
+        }
+        
+        $project->update([
+            'progres' => $progres,
+            'status' => $statusFinal,
+        ]);
+
+        Log::info('Project updated by manager divisi', [
+            'project_id' => $project->id,
+            'new_progres' => $progres,
+            'new_status' => $statusFinal,
+            'updated_by' => auth()->id()
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Progres dan status berhasil diupdate!',
+            'data' => $project
+        ]);
+    }
+
+    /**
+     * Update General Manager (Full Update - untuk method updategeneral).
+     */
+    public function updategeneral(Request $request, string $id)
+    {
+        Log::info('Updategeneral method called', ['id' => $id, 'request_data' => $request->all()]);
+        
+        $validator = Validator::make($request->all(), [
+            'nama' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
+            'harga' => 'required|numeric|min:0',
+            'deadline' => 'required|date',
+            'penanggung_jawab_id' => 'nullable|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            Log::error('Updategeneral validation failed', ['errors' => $validator->errors()->toArray()]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -195,116 +443,16 @@ class DataProjectController extends Controller
                 'status_kerjasama' => $request->status_kerjasama,
             ]);
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Project berhasil diupdate!',
-                'data' => $project
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Update Error: ' . $e->getMessage());
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengupdate project: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function updateManager(Request $request, string $id)
-    {
-        $validator = Validator::make($request->all(), [
-            'progres' => 'required|integer|min:0|max:100',
-            'status_pengerjaan' => 'required|in:pending,dalam_pengerjaan,selesai,dibatalkan',
-            'status_kerjasama' => 'required|in:aktif,selesai,ditangguhkan',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $project = Project::findOrFail($id);
-        
-        $project->update([
-            'progres' => (int) $request->progres,
-            'status_pengerjaan' => $request->status_pengerjaan,
-            'status_kerjasama' => $request->status_kerjasama,
-        ]);
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Project berhasil diupdate!',
-            'data' => $project
-        ]);
-    }
-
-    public function updategeneral(Request $request, string $id)
-    {
-        $validator = Validator::make($request->all(), [
-            'nama' => 'sometimes|string|max:255',
-            'deskripsi' => 'sometimes|string',
-            'harga' => 'sometimes|numeric|min:0',
-            'tanggal_mulai_pengerjaan' => 'sometimes|date',
-            'tanggal_selesai_pengerjaan' => 'nullable|date|after:tanggal_mulai_pengerjaan',
-            'tanggal_mulai_kerjasama' => 'nullable|date',
-            'tanggal_selesai_kerjasama' => 'nullable|date|after:tanggal_mulai_kerjasama',
-            'status_pengerjaan' => 'sometimes|in:pending,dalam_pengerjaan,selesai,dibatalkan',
-            'status_kerjasama' => 'sometimes|in:aktif,selesai,ditangguhkan',
-            'progres' => 'sometimes|integer|min:0|max:100',
-            'penanggung_jawab_id' => 'required|exists:users,id',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        try {
-            $project = Project::findOrFail($id);
-            
-            \Log::info('General Manager updating project ID: ' . $id, [
-                'old_data' => $project->toArray(),
-                'new_data' => $request->all()
-            ]);
-            
-            $updateData = [];
-            
-            // Update semua field jika ada
-            $fields = [
-                'nama', 'deskripsi', 'harga', 'tanggal_mulai_pengerjaan',
-                'tanggal_selesai_pengerjaan', 'tanggal_mulai_kerjasama',
-                'tanggal_selesai_kerjasama', 'status_pengerjaan',
-                'status_kerjasama', 'progres'
-            ];
-            
-            foreach ($fields as $field) {
-                if ($request->has($field)) {
-                    $updateData[$field] = $request->$field;
-                }
-            }
-            
-            // Field utama yang diubah General Manager
-            $updateData['penanggung_jawab_id'] = $request->penanggung_jawab_id;
-            
-            $project->update($updateData);
-            
-            \Log::info('Project updated by General Manager:', $project->toArray());
+            Log::info('Project updated via updategeneral', ['project' => $project->toArray()]);
             
             return response()->json([
                 'success' => true,
                 'message' => 'Project berhasil diupdate!',
                 'data' => $project
             ]);
-
+            
         } catch (\Exception $e) {
-            \Log::error('General Manager Update Error: ' . $e->getMessage(), [
+            Log::error('Updategeneral Error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
             
@@ -320,22 +468,41 @@ class DataProjectController extends Controller
      */
     public function destroy(string $id)
     {
-        $project = Project::findOrFail($id);
-        $project->delete();
+        try {
+            $project = Project::findOrFail($id);
+            $project->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Project berhasil dihapus!'
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Project berhasil dihapus!'
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Delete Error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus project: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
+    /**
+     * Filter/Refresh Table via AJAX.
+     */
     public function filterByUser(Request $request)
     {
         $user = auth()->user();
-        $projects = Project::query();
+        $projects = Project::query()->with(['layanan', 'penanggungJawab']);
+
+        if ($user->role === 'manager_divisi') {
+            $projects->where('penanggung_jawab_id', $user->id);
+        }
 
         if ($request->has('user_id') && $request->user_id) {
-            $projects->where('penanggung_jawab_id', $request->user_id);
+            if ($user->role !== 'manager_divisi') {
+                $projects->where('penanggung_jawab_id', $request->user_id);
+            }
         }
 
         $projects = $projects->orderBy('id', 'desc')->paginate(3);
@@ -345,68 +512,144 @@ class DataProjectController extends Controller
             'total' => $projects->total()
         ]);
     }
-
+    
     /**
-     * Sync project data from invoice
+     * Synchronize projects from layanan
      */
-    public function syncFromInvoice($invoiceId)
+    public function syncFromLayanan($layananId)
     {
         try {
-            $invoice = Invoice::findOrFail($invoiceId);
-            $projects = Project::where('invoice_id', $invoiceId)->get();
+            $layanan = Layanan::findOrFail($layananId);
+            $projects = Project::where('layanan_id', $layananId)->get();
             
             $updatedCount = 0;
             
             foreach ($projects as $project) {
                 $project->update([
-                    'nama' => $invoice->judul ?? 'Project dari Invoice #' . $invoice->id,
-                    'deskripsi' => $invoice->deskripsi ?? '',
-                    'harga' => $invoice->total ?? 0,
+                    'nama' => $layanan->nama_layanan,
+                    'deskripsi' => $layanan->deskripsi,
+                    'harga' => $layanan->harga,
                 ]);
                 $updatedCount++;
             }
             
             return response()->json([
                 'success' => true,
-                'message' => "{$updatedCount} project berhasil disinkronisasi dari invoice.",
+                'message' => "{$updatedCount} project berhasil disinkronisasi dari layanan.",
                 'data' => [
-                    'invoice' => $invoice,
+                    'layanan' => $layanan,
                     'updated_projects_count' => $updatedCount
                 ]
             ]);
             
         } catch (\Exception $e) {
+            Log::error('Sync Error: ' . $e->getMessage());
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal sinkronisasi: ' . $e->getMessage()
             ], 500);
         }
     }
-
+    
     /**
-     * Get invoice details for auto-fill
+     * Assign Penanggung Jawab saja (Method khusus untuk hanya mengubah penanggung jawab)
+     * Method alternatif jika hanya ingin mengubah penanggung jawab
      */
-    public function getInvoiceDetails($id)
+    public function assignResponsible(Request $request, string $id)
     {
+        Log::info('Assign responsible method called', [
+            'id' => $id, 
+            'request_data' => $request->all()
+        ]);
+        
+        $validator = Validator::make($request->all(), [
+            'penanggung_jawab_id' => 'nullable|exists:users,id',
+        ], [
+            'penanggung_jawab_id.exists' => 'Manager Divisi yang dipilih tidak valid',
+        ]);
+
+        if ($validator->fails()) {
+            Log::error('Assign responsible validation failed', ['errors' => $validator->errors()->toArray()]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
         try {
-            $invoice = Invoice::findOrFail($id);
+            DB::beginTransaction();
+            
+            $project = Project::findOrFail($id);
+            
+            $project->update([
+                'penanggung_jawab_id' => $request->penanggung_jawab_id ?: null,
+            ]);
+            
+            DB::commit();
+            
+            Log::info('Responsible assigned successfully', [
+                'project_id' => $project->id,
+                'new_responsible_id' => $project->penanggung_jawab_id
+            ]);
             
             return response()->json([
                 'success' => true,
-                'data' => [
-                    'nama' => $invoice->judul ?? 'Project dari Invoice #' . $invoice->id,
-                    'deskripsi' => $invoice->deskripsi ?? '',
-                    'harga' => $invoice->total ?? 0,
-                    'tanggal_mulai_kerjasama' => $invoice->tanggal_mulai ? $invoice->tanggal_mulai->format('Y-m-d') : null,
-                    'tanggal_selesai_kerjasama' => $invoice->tanggal_selesai ? $invoice->tanggal_selesai->format('Y-m-d') : null,
-                ]
+                'message' => 'Penanggung jawab berhasil ditetapkan!',
+                'data' => $project->fresh(['layanan', 'penanggungJawab'])
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            DB::rollBack();
+            Log::error('Project not found in assignResponsible: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Project tidak ditemukan!'
+            ], 404);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Assign Responsible Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menetapkan penanggung jawab: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Simple update method for just assigning responsible person
+     * Method yang lebih sederhana untuk debug
+     */
+    public function simpleUpdate(Request $request, string $id)
+    {
+        Log::info('Simple update called', ['id' => $id, 'data' => $request->all()]);
+        
+        try {
+            $project = Project::findOrFail($id);
+            
+            // Hanya update penanggung jawab
+            $project->update([
+                'penanggung_jawab_id' => $request->penanggung_jawab_id
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil update penanggung jawab',
+                'data' => $project
             ]);
             
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengambil data invoice: ' . $e->getMessage()
+                'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
     }
-}
+} 

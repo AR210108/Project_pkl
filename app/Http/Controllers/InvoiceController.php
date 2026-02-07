@@ -912,4 +912,66 @@ public function store(Request $request)
             ], 500);
         }
     }
+
+    /**
+     * Get invoices for kwitansi dropdown - API Endpoint
+     */
+    public function getInvoicesForKwitansi(Request $request)
+    {
+        try {
+            $invoices = Invoice::orderBy('invoice_date', 'desc')
+                ->get([
+                    'id',
+                    'invoice_no',
+                    'invoice_date',
+                    'company_name',
+                    'client_name',
+                    'total',
+                    'status_pembayaran'
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data invoice berhasil diambil',
+                'data' => $invoices
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting invoices for kwitansi: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data invoice',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get single invoice detail for kwitansi form - API Endpoint
+     */
+    public function getInvoiceDetailForKwitansi($id)
+    {
+        try {
+            $invoice = Invoice::findOrFail($id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data invoice berhasil diambil',
+                'data' => $invoice
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invoice tidak ditemukan'
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Error getting invoice detail for kwitansi: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil detail invoice',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Project;
+use Illuminate\Support\Facades\Log;
 
 class Invoice extends Model
 {
@@ -138,7 +139,7 @@ class Invoice extends Model
                 // Status dan progres akan diisi oleh model boot dengan default value
             ]);
 
-            \Log::info('Project berhasil dibuat dari invoice', [
+            Log::info('Project berhasil dibuat dari invoice', [
                 'invoice_id' => $this->id,
                 'project_id' => $project->id,
                 'invoice_no' => $this->invoice_no
@@ -147,7 +148,7 @@ class Invoice extends Model
             return $project;
 
         } catch (\Exception $e) {
-            \Log::error('Gagal membuat project dari invoice: ' . $e->getMessage(), [
+            Log::error('Gagal membuat project dari invoice: ' . $e->getMessage(), [
                 'invoice_id' => $this->id,
                 'error' => $e->getTraceAsString()
             ]);
@@ -188,11 +189,11 @@ class Invoice extends Model
                 'invoice_id' => $this->id,
             ]);
 
-            \Log::info('Order created from invoice (model)', ['order_id' => $order->id, 'invoice_id' => $this->id]);
+            Log::info('Order created from invoice (model)', ['order_id' => $order->id, 'invoice_id' => $this->id]);
 
             return $order;
         } catch (\Exception $e) {
-            \Log::error('Failed to create order from invoice (model): ' . $e->getMessage(), ['invoice_id' => $this->id]);
+            Log::error('Failed to create order from invoice (model): ' . $e->getMessage(), ['invoice_id' => $this->id]);
             return null;
         }
     }
@@ -227,7 +228,7 @@ class Invoice extends Model
             // Simpan perubahan
             $project->save();
 
-            \Log::info('Project berhasil disinkronisasi dengan invoice', [
+            Log::info('Project berhasil disinkronisasi dengan invoice', [
                 'invoice_id' => $this->id,
                 'project_id' => $project->id
             ]);
@@ -235,7 +236,7 @@ class Invoice extends Model
             return true;
 
         } catch (\Exception $e) {
-            \Log::error('Gagal sinkronisasi project dengan invoice: ' . $e->getMessage(), [
+            Log::error('Gagal sinkronisasi project dengan invoice: ' . $e->getMessage(), [
                 'invoice_id' => $this->id
             ]);
             return false;

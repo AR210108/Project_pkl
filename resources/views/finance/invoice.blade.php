@@ -718,8 +718,8 @@
                                 <span class="error-message" id="company_name_error"></span>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Kerjasama</label>
-                                <input type="text" id="jumlahKerjasama"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kontak Perusahaan</label>
+                                <input type="text" id="kontakPerusahaan"
                                     class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700"
                                     readonly>
                             </div>
@@ -1557,7 +1557,7 @@
         async function loadDataPerusahaan() {
             try {
                 // Ambil data perusahaan dari endpoint yang benar
-                const response = await fetch('/perusahaan/data', {
+                const response = await fetch('/admin/perusahaan/data', {
                     method: 'GET',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
@@ -1607,11 +1607,11 @@
             }
             dataPerusahaan.forEach(perusahaan => {
                 const option = document.createElement('option');
-                option.value = perusahaan.id;
+                option.value = perusahaan.nama_perusahaan;
                 option.textContent = perusahaan.nama_perusahaan;
                 option.setAttribute('data-klien', perusahaan.klien || '');
                 option.setAttribute('data-alamat', perusahaan.alamat || '');
-                option.setAttribute('data-kerjasama', perusahaan.jumlah_kerjasama || 0);
+                option.setAttribute('data-kontak', perusahaan.kontak || '');
                 perusahaanSelect.appendChild(option);
             });
             if (currentValue) {
@@ -1695,18 +1695,18 @@
                     if (!selectedOption || !selectedOption.value) return;
 
                     // Ambil data dari attribute option
-                    const jumlahKerjasama = selectedOption.getAttribute('data-kerjasama') || '';
                     const klien = selectedOption.getAttribute('data-klien') || '';
                     const alamat = selectedOption.getAttribute('data-alamat') || '';
+                    const kontak = selectedOption.getAttribute('data-kontak') || '';
 
                     // Isi ke input form jika ada
-                    const jumlahKerjasamaInput = document.getElementById('jumlahKerjasama');
                     const klienInput = document.getElementById('client_name');
                     const alamatInput = document.getElementById('company_address');
+                    const kontakInput = document.getElementById('kontakPerusahaan');
 
-                    if (jumlahKerjasamaInput) jumlahKerjasamaInput.value = jumlahKerjasama;
                     if (klienInput) klienInput.value = klien;
                     if (alamatInput) alamatInput.value = alamat;
+                    if (kontakInput) kontakInput.value = kontak;
                 });
             }
 

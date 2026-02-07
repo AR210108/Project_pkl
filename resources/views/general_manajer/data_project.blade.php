@@ -525,7 +525,7 @@
                                 Daftar Project
                             </h3>
                             <div class="flex items-center gap-2">
-                                <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light">{{ $project->total() }}</span> project</span>
+                                <span class="text-sm text-text-muted-light">Total: <span class="font-semibold text-text-light">{{ $projects->total() }}</span> project</span>
                             </div>
                         </div>
                         <div class="panel-body">
@@ -561,9 +561,9 @@
                                             </tr>
                                         </thead>
                                         <tbody id="desktopTableBody">
-                                            @foreach($project as $index => $item)
+                                            @foreach($projects as $index => $item)
                                                 <tr>
-                                                    <td style="min-width: 60px;">{{ ($project->currentPage() - 1) * $project->perPage() + $index + 1 }}</td>
+                                                    <td style="min-width: 60px;">{{ ($projects->currentPage() - 1) * $projects->perPage() + $index + 1 }}</td>
                                                     <td style="min-width: 200px;">{{ $item->nama }}</td>
                                                     <td style="min-width: 250px;" class="truncate-text" title="{{ $item->deskripsi }}">
                                                         {{ Str::limit($item->deskripsi, 40) }}
@@ -628,18 +628,18 @@
                             <!-- Desktop Pagination -->
                             @if($project->lastPage() > 1)
                             <div class="desktop-pagination">
-                                <button class="desktop-nav-btn" @if($project->currentPage() == 1) disabled @endif onclick="window.location.href='{{ $project->previousPageUrl() }}'">
+                                <button class="desktop-nav-btn" @if($projects->currentPage() == 1) disabled @endif onclick="window.location.href='{{ $projects->previousPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_left</span>
                                 </button>
                                 <div class="flex gap-1">
-                                    @for($i = 1; $i <= $project->lastPage(); $i++)
-                                        <button class="desktop-page-btn {{ $i == $project->currentPage() ? 'active' : '' }}" 
-                                            onclick="window.location.href='{{ $project->url($i) }}'">
+                                    @for($i = 1; $i <= $projects->lastPage(); $i++)
+                                        <button class="desktop-page-btn {{ $i == $projects->currentPage() ? 'active' : '' }}" 
+                                            onclick="window.location.href='{{ $projects->url($i) }}'">
                                             {{ $i }}
                                         </button>
                                     @endfor
                                 </div>
-                                <button class="desktop-nav-btn" @if($project->currentPage() == $project->lastPage()) disabled @endif onclick="window.location.href='{{ $project->nextPageUrl() }}'">
+                                <button class="desktop-nav-btn" @if($projects->currentPage() == $projects->lastPage()) disabled @endif onclick="window.location.href='{{ $projects->nextPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_right</span>
                                 </button>
                             </div>
