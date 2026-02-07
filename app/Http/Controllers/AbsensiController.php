@@ -393,8 +393,9 @@ public function rekapAbsensi()
     // KIRIM KE VIEW
     return view('pemilik.rekap_absensi', compact(
         'stats',
-        'formattedAbsensi',
+        'attendances',
         'ketidakhadiran',
+        'formattedAbsensi',
         'users',
         'usersList',
         'selectedDivision',
@@ -677,10 +678,6 @@ private function getStatusKehadiran($absen)
     }
 
    /**
- * Menampilkan halaman rekap absensi untuk General Manajer
- * 
- * @return \Illuminate\View\View
- */
     private function markAbsentEmployees($date)
     {
         if (!$this->isValidDate($date)) {

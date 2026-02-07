@@ -18,20 +18,27 @@ class FinanceController extends Controller
 
         // Format data agar sama persis dengan struktur 'financeData' di JavaScript Anda
         // Ini penting agar JavaScript (filter, tabel, pagination) bisa membacanya
-        $formattedData = $transactions->map(function ($item) {
+        $financeData = $transactions->map(function ($item) {
             return [
-                'no' => $item->id,
-                'tanggal' => $item->tanggal->format('Y-m-d'),
-                'nama' => $item->nama,
+                'id' => $item->id,
+                'tanggal_transaksi' => $item->tanggal->format('Y-m-d'),
+                'nama_transaksi' => $item->nama,
                 'kategori' => $item->kategori,
                 'deskripsi' => $item->deskripsi,
-                'jumlah' => 'Rp ' . number_format($item->jumlah, 0, ',', '.'), // Format Rupiah string
-                'tipe' => $item->tipe,
+                'jumlah' => $item->jumlah,
+                'tipe_transaksi' => $item->tipe === 'income' ? 'pemasukan' : 'pengeluaran',
+                'nomor_transaksi' => $item->nama,
             ];
         });
 
-        // Kirim data ke view dengan nama variabel '$financeData'
-        return view('finance.pemasukan', ['financeData' => $formattedData]);
+        // Extract kategori unik dari financeData
+        $kategoriList = $transactions->pluck('kategori')->unique()->values();
+        $allKategori = $kategoriList->map(function ($kategori) {
+            return (object)['nama_kategori' => $kategori];
+        });
+
+        // Kirim data ke view
+        return view('finance.pemasukan', compact('financeData', 'allKategori'));
     }
 
     /**

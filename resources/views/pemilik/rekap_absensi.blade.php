@@ -600,23 +600,26 @@
                     <!-- Tanggal Mulai -->
                     <div>
                         <label for="tanggal_mulai" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</label>
-                        <input type="date" id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai', $tanggalMulai) }}" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                        <input type="date" id="tanggal_mulai" name="date" value="{{ old('date', $startDate ?? now()->format('Y-m-d')) }}" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
                     </div>
 
                     <!-- Tanggal Akhir -->
                     <div>
                         <label for="tanggal_akhir" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Akhir</label>
-                        <input type="date" id="tanggal_akhir" name="tanggal_akhir" value="{{ old('tanggal_akhir', $tanggalAkhir) }}" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                        <input type="date" id="tanggal_akhir" name="tanggal_akhir" value="{{ old('tanggal_akhir', $endDate ?? now()->format('Y-m-d')) }}" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" disabled>
                     </div>
 
                     <!-- Divisi -->
                     <div>
                         <label for="divisi" class="block text-sm font-medium text-gray-700 mb-2">Divisi</label>
-                        <select id="divisi" name="divisi" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                        <select id="divisi" name="divisi" class="w-full px-3 py-2 bg-white border border-border-light text-text-muted-light rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-primary">
                             <option value="">Semua Divisi</option>
-                            @foreach($divisions as $division)
-                                <option value="{{ $division }}" {{ old('divisi', $divisiFilter) == $division ? 'selected' : '' }}>
-                                    {{ ucfirst($division) }}
+                            @php
+                                $divisionsDropdown = \App\Models\Divisi::orderBy('divisi')->pluck('divisi');
+                            @endphp
+                            @foreach($divisionsDropdown as $div)
+                                <option value="{{ $div }}" {{ old('divisi', $selectedDivision ?? '') == $div ? 'selected' : '' }}>
+                                    {{ $div }}
                                 </option>
                             @endforeach
                         </select>
@@ -666,6 +669,7 @@
                                 <tr>
                                     <th style="min-width: 60px;">No</th>
                                     <th style="min-width: 200px;">Nama</th>
+                                    <th style="min-width: 150px;">Divisi</th>
                                     <th style="min-width: 120px;">Tanggal</th>
                                     <th style="min-width: 120px;">Jam Masuk</th>
                                     <th style="min-width: 120px;">Jam Keluar</th>
@@ -774,6 +778,12 @@
         const absensiData = @json($attendances);
         const ketidakhadiranData = @json($ketidakhadiran);
 
+        // Debug logging
+        console.log('Absensi Data:', absensiData);
+        console.log('Ketidakhadiran Data:', ketidakhadiranData);
+        console.log('Absensi Count:', absensiData.length);
+        console.log('Ketidakhadiran Count:', ketidakhadiranData.length);
+
         // Pagination variables for absensi
         const absensiItemsPerPage = 10;
         let absensiCurrentPage = 1;
@@ -785,6 +795,7 @@
         const ketidakhadiranTotalPages = Math.ceil(ketidakhadiranData.length / ketidakhadiranItemsPerPage);
 
         document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM Content Loaded - Initializing pagination...');
             initializeAbsensiPagination();
             initializeKetidakhadiranPagination();
         });
@@ -958,6 +969,8 @@
             const startIndex = (page - 1) * absensiItemsPerPage;
             const endIndex = Math.min(startIndex + absensiItemsPerPage, absensiData.length);
 
+            console.log('Rendering absensi table - Page:', page, 'Start:', startIndex, 'End:', endIndex, 'Total:', absensiData.length);
+
             const statusClassMap = {
                 'Tepat Waktu': 'status-hadir',
                 'Terlambat': 'status-terlambat',
@@ -968,10 +981,20 @@
                 'Dinas Luar': 'status-dinas'
             };
 
+            if (absensiData.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="7" style="text-align: center; padding: 20px;">Tidak ada data absensi</td>`;
+                tbody.appendChild(row);
+                console.warn('No absensi data to display');
+                return;
+            }
+
             for (let i = startIndex; i < endIndex; i++) {
                 const absensi = absensiData[i];
+                console.log('Processing row:', i, absensi);
 
-                const nama = absensi.user?.name || absensi.name || '-';
+                const nama = absensi.user?.name || '-';
+                const divisi = absensi.user?.divisi || '-';
                 const tanggal = absensi.tanggal ? new Date(absensi.tanggal).toLocaleDateString('id-ID') : '-';
                 const jamMasuk = absensi.jam_masuk ? absensi.jam_masuk.substring(0, 5) : '-';
                 const jamKeluar = absensi.jam_pulang ? absensi.jam_pulang.substring(0, 5) : '-';
@@ -992,6 +1015,7 @@
                 row.innerHTML = `
                     <td style="min-width: 60px;">${i + 1}</td>
                     <td style="min-width: 200px;">${nama}</td>
+                    <td style="min-width: 150px;">${divisi}</td>
                     <td style="min-width: 120px;">${tanggal}</td>
                     <td style="min-width: 120px;">${jamMasuk}</td>
                     <td style="min-width: 120px;">${jamKeluar}</td>

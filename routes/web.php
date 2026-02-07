@@ -691,6 +691,10 @@ Route::middleware(['auth', 'role:general_manager'])
         Route::get('/divisis/list', [TimDivisiController::class, 'getDivisis'])->name('divisis.list');
     });
 
+    // Convenience route: Rekap Absensi (auth-only)
+    // Allows accessing the same page at /rekap_absensi without owner prefix
+    Route::middleware(['auth'])->get('/rekap_absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekap_absensi');
+
 /*
 |--------------------------------------------------------------------------
 | Role: OWNER Routes
@@ -712,9 +716,8 @@ Route::middleware(['auth', 'role:owner'])
         Route::get('home', [OwnerBerandaController::class, 'index'])->name('home');
 
         Route::get('/rekap_absen', [AbsensiController::class, 'rekapAbsensi'])->name('rekap_absen');
-        Route::get('/laporan', function () {
-            return view('pemilik.laporan');
-        })->name('laporan');
+        Route::get('/laporan_pemasukan', [OwnerController::class, 'laporanPemasukan'])->name('laporan_pemasukan');
+        Route::get('/laporan', [OwnerController::class, 'laporan'])->name('laporan');
 
         // CUTI MANAGEMENT
         Route::prefix('cuti')->name('cuti.')->group(function () {

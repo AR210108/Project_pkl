@@ -302,7 +302,7 @@
                             <i class='bx bx-home-alt text-xl mr-2'></i>
                             Beranda
                         </a>
-                        <a class="nav-link" data-page="rekap" href="/owner/rekap_absensi">
+                        <a class="nav-link" data-page="rekap" href="/owner/rekap_absen">
                             <i class='bx bx-calendar-check text-xl mr-2'></i>
                             Rekap Absensi
                         </a>
