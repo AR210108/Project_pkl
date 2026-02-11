@@ -6,9 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Layanan extends Model
 {
+    protected $table = 'layanans';
+    
     protected $fillable = [
         'nama_layanan',
         'deskripsi',
+        'hpp',
         'harga',
         'foto',
     ];
@@ -18,6 +21,6 @@ class Layanan extends Model
      */
     public function projects()
     {
-        return $this->hasMany(Project::class, 'layanan_id');
+        return $this->hasMany(Project::class);
     }
 }

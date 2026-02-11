@@ -445,9 +445,13 @@ class CutiController extends Controller
             
             $jenisMap = [
                 'tahunan' => 'Cuti Tahunan',
+                'melahirkan' => 'Cuti Melahirkan',
+                'duka' => 'Cuti Duka',
+                'izin-khusus' => 'Cuti Izin Khusus',
+                'tanpa-gaji' => 'Cuti Tanpa Gaji',
+                // Legacy values for backward compatibility
                 'sakit' => 'Cuti Sakit',
                 'penting' => 'Cuti Penting',
-                'melahirkan' => 'Cuti Melahirkan',
                 'lainnya' => 'Cuti Lainnya',
             ];
             $jenisText = $jenisMap[$item->jenis_cuti] ?? 'Cuti Lainnya';
@@ -709,26 +713,26 @@ class CutiController extends Controller
                 ->whereYear('tanggal_mulai', $year)
                 ->sum('durasi');
             
-            $cutiSakit = Cuti::where('user_id', $userId)
-                ->where('jenis_cuti', 'sakit')
-                ->where('status', 'disetujui')
-                ->whereYear('tanggal_mulai', $year)
-                ->count();
-            
-            $cutiPenting = Cuti::where('user_id', $userId)
-                ->where('jenis_cuti', 'penting')
-                ->where('status', 'disetujui')
-                ->whereYear('tanggal_mulai', $year)
-                ->count();
-            
             $cutiMelahirkan = Cuti::where('user_id', $userId)
                 ->where('jenis_cuti', 'melahirkan')
                 ->where('status', 'disetujui')
                 ->whereYear('tanggal_mulai', $year)
                 ->count();
             
-            $cutiLainnya = Cuti::where('user_id', $userId)
-                ->where('jenis_cuti', 'lainnya')
+            $cutiDuka = Cuti::where('user_id', $userId)
+                ->where('jenis_cuti', 'duka')
+                ->where('status', 'disetujui')
+                ->whereYear('tanggal_mulai', $year)
+                ->count();
+            
+            $cutiIzinKhusus = Cuti::where('user_id', $userId)
+                ->where('jenis_cuti', 'izin-khusus')
+                ->where('status', 'disetujui')
+                ->whereYear('tanggal_mulai', $year)
+                ->count();
+            
+            $cutiTanpaGaji = Cuti::where('user_id', $userId)
+                ->where('jenis_cuti', 'tanpa-gaji')
                 ->where('status', 'disetujui')
                 ->whereYear('tanggal_mulai', $year)
                 ->count();
@@ -769,13 +773,13 @@ class CutiController extends Controller
                 ],
                 'statistics' => [
                     'cuti_tahunan_disetujui' => $cutiTahunan,
-                    'cuti_sakit_disetujui' => $cutiSakit,
-                    'cuti_penting_disetujui' => $cutiPenting,
                     'cuti_melahirkan_disetujui' => $cutiMelahirkan,
-                    'cuti_lainnya_disetujui' => $cutiLainnya,
+                    'cuti_duka_disetujui' => $cutiDuka,
+                    'cuti_izin_khusus_disetujui' => $cutiIzinKhusus,
+                    'cuti_tanpa_gaji_disetujui' => $cutiTanpaGaji,
                     'cuti_menunggu' => $cutiMenunggu,
-                    'total_disetujui' => $cutiTahunan + $cutiSakit + $cutiPenting + $cutiMelahirkan + $cutiLainnya,
-                    'total_pengajuan' => $cutiTahunan + $cutiSakit + $cutiPenting + $cutiMelahirkan + $cutiLainnya + $cutiMenunggu
+                    'total_disetujui' => $cutiTahunan + $cutiMelahirkan + $cutiDuka + $cutiIzinKhusus + $cutiTanpaGaji,
+                    'total_pengajuan' => $cutiTahunan + $cutiMelahirkan + $cutiDuka + $cutiIzinKhusus + $cutiTanpaGaji + $cutiMenunggu
                 ],
                 'quota_usage_percentage' => $quota->quota_tahunan > 0 
                     ? round(($quota->terpakai / $quota->quota_tahunan) * 100, 1) 
@@ -807,7 +811,7 @@ class CutiController extends Controller
         try {
             $validated = $request->validate([
                 'keterangan' => 'required|string|max:255',
-                'jenis_cuti' => 'required|in:tahunan,sakit,penting,melahirkan,lainnya',
+                'jenis_cuti' => 'required|in:tahunan,melahirkan,duka,izin-khusus,tanpa-gaji',
                 'tanggal_mulai' => 'required|date',
                 'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
                 'durasi' => 'required|integer|min:1'
@@ -820,7 +824,8 @@ class CutiController extends Controller
             $today = Carbon::today();
             $tanggalMulai = Carbon::parse($validated['tanggal_mulai']);
             
-            if ($validated['jenis_cuti'] !== 'sakit' && $tanggalMulai->lt($today)) {
+            // Tidak boleh mengajukan cuti untuk tanggal yang sudah lewat
+            if ($tanggalMulai->lt($today)) {
                 return response()->json([
                     'success' => false, 
                     'message' => 'Cuti tidak bisa diajukan untuk tanggal yang sudah lewat'
@@ -867,6 +872,9 @@ class CutiController extends Controller
                 'durasi' => $validated['durasi'],
                 'status' => 'menunggu'
             ]);
+            
+            // Load user relationship untuk formatCutiData
+            $cuti->load('user:id,name,divisi_id,sisa_cuti,email', 'user.divisionDetail');
             
             CutiHistory::create([
                 'cuti_id' => $cuti->id,
@@ -1050,7 +1058,7 @@ class CutiController extends Controller
             // Gunakan 'sometimes' agar field tidak wajib diisi
             $validated = $request->validate([
                 'keterangan' => 'sometimes|string|max:255',
-                'jenis_cuti' => 'sometimes|in:tahunan,sakit,penting,melahirkan,lainnya',
+                'jenis_cuti' => 'sometimes|in:tahunan,melahirkan,duka,izin-khusus,tanpa-gaji',
                 'tanggal_mulai' => 'sometimes|date',
                 'tanggal_selesai' => 'sometimes|date|after_or_equal:tanggal_mulai',
                 'durasi' => 'sometimes|integer|min:1'
@@ -1166,7 +1174,7 @@ class CutiController extends Controller
             return response()->json([
                 'success' => true, 
                 'message' => 'Cuti berhasil diperbarui',
-                'data' => $this->formatCutiData($cuti->fresh())
+                'data' => $this->formatCutiData($cuti->fresh()->load('user:id,name,divisi_id,sisa_cuti,email', 'user.divisionDetail'))
             ]);
             
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -1684,26 +1692,28 @@ class CutiController extends Controller
                 $resetCount = 0;
                 
                 foreach ($quotas as $quota) {
-                    $quota->update([
-                        'terpakai' => 0,
-                        'sisa' => $quota->quota_tahunan,
-                        'quota_khusus' => $quotaKhusus,
-                        'terpakai_khusus' => 0,
-                        'is_reset' => true,
-                        'reset_at' => now(),
-                        'reset_by' => $this->user->id
-                    ]);
-                    
-                    $user = User::find($quota->user_id);
-                    if ($user) {
-                        $user->update([
-                            'sisa_cuti' => $quota->quota_tahunan,
-                            'cuti_terpakai_tahun_ini' => 0,
-                            'cuti_reset_date' => now()
+                    if ($quota instanceof \App\Models\CutiQuota) {
+                        $quota->update([
+                            'terpakai' => 0,
+                            'sisa' => $quota->quota_tahunan,
+                            'quota_khusus' => $quotaKhusus,
+                            'terpakai_khusus' => 0,
+                            'is_reset' => true,
+                            'reset_at' => now(),
+                            'reset_by' => $this->user->id
                         ]);
+                        
+                        $user = User::find($quota->user_id);
+                        if ($user) {
+                            $user->update([
+                                'sisa_cuti' => $quota->quota_tahunan,
+                                'cuti_terpakai_tahun_ini' => 0,
+                                'cuti_reset_date' => now()
+                            ]);
+                        }
+                        
+                        $resetCount++;
                     }
-                    
-                    $resetCount++;
                 }
                 
                 return response()->json([
@@ -1877,8 +1887,8 @@ class CutiController extends Controller
                         'jenis_cuti' => $cuti->jenis_cuti,
                         'jenis_cuti_label' => $this->getJenisCutiLabel($cuti->jenis_cuti),
                         'keterangan' => $cuti->keterangan,
-                        'tanggal_mulai' => $cuti->tanggal_mulai->format('d F Y'),
-                        'tanggal_selesai' => $cuti->tanggal_selesai->format('d F Y'),
+                        'tanggal_mulai' => $cuti->tanggal_mulai ? $cuti->tanggal_mulai->format('d F Y') : '-',
+                        'tanggal_selesai' => $cuti->tanggal_selesai ? $cuti->tanggal_selesai->format('d F Y') : '-',
                         'durasi' => $cuti->durasi
                     ] : null
                 ]

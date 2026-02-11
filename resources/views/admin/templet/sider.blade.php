@@ -268,18 +268,22 @@
                 <span class="material-icons sidebar-icon">handshake</span>
                 <span class="sidebar-text">Data Layanan</span>
             </a>
-            
+
+            <!-- Menu Data Project -->
+            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                href="/admin/data_project" data-page="data_project">
+                <span class="material-icons sidebar-icon">dashboard</span>
+                <span class="sidebar-text">Data Project</span>
+            </a>
+
+            <!-- ============================================ -->
+            <!-- DITAMBAHKAN: Menu Data Perusahaan -->
+            <!-- ============================================ -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 href="/admin/perusahaan" data-page="perusahaan">
                 <span class="material-icons sidebar-icon">business</span>
                 <span class="sidebar-text">Data Perusahaan</span>
             </a>
-
-
-
-            <!-- ============================================ -->
-            <!-- DITAMBAHKAN: Menu Data Perusahaan -->
-            <!-- ============================================ -->
             <!-- ============================================ -->
 
             <!-- Menu Surat Kerjasama (Dropdown) -->
@@ -302,24 +306,15 @@
                     </a>
 
                     <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        href="/admin/kwitansi/index" data-page="list_surat">
+                        href="{{ route('admin.kwitansi.index') }}" data-page="list_surat">
                         <span class="material-icons sidebar-icon">list_alt</span>
                         <span class="sidebar-text">Kwitansi</span>
                     </a>
                 </div>
             </div>
-
-                        <!-- Menu Data Project -->
-            <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/admin/data_project" data-page="data_project">
-                <span class="material-icons sidebar-icon">dashboard</span>
-                <span class="sidebar-text">Data Project</span>
-            </a>
-
-
             <!-- Catatan Rapat -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/admin/catatan_rapat" data-page="catatan_rapat">
+                href="/admin/catatan-rapat" data-page="catatan_rapat">
                 <span class="material-icons sidebar-icon">note</span>
                 <span class="sidebar-text">Catatan Rapat</span>
             </a>

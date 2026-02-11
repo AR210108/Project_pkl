@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use App\Models\Setting;
 
 class Absensi extends Model
 {
@@ -29,6 +31,7 @@ class Absensi extends Model
         'tanggal_akhir',
         'jam_masuk',
         'jam_pulang',
+        'late_minutes',
         'is_early_checkout',
         'early_checkout_reason',
         'jenis_ketidakhadiran',
@@ -52,6 +55,7 @@ class Absensi extends Model
         'tanggal_akhir' => 'date',
         'jam_masuk' => 'datetime:H:i',
         'jam_pulang' => 'datetime:H:i',
+        'late_minutes' => 'integer',
         'is_early_checkout' => 'boolean',
         'approved_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -296,15 +300,44 @@ class Absensi extends Model
         if (!$this->jam_masuk) {
             return 0;
         }
-        
-        $jamMasuk = Carbon::parse($this->jam_masuk);
-        $jamBatas = Carbon::parse('08:00');
-        
-        if ($jamMasuk->lte($jamBatas)) {
+        // Ensure we have a Carbon instance in the application timezone
+        if ($this->jam_masuk instanceof Carbon) {
+            $jamMasuk = $this->jam_masuk->copy()->setTimezone(config('app.timezone'));
+        } else {
+            $jamMasuk = Carbon::parse($this->jam_masuk)->setTimezone(config('app.timezone'));
+        }
+
+        // Ambil pengaturan jam operasional jika tersedia
+        $operational = Setting::getValue('operational_hours', null);
+        if ($operational && is_array($operational)) {
+            $hour = isset($operational['late_limit_hour']) ? intval($operational['late_limit_hour']) : 9;
+            $minute = isset($operational['late_limit_minute']) ? intval($operational['late_limit_minute']) : 5;
+        } else {
+            // default sama seperti AbsensiController::getOperationalHours
+            $hour = 9; $minute = 5;
+        }
+
+        // Bandingkan hanya time-of-day untuk menghindari masalah timezone/tanggal
+        $jamMasukSeconds = $jamMasuk->hour * 3600 + $jamMasuk->minute * 60 + $jamMasuk->second;
+        $batasSeconds = $hour * 3600 + $minute * 60;
+
+        // Debug log to help diagnose timezone/format issues
+        Log::debug('Absensi lateness calc', [
+            'raw_jam_masuk' => $this->attributes['jam_masuk'] ?? null,
+            'parsed_jam_masuk' => $jamMasuk->toIso8601String(),
+            'jamMasuk_seconds' => $jamMasukSeconds,
+            'batas_seconds' => $batasSeconds,
+            'app_timezone' => config('app.timezone'),
+            'limit_hour' => $hour,
+            'limit_minute' => $minute,
+        ]);
+
+        if ($jamMasukSeconds <= $batasSeconds) {
             return 0;
         }
-        
-        return $jamMasuk->diffInMinutes($jamBatas);
+
+        // Kembalikan selisih dalam menit (pembulatan ke bawah)
+        return intdiv($jamMasukSeconds - $batasSeconds, 60);
     }
 
     /**

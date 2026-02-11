@@ -673,6 +673,7 @@
                                     <th style="min-width: 120px;">Tanggal</th>
                                     <th style="min-width: 120px;">Jam Masuk</th>
                                     <th style="min-width: 120px;">Jam Keluar</th>
+                                    <th style="min-width: 150px;">Keterangan</th>
                                     <th style="min-width: 120px;">Status</th>
                                 </tr>
                             </thead>
@@ -728,6 +729,7 @@
                                 <tr>
                                     <th style="min-width: 60px;">No</th>
                                     <th style="min-width: 200px;">Nama</th>
+                                    <th style="min-width: 150px;">Divisi</th>
                                     <th style="min-width: 120px;">Tanggal Mulai</th>
                                     <th style="min-width: 120px;">Tanggal Akhir</th>
                                     <th style="min-width: 200px;">Alasan</th>
@@ -983,7 +985,7 @@
 
             if (absensiData.length === 0) {
                 const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="7" style="text-align: center; padding: 20px;">Tidak ada data absensi</td>`;
+                row.innerHTML = `<td colspan="8" style="text-align: center; padding: 20px;">Tidak ada data absensi</td>`;
                 tbody.appendChild(row);
                 console.warn('No absensi data to display');
                 return;
@@ -999,6 +1001,23 @@
                 const jamMasuk = absensi.jam_masuk ? absensi.jam_masuk.substring(0, 5) : '-';
                 const jamKeluar = absensi.jam_pulang ? absensi.jam_pulang.substring(0, 5) : '-';
                 
+                // Tentukan keterangan berdasarkan catatan
+                let keterangan = '-';
+                let keteranganClass = '';
+                if (absensi.catatan) {
+                    keterangan = absensi.catatan;
+                    // Map keterangan ke status class
+                    if (absensi.catatan.toLowerCase().includes('sakit')) {
+                        keteranganClass = 'status-sakit';
+                    } else if (absensi.catatan.toLowerCase().includes('izin')) {
+                        keteranganClass = 'status-izin';
+                    } else if (absensi.catatan.toLowerCase().includes('cuti')) {
+                        keteranganClass = 'status-cuti';
+                    } else if (absensi.catatan.toLowerCase().includes('dinas')) {
+                        keteranganClass = 'status-dinas';
+                    }
+                }
+                
                 // Tentukan status berdasarkan jam masuk
                 let status = 'Tepat Waktu';
                 if (absensi.jam_masuk) {
@@ -1007,6 +1026,8 @@
                     if (jamMasukTime > batasTerlambat) {
                         status = 'Terlambat';
                     }
+                } else if (!absensi.jam_masuk && keterangan === '-') {
+                    status = 'Tidak Masuk';
                 }
 
                 const statusClass = statusClassMap[status] || 'status-default';
@@ -1019,6 +1040,9 @@
                     <td style="min-width: 120px;">${tanggal}</td>
                     <td style="min-width: 120px;">${jamMasuk}</td>
                     <td style="min-width: 120px;">${jamKeluar}</td>
+                    <td style="min-width: 150px;">
+                        ${keterangan !== '-' ? `<span class="status-badge ${keteranganClass}">${keterangan}</span>` : '<span>-</span>'}
+                    </td>
                     <td style="min-width: 120px;">
                         <span class="status-badge ${statusClass}">
                             ${status}
@@ -1069,6 +1093,7 @@
                 row.innerHTML = `
                     <td style="min-width: 60px;">${i + 1}</td>
                     <td style="min-width: 200px;">${ketidakhadiran.user ? ketidakhadiran.user.name : ketidakhadiran.name}</td>
+                    <td style="min-width: 150px;">${ketidakhadiran.user ? ketidakhadiran.user.divisi || '-' : '-'}</td>
                     <td style="min-width: 120px;">${tanggalMulai}</td>
                     <td style="min-width: 120px;">${tanggalAkhir}</td>
                     <td style="min-width: 200px;">${alasan}</td>

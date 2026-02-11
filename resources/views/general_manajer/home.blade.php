@@ -461,7 +461,7 @@
         // --- FUNGSI API ---
         async function apiFetch(endpoint, options = {}) {
             const cacheBuster = `_t=${Date.now()}`;
-            const url = `/general_manager/api${endpoint}${endpoint.includes('?') ? '&' : '?'}${cacheBuster}`;
+            const url = `/api/general-manager${endpoint}${endpoint.includes('?') ? '&' : '?'}${cacheBuster}`;
             const defaultOptions = { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': window.csrfToken } };
             const finalOptions = { ...defaultOptions, ...options };
 

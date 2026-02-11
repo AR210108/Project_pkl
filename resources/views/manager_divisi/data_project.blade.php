@@ -1153,7 +1153,7 @@ editOrderanForm.addEventListener('submit', function(e) {
     });
     
     // GUNAKAN URL YANG BENAR
-    const url = `/manager_divisi/data_project/${id}/update`;
+    const url = `/manager-divisi/data_project/${id}/update`;
     console.log('Request URL:', url);
     
     fetch(url, {

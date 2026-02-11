@@ -828,8 +828,8 @@
                                             @endphp
                                             @foreach ($karyawan as $item)
                                                 <tr class="karyawan-row" data-id="{{ $item->id }}"
-                                                    data-nama="{{ $item->nama }}" data-email="{{ $item->email }}"
-                                                    data-role="{{ $item->role }}" data-divisi="{{ $item->divisi }}"
+                                                    data-nama="{{ $item->name }}" data-email="{{ $item->email }}"
+                                                    data-role="{{ $item->role }}" data-divisi="{{ $item->divisi ? $item->divisi->divisi : ($item->karyawan && $item->karyawan->divisi ? $item->karyawan->divisi : '') }}"
                                                     data-alamat="{{ $item->alamat }}" data-kontak="{{ $item->kontak }}"
                                                     data-foto="{{ $item->foto ?? '' }}">
                                                     <td style="min-width: 60px;">{{ $no++ }}</td>
@@ -837,7 +837,7 @@
                                                         <div class="flex items-center gap-2">
                                                             @if ($item->foto)
                                                                 <img src="{{ asset('storage/' . $item->foto) }}"
-                                                                    alt="{{ $item->nama }}"
+                                                                    alt="{{ $item->name }}"
                                                                     class="h-8 w-8 rounded-full object-cover"
                                                                     onerror="this.src='{{ asset('images/default-avatar.png') }}'">
                                                             @else
@@ -848,20 +848,14 @@
                                                                 </div>
                                                             @endif
                                                             <div>
-                                                                <div class="font-medium">{{ $item->nama }}</div>
-                                                                @if ($item->user)
-                                                                    <div class="text-xs text-gray-500">User ID:
-                                                                        {{ $item->user->id }}</div>
-                                                                @endif
+                                                                <div class="font-medium">{{ $item->name }}</div>
+                                                                <div class="text-xs text-gray-500">ID: {{ $item->id }}</div>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td style="min-width: 200px;">
                                                         <div class="text-sm">{{ $item->email }}</div>
-                                                        @if ($item->user)
-                                                            <div class="text-xs text-gray-500">Role:
-                                                                {{ $item->user->role }}</div>
-                                                        @endif
+                                                        <div class="text-xs text-gray-500">Role: {{ $item->role }}</div>
                                                     </td>
                                                     <td style="min-width: 150px;">
                                                         <span
@@ -873,13 +867,13 @@
                                                             {{ $item->role }}
                                                         </span>
                                                     </td>
-                                                    <td style="min-width: 150px;">{{ $item->divisi ?? '-' }}</td>
+                                                    <td style="min-width: 150px;">{{ $item->divisi ? $item->divisi->divisi : ($item->karyawan && $item->karyawan->divisi ? $item->karyawan->divisi : '-') }}</td>
                                                     <td style="min-width: 250px;">{{ $item->alamat }}</td>
                                                     <td style="min-width: 150px;">{{ $item->kontak }}</td>
                                                     <td style="min-width: 100px;">
                                                         @if ($item->foto)
                                                             <img src="{{ asset('storage/' . $item->foto) }}"
-                                                                alt="{{ $item->nama }}"
+                                                                alt="{{ $item->name }}"
                                                                 class="h-10 w-10 rounded-full object-cover mx-auto"
                                                                 onerror="this.src='{{ asset('images/default-avatar.png') }}'">
                                                         @else
@@ -895,19 +889,23 @@
                                                             <button
                                                                 class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
                                                                 data-id="{{ $item->id }}"
-                                                                data-nama="{{ $item->nama }}"
+                                                                data-nama="{{ $item->name }}"
                                                                 data-email="{{ $item->email }}"
                                                                 data-role="{{ $item->role }}"
-                                                                data-divisi="{{ $item->divisi }}"
+                                                                data-divisi_id="{{ $item->divisi_id }}"
+                                                                data-divisi="{{ $item->divisi ? $item->divisi->divisi : '' }}"
                                                                 data-alamat="{{ $item->alamat }}"
                                                                 data-kontak="{{ $item->kontak }}"
+                                                                data-status_kerja="{{ $item->status_kerja }}"
+                                                                data-status_karyawan="{{ $item->status_karyawan }}"
+                                                                data-gaji="{{ $item->gaji }}"
                                                                 data-foto="{{ $item->foto ?? '' }}">
                                                                 <span class="material-icons-outlined">edit</span>
                                                             </button>
                                                             <button
                                                                 class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
                                                                 data-id="{{ $item->id }}"
-                                                                data-nama="{{ $item->nama }}">
+                                                                data-nama="{{ $item->name }}">
                                                                 <span class="material-icons-outlined">delete</span>
                                                             </button>
                                                         </div>
@@ -937,15 +935,15 @@
                                 @endphp
                                 @foreach ($karyawan as $item)
                                     <div class="bg-white rounded-lg border border-border-light p-4 shadow-sm karyawan-card"
-                                        data-id="{{ $item->id }}" data-nama="{{ $item->nama }}"
-                                        data-role="{{ $item->role }}" data-divisi="{{ $item->divisi }}"
+                                        data-id="{{ $item->id }}" data-nama="{{ $item->name }}"
+                                        data-role="{{ $item->role }}" data-divisi="{{ $item->divisi ? $item->divisi->divisi : ($item->karyawan && $item->karyawan->divisi ? $item->karyawan->divisi : '') }}"
                                         data-alamat="{{ $item->alamat }}" data-kontak="{{ $item->kontak }}"
                                         data-foto="{{ $item->foto ?? '' }}">
                                         <div class="flex justify-between items-start mb-3">
                                             <div class="flex items-center gap-3">
                                                 @if ($item->foto)
                                                     <img src="{{ asset('storage/' . $item->foto) }}"
-                                                        alt="{{ $item->nama }}"
+                                                        alt="{{ $item->name }}"
                                                         class="h-12 w-12 rounded-full object-cover"
                                                         onerror="this.src='{{ asset('images/default-avatar.png') }}'">
                                                 @else
@@ -956,19 +954,19 @@
                                                     </div>
                                                 @endif
                                                 <div>
-                                                    <h4 class="font-semibold text-base">{{ $item->nama }}</h4>
+                                                    <h4 class="font-semibold text-base">{{ $item->name }}</h4>
                                                     <p class="text-sm text-text-muted-light">{{ $item->kontak }}</p>
                                                 </div>
                                             </div>
                                             <div class="flex gap-2">
                                                 <button
                                                     class="edit-btn p-1 rounded-full hover:bg-primary/20 text-gray-700"
-                                                    data-karyawan='{"id": "{{ $item->id }}", "nama": "{{ $item->nama }}", "role": "{{ $item->role }}", "divisi": "{{ $item->divisi }}", "alamat": "{{ $item->alamat }}", "kontak": "{{ $item->kontak }}", "foto": "{{ $item->foto ?? '' }}" }'>
+                                                    data-karyawan='{"id": "{{ $item->id }}", "name": "{{ $item->name }}", "email": "{{ $item->email }}", "role": "{{ $item->role }}", "divisi_id": "{{ $item->divisi_id }}", "divisi": "{{ $item->divisi ? $item->divisi->divisi : ($item->karyawan && $item->karyawan->divisi ? $item->karyawan->divisi : '') }}", "alamat": "{{ $item->alamat }}", "kontak": "{{ $item->kontak }}", "status_kerja": "{{ $item->status_kerja }}", "status_karyawan": "{{ $item->status_karyawan }}", "gaji": "{{ $item->gaji }}", "foto": "{{ $item->foto ?? '' }}" }'>
                                                     <span class="material-icons-outlined">edit</span>
                                                 </button>
                                                 <button
                                                     class="delete-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700"
-                                                    data-id="{{ $item->id }}" data-nama="{{ $item->nama }}">
+                                                    data-id="{{ $item->id }}" data-nama="{{ $item->name }}">
                                                     <span class="material-icons-outlined">delete</span>
                                                 </button>
                                             </div>
@@ -992,7 +990,7 @@
                                             </div>
                                             <div>
                                                 <p class="text-text-muted-light">Divisi</p>
-                                                <p class="font-medium">{{ $item->divisi }}</p>
+                                                <p class="font-medium">{{ $item->divisi ? $item->divisi->divisi : ($item->karyawan && $item->karyawan->divisi ? $item->karyawan->divisi : '-') }}</p>
                                             </div>
                                             <div>
                                                 <p class="text-text-muted-light">Alamat</p>

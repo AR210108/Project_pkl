@@ -6,7 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Employee Dashboard</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
@@ -17,14 +17,22 @@
                 extend: {
                     colors: {
                         primary: "#3b82f6",
-                        "background-light": "#f3f4f6",
-                        "background-dark": "#111827",
+                        "background-light": "#f8fafc", // Slightly lighter slate
+                        "background-dark": "#0f172a",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1e293b",
                     },
                     fontFamily: {
                         display: ["Poppins", "sans-serif"],
                     },
                     borderRadius: {
-                        DEFAULT: "0.75rem",
+                        DEFAULT: "1rem", // Slightly more rounded by default
+                        '2xl': '1.5rem',
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'hover': '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                        'glow': '0 0 15px rgba(59, 130, 246, 0.15)',
                     },
                 },
             },
@@ -33,6 +41,7 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
 
         .material-symbols-outlined {
@@ -43,107 +52,162 @@
                 'opsz' 24
         }
 
+        /* --- ENTRANCE ANIMATION --- */
+        .reveal-on-load {
+            opacity: 0;
+            transform: translateY(30px);
+            will-change: opacity, transform;
+        }
+
+        .reveal-active {
+            animation: elegantEntrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        @keyframes elegantEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- CUSTOM UI ELEMENTS --- */
+        
+        /* Glass effect for Hero */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .dark .glass-panel {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Card Style */
+        .modern-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .modern-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Calendar Grid */
         .calendar-day {
-            transition: all 0.2s ease;
-            position: relative;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        .calendar-day.has-event {
-            cursor: pointer;
+        .calendar-day:hover:not(.empty) {
+            background-color: rgba(59, 130, 246, 0.08);
+            border-radius: 0.5rem;
         }
-
-        .calendar-day.has-event:hover {
-            background-color: rgba(59, 130, 246, 0.1);
-        }
-
-        .calendar-day.highlighted {
-            background-color: rgba(59, 130, 246, 0.2);
+        .calendar-day.selected {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white !important;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
             font-weight: 600;
         }
-
-        .calendar-day.selected {
-            background-color: rgba(59, 130, 246, 0.3);
-            font-weight: 700;
+        
+        /* Button Gradient */
+        .btn-primary-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary-gradient:hover {
+            box-shadow: 0 10px 20px -10px rgba(37, 99, 235, 0.5);
+            transform: translateY(-2px);
         }
 
-        .event-indicator {
-            position: absolute;
-            bottom: 2px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background-color: #3b82f6;
+        /* List Item Indicator */
+        .list-indicator {
+            position: relative;
         }
-
-        .announcement-indicator {
+        .list-indicator::before {
+            content: '';
             position: absolute;
-            bottom: 2px;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 0;
+            top: 0;
+            bottom: 0;
             width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background-color: #f59e0b;
+            border-radius: 0 4px 4px 0;
+        }
+        .indicator-blue::before { background-color: #3b82f6; }
+        .indicator-purple::before { background-color: #8b5cf6; }
+        .indicator-yellow::before { background-color: #f59e0b; }
+        .indicator-red::before { background-color: #ef4444; }
+
+        /* Scrollbar styling */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #475569;
         }
     </style>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark font-display">
+<body class="bg-background-light dark:bg-background-dark text-gray-700 dark:text-gray-300 font-display">
     <div class="flex flex-col min-h-screen p-4 sm:p-6 lg:p-8">
         @include('karyawan.templet.header')
 
-        <main class="flex-grow my-8">
-            <section class="bg-white dark:bg-gray-800 rounded-lg p-8 sm:p-12 lg:p-16 shadow-sm">
-                <div class="max-w-4xl mx-auto">
-                    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-2">HALLO,
-                        <span id="employee-name" class="text-primary">{{ Auth::user()->name ?? 'Karyawan' }}</span>
+        <main class="flex-grow my-8 max-w-7xl mx-auto w-full">
+            <!-- Hero Section with Glassmorphism -->
+            <section class="reveal-on-load glass-panel dark:bg-surface-dark/80 rounded-3xl p-8 sm:p-12 lg:p-16 shadow-soft relative overflow-hidden">
+                <!-- Decorative background gradient -->
+                <div class="absolute top-0 right-0 w-96 h-96 bg-blue-400/10 dark:bg-blue-400/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
+                <div class="max-w-4xl mx-auto relative z-10">
+                    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">HALLO,
+                        <span id="employee-name" class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600">{{ Auth::user()->name ?? 'Karyawan' }}</span>
                     </h2>
 
-                    <!-- Division display right below the name -->
-                    <div class="flex items-center mb-4">
+                    <div class="flex items-center mb-6">
                         <span
-                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                            <span class="material-symbols-outlined text-base mr-1">business</span>
-                            Divisi {{ $user_divisi ?? 'Tidak Diketahui' }}
+                            class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800">
+                            <span class="material-symbols-outlined text-sm mr-1.5">business</span>
+                            Divisi {{ $user_divisi ?? optional(Auth::user()->divisi)->divisi ?? 'Tidak Diketahui' }}
                         </span>
                     </div>
 
-                    <!-- Role-based welcome message -->
-                    @if($user_role === 'general_manager')
-                        <p class="text-gray-600 dark:text-gray-400 mb-8">
+                    <p class="text-lg text-gray-600 dark:text-gray-400 mb-10 leading-relaxed max-w-2xl">
+                        @if($user_role === 'general_manager')
                             Selamat datang di Dashboard General Manager. Kelola tim dan pantau kinerja perusahaan dari sini.
-                        </p>
-                    @elseif($user_role === 'manager')
-                        <p class="text-gray-600 dark:text-gray-400 mb-8">
-                            Selamat datang di Dashboard Manajer. Pantau tim divisi {{ $user_divisi }} dan kelola tugas
-                            mereka.
-                        </p>
-                    @else
-                        <p class="text-gray-600 dark:text-gray-400 mb-8">
-                            Bisnis digital agency adalah perusahaan yang membantu bisnis lain memasarkan produk atau jasanya
-                            secara online melalui berbagai layanan digital.
-                        </p>
-                    @endif
+                        @elseif($user_role === 'manager')
+                            Selamat datang di Dashboard Manajer. Pantau tim divisi {{ $user_divisi ?? optional(Auth::user()->divisi)->divisi ?? 'Tidak Diketahui' }} dan kelola tugas mereka.
+                        @else
+                            Bisnis digital agency adalah perusahaan yang membantu bisnis lain memasarkan produk atau jasanya secara online melalui berbagai layanan digital.
+                        @endif
+                    </p>
 
-                    <!-- Role-based action buttons -->
                     <div class="flex flex-wrap gap-4">
                         <a href="/karyawan/absensi"
-                            class="bg-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-transform transform hover:scale-105 shadow-lg inline-block">
-                            Absen Karyawan
+                            class="btn-primary-gradient text-white px-8 py-3.5 rounded-xl font-semibold shadow-lg shadow-blue-500/30 inline-flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[1.25rem]">fingerprint</span>
+                            Presensi Karyawan
                         </a>
 
                         @if($user_role === 'general_manager')
                             <a href="/pegawai"
-                                class="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition-transform transform hover:scale-105 shadow-lg inline-block">
+                                class="bg-white dark:bg-surface-dark text-gray-800 dark:text-gray-200 px-8 py-3.5 rounded-xl font-semibold shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all inline-flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[1.25rem] text-green-600">manage_accounts</span>
                                 Kelola Karyawan
                             </a>
                         @endif
 
                         @if($user_role === 'manager' || $user_role === 'general_manager')
                             <a href="/tugas"
-                                class="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-transform transform hover:scale-105 shadow-lg inline-block">
+                                class="bg-white dark:bg-surface-dark text-gray-800 dark:text-gray-200 px-8 py-3.5 rounded-xl font-semibold shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all inline-flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[1.25rem] text-purple-600">checklist</span>
                                 Kelola Tugas
                             </a>
                         @endif
@@ -151,258 +215,265 @@
                 </div>
             </section>
 
-            <!-- Updated cards section with new metrics -->
-            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <div
-                        class="bg-blue-100 dark:bg-blue-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-primary">person</span>
+            <!-- Stats Grid -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-10">
+                <!-- Template for Card Style -->
+                <div class="reveal-on-load modern-card bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center space-x-4">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ring-1 ring-blue-100 dark:ring-blue-800">
+                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">person</span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Status Absensi</p>
-                        <p class="text-lg font-semibold text-gray-900 dark:text-white" id="attendance-status">Memuat...
-                        </p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Status Presensi</p>
+                        <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5" id="attendance-status">Memuat...</p>
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <div
-                        class="bg-purple-100 dark:bg-purple-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-purple-500">assignment</span>
+                <div class="reveal-on-load modern-card bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center space-x-4">
+                    <div class="bg-purple-50 dark:bg-purple-900/20 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ring-1 ring-purple-100 dark:ring-purple-800">
+                        <span class="material-symbols-outlined text-purple-600 dark:text-purple-400">assignment</span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Jumlah Tugas</p>
-                        <p class="text-lg font-semibold text-gray-900 dark:text-white" id="tugas-count">
-                            {{ $tugas_count ?? 0 }}</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Jumlah Tugas</p>
+                        <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5" id="tugas-count">Memuat...</p>
                     </div>
                 </div>
 
-                <!-- New Card: Total Cuti -->
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <div
-                        class="bg-green-100 dark:bg-green-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-green-500">beach_access</span>
+                <div class="reveal-on-load modern-card bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center space-x-4">
+                    <div class="bg-green-50 dark:bg-green-900/20 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ring-1 ring-green-100 dark:ring-green-800">
+                        <span class="material-symbols-outlined text-green-600 dark:text-green-400">beach_access</span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Cuti</p>
-                        <p class="text-lg font-semibold text-gray-900 dark:text-white">12 hari</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Cuti</p>
+                        <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5" id="total-cuti">Memuat...</p>
                     </div>
                 </div>
 
-                <!-- New Card: Total Hadir -->
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <div
-                        class="bg-blue-100 dark:bg-blue-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-blue-500">check_circle</span>
+                <div class="reveal-on-load modern-card bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center space-x-4">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ring-1 ring-blue-100 dark:ring-blue-800">
+                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">check_circle</span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Hadir</p>
-                        <p class="text-lg font-semibold text-gray-900 dark:text-white">210 hari</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Hadir</p>
+                        <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5" id="total-hadir">Memuat...</p>
                     </div>
                 </div>
 
-                <!-- New Card: Total Terlambat -->
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <div
-                        class="bg-red-100 dark:bg-red-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-red-500">schedule</span>
+                <div class="reveal-on-load modern-card bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center space-x-4">
+                    <div class="bg-red-50 dark:bg-red-900/20 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ring-1 ring-red-100 dark:ring-red-800">
+                        <span class="material-symbols-outlined text-red-600 dark:text-red-400">schedule</span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Terlambat</p>
-                        <p class="text-lg font-semibold text-gray-900 dark:text-white">8 kali</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Terlambat</p>
+                        <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5" id="total-terlambat">Memuat...</p>
                     </div>
                 </div>
 
-                <!-- New Card: Total Izin -->
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <div
-                        class="bg-yellow-100 dark:bg-yellow-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-yellow-500">event_available</span>
+                <div class="reveal-on-load modern-card bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center space-x-4">
+                    <div class="bg-yellow-50 dark:bg-yellow-900/20 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ring-1 ring-yellow-100 dark:ring-yellow-800">
+                        <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400">event_available</span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Izin</p>
-                        <p class="text-lg font-semibold text-gray-900 dark:text-white">5 hari</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Izin</p>
+                        <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5" id="total-izin">Memuat...</p>
                     </div>
                 </div>
 
-                <!-- New Card: Total Sakit -->
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <div
-                        class="bg-orange-100 dark:bg-orange-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-orange-500">sick</span>
+                <div class="reveal-on-load modern-card bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center space-x-4">
+                    <div class="bg-orange-50 dark:bg-orange-900/20 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ring-1 ring-orange-100 dark:ring-orange-800">
+                        <span class="material-symbols-outlined text-orange-600 dark:text-orange-400">sick</span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Sakit</p>
-                        <p class="text-lg font-semibold text-gray-900 dark:text-white">3 hari</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Sakit</p>
+                        <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5" id="total-sakit">Memuat...</p>
                     </div>
                 </div>
 
-                <!-- New Card: Total Absen -->
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <div
-                        class="bg-gray-100 dark:bg-gray-700 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-gray-500">event_busy</span>
+                <div class="reveal-on-load modern-card bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center space-x-4">
+                    <div class="bg-gray-100 dark:bg-gray-700 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ring-1 ring-gray-200 dark:ring-gray-600">
+                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-400">event_busy</span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Absen</p>
-                        <p class="text-lg font-semibold text-gray-900 dark:text-white">2 hari</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Presensi</p>
+                        <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5" id="total-absen">Memuat...</p>
                     </div>
                 </div>
             </section>
 
-            <!-- Calendar and Meeting Notes Section -->
-            <section class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm mt-8">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Calendar Section -->
-                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Kalender</h3>
-                            <div class="flex items-center space-x-2">
-                                <button id="prev-month"
-                                    class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    <span class="material-symbols-outlined">chevron_left</span>
-                                </button>
-                                <span id="current-month"
-                                    class="text-lg font-medium text-gray-900 dark:text-white"></span>
-                                <button id="next-month"
-                                    class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    <span class="material-symbols-outlined">chevron_right</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div
-                            class="grid grid-cols-7 gap-1 text-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            <div>Min</div>
-                            <div>Sen</div>
-                            <div>Sel</div>
-                            <div>Rab</div>
-                            <div>Kam</div>
-                            <div>Jum</div>
-                            <div>Sab</div>
-                        </div>
-                        <div id="calendar-days" class="grid grid-cols-7 gap-1">
-                            <!-- Calendar days will be generated by JavaScript -->
-                        </div>
-                        <div class="flex justify-center mt-4 space-x-4 text-xs">
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 bg-blue-500 rounded-full mr-1"></div>
-                                <span class="text-gray-600 dark:text-gray-400">Meeting</span>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 bg-amber-500 rounded-full mr-1"></div>
-                                <span class="text-gray-600 dark:text-gray-400">Pengumuman</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Meeting Notes Section -->
-                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Catatan Meeting</h3>
-                            <button id="refresh-notes"
-                                class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                                <span class="material-symbols-outlined">refresh</span>
+            <!-- Main Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
+                <!-- Calendar Section -->
+                <section class="reveal-on-load bg-white dark:bg-surface-dark rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-lg text-sm">calendar_month</span>
+                            Kalender
+                        </h3>
+                        <div class="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800/50 p-1 rounded-lg">
+                            <button id="prev-month" class="p-2 rounded-md hover:bg-white dark:hover:bg-gray-700 shadow-sm transition-all">
+                                <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">chevron_left</span>
+                            </button>
+                            <span id="current-month" class="text-sm font-semibold text-gray-800 dark:text-gray-200 w-32 text-center"></span>
+                            <button id="next-month" class="p-2 rounded-md hover:bg-white dark:hover:bg-gray-700 shadow-sm transition-all">
+                                <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">chevron_right</span>
                             </button>
                         </div>
-                        <div id="meeting-notes-container" class="space-y-3 max-h-96 overflow-y-auto">
-                            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                                <span class="material-symbols-outlined text-4xl">event_note</span>
-                                <p class="mt-2">Tidak ada catatan pada tanggal ini</p>
-                            </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-7 gap-1 text-center text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
+                        <div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
+                    </div>
+                    <div id="calendar-days" class="grid grid-cols-7 gap-1">
+                        <!-- JS Generated -->
+                    </div>
+                    
+                    <div class="flex justify-center mt-6 gap-6 text-xs font-medium text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-700/50 pt-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></div>
+                            <span>Meeting</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></div>
+                            <span>Pengumuman</span>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+
+                <!-- Meeting Notes Section -->
+                <section class="reveal-on-load bg-white dark:bg-surface-dark rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 p-6 flex flex-col h-[450px]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <span class="material-symbols-outlined text-purple-500 bg-purple-100 dark:bg-purple-900/30 p-1.5 rounded-lg text-sm">description</span>
+                            Catatan Meeting
+                        </h3>
+                        <button id="refresh-notes" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500">
+                            <span class="material-symbols-outlined">refresh</span>
+                        </button>
+                    </div>
+                    <div id="meeting-notes-container" class="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-grow">
+                        <div class="h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
+                            <span class="material-symbols-outlined text-5xl mb-2 opacity-50">event_note</span>
+                            <p class="text-sm">Tidak ada catatan pada tanggal ini</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
 
             <!-- Announcements Section -->
-            <section class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm mt-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Pengumuman</h3>
-                    <button id="refresh-announcements"
-                        class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+            <section class="reveal-on-load bg-white dark:bg-surface-dark rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 p-6 mt-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-amber-500 bg-amber-100 dark:bg-amber-900/30 p-1.5 rounded-lg text-sm">campaign</span>
+                        Pengumuman Terbaru
+                    </h3>
+                    <button id="refresh-announcements" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500">
                         <span class="material-symbols-outlined">refresh</span>
                     </button>
                 </div>
-                <div id="announcements-container" class="space-y-3 max-h-96 overflow-y-auto">
-                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                        <span class="material-symbols-outlined text-4xl">campaign</span>
-                        <p class="mt-2">Tidak ada pengumuman</p>
+                <div id="announcements-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="col-span-full h-32 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
+                        <span class="material-symbols-outlined text-5xl mb-2 opacity-50">campaign</span>
+                        <p class="text-sm">Tidak ada pengumuman</p>
                     </div>
                 </div>
             </section>
 
-            <!-- Role-specific additional cards -->
+            <!-- Role-specific Cards -->
             @if($user_role === 'general_manager')
-                <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                        <div
-                            class="bg-indigo-100 dark:bg-indigo-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-indigo-500">groups</span>
+                <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 reveal-on-load">
+                    <div class="modern-card bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center space-x-4">
+                        <div class="bg-indigo-50 dark:bg-indigo-900/20 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ring-1 ring-indigo-100 dark:ring-indigo-800">
+                            <span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400">groups</span>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Total Karyawan</p>
-                            <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                                {{ $role_based_data['totalKaryawan'] ?? 0 }}</p>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Karyawan</p>
+                            <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5">{{ $role_based_data['totalKaryawan'] ?? 0 }}</p>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                        <div
-                            class="bg-teal-100 dark:bg-teal-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-teal-500">business</span>
+                    <div class="modern-card bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center space-x-4">
+                        <div class="bg-teal-50 dark:bg-teal-900/20 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ring-1 ring-teal-100 dark:ring-teal-800">
+                            <span class="material-symbols-outlined text-teal-600 dark:text-teal-400">business</span>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Total Divisi</p>
-                            <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                                {{ $role_based_data['totalDivisi'] ?? 0 }}</p>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Divisi</p>
+                            <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5">{{ $role_based_data['totalDivisi'] ?? 0 }}</p>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                        <div
-                            class="bg-orange-100 dark:bg-orange-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-orange-500">pending_actions</span>
+                    <div class="modern-card bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center space-x-4">
+                        <div class="bg-orange-50 dark:bg-orange-900/20 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ring-1 ring-orange-100 dark:ring-orange-800">
+                            <span class="material-symbols-outlined text-orange-600 dark:text-orange-400">pending_actions</span>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Menunggu Persetujuan</p>
-                            <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                                {{ $role_based_data['pendingApprovals'] ?? 0 }}</p>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Menunggu Persetujuan</p>
+                            <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5">{{ $role_based_data['pendingApprovals'] ?? 0 }}</p>
                         </div>
                     </div>
                 </section>
             @elseif($user_role === 'manager')
-                <section class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                        <div
-                            class="bg-indigo-100 dark:bg-indigo-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-indigo-500">groups</span>
+                <section class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8 reveal-on-load">
+                    <div class="modern-card bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center space-x-4">
+                        <div class="bg-indigo-50 dark:bg-indigo-900/20 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ring-1 ring-indigo-100 dark:ring-indigo-800">
+                            <span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400">groups</span>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Anggota Tim</p>
-                            <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                                {{ $role_based_data['teamMembers'] ?? 0 }}</p>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Anggota Tim</p>
+                            <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5">{{ $role_based_data['teamMembers'] ?? 0 }}</p>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                        <div
-                            class="bg-orange-100 dark:bg-orange-900/50 w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-orange-500">pending_actions</span>
+                    <div class="modern-card bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center space-x-4">
+                        <div class="bg-orange-50 dark:bg-orange-900/20 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ring-1 ring-orange-100 dark:ring-orange-800">
+                            <span class="material-symbols-outlined text-orange-600 dark:text-orange-400">pending_actions</span>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Tim Menunggu Persetujuan</p>
-                            <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                                {{ $role_based_data['teamPendingApprovals'] ?? 0 }}</p>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Tim Menunggu Persetujuan</p>
+                            <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5">{{ $role_based_data['teamPendingApprovals'] ?? 0 }}</p>
                         </div>
                     </div>
                 </section>
             @endif
         </main>
-        <footer
-            class="bg-white dark:bg-gray-800 rounded-lg p-4 text-center text-gray-600 dark:text-gray-400 text-sm shadow-sm">
+        
+        <footer class="max-w-7xl mx-auto w-full mt-12 text-center text-sm text-gray-400 dark:text-gray-600 pb-4">
             <p>Copyright ©2025 by digicity.id</p>
         </footer>
     </div>
 
     <script>
         window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // --- ANIMASI MASUK (ENTRANCE ANIMATION) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const revealElements = document.querySelectorAll('.reveal-on-load');
+            
+            revealElements.forEach((element, index) => {
+                const delay = index * 70; 
+                setTimeout(() => {
+                    element.classList.add('reveal-active');
+                }, delay);
+            });
+        });
+
+        // --- JS LOGIC (Functional) ---
+        
+        // Helper function to animate numbers
+        function animateValue(obj, start, end, duration) {
+            if (!obj) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function extractNumber(str) {
+            if (!str) return 0;
+            const num = parseInt(str.toString().replace(/\D/g, ''));
+            return isNaN(num) ? 0 : num;
+        }
 
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         if (mobileMenuButton) {
@@ -424,17 +495,12 @@
         });
 
         function formatAttendanceStatus(status) {
-            if (status === 'Belum Absen') {
-                return 'Belum Absen';
-            } else if (status === 'Tepat Waktu') {
-                return '<span class="text-green-500">Tepat Waktu</span>';
-            } else if (status === 'Terlambat') {
-                return '<span class="text-red-500">Terlambat</span>';
-            } else if (status === 'Sakit' || status === 'Izin' || status === 'Dinas Luar') {
-                return '<span class="text-yellow-500">' + status + '</span>';
-            } else {
-                return status;
-            }
+            if (status === 'Belum Absen') return '<span class="text-gray-400 font-medium">Belum Absen</span>';
+            if (status === 'Tepat Waktu') return '<span class="text-green-500 font-bold bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-md">Tepat Waktu</span>';
+            if (status === 'Terlambat') return '<span class="text-red-500 font-bold bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded-md">Terlambat</span>';
+            if (['Sakit', 'Izin', 'Dinas Luar', 'Cuti'].includes(status)) return `<span class="text-yellow-600 font-medium">${status}</span>`;
+            if (status === 'Lainnya' || status === 'Tidak Hadir') return '<span class="text-gray-500">Tidak Masuk</span>';
+            return status;
         }
 
         async function apiFetch(endpoint, options = {}) {
@@ -450,31 +516,18 @@
             };
             const finalOptions = { ...defaultOptions, ...options };
 
-            console.log('=== API FETCH ===');
-            console.log('URL:', url);
-            console.log('Options:', finalOptions);
-
             const response = await fetch(url, finalOptions);
-
-            console.log('Response status:', response.status);
-            console.log('Response headers:', [...response.headers.entries()]);
-
             const responseText = await response.text();
-            console.log('Raw response:', responseText);
-
+            
             let data;
             try {
                 data = JSON.parse(responseText);
             } catch (e) {
-                console.error('Failed to parse JSON:', e);
                 throw new Error('Invalid JSON response');
             }
 
-            console.log('Parsed data:', data);
-
             if (response.status === 419) throw new Error('CSRF token mismatch. Silakan muat ulang halaman.');
             if (!response.ok) {
-                console.error('API Error:', data);
                 throw new Error(data.message || data.error || 'Something went wrong');
             }
 
@@ -484,16 +537,43 @@
         async function fetchDashboardData() {
             try {
                 const data = await apiFetch('/dashboard-data');
+                const payload = data && data.data ? data.data : data;
 
-                if (data.attendance_status) {
+                const attendanceStatusVal = payload.attendance_status ?? (payload.absensi_today ? payload.absensi_today.status : null);
+                if (attendanceStatusVal) {
                     const statusElement = document.getElementById('attendance-status');
-                    if (statusElement) statusElement.innerHTML = formatAttendanceStatus(data.attendance_status);
+                    if (statusElement) statusElement.innerHTML = formatAttendanceStatus(attendanceStatusVal);
                 }
 
-                if (data.tugas_count !== undefined) {
+                const tugasCountVal = payload.tugas_count ?? (payload.tasks && payload.tasks.total ? payload.tasks.total : null);
+                if (tugasCountVal !== undefined && tugasCountVal !== null) {
                     const tugasElement = document.getElementById('tugas-count');
-                    if (tugasElement) tugasElement.textContent = data.tugas_count;
+                    if (tugasElement) {
+                        animateValue(tugasElement, 0, tugasCountVal, 1000);
+                    }
                 }
+
+                const statsMap = [
+                    { id: 'total-hadir', key: 'total_hadir', suffix: ' hari' },
+                    { id: 'total-terlambat', key: 'total_terlambat', suffix: ' kali' },
+                    { id: 'total-izin', key: 'total_izin', suffix: ' hari' },
+                    { id: 'total-sakit', key: 'total_sakit', suffix: ' hari' },
+                    { id: 'total-absen', key: 'total_absen', suffix: ' hari' },
+                    { id: 'total-cuti', key: 'total_cuti', suffix: ' hari' }
+                ];
+
+                statsMap.forEach(stat => {
+                    if (data[stat.key] !== undefined) {
+                        const el = document.getElementById(stat.id);
+                        if (el) {
+                            el.innerHTML = ''; 
+                            const numSpan = document.createElement('span');
+                            el.appendChild(numSpan);
+                            el.appendChild(document.createTextNode(stat.suffix));
+                            animateValue(numSpan, 0, data[stat.key], 1000);
+                        }
+                    }
+                });
 
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
@@ -510,65 +590,65 @@
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
 
-            // Update month display
             const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni",
                 "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            document.getElementById('current-month').textContent = `${monthNames[month]} ${year}`;
+            const monthEl = document.getElementById('current-month');
+            
+            if (monthEl) {
+                monthEl.style.opacity = '0';
+                setTimeout(() => {
+                    monthEl.textContent = `${monthNames[month]} ${year}`;
+                    monthEl.style.opacity = '1';
+                }, 150);
+            }
 
-            // Clear calendar days
             const calendarDays = document.getElementById('calendar-days');
+            if(!calendarDays) return;
+
             calendarDays.innerHTML = '';
 
-            // Get first day of month and number of days in month
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            // Add empty cells for days before month starts
             for (let i = 0; i < firstDay; i++) {
                 const emptyDay = document.createElement('div');
                 calendarDays.appendChild(emptyDay);
             }
 
-            // Add days of the month
+            const today = new Date();
+
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayElement = document.createElement('div');
-                dayElement.className = 'calendar-day p-2 text-center rounded';
+                dayElement.className = 'calendar-day p-2.5 text-center rounded-xl text-sm text-gray-700 dark:text-gray-300 font-medium cursor-pointer relative hover:bg-gray-100 dark:hover:bg-gray-700 transition';
                 dayElement.textContent = day;
 
-                // Format date as YYYY-MM-DD for comparison
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
-                // Check if this date has events
                 const hasMeeting = highlightedDates.includes(dateStr);
                 const hasAnnouncement = announcementDates.includes(dateStr);
 
-                if (hasMeeting || hasAnnouncement) {
-                    dayElement.classList.add('has-event');
-
-                    // Add event indicators
-                    if (hasMeeting) {
-                        const indicator = document.createElement('div');
-                        indicator.className = 'event-indicator';
-                        dayElement.appendChild(indicator);
-                    }
-
-                    if (hasAnnouncement) {
-                        const indicator = document.createElement('div');
-                        indicator.className = 'announcement-indicator';
-                        // Adjust position if there's already a meeting indicator
-                        if (hasMeeting) {
-                            indicator.style.left = '60%';
-                        }
-                        dayElement.appendChild(indicator);
-                    }
-
-                    // Add click event
-                    dayElement.addEventListener('click', function () {
-                        selectDate(dateStr);
-                    });
+                // Tambahkan indikator jika ada meeting/pengumuman
+                if (hasMeeting) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'absolute bottom-1.5 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-blue-500 shadow-sm';
+                    dayElement.appendChild(indicator);
+                }
+                if (hasAnnouncement) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'absolute bottom-1.5 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500 shadow-sm';
+                    if (hasMeeting) indicator.style.left = '60%';
+                    dayElement.appendChild(indicator);
                 }
 
-                // Check if this is the selected date
+                // Semua tanggal bisa diklik
+                dayElement.addEventListener('click', function () {
+                    selectDate(dateStr);
+                });
+
+                if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+                    dayElement.classList.add('border', 'border-blue-500', 'text-blue-600', 'dark:text-blue-400');
+                }
+
                 if (selectedDate === dateStr) {
                     dayElement.classList.add('selected');
                 }
@@ -578,9 +658,6 @@
         }
 
         function selectDate(dateStr) {
-            console.log('=== SELECT DATE ===');
-            console.log('Selected date:', dateStr);
-
             selectedDate = dateStr;
             renderCalendar();
             loadMeetingNotes(dateStr);
@@ -588,22 +665,13 @@
 
         async function loadHighlightedDates() {
             try {
-                console.log('=== LOADING HIGHLIGHTED DATES ===');
                 const dates = await apiFetch('/meeting-notes-dates');
-                console.log('Received dates:', dates);
-
-                // Ensure dates are in YYYY-MM-DD format
                 highlightedDates = dates.map(date => {
                     const d = new Date(date);
-                    const formatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                    console.log(`Date ${date} formatted to ${formatted}`);
-                    return formatted;
+                    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                 });
-
-                console.log('Final highlighted dates:', highlightedDates);
                 renderCalendar();
             } catch (error) {
-                console.error('Error loading highlighted dates:', error);
                 highlightedDates = [];
                 renderCalendar();
             }
@@ -611,22 +679,13 @@
 
         async function loadAnnouncementDates() {
             try {
-                console.log('=== LOADING ANNOUNCEMENT DATES ===');
                 const announcements = await apiFetch('/announcements-dates');
-                console.log('Received announcement dates:', announcements);
-
-                // Ensure dates are in YYYY-MM-DD format
                 announcementDates = announcements.map(date => {
                     const d = new Date(date);
-                    const formatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                    console.log(`Announcement date ${date} formatted to ${formatted}`);
-                    return formatted;
+                    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                 });
-
-                console.log('Final announcement dates:', announcementDates);
                 renderCalendar();
             } catch (error) {
-                console.error('Error loading announcement dates:', error);
                 announcementDates = [];
                 renderCalendar();
             }
@@ -634,51 +693,49 @@
 
         async function loadMeetingNotes(date) {
             try {
-                console.log('=== LOADING MEETING NOTES ===');
-                console.log('Date parameter:', date);
-
                 const notes = await apiFetch(`/meeting-notes?date=${encodeURIComponent(date)}`);
-                console.log('Received notes:', notes);
-
                 const container = document.getElementById('meeting-notes-container');
 
                 if (!notes || notes.length === 0) {
-                    console.log('No notes found, displaying empty message');
                     container.innerHTML = `
-                        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                            <span class="material-symbols-outlined text-4xl">event_note</span>
-                            <p class="mt-2">Tidak ada catatan pada tanggal ini</p>
-                            <p class="text-xs mt-1">Tanggal: ${date}</p>
+                        <div class="h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
+                            <span class="material-symbols-outlined text-5xl mb-2 opacity-50">event_note</span>
+                            <p class="text-sm">Tidak ada catatan pada tanggal ini</p>
+                            <p class="text-xs mt-1 opacity-70">${date}</p>
                         </div>
                     `;
                     return;
                 }
 
-                console.log(`Found ${notes.length} notes, rendering...`);
-                container.innerHTML = notes.map(note => `
-                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                        <h4 class="font-semibold text-gray-900 dark:text-white mb-2">${note.topik || 'Tanpa Topik'}</h4>
-                        <div class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                container.innerHTML = '';
+                
+                notes.forEach((note, index) => {
+                    const noteEl = document.createElement('div');
+                    noteEl.className = 'bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl list-indicator indicator-purple hover:shadow-md transition-all duration-300';
+                    
+                    noteEl.innerHTML = `
+                        <h4 class="font-bold text-gray-900 dark:text-white mb-2">${note.topik || 'Tanpa Topik'}</h4>
+                        <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                             <div>
-                                <span class="font-medium">Hasil Diskusi:</span>
-                                <p class="mt-1">${note.hasil_diskusi || 'Tidak ada hasil diskusi'}</p>
+                                <span class="font-medium text-gray-700 dark:text-gray-300 text-xs uppercase tracking-wide">Hasil Diskusi:</span>
+                                <p class="mt-1 opacity-90 leading-relaxed">${note.hasil_diskusi || 'Tidak ada hasil diskusi'}</p>
                             </div>
                             <div>
-                                <span class="font-medium">Keputusan:</span>
-                                <p class="mt-1">${note.keputusan || 'Tidak ada keputusan'}</p>
+                                <span class="font-medium text-gray-700 dark:text-gray-300 text-xs uppercase tracking-wide">Keputusan:</span>
+                                <p class="mt-1 opacity-90 leading-relaxed">${note.keputusan || 'Tidak ada keputusan'}</p>
                             </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                    container.appendChild(noteEl);
+                });
 
             } catch (error) {
                 console.error('Error loading meeting notes:', error);
                 const container = document.getElementById('meeting-notes-container');
                 container.innerHTML = `
-                    <div class="text-center py-8 text-red-500">
-                        <span class="material-symbols-outlined text-4xl">error</span>
-                        <p class="mt-2">Gagal memuat catatan meeting</p>
-                        <p class="text-xs mt-1">${error.message}</p>
+                    <div class="h-full flex flex-col items-center justify-center text-red-400">
+                        <span class="material-symbols-outlined text-5xl mb-2">error</span>
+                        <p class="text-sm">Gagal memuat catatan meeting</p>
                     </div>
                 `;
             }
@@ -686,50 +743,57 @@
 
         async function loadAnnouncements() {
             try {
-                console.log('=== LOADING ANNOUNCEMENTS ===');
                 const announcements = await apiFetch('/announcements');
-                console.log('Received announcements:', announcements);
-
                 const container = document.getElementById('announcements-container');
 
                 if (!announcements || announcements.length === 0) {
                     container.innerHTML = `
-                        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                            <span class="material-symbols-outlined text-4xl">campaign</span>
-                            <p class="mt-2">Tidak ada pengumuman</p>
+                        <div class="col-span-full h-32 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
+                            <span class="material-symbols-outlined text-5xl mb-2 opacity-50">campaign</span>
+                            <p class="text-sm">Tidak ada pengumuman</p>
                         </div>
                     `;
                     return;
                 }
 
-                container.innerHTML = announcements.map(announcement => `
-                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-semibold text-gray-900 dark:text-white">${announcement.judul || 'Tanpa Judul'}</h4>
-                            <span class="text-xs text-gray-500 dark:text-gray-500">
+                container.innerHTML = '';
+
+                announcements.forEach((announcement, index) => {
+                    const el = document.createElement('div');
+                    el.className = 'bg-gray-50 dark:bg-gray-800/50 p-5 rounded-xl list-indicator indicator-yellow hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 border border-transparent hover:border-gray-200 dark:hover:border-gray-700';
+                    
+                    el.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <h4 class="font-bold text-gray-900 dark:text-white text-lg leading-tight">${announcement.judul || 'Tanpa Judul'}</h4>
+                            <span class="text-xs font-medium bg-white dark:bg-gray-700 px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400">
                                 ${announcement.tanggal_indo || new Date(announcement.created_at).toLocaleDateString('id-ID')}
                             </span>
                         </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
                             ${announcement.ringkasan || announcement.isi_pesan || 'Tidak ada pesan'}
                         </p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500 dark:text-gray-500">Oleh: ${announcement.creator || 'System'}</span>
+                        <div class="flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-3 mt-auto">
+                            <div class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                                <span class="material-symbols-outlined text-sm">person</span>
+                                ${announcement.creator || 'System'}
+                            </div>
                             ${announcement.lampiran_url ?
-                        `<a href="${announcement.lampiran_url}" target="_blank" class="text-xs text-primary hover:underline">Lihat Lampiran</a>` :
+                        `<a href="${announcement.lampiran_url}" target="_blank" class="text-xs font-medium text-primary hover:text-blue-700 dark:hover:text-blue-400 transition-colors flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">attach_file</span>
+                            Lampiran</a>` :
                         ''}
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                    container.appendChild(el);
+                });
 
             } catch (error) {
                 console.error('Error loading announcements:', error);
                 const container = document.getElementById('announcements-container');
                 container.innerHTML = `
-                    <div class="text-center py-8 text-red-500">
-                        <span class="material-symbols-outlined text-4xl">error</span>
-                        <p class="mt-2">Gagal memuat pengumuman</p>
-                        <p class="text-xs mt-1">${error.message}</p>
+                    <div class="col-span-full h-32 flex flex-col items-center justify-center text-red-400">
+                        <span class="material-symbols-outlined text-5xl mb-2">error</span>
+                        <p class="text-sm">Gagal memuat pengumuman</p>
                     </div>
                 `;
             }
@@ -746,38 +810,38 @@
             renderCalendar();
         });
 
-        // Refresh buttons
+        // Refresh buttons with simple spin animation
         document.getElementById('refresh-notes')?.addEventListener('click', function () {
+            const icon = this.querySelector('.material-symbols-outlined');
+            icon.style.transition = 'transform 0.5s ease';
+            icon.style.transform = 'rotate(360deg)';
+            setTimeout(() => { icon.style.transition = 'none'; icon.style.transform = 'none'; }, 500);
+            
             if (selectedDate) {
                 loadMeetingNotes(selectedDate);
             }
         });
 
         document.getElementById('refresh-announcements')?.addEventListener('click', function () {
+            const icon = this.querySelector('.material-symbols-outlined');
+            icon.style.transition = 'transform 0.5s ease';
+            icon.style.transform = 'rotate(360deg)';
+            setTimeout(() => { icon.style.transition = 'none'; icon.style.transform = 'none'; }, 500);
+            
             loadAnnouncements();
         });
 
-        // Initialize everything when DOM is loaded
+        // Initialize
         document.addEventListener('DOMContentLoaded', async function () {
-            console.log('=== INITIALIZATION START ===');
-
-            // Load dashboard data
             fetchDashboardData();
-
-            // Initialize calendar
             renderCalendar();
-
-            // Load data from database
             await loadHighlightedDates();
             await loadAnnouncementDates();
             await loadAnnouncements();
 
-            // Select today by default
             const today = new Date();
             const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
             selectDate(todayStr);
-
-            console.log('=== INITIALIZATION COMPLETE ===');
         });
     </script>
 </body>

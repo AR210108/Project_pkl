@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Project;
 use Illuminate\Support\Facades\Log;
 
 class Invoice extends Model
@@ -23,6 +22,10 @@ class Invoice extends Model
         'order_number',
         'payment_method',
         'description',
+        'keterangan_tambahan',
+        'jenis_bank',
+        'kategori_pemasukan',
+        'fee_maintenance',
         'subtotal',
         'tax',
         'total',
@@ -32,31 +35,56 @@ class Invoice extends Model
 
     protected $casts = [
         'invoice_date' => 'date',
-        'subtotal' => 'integer',
-        'tax' => 'integer',
-        'total' => 'integer',
+        'subtotal' => 'decimal:0',
+        'tax' => 'decimal:0',
+        'total' => 'decimal:0',
+        'fee_maintenance' => 'decimal:0',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
 
+    protected $appends = ['tax_percentage'];
+
+    // Relationships
     public function kwitansi()
     {
         return $this->hasMany(Kwitansi::class, 'invoice_id');
     }
 
-    // Relationship dengan Project
     public function projects()
     {
         return $this->hasMany(Project::class, 'invoice_id');
     }
 
-    // Accessor untuk mendapatkan project pertama (jika ada)
+    public function layanan()
+    {
+        return $this->belongsTo(Layanan::class, 'nama_layanan', 'nama_layanan');
+    }
+
+    public function perusahaan()
+    {
+        return $this->belongsTo(Perusahaan::class, 'company_name', 'nama_perusahaan');
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'invoice_id');
+    }
+
+    // Accessors
     public function getProjectAttribute()
     {
         return $this->projects()->first();
     }
 
-    // Optional: Tambahkan accessor jika perlu kompatibilitas dengan field lama
+    public function getTaxPercentageAttribute()
+    {
+        if ($this->subtotal > 0) {
+            return round(($this->tax / $this->subtotal) * 100, 2);
+        }
+        return 0;
+    }
+
     public function getNamaPerusahaanAttribute()
     {
         return $this->company_name;
@@ -77,96 +105,87 @@ class Invoice extends Model
         return $this->tax;
     }
 
-    public function getTotalAttribute()
+    public function getDeskripsiAttribute()
     {
-        return $this->attributes['total'] ?? 0;
+        if (!empty($this->description)) {
+            return $this->description;
+        }
+        
+        if ($this->layanan && !empty($this->layanan->deskripsi)) {
+            return $this->layanan->deskripsi;
+        }
+        
+        return $this->nama_layanan ? 'Layanan: ' . $this->nama_layanan : 'Tidak ada deskripsi';
     }
 
-    // Relationship dengan model Layanan (jika ada)
-    public function layanan()
-    {
-        return $this->belongsTo(Layanan::class, 'nama_layanan', 'nama_layanan');
-    }
-
-    public function perusahaan()
-{
-    return $this->belongsTo(Perusahaan::class, 'company_name', 'nama_perusahaan');
-}
-
-    /**
-     * Boot method untuk event listeners
-     */
+    // Boot method
     protected static function boot()
     {
         parent::boot();
 
-        // Event ketika invoice dibuat
         static::created(function ($invoice) {
-            $invoice->createProjectFromInvoice();
-            // Juga buat order otomatis agar invoice muncul di Data Orderan
-            $invoice->createOrderFromInvoice();
+            try {
+                // Buat project dari invoice
+                $invoice->createProjectFromInvoice();
+                
+                // Buat order otomatis
+                $invoice->createOrderFromInvoice();
+            } catch (\Exception $e) {
+                Log::error('Error in invoice created event: ' . $e->getMessage());
+            }
         });
 
-        // Event ketika invoice diupdate
         static::updated(function ($invoice) {
-            // Jika invoice sudah memiliki project, sinkronkan data
-            if ($invoice->project) {
-                $invoice->syncProjectWithInvoice();
+            try {
+                // Sinkronisasi project jika ada
+                if ($invoice->hasProject()) {
+                    $invoice->syncProjectWithInvoice();
+                }
+            } catch (\Exception $e) {
+                Log::error('Error in invoice updated event: ' . $e->getMessage());
             }
         });
     }
 
-    /**
-     * Method untuk membuat project dari invoice
-     */
+    // Methods
     public function createProjectFromInvoice()
     {
         try {
-            // Cek apakah sudah ada project untuk invoice ini
-            $existingProject = Project::where('invoice_id', $this->id)->first();
-            
-            if ($existingProject) {
-                return $existingProject;
+            if ($this->hasProject()) {
+                return $this->project;
             }
 
-            // Buat project baru dengan data minimal
             $project = Project::create([
                 'invoice_id' => $this->id,
                 'nama' => $this->nama_layanan ?? 'Project dari Invoice #' . $this->invoice_no,
                 'deskripsi' => $this->description ?? '',
                 'harga' => $this->total,
-                // Tanggal dibiarkan kosong (null)
-                // Status dan progres akan diisi oleh model boot dengan default value
+                'status_pengerjaan' => 'pending',
+                'status_kerjasama' => 'aktif',
+                'progres' => 0,
             ]);
 
             Log::info('Project berhasil dibuat dari invoice', [
                 'invoice_id' => $this->id,
-                'project_id' => $project->id,
-                'invoice_no' => $this->invoice_no
+                'project_id' => $project->id
             ]);
 
             return $project;
-
         } catch (\Exception $e) {
-            Log::error('Gagal membuat project dari invoice: ' . $e->getMessage(), [
-                'invoice_id' => $this->id,
-                'error' => $e->getTraceAsString()
-            ]);
+            Log::error('Gagal membuat project dari invoice: ' . $e->getMessage());
             return null;
         }
     }
 
-    /**
-     * Create an Order when an Invoice is created so it appears in Data Orderan
-     */
     public function createOrderFromInvoice()
     {
         try {
-            // Avoid duplicating orders
-            $existingOrder = \App\Models\Order::where('invoice_id', $this->id)->first();
-            if ($existingOrder) return $existingOrder;
+            $existingOrder = Order::where('invoice_id', $this->id)->first();
+            if ($existingOrder) {
+                return $existingOrder;
+            }
 
-            $order = \App\Models\Order::create([
+            $order = Order::create([
                 'order_no' => 'ORD-' . $this->id . '-' . time(),
                 'layanan' => $this->nama_layanan ?? null,
                 'kategori' => $this->nama_layanan ?? null,
@@ -189,18 +208,15 @@ class Invoice extends Model
                 'invoice_id' => $this->id,
             ]);
 
-            Log::info('Order created from invoice (model)', ['order_id' => $order->id, 'invoice_id' => $this->id]);
+            Log::info('Order created from invoice', ['order_id' => $order->id, 'invoice_id' => $this->id]);
 
             return $order;
         } catch (\Exception $e) {
-            Log::error('Failed to create order from invoice (model): ' . $e->getMessage(), ['invoice_id' => $this->id]);
+            Log::error('Failed to create order from invoice: ' . $e->getMessage());
             return null;
         }
     }
 
-    /**
-     * Method untuk sinkronisasi project dengan invoice
-     */
     public function syncProjectWithInvoice()
     {
         try {
@@ -210,23 +226,11 @@ class Invoice extends Model
                 return false;
             }
 
-            // Update nama project jika layanan berubah
-            if ($this->nama_layanan && $project->nama != $this->nama_layanan) {
-                $project->nama = $this->nama_layanan;
-            }
-
-            // Update harga jika berubah
-            if ($project->harga != $this->total) {
-                $project->harga = $this->total;
-            }
-
-            // Update deskripsi jika berubah
-            if ($project->deskripsi != $this->description) {
-                $project->deskripsi = $this->description ?? '';
-            }
-
-            // Simpan perubahan
-            $project->save();
+            $project->update([
+                'nama' => $this->nama_layanan ?: $project->nama,
+                'deskripsi' => $this->description ?: $project->deskripsi,
+                'harga' => $this->total ?: $project->harga,
+            ]);
 
             Log::info('Project berhasil disinkronisasi dengan invoice', [
                 'invoice_id' => $this->id,
@@ -234,26 +238,17 @@ class Invoice extends Model
             ]);
 
             return true;
-
         } catch (\Exception $e) {
-            Log::error('Gagal sinkronisasi project dengan invoice: ' . $e->getMessage(), [
-                'invoice_id' => $this->id
-            ]);
+            Log::error('Gagal sinkronisasi project dengan invoice: ' . $e->getMessage());
             return false;
         }
     }
 
-    /**
-     * Method untuk mengecek apakah invoice memiliki project
-     */
     public function hasProject()
     {
         return $this->projects()->exists();
     }
 
-    /**
-     * Method untuk mendapatkan link ke project
-     */
     public function getProjectLinkAttribute()
     {
         $project = $this->project;
@@ -263,47 +258,16 @@ class Invoice extends Model
         return null;
     }
 
-    /**
-     * Method untuk mendapatkan status project
-     */
     public function getProjectStatusAttribute()
     {
         $project = $this->project;
         if ($project) {
             return [
-                'status_pengerjaan' => $project->status_pengerjaan_formatted,
-                'status_kerjasama' => $project->status_kerjasama_formatted,
-                'progres' => $project->progres . '%'
+                'status_pengerjaan' => $project->status_pengerjaan ?? 'planning',
+                'status_kerjasama' => $project->status_kerjasama ?? 'pending',
+                'progres' => ($project->progres ?? 0) . '%'
             ];
         }
         return null;
     }
-
-    // Di App\Models\Invoice.php
-public function getDescriptionAttribute($value)
-{
-    // Jika description kosong, ambil dari layanan terkait
-    if (empty($value) && $this->layanan) {
-        return $this->layanan->deskripsi;
-    }
-    
-    return $value;
-}
-
-// Atau tambahkan attribute casting untuk memastikan deskripsi selalu ada
-public function getDeskripsiAttribute()
-{
-    // Prioritas 1: description dari invoice
-    if (!empty($this->attributes['description'])) {
-        return $this->attributes['description'];
-    }
-    
-    // Prioritas 2: deskripsi dari layanan
-    if ($this->layanan && !empty($this->layanan->deskripsi)) {
-        return $this->layanan->deskripsi;
-    }
-    
-    // Default: nama layanan
-    return $this->nama_layanan ? 'Layanan: ' . $this->nama_layanan : 'Tidak ada deskripsi';
-}
 }

@@ -20,7 +20,9 @@ class Task extends Model
         'deskripsi',
         'deadline',
         'status',
+        'priority',
         'assigned_to',
+        'assigned_to_ids',
         'created_by',
         'assigned_by_manager',
         'target_type',
@@ -44,8 +46,7 @@ class Task extends Model
         'assigned_at' => 'datetime',
         'completed_at' => 'datetime',
         'submitted_at' => 'datetime',
-      
-        // 'progress_percentage' => 'integer', <--- DIHAPUS
+        'assigned_to_ids' => 'array',
     ];
 
     protected $attributes = [
@@ -108,6 +109,11 @@ class Task extends Model
     public function files()
     {
         return $this->hasMany(TaskFile::class)->orderBy('created_at', 'desc');
+    }
+
+    public function acceptances()
+    {
+        return $this->hasMany(TaskAcceptance::class)->orderBy('created_at', 'asc');
     }
 
     public function parentTask()
@@ -497,6 +503,57 @@ class Task extends Model
             // 'progress_percentage' => ..., <--- DIHAPUS
             // 'progress_label' => ..., <--- DIHAPUS
         ];
+    }
+
+    // ========== ACCEPTANCE TRACKING HELPERS ==========
+    public function getAcceptanceStatus()
+    {
+        $acceptances = $this->acceptances()->get();
+        
+        if ($acceptances->isEmpty()) {
+            return [
+                'total' => 0,
+                'accepted' => 0,
+                'pending' => 0,
+                'rejected' => 0,
+                'percentage' => 0,
+                'is_fully_accepted' => false
+            ];
+        }
+
+        $total = $acceptances->count();
+        $accepted = $acceptances->where('status', 'accepted')->count();
+        $pending = $acceptances->where('status', 'pending')->count();
+        $rejected = $acceptances->where('status', 'rejected')->count();
+        $percentage = ($total > 0) ? round(($accepted / $total) * 100) : 0;
+
+        return [
+            'total' => $total,
+            'accepted' => $accepted,
+            'pending' => $pending,
+            'rejected' => $rejected,
+            'percentage' => $percentage,
+            'is_fully_accepted' => $accepted === $total && $total > 0,
+            'is_any_accepted' => $accepted > 0,
+            'is_any_rejected' => $rejected > 0
+        ];
+    }
+
+    public function getAcceptanceDetails()
+    {
+        return $this->acceptances()
+                    ->with('user:id,name,email')
+                    ->get()
+                    ->map(function($acceptance) {
+                        return [
+                            'user_id' => $acceptance->user_id,
+                            'user_name' => $acceptance->user->name,
+                            'user_email' => $acceptance->user->email,
+                            'status' => $acceptance->status,
+                            'accepted_at' => $acceptance->accepted_at,
+                            'notes' => $acceptance->notes
+                        ];
+                    });
     }
 
     // ========== Boot method untuk event handling ==========

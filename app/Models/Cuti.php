@@ -34,8 +34,8 @@ class Cuti extends Model
     ];
 
     protected $casts = [
-        'tanggal_mulai' => 'date',
-        'tanggal_selesai' => 'date',
+        'tanggal_mulai' => 'datetime:Y-m-d',
+        'tanggal_selesai' => 'datetime:Y-m-d',
         'disetujui_pada' => 'datetime',
         'dibatalkan_pada' => 'datetime', // ADDED
     ];
@@ -134,10 +134,10 @@ class Cuti extends Model
     {
         $jenis = [
             'tahunan' => 'Cuti Tahunan',
-            'sakit' => 'Cuti Sakit',
-            'penting' => 'Cuti Penting',
             'melahirkan' => 'Cuti Melahirkan',
-            'lainnya' => 'Cuti Lainnya',
+            'duka' => 'Cuti Duka',
+            'izin-khusus' => 'Cuti Izin Khusus',
+            'tanpa-gaji' => 'Cuti Tanpa Gaji',
         ];
 
         return $jenis[$this->jenis_cuti] ?? 'Cuti Lainnya';

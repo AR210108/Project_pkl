@@ -102,4 +102,72 @@ class CashflowController extends Controller
         // Kembalikan dalam format JSON
         return response()->json($kategoris);
     }
+
+    /**
+     * Update the specified cashflow entry.
+     */
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'tanggal' => 'required|date',
+            'tipe' => 'required|in:income,expense',
+            'kategori_id' => 'required_if:tipe,income|nullable|exists:kategori_cashflow,id',
+            'subkategori' => 'required_if:tipe,expense|nullable|string|max:255',
+            'nama' => 'required|string|max:255',
+            'jumlah' => 'required|numeric|min:0',
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        $cashflow = Cashflow::findOrFail($id);
+
+        $cashflow->tanggal_transaksi = $validated['tanggal'];
+        $cashflow->tipe_transaksi = $validated['tipe'] === 'income' ? 'pemasukan' : 'pengeluaran';
+        $cashflow->nama_transaksi = $validated['nama'];
+        $cashflow->jumlah = $validated['jumlah'];
+        $cashflow->deskripsi = $validated['deskripsi'] ?? null;
+
+        if ($validated['tipe'] === 'income') {
+            $cashflow->kategori_id = $validated['kategori_id'];
+            $cashflow->subkategori = null;
+        } else {
+            $cashflow->kategori_id = null;
+            $cashflow->subkategori = $validated['subkategori'] ?? null;
+        }
+
+        $cashflow->save();
+
+        // Jika request AJAX ingin JSON, kembalikan JSON
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Transaksi diperbarui', 'data' => $cashflow]);
+        }
+
+        return redirect()->back()->with('success', 'Transaksi berhasil diperbarui!');
+    }
+
+    /**
+     * Remove the specified cashflow entry.
+     */
+    public function destroy(Request $request, $id)
+    {
+        $cashflow = Cashflow::find($id);
+        if (!$cashflow) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
+            }
+            return redirect()->back()->with('error', 'Data tidak ditemukan');
+        }
+
+        try {
+            $cashflow->delete();
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Transaksi dihapus']);
+            }
+            return redirect()->back()->with('success', 'Transaksi berhasil dihapus');
+        } catch (\Exception $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Gagal menghapus data'], 500);
+            }
+            return redirect()->back()->with('error', 'Gagal menghapus data');
+        }
+    }
 }

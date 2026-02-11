@@ -389,7 +389,7 @@
                                                 </span>
                                             </td>
                                             <td style="min-width: 200px;">{{ $item->email }}</td>
-                                            <td style="min-width: 150px;">{{ $item->divisi ?? '-' }}</td>
+                                            <td style="min-width: 150px;">{{ $item->divisi_name ?? '-' }}</td>
                                             <td style="min-width: 350px;">{{ $item->alamat }}</td>
                                             <td style="min-width: 150px;">{{ $item->kontak }}</td>
                                             <td style="min-width: 120px;">
@@ -437,7 +437,7 @@
                                     </div>
                                     <div>
                                         <p class="text-text-muted-light">Divisi</p>
-                                        <p class="font-medium">{{ $item->divisi ?? '-' }}</p>
+                                        <p class="font-medium">{{ $item->divisi_name ?? '-' }}</p>
                                     </div>
                                     <div>
                                         <p class="text-text-muted-light">No. Kontak</p>

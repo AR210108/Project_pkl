@@ -1394,8 +1394,8 @@
             emptyState.classList.add('hidden');
             mobileCards.classList.add('hidden');
             
-            // Fetch data from API
-            fetch('/catatan_rapat/data', {
+            // Fetch data from API (with admin prefix)
+            fetch('/admin/catatan_rapat/data', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1948,9 +1948,16 @@
         
         // Initialize filter
         function initializeFilter() {
+            // Check if filter elements exist before initializing
             const filterAll = document.getElementById('filterAll');
             const applyFilterBtn = document.getElementById('applyFilter');
             const resetFilterBtn = document.getElementById('resetFilter');
+            
+            // If filter elements don't exist, skip filter initialization
+            if (!filterAll || !applyFilterBtn || !resetFilterBtn) {
+                console.warn('Filter elements not found, skipping filter initialization');
+                return;
+            }
             
             // Handle "All" checkbox
             filterAll.addEventListener('change', function() {

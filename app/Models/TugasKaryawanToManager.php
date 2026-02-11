@@ -25,7 +25,7 @@ class TugasKaryawanToManager extends Model
     ];
 
     protected $casts = [
-        'deadline' => 'date',
+        'deadline' => 'datetime',
     ];
 
     // Relationships

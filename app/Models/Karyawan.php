@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Models\Divisi;
 
 class Karyawan extends Model
 {
@@ -21,9 +22,10 @@ class Karyawan extends Model
         'alamat',
         'kontak',
         'foto',
-        'email'
+        'email',
+        'status_kerja',
+        'status_karyawan'
     ];
-
     /**
      * Relasi ke tabel users.
      */
@@ -32,12 +34,20 @@ class Karyawan extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getJabatanFromUserAttribute()
+    /**
+     * Relasi ke tabel divisi berdasarkan kolom divisi (string)
+     */
+    public function divisi()
     {
-        if ($this->user) {
-            return $this->user->role;
-        }
-        return $this->jabatan;
+        return $this->belongsTo(Divisi::class, 'divisi', 'divisi');
+    }
+
+    /**
+     * Accessor untuk mendapatkan nama divisi
+     */
+    public function getDivisiNameAttribute()
+    {
+        return $this->divisi;
     }
     
     public function getNamaFromUserAttribute()

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -289,7 +290,7 @@
 
         <main class="flex-grow w-full max-w-7xl mx-auto">
             <div class="text-center mb-8">
-                <h2 class="text-4xl font-bold" style="color: var(--text-primary);">ABSENSI KARYAWAN</h2>
+                <h2 class="text-4xl font-bold" style="color: var(--text-primary);">PRESENSI KARYAWAN</h2>
             </div>
 
             <!-- Clock -->
@@ -345,7 +346,7 @@
                 <div class="card lg:col-span-2">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
                         <h3 class="font-bold text-xl flex items-center" style="color: var(--text-primary);">
-                            <span class="material-icons text-primary mr-2">history</span>Riwayat Absensi
+                            <span class="material-icons text-primary mr-2">history</span>Riwayat Presensi
                         </h3>
                         
                         <!-- Filter Group -->
@@ -412,8 +413,8 @@
                     </table>
                     <div id="empty-state" class="empty-state">
                         <span class="material-icons">assignment_late</span>
-                        <h4>Belum Ada Riwayat Absensi</h4>
-                        <p>Anda belum memiliki riwayat absensi periode ini.</p>
+                        <h4>Belum Ada Riwayat Presensi</h4>
+                        <p>Anda belum memiliki riwayat presensi periode ini.</p>
                     </div>
                     <div class="pagination-container" id="pagination"></div>
                 </div>
@@ -421,7 +422,7 @@
                 <!-- Status Absensi -->
                 <div class="card">
                     <h3 class="font-bold text-xl mb-4 flex items-center" style="color: var(--text-primary);">
-                        <span class="material-icons text-primary mr-2">assignment</span>Status Absensi
+                        <span class="material-icons text-primary mr-2">assignment</span>Status Presensi
                     </h3>
                     
                     <div class="space-y-3">
@@ -430,7 +431,7 @@
                             <span class="material-icons text-success">check_circle</span>
                             <div>
                                 <p class="font-medium" style="color: var(--text-primary);">Status Hari Ini</p>
-                                <div id="today-status" class="font-medium text-success">Belum Absen</div>
+                                <div id="today-status" class="font-medium text-success">Belum Masuk</div>
                             </div>
                         </div>
 
@@ -456,7 +457,7 @@
                         <div class="flex items-center gap-3">
                             <span class="material-icons text-primary">login</span>
                             <div>
-                                <p class="text-sm text-gray-500">Absen Masuk Hari Ini</p>
+                                <p class="text-sm text-gray-500">Jam Masuk Hari Ini</p>
                                 <p id="today-checkin" style="color: var(--text-primary); font-weight: 600;">-</p>
                             </div>
                         </div>
@@ -465,7 +466,7 @@
                         <div class="flex items-center gap-3">
                             <span class="material-icons text-primary">logout</span>
                             <div>
-                                <p class="text-sm text-gray-500">Absen Pulang Hari Ini</p>
+                                <p class="text-sm text-gray-500">Jam Pulang Hari Ini</p>
                                 <p id="today-checkout" style="color: var(--text-primary); font-weight: 600;">-</p>
                             </div>
                         </div>
@@ -837,7 +838,7 @@
                         <tr>
                             <td colspan="5" class="text-center py-8" style="color: var(--text-secondary);">
                                 <span class="material-icons text-red-500" style="font-size: 2rem;">error</span>
-                                <p class="mt-2">Gagal memuat riwayat absensi</p>
+                                <p class="mt-2">Gagal memuat riwayat presensi</p>
                                 <button onclick="fetchAttendanceHistory()" class="mt-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">
                                     Coba Lagi
                                 </button>
@@ -978,12 +979,19 @@
             const checkinEl = document.getElementById('today-checkin');
             const checkoutEl = document.getElementById('today-checkout');
             const statusEl = document.getElementById('today-status');
+            
+            // Grid elements for today's times
+            const statusStartTimeEl = document.getElementById('status-start-time');
+            const statusLimitEl = document.getElementById('status-late-limit');
+            const statusEndTimeEl = document.getElementById('status-end-time');
 
             if (!checkinEl || !checkoutEl || !statusEl) return;
 
             if (data && data.is_on_leave) {
                 checkinEl.textContent = '-';
                 checkoutEl.textContent = '-';
+                if (statusStartTimeEl) statusStartTimeEl.textContent = '-';
+                if (statusEndTimeEl) statusEndTimeEl.textContent = '-';
                 statusEl.innerHTML = '';
                 const mainText = document.createElement('span');
                 mainText.textContent = `CUTI (${data.leave_type || 'Umum'})`;
@@ -1013,6 +1021,8 @@
             if (!data) {
                 checkinEl.textContent = '-';
                 checkoutEl.textContent = '-';
+                if (statusStartTimeEl) statusStartTimeEl.textContent = '-';
+                if (statusEndTimeEl) statusEndTimeEl.textContent = '-';
                 statusEl.textContent = 'Belum Absen';
                 statusEl.className = 'font-medium text-success';
                 updateMainActionButton(false);
@@ -1051,7 +1061,8 @@
                 }
                 enableButtons(false);
             } else if (data.jam_masuk && !data.jam_pulang) {
-                const lateMinutes = calculateLateMinutesFromTime(data.jam_masuk);
+                // Use late_minutes from API response (from database)
+                const lateMinutes = data.late_minutes !== undefined && data.late_minutes !== null ? parseInt(data.late_minutes) : calculateLateMinutesFromTime(data.jam_masuk);
                 const elapsedResult = calculateTimeElapsedSinceCheckin(data.jam_masuk);
 
                 statusEl.innerHTML = '';
@@ -1098,7 +1109,20 @@
                 data.elapsed_minutes = elapsedResult.elapsedMinutes;
                 data.is_terlambat = lateMinutes > 0;
 
-                updateMainActionButton(true);
+                // Pastikan update tombol absen ke 'Absen Pulang'
+                const mainBtn = document.getElementById('main-action-btn');
+                if (mainBtn) {
+                    mainBtn.classList.remove('checkin', 'cuti');
+                    mainBtn.classList.add('checkout');
+                    const icon = mainBtn.querySelector('.material-icons');
+                    const text = mainBtn.querySelector('p');
+                    if (icon) icon.textContent = 'logout';
+                    if (text) text.textContent = 'ABSEN PULANG';
+                    mainBtn.dataset.action = 'Absen Pulang';
+                    mainBtn.disabled = false;
+                    mainBtn.style.pointerEvents = 'auto';
+                    mainBtn.style.opacity = '1';
+                }
                 enableButtons(true);
 
             } else {
@@ -1312,42 +1336,48 @@
             if (mainBtn) {
                 mainBtn.addEventListener('click', async function () {
                     const action = this.dataset.action;
-                    await fetchAndDisplayTodayStatus();
 
-                    if (window.todayData && window.todayData.is_on_leave) {
-                        const leaveType = window.todayData.leave_type || 'Umum';
-                        await Swal.fire({
-                            icon: 'info',
-                            title: 'Sedang Cuti',
-                            html: `Anda sedang dalam status cuti (${leaveType}).<br><small class="text-sm">Tidak dapat melakukan absensi selama periode cuti.</small>`,
-                            confirmButtonColor: '#3b82f6'
-                        });
-                        return;
-                    }
-
-                    if (action === 'Absen Pulang') {
-                        if (!window.todayData || !window.todayData.jam_masuk) {
-                            await Swal.fire({ icon: 'warning', title: 'Belum Absen Masuk', text: 'Anda harus melakukan absen masuk terlebih dahulu sebelum absen pulang.', confirmButtonColor: '#3b82f6' });
-                            return;
-                        }
-                        if (window.todayData.jam_pulang) {
-                            await Swal.fire({ icon: 'info', title: 'Sudah Absen Pulang', text: 'Anda sudah melakukan absen pulang hari ini.', confirmButtonColor: '#3b82f6' });
-                            return;
-                        }
-
+                    // Popup konfirmasi langsung muncul, status hari ini di-fetch setelah konfirmasi
+                    if (action === 'Absen Pulang' || action === 'Absen Masuk') {
                         const currentWIBTime = getCurrentWIBHoursMinutes();
+                        const confirmTitle = action === 'Absen Pulang' ? 'Konfirmasi Absen Pulang' : 'Konfirmasi Absen Masuk';
+                        const confirmHtml = action === 'Absen Pulang'
+                            ? `<p>Apakah Anda yakin ingin melakukan <strong>Absen Pulang</strong>?</p><p class="text-sm mt-2">Waktu saat ini: <strong>${currentWIBTime} WIB</strong></p>`
+                            : `<p>Apakah Anda yakin ingin melakukan <strong>Absen Masuk</strong>?</p><p class="text-sm mt-2">Waktu saat ini: <strong>${currentWIBTime} WIB</strong></p><p class="text-xs mt-1 text-warning">Batas waktu absen masuk: <strong>${LIMIT_HOUR.toString().padStart(2, '0')}:${LIMIT_MINUTE.toString().padStart(2, '0')} WIB</strong></p>`;
                         const result = await Swal.fire({
-                            title: 'Konfirmasi Absen Pulang',
-                            html: `<p>Apakah Anda yakin ingin melakukan <strong>Absen Pulang</strong>?</p><p class="text-sm mt-2">Waktu saat ini: <strong>${currentWIBTime} WIB</strong></p>`,
+                            title: confirmTitle,
+                            html: confirmHtml,
                             icon: 'question',
                             showCancelButton: true,
-                            confirmButtonText: 'Ya, Absen Pulang',
+                            confirmButtonText: action === 'Absen Pulang' ? 'Ya, Absen Pulang' : 'Ya, Absen Masuk',
                             cancelButtonText: 'Batal',
                             confirmButtonColor: '#3b82f6',
                             cancelButtonColor: '#6b7280'
                         });
 
-                        if (result.isConfirmed) {
+                        // Setelah konfirmasi, baru fetch status dan validasi
+                        await fetchAndDisplayTodayStatus();
+                        if (window.todayData && window.todayData.is_on_leave) {
+                            const leaveType = window.todayData.leave_type || 'Umum';
+                            await Swal.fire({
+                                icon: 'info',
+                                title: 'Sedang Cuti',
+                                html: `Anda sedang dalam status cuti (${leaveType}).<br><small class="text-sm">Tidak dapat melakukan presensi selama periode cuti.</small>`,
+                                confirmButtonColor: '#3b82f6'
+                            });
+                            return;
+                        }
+
+                        if (action === 'Absen Pulang') {
+                            if (!window.todayData || !window.todayData.jam_masuk) {
+                                await Swal.fire({ icon: 'warning', title: 'Belum Absen Masuk', text: 'Anda harus melakukan absen masuk terlebih dahulu sebelum absen pulang.', confirmButtonColor: '#3b82f6' });
+                                return;
+                            }
+                            if (window.todayData.jam_pulang) {
+                                await Swal.fire({ icon: 'info', title: 'Sudah Absen Pulang', text: 'Anda sudah melakukan absen pulang hari ini.', confirmButtonColor: '#3b82f6' });
+                                return;
+                            }
+
                             const currentWIBHour = getCurrentWIBHour();
                             const endHour = parseInt(END_TIME.split(':')[0]);
                             let payload = { reason: '' };
@@ -1368,6 +1398,7 @@
                                 Swal.hideLoading();
                                 if (response.success) {
                                     updateUIAfterAction(response.data);
+                                    if (typeof fetchAttendanceHistory === 'function') fetchAttendanceHistory();
                                     const jamPulangWIB = formatTimeDetailed(response.data.jam_pulang);
                                     await Swal.fire({ icon: 'success', title: 'Berhasil!', html: `Absen pulang berhasil dicatat<br><p class="text-sm mt-2">Jam Pulang: <strong>${jamPulangWIB}</strong></p>`, confirmButtonColor: '#3b82f6' });
                                 } else { throw new Error(response.message || 'Gagal melakukan absen pulang'); }
@@ -1375,32 +1406,47 @@
                                 Swal.hideLoading();
                                 await Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Terjadi kesalahan saat melakukan absen pulang', confirmButtonColor: '#ef4444' });
                             }
-                        }
-                    } else if (action === 'Absen Masuk') {
-                        if (window.todayData && window.todayData.jam_masuk) {
-                            const jamMasukWIB = formatTimeDetailed(window.todayData.jam_masuk);
-                            await Swal.fire({ icon: 'info', title: 'Sudah Absen Masuk', text: `Anda sudah melakukan absen masuk hari ini pukul ${jamMasukWIB}`, confirmButtonColor: '#3b82f6' });
-                            return;
-                        }
-                        if (window.todayData && window.todayData.jenis_ketidakhadiran) {
-                            await Swal.fire({ icon: 'warning', title: 'Tidak Dapat Absen', text: `Anda sudah mengajukan ${window.todayData.jenis_ketidakhadiran_label} hari ini.`, confirmButtonColor: '#3b82f6' });
-                            return;
-                        }
+                        } else if (action === 'Absen Masuk') {
+                            if (window.todayData && window.todayData.jam_masuk) {
+                                const jamMasukWIB = formatTimeDetailed(window.todayData.jam_masuk);
+                                await Swal.fire({ icon: 'info', title: 'Sudah Absen Masuk', text: `Anda sudah melakukan absen masuk hari ini pukul ${jamMasukWIB}`, confirmButtonColor: '#3b82f6' });
+                                return;
+                            }
+                            if (window.todayData && window.todayData.jenis_ketidakhadiran) {
+                                await Swal.fire({ icon: 'warning', title: 'Tidak Dapat Absen', text: `Anda sudah mengajukan ${window.todayData.jenis_ketidakhadiran_label} hari ini.`, confirmButtonColor: '#3b82f6' });
+                                return;
+                            }
 
-                        const currentWIBTime = getCurrentWIBHoursMinutes();
-                        const result = await Swal.fire({
-                            title: 'Konfirmasi Absen Masuk',
-                            html: `<p>Apakah Anda yakin ingin melakukan <strong>Absen Masuk</strong>?</p><p class="text-sm mt-2">Waktu saat ini: <strong>${currentWIBTime} WIB</strong></p><p class="text-xs mt-1 text-warning">Batas waktu absen masuk: <strong>${LIMIT_HOUR.toString().padStart(2, '0')}:${LIMIT_MINUTE.toString().padStart(2, '0')} WIB</strong></p>`,
-                            icon: 'question', showCancelButton: true, confirmButtonText: 'Ya, Absen Masuk', cancelButtonText: 'Batal', confirmButtonColor: '#3b82f6', cancelButtonColor: '#6b7280'
-                        });
+                            // Validasi: Cek apakah jam sekarang sudah mencapai jam masuk (START_TIME)
+                            const currentWIBTime2 = getCurrentWIBHoursMinutes();
+                            const [currentHours, currentMinutes] = currentWIBTime2.split(':').map(Number);
+                            const [startHours, startMinutes] = START_TIME.split(':').map(Number);
+                            const currentTotalMinutes = currentHours * 60 + currentMinutes;
+                            const startTotalMinutes = startHours * 60 + startMinutes;
 
-                        if (result.isConfirmed) {
+                            if (currentTotalMinutes < startTotalMinutes) {
+                                const timeUntilStart = startTotalMinutes - currentTotalMinutes;
+                                const hrsRemaining = Math.floor(timeUntilStart / 60);
+                                const minsRemaining = timeUntilStart % 60;
+                                const remainingMsg = `${hrsRemaining} jam ${minsRemaining} menit`;
+                                await Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Belum Boleh Absen',
+                                    html: `<p>Absen masuk baru bisa dilakukan mulai pukul <strong>${START_TIME} WIB</strong></p><p class="text-sm mt-2">Sisa waktu: <strong>${remainingMsg}</strong></p>`,
+                                    confirmButtonColor: '#3b82f6'
+                                });
+                                return;
+                            }
+
                             try {
-                                Swal.showLoading();
+                                const mainBtn = document.getElementById('main-action-btn');
+                                const statusEl = document.getElementById('today-status');
+                                // ...existing code...
                                 const response = await apiFetch('/absen-masuk', { method: 'POST', body: JSON.stringify({}) });
-                                Swal.hideLoading();
+                                // ...existing code...
                                 if (response.success) {
                                     updateUIAfterAction(response.data);
+                                    if (typeof fetchAttendanceHistory === 'function') fetchAttendanceHistory();
                                     let message = response.message || 'Absen masuk berhasil dicatat';
                                     let icon = 'success';
                                     let title = 'Berhasil!';
@@ -1420,6 +1466,12 @@
                             } catch (error) {
                                 Swal.hideLoading();
                                 await Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Terjadi kesalahan saat melakukan absen masuk', confirmButtonColor: '#ef4444' });
+                            } finally {
+                                if (mainBtn) {
+                                    mainBtn.disabled = false;
+                                    mainBtn.style.pointerEvents = 'auto';
+                                    mainBtn.innerHTML = '<span id="main-action-icon" class="material-icons">login</span> <p id="main-action-text" class="font-semibold" style="color: var(--text-primary); display:inline;">ABSEN MASUK</p>';
+                                }
                             }
                         }
                     }

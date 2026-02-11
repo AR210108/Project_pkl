@@ -89,26 +89,36 @@ public function store(Request $request)
 {
     try {
         $validated = $request->validate([
-            'name'      => 'required|string|max:255',
-            'email'     => 'required|email|unique:users,email',
-            'password'  => 'required|min:5',
-            'role'      => 'required|in:owner,admin,general_manager,manager_divisi,finance,karyawan',
-            'divisi_id' => 'nullable|exists:divisi,id',
+            'name'              => 'required|string|max:255',
+            'email'             => 'required|email|unique:users,email',
+            'password'          => 'required|min:5',
+            'role'              => 'required|in:owner,admin,general_manager,manager_divisi,finance,karyawan',
+            'divisi_id'         => 'nullable|exists:divisi,id',
+            'alamat'            => 'nullable|string',
+            'kontak'            => 'nullable|string|max:20',
+            'status_kerja'      => 'nullable|in:aktif,resign,phk',
+            'status_karyawan'   => 'nullable|in:tetap,kontrak,freelance',
+            'gaji'              => 'nullable|numeric',
         ]);
 
         $user = User::create([
-            'name'      => $validated['name'],
-            'email'     => $validated['email'],
-            'password'  => bcrypt($validated['password']),
-            'role'      => $validated['role'],
-            'divisi_id' => $validated['divisi_id'] ?? null,
-            'sisa_cuti' => 12, // Default value sesuai migration
+            'name'              => $validated['name'],
+            'email'             => $validated['email'],
+            'password'          => bcrypt($validated['password']),
+            'role'              => $validated['role'],
+            'divisi_id'         => $validated['divisi_id'] ?? null,
+            'alamat'            => $validated['alamat'] ?? null,
+            'kontak'            => $validated['kontak'] ?? null,
+            'status_kerja'      => $validated['status_kerja'] ?? 'aktif',
+            'status_karyawan'   => $validated['status_karyawan'] ?? 'tetap',
+            'gaji'              => $validated['gaji'] ?? null,
+            'sisa_cuti'         => 12, // Default value sesuai migration
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'User berhasil ditambahkan',
-            'data'    => $user->load('divisi')
+            'data'    => $user->load('divisi', 'karyawan')
         ], 200);
 
     } catch (\Illuminate\Validation\ValidationException $e) {
@@ -148,11 +158,16 @@ public function update(Request $request, $id)
         
         // Validasi
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'role' => 'required|in:owner,admin,general_manager,manager_divisi,finance,karyawan',
-            'divisi_id' => 'nullable|exists:divisi,id',
-            'password' => 'nullable|min:5'
+            'name'              => 'required|string|max:255',
+            'email'             => 'required|email|unique:users,email,' . $id,
+            'role'              => 'required|in:owner,admin,general_manager,manager_divisi,finance,karyawan',
+            'divisi_id'         => 'nullable|exists:divisi,id',
+            'password'          => 'nullable|min:5',
+            'alamat'            => 'nullable|string',
+            'kontak'            => 'nullable|string|max:20',
+            'status_kerja'      => 'nullable|in:aktif,resign,phk',
+            'status_karyawan'   => 'nullable|in:tetap,kontrak,freelance',
+            'gaji'              => 'nullable|numeric',
         ]);
 
         // Cari user dengan relasi karyawan
@@ -172,6 +187,11 @@ public function update(Request $request, $id)
         $user->email = $validated['email'];
         $user->role = $validated['role'];
         $user->divisi_id = $validated['divisi_id'] ?? null;
+        $user->alamat = $validated['alamat'] ?? null;
+        $user->kontak = $validated['kontak'] ?? null;
+        $user->status_kerja = $validated['status_kerja'] ?? 'aktif';
+        $user->status_karyawan = $validated['status_karyawan'] ?? 'tetap';
+        $user->gaji = $validated['gaji'] ?? null;
         
         // Update password jika diisi
         if (!empty($validated['password'])) {

@@ -7,6 +7,8 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+    {{-- MATERIAL SYMBOLS untuk Sidebar (WAJIB) --}}
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <style>
@@ -96,6 +98,167 @@
         .modal.show { display: flex; }
         .modal-content { background: white; border-radius: 0.75rem; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); animation: slideDown 0.3s ease-out; }
         
+        /* Sidebar Styles */
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .hamburger-line {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .hamburger-active .line1 {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .hamburger-active .line2 {
+            opacity: 0;
+        }
+
+        .hamburger-active .line3 {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        .nav-item {
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background-color: #000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+            .nav-item::before {
+                right: auto;
+                left: 0;
+                transform: translateX(-100%);
+            }
+        }
+
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            transform: translateX(0);
+        }
+
+        .nav-item.active {
+            background-color: #e5e7eb;
+            color: #111827 !important;
+            font-weight: 600 !important;
+        }
+
+        .sidebar-fixed {
+            position: fixed;
+            top: 0;
+            width: 256px !important;
+            min-width: 256px !important;
+            max-width: 256px !important;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 40;
+            flex-shrink: 0 !important;
+        }
+
+        .main-content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease-in-out;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                margin-left: 256px !important;
+                width: calc(100% - 256px) !important;
+            }
+        }
+
+        .sidebar-fixed::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-fixed::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .sidebar-fixed::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .sidebar-fixed::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar-wrapper {
+            width: 256px !important;
+            min-width: 256px !important;
+            max-width: 256px !important;
+            flex-shrink: 0 !important;
+        }
+
+        .sidebar-text {
+            font-size: 0.875rem !important;
+            line-height: 1.25rem !important;
+            font-weight: 500 !important;
+            color: #374151 !important;
+        }
+
+        .sidebar-title {
+            font-size: 1.5rem !important;
+            line-height: 2rem !important;
+            font-weight: 700 !important;
+            color: #1f2937 !important;
+        }
+
+        .sidebar-icon {
+            font-size: 1.25rem !important;
+            width: 1.25rem !important;
+            height: 1.25rem !important;
+        }
+
+        .sidebar-nav-item {
+            padding: 0.625rem 1rem !important;
+        }
+
+        .sidebar-header {
+            height: 5rem !important;
+            min-height: 5rem !important;
+            max-height: 5rem !important;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem 1rem !important;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .sidebar-header img {
+            max-height: 3rem;
+            width: auto;
+            object-fit: contain;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header:hover img {
+            transform: scale(1.05);
+        }
+        
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -107,16 +270,105 @@
     </style>
 </head>
 
-<body class="bg-gray-50 text-gray-800 antialiased">
-    <!-- Main Container -->
-    <main class="p-4 sm:p-6 lg:p-8 min-h-screen">
-        <div class="max-w-7xl mx-auto">
+<body class="bg-gray-50 text-gray-800 antialiased" x-data="{ sidebarOpen: false }">
+    <!-- Tombol Hamburger untuk Mobile (sekarang di kanan) -->
+    <button @click="sidebarOpen = !sidebarOpen"
+        class="md:hidden fixed top-4 right-4 z-50 p-2 rounded-md bg-white shadow-md">
+        <div class="w-6 h-6 flex flex-col justify-center space-y-1" :class="sidebarOpen ? 'hamburger-active' : ''">
+            <div class="hamburger-line line1 w-6 h-0.5 bg-gray-800"></div>
+            <div class="hamburger-line line2 w-6 h-0.5 bg-gray-800"></div>
+            <div class="hamburger-line line3 w-6 h-0.5 bg-gray-800"></div>
+        </div>
+    </button>
+
+    <!-- Overlay untuk Mobile -->
+    <div x-show="sidebarOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" @click="sidebarOpen = false"
+        class="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"></div>
+
+    <!-- Container utama aplikasi -->
+    <div class="app-container flex">
+        <!-- Sidebar dari template -->
+        <aside id="sidebar"
+            class="sidebar-fixed bg-white flex flex-col sidebar-transition transform translate-x-full md:translate-x-0 right-0 md:left-0 md:right-auto shadow-lg"
+            :class="sidebarOpen ? 'translate-x-0' : ''">
+
+            <!-- BRAND -->
+            <div class="sidebar-header flex items-center justify-center border-b border-gray-200 flex-shrink-0">
+                <img src="{{ asset('images/logo_inovindo.jpg') }}" alt="Inovindo Logo"
+                    class="h-12 w-auto object-contain">
+            </div>
+
+            <!-- MENU -->
+            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+
+                <!-- BERANDA -->
+                <a href="/manager-divisi/home"
+                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    :class="window.location.pathname === '/manager-divisi/home' ? 'active' : ''">
+                    <span class="material-symbols-outlined sidebar-icon">home</span>
+                    <span class="sidebar-text">Beranda</span>
+                </a>
+
+                <!-- DATA PROJECT -->
+                <a href="/manager-divisi/data_project"
+                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    :class="window.location.pathname === '/manager-divisi/data_project' ? 'active' : ''">
+                    <span class="material-symbols-outlined sidebar-icon">assignment</span>
+                    <span class="sidebar-text">Data Project</span>
+                </a>
+
+                <!-- KELOLA TUGAS -->
+                <a href="/manager-divisi/pengelola_tugas"
+                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    :class="window.location.pathname === '/manager-divisi/pengelola_tugas' ? 'active' : ''">
+                    <span class="material-symbols-outlined sidebar-icon">assignment</span>
+                    <span class="sidebar-text">Kelola Tugas</span>
+                </a>
+
+                <!-- DATA KARYAWAN -->
+                <a href="/manager-divisi/daftar_karyawan"
+                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    :class="window.location.pathname === '/manager-divisi/daftar_karyawan' ? 'active' : ''">
+                    <span class="material-symbols-outlined sidebar-icon">groups</span>
+                    <span class="sidebar-text">Data Karyawan</span>
+                </a>
+
+                <!-- LAPORAN ABSENSI -->
+                <a href="/manager-divisi/kelola_absensi"
+                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    :class="window.location.pathname === '/manager-divisi/kelola_absensi' ? 'active' : ''">
+                    <span class="material-symbols-outlined sidebar-icon">fact_check</span>
+                    <span class="sidebar-text">Laporan Absensi</span>
+                </a>
+
+            </nav>
+
+            <!-- LOGOUT -->
+            <div class="sidebar-footer border-t border-gray-200 flex-shrink-0">
+                <a href="#" @click="event.preventDefault(); document.getElementById('logout-form').submit();"
+                    class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                    <span class="material-symbols-outlined sidebar-icon">logout</span>
+                    <span class="sidebar-text">Log Out</span>
+                </a>
+
+                <form id="logout-form" action="/logout" method="POST" class="hidden">
+                    @csrf
+                </form>
+            </div>
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content p-4 sm:p-6 lg:p-8 min-h-screen">
+            <div class="max-w-7xl mx-auto">
             
             <!-- Header -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Kelola Absensi</h1>
-                    <p class="text-sm text-gray-500 mt-1">Dashboard Manajemen Kehadiran Karyawan</p>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Laporan Absensi</h1>
+                    <p class="text-sm text-gray-500 mt-1">Laporan kehadiran karyawan Divisi <span class="font-semibold text-gray-700">{{ $selectedDivision }}</span> (View Only)</p>
                 </div>
                 <div class="flex items-center gap-2 text-sm text-gray-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-200">
                     <span class="material-icons-outlined text-base text-blue-500">calendar_today</span>
@@ -172,7 +424,6 @@
                             <div class="filter-option" onclick="toggleFilter('Izin')"><input type="radio" name="filter" value="Izin"> <label class="cursor-pointer w-full">Izin</label></div>
                             <div class="filter-option" onclick="toggleFilter('Sakit')"><input type="radio" name="filter" value="Sakit"> <label class="cursor-pointer w-full">Sakit</label></div>
                             <div class="filter-option" onclick="toggleFilter('Cuti')"><input type="radio" name="filter" value="Cuti"> <label class="cursor-pointer w-full">Cuti</label></div>
-                            <div class="filter-option" onclick="toggleFilter('Dinas Luar')"><input type="radio" name="filter" value="Dinas Luar"> <label class="cursor-pointer w-full">Dinas Luar</label></div>
                         </div>
                     </div>
                 </div>
@@ -186,7 +437,7 @@
                         Riwayat Absensi Harian
                     </h3>
                     <div class="flex items-center gap-2">
-                        <span class="text-sm text-gray-500">Total: <span id="totalCountAbsensi" class="font-bold text-gray-800">0</span> data</span>
+                        <span class="text-sm text-gray-500">Total: <span id="totalCountAbsensi" class="font-bold text-gray-800">{{ isset($formattedAbsensi) ? count($formattedAbsensi) : (isset($absensiPaginator) ? $absensiPaginator->total() : 0) }}</span> data</span>
                     </div>
                 </div>
                 <div class="panel-body p-0">
@@ -201,23 +452,61 @@
                                     <th class="min-w-[120px]">Jam Masuk</th>
                                     <th class="min-w-[120px]">Jam Pulang</th>
                                     <th class="min-w-[120px]">Status Kehadiran</th>
-                                    <th class="min-w-[100px] text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="absensiTableBody" class="text-sm text-gray-600">
-                                <!-- Rows injected by JS -->
+                                @if(isset($formattedAbsensi) && count($formattedAbsensi) > 0)
+                                    @foreach($formattedAbsensi as $i => $item)
+                                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                            <td class="text-center text-gray-400">{{ ($absensiPaginator && method_exists($absensiPaginator, 'firstItem')) ? $absensiPaginator->firstItem() + $i : $i+1 }}</td>
+                                            <td class="font-medium text-gray-800">{{ $item['user_name'] ?? $item->user_name ?? ($item->user_name ?? '') }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($item['tanggal'] ?? ($item->tanggal ?? ''))->translatedFormat('d M Y') }}</td>
+                                            <td><span class="text-gray-700 font-medium">{{ $item['jam_masuk'] ?? ($item->jam_masuk ?? '-') }}</span></td>
+                                            <td><span class="{{ ( ($item['jam_pulang'] ?? ($item->jam_pulang ?? '-')) === '-' ) ? 'text-gray-400 italic' : 'text-gray-700 font-medium' }}">{{ $item['jam_pulang'] ?? ($item->jam_pulang ?? '-') }}</span></td>
+                                            <td><span class="status-badge {{ $item['status_class'] ?? ($item->status_class ?? '') }}">{{ $item['status_kehadiran'] ?? ($item->status_kehadiran ?? '') }}</span></td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="6" class="text-center text-sm text-gray-500 py-6">Tidak ada data absensi.</td>
+                                    </tr>
+                                @endif
                             </tbody>
                         </table>
                     </div>
 
                     <!-- Mobile Cards -->
                     <div class="mobile-cards p-4" id="absensiMobileCards">
-                        <!-- Cards injected by JS -->
+                        @if(isset($formattedAbsensi) && count($formattedAbsensi) > 0)
+                            @foreach($formattedAbsensi as $i => $item)
+                                <div class="mobile-card border-l-4 {{ (($item['status_kehadiran'] ?? ($item->status_kehadiran ?? '')) === 'Tepat Waktu') ? 'border-l-green-500' : 'border-l-yellow-500' }}">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h4 class="font-bold text-gray-800">{{ $item['user_name'] ?? ($item->user_name ?? '') }}</h4>
+                                            <p class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($item['tanggal'] ?? ($item->tanggal ?? ''))->translatedFormat('d M Y') }}</p>
+                                        </div>
+                                        <span class="status-badge {{ $item['status_class'] ?? ($item->status_class ?? '') }} text-xs">{{ $item['status_kehadiran'] ?? ($item->status_kehadiran ?? '') }}</span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3 text-sm mb-3">
+                                        <div class="bg-gray-50 p-2 rounded">
+                                            <p class="text-xs text-gray-400">Masuk</p>
+                                            <p class="font-semibold text-gray-700">{{ $item['jam_masuk'] ?? ($item->jam_masuk ?? '-') }}</p>
+                                        </div>
+                                        <div class="bg-gray-50 p-2 rounded">
+                                            <p class="text-xs text-gray-400">Pulang</p>
+                                            <p class="font-semibold text-gray-700">{{ $item['jam_pulang'] ?? ($item->jam_pulang ?? '-') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
                     </div>
 
                     <!-- Pagination -->
                     <div id="paginationAbsensi" class="pagination-container p-4 border-t border-gray-100">
-                        <!-- Pagination injected by JS -->
+                        @if(isset($absensiPaginator))
+                            {{ $absensiPaginator->links() }}
+                        @endif
                     </div>
                 </div>
             </div>
@@ -230,7 +519,7 @@
                         Pengajuan Izin & Cuti
                     </h3>
                     <div class="flex items-center gap-2">
-                        <span class="text-sm text-gray-500">Total: <span id="totalCountKetidakhadiran" class="font-bold text-gray-800">0</span> data</span>
+                        <span class="text-sm text-gray-500">Total: <span id="totalCountKetidakhadiran" class="font-bold text-gray-800">{{ isset($ketidakhadiran) ? count($ketidakhadiran) : 0 }}</span> data</span>
                     </div>
                 </div>
                 <div class="panel-body p-0">
@@ -245,23 +534,60 @@
                                     <th class="min-w-[150px]">Tanggal</th>
                                     <th class="min-w-[200px]">Keterangan</th>
                                     <th class="min-w-[120px]">Status Approval</th>
-                                    <th class="min-w-[150px] text-center">Aksi Manajer</th>
                                 </tr>
                             </thead>
                             <tbody id="ketidakhadiranTableBody" class="text-sm text-gray-600">
-                                <!-- Rows injected by JS -->
+                                @if(isset($ketidakhadiran) && count($ketidakhadiran) > 0)
+                                    @foreach($ketidakhadiran as $j => $k)
+                                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                            <td class="text-center text-gray-400">{{ $j + 1 }}</td>
+                                            <td class="font-medium text-gray-800">{{ $k->user_name ?? ($k->user->name ?? '') }}</td>
+                                            <td><span class="font-semibold text-gray-700">{{ $k->jenis_ketidakhadiran ?? ($k->type ?? '-') }}</span></td>
+                                            <td>{{ \Carbon\Carbon::parse($k->tanggal ?? ($k->dateStart ?? ''))->translatedFormat('d M Y') }}{{ (isset($k->tanggal_akhir) && $k->tanggal_akhir && $k->tanggal_akhir !== $k->tanggal) ? ' - ' . \Carbon\Carbon::parse($k->tanggal_akhir)->translatedFormat('d M Y') : '' }}</td>
+                                            <td class="max-w-xs truncate text-gray-500" title="{{ $k->keterangan ?? ($k->reason ?? '') }}">{{ $k->keterangan ?? ($k->reason ?? '') }}</td>
+                                            <td><span class="status-badge {{ ($k->approval_status ?? '') === 'approved' ? 'bg-approved' : (($k->approval_status ?? '') === 'rejected' ? 'bg-rejected' : 'bg-pending') }}">{{ ucfirst($k->approval_status ?? 'pending') }}</span></td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="6" class="text-center text-sm text-gray-500 py-6">Tidak ada data ketidakhadiran.</td>
+                                    </tr>
+                                @endif
                             </tbody>
                         </table>
                     </div>
 
                     <!-- Mobile Cards -->
                     <div class="mobile-cards p-4" id="ketidakhadiranMobileCards">
-                        <!-- Cards injected by JS -->
+                        @if(isset($ketidakhadiran) && count($ketidakhadiran) > 0)
+                            @foreach($ketidakhadiran as $k)
+                                <div class="mobile-card border-l-4 border-gray-400">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <h4 class="font-bold text-gray-800">{{ $k->user_name ?? ($k->user->name ?? '') }}</h4>
+                                            <p class="text-xs text-gray-500 font-medium">{{ $k->jenis_ketidakhadiran ?? ($k->type ?? '-') }}</p>
+                                        </div>
+                                        <span class="status-badge {{ ($k->approval_status ?? '') === 'approved' ? 'bg-approved' : (($k->approval_status ?? '') === 'rejected' ? 'bg-rejected' : 'bg-pending') }}">{{ ucfirst($k->approval_status ?? 'pending') }}</span>
+                                    </div>
+                                    <div class="text-sm mb-3">
+                                        <p class="text-gray-400 text-xs mb-1">Tanggal</p>
+                                        <p class="font-medium text-gray-700">{{ \Carbon\Carbon::parse($k->tanggal ?? ($k->dateStart ?? ''))->translatedFormat('d M Y') }}{{ (isset($k->tanggal_akhir) && $k->tanggal_akhir && $k->tanggal_akhir !== $k->tanggal) ? ' - ' . \Carbon\Carbon::parse($k->tanggal_akhir)->translatedFormat('d M Y') : '' }}</p>
+                                    </div>
+                                    <div class="text-sm mb-4">
+                                        <p class="text-gray-400 text-xs mb-1">Keterangan</p>
+                                        <p class="text-gray-600">{{ $k->keterangan ?? ($k->reason ?? '') }}</p>
+                                        @if(($k->approval_status ?? '') === 'rejected')
+                                            <p class="text-red-500 text-xs mt-1 italic">Alasan Ditolak: {{ $k->rejection_reason ?? '-' }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
                     </div>
 
                     <!-- Pagination -->
                     <div id="paginationKetidakhadiran" class="pagination-container p-4 border-t border-gray-100">
-                        <!-- Pagination injected by JS -->
+                        {{-- If you have separate paginator for ketidakhadiran, render links here --}}
                     </div>
                 </div>
             </div>
@@ -329,33 +655,37 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // === 1. DATA SIMULASI (Mock Data) ===
-        // Digunakan agar tampilan tidak kosong saat pertama kali dibuka
-        const users = [
-            { id: 1, name: "Budi Santoso", avatar: "BS" },
-            { id: 2, name: "Siti Aminah", avatar: "SA" },
-            { id: 3, name: "Rizky Pratama", avatar: "RP" },
-            { id: 4, name: "Dewi Lestari", avatar: "DL" },
-            { id: 5, name: "Andi Wijaya", avatar: "AW" },
-            { id: 6, name: "Fitri Handayani", avatar: "FH" }
-        ];
+        // === 1. SERVER DATA (from Controller) ===
+        const users = @json(isset($users) ? $users->map(fn($u) => ['id' => $u->id, 'name' => $u->name])->values() : []);
+        const serverAbsensi = @json(isset($formattedAbsensi) ? $formattedAbsensi : []);
+        const serverKetidakhadiran = @json(isset($ketidakhadiran) ? $ketidakhadiran : []);
 
-        let dataAbsensi = [
-            { id: 101, userId: 1, date: "2023-10-25", checkIn: "08:00", checkOut: "17:00", status: "Hadir" },
-            { id: 102, userId: 2, date: "2023-10-25", checkIn: "08:45", checkOut: "17:10", status: "Hadir" },
-            { id: 103, userId: 3, date: "2023-10-25", checkIn: "09:15", checkOut: "17:30", status: "Terlambat" }, // Terlambat
-            { id: 104, userId: 4, date: "2023-10-25", checkIn: "08:05", checkOut: "-", status: "Hadir" }, // Belum pulang
-            { id: 105, userId: 1, date: "2023-10-24", checkIn: "07:55", checkOut: "17:05", status: "Hadir" },
-            { id: 106, userId: 5, date: "2023-10-24", checkIn: "09:00", checkOut: "-", status: "Terlambat" },
-        ];
+        // If controller passed a paginator object, its items are under `data` (or `items`).
+        const serverAbsensiArray = Array.isArray(serverAbsensi) ? serverAbsensi : (serverAbsensi && serverAbsensi.data ? serverAbsensi.data : (serverAbsensi && serverAbsensi.items ? serverAbsensi.items : []));
+        const serverKetidakhadiranArray = Array.isArray(serverKetidakhadiran) ? serverKetidakhadiran : (serverKetidakhadiran && serverKetidakhadiran.data ? serverKetidakhadiran.data : (serverKetidakhadiran && serverKetidakhadiran.items ? serverKetidakhadiran.items : []));
 
-        let dataKetidakhadiran = [
-            { id: 201, userId: 5, type: "Sakit", dateStart: "2023-10-25", dateEnd: "2023-10-26", reason: "Demam tinggi dan flu.", status: "pending" },
-            { id: 202, userId: 6, type: "Izin", dateStart: "2023-10-24", dateEnd: "2023-10-24", reason: "Acara keluarga.", status: "approved" },
-            { id: 203, userId: 3, type: "Cuti", dateStart: "2023-10-20", dateEnd: "2023-10-23", reason: "Cuti tahunan.", status: "approved" },
-            { id: 204, userId: 2, type: "Dinas Luar", dateStart: "2023-10-26", dateEnd: "2023-10-27", reason: "Meeting klien di Surabaya.", status: "pending" },
-            { id: 205, userId: 4, type: "Izin", dateStart: "2023-10-23", dateEnd: "2023-10-23", reason: "Keperluan bank.", status: "rejected", rejectionNote: "Izin ditolak karena deadline project." },
-        ];
+        // Normalize server data into the shapes expected by the client renderers
+        let dataAbsensi = (serverAbsensiArray || []).map(item => ({
+            id: item.id,
+            userId: item.user_id ?? item.userId ?? (item.user && item.user.id) ?? null,
+            name: item.user_name ?? (item.user && item.user.name) ?? item.name ?? '',
+            date: item.tanggal ?? item.date ?? item.created_at ?? null,
+            checkIn: item.jam_masuk ?? item.checkIn ?? item.check_in ?? '-',
+            checkOut: item.jam_pulang ?? item.checkOut ?? item.check_out ?? '-',
+            status: item.status_kehadiran ?? item.jenis_ketidakhadiran ?? item.status ?? 'Hadir'
+        }));
+
+        let dataKetidakhadiran = (serverKetidakhadiranArray || []).map(item => ({
+            id: item.id,
+            userId: item.user_id ?? item.userId ?? (item.user && item.user.id) ?? null,
+            name: item.user_name ?? (item.user && item.user.name) ?? item.name ?? '',
+            type: item.jenis_ketidakhadiran ?? item.type ?? item.kategori ?? 'Izin',
+            dateStart: item.tanggal ?? item.dateStart ?? item.tanggal_mulai ?? item.start_date ?? null,
+            dateEnd: item.tanggal_akhir ?? item.dateEnd ?? item.tanggal_selesai ?? item.end_date ?? item.date ?? null,
+            reason: item.keterangan ?? item.reason ?? item.alasan ?? '',
+            status: item.approval_status ?? item.status ?? 'pending',
+            rejectionNote: item.rejection_reason ?? item.rejectionNote ?? item.alasan_penolakan ?? null
+        }));
 
         // === 2. STATE MANAGEMENT ===
         let state = {
@@ -373,10 +703,10 @@
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('id-ID', options);
 
-            // Initial Render
-            updateStats();
-            renderAbsensiTable();
-            renderKetidakhadiranTable();
+            // Initial Render: skip client-side table rendering to preserve server-side HTML
+            // updateStats();
+            // renderAbsensiTable();
+            // renderKetidakhadiranTable();
             
             // Event Listeners
             document.getElementById('searchInput').addEventListener('input', (e) => {
@@ -470,7 +800,7 @@
 
             // Filter Logic
             let filtered = dataAbsensi.filter(item => {
-                const name = getUserName(item.userId).toLowerCase();
+                const name = (item.name || getUserName(item.userId)).toLowerCase();
                 const matchesSearch = name.includes(state.search);
                 const matchesDate = state.filterDate ? item.date === state.filterDate : true;
                 const matchesStatus = state.filterStatus === 'all' ? true : item.status === state.filterStatus;
@@ -492,21 +822,16 @@
             pageData.forEach((item, index) => {
                 const globalIndex = start + index + 1;
                 const statusClass = item.status === 'Hadir' ? 'bg-hadir' : 'bg-terlambat';
-                const name = getUserName(item.userId);
+                const name = item.name || getUserName(item.userId);
                 
                 const row = `
                     <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                         <td class="text-center text-gray-400">${globalIndex}</td>
                         <td class="font-medium text-gray-800">${name}</td>
                         <td>${formatDateIndo(item.date)}</td>
-                        <td><span class="text-gray-700 font-medium">${item.checkIn}</span></td>
-                        <td><span class="${item.checkOut === '-' ? 'text-gray-400 italic' : 'text-gray-700 font-medium'}">${item.checkOut}</span></td>
+                        <td><span class="text-gray-700 font-medium">${displayRaw(item.checkIn)}</span></td>
+                        <td><span class="${item.checkOut === '-' ? 'text-gray-400 italic' : 'text-gray-700 font-medium'}">${displayRaw(item.checkOut)}</span></td>
                         <td><span class="status-badge ${statusClass}">${item.status}</span></td>
-                        <td class="text-center">
-                            <button class="text-gray-400 hover:text-red-500 transition-colors" title="Hapus Data" onclick="deleteAbsensi(${item.id})">
-                                <span class="material-icons-outlined text-sm">delete</span>
-                            </button>
-                        </td>
                     </tr>
                 `;
                 tbody.insertAdjacentHTML('beforeend', row);
@@ -524,17 +849,12 @@
                         <div class="grid grid-cols-2 gap-3 text-sm mb-3">
                             <div class="bg-gray-50 p-2 rounded">
                                 <p class="text-xs text-gray-400">Masuk</p>
-                                <p class="font-semibold text-gray-700">${item.checkIn}</p>
+                                <p class="font-semibold text-gray-700">${displayRaw(item.checkIn)}</p>
                             </div>
                             <div class="bg-gray-50 p-2 rounded">
                                 <p class="text-xs text-gray-400">Pulang</p>
-                                <p class="font-semibold text-gray-700">${item.checkOut}</p>
+                                <p class="font-semibold text-gray-700">${displayRaw(item.checkOut)}</p>
                             </div>
-                        </div>
-                        <div class="flex justify-end">
-                            <button class="text-xs text-red-500 flex items-center gap-1" onclick="deleteAbsensi(${item.id})">
-                                <span class="material-icons-outlined text-sm">delete</span> Hapus
-                            </button>
                         </div>
                     </div>
                 `;
@@ -558,7 +878,7 @@
 
             // Filter Logic
             let filtered = dataKetidakhadiran.filter(item => {
-                const name = getUserName(item.userId).toLowerCase();
+                const name = (item.name || getUserName(item.userId)).toLowerCase();
                 const matchesSearch = name.includes(state.search);
                 const matchesDate = state.filterDate ? item.dateStart === state.filterDate : true;
                 
@@ -583,7 +903,7 @@
 
             pageData.forEach((item, index) => {
                 const globalIndex = start + index + 1;
-                const name = getUserName(item.userId);
+                const name = item.name || getUserName(item.userId);
                 
                 // Styling based on approval status
                 let statusBadge = '';
@@ -607,7 +927,6 @@
                     'Sakit': 'border-orange-400',
                     'Izin': 'border-blue-400',
                     'Cuti': 'border-red-400',
-                    'Dinas Luar': 'border-purple-400'
                 };
                 const typeClass = typeColorMap[item.type] || 'border-gray-400';
 
@@ -691,7 +1010,6 @@
                 terlambat: dataAbsensi.filter(i => i.status === 'Terlambat').length,
                 izin: dataKetidakhadiran.filter(i => i.type === 'Izin').length,
                 cuti: dataKetidakhadiran.filter(i => i.type === 'Cuti').length,
-                dinas: dataKetidakhadiran.filter(i => i.type === 'Dinas Luar').length,
                 sakit: dataKetidakhadiran.filter(i => i.type === 'Sakit').length,
             };
 
@@ -700,7 +1018,6 @@
                 { label: 'Terlambat', val: stats.terlambat, color: 'bg-yellow-100 text-yellow-600', icon: 'schedule' },
                 { label: 'Izin', val: stats.izin, color: 'bg-blue-100 text-blue-600', icon: 'info' },
                 { label: 'Cuti', val: stats.cuti, color: 'bg-red-100 text-red-600', icon: 'flight_takeoff' },
-                { label: 'Dinas Luar', val: stats.dinas, color: 'bg-purple-100 text-purple-600', icon: 'directions_car' },
                 { label: 'Sakit', val: stats.sakit, color: 'bg-orange-100 text-orange-600', icon: 'healing' },
             ];
 
@@ -727,7 +1044,7 @@
             if (!item) return;
 
             document.getElementById('verifyId').value = id;
-            document.getElementById('verifyEmployeeName').textContent = getUserName(item.userId);
+            document.getElementById('verifyEmployeeName').textContent = item.name || getUserName(item.userId);
             document.getElementById('verifyLeaveType').textContent = item.type;
             document.getElementById('verifyDateRange').textContent = `${formatDateIndo(item.dateStart)} - ${formatDateIndo(item.dateEnd)}`;
 
@@ -781,12 +1098,7 @@
         }
 
         function deleteAbsensi(id) {
-            if(confirm('Apakah Anda yakin ingin menghapus data absensi ini?')) {
-                dataAbsensi = dataAbsensi.filter(i => i.id !== id);
-                showNotification('Data absensi dihapus', 'success');
-                renderAbsensiTable();
-                updateStats();
-            }
+            showNotification('Fitur hapus data tidak tersedia. Manager Divisi hanya dapat melihat laporan absensi.', 'warning');
         }
 
         // === 10. UTILITIES ===
@@ -794,6 +1106,68 @@
         function formatDateIndo(dateString) {
             const options = { day: 'numeric', month: 'short', year: 'numeric' };
             return new Date(dateString).toLocaleDateString('id-ID', options);
+        }
+
+        function formatTime(value) {
+            if (value === null || value === undefined) return '-';
+            const s = String(value).trim();
+            if (s === '' || s === '-' || s.toLowerCase() === 'null') return '-';
+
+            // Treat all-zero placeholders as empty (e.g. '0000', '000000', '00:00')
+            if (/^0{4}$/.test(s) || /^0{6}$/.test(s) || s === '00:00' || s === '00:00:00') return '-';
+
+            // Common formats:
+            // HH:MM or HH:MM:SS => capture HH:MM
+            const colonMatch = s.match(/^(\d{2}:\d{2})(:\d{2})?$/);
+            if (colonMatch) return colonMatch[1];
+
+            // 4-digit HHMM => convert to HH:MM (e.g., 0800 -> 08:00, 0000 -> 00:00)
+            const fourDigit = s.match(/^\d{4}$/);
+            if (fourDigit) return s.slice(0,2) + ':' + s.slice(2,4);
+
+            // 6-digit HHMMSS => take first four digits
+            const sixDigit = s.match(/^\d{6}$/);
+            if (sixDigit) return s.slice(0,2) + ':' + s.slice(2,4);
+
+            // ISO or datetime with time part: try to extract time with regex
+            const datetimeMatch = s.match(/(\d{2}:\d{2})(:\d{2})?/);
+            if (datetimeMatch) return datetimeMatch[1];
+
+            // Fallback: attempt Date parsing
+            const d = new Date(s);
+            if (!isNaN(d.getTime())) {
+                const hh = String(d.getHours()).padStart(2, '0');
+                const mm = String(d.getMinutes()).padStart(2, '0');
+                return `${hh}:${mm}`;
+            }
+
+            // As last resort, return first 5 chars (may normalize something like "0000" -> "0000" so ensure format)
+            const fallback = s.slice(0,5);
+            if (/^\d{4}$/.test(s)) return s.slice(0,2) + ':' + s.slice(2,4);
+            return fallback || '-';
+        }
+
+        function displayRaw(value) {
+            if (value === null || value === undefined) return '-';
+            const s = String(value).trim();
+            if (s === '' || s === '-') return '-';
+
+            // Prefer extracting HH:MM if any time portion exists in the string
+            const timeMatch = s.match(/(\d{1,2}):(\d{2})(?::\d{2})?/);
+            if (timeMatch) {
+                const hh = String(timeMatch[1]).padStart(2, '0');
+                const mm = timeMatch[2];
+                return `${hh}:${mm}`;
+            }
+
+            // Handle compact HHMM or HHMMSS anywhere in the string (e.g., '0800' or '080000')
+            const compactMatch = s.match(/(\d{2})(\d{2})(\d{2})?/);
+            if (compactMatch && s.length <= 6) {
+                return compactMatch[1] + ':' + compactMatch[2];
+            }
+
+            // No time found — return the raw DB value (date or other) so it's preserved
+            return s;
         }
 
         function showNotification(message, type = 'success') {
@@ -832,5 +1206,11 @@
             }, 3000);
         }
     </script>
+    
+    <!-- ALPINE JS -->
+    <script src="//unpkg.com/alpinejs" defer></script>
+            </div>
+        </main>
+    </div>
 </body>
 </html>

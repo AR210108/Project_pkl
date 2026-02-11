@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <script>
@@ -239,6 +240,13 @@
             border-radius: 50%;
             background-color: #f59e0b;
         }
+
+        /* Chart Container Styles */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
     </style>
 </head>
 
@@ -255,7 +263,7 @@
 
                 <div class="max-w-4xl mx-auto relative z-10">
                     <h2 class="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-3 md:mb-4">HALLO, <span
-                            id="ownerName" class="loading-dots">Memuat</span>
+                            id="ownerName">-</span>
                     </h2>
                     <p class="text-sm md:text-base text-white/90 mb-6 md:mb-8">
                         Bisnis digital agency adalah perusahaan yang membantu bisnis lain memasarkan produk atau
@@ -279,8 +287,8 @@
                     </div>
                     <div>
                         <p class="text-xs text-gray-400">Kehadiran Karyawan</p>
-                        <p id="attendancePercentage" class="text-xl md:text-2xl font-bold text-white loading-dots">
-                            Memuat</p>
+                        <p id="attendancePercentage" class="text-xl md:text-2xl font-bold text-white">
+                            00%</p>
                     </div>
                 </div>
 
@@ -291,19 +299,10 @@
                     </div>
                     <div>
                         <p class="text-xs text-gray-400">Jumlah Layanan</p>
-                        <p id="serviceCount" class="text-xl md:text-2xl font-bold text-white loading-dots">Memuat</p>
+                        <p id="serviceCount" class="text-xl md:text-2xl font-bold text-white">0</p>
                     </div>
                 </div>
 
-                <div class="card-hover bg-card-light p-4 rounded-lg shadow-sm flex items-start space-x-4">
-                    <div class="bg-gray-700 p-3 rounded-md">
-                        <span class="material-icons text-white">arrow_downward</span>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400">Total Pemasukan</p>
-                        <p id="totalIncome" class="text-lg md:text-xl font-bold text-white loading-dots">Memuat</p>
-                    </div>
-                </div>
 
                 <!-- TOTAL PEMASUKAN CARD -->
                 <div class="card-hover stat-card bg-card-light p-4 rounded-lg shadow-sm">
@@ -315,7 +314,7 @@
                         </div>
                         <div class="mt-auto">
                             <p class="text-xs text-gray-400 mb-1">Total Pemasukan</p>
-                            <p id="totalIncome" class="text-lg md:text-xl font-bold text-white loading-dots">Memuat</p>
+                            <p id="totalIncome" class="text-lg md:text-xl font-bold text-white">Rp 0</p>
                         </div>
                     </div>
                 </div>
@@ -330,7 +329,7 @@
                         </div>
                         <div class="mt-auto">
                             <p class="text-xs text-gray-400 mb-1">Total Pengeluaran</p>
-                            <p id="totalExpense" class="text-lg md:text-xl font-bold text-white loading-dots">Memuat</p>
+                            <p id="totalExpense" class="text-lg md:text-xl font-bold text-white">Rp 0</p>
                         </div>
                     </div>
                 </div>
@@ -345,57 +344,25 @@
                         </div>
                         <div class="mt-auto">
                             <p class="text-xs text-gray-400 mb-1">Total Keuntungan</p>
-                            <p id="totalProfit" class="text-lg md:text-xl font-bold text-white loading-dots">Memuat</p>
+                            <p id="totalProfit" class="text-lg md:text-xl font-bold text-white">Rp 0</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section class="gradient-subtle p-4 md:p-6 rounded-2xl shadow-sm">
-                <div class="flex justify-between items-center mb-4 md:mb-6">
+            <section class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 md:p-6 mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3 flex-wrap">
                     <h3 class="text-lg md:text-xl font-bold text-black">Grafik Keuangan</h3>
-                    <button class="bg-gray-200 p-2 rounded-full text-black hover:bg-gray-300 transition-colors">
-                        <span class="material-icons">open_in_new</span>
-                    </button>
-                </div>
-
-                <!-- Grafik untuk Desktop (Vertikal) -->
-                <div class="hidden md:block">
-                    <div class="flex items-end h-64 space-x-4">
-                        <div
-                            class="flex flex-col justify-between h-full text-xs text-gray-600 pr-2 border-r border-gray-300">
-                            <span>10k</span>
-                            <span>8k</span>
-                            <span>4k</span>
-                            <span>2k</span>
-                            <span>0</span>
-                        </div>
-                        <div id="chartContainer" class="w-full h-full flex items-end justify-around">
-                            <!-- Chart bars will be populated by JavaScript -->
-                        </div>
+                    <div class="flex gap-2 flex-wrap">
+                        <button id="filter-minggu" class="filter-btn active px-4 py-2 rounded-lg bg-blue-500 text-white font-medium text-sm hover:bg-blue-600 transition-colors">Per Minggu</button>
+                        <button id="filter-bulan" class="filter-btn px-4 py-2 rounded-lg bg-gray-300 text-black font-medium text-sm hover:bg-gray-400 transition-colors">Per Bulan</button>
+                        <button id="filter-tahun" class="filter-btn px-4 py-2 rounded-lg bg-gray-300 text-black font-medium text-sm hover:bg-gray-400 transition-colors">Per Tahun</button>
                     </div>
                 </div>
 
-                <!-- Grafik untuk Mobile (Sama seperti Desktop, hanya lebih kecil) -->
-                <div class="md:hidden overflow-x-auto pb-4">
-                    <div class="flex items-end h-48 min-w-max">
-                        <div
-                            class="flex flex-col justify-between h-full text-xs text-gray-600 pr-2 border-r border-gray-300">
-                            <span>10k</span>
-                            <span>8k</span>
-                            <span>4k</span>
-                            <span>2k</span>
-                            <span>0</span>
-                        </div>
-                        <div id="chartContainerMobile" class="w-full h-full flex items-end justify-around px-2">
-                            <!-- Chart bars will be populated by JavaScript -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Indikator scroll untuk mobile -->
-                <div class="md:hidden text-center text-xs text-gray-600 mt-2">
-                    <span class="material-icons text-sm">swipe</span> Geser untuk melihat grafik lengkap
+                <!-- Grafik Keuangan menggunakan Chart.js -->
+                <div class="chart-container" style="position: relative; height: 400px;">
+                    <canvas id="finance-chart"></canvas>
                 </div>
             </section>
 
@@ -490,10 +457,10 @@
         <div class="modal-content">
             <span class="close-modal">&times;</span>
             <div class="p-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">Detail Kehadiran Per Divisi</h3>
-                <div id="modal-body-content">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Persentase Kehadiran Per Divisi</h3>
+                <div id="modal-body-content" class="space-y-3">
                     <!-- Konten akan diisi oleh JavaScript -->
-                    <p class="text-center text-gray-500">Klik untuk melihat detail</p>
+                    <p class="text-center text-gray-500">Memuat...</p>
                 </div>
             </div>
         </div>
@@ -506,11 +473,16 @@
             let selectedDate = null;
             let highlightedDates = [];
             let announcementDates = [];
+            let currentChartFilter = 'minggu'; // Default to weekly
+            window.chartDataCache = {
+                pemasukan_per_bulan: [0, 0, 0, 0, 0, 0, 0],
+                pengeluaran_per_bulan: [0, 0, 0, 0, 0, 0, 0]
+            };
 
             // --- FUNGSI API UNTUK OWNER ---
             async function ownerApiFetch(endpoint, options = {}) {
                 const cacheBuster = `_t=${Date.now()}`;
-                const url = `/owner/api${endpoint}${endpoint.includes('?') ? '&' : '?'}${cacheBuster}`;
+                const url = `/api/owner${endpoint}${endpoint.includes('?') ? '&' : '?'}${cacheBuster}`;
                 const defaultOptions = { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') } };
                 const finalOptions = { ...defaultOptions, ...options };
 
@@ -522,17 +494,316 @@
                 return await response.json();
             }
 
-            // --- FUNGSI-FUNGSI LAMA (TIDAK PERLU DIUBANG) ---
-            async function fetchOwnerData() { /* ... biarkan seperti semula ... */ }
-            async function fetchServiceCount() { /* ... biarkan seperti semula ... */ }
-            async function fetchDashboardData() { /* ... biarkan seperti semula ... */ }
-            function updateDashboardStats() { /* ... biarkan seperti semula ... */ }
-            function formatCurrency(amount) { /* ... biarkan seperti semula ... */ }
-            function initializeChart() { /* ... biarkan seperti semula ... */ }
+            // --- FUNGSI-FUNGSI DASHBOARD ---
+            async function fetchOwnerData() {
+                try {
+                    const response = await ownerApiFetch('/data');
+                    if (response.success && response.data) {
+                        document.getElementById('ownerName').textContent = response.data.name.toUpperCase();
+                    }
+                } catch (error) {
+                    console.error('Error loading owner data:', error);
+                }
+            }
 
-            // --- MODAL LOGIC (TIDAK PERLU DIUBANG) ---
+            async function fetchServiceCount() {
+                try {
+                    const response = await ownerApiFetch('/service-count');
+                    if (response.success) {
+                        document.getElementById('serviceCount').textContent = response.data;
+                    }
+                } catch (error) {
+                    console.error('Error loading service count:', error);
+                    document.getElementById('serviceCount').textContent = '0';
+                }
+            }
+
+            async function fetchDashboardData() {
+                try {
+                    // Fetch attendance percentage
+                    const attendanceResponse = await ownerApiFetch('/attendance-percentage');
+                    if (attendanceResponse.success) {
+                        const percentage = attendanceResponse.data.persentase;
+                        document.getElementById('attendancePercentage').textContent = percentage + '%';
+                    }
+
+                    // Fetch financial stats and chart data
+                    const statsResponse = await ownerApiFetch('/dashboard-stats');
+                    if (statsResponse.success) {
+                        const stats = statsResponse.data;
+                        console.log('Dashboard stats received:', stats);
+                        document.getElementById('totalIncome').textContent = formatCurrency(stats.total_pemasukan);
+                        document.getElementById('totalExpense').textContent = formatCurrency(stats.total_pengeluaran);
+                        document.getElementById('totalProfit').textContent = formatCurrency(stats.total_keuntungan);
+                        
+                        // Store chart data untuk digunakan oleh filter
+                        const pemasukanData = stats.pemasukan_per_bulan || [0, 0, 0, 0, 0, 0, 0];
+                        const pengeluaranData = stats.pengeluaran_per_bulan || [0, 0, 0, 0, 0, 0, 0];
+                        
+                        window.chartDataCache = {
+                            pemasukan_per_bulan: Array.isArray(pemasukanData) ? pemasukanData : [0, 0, 0, 0, 0, 0, 0],
+                            pengeluaran_per_bulan: Array.isArray(pengeluaranData) ? pengeluaranData : [0, 0, 0, 0, 0, 0, 0]
+                        };
+                        
+                        console.log('Chart data cached:', window.chartDataCache);
+                        
+                        // Update chart dengan data default (per minggu)
+                        updateChart(window.chartDataCache.pemasukan_per_bulan, window.chartDataCache.pengeluaran_per_bulan, 'minggu');
+                    }
+                } catch (error) {
+                    console.error('Error loading dashboard data:', error);
+                    // Provide default data even if API fails
+                    window.chartDataCache = {
+                        pemasukan_per_bulan: [0, 0, 0, 0, 0, 0, 0],
+                        pengeluaran_per_bulan: [0, 0, 0, 0, 0, 0, 0]
+                    };
+                    updateChart([0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], 'minggu');
+                }
+            }
+
+            async function updateChartByFilter(filter) {
+                try {
+                    currentChartFilter = filter;
+                    let endpoint = '/dashboard-stats?period=weekly';
+                    
+                    if (filter === 'bulan') {
+                        endpoint = '/dashboard-stats?period=monthly';
+                    } else if (filter === 'tahun') {
+                        endpoint = '/dashboard-stats?period=yearly';
+                    }
+                    
+                    const statsResponse = await ownerApiFetch(endpoint);
+                    if (statsResponse.success) {
+                        const stats = statsResponse.data;
+                        const pemasukanData = stats.pemasukan_per_bulan || stats.pemasukan_per_periode || [0, 0, 0, 0, 0, 0, 0];
+                        const pengeluaranData = stats.pengeluaran_per_bulan || stats.pengeluaran_per_periode || [0, 0, 0, 0, 0, 0, 0];
+                        const labels = stats.labels || null;
+                        
+                        updateChart(pemasukanData, pengeluaranData, filter, labels);
+                    } else {
+                        const pemasukanData = [0, 0, 0, 0, 0, 0, 0];
+                        const pengeluaranData = [0, 0, 0, 0, 0, 0, 0];
+                        updateChart(pemasukanData, pengeluaranData, filter);
+                    }
+                    } catch (error) {
+                    console.error('Error updating chart:', error);
+                    const pemasukanData = [0, 0, 0, 0, 0, 0, 0];
+                    const pengeluaranData = [0, 0, 0, 0, 0, 0, 0];
+                    updateChart(pemasukanData, pengeluaranData, filter);
+                }
+            }
+
+            function formatCurrency(amount) {
+                if (amount === null || amount === undefined || isNaN(amount)) {
+                    return 'Rp 0';
+                }
+                
+                // Konversi ke number jika string
+                const numAmount = parseFloat(amount);
+                
+                if (numAmount === 0 || !isFinite(numAmount)) {
+                    return 'Rp 0';
+                }
+                
+                // Format manual ke Rupiah
+                const formatted = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(numAmount);
+                
+                return formatted;
+            }
+
+            function updateChart(pemasukanPerBulan, pengeluaranPerBulan, filter = 'minggu', labelsFromApi = null) {
+                const ctx = document.getElementById('finance-chart');
+                if (!ctx) return;
+
+                // Validasi dan sanitasi data
+                const pemasukanData = Array.isArray(pemasukanPerBulan) ? pemasukanPerBulan : [0, 0, 0, 0, 0, 0, 0];
+                const pengeluaranData = Array.isArray(pengeluaranPerBulan) ? pengeluaranPerBulan : [0, 0, 0, 0, 0, 0, 0];
+                
+                // Pastikan semua nilai adalah number
+                const pemasukanArray = pemasukanData.map(v => parseFloat(v) || 0);
+                const pengeluaranArray = pengeluaranData.map(v => parseFloat(v) || 0);
+
+                // Gunakan labels dari API jika tersedia
+                let labels = Array.isArray(labelsFromApi) && labelsFromApi.length ? labelsFromApi.slice() : null;
+
+                if (!labels) {
+                    if (filter === 'minggu') {
+                        labels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+                    } else if (filter === 'bulan') {
+                        // Jika API tidak memberikan label, buat Minggu 1..N
+                        labels = Array.from({ length: pemasukanArray.length }, (_, i) => `Minggu ${i + 1}`);
+                    } else if (filter === 'tahun') {
+                        // Jika API tidak memberikan label, gunakan Januari..Desember
+                        labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'].slice(0, pemasukanArray.length);
+                    }
+                }
+
+                // Destroy chart lama jika ada
+                if (window.chartInstance) {
+                    window.chartInstance.destroy();
+                }
+
+                window.chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Pemasukan',
+                                data: pemasukanArray,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 5,
+                                pointBackgroundColor: '#10b981',
+                                pointBorderColor: '#10b981',
+                                pointBorderWidth: 2,
+                                pointHoverRadius: 7
+                            },
+                            {
+                                label: 'Pengeluaran',
+                                data: pengeluaranArray,
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 5,
+                                pointBackgroundColor: '#ef4444',
+                                pointBorderColor: '#ef4444',
+                                pointBorderWidth: 2,
+                                pointHoverRadius: 7
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    font: { size: 12, weight: 'bold' },
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    color: '#000000'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                titleFont: { size: 12, weight: 'bold' },
+                                bodyFont: { size: 11 },
+                                borderColor: '#ddd',
+                                borderWidth: 1,
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + formatCurrency(context.parsed.y);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    },
+                                    font: { size: 10 },
+                                    color: '#000000'
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)',
+                                    drawBorder: true
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    font: { size: 11 },
+                                    color: '#000000'
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- MODAL LOGIC ---
             const attendanceModal = document.getElementById('attendanceModal');
-            // ... (biarkan semua kode modal seperti semula) ...
+            const closeModal = document.querySelector('.close-modal');
+            const attendanceCardTrigger = document.getElementById('attendance-card-trigger');
+
+            if (closeModal) {
+                closeModal.addEventListener('click', () => {
+                    attendanceModal.style.display = 'none';
+                });
+            }
+
+            if (attendanceCardTrigger) {
+                attendanceCardTrigger.addEventListener('click', async () => {
+                    try {
+                        // Reload data attendance terbaru sebelum membuka modal
+                        const attendanceResponse = await ownerApiFetch('/attendance-percentage');
+                        let overallPercentage = 0;
+                        if (attendanceResponse.success) {
+                            overallPercentage = attendanceResponse.data.persentase;
+                            document.getElementById('attendancePercentage').textContent = overallPercentage + '%';
+                        }
+                        
+                        const response = await ownerApiFetch('/attendance-by-division');
+                        if (response.success && response.data) {
+                            const modalBody = document.getElementById('modal-body-content');
+                            if (response.data.length === 0) {
+                                modalBody.innerHTML = '<p class="text-center text-gray-500">Tidak ada data kehadiran</p>';
+                            } else {
+                                
+                                modalBody.innerHTML = `
+                                    <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-300">
+                                        <p class="text-sm text-gray-600 mb-1">Kehadiran Keseluruhan:</p>
+                                        <p class="text-3xl font-bold text-blue-600">${overallPercentage}%</p>
+                                    </div>
+                                    <p class="text-sm font-semibold text-gray-700 mb-3">Breakdown Per Divisi:</p>
+                                    ${response.data.map(div => `
+                                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg border-l-4 border-green-500 mb-2">
+                                            <div>
+                                                <p class="font-semibold text-gray-800">${div.divisi}</p>
+                                                <p class="text-xs text-gray-600">Hadir: ${div.hadir}/${div.total}</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-2xl font-bold text-green-600">${div.persentase}%</p>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                `;
+                            }
+                            attendanceModal.style.display = 'block';
+                        }
+                    } catch (error) {
+                        console.error('Error loading attendance data:', error);
+                        const modalBody = document.getElementById('modal-body-content');
+                        modalBody.innerHTML = '<p class="text-center text-red-500">Gagal memuat data kehadiran</p>';
+                        attendanceModal.style.display = 'block';
+                    }
+                });
+            }
+
+            window.addEventListener('click', (event) => {
+                if (event.target === attendanceModal) {
+                    attendanceModal.style.display = 'none';
+                }
+            });
 
             // --- FUNGSI KALENDER & PEMANGGIL DATA BARU - DIPERBAIKI ---
             function renderCalendar() {
@@ -609,20 +880,32 @@
 
             async function loadOwnerHighlightedDates() {
                 try {
-                    const dates = await ownerApiFetch('/meeting-notes-dates');
-                    highlightedDates = dates.map(date => new Date(date).toISOString().split('T')[0]);
+                    const response = await ownerApiFetch('/meeting-notes-dates');
+                    const dates = response.data || [];
+                    highlightedDates = dates.map(date => {
+                        const dateObj = new Date(date);
+                        return dateObj.toISOString().split('T')[0];
+                    });
                     console.log('Tanggal meeting berhasil dimuat:', highlightedDates);
                     renderCalendar();
-                } catch (error) { console.error('Gagal load tanggal meeting:', error); }
+                } catch (error) { 
+                    console.error('Gagal load tanggal meeting:', error); 
+                }
             }
 
             async function loadOwnerAnnouncementDates() {
                 try {
-                    const dates = await ownerApiFetch('/announcements-dates');
-                    announcementDates = dates.map(date => new Date(date).toISOString().split('T')[0]);
+                    const response = await ownerApiFetch('/announcements-dates');
+                    const dates = response.data || [];
+                    announcementDates = dates.map(date => {
+                        const dateObj = new Date(date);
+                        return dateObj.toISOString().split('T')[0];
+                    });
                     console.log('Tanggal pengumuman berhasil dimuat:', announcementDates);
                     renderCalendar();
-                } catch (error) { console.error('Gagal load tanggal pengumuman:', error); }
+                } catch (error) { 
+                    console.error('Gagal load tanggal pengumuman:', error); 
+                }
             }
 
             async function loadOwnerMeetingNotes(date) {
@@ -665,19 +948,17 @@
                         return;
                     }
 
-                    container.innerHTML = announcements.map(announcement => `
-                    <div class="bg-gray-100 p-4 rounded-lg">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-semibold text-black">${announcement.judul || 'Tanpa Judul'}</h4>
-                            <span class="text-xs text-gray-600">${announcement.tanggal_indo || new Date(announcement.created_at).toLocaleDateString('id-ID')}</span>
+                    container.innerHTML = announcements.map(announcement => {
+                        const tanggal = announcement.created_at ? new Date(announcement.created_at).toLocaleDateString('id-ID') : 'Tanpa tanggal';
+                        return `
+                        <div class="bg-gray-100 p-4 rounded-lg">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-semibold text-black">${announcement.judul || 'Tanpa Judul'}</h4>
+                                <span class="text-xs text-gray-600">${tanggal}</span>
+                            </div>
+                            <p class="text-sm text-gray-600">${announcement.isi_pesan || 'Tidak ada pesan'}</p>
                         </div>
-                        <p class="text-sm text-gray-600 mb-2">${announcement.ringkasan || announcement.isi_pesan || 'Tidak ada pesan'}</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-600">Oleh: ${announcement.creator || 'System'}</span>
-                            ${announcement.lampiran_url ? `<a href="${announcement.lampiran_url}" target="_blank" class="text-xs text-blue-600 hover:underline">Lihat Lampiran</a>` : ''}
-                        </div>
-                    </div>
-                `).join('');
+                    `}).join('');
 
                 } catch (error) {
                     console.error('Error loading announcements:', error);
@@ -691,7 +972,35 @@
             document.getElementById('refresh-notes')?.addEventListener('click', () => { if (selectedDate) loadOwnerMeetingNotes(selectedDate); });
             document.getElementById('refresh-announcements')?.addEventListener('click', loadOwnerAnnouncements);
 
+            // --- FILTER CHART EVENT LISTENERS ---
+            document.getElementById('filter-minggu')?.addEventListener('click', function() {
+                updateChartByFilter('minggu');
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active', 'bg-blue-500', 'text-white'));
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.add('bg-gray-300', 'text-black'));
+                this.classList.remove('bg-gray-300', 'text-black');
+                this.classList.add('active', 'bg-blue-500', 'text-white');
+            });
+
+            document.getElementById('filter-bulan')?.addEventListener('click', function() {
+                updateChartByFilter('bulan');
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active', 'bg-blue-500', 'text-white'));
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.add('bg-gray-300', 'text-black'));
+                this.classList.remove('bg-gray-300', 'text-black');
+                this.classList.add('active', 'bg-blue-500', 'text-white');
+            });
+
+            document.getElementById('filter-tahun')?.addEventListener('click', function() {
+                updateChartByFilter('tahun');
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active', 'bg-blue-500', 'text-white'));
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.add('bg-gray-300', 'text-black'));
+                this.classList.remove('bg-gray-300', 'text-black');
+                this.classList.add('active', 'bg-blue-500', 'text-white');
+            });
+
             // --- INISIALISASI UTAMA (DIPERBAIKI) ---
+            // Initialize chart dengan data default terlebih dahulu
+            updateChart([0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], 'minggu');
+            
             fetchOwnerData();
             fetchServiceCount();
             fetchDashboardData();

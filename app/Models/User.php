@@ -61,6 +61,72 @@ class User extends Authenticatable
     ];
 
     // ============================================
+    // BOOT & EVENTS
+    // ============================================
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        /**
+         * Ketika user dibuat, otomatis buat record di tabel karyawan
+         */
+        static::created(function ($user) {
+            // Ambil nama divisi jika ada divisi_id
+            $divisiName = null;
+            if ($user->divisi_id) {
+                $divisi = Divisi::find($user->divisi_id);
+                $divisiName = $divisi ? $divisi->divisi : null;
+            }
+
+            // Buat karyawan baru
+            Karyawan::create([
+                'user_id' => $user->id,
+                'nama' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'divisi' => $divisiName,
+                'gaji' => $user->gaji,
+                'alamat' => $user->alamat,
+                'kontak' => $user->kontak,
+                'foto' => $user->foto,
+                'status_kerja' => $user->status_kerja ?? 'aktif',
+                'status_karyawan' => $user->status_karyawan ?? 'tetap',
+            ]);
+        });
+
+        /**
+         * Ketika user diupdate, sinkronkan ke tabel karyawan
+         */
+        static::updated(function ($user) {
+            if ($user->karyawan) {
+                $karyawan = $user->karyawan;
+                
+                // Ambil nama divisi jika ada perubahan divisi_id
+                $divisiName = null;
+                if ($user->divisi_id) {
+                    $divisi = Divisi::find($user->divisi_id);
+                    $divisiName = $divisi ? $divisi->divisi : null;
+                }
+
+                // Update karyawan dengan data user terbaru
+                $karyawan->update([
+                    'nama' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'divisi' => $divisiName,
+                    'gaji' => $user->gaji,
+                    'alamat' => $user->alamat,
+                    'kontak' => $user->kontak,
+                    'foto' => $user->foto,
+                    'status_kerja' => $user->status_kerja,
+                    'status_karyawan' => $user->status_karyawan,
+                ]);
+            }
+        });
+    }
+
+    // ============================================
     // RELASI
     // ============================================
 
@@ -230,8 +296,7 @@ class User extends Authenticatable
             $karyawan->nama = $this->name;
             $karyawan->email = $this->email;
             
-            // Perbaikan: Mengakses relasi divisi dengan () agar mengembalikan object query builder
-            // Kemudian menggunakan ->first() untuk mendapatkan data modelnya
+            // Ambil nama divisi dari relasi
             if ($this->divisi) {
                 $karyawan->divisi = $this->divisi->divisi;
             }

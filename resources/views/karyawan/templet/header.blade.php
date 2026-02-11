@@ -276,7 +276,7 @@
             </a>
             <a class="nav-link {{ strpos($currentPage, 'absensi') !== false ? 'active' : '' }} px-1 py-2"
                 href="{{ route('absensi.redirect') }}">
-                Absensi
+                Presensi
                 <span class="nav-indicator"></span>
             </a>
             <a class="nav-link {{ strpos($currentPage, 'karyawan/list') !== false ? 'active' : '' }} px-1 py-2"
@@ -287,7 +287,7 @@
             <!-- PERBAIKAN UTAMA: Ganti /karyawan/pengajuan_cuti dengan route yang benar -->
             <a class="nav-link {{ strpos($currentPage, 'karyawan/cuti') !== false ? 'active' : '' }} px-1 py-2"
                 href="{{ route('karyawan.cuti.index') }}">
-                Manajemen Cuti
+                Pengajuan Cuti
                 <span class="nav-indicator"></span>
             </a>
         </nav>
@@ -376,7 +376,7 @@
                 <div class="flex items-center">
                     <span
                         class="nav-dot inline-block w-2 h-2 rounded-full mr-2 {{ strpos($currentPage, 'absensi') !== false ? 'bg-white' : 'bg-transparent' }}"></span>
-                    Absensi
+                    Presensi
                 </div>
             </a>
             <a class="mobile-nav-link block px-3 py-2 rounded-md transition-all duration-300 {{ strpos($currentPage, 'karyawan/list') !== false ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800' }}"
@@ -393,7 +393,7 @@
                 <div class="flex items-center">
                     <span
                         class="nav-dot inline-block w-2 h-2 rounded-full mr-2 {{ strpos($currentPage, 'karyawan/cuti') !== false ? 'bg-white' : 'bg-transparent' }}"></span>
-                    Manajemen Cuti
+                    Pengajuan Cuti
                 </div>
             </a>
             <a href="{{ route('karyawan.profile') }}"

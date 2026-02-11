@@ -31,9 +31,9 @@ class InvoiceController extends Controller
         ]);
 
         // Untuk API requests (AJAX) - kembalikan JSON
-        if ($request->ajax() || $request->wantsJson() || $request->is('api/*') || $request->expectsJson()) {
+        if ($request->ajax() || $request->wantsJson() || $request->is('*api*') || $request->expectsJson() || $request->filled('ajax')) {
             try {
-                $query = Invoice::latest();
+                $query = Invoice::with(['layanan', 'perusahaan'])->latest();
 
                 if ($request->filled('search')) {
                     $search = $request->search;
@@ -41,7 +41,7 @@ class InvoiceController extends Controller
                         $q->where('company_name', 'like', "%$search%")
                             ->orWhere('client_name', 'like', "%$search%")
                             ->orWhere('invoice_no', 'like', "%$search%")
-                            ->orWhere('nama_layanan', 'like', "%$search%"); // Tambah pencarian nama layanan
+                            ->orWhere('nama_layanan', 'like', "%$search%");
                     });
                 }
 
@@ -55,24 +55,20 @@ class InvoiceController extends Controller
                     $query->where('nama_layanan', $request->nama_layanan);
                 }
 
-                $perPage = $request->input('per_page', 10);
-                $invoices = $query->paginate($perPage);
+                // Return full collection for AJAX frontend (client-side pagination)
+                $invoices = $query->orderBy('created_at', 'desc')->get();
+
+                Log::info('API Invoice Index returning count', ['count' => $invoices->count()]);
 
                 return response()->json([
                     'success' => true,
                     'message' => 'Data invoice berhasil diambil',
-                    'data' => $invoices->items(),
-                    'pagination' => [
-                        'total' => $invoices->total(),
-                        'per_page' => $invoices->perPage(),
-                        'current_page' => $invoices->currentPage(),
-                        'last_page' => $invoices->lastPage(),
-                        'from' => $invoices->firstItem(),
-                        'to' => $invoices->lastItem()
-                    ]
+                    'data' => $invoices
                 ]);
             } catch (\Exception $e) {
-                Log::error('API Invoice Index Error: ' . $e->getMessage());
+                Log::error('API Invoice Index Error: ' . $e->getMessage(), [
+                    'trace' => $e->getTraceAsString()
+                ]);
 
                 return response()->json([
                     'success' => false,
@@ -83,22 +79,20 @@ class InvoiceController extends Controller
         }
 
         // Untuk web requests - kembalikan view
-        if ($user && $user->role == 'finance') {
-            $viewName = 'finance.invoice';
-        } else if ($user && $user->role == 'admin') {
-            $viewName = 'admin.invoice';
+        $role = $user ? $user->role : 'guest';
+        
+        if ($role == 'finance') {
+            return view('finance.invoice');
+        } elseif ($role == 'admin') {
+            return view('admin.invoice');
         } else {
-            $viewName = 'admin.invoice'; // Default
+            abort(403, 'Unauthorized access');
         }
-
-        return view($viewName);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-
-
     public function create()
     {
         $user = Auth::user();
@@ -113,12 +107,10 @@ class InvoiceController extends Controller
                 ->get(['id', 'nama_perusahaan', 'klien', 'alamat', 'kontak']);
 
             if ($user && $user->role == 'finance') {
-                $viewName = 'finance.invoice_create';
+                return view('finance.invoice_create', compact('layanan', 'perusahaanList'));
             } else {
-                $viewName = 'admin.invoice_create';
+                return view('admin.invoice_create', compact('layanan', 'perusahaanList'));
             }
-
-            return view($viewName, compact('layanan', 'perusahaanList'));
         } catch (\Exception $e) {
             Log::error('Error getting data for create form: ' . $e->getMessage());
 
@@ -126,167 +118,185 @@ class InvoiceController extends Controller
             $perusahaanList = collect();
 
             if ($user && $user->role == 'finance') {
-                $viewName = 'finance.invoice_create';
+                return view('finance.invoice_create', compact('layanan', 'perusahaanList'));
             } else {
-                $viewName = 'admin.invoice_create';
+                return view('admin.invoice_create', compact('layanan', 'perusahaanList'));
             }
-
-            return view($viewName, compact('layanan', 'perusahaanList'));
         }
     }
 
-public function store(Request $request)
-{
-    Log::info('Store Invoice Request:', $request->all());
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        Log::info('Store Invoice Request:', $request->all());
 
-    $validator = Validator::make($request->all(), [
-        'invoice_no' => 'required|string|unique:invoices,invoice_no',
-        'invoice_date' => 'required|date',
-        'company_name' => 'required|string|max:255',
-        'company_address' => 'required|string',
-        'kontak' => 'nullable|string|max:255', // Pastikan field ini divalidasi
-        'client_name' => 'required|string|max:255',
-        'nama_layanan' => 'required|string|max:255',
-        'status_pembayaran' => 'required|in:down payment,lunas',
-        'payment_method' => 'required|string',
-        'description' => 'nullable|string',
-        'subtotal' => 'required|numeric|min:0',
-        'tax' => 'required|numeric|min:0',
-        'total' => 'required|numeric|min:0',
-        'order_number' => 'nullable|string',
-    ]);
-
-    if ($validator->fails()) {
-        Log::error('Validation failed:', $validator->errors()->toArray());
-
-        if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        return redirect()->back()
-            ->withErrors($validator)
-            ->withInput();
-    }
-
-    DB::beginTransaction();
-    try {
-        $validated = $validator->validated();
-
-        // TAMBAHKAN LOGIKA INI: Ambil data kontak dari perusahaan jika kosong
-        if (empty($validated['kontak']) && !empty($validated['company_name'])) {
-            $perusahaan = Perusahaan::where('nama_perusahaan', $validated['company_name'])->first();
-            if ($perusahaan) {
-                // Ambil kontak dari berbagai kemungkinan field
-                if (!empty($perusahaan->kontak)) {
-                    $validated['kontak'] = $perusahaan->kontak;
-                } elseif (!empty($perusahaan->telepon)) {
-                    $validated['kontak'] = $perusahaan->telepon;
-                } elseif (!empty($perusahaan->no_telp)) {
-                    $validated['kontak'] = $perusahaan->no_telp;
-                } elseif (!empty($perusahaan->phone)) {
-                    $validated['kontak'] = $perusahaan->phone;
-                } elseif (!empty($perusahaan->no_hp)) {
-                    $validated['kontak'] = $perusahaan->no_hp;
-                } elseif (!empty($perusahaan->telephone)) {
-                    $validated['kontak'] = $perusahaan->telephone;
-                }
-                Log::info('Auto-filled kontak from perusahaan:', ['kontak' => $validated['kontak'] ?? '']);
-            }
-        }
-
-        // TAMBAHKAN INI: Jika deskripsi kosong, ambil dari layanan
-        if (empty($validated['description']) && !empty($validated['nama_layanan'])) {
-            $layanan = Layanan::where('nama_layanan', $validated['nama_layanan'])->first();
-            if ($layanan && !empty($layanan->deskripsi)) {
-                $validated['description'] = $layanan->deskripsi;
-                Log::info('Auto-filled description from layanan:', ['deskripsi' => $layanan->deskripsi]);
-            }
-        }
-
-        // Generate invoice number if not provided
-        if (empty($validated['invoice_no'])) {
-            $validated['invoice_no'] = 'INV-' . date('Ymd') . '-' . strtoupper(uniqid());
-        }
-
-        // Convert numeric values
-        $validated['subtotal'] = (float) $validated['subtotal'];
-        $validated['tax'] = (float) $validated['tax'];
-        $validated['total'] = (float) $validated['total'];
-
-        // Simpan dari perusahaan (update kontak counter)
-        $perusahaan = Perusahaan::where('nama_perusahaan', $validated['company_name'])->first();
-        if ($perusahaan) {
-            // Update perusahaan - pastikan kontak adalah integer untuk increment
-            $currentKontak = (int) ($perusahaan->kontak ?? 0);
-            $perusahaan->update([
-                'kontak' => $currentKontak + 1
-            ]);
-        }
-
-        Log::info('Creating invoice with data:', $validated);
-
-        $invoice = Invoice::create($validated);
-        Log::info('Invoice created successfully:', ['id' => $invoice->id]);
-
-        // The Invoice model's created event will create the Order. Try to fetch it for logging.
-        try {
-            $order = Order::where('invoice_id', $invoice->id)->first();
-            if ($order) {
-                Log::info('Order exists for invoice', ['order_id' => $order->id, 'invoice_id' => $invoice->id]);
-            } else {
-                Log::warning('Order not found immediately after invoice creation', ['invoice_id' => $invoice->id]);
-            }
-        } catch (\Exception $e) {
-            Log::error('Failed while checking for order after invoice creation: ' . $e->getMessage());
-        }
-
-        DB::commit();
-
-        // Untuk API/AJAX request
-        if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Invoice berhasil dibuat',
-                'data' => $invoice
-            ], 201);
-        }
-
-        // Untuk web form request
-        return redirect()->route('admin.invoice.index')
-            ->with('success', 'Invoice berhasil dibuat');
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Error creating invoice: ' . $e->getMessage(), [
-            'trace' => $e->getTraceAsString()
+        $validator = Validator::make($request->all(), [
+            'invoice_no' => 'required|string|unique:invoices,invoice_no',
+            'invoice_date' => 'required|date',
+            'company_name' => 'required|string|max:255',
+            'company_address' => 'required|string',
+            'kontak' => 'nullable|string|max:255',
+            'client_name' => 'required|string|max:255',
+            'nama_layanan' => 'required|string|max:255',
+            'status_pembayaran' => 'required|in:down payment,lunas,pembayaran awal',
+            'payment_method' => 'required|string',
+            'description' => 'nullable|string',
+            'keterangan_tambahan' => 'nullable|string',
+            'jenis_bank' => 'nullable|string|max:100',
+            'kategori_pemasukan' => 'nullable|in:layanan,produk,fee/komisi',
+            'fee_maintenance' => 'nullable|numeric|min:0',
+            'subtotal' => 'required|numeric|min:0',
+            'tax' => 'required|numeric|min:0',
+            'total' => 'required|numeric|min:0',
+            'order_number' => 'nullable|string',
         ]);
 
-        // Untuk API/AJAX request
-        if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal membuat invoice',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-            ], 500);
+        if ($validator->fails()) {
+            Log::error('Validation failed:', $validator->errors()->toArray());
+
+            if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validasi gagal',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        // Untuk web form request
-        return redirect()->back()
-            ->with('error', 'Gagal membuat invoice: ' . $e->getMessage())
-            ->withInput();
+        DB::beginTransaction();
+        try {
+            $validated = $validator->validated();
+
+            // Auto-fill kontak jika kosong
+            if (empty($validated['kontak']) && !empty($validated['company_name'])) {
+                $perusahaan = Perusahaan::where('nama_perusahaan', $validated['company_name'])->first();
+                if ($perusahaan) {
+                    $validated['kontak'] = $perusahaan->kontak ?? 
+                                          $perusahaan->telepon ?? 
+                                          $perusahaan->no_telp ?? 
+                                          $perusahaan->phone ?? 
+                                          $perusahaan->no_hp ?? 
+                                          $perusahaan->telephone ?? 
+                                          '';
+                    Log::info('Auto-filled kontak from perusahaan:', ['kontak' => $validated['kontak'] ?? '']);
+                }
+            }
+
+            // Auto-fill deskripsi jika kosong
+            if (empty($validated['description']) && !empty($validated['nama_layanan'])) {
+                $layanan = Layanan::where('nama_layanan', $validated['nama_layanan'])->first();
+                if ($layanan && !empty($layanan->deskripsi)) {
+                    $validated['description'] = $layanan->deskripsi;
+                    Log::info('Auto-filled description from layanan:', ['deskripsi' => $layanan->deskripsi]);
+                }
+            }
+
+            // Generate invoice number if not provided
+            if (empty($validated['invoice_no'])) {
+                $validated['invoice_no'] = 'INV-' . date('Ymd') . '-' . strtoupper(uniqid());
+            }
+
+            // Convert numeric values
+            $validated['subtotal'] = (float) $validated['subtotal'];
+            $validated['tax'] = (float) $validated['tax'];
+            $validated['total'] = (float) $validated['total'];
+            $validated['fee_maintenance'] = (float) ($validated['fee_maintenance'] ?? 0);
+
+            // Update perusahaan kontak counter
+            $perusahaan = Perusahaan::where('nama_perusahaan', $validated['company_name'])->first();
+            if ($perusahaan) {
+                $currentKontak = (int) ($perusahaan->kontak ?? 0);
+                $perusahaan->update([
+                    'kontak' => $currentKontak + 1
+                ]);
+            }
+
+            Log::info('Creating invoice with data:', $validated);
+
+            $invoice = Invoice::create($validated);
+            Log::info('Invoice created successfully:', ['id' => $invoice->id]);
+
+            // Create order automatically
+            try {
+                $order = $invoice->createOrderFromInvoice();
+                if ($order) {
+                    Log::info('Order created for invoice', ['order_id' => $order->id, 'invoice_id' => $invoice->id]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed while creating order: ' . $e->getMessage());
+            }
+
+            // Ensure a Project is created from this Invoice (fallback in case model event didn't run)
+            try {
+                $createdProject = null;
+                if (method_exists($invoice, 'createProjectFromInvoice')) {
+                    $createdProject = $invoice->createProjectFromInvoice();
+                }
+
+                if ($createdProject) {
+                    Log::info('Project created from invoice (fallback)', [
+                        'invoice_id' => $invoice->id,
+                        'project_id' => $createdProject->id
+                    ]);
+                } else {
+                    Log::info('No project created from invoice (either already exists or method returned null)', [
+                        'invoice_id' => $invoice->id
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to create project from invoice (fallback): ' . $e->getMessage());
+            }
+
+            DB::commit();
+
+            // Untuk API/AJAX request
+            if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Invoice berhasil dibuat',
+                    'data' => $invoice->load(['layanan', 'perusahaan'])
+                ], 201);
+            }
+
+            // Untuk web form request
+            return redirect()->route('admin.invoice.index')
+                ->with('success', 'Invoice berhasil dibuat');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating invoice: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Untuk API/AJAX request
+            if ($request->ajax() || $request->wantsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal membuat invoice',
+                    'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+                ], 500);
+            }
+
+            // Untuk web form request
+            return redirect()->back()
+                ->with('error', 'Gagal membuat invoice: ' . $e->getMessage())
+                ->withInput();
+        }
     }
-}
+
     /**
      * Display the specified resource.
      */
     public function show($id)
     {
         try {
-            $invoice = Invoice::findOrFail($id);
+            $invoice = Invoice::with(['layanan', 'perusahaan', 'kwitansi', 'projects'])->findOrFail($id);
 
             return response()->json([
                 'success' => true,
@@ -329,12 +339,10 @@ public function store(Request $request)
             // Untuk web request
             $user = Auth::user();
             if ($user && $user->role == 'finance') {
-                $viewName = 'finance.invoice_edit';
+                return view('finance.invoice_edit', compact('invoice', 'layanan'));
             } else {
-                $viewName = 'admin.invoice_edit';
+                return view('admin.invoice_edit', compact('invoice', 'layanan'));
             }
-
-            return view($viewName, compact('invoice', 'layanan'));
         } catch (\Exception $e) {
             Log::error('Error editing invoice: ' . $e->getMessage());
 
@@ -369,12 +377,16 @@ public function store(Request $request)
                 'invoice_date' => 'required|date',
                 'company_name' => 'required|string|max:255',
                 'company_address' => 'required|string',
-                'kontak' => 'nullable|string|max:255', // Tambahkan validasi kontak
+                'kontak' => 'nullable|string|max:255',
                 'client_name' => 'required|string|max:255',
                 'nama_layanan' => 'required|string|max:255',
-                'status_pembayaran' => 'required|in:down payment,lunas',
+                'status_pembayaran' => 'required|in:down payment,lunas,pembayaran awal',
                 'payment_method' => 'required|string',
                 'description' => 'nullable|string',
+                'keterangan_tambahan' => 'nullable|string',
+                'jenis_bank' => 'nullable|string|max:100',
+                'kategori_pemasukan' => 'nullable|in:layanan,produk,fee/komisi',
+                'fee_maintenance' => 'nullable|numeric|min:0',
                 'subtotal' => 'required|numeric|min:0',
                 'tax' => 'required|numeric|min:0',
                 'total' => 'required|numeric|min:0',
@@ -397,8 +409,15 @@ public function store(Request $request)
             $validated['subtotal'] = (float) $validated['subtotal'];
             $validated['tax'] = (float) $validated['tax'];
             $validated['total'] = (float) $validated['total'];
+            $validated['fee_maintenance'] = (float) ($validated['fee_maintenance'] ?? 0);
 
             $invoice->update($validated);
+            
+            // Sync project jika ada
+            if ($invoice->hasProject()) {
+                $invoice->syncProjectWithInvoice();
+            }
+            
             DB::commit();
 
             Log::info('Invoice updated successfully:', ['id' => $invoice->id]);
@@ -406,7 +425,7 @@ public function store(Request $request)
             return response()->json([
                 'success' => true,
                 'message' => 'Invoice berhasil diperbarui',
-                'data' => $invoice
+                'data' => $invoice->load(['layanan', 'perusahaan'])
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
@@ -415,7 +434,9 @@ public function store(Request $request)
             ], 404);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error updating invoice: ' . $e->getMessage());
+            Log::error('Error updating invoice: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
 
             return response()->json([
                 'success' => false,
@@ -457,7 +478,9 @@ public function store(Request $request)
             ], 404);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error deleting invoice: ' . $e->getMessage());
+            Log::error('Error deleting invoice: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
 
             return response()->json([
                 'success' => false,
@@ -468,7 +491,7 @@ public function store(Request $request)
     }
 
     /**
-     * Get all unique layanan names from invoices (for filter dropdown)
+     * API: Get all unique layanan names from invoices
      */
     public function getLayananList(Request $request)
     {
@@ -496,7 +519,7 @@ public function store(Request $request)
     }
 
     /**
-     * Get status pembayaran list (for filter dropdown)
+     * API: Get status pembayaran list
      */
     public function getStatusPembayaranList(Request $request)
     {
@@ -524,7 +547,7 @@ public function store(Request $request)
     }
 
     /**
-     * Get data layanan from Layanan model (for dropdown)
+     * API: Get layanan data for dropdown
      */
     public function getLayananData(Request $request)
     {
@@ -554,7 +577,7 @@ public function store(Request $request)
     public function print($id)
     {
         try {
-            $invoice = Invoice::findOrFail($id);
+            $invoice = Invoice::with(['layanan', 'perusahaan'])->findOrFail($id);
 
             // Jika request AJAX, kembalikan data JSON
             if (request()->ajax() || request()->wantsJson()) {
@@ -584,35 +607,104 @@ public function store(Request $request)
     }
 
     /**
-     * Get finance invoices
+     * API: Get finance invoices
      */
-    public function getFinanceInvoices()
-    {
-        try {
-            $invoices = Invoice::with(['client', 'layanan'])
-                ->orderBy('created_at', 'desc')
-                ->get();
+  // Di InvoiceController.php tambahkan method:
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Data invoice berhasil diambil',
-                'data' => $invoices
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error fetching finance invoices: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengambil data invoice',
-                'error' => $e->getMessage()
-            ], 500);
+/**
+ * API: Get finance invoices for dashboard
+ */
+public function getFinanceInvoices(Request $request)
+{
+    try {
+        \Log::info('API getFinanceInvoices called', ['user_id' => auth()->id()]);
+        
+        $query = Invoice::query();
+        
+        // Search
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('company_name', 'like', "%{$search}%")
+                  ->orWhere('client_name', 'like', "%{$search}%")
+                  ->orWhere('invoice_no', 'like', "%{$search}%")
+                  ->orWhere('nama_layanan', 'like', "%{$search}%");
+            });
         }
+        
+        $invoices = $query->orderBy('created_at', 'desc')->get();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Data invoice finance berhasil diambil',
+            'data' => $invoices
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Error in getFinanceInvoices: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengambil data invoice',
+            'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+        ], 500);
     }
+}
+
+/**
+ * API: Get finance dashboard data
+ */
+public function getFinanceDashboardData(Request $request)
+{
+    try {
+        \Log::info('API getFinanceDashboardData called');
+        
+        // Statistics
+        $totalInvoiceCount = Invoice::count();
+        $paidInvoiceCount = Invoice::where('status_pembayaran', 'lunas')->count();
+        $pendingInvoiceCount = Invoice::where('status_pembayaran', 'pembayaran awal')->count();
+        $totalRevenue = Invoice::where('status_pembayaran', 'lunas')->sum('total');
+        
+        // Get invoices
+        $query = Invoice::query();
+        
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('company_name', 'like', "%{$search}%")
+                  ->orWhere('client_name', 'like', "%{$search}%")
+                  ->orWhere('invoice_no', 'like', "%{$search}%");
+            });
+        }
+        
+        $invoices = $query->orderBy('created_at', 'desc')->get();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Data dashboard finance berhasil diambil',
+            'data' => [
+                'statistics' => [
+                    'total_invoice' => $totalInvoiceCount,
+                    'paid_invoice' => $paidInvoiceCount,
+                    'pending_invoice' => $pendingInvoiceCount,
+                    'total_revenue' => (int)$totalRevenue
+                ],
+                'invoices' => $invoices
+            ]
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Error in getFinanceDashboardData: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengambil data dashboard',
+            'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+        ], 500);
+    }
+}
 
     /**
-     * Get invoices for kwitansi
+     * API: Get invoices for kwitansi
      */
-    // InvoiceController.php - Method getInvoicesForKwitansi
     public function getInvoicesForKwitansi(Request $request)
     {
         try {
@@ -621,8 +713,9 @@ public function store(Request $request)
                 'user_role' => Auth::user()->role ?? 'guest'
             ]);
 
-            // Query semua invoice (bisa difilter nanti)
-            $query = Invoice::select('invoices.*')
+            // Query semua invoice yang belum lunas
+            $query = Invoice::with(['perusahaan', 'layanan'])
+                ->where('status_pembayaran', 'down payment')
                 ->orderBy('created_at', 'desc');
 
             // Filter pencarian
@@ -636,31 +729,33 @@ public function store(Request $request)
                 });
             }
 
-            // Filter hanya invoice yang belum memiliki kwitansi (opsional)
-            if ($request->input('unpaid_only', false)) {
-                $query->whereDoesntHave('kwitansi'); // Asumsi ada relationship
-            }
-
             $invoices = $query->get()->map(function ($invoice) {
                 return [
                     'id' => $invoice->id,
-                    'invoice_no' => $invoice->invoice_no,
-                    'order_number' => $invoice->order_number,
-                    'company_name' => $invoice->company_name,
-                    'client_name' => $invoice->client_name,
-                    'description' => $invoice->description,
-                    'total' => $invoice->total,
-                    'invoice_date' => $invoice->invoice_date,
-                    'status_pembayaran' => $invoice->status_pembayaran,
-                    'nama_layanan' => $invoice->nama_layanan,
-                    'company_address' => $invoice->company_address,
-                    'payment_method' => $invoice->payment_method,
-                    'subtotal' => $invoice->subtotal,
-                    'tax' => $invoice->tax,
+                    'invoice_no' => $invoice->invoice_no ?? '',
+                    'order_number' => $invoice->order_number ?? '',
+                    'company_name' => $invoice->company_name ?? '',
+                    'company_address' => $invoice->company_address ?? '',
+                    'kontak' => $invoice->kontak ?? '',
+                    'client_name' => $invoice->client_name ?? '',
+                    'description' => $invoice->description ?? '',
+                    'nama_layanan' => $invoice->nama_layanan ?? '',
+                    'invoice_date' => $invoice->invoice_date ?? '',
+                    'payment_method' => $invoice->payment_method ?? '',
+                    'subtotal' => $invoice->subtotal ?? 0,
+                    'tax' => $invoice->tax ?? 0,
+                    'fee_maintenance' => $invoice->fee_maintenance ?? 0,
+                    'total' => $invoice->total ?? 0,
+                    'status_pembayaran' => $invoice->status_pembayaran ?? 'down payment',
+                    'jenis_bank' => $invoice->jenis_bank ?? '',
+                    'kategori_pemasukan' => $invoice->kategori_pemasukan ?? 'layanan',
+                    'keterangan_tambahan' => $invoice->keterangan_tambahan ?? '',
                 ];
             });
 
-            Log::info('Admin API: Invoices data returned', ['count' => $invoices->count()]);
+            Log::info('Admin API: Invoices data returned', [
+                'count' => $invoices->count()
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -669,7 +764,9 @@ public function store(Request $request)
                 'total' => $invoices->count()
             ]);
         } catch (\Exception $e) {
-            Log::error('Error in getInvoicesForKwitansi: ' . $e->getMessage());
+            Log::error('Error in getInvoicesForKwitansi: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
 
             return response()->json([
                 'success' => false,
@@ -679,7 +776,9 @@ public function store(Request $request)
         }
     }
 
-    // Method getInvoiceDetailForKwitansi - PERBAIKAN
+    /**
+     * API: Get invoice detail for kwitansi form
+     */
     public function getInvoiceDetailForKwitansi($id)
     {
         try {
@@ -688,27 +787,35 @@ public function store(Request $request)
                 'user_id' => Auth::id()
             ]);
 
-            $invoice = Invoice::findOrFail($id);
+            $invoice = Invoice::with(['perusahaan', 'layanan'])->findOrFail($id);
 
             // Format data untuk form kwitansi
             $invoiceData = [
                 'id' => $invoice->id,
-                'invoice_no' => $invoice->invoice_no,
-                'order_number' => $invoice->order_number,
-                'company_name' => $invoice->company_name,
-                'client_name' => $invoice->client_name,
-                'description' => $invoice->description,
-                'nama_layanan' => $invoice->nama_layanan,
-                'total' => $invoice->total,
-                'subtotal' => $invoice->subtotal,
-                'tax' => $invoice->tax,
-                'invoice_date' => $invoice->invoice_date,
-                'status_pembayaran' => $invoice->status_pembayaran,
-                'company_address' => $invoice->company_address,
-                'payment_method' => $invoice->payment_method,
+                'invoice_no' => $invoice->invoice_no ?? '',
+                'order_number' => $invoice->order_number ?? '',
+                'company_name' => $invoice->company_name ?? '',
+                'company_address' => $invoice->company_address ?? '',
+                'kontak' => $invoice->kontak ?? '',
+                'client_name' => $invoice->client_name ?? '',
+                'nama_layanan' => $invoice->nama_layanan ?? '',
+                'description' => $invoice->description ?? '',
+                'invoice_date' => $invoice->invoice_date ?? '',
+                'payment_method' => $invoice->payment_method ?? '',
+                'subtotal' => $invoice->subtotal ?? 0,
+                'tax' => $invoice->tax ?? 0,
+                'fee_maintenance' => $invoice->fee_maintenance ?? 0,
+                'total' => $invoice->total ?? 0,
+                'status_pembayaran' => $invoice->status_pembayaran ?? 'down payment',
+                'jenis_bank' => $invoice->jenis_bank ?? '',
+                'kategori_pemasukan' => $invoice->kategori_pemasukan ?? 'layanan',
+                'keterangan_tambahan' => $invoice->keterangan_tambahan ?? '',
             ];
 
-            Log::info('Admin API: Invoice detail returned', ['invoice_id' => $id]);
+            Log::info('Admin API: Invoice detail returned', [
+                'invoice_id' => $id,
+                'data' => $invoiceData
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -723,7 +830,10 @@ public function store(Request $request)
                 'message' => 'Invoice tidak ditemukan'
             ], 404);
         } catch (\Exception $e) {
-            Log::error('Error in getInvoiceDetailForKwitansi: ' . $e->getMessage());
+            Log::error('Error in getInvoiceDetailForKwitansi: ' . $e->getMessage(), [
+                'invoice_id' => $id,
+                'trace' => $e->getTraceAsString()
+            ]);
 
             return response()->json([
                 'success' => false,
@@ -732,13 +842,14 @@ public function store(Request $request)
             ], 500);
         }
     }
+
     /**
-     * Get all invoices (API) - untuk kwitansi dropdown
+     * API: Get all invoices - untuk kwitansi dropdown
      */
     public function getAllInvoicesApi(Request $request)
     {
         try {
-            $query = Invoice::orderBy('created_at', 'desc');
+            $query = Invoice::with(['perusahaan'])->orderBy('created_at', 'desc');
 
             // Filter
             if ($request->filled('search')) {
@@ -769,7 +880,7 @@ public function store(Request $request)
     }
 
     /**
-     * Create project from invoice manually
+     * API: Create project from invoice manually
      */
     public function createProjectFromInvoice($id)
     {
@@ -809,7 +920,7 @@ public function store(Request $request)
                 ], 500);
             }
         } catch (\Exception $e) {
-            \Log::error('Error creating project from invoice: ' . $e->getMessage());
+            Log::error('Error creating project from invoice: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -819,7 +930,7 @@ public function store(Request $request)
     }
 
     /**
-     * Sync project with invoice
+     * API: Sync project with invoice
      */
     public function syncProjectWithInvoice($id)
     {
@@ -851,7 +962,7 @@ public function store(Request $request)
                 ], 500);
             }
         } catch (\Exception $e) {
-            \Log::error('Error syncing project with invoice: ' . $e->getMessage());
+            Log::error('Error syncing project with invoice: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -861,12 +972,12 @@ public function store(Request $request)
     }
 
     /**
-     * Get project info for invoice
+     * API: Get project info for invoice
      */
     public function getInvoiceProjectInfo($id)
     {
         try {
-            $invoice = Invoice::findOrFail($id);
+            $invoice = Invoice::with(['projects'])->findOrFail($id);
 
             return response()->json([
                 'success' => true,
@@ -879,7 +990,7 @@ public function store(Request $request)
                 ]
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error getting invoice project info: ' . $e->getMessage());
+            Log::error('Error getting invoice project info: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -887,6 +998,10 @@ public function store(Request $request)
             ], 500);
         }
     }
+
+    /**
+     * API: Get layanan data for dropdown
+     */
     public function getLayananForDropdown(Request $request)
     {
         try {
@@ -912,64 +1027,31 @@ public function store(Request $request)
             ], 500);
         }
     }
-
+    
     /**
-     * Get invoices for kwitansi dropdown - API Endpoint
+     * API: Get perusahaan data for dropdown
      */
-    public function getInvoicesForKwitansi(Request $request)
+    public function getPerusahaanForDropdown(Request $request)
     {
         try {
-            $invoices = Invoice::orderBy('invoice_date', 'desc')
-                ->get([
-                    'id',
-                    'invoice_no',
-                    'invoice_date',
-                    'company_name',
-                    'client_name',
-                    'total',
-                    'status_pembayaran'
-                ]);
+            Log::info('Getting perusahaan data for dropdown');
+
+            $perusahaan = Perusahaan::orderBy('nama_perusahaan', 'asc')
+                ->get(['id', 'nama_perusahaan', 'klien', 'alamat', 'kontak', 'telepon', 'no_telp']);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data invoice berhasil diambil',
-                'data' => $invoices
+                'message' => 'Data perusahaan berhasil diambil',
+                'data' => $perusahaan
             ]);
         } catch (\Exception $e) {
-            Log::error('Error getting invoices for kwitansi: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengambil data invoice',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-            ], 500);
-        }
-    }
-
-    /**
-     * Get single invoice detail for kwitansi form - API Endpoint
-     */
-    public function getInvoiceDetailForKwitansi($id)
-    {
-        try {
-            $invoice = Invoice::findOrFail($id);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Data invoice berhasil diambil',
-                'data' => $invoice
+            Log::error('Error getting perusahaan data for dropdown: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
             ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invoice tidak ditemukan'
-            ], 404);
-        } catch (\Exception $e) {
-            Log::error('Error getting invoice detail for kwitansi: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengambil detail invoice',
+                'message' => 'Gagal mengambil data perusahaan',
                 'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
             ], 500);
         }

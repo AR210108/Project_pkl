@@ -40,7 +40,8 @@ class GeneralManagerTaskController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'judul' => 'required|string|max:255',
+            'judul' => 'nullable|string|max:255',
+            'nama_tugas' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'deadline' => 'required|date',
             'status' => 'sometimes|in:pending,proses,selesai,dibatalkan',
@@ -59,6 +60,8 @@ class GeneralManagerTaskController extends Controller
         $validated['status'] = $validated['status'] ?? 'pending';
         // Set default priority jika tidak disediakan
         $validated['priority'] = $validated['priority'] ?? 'medium';
+        // Default judul to nama_tugas if not provided
+        $validated['judul'] = $validated['judul'] ?? $validated['nama_tugas'];
         
         // Handle different target types
         if ($request->target_type === 'karyawan' && $request->filled('assigned_to')) {
@@ -66,7 +69,7 @@ class GeneralManagerTaskController extends Controller
             $validated['target_type'] = 'karyawan';
             $validated['is_broadcast'] = false;
         } elseif ($request->target_type === 'divisi' && $request->filled('target_divisi')) {
-            $validated['target_divisi'] = $request->target_divisi;
+            $validated['target_divisi_id'] = $request->target_divisi;
             $validated['target_type'] = 'divisi';
             $validated['is_broadcast'] = true;
         } elseif ($request->target_type === 'manager' && $request->filled('target_manager_id')) {
@@ -127,7 +130,8 @@ class GeneralManagerTaskController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'judul' => 'required|string|max:255',
+            'judul' => 'nullable|string|max:255',
+            'nama_tugas' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'deadline' => 'required|date',
             'status' => 'required|in:pending,proses,selesai,dibatalkan',
@@ -139,6 +143,9 @@ class GeneralManagerTaskController extends Controller
         
         $task = Task::findOrFail($id);
         $user = Auth::user();
+        
+        // Default judul to nama_tugas if not provided
+        $validated['judul'] = $validated['judul'] ?? $validated['nama_tugas'];
         
         // Check if user is authorized to edit
         if ($task->created_by != $user->id || $user->role !== 'general_manager') {
@@ -152,7 +159,7 @@ class GeneralManagerTaskController extends Controller
         if ($request->target_type === 'karyawan' && $request->filled('assigned_to')) {
             $validated['assigned_to'] = $request->assigned_to;
         } elseif ($request->target_type === 'divisi' && $request->filled('target_divisi')) {
-            $validated['target_divisi'] = $request->target_divisi;
+            $validated['target_divisi_id'] = $request->target_divisi;
             $validated['is_broadcast'] = true;
             
             // FIX: Auto assign ke manager divisi
@@ -270,7 +277,7 @@ class GeneralManagerTaskController extends Controller
         
         // Check if karyawan is in the same division
         $karyawan = User::findOrFail($request->karyawan_id);
-        if ($karyawan->divisi != $task->target_divisi) {
+        if ($karyawan->divisi_id != $task->target_divisi_id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Karyawan tidak berada di divisi yang sama'
@@ -316,8 +323,9 @@ class GeneralManagerTaskController extends Controller
                 $task->assignee_text = $task->assignedUser->name;
                 $task->assignee_divisi = $task->assignedUser->divisi ?? '-';
             } elseif ($task->target_type === 'divisi') {
-                $task->assignee_text = 'Divisi ' . ($task->target_divisi ?? '-');
-                $task->assignee_divisi = $task->target_divisi ?? '-';
+                $divisiName = $task->targetDivisi ? $task->targetDivisi->divisi : '-';
+                $task->assignee_text = 'Divisi ' . $divisiName;
+                $task->assignee_divisi = $divisiName;
             } elseif ($task->target_type === 'manager' && $task->targetManager) {
                 $task->assignee_text = 'Manager: ' . $task->targetManager->name;
                 $task->assignee_divisi = $task->targetManager->divisi ?? '-';

@@ -9,7 +9,7 @@ class TaskFile extends Model
     // Change 'task_files' if your database table name is different
     protected $table = 'task_files'; 
     
-    protected $fillable = ['task_id', 'user_id', 'filename', 'path', 'size', 'mime_type'];
+    protected $fillable = ['task_id', 'user_id', 'filename', 'original_name', 'path', 'size', 'mime_type'];
     
     // Relationship to the Task
     public function task()

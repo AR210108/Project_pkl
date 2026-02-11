@@ -538,7 +538,7 @@
                                                     <td>{{ $k->email }}</td>
                                                     <td>
                                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                            {{ $k->divisi ?? '-' }}
+                                                            {{ isset($k->divisi_name) ? $k->divisi_name : (isset($k->user) && isset($k->user->divisi) ? $k->user->divisi : ($k->divisi ?? '-')) }}
                                                         </span>
                                                     </td>
                                                     <td>{{ $k->alamat }}</td>
@@ -613,7 +613,7 @@
                                             </div>
                                             <div>
                                                 <p class="text-text-muted-light">Divisi</p>
-                                                <p class="font-medium">{{ $k->divisi ?? '-' }}</p>
+                                                <p class="font-medium">{{ isset($k->divisi_name) ? $k->divisi_name : (isset($k->user) && isset($k->user->divisi) ? $k->user->divisi : ($k->divisi ?? '-')) }}</p>
                                             </div>
                                             <div>
                                                 <p class="text-text-muted-light">Status Kerja</p>

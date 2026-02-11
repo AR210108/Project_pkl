@@ -33,6 +33,7 @@ use App\Http\Controllers\CutiController;
 use App\Http\Controllers\GMPerusahaanController;
 use App\Http\Controllers\ProfileController;
 
+
 /*
 |--------------------------------------------------------------------------
 | Helper Functions
@@ -67,6 +68,7 @@ Route::prefix('api')->name('api.public.')->group(function () {
     Route::get('/articles', [SettingController::class, 'getArticlesData'])->name('articles');
     Route::get('/portfolios', [SettingController::class, 'getPortfoliosData'])->name('portfolios');
     Route::get('/layanan', [LayananController::class, 'index'])->name('layanan.public');
+    Route::get('/operational-hours', [SettingController::class, 'getOperationalHours'])->name('operational.hours');
 
     // Test API untuk finance (temporary)
     Route::get('/finance/layanan-test', function () {
@@ -148,7 +150,7 @@ Route::middleware('auth')->group(function () {
     // Pengumuman & Catatan Rapat (Global)
     Route::resource('pengumuman', PengumumanController::class);
 
-    Route::prefix('catatan-rapat')->name('catatan_rapat.')->group(function () {
+Route::prefix('catatan-rapat')->name('catatan_rapat.')->group(function () {
         Route::get('/', [CatatanRapatController::class, 'index'])->name('index');
         Route::post('/', [CatatanRapatController::class, 'store'])->name('store');
         Route::put('/{id}', [CatatanRapatController::class, 'update'])->name('update');
@@ -508,6 +510,16 @@ Route::middleware(['auth', 'role:admin'])
             Route::post('/portfolios', [SettingController::class, 'storePortfolio'])->name('portfolios.store');
             Route::put('/portfolios/{id}', [SettingController::class, 'updatePortfolio'])->name('portfolios.update');
             Route::delete('/portfolios/{id}', [SettingController::class, 'deletePortfolio'])->name('portfolios.delete');
+
+            // Operational Hours
+            Route::get('/operational-hours', [SettingController::class, 'getOperationalHours'])->name('operational.hours');
+            Route::post('/operational-hours', [SettingController::class, 'saveOperationalHours'])->name('operational.hours.save');
+        });
+        Route::get('/catatan_rapat', function () {
+            return redirect()->route('catatan_rapat.index');
+        });
+                Route::get('/pengumuman', function () {
+            return redirect()->route('pengumuman.index');
         });
     });
 
@@ -560,6 +572,8 @@ Route::middleware(['auth', 'role:karyawan'])
             Route::post('/{id}/upload-file', [TaskController::class, 'uploadTaskFile'])->name('upload.file');
             Route::post('/{id}/complete', [TaskController::class, 'markAsComplete'])->name('complete');
             Route::post('/{id}/status', [TaskController::class, 'updateTaskStatus'])->name('update.status');
+            Route::put('/{id}/accept', [KaryawanController::class, 'acceptTask'])->name('accept');
+            Route::get('/{id}/acceptance-status', [KaryawanController::class, 'getAcceptanceStatus'])->name('acceptance.status');
             Route::get('/{id}/comments', [TaskController::class, 'getComments'])->name('comments');
             Route::post('/{id}/comments', [TaskController::class, 'storeComment'])->name('comments.store');
             Route::get('/{id}/files', [TaskController::class, 'getTaskFiles'])->name('files');
@@ -622,8 +636,6 @@ Route::middleware(['auth', 'role:general_manager'])
         Route::get('/layanan', [LayananController::class, 'Generalindex'])->name('layanan');
 
         // DATA PROJECT - ROUTES
-        Route::get('/data_project', [DataProjectController::class, 'index'])->name('data_project');
-
         Route::prefix('data_project')->name('data_project.')->group(function () {
             Route::get('/', [DataProjectController::class, 'index'])->name('index');
             Route::post('/', [DataProjectController::class, 'store'])->name('store');
@@ -721,14 +733,6 @@ Route::middleware(['auth', 'role:owner'])
     ->prefix('owner')
     ->name('owner.')
     ->group(function () {
-        Route::get('/home', function () {
-            return view('pemilik.home');
-        })->name('home');
-        
-        // Profile
-        Route::get('/profile', function () {
-            return view('pemilik.profile');
-        })->name('profile');
 
         Route::get('home', [OwnerBerandaController::class, 'index'])->name('home');
 
@@ -842,7 +846,7 @@ Route::middleware(['auth', 'role:finance'])
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:manager_divisi'])
-    ->prefix('manager_divisi')
+    ->prefix('manager-divisi')
     ->name('manager_divisi.')
     ->group(function () {
         // Dashboard
@@ -862,7 +866,9 @@ Route::middleware(['auth', 'role:manager_divisi'])
             ->name('kelola-tugas');
         
         // Halaman view untuk pengelolaan tugas (kompatibilitas)
-        Route::get('/pengelola_tugas', [TaskController::class, 'managerTasks'])->name('pengelola_tugas');
+        Route::get('/pengelola_tugas', function () {
+            return view('manager_divisi.pengelola_tugas');
+        })->name('pengelola_tugas');
         
         // =========== TUGAS MANAGEMENT ROUTES (CRUD) - DIPERBAIKI ===========
         Route::prefix('tasks')->name('tasks.')->group(function () {
@@ -915,6 +921,15 @@ Route::middleware(['auth', 'role:manager_divisi'])
             Route::get('/karyawan-dropdown', [ManagerDivisiTaskController::class, 'getKaryawanDropdown'])
                 ->name('karyawan-dropdown');
             
+            // Test karyawan endpoint
+            Route::get('/karyawan-test', function() {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Test endpoint working',
+                    'user' => auth()->id()
+                ]);
+            })->name('karyawan-test');
+            
             // Data Tasks utama - MENGGUNAKAN TaskController::apiGetManagerTasks
             Route::get('/tasks-api', [TaskController::class, 'apiGetManagerTasks'])
                 ->name('tasks-api');
@@ -942,14 +957,15 @@ Route::middleware(['auth', 'role:manager_divisi'])
             // Delete task
             Route::delete('/tasks/{id}', [ManagerDivisiTaskController::class, 'destroy'])
                 ->name('tasks.destroy.api');
+
+            // Approve tugas dari karyawan (oleh Manager Divisi)
+            Route::post('/tugas-karyawan/{id}/approve', [ManagerDivisiTaskController::class, 'approveTaskFromKaryawan'])
+                ->name('tugas-karyawan.approve');
             
             // Test endpoint untuk create task
             Route::post('/tasks/test-create', [TaskController::class, 'testCreateTask'])
                 ->name('tasks.test-create');
         });
-
-        // ABSENSI
-        Route::get('/kelola_absensi', [AbsensiController::class, 'kelolaAbsensiManagerDivisi'])->name('kelola_absensi');
 
         // CUTI MANAGEMENT
         Route::prefix('cuti')->name('cuti.')->group(function () {
@@ -991,9 +1007,6 @@ Route::middleware(['auth', 'role:manager_divisi'])
             Route::delete('/{id}', [ManagerDivisiTaskController::class, 'destroy'])->name('destroy');
         });
 
-        Route::get('/pengelola_tugas', function () {
-            return view('manager_divisi.pengelola_tugas');
-        })->name('pengelola_tugas');
         Route::get('/daftar_karyawan', [AdminKaryawanController::class, 'karyawanDivisi'])->name('daftar_karyawan');
 
         // Tim Saya
@@ -1012,9 +1025,6 @@ Route::middleware(['auth', 'role:manager_divisi'])
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->prefix('api')->group(function () {
-    // Projects API global (untuk testing/compatibility)
-    Route::get('/projects/all', [DataProjectController::class, 'getAllProjects'])->name('projects.all');
-
     // INVOICE API ROUTES
     Route::prefix('invoices')->name('api.invoices.')->group(function () {
         Route::get('/', [InvoiceController::class, 'index'])->name('index');
@@ -1027,9 +1037,10 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
     });
 
     // Karyawan API
-    Route::get('/karyawan/history', [KaryawanController::class, 'getHistory'])->name('api.karyawan.history');
-    Route::get('/karyawan/dashboard-data', [KaryawanController::class, 'getDashboardData'])->name('api.karyawan.dashboard-data');
-    Route::get('/karyawan/today-status', [KaryawanController::class, 'getTodayStatus'])->name('api.karyawan.today-status');
+    Route::get('/karyawan/history', [KaryawanController::class, 'getHistoryApi'])->name('api.karyawan.history');
+    Route::get('/karyawan/dashboard-data', [KaryawanController::class, 'getDashboardDataApi'])->name('api.karyawan.dashboard-data');
+    Route::get('/karyawan/today-status', [KaryawanController::class, 'getTodayStatusApi'])->name('api.karyawan.today-status');
+    Route::get('/karyawan/{id}/detail', [KaryawanController::class, 'getDetailApi'])->name('api.karyawan.detail');
 
     // Absensi actions
     Route::post('/karyawan/absen-masuk', [KaryawanController::class, 'absenMasukApi'])->name('api.karyawan.absen-masuk');
@@ -1042,7 +1053,6 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
 
     /* ABSENSI API */
     Route::prefix('karyawan')->name('karyawan.')->group(function () {
-        Route::get('/dashboard-data', [AbsensiController::class, 'apiTodayStatus'])->name('dashboard-data');
         Route::get('/today-status', [AbsensiController::class, 'apiTodayStatus'])->name('today-status');
         Route::get('/history', [AbsensiController::class, 'apiHistory'])->name('history');
         Route::post('/absen-masuk', [AbsensiController::class, 'apiAbsenMasuk'])->name('absen-masuk');
@@ -1053,17 +1063,18 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
     /* =====================================================
      |  API MEETING NOTES & ANNOUNCEMENTS
      ===================================================== */
-    Route::get('/karyawan/meeting-notes', [KaryawanController::class, 'getMeetingNotes']);
-    Route::get('/karyawan/meeting-notes-dates', [KaryawanController::class, 'getMeetingNotesDates']);
-    Route::get('/karyawan/announcements', [KaryawanController::class, 'getAnnouncements']);
-    Route::get('/karyawan/announcements-by-date', [KaryawanController::class, 'getAnnouncementsByDate']);
-    Route::get('/karyawan/announcements-dates', [KaryawanController::class, 'getAnnouncementsDates']);
+    Route::get('karyawan/meeting-notes', [KaryawanController::class, 'getMeetingNotes']);
+    Route::get('karyawan/meeting-notes-dates', [KaryawanController::class, 'getMeetingNotesDates']);
+    Route::get('karyawan/announcements', [KaryawanController::class, 'getAnnouncements']);
+    Route::get('karyawan/announcements-by-date', [KaryawanController::class, 'getAnnouncementsByDate']);
+    Route::get('karyawan/announcements-dates', [KaryawanController::class, 'getAnnouncementsDates']);
     Route::get('/karyawan/calendar-dates', [KaryawanController::class, 'getCalendarDates']);
 
     /* TASKS API */
     Route::prefix('tasks')->name('tasks.')->group(function () {
         Route::get('/{id}', [TaskController::class, 'show'])->name('show');
         Route::get('/{id}/detail', [TaskController::class, 'getTaskDetailApi'])->name('detail');
+        Route::post('/{id}/upload', [TaskController::class, 'uploadTaskFile'])->name('upload');
         Route::post('/{id}/upload-file', [TaskController::class, 'uploadTaskFile'])->name('upload.file');
         Route::post('/{id}/complete', [TaskController::class, 'markAsComplete'])->name('complete');
         Route::post('/{id}/status', [TaskController::class, 'updateTaskStatus'])->name('status');
@@ -1131,7 +1142,6 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('pengumuman', PengumumanController::class);
 
     // API endpoints
-    Route::get('/catatan_rapat/data', [CatatanRapatController::class, 'getData'])->name('catatan_rapat.data');
     Route::get('/users/data', [UserController::class, 'getData'])->name('users.data');
     Route::get('/divisis/list', [UserController::class, 'getDivisis'])->name('divisis.list');
 });
@@ -1418,6 +1428,199 @@ if (env('APP_DEBUG', false)) {
             ]);
         });
 
+        // DEBUG: Check latest task with multi-assign
+        Route::get('/debug/latest-task', function () {
+            try {
+                $latestTask = \App\Models\Task::latest('id')->first();
+                
+                if (!$latestTask) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No tasks found'
+                    ]);
+                }
+
+                // Get raw database value
+                $rawData = \DB::table('tasks')->where('id', $latestTask->id)->first();
+
+                // Test query with both methods
+                $testUser7Old = \App\Models\Task::where('id', $latestTask->id)
+                    ->whereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [7])
+                    ->count();
+
+                $testUser7New = \App\Models\Task::where('id', $latestTask->id)
+                    ->whereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [7])
+                    ->count();
+
+                $rawSql = \DB::select("
+                    SELECT 
+                        assigned_to_ids,
+                        JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(7)) as contains_7,
+                        JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(6)) as contains_6
+                    FROM tasks
+                    WHERE id = ?
+                ", [$latestTask->id]);
+
+                return response()->json([
+                    'success' => true,
+                    'task_id' => $latestTask->id,
+                    'judul' => $latestTask->judul,
+                    'nama_tugas' => $latestTask->nama_tugas,
+                    'assigned_to' => $latestTask->assigned_to,
+                    'assigned_to_ids' => $latestTask->assigned_to_ids,
+                    'assigned_to_ids_count' => is_array($latestTask->assigned_to_ids) ? count($latestTask->assigned_to_ids) : 0,
+                    'raw_assigned_to_ids' => $rawData ? $rawData->assigned_to_ids : null,
+                    'is_broadcast' => $latestTask->is_broadcast ?? false,
+                    'created_at' => $latestTask->created_at,
+                    'query_tests' => [
+                        'test_user_7_with_old_json_contains' => $testUser7Old,
+                        'test_user_7_with_new_json_search' => $testUser7New,
+                    ],
+                    'raw_sql_debug' => $rawSql,
+                    'message' => 'Latest task retrieved successfully'
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        });
+
+        // DEBUG: Check which users can see a specific task
+        Route::get('/debug/task-visibility/{taskId}', function ($taskId) {
+            try {
+                $task = \App\Models\Task::find($taskId);
+                
+                if (!$task) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Task not found'
+                    ]);
+                }
+
+                // Get all users
+                $allUsers = \App\Models\User::whereIn('role', ['karyawan', 'manager_divisi', 'admin'])->get();
+                
+                $canSeeTask = [];
+                $cannotSeeTask = [];
+
+                foreach ($allUsers as $user) {
+                    // Test the same query as karyawanTasks with NEW JSON_CONTAINS(JSON_ARRAY()) method
+                    $taskCount = \App\Models\Task::where('id', $taskId)
+                        ->where(function($q) use ($user) {
+                            $q->where('assigned_to', $user->id)
+                                ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$user->id]);
+                        })
+                        ->count();
+
+                    if ($taskCount > 0) {
+                        $canSeeTask[] = [
+                            'id' => $user->id,
+                            'name' => $user->name,
+                            'role' => $user->role
+                        ];
+                    } else {
+                        $cannotSeeTask[] = [
+                            'id' => $user->id,
+                            'name' => $user->name,
+                            'role' => $user->role
+                        ];
+                    }
+                }
+
+                // Also test raw SQL to debug
+                $rawSql = \DB::select("
+                    SELECT 
+                        id, 
+                        assigned_to, 
+                        assigned_to_ids,
+                        JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(7)) as contains_7_new,
+                        JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(6)) as contains_6_new
+                    FROM tasks
+                    WHERE id = ?
+                ", [$taskId]);
+
+                return response()->json([
+                    'success' => true,
+                    'task_id' => $taskId,
+                    'task_assigned_to' => $task->assigned_to,
+                    'task_assigned_to_ids' => $task->assigned_to_ids,
+                    'can_see_count' => count($canSeeTask),
+                    'can_see' => $canSeeTask,
+                    'cannot_see_count' => count($cannotSeeTask),
+                    'cannot_see' => $cannotSeeTask,
+                    'raw_sql_debug' => $rawSql,
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        });
+
+        // DEBUG: Manual test untuk karyawan 7 lihat task 17
+        Route::get('/debug/karyawan-7-see-task-17', function () {
+            try {
+                $userId = 7;
+                $taskId = 17;
+
+                $task = \App\Models\Task::find($taskId);
+                if (!$task) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Task tidak ditemukan'
+                    ]);
+                }
+
+                // Test query 1: assigned_to check
+                $canSee1 = $task->assigned_to == $userId;
+
+                // Test query 2: JSON_CONTAINS
+                $canSee2 = \DB::selectOne("
+                    SELECT JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?)) as result
+                    FROM tasks
+                    WHERE id = ?
+                ", [$userId, $taskId]);
+
+                // Test query 3: Full where clause
+                $count = \App\Models\Task::where('id', $taskId)
+                    ->where(function($q) use ($userId) {
+                        $q->where('assigned_to', $userId)
+                            ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+                    })
+                    ->count();
+
+                return response()->json([
+                    'success' => true,
+                    'user_id' => $userId,
+                    'task_id' => $taskId,
+                    'task_data' => [
+                        'assigned_to' => $task->assigned_to,
+                        'assigned_to_ids' => $task->assigned_to_ids,
+                    ],
+                    'tests' => [
+                        'assigned_to_match' => $canSee1,
+                        'json_contains_result' => $canSee2->result ?? null,
+                        'full_query_count' => $count,
+                    ],
+                    'should_see' => $canSee1 || ($canSee2 && $canSee2->result),
+                    'message' => ($canSee1 || ($canSee2 && $canSee2->result)) 
+                        ? 'User 7 SHOULD be able to see this task' 
+                        : 'User 7 should NOT see this task'
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        });
+
         Route::get('/test/edit-cuti/{id}', function ($id) {
             try {
                 $cuti = \App\Models\Cuti::find($id);
@@ -1537,17 +1740,6 @@ Route::prefix('owner/api')->middleware(['auth', 'role:owner'])->group(function (
     Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsForOwner']);
 });
 
-// Grup route untuk Manager Divisi
-Route::prefix('manager_divisi/api')->middleware(['auth', 'role:manager_divisi'])->group(function () {
-    // Route untuk Catatan Rapat
-    Route::get('/meeting-notes-dates', [CatatanRapatController::class, 'getMeetingNotesDatesForManager']);
-    Route::get('/meeting-notes', [CatatanRapatController::class, 'getMeetingNotesByDateForManager']);
-
-    // Route untuk Pengumuman
-    Route::get('/announcements-dates', [PengumumanController::class, 'getAnnouncementDatesForManager']);
-    Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsForManager']);
-});
-
 /*
 |--------------------------------------------------------------------------
 | MAIN FALLBACK ROUTE
@@ -1602,22 +1794,98 @@ Route::prefix('owner/api')->middleware(['auth', 'role:owner'])->group(function (
     Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsForOwner']);
 });
 
-// Grup route untuk Manager Divisi
-Route::prefix('manager_divisi/api')->middleware(['auth', 'role:manager_divisi'])->group(function () {
-    // Route untuk Catatan Rapat
-    Route::get('/meeting-notes-dates', [CatatanRapatController::class, 'getMeetingNotesDatesForManager']);
-    Route::get('/meeting-notes', [CatatanRapatController::class, 'getMeetingNotesByDateForManager']);
+// DEBUG: Test karyawanTasks for current user (protected by auth)
+Route::middleware('auth')->group(function () {
+    Route::get('/debug/current-user-tasks', function () {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Not authenticated'], 401);
+        }
+        
+        $userId = $user->id;
+        $tasks = \App\Models\Task::with(['creator', 'assigner', 'comments', 'files', 'project', 'targetDivisi'])
+                                    ->where(function($q) use ($userId) {
+                                            $q->where('assigned_to', $userId)
+                                                ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+                                    })
+                                    ->orderBy('deadline', 'asc')
+                                    ->get();
+        
+        return response()->json([
+            'current_user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+            'query_result_count' => $tasks->count(),
+            'tasks' => $tasks->map(function($t) {
+                return [
+                    'id' => $t->id,
+                    'judul' => $t->judul,
+                    'assigned_to' => $t->assigned_to,
+                    'assigned_to_ids' => $t->assigned_to_ids,
+                ];
+            }),
+        ]);
+    });
 
-    // Route untuk Pengumuman
-    Route::get('/announcements-dates', [PengumumanController::class, 'getAnnouncementDatesForManager']);
-    Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsForManager']);
-});
-
-// Route untuk pengaturan jam operasional
-Route::post('/admin/settings/operational-hours', [App\Http\Controllers\SettingController::class, 'saveOperationalHours'])->name('admin.settings.operational-hours');
-Route::get('/admin/settings/operational-hours', [App\Http\Controllers\SettingController::class, 'getOperationalHours'])->name('admin.settings.operational-hours.get');
-// Route untuk API jam operasional
-Route::get('/api/operational-hours', [App\Http\Controllers\AbsensiController::class, 'apiGetOperationalHours']);
+    // DEBUG: Incrementally test to see where query breaks
+    Route::get('/debug/test-tasks-step/{step}', function ($step) {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Not authenticated'], 401);
+        }
+        
+        $userId = $user->id;
+        
+        switch ($step) {
+            case 1:
+                $tasks = \App\Models\Task::where('assigned_to', $userId)->get();
+                $label = "Only assigned_to = {$userId}";
+                break;
+                
+            case 2:
+                $tasks = \App\Models\Task::whereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId])->get();
+                $label = "Only JSON_CONTAINS for {$userId}";
+                break;
+                
+            case 3:
+                $tasks = \App\Models\Task::where(function($q) use ($userId) {
+                    $q->where('assigned_to', $userId)
+                      ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+                })->get();
+                $label = "Combined where clause (assigned_to OR JSON_CONTAINS)";
+                break;
+                
+            case 4:
+                $tasks = \App\Models\Task::where(function($q) use ($userId) {
+                    $q->where('assigned_to', $userId)
+                      ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+                })->with('creator')->get();
+                $label = "Combined where + with creator";
+                break;
+                
+            case 5:
+                $tasks = \App\Models\Task::where(function($q) use ($userId) {
+                    $q->where('assigned_to', $userId)
+                      ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+                })->with(['creator', 'assigner', 'comments', 'files', 'project', 'targetDivisi'])->get();
+                $label = "Full relationships";
+                break;
+                
+            default:
+                return response()->json(['error' => 'Invalid step'], 400);
+        }
+        
+        return response()->json([
+            'step' => $step,
+            'label' => $label,
+            'user_id' => $userId,
+            'count' => $tasks->count(),
+            'ids' => $tasks->pluck('id')->values()->toArray(),
+        ]);
+    });
+});;
 
 // Finance API routes
 Route::middleware(['auth', 'role:finance'])->prefix('finance/api')->group(function () {

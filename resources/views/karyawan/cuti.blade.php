@@ -75,6 +75,54 @@
             vertical-align: middle;
         }
 
+        /* --- ANIMATIONS --- */
+        
+        /* Fade In Up Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Pulse Animation for Pending Status */
+        @keyframes subtlePulse {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+
+        /* Slide In Right with Bounce for Toast */
+        @keyframes slideInRightBounce {
+            0% { transform: translateX(120%); opacity: 0; }
+            60% { transform: translateX(-10%); opacity: 1; }
+            80% { transform: translateX(5%); }
+            100% { transform: translateX(0); }
+        }
+
+        /* Apply Animations */
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0; /* Start hidden */
+        }
+
+        .animate-pulse-subtle {
+            animation: subtlePulse 2s infinite;
+        }
+
+        .animate-slide-in-bounce {
+            animation: slideInRightBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        /* Button Click Feedback */
+        .btn-active:active {
+            transform: scale(0.95);
+        }
+
         /* Status Badge */
         .status-badge {
             display: inline-block;
@@ -82,6 +130,7 @@
             border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 600;
+            transition: all 0.3s ease;
         }
 
         .status-disetujui {
@@ -92,6 +141,11 @@
         .status-menunggu {
             background-color: rgba(245, 158, 11, 0.15);
             color: #92400e;
+        }
+
+        /* Add subtle pulse to waiting status specifically */
+        .status-menunggu.animate-pulse-subtle {
+            background-color: rgba(245, 158, 11, 0.25);
         }
 
         .status-ditolak {
@@ -122,6 +176,12 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         .stat-card::before {
@@ -153,6 +213,11 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: rotate(5deg) scale(1.05);
         }
 
         .stat-icon.blue {
@@ -209,6 +274,10 @@
             color: #374151;
             font-size: 0.875rem;
             text-transform: uppercase;
+        }
+
+        .data-table tbody tr {
+            transition: background-color 0.2s ease;
         }
 
         .data-table tbody tr:nth-child(even) {
@@ -277,7 +346,7 @@
         }
 
         .minimal-popup.show {
-            transform: translateX(0);
+            /* Overridden by JS to use specific animation class */
         }
 
         .minimal-popup.error {
@@ -320,6 +389,7 @@
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
+        /* Add backdrop fade-in */
         .edit-popup.show {
             opacity: 1;
             visibility: visible;
@@ -334,7 +404,7 @@
             overflow-y: auto;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             transform: scale(0.9);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .edit-popup.show .edit-popup-content {
@@ -406,6 +476,10 @@
             color: #64748b;
         }
 
+        .desktop-page-btn:not(.active):hover {
+            background-color: #e2e8f0;
+        }
+
         .desktop-nav-btn {
             display: flex;
             justify-content: center;
@@ -438,6 +512,8 @@
             justify-content: space-between;
             padding: 12px 0;
             border-bottom: 1px solid #e5e7eb;
+            opacity: 0;
+            animation: fadeInUp 0.4s ease-out forwards;
         }
 
         .detail-label {
@@ -468,8 +544,13 @@
             padding: 0.5rem 1rem;
             border-radius: 2rem;
             font-size: 0.875rem;
+            transition: all 0.2s ease;
         }
         
+        .filter-badge:hover {
+            background-color: #f8fafc;
+        }
+
         .filter-badge.active {
             background-color: #3b82f6;
             color: white;
@@ -486,14 +567,14 @@
         <main class="flex-1 flex flex-col">
             <div class="flex-1 p-3 sm:p-8">
                 <!-- Header -->
-                <div class="page-header mb-6">
-                    <h1 class="text-2xl font-bold text-gray-800">Manajemen Cuti</h1>
-                    <p class="text-gray-600">Kelola pengajuan cuti Anda dengan mudah</p>
+                <div class="page-header mb-6 animate-fade-in-up">
+                    <h1 class="text-2xl font-bold text-gray-800">Cuti</h1>
+                   
                 </div>
 
                 <!-- Stats Cards -->
                 <div class="stats-container">
-                    <div class="stat-card blue">
+                    <div class="stat-card blue animate-fade-in-up" style="animation-delay: 100ms;">
                         <div class="stat-icon blue"><span class="material-icons-outlined text-xl">calendar_today</span>
                         </div>
                         <div class="stat-content">
@@ -501,14 +582,14 @@
                             <div class="stat-value" id="stat-total-cuti">12</div>
                         </div>
                     </div>
-                    <div class="stat-card red">
+                    <div class="stat-card red animate-fade-in-up" style="animation-delay: 200ms;">
                         <div class="stat-icon red"><span class="material-icons-outlined text-xl">event_busy</span></div>
                         <div class="stat-content">
                             <div class="stat-label">Cuti Terpakai</div>
                             <div class="stat-value" id="stat-cuti-terpakai">0</div>
                         </div>
                     </div>
-                    <div class="stat-card green">
+                    <div class="stat-card green animate-fade-in-up" style="animation-delay: 300ms;">
                         <div class="stat-icon green"><span
                                 class="material-icons-outlined text-xl">event_available</span></div>
                         <div class="stat-content">
@@ -519,25 +600,25 @@
                 </div>
 
                 <!-- Filter dan Quick Actions -->
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 animate-fade-in-up" style="animation-delay: 400ms;">
                     <div class="flex flex-wrap gap-2">
-                        <button class="filter-badge active" onclick="setFilter('all')">
+                        <button class="filter-badge active btn-active" onclick="setFilter('all')">
                             <span class="material-icons-outlined text-sm">list</span> Semua
                         </button>
-                        <button class="filter-badge" onclick="setFilter('menunggu')">
+                        <button class="filter-badge btn-active" onclick="setFilter('menunggu')">
                             <span class="material-icons-outlined text-sm">schedule</span> Menunggu
                         </button>
-                        <button class="filter-badge" onclick="setFilter('disetujui')">
+                        <button class="filter-badge btn-active" onclick="setFilter('disetujui')">
                             <span class="material-icons-outlined text-sm">check_circle</span> Disetujui
                         </button>
-                        <button class="filter-badge" onclick="setFilter('ditolak')">
+                        <button class="filter-badge btn-active" onclick="setFilter('ditolak')">
                             <span class="material-icons-outlined text-sm">cancel</span> Ditolak
                         </button>
                     </div>
                     <div class="flex gap-2">
                         
                         <button id="tambahCutiBtn"
-                            class="btn-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                            class="btn-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 btn-active">
                             <span class="material-icons-outlined text-sm">add</span>
                             Ajukan Cuti
                         </button>
@@ -545,7 +626,7 @@
                 </div>
 
                 <!-- Data Cuti Panel -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-fade-in-up" style="animation-delay: 500ms;">
                     <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
                         <h3 class="font-semibold text-lg text-gray-800 flex items-center gap-2">
                             <span class="material-icons-outlined text-primary">event_note</span>
@@ -601,10 +682,10 @@
 
                         <!-- Pagination -->
                         <div id="cutiPaginationContainer" class="desktop-pagination hidden">
-                            <button id="cutiPrevPage" class="desktop-nav-btn"><span
+                            <button id="cutiPrevPage" class="desktop-nav-btn btn-active"><span
                                     class="material-icons-outlined text-sm">chevron_left</span></button>
                             <div id="cutiPageNumbers" class="flex gap-1"></div>
-                            <button id="cutiNextPage" class="desktop-nav-btn"><span
+                            <button id="cutiNextPage" class="desktop-nav-btn btn-active"><span
                                     class="material-icons-outlined text-sm">chevron_right</span></button>
                         </div>
                     </div>
@@ -622,7 +703,7 @@
         <div class="edit-popup-content">
             <div class="edit-popup-header p-6 border-b border-gray-100 flex justify-between items-center">
                 <h3 class="edit-popup-title text-xl font-bold text-gray-800">Ajukan Cuti Baru</h3>
-                <button class="text-gray-400 hover:text-gray-600" onclick="closeModal('tambahCutiModal')"><span
+                <button class="text-gray-400 hover:text-gray-600 btn-active" onclick="closeModal('tambahCutiModal')"><span
                         class="material-icons-outlined">close</span></button>
             </div>
             <div class="edit-popup-body p-6">
@@ -654,7 +735,10 @@
                                 id="jenisCutiSelect">
                                 <option value="">Pilih Jenis Cuti</option>
                                 <option value="tahunan">Cuti Tahunan</option>
-                               
+                                <option value="melahirkan">Cuti Melahirkan</option>
+                                <option value="duka">Cuti Duka</option>
+                                <option value="izin-khusus">Cuti Izin Khusus</option>
+                                <option value="tanpa-gaji">Cuti Tanpa Gaji</option>
                             </select>
                         </div>
                     </div>
@@ -674,9 +758,9 @@
             </div>
             <div class="edit-popup-footer p-6 border-t border-gray-100 flex justify-end gap-3">
                 <button type="button" onclick="closeModal('tambahCutiModal')"
-                    class="btn-secondary px-4 py-2 rounded-lg font-medium">Batal</button>
+                    class="btn-secondary px-4 py-2 rounded-lg font-medium btn-active">Batal</button>
                 <button type="button" onclick="handleAddCuti()" id="submitCutiBtn"
-                    class="btn-primary px-4 py-2 rounded-lg font-medium flex items-center gap-2">
+                    class="btn-primary px-4 py-2 rounded-lg font-medium flex items-center gap-2 btn-active">
                     <span class="material-icons-outlined text-sm">send</span> Kirim Pengajuan
                 </button>
             </div>
@@ -688,52 +772,15 @@
         <div class="detail-modal-content">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center">
                 <h3 class="text-xl font-bold text-gray-800">Detail Pengajuan Cuti</h3>
-                <button class="text-gray-400 hover:text-gray-600" onclick="closeModal('detailCutiModal')"><span
+                <button class="text-gray-400 hover:text-gray-600 btn-active" onclick="closeModal('detailCutiModal')"><span
                         class="material-icons-outlined">close</span></button>
             </div>
-            <div class="p-6 space-y-4">
-                <div class="detail-item">
-                    <span class="detail-label">Tanggal Pengajuan</span>
-                    <span class="detail-value" id="detailTanggalPengajuan">-</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Periode</span>
-                    <span class="detail-value" id="detailPeriode">-</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Durasi</span>
-                    <span class="detail-value" id="detailDurasi">-</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Jenis Cuti</span>
-                    <span class="detail-value" id="detailJenisCuti">-</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Keterangan</span>
-                    <span class="detail-value" id="detailKeterangan">-</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Status</span>
-                    <span class="detail-value">
-                        <span id="detailStatusBadge" class="status-badge status-menunggu">-</span>
-                    </span>
-                </div>
-                <div class="detail-item" id="detailDisetujuiOlehContainer" style="display: none;">
-                    <span class="detail-label">Disetujui Oleh</span>
-                    <span class="detail-value" id="detailDisetujuiOleh">-</span>
-                </div>
-                <div class="detail-item" id="detailDisetujuiPadaContainer" style="display: none;">
-                    <span class="detail-label">Disetujui Pada</span>
-                    <span class="detail-value" id="detailDisetujuiPada">-</span>
-                </div>
-                <div class="detail-item" id="detailCatatanPenolakanContainer" style="display: none;">
-                    <span class="detail-label">Catatan Penolakan</span>
-                    <span class="detail-value" id="detailCatatanPenolakan">-</span>
-                </div>
+            <div class="p-6 space-y-4" id="detailContent">
+                <!-- Detail items injected by JS with animation -->
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end">
                 <button onclick="closeModal('detailCutiModal')"
-                    class="btn-secondary px-4 py-2 rounded-lg font-medium">Tutup</button>
+                    class="btn-secondary px-4 py-2 rounded-lg font-medium btn-active">Tutup</button>
             </div>
         </div>
     </div>
@@ -743,7 +790,7 @@
         <div class="edit-popup-content">
             <div class="edit-popup-header p-6 border-b border-gray-100 flex justify-between items-center">
                 <h3 class="edit-popup-title text-xl font-bold text-gray-800">Edit Pengajuan Cuti</h3>
-                <button class="text-gray-400 hover:text-gray-600" onclick="closeModal('editCutiModal')"><span
+                <button class="text-gray-400 hover:text-gray-600 btn-active" onclick="closeModal('editCutiModal')"><span
                         class="material-icons-outlined">close</span></button>
             </div>
             <div class="edit-popup-body p-6">
@@ -777,7 +824,10 @@
                                 id="editJenisCuti">
                                 <option value="">Pilih Jenis Cuti</option>
                                 <option value="tahunan">Cuti Tahunan</option>
-                            
+                                <option value="melahirkan">Cuti Melahirkan</option>
+                                <option value="duka">Cuti Duka</option>
+                                <option value="izin-khusus">Cuti Izin Khusus</option>
+                                <option value="tanpa-gaji">Cuti Tanpa Gaji</option>
                             </select>
                         </div>
                     </div>
@@ -797,9 +847,9 @@
             </div>
             <div class="edit-popup-footer p-6 border-t border-gray-100 flex justify-end gap-3">
                 <button type="button" onclick="closeModal('editCutiModal')"
-                    class="btn-secondary px-4 py-2 rounded-lg font-medium">Batal</button>
+                    class="btn-secondary px-4 py-2 rounded-lg font-medium btn-active">Batal</button>
                 <button type="button" onclick="handleUpdateCuti()" id="updateCutiBtn"
-                    class="btn-primary px-4 py-2 rounded-lg font-medium flex items-center gap-2">
+                    class="btn-primary px-4 py-2 rounded-lg font-medium flex items-center gap-2 btn-active">
                     <span class="material-icons-outlined text-sm">save</span> Simpan Perubahan
                 </button>
             </div>
@@ -811,7 +861,7 @@
         <div class="edit-popup-content">
             <div class="edit-popup-header p-6 border-b border-gray-100 flex justify-between items-center">
                 <h3 class="edit-popup-title text-xl font-bold text-gray-800">Informasi Quota Cuti</h3>
-                <button class="text-gray-400 hover:text-gray-600" onclick="closeModal('quotaInfoModal')"><span
+                <button class="text-gray-400 hover:text-gray-600 btn-active" onclick="closeModal('quotaInfoModal')"><span
                         class="material-icons-outlined">close</span></button>
             </div>
             <div class="edit-popup-body p-6">
@@ -864,7 +914,7 @@
             </div>
             <div class="edit-popup-footer p-6 border-t border-gray-100 flex justify-end">
                 <button onclick="closeModal('quotaInfoModal')"
-                    class="btn-secondary px-4 py-2 rounded-lg font-medium">Tutup</button>
+                    class="btn-secondary px-4 py-2 rounded-lg font-medium btn-active">Tutup</button>
             </div>
         </div>
     </div>
@@ -876,7 +926,7 @@
             <div class="minimal-popup-title font-medium">Berhasil</div>
             <div class="minimal-popup-message text-sm">Operasi berhasil dilakukan</div>
         </div>
-        <button class="minimal-popup-close" onclick="hidePopup()"><span
+        <button class="minimal-popup-close btn-active" onclick="hidePopup()"><span
                 class="material-icons-outlined text-sm">close</span></button>
     </div>
 
@@ -1137,6 +1187,21 @@
             }
         }
 
+        // ==================== ANIMATION HELPER: Counter ====================
+        function animateValue(obj, start, end, duration) {
+            if (!obj) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
         // ==================== RENDER FUNCTIONS ====================
         function renderCutiTable(cutiData) {
             const tbody = document.getElementById('cutiTableBody');
@@ -1183,45 +1248,54 @@
                     statusText = 'Dibatalkan';
                 }
 
-                const statusBadge = `<span class="status-badge ${badgeClass}">${statusText}</span>`;
+                const statusBadge = `<span class="status-badge ${badgeClass} ${item.status === 'menunggu' ? 'animate-pulse-subtle' : ''}">${statusText}</span>`;
 
-                // Jenis cuti text
+                // Jenis cuti text - gunakan jenis_cuti_kode untuk mapping
                 const jenisCutiMap = {
                     'tahunan': 'Cuti Tahunan',
-                    
+                    'melahirkan': 'Cuti Melahirkan',
+                    'duka': 'Cuti Duka',
+                    'izin-khusus': 'Cuti Izin Khusus',
+                    'tanpa-gaji': 'Cuti Tanpa Gaji',
+                    'sakit': 'Cuti Sakit',
+                    'penting': 'Cuti Penting',
+                    'lainnya': 'Cuti Lainnya'
                 };
-                const jenisCutiText = jenisCutiMap[item.jenis_cuti] || item.jenis_cuti;
+                // Gunakan jenis_cuti_kode (kode) untuk mapping, bukan jenis_cuti (text)
+                const jenisCutiText = item.jenis_cuti || jenisCutiMap[item.jenis_cuti_kode] || 'Cuti Lainnya';
 
                 // Action buttons
                 let actions = `<div class="flex justify-center gap-1">`;
 
                 // Lihat detail
-                actions += `<button class="text-blue-500 hover:bg-blue-50 p-1 rounded" title="Lihat Detail" onclick="showDetailCuti(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                actions += `<button class="text-blue-500 hover:bg-blue-50 p-1 rounded transition-colors btn-active" title="Lihat Detail" onclick="showDetailCuti(${JSON.stringify(item).replace(/"/g, '&quot;')})">
                               <span class="material-icons-outlined text-sm">visibility</span>
                             </button>`;
 
                 // Edit hanya untuk status menunggu
                 if (item.status === 'menunggu' && item.dapat_diubah) {
-                    actions += `<button class="text-green-500 hover:bg-green-50 p-1 rounded" title="Edit" onclick="showEditCutiModal(${item.id})">
+                    actions += `<button class="text-green-500 hover:bg-green-50 p-1 rounded transition-colors btn-active" title="Edit" onclick="showEditCutiModal(${item.id})">
                                   <span class="material-icons-outlined text-sm">edit</span>
                                 </button>`;
                 }
 
                 // Hapus/batal
                 if (item.status === 'menunggu' && item.dapat_dihapus) {
-                    actions += `<button class="text-red-500 hover:bg-red-50 p-1 rounded" title="Hapus" onclick="deleteCuti(${item.id})">
+                    actions += `<button class="text-red-500 hover:bg-red-50 p-1 rounded transition-colors btn-active" title="Hapus" onclick="deleteCuti(${item.id})">
                                   <span class="material-icons-outlined text-sm">delete</span>
                                 </button>`;
                 } else if (item.status === 'disetujui' && item.dapat_batalkan) {
-                    actions += `<button class="text-orange-500 hover:bg-orange-50 p-1 rounded" title="Batalkan" onclick="cancelCuti(${item.id})">
+                    actions += `<button class="text-orange-500 hover:bg-orange-50 p-1 rounded transition-colors btn-active" title="Batalkan" onclick="cancelCuti(${item.id})">
                                   <span class="material-icons-outlined text-sm">cancel</span>
                                 </button>`;
                 }
 
                 actions += `</div>`;
 
-                // Desktop Row
+                // Desktop Row - Add animation class with delay
                 const tr = document.createElement('tr');
+                tr.className = 'animate-fade-in-up';
+                tr.style.animationDelay = `${index * 50}ms`;
                 tr.innerHTML = `
                     <td>${globalIndex}</td>
                     <td>${formattedDate}</td>
@@ -1234,9 +1308,10 @@
                 `;
                 tbody.appendChild(tr);
 
-                // Mobile Card
+                // Mobile Card - Add animation class with delay
                 const card = document.createElement('div');
-                card.className = "bg-white border border-gray-200 rounded-lg p-4 shadow-sm";
+                card.className = "bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-fade-in-up";
+                card.style.animationDelay = `${index * 50}ms`;
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-2">
                         <div>
@@ -1353,9 +1428,15 @@
             const terpakai = stats.cuti_terpakai || 0;
             const sisa = stats.sisa_cuti || (total - terpakai);
 
-            document.getElementById('stat-total-cuti').textContent = total;
-            document.getElementById('stat-cuti-terpakai').textContent = terpakai;
-            document.getElementById('stat-cuti-tersisa').textContent = sisa;
+            // Get current values to animate from
+            const currentTotal = parseInt(document.getElementById('stat-total-cuti').textContent) || 0;
+            const currentTerpakai = parseInt(document.getElementById('stat-cuti-terpakai').textContent) || 0;
+            const currentSisa = parseInt(document.getElementById('stat-cuti-tersisa').textContent) || 0;
+
+            // Animate numbers
+            animateValue(document.getElementById('stat-total-cuti'), currentTotal, total, 1000);
+            animateValue(document.getElementById('stat-cuti-terpakai'), currentTerpakai, terpakai, 1000);
+            animateValue(document.getElementById('stat-cuti-tersisa'), currentSisa, sisa, 1000);
 
             if (stats.quota_info) {
                 currentQuotaInfo = stats.quota_info;
@@ -1405,8 +1486,12 @@
             titleEl.textContent = title;
             messageEl.textContent = message;
 
-            popup.className = 'minimal-popup show';
-            popup.classList.add(type);
+            // Reset animation
+            popup.classList.remove('animate-slide-in-bounce');
+            void popup.offsetWidth; // Trigger reflow
+            popup.classList.add('animate-slide-in-bounce');
+
+            popup.className = `minimal-popup show animate-slide-in-bounce ${type}`;
 
             icon.innerHTML = type === 'success'
                 ? '<span class="material-icons-outlined">check_circle</span>'
@@ -1418,7 +1503,7 @@
         }
 
         function hidePopup() {
-            document.getElementById('minimalPopup').classList.remove('show');
+            document.getElementById('minimalPopup').classList.remove('show', 'animate-slide-in-bounce');
         }
 
         function goToPage(page) {
@@ -1588,6 +1673,20 @@
         }
 
         function populateEditForm(cutiData) {
+            // Map untuk old values yang tidak valid lagi ke nilai baru
+            const valueMapping = {
+                'sakit': 'duka',           
+                'penting': 'izin-khusus', 
+                'lainnya': 'tanpa-gaji'    
+            };
+            
+            const validValues = ['tahunan', 'melahirkan', 'duka', 'izin-khusus', 'tanpa-gaji'];
+            let selectedValue = cutiData.jenis_cuti_kode || cutiData.jenis_cuti;
+            
+            if (!validValues.includes(selectedValue)) {
+                selectedValue = valueMapping[selectedValue] || 'tanpa-gaji'; 
+            }
+
             const form = document.getElementById('editCutiForm');
             form.innerHTML = `
                 @csrf
@@ -1611,8 +1710,11 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Cuti <span class="text-red-500">*</span></label>
                         <select name="jenis_cuti" required class="form-input w-full px-3 py-2 rounded-lg" id="editJenisCuti">
                             <option value="">Pilih Jenis Cuti</option>
-                            <option value="tahunan" ${cutiData.jenis_cuti_kode === 'tahunan' ? 'selected' : ''}>Cuti Tahunan</option>
-                           
+                            <option value="tahunan" ${selectedValue === 'tahunan' ? 'selected' : ''}>Cuti Tahunan</option>
+                            <option value="melahirkan" ${selectedValue === 'melahirkan' ? 'selected' : ''}>Cuti Melahirkan</option>
+                            <option value="duka" ${selectedValue === 'duka' ? 'selected' : ''}>Cuti Duka</option>
+                            <option value="izin-khusus" ${selectedValue === 'izin-khusus' ? 'selected' : ''}>Cuti Izin Khusus</option>
+                            <option value="tanpa-gaji" ${selectedValue === 'tanpa-gaji' ? 'selected' : ''}>Cuti Tanpa Gaji</option>
                         </select>
                     </div>
                 </div>
@@ -1627,7 +1729,6 @@
                 </div>
             `;
 
-            // Setup event listeners untuk edit form
             document.getElementById('editTanggalMulai').addEventListener('change', () => calculateWorkingDays('edit'));
             document.getElementById('editTanggalSelesai').addEventListener('change', () => calculateWorkingDays('edit'));
             document.getElementById('editJenisCuti').addEventListener('change', function() {
@@ -1638,8 +1739,7 @@
                 }
             });
 
-            // Tampilkan warning jika jenis cuti tahunan
-            if (cutiData.jenis_cuti_kode === 'tahunan') {
+            if (selectedValue === 'tahunan') {
                 showEditSisaCutiWarning();
             }
         }
@@ -1673,7 +1773,6 @@
 
             // Validasi cuti tahunan
             if (jenisCuti === 'tahunan' && currentQuotaInfo?.quota?.sisa !== undefined) {
-                // Hitung selisih dengan durasi lama
                 const oldDurasi = currentEditingCuti.durasi;
                 const selisihHari = durasi - oldDurasi;
                 
@@ -1683,7 +1782,6 @@
                 }
             }
 
-            // Disable button
             const originalText = updateBtn.innerHTML;
             updateBtn.innerHTML = '<span class="material-icons-outlined text-sm animate-spin">sync</span> Menyimpan...';
             updateBtn.disabled = true;
@@ -1706,7 +1804,6 @@
                     closeModal('editCutiModal');
                     showPopup('Berhasil', data.message, 'success');
 
-                    // Reload data
                     await Promise.all([
                         loadCutiData(),
                         loadCutiStats()
@@ -1728,6 +1825,9 @@
         }
 
         function showDetailCuti(item) {
+            const detailContent = document.getElementById('detailContent');
+            detailContent.innerHTML = ''; // Clear previous content
+
             const createdDate = new Date(item.created_at).toLocaleDateString('id-ID', {
                 day: 'numeric',
                 month: 'long',
@@ -1773,39 +1873,47 @@
                 statusText = 'Dibatalkan';
             }
 
-            document.getElementById('detailTanggalPengajuan').textContent = createdDate;
-            document.getElementById('detailPeriode').textContent = periode;
-            document.getElementById('detailDurasi').textContent = `${item.durasi} hari`;
-            document.getElementById('detailJenisCuti').textContent = jenisCutiText;
-            document.getElementById('detailKeterangan').textContent = item.keterangan;
+            // Create detail items dynamically with animation delays
+            const details = [
+                { label: 'Tanggal Pengajuan', value: createdDate },
+                { label: 'Periode', value: periode },
+                { label: 'Durasi', value: `${item.durasi} hari` },
+                { label: 'Jenis Cuti', value: jenisCutiText },
+                { label: 'Keterangan', value: item.keterangan },
+                { label: 'Status', value: `<span class="status-badge ${badgeClass}">${statusText}</span>`, isHtml: true }
+            ];
 
-            const statusBadge = document.getElementById('detailStatusBadge');
-            statusBadge.className = `status-badge ${badgeClass}`;
-            statusBadge.textContent = statusText;
-
+            // Add conditional fields
             if (item.status === 'disetujui' || item.status === 'ditolak') {
-                document.getElementById('detailDisetujuiOlehContainer').style.display = 'flex';
-                document.getElementById('detailDisetujuiPadaContainer').style.display = 'flex';
-                document.getElementById('detailDisetujuiOleh').textContent = item.disetujui_oleh || '-';
-                document.getElementById('detailDisetujuiPada').textContent = item.disetujui_pada ?
+                details.push({ label: 'Disetujui Oleh', value: item.disetujui_oleh || '-' });
+                details.push({ 
+                    label: 'Disetujui Pada', 
+                    value: item.disetujui_pada ?
                     new Date(item.disetujui_pada).toLocaleDateString('id-ID', {
                         day: 'numeric',
                         month: 'long',
                         year: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit'
-                    }) : '-';
-            } else {
-                document.getElementById('detailDisetujuiOlehContainer').style.display = 'none';
-                document.getElementById('detailDisetujuiPadaContainer').style.display = 'none';
+                    }) : '-'
+                });
             }
 
             if (item.status === 'ditolak' && item.catatan_penolakan) {
-                document.getElementById('detailCatatanPenolakanContainer').style.display = 'flex';
-                document.getElementById('detailCatatanPenolakan').textContent = item.catatan_penolakan;
-            } else {
-                document.getElementById('detailCatatanPenolakanContainer').style.display = 'none';
+                details.push({ label: 'Catatan Penolakan', value: item.catatan_penolakan });
             }
+
+            // Render with staggered animation
+            details.forEach((d, index) => {
+                const div = document.createElement('div');
+                div.className = 'detail-item';
+                div.style.animationDelay = `${index * 50}ms`;
+                div.innerHTML = `
+                    <span class="detail-label">${d.label}</span>
+                    <span class="detail-value">${d.isHtml ? d.value : d.value}</span>
+                `;
+                detailContent.appendChild(div);
+            });
 
             openModal('detailCutiModal');
         }

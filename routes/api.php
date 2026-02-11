@@ -68,6 +68,13 @@ Route::middleware(['web', 'auth'])->group(function () {
             'message' => 'Authenticated API access'
         ]);
     });
+    
+    // Task API routes
+    Route::prefix('tasks')->group(function () {
+        Route::get('/{id}/files', 'App\Http\Controllers\TaskController@getTaskFiles')->name('api.tasks.files');
+        // POST /api/tasks/{id}/upload - file upload from karyawan (requires session auth)
+        Route::post('/{id}/upload', 'App\Http\Controllers\TaskController@uploadTaskFile')->name('api.tasks.upload');
+    });
 });
 
 // Debug route untuk melihat semua routes

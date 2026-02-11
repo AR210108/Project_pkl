@@ -138,8 +138,8 @@ public function kelolaAbsenGeneral()
                 'user_name' => $absen->user->name,
                 'divisi' => $absen->user->divisi ?? '-',
                 'tanggal' => $absen->tanggal,
-                'jam_masuk' => substr($absen->jam_masuk, 0, 5),
-                'jam_pulang' => $absen->jam_pulang ? substr($absen->jam_pulang, 0, 5) : '-',
+                'jam_masuk' => $this->formatTime($absen->jam_masuk),
+                'jam_pulang' => $this->formatTime($absen->jam_pulang),
                 'jenis_ketidakhadiran' => $absen->jenis_ketidakhadiran,
                 'keterangan' => $absen->keterangan,
                 'approval_status' => $absen->approval_status,
@@ -297,8 +297,8 @@ public function rekapAbsensi()
                 'user_name' => $absen->user->name,
                 'divisi' => $absen->user->divisi ?? '-',
                 'tanggal' => $absen->tanggal,
-                'jam_masuk' => substr($absen->jam_masuk, 0, 5),
-                'jam_pulang' => $absen->jam_pulang ? substr($absen->jam_pulang, 0, 5) : '-',
+                'jam_masuk' => $this->formatTime($absen->jam_masuk),
+                'jam_pulang' => $this->formatTime($absen->jam_pulang),
                 'jenis_ketidakhadiran' => $absen->jenis_ketidakhadiran,
                 'keterangan' => $absen->keterangan,
                 'approval_status' => $absen->approval_status,
@@ -415,7 +415,8 @@ public function kelolaAbsenManajer()
         // 1. AMBIL FILTER DARI URL
         $startDate = request('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
         $endDate = request('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
-        $selectedDivision = $user->divisi; // Manager hanya bisa melihat divisinya sendiri
+        $selectedDivision = $user->divisi; // Manager hanya bisa melihat divisinya sendiri (nama)
+        $selectedDivisionId = $user->divisi_id; // gunakan divisi_id untuk filter DB
         $statusFilter = request('status');
 
         // 2. INISIALISASI SEMUA VARIABLE YANG AKAN DIKIRIM KE VIEW
@@ -427,7 +428,7 @@ public function kelolaAbsenManajer()
         $query = Absensi::with(['user:id,name,divisi', 'approver:id,name'])
             ->join('users', 'absensis.user_id', '=', 'users.id')
             ->whereBetween('absensis.tanggal', [$startDate, $endDate])
-            ->where('users.divisi', $selectedDivision) // Filter hanya divisi manager
+            ->where('users.divisi_id', $selectedDivisionId) // Filter hanya divisi manager (by id)
             ->select('absensis.*', 'users.name as user_name', 'users.divisi as user_divisi')
             ->orderBy('absensis.tanggal', 'desc')
             ->orderBy('absensis.created_at', 'desc');
@@ -532,8 +533,8 @@ public function kelolaAbsenManajer()
                 'user_name' => $absen->user->name ?? $absen->user_name,
                 'divisi' => $absen->user->divisi ?? $absen->user_divisi,
                 'tanggal' => $absen->tanggal,
-                'jam_masuk' => $absen->jam_masuk ? substr($absen->jam_masuk, 0, 5) : '-',
-                'jam_pulang' => $absen->jam_pulang ? substr($absen->jam_pulang, 0, 5) : '-',
+                'jam_masuk' => $this->formatTime($absen->jam_masuk),
+                'jam_pulang' => $this->formatTime($absen->jam_pulang),
                 'jenis_ketidakhadiran' => $absen->jenis_ketidakhadiran,
                 'keterangan' => $absen->keterangan ?? $absen->reason,
                 'alasan' => $alasan,
@@ -555,14 +556,14 @@ public function kelolaAbsenManajer()
         $ketidakhadiran = Absensi::with(['user:id,name', 'approver:id,name'])
             ->join('users', 'absensis.user_id', '=', 'users.id')
             ->whereBetween('absensis.tanggal', [$startDate, $endDate])
-            ->where('users.divisi', $selectedDivision)
+            ->where('users.divisi_id', $selectedDivisionId)
             ->whereNotNull('absensis.jenis_ketidakhadiran')
             ->select('absensis.*', 'users.name as user_name')
             ->orderBy('absensis.tanggal', 'desc')
             ->get();
 
         // 8. DATA USER (untuk dropdown di modal)
-        $users = User::where('divisi', $selectedDivision)
+        $users = User::where('divisi_id', $selectedDivisionId)
             ->where('role', 'karyawan')
             ->get();
 
@@ -590,6 +591,7 @@ public function kelolaAbsenManajer()
         $absensiPaginator = null;
         $absenceCount = 0;
         $selectedDivision = $user->divisi ?? null;
+        $selectedDivisionId = $user->divisi_id ?? null;
         $statusFilter = request('status') ?? null;
         $startDate = $startDate ?? Carbon::now()->startOfMonth()->format('Y-m-d');
         $endDate = $endDate ?? Carbon::now()->endOfMonth()->format('Y-m-d');
@@ -603,6 +605,7 @@ public function kelolaAbsenManajer()
         'ketidakhadiran',
         'users',
         'selectedDivision',
+        'selectedDivisionId',
         'statusFilter',
         'startDate',
         'endDate',
@@ -631,17 +634,38 @@ private function getStatusKehadiran($absen)
     }
     
     if ($absen->jam_masuk) {
-        $jamMasuk = strtotime($absen->jam_masuk);
-        $batasTerlambat = strtotime($limitTime . ':00');
-        
-        if ($jamMasuk <= $batasTerlambat) {
-            return ['label' => 'Tepat Waktu', 'class' => 'status-hadir'];
-        } else {
+        try {
+            $jamMasukCarbon = ($absen->jam_masuk instanceof Carbon) ? $absen->jam_masuk : Carbon::parse($absen->jam_masuk);
+
+            // Compare only time-of-day to avoid date-related parsing issues
+            $jamMasukSeconds = $jamMasukCarbon->hour * 3600 + $jamMasukCarbon->minute * 60 + $jamMasukCarbon->second;
+            $batasSeconds = $operationalHours->late_limit_hour * 3600 + $operationalHours->late_limit_minute * 60;
+
+            if ($jamMasukSeconds <= $batasSeconds) {
+                return ['label' => 'Tepat Waktu', 'class' => 'status-hadir'];
+            }
+            return ['label' => 'Terlambat', 'class' => 'status-terlambat'];
+        } catch (\Exception $e) {
+            // Fallback to previous behavior but log the parsing issue
+            \Log::warning('getStatusKehadiran: gagal parse jam_masuk "' . ($absen->jam_masuk ?? '') . '": ' . $e->getMessage());
+            $jamMasuk = strtotime($absen->jam_masuk);
+            $batasTerlambat = strtotime($limitTime . ':00');
+            if ($jamMasuk !== false && $jamMasuk <= $batasTerlambat) {
+                return ['label' => 'Tepat Waktu', 'class' => 'status-hadir'];
+            }
             return ['label' => 'Terlambat', 'class' => 'status-terlambat'];
         }
     }
     
     return ['label' => 'Tidak Hadir', 'class' => 'status-tidak-hadir'];
+}
+
+/**
+ * Wrapper method untuk manager divisi
+ */
+public function kelolaAbsensiManagerDivisi()
+{
+    return $this->kelolaAbsenManajer();
 }
 
     public function approve($id)
@@ -840,7 +864,7 @@ private function getStatusKehadiran($absen)
             
             $responseData = $attendance ? [
                 'id' => $attendance->id,
-                'tanggal' => $attendance->tanggal->format('Y-m-d'),
+                'tanggal' => Carbon::parse($attendance->tanggal)->format('Y-m-d'),
                 'jam_masuk' => $attendance->jam_masuk,
                 'jam_pulang' => $attendance->jam_pulang,
                 'late_minutes' => $lateMinutes,
@@ -1037,7 +1061,7 @@ private function getStatusKehadiran($absen)
             } else {
                 $attendance = new Absensi();
                 $attendance->user_id = $user->id;
-                $attendance->tanggal = $today;
+                $attendance->tanggal = Carbon::createFromFormat('Y-m-d', $today);
                 \Log::info("Create new attendance for user {$user->id}");
             }
 
@@ -1057,7 +1081,7 @@ private function getStatusKehadiran($absen)
                 'message' => 'Absen masuk berhasil' . ($isTerlambat ? ' (Terlambat)' : ''),
                 'data' => [
                     'id' => $attendance->id,
-                    'tanggal' => $attendance->tanggal->format('Y-m-d'),
+                    'tanggal' => Carbon::parse($attendance->tanggal)->format('Y-m-d'),
                     'jam_masuk' => $attendance->jam_masuk,
                     'jam_pulang' => $attendance->jam_pulang,
                     'late_minutes' => $lateMinutes,
@@ -1156,7 +1180,7 @@ private function getStatusKehadiran($absen)
                 'message' => 'Absen pulang berhasil',
                 'data' => [
                     'id' => $attendance->id,
-                    'tanggal' => $attendance->tanggal->format('Y-m-d'),
+                    'tanggal' => Carbon::parse($attendance->tanggal)->format('Y-m-d'),
                     'jam_masuk' => $attendance->jam_masuk,
                     'jam_pulang' => $attendance->jam_pulang,
                     'is_early_checkout' => $attendance->is_early_checkout,
@@ -1176,143 +1200,137 @@ private function getStatusKehadiran($absen)
     }
 
     public function apiSubmitIzin(Request $request)
-    {
-        try {
-            $user = Auth::user();
+{
+    try {
+        $user = Auth::user();
 
-            // 1. VALIDASI INPUT FRONTEND (start_date, end_date, reason)
-            $validator = Validator::make($request->all(), [
-                'type'       => 'required|in:sakit,izin',
-                'start_date' => 'required|date',
-                'end_date'   => 'required|date|after_or_equal:start_date',
-                'reason'     => 'required|string|max:1000'
-            ]);
+        // 1. VALIDASI LANGSUNG MENGHADAP INPUT FRONTEND
+        // Frontend mengirim: type, start_date, end_date, reason
+        $validator = Validator::make($request->all(), [
+            'type' => 'required|in:sakit,izin',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'reason' => 'required|string|max:1000'
+        ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validasi gagal',
-                    'errors'  => $validator->errors()
-                ], 422);
-            }
-
-            // 2. AMBIL DATA YANG SUDAH VALIDE
-            $data = $validator->validated();
-
-            // 3. SIAPKAN VARIABEL UNTUK DATABASE
-            // Frontend kirim 'start_date' -> Database simpan di 'tanggal'
-            // Frontend kirim 'end_date' -> Database simpan di 'tanggal_akhir'
-            $startDate = $data['start_date'];
-            $endDate   = $data['end_date'];
-            $keterangan = $data['reason'];
-            $jenis      = $data['type']; // 'sakit' atau 'izin'
-
-            // 4. LOGIC BISNIS
-            if (!$this->isValidDate($startDate) || !$this->isValidDate($endDate)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tanggal tidak valid. Maksimal 1 bulan di masa depan.'
-                ], 400);
-            }
-
-            $leaveCheck = $this->checkLeaveInRange($user->id, $startDate, $endDate);
-            if ($leaveCheck['has_leave']) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda memiliki cuti yang disetujui pada tanggal ' . $leaveCheck['conflict_dates'] . '.'
-                ], 400);
-            }
-
-            $today = Carbon::now()->format('Y-m-d');
-            if ($startDate < $today && $jenis === 'sakit') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Pengajuan sakit tidak boleh untuk tanggal yang sudah lewat'
-                ], 400);
-            }
-
-            // Cek jika sudah absen masuk pada rentang tanggal tersebut
-            $existingAttendance = Absensi::where('user_id', $user->id)
-                ->whereBetween('tanggal', [$startDate, $endDate])
-                ->whereNotNull('jam_masuk')
-                ->exists();
-
-            if ($existingAttendance) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sudah melakukan absen pada rentang tanggal tersebut'
-                ], 400);
-            }
-
-            // Cek jika ada pengajuan tumpang tindih
-            $existingRequest = Absensi::where('user_id', $user->id)
-                ->where(function ($query) use ($startDate, $endDate) {
-                    $query->whereBetween('tanggal', [$startDate, $endDate])
-                        ->orWhereBetween('tanggal_akhir', [$startDate, $endDate])
-                        ->orWhere(function ($q) use ($startDate, $endDate) {
-                            $q->where('tanggal', '<=', $startDate)
-                                ->where('tanggal_akhir', '>=', $endDate);
-                        });
-                })
-                ->whereNotNull('jenis_ketidakhadiran')
-                ->whereIn('approval_status', ['pending', 'approved'])
-                ->first();
-
-            if ($existingRequest) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sudah memiliki pengajuan ' . $existingRequest->jenis_ketidakhadiran . ' pada rentang tanggal tersebut'
-                ], 400);
-            }
-
-            // 5. SIMPAN DATA KE DATABASE
-            $start = Carbon::parse($startDate);
-            $end   = Carbon::parse($endDate);
-            $createdRecords = [];
-
-            DB::beginTransaction();
-
-            // Looping tanggal untuk membuat record per hari (Opsional, tergantung kebutuhan sistem Anda)
-            // Jika sistem Anda hanya butuh 1 record untuk rentang tanggal, hapus loop ini dan gunakan create() saja.
-            for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
-                $record = Absensi::create([
-                    'user_id'             => $user->id,
-                    'tanggal'             => $date->format('Y-m-d'),      // Kolom DB: tanggal
-                    'tanggal_akhir'       => $end->format('Y-m-d'),      // Kolom DB: tanggal_akhir
-                    'jenis_ketidakhadiran'=> $jenis,                     // Disimpan 'sakit' / 'izin'
-                    'keterangan'          => $keterangan,                // Disimpan alasan
-                    'approval_status'     => 'pending',
-                ]);
-
-                $createdRecords[] = $record;
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengajuan ' . $jenis . ' berhasil dikirim',
-                'data' => [
-                    'tanggal'        => $startDate,
-                    'tanggal_akhir'  => $endDate,
-                    'jam_masuk'      => null,
-                    'jam_pulang'     => null,
-                    'late_minutes'   => 0,
-                    'is_terlambat'   => false,
-                    'jenis_ketidakhadiran' => $jenis,
-                    'approval_status' => 'pending',
-                    'keterangan'     => $keterangan
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengirim pengajuan: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
         }
+
+        // 2. AMBIL DATA YANG SUDAH VALIDE
+        $data = $validator->validated();
+
+        // 3. PINDAHKAN KE NAMA KOLOM DATABASE
+        $startDate = $data['start_date'];
+        $endDate = $data['end_date'];
+        $keterangan = $data['reason'];
+        $jenis = $data['type']; // 'sakit' atau 'izin'
+
+        // 4. LOGIC BISNIS
+        if (!$this->isValidDate($startDate) || !$this->isValidDate($endDate)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tanggal tidak valid. Maksimal 1 bulan di masa depan.'
+            ], 400);
+        }
+        
+        $leaveCheck = $this->checkLeaveInRange($user->id, $startDate, $endDate);
+        if ($leaveCheck['has_leave']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda memiliki cuti yang disetujui pada tanggal ' . $leaveCheck['conflict_dates'] . '.'
+            ], 400);
+        }
+        
+        $today = Carbon::now()->format('Y-m-d');
+        if ($startDate < $today && $jenis === 'sakit') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pengajuan sakit tidak boleh untuk tanggal yang sudah lewat'
+            ], 400);
+        }
+        
+        $existingAttendance = Absensi::where('user_id', $user->id)
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->whereNotNull('jam_masuk')
+            ->exists();
+
+        if ($existingAttendance) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda sudah melakukan absen pada rentang tanggal tersebut'
+            ], 400);
+        }
+        
+        $existingRequest = Absensi::where('user_id', $user->id)
+            ->where(function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('tanggal', [$startDate, $endDate])
+                    ->orWhereBetween('tanggal_akhir', [$startDate, $endDate])
+                    ->orWhere(function ($q) use ($startDate, $endDate) {
+                        $q->where('tanggal', '<=', $startDate)
+                            ->where('tanggal_akhir', '>=', $endDate);
+                    });
+            })
+            ->whereNotNull('jenis_ketidakhadiran')
+            ->whereIn('approval_status', ['pending', 'approved'])
+            ->first();
+
+        if ($existingRequest) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda sudah memiliki pengajuan ' . $existingRequest->jenis_ketidakhadiran . ' pada rentang tanggal tersebut'
+            ], 400);
+        }
+        
+        $start = Carbon::parse($startDate);
+        $end = Carbon::parse($endDate);
+        $createdRecords = [];
+
+        DB::beginTransaction();
+
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            $record = Absensi::create([
+                'user_id' => $user->id,
+                'tanggal' => $date->format('Y-m-d'),
+                'tanggal_akhir' => $end->format('Y-m-d'),
+                'jenis_ketidakhadiran' => $jenis,     // Disimpan 'sakit' / 'izin'
+                'keterangan' => $keterangan,          // Disimpan alasan
+                'approval_status' => 'pending',
+            ]);
+
+            $createdRecords[] = $record;
+        }
+
+        DB::commit();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengajuan ' . $jenis . ' berhasil dikirim',
+            'data' => [
+                'tanggal' => $startDate,
+                'tanggal_akhir' => $endDate,
+                'jam_masuk' => null,
+                'jam_pulang' => null,
+                'late_minutes' => 0,
+                'is_terlambat' => false,
+                'jenis_ketidakhadiran' => $jenis,
+                'approval_status' => 'pending',
+                'keterangan' => $keterangan
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengirim pengajuan: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     /* =====================================================
      |  HELPER FUNCTIONS UNTUK CUTI
@@ -1615,6 +1633,24 @@ public function apiIndexKetidakhadiran(Request $request)
         ], 500);
     }
 }
+
+    /**
+     * Format waktu jam masuk/jam pulang menjadi string 'H:i'.
+     * Handles Carbon instances and plain strings safely.
+     */
+    private function formatTime($time)
+    {
+        if (!$time) return '-';
+        try {
+            if ($time instanceof \Carbon\Carbon) {
+                return $time->format('H:i');
+            }
+            return Carbon::parse($time)->format('H:i');
+        } catch (\Exception $e) {
+            // Fallback: cast to string and take first 5 chars
+            return substr((string)$time, 0, 5);
+        }
+    }
 
     public function apiStore(Request $request)
     {

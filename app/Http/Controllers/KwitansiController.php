@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Kwitansi;
 use App\Models\Invoice; // TAMBAHKAN INI
+use App\Models\Cashflow; // TAMBAHAN IMPORT CASHFLOW
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -27,7 +28,6 @@ class KwitansiController extends Controller
                 $searchTerm = $request->search;
                 $query->where(function ($q) use ($searchTerm) {
                     $q->where('nama_klien', 'LIKE', "%{$searchTerm}%")
-                        ->orWhere('nomor_order', 'LIKE', "%{$searchTerm}%")
                         ->orWhere('nama_perusahaan', 'LIKE', "%{$searchTerm}%")
                         ->orWhere('deskripsi', 'LIKE', "%{$searchTerm}%");
                 });
@@ -73,7 +73,6 @@ class KwitansiController extends Controller
                 $searchTerm = $request->search;
                 $query->where(function ($q) use ($searchTerm) {
                     $q->where('nama_klien', 'LIKE', "%{$searchTerm}%")
-                        ->orWhere('nomor_order', 'LIKE', "%{$searchTerm}%")
                         ->orWhere('nama_perusahaan', 'LIKE', "%{$searchTerm}%")
                         ->orWhere('deskripsi', 'LIKE', "%{$searchTerm}%");
                 });
@@ -105,13 +104,29 @@ class KwitansiController extends Controller
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('nama_klien', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('nomor_order', 'LIKE', "%{$searchTerm}%")
                     ->orWhere('nama_perusahaan', 'LIKE', "%{$searchTerm}%")
                     ->orWhere('deskripsi', 'LIKE', "%{$searchTerm}%");
             });
         }
 
         $kwitansis = $query->paginate(10);
+
+        // Return JSON for AJAX requests
+        if ($request->ajax() || $request->wantsJson() || $request->is('*ajax*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data kwitansi berhasil diambil',
+                'data' => $kwitansis->items(),
+                'pagination' => [
+                    'total' => $kwitansis->total(),
+                    'per_page' => $kwitansis->perPage(),
+                    'current_page' => $kwitansis->currentPage(),
+                    'last_page' => $kwitansis->lastPage(),
+                    'from' => $kwitansis->firstItem(),
+                    'to' => $kwitansis->lastItem()
+                ]
+            ]);
+        }
 
         return view('finance.kwitansi', compact('kwitansis'));
     }
@@ -148,6 +163,15 @@ class KwitansiController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
+            // Validasi input awal - hanya tanggal dan invoice_id yang required
+            $validated = $request->validate([
+                'invoice_id' => 'required|exists:invoices,id',
+                'tanggal' => 'required|date'
+            ]);
+
+            // Ambil data invoice
+            $invoice = Invoice::findOrFail($validated['invoice_id']);
+
             // Generate kwitansi number
             $year = date('Y');
             $lastKwitansi = Kwitansi::orderBy('id', 'desc')->first();
@@ -161,39 +185,68 @@ class KwitansiController extends Controller
 
             $kwitansiNo = "KW-$year-$nextNumber";
 
-            $validated = $request->validate([
-                'invoice_id' => 'nullable|exists:invoices,id',
-                'tanggal' => 'required|date',
-                'nama_perusahaan' => 'required|string|max:255',
-                'nomor_order' => 'required|string',
-                'nama_klien' => 'required|string|max:255',
-                'deskripsi' => 'required|string',
-                'harga' => 'required|numeric|min:0',
-                'sub_total' => 'required|numeric|min:0',
-                'fee_maintenance' => 'required|numeric|min:0',
-                'total' => 'required|numeric|min:0',
-                'status' => 'required|in:Pembayaran Awal,Lunas',
-                'bank' => 'nullable|string|max:100',
-                'no_rekening' => 'nullable|string|max:50'
+            // Populate kwitansi data dari invoice
+            $kwitansiData = [
+                'kwitansi_no' => $kwitansiNo,
+                'invoice_id' => $invoice->id,
+                'invoice_no' => $invoice->invoice_no,
+                'tanggal' => $validated['tanggal'],
+                
+                // Data perusahaan dari invoice
+                'nama_perusahaan' => $invoice->company_name,
+                'company_address' => $invoice->company_address,
+                'kontak' => $invoice->kontak,
+                
+                'order_number' => $invoice->order_number,
+                'nama_klien' => $invoice->client_name,
+                
+                // Data layanan dari invoice
+                'nama_layanan' => $invoice->nama_layanan,
+                'deskripsi' => $invoice->description,
+                'payment_method' => $invoice->payment_method,
+                
+                // Data finansial dari invoice
+                'harga' => $invoice->subtotal ?? 0,
+                'sub_total' => $invoice->subtotal ?? 0,
+                'tax' => $invoice->tax ?? 0,
+                'fee_maintenance' => $invoice->fee_maintenance ?? 0,
+                'total' => $invoice->total ?? 0,
+                
+                // Status pembayaran dari invoice - default ke Pembayaran Awal
+                'status' => 'Pembayaran Awal',
+                
+                // Data bank - gunakan jenis_bank dari invoice atau default
+                'bank' => $invoice->jenis_bank ?? 'BCA',
+                'jenis_bank' => $invoice->jenis_bank,
+                'no_rekening' => $request->no_rekening ?? null,
+                
+                // Data tambahan dari invoice
+                'keterangan_tambahan' => $invoice->keterangan_tambahan,
+                'kategori_pemasukan' => $invoice->kategori_pemasukan
+            ];
+
+            $kwitansi = Kwitansi::create($kwitansiData);
+
+            // Tambahkan data ke Cashflow sebagai pemasukan
+            Cashflow::create([
+                'tanggal_transaksi' => $validated['tanggal'],
+                'nama_transaksi' => 'Kwitansi - ' . $invoice->client_name . ' (' . $kwitansiNo . ')',
+                'deskripsi' => $invoice->description ?? $invoice->nama_layanan,
+                'jumlah' => $kwitansi->total,
+                'tipe_transaksi' => 'pemasukan',
+                'kategori_id' => 1, // Kategori default untuk pemasukan dari kwitansi
+                'subkategori' => null,
             ]);
 
-            // Add kwitansi number to validated data
-            $validated['kwitansi_no'] = $kwitansiNo;
-
-            $kwitansi = Kwitansi::create($validated);
-
-            // Update invoice status if needed
-            if ($request->invoice_id) {
-                $invoice = Invoice::find($request->invoice_id);
-                if ($invoice && $request->status == 'Lunas') {
-                    $invoice->status_pembayaran = 'lunas';
-                    $invoice->save();
-                }
+            // Update invoice status if needed (jika kwitansi dibuat dengan status Lunas)
+            if ($request->status === 'Lunas') {
+                $invoice->status_pembayaran = 'lunas';
+                $invoice->save();
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Kwitansi berhasil dibuat!',
+                'message' => 'Kwitansi berhasil dibuat dari Invoice!',
                 'data' => $kwitansi
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -229,23 +282,42 @@ class KwitansiController extends Controller
         }
 
         try {
-            // Validate the request
+            // Only allow editing of tanggal and status from the frontend
             $validated = $request->validate([
-                'invoice_id' => 'nullable|exists:invoices,id',
-                'nama_perusahaan' => 'required|string|max:255',
-                'nomor_order' => 'required|string|unique:kwitansis,nomor_order,' . $id,
                 'tanggal' => 'required|date',
-                'nama_klien' => 'required|string|max:255',
-                'deskripsi' => 'required|string',
-                'harga' => 'required|numeric|min:0',
-                'sub_total' => 'nullable|numeric|min:0',
-                'fee_maintenance' => 'nullable|numeric|min:0',
-                'total' => 'nullable|numeric|min:0',
-                'status' => 'required|in:Pembayaran Awal,Lunas', // PERBAIKI TYPO DI SINI
+                'status' => 'required|in:Pembayaran Awal,Lunas',
             ]);
 
-            // Update kwitansi
+            $oldStatus = $kwitansi->status;
+            $newStatus = $validated['status'];
+
+            // Update only the validated fields
             $kwitansi->update($validated);
+
+            // Jika status berubah dari "Pembayaran Awal" menjadi "Lunas", tambahkan/update di Cashflow
+            if ($oldStatus !== 'Lunas' && $newStatus === 'Lunas') {
+                // Cek apakah sudah ada record cashflow untuk kwitansi ini
+                $cashflow = Cashflow::where('nama_transaksi', 'LIKE', '%' . $kwitansi->kwitansi_no . '%')->first();
+
+                if (!$cashflow) {
+                    // Buat record baru di Cashflow
+                    Cashflow::create([
+                        'tanggal_transaksi' => $validated['tanggal'],
+                        'nama_transaksi' => 'Kwitansi - ' . $kwitansi->nama_klien . ' (' . $kwitansi->kwitansi_no . ')',
+                        'deskripsi' => $kwitansi->deskripsi,
+                        'jumlah' => $kwitansi->total,
+                        'tipe_transaksi' => 'pemasukan',
+                        'kategori_id' => 1,
+                        'subkategori' => null,
+                    ]);
+                } else {
+                    // Update record yang sudah ada
+                    $cashflow->update([
+                        'tanggal_transaksi' => $validated['tanggal'],
+                        'jumlah' => $kwitansi->total,
+                    ]);
+                }
+            }
 
             return response()->json([
                 'success' => true,
@@ -293,6 +365,9 @@ class KwitansiController extends Controller
         }
 
         try {
+            // Hapus record cashflow yang terkait dengan kwitansi ini
+            Cashflow::where('nama_transaksi', 'LIKE', '%' . $kwitansi->kwitansi_no . '%')->delete();
+
             // Delete kwitansi
             $kwitansi->delete();
 
@@ -307,6 +382,47 @@ class KwitansiController extends Controller
                 'message' => 'Gagal menghapus kwitansi. Mungkin masih terkait dengan data lain.',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Get invoice detail for kwitansi form
+     * Frontend akan call ini untuk autofill form saat invoice dipilih
+     */
+    public function getInvoiceDetail($id)
+    {
+        try {
+            $invoice = Invoice::findOrFail($id);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'id' => $invoice->id,
+                    'invoice_no' => $invoice->invoice_no,
+                    'invoice_date' => $invoice->invoice_date,
+                    'nama_perusahaan' => $invoice->company_name,
+                    'company_address' => $invoice->company_address,
+                    'kontak' => $invoice->kontak,
+                    'nama_klien' => $invoice->client_name,
+                    'nama_layanan' => $invoice->nama_layanan,
+                    'payment_method' => $invoice->payment_method,
+                    'deskripsi' => $invoice->description,
+                    'harga' => $invoice->subtotal,
+                    'sub_total' => $invoice->subtotal,
+                    'tax' => $invoice->tax,
+                    'fee_maintenance' => $invoice->fee_maintenance,
+                    'total' => $invoice->total,
+                    'status_pembayaran' => $invoice->status_pembayaran,
+                    'jenis_bank' => $invoice->jenis_bank,
+                    'keterangan_tambahan' => $invoice->keterangan_tambahan,
+                    'kategori_pemasukan' => $invoice->kategori_pemasukan
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invoice tidak ditemukan: ' . $e->getMessage()
+            ], 404);
         }
     }
 

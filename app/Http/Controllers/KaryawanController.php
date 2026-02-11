@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Absensi;
 use App\Models\Task;
+use App\Models\TaskAcceptance;
 use App\Models\User;
 use App\Models\Karyawan;
+use App\Models\Divisi;
+use App\Models\Setting;
 use App\Models\CatatanRapat;
 use App\Models\Pengumuman;
 use App\Models\Cuti;
@@ -24,7 +27,7 @@ class KaryawanController extends Controller
      */
     public function indexPegawai(Request $request)
     {
-        $query = Karyawan::query();
+        $query = Karyawan::with('user.divisi');
 
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
@@ -35,7 +38,12 @@ class KaryawanController extends Controller
         }
 
         if ($divisi = $request->query('divisi')) {
-            $query->where('divisi', $divisi);
+            // Filter berdasarkan divisi_id dari user
+            $query->whereHas('user', function ($q) use ($divisi) {
+                $q->whereHas('divisi', function ($sq) use ($divisi) {
+                    $sq->where('divisi', $divisi);
+                });
+            });
         }
 
         $karyawan = $query->orderBy('nama')->paginate(15)->withQueryString();
@@ -134,15 +142,26 @@ class KaryawanController extends Controller
     {
         $userId = Auth::id();
         $today = now()->toDateString();
-        $user = Auth::user(); 
+        $user = Auth::user()->load('divisi');  // Eager load the divisi relationship
         $userRole = $user->role; 
         
-        // Ambil divisi dengan Fallback
-        $userDivisi = $user->divisi ?? null;
+        // Determine divisi id and name (prefer divisi_id on users table)
+        $userDivisiId = null;
+        $userDivisi = null; // name
+        if ($user->divisi_id) {
+            $userDivisiId = $user->divisi_id;
+            $userDivisi = $user->divisi ? $user->divisi->divisi : null;
+        }
+        
+        // Fallback to karyawan.divisi if still empty
         if (!$userDivisi) {
             $karyawanData = Karyawan::where('user_id', $userId)->first();
             if ($karyawanData) {
                 $userDivisi = $karyawanData->divisi;
+                if ($userDivisi) {
+                    $div = Divisi::where('divisi', $userDivisi)->first();
+                    if ($div) $userDivisiId = $div->id;
+                }
             }
         }
 
@@ -154,9 +173,8 @@ class KaryawanController extends Controller
         $attendanceStatus = 'Belum Absen';
         if ($absenToday) {
             if ($absenToday->jam_masuk) {
-                $jamMasuk = Carbon::parse($absenToday->jam_masuk);
-                $jamBatas = Carbon::parse('08:00');
-                $attendanceStatus = $jamMasuk->gt($jamBatas) ? 'Terlambat' : 'Tepat Waktu';
+                // Gunakan accessor model untuk menentukan keterlambatan (sumber kebenaran tunggal)
+                $attendanceStatus = $absenToday->is_terlambat ? 'Terlambat' : 'Tepat Waktu';
             } elseif ($absenToday->jenis_ketidakhadiran) {
                 $attendanceStatus = match($absenToday->jenis_ketidakhadiran) {
                     'cuti' => 'Cuti',
@@ -175,20 +193,19 @@ class KaryawanController extends Controller
                                 ->whereIn('jenis_ketidakhadiran', ['cuti', 'sakit', 'izin'])
                                 ->count();
 
-        // Hitung Jumlah Tugas
-        $userDivisi = $user->divisi; 
-        $tugasCount = Task::where(function ($query) use ($userId, $userDivisi) {
-            $query->where('assigned_to', $userId);
-            
-            if (Schema::hasColumn('tasks', 'target_type') && $userDivisi) {
-                $query->orWhere(function ($q) use ($userDivisi) {
+        // Hitung Jumlah Tugas (use divisi_id when available)
+        $tugasCount = Task::where(function ($query) use ($userId, $userDivisiId) {
+            $query->where('assigned_to', $userId)
+                  ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+            if (Schema::hasColumn('tasks', 'target_type') && $userDivisiId) {
+                $query->orWhere(function ($q) use ($userDivisiId) {
                     $q->where('target_type', 'divisi');
-                    if (Schema::hasColumn('tasks', 'target_divisi')) $q->where('target_divisi', $userDivisi);
-                    elseif (Schema::hasColumn('tasks', 'target_id')) $q->where('target_id', $userDivisi);
+                    if (Schema::hasColumn('tasks', 'target_divisi_id')) $q->where('target_divisi_id', $userDivisiId);
+                    elseif (Schema::hasColumn('tasks', 'target_id')) $q->where('target_id', $userDivisiId);
                 });
             } else {
-                if ($userDivisi && Schema::hasColumn('tasks', 'divisi')) {
-                    $query->orWhere('divisi', $userDivisi);
+                if ($userDivisiId && Schema::hasColumn('tasks', 'divisi')) {
+                    $query->orWhere('divisi', $userDivisiId);
                 }
             }
         })
@@ -222,19 +239,24 @@ class KaryawanController extends Controller
                 'user_id' => $userId,
                 'user_role' => $userRole,
                 'user_divisi' => $userDivisi,
+                'user_divisi_id' => $userDivisiId,
                 'count_pending_manual' => $countPendingManual,
                 'count_cuti_table' => $countPendingCuti,
                 'final_total' => $roleBasedData['pendingApprovals']
             ]);
 
         } elseif ($userRole === 'manager') {
-            if ($userDivisi) {
-                $roleBasedData['teamMembers'] = Karyawan::where('divisi', $userDivisi)->count();
-                
-                $roleBasedData['teamPendingApprovals'] = Absensi::whereIn('user_id', function($query) use ($userDivisi) {
-                    $query->select('user_id')
-                          ->from('karyawan')
-                          ->where('divisi', $userDivisi);
+            if ($userDivisiId) {
+                // Count team members by users.divisi_id
+                $roleBasedData['teamMembers'] = Karyawan::whereHas('user', function($q) use ($userDivisiId) {
+                    $q->where('divisi_id', $userDivisiId);
+                })->count();
+
+                // Pending approvals for users in the same divisi
+                $roleBasedData['teamPendingApprovals'] = Absensi::whereIn('user_id', function($query) use ($userDivisiId) {
+                    $query->select('id')
+                          ->from('users')
+                          ->where('divisi_id', $userDivisiId);
                 })
                 ->where('approval_status', 'pending')
                 ->count();
@@ -250,6 +272,7 @@ class KaryawanController extends Controller
             'tugas_count' => $tugasCount,
             'user_role' => $userRole,
             'user_divisi' => $userDivisi,
+            'user_divisi_id' => $userDivisiId,
             'role_based_data' => $roleBasedData,
         ]);
     }
@@ -336,11 +359,19 @@ class KaryawanController extends Controller
         try {
             $userId = Auth::id();
             $user = Auth::user();
-            $userDivisi = $user->divisi ?? null;
-            
-            if (!$userDivisi) {
+            // Determine divisi id and name
+            $userDivisiId = null;
+            $userDivisi = null;
+            if ($user->divisi_id) {
+                $userDivisiId = $user->divisi_id;
+                $userDivisi = $user->divisi ? $user->divisi->divisi : null;
+            } else {
                 $karyawan = Karyawan::where('user_id', $userId)->first();
                 $userDivisi = $karyawan ? $karyawan->divisi : null;
+                if ($userDivisi) {
+                    $divModel = Divisi::where('divisi', $userDivisi)->first();
+                    if ($divModel) $userDivisiId = $divModel->id;
+                }
             }
             
             $userName = $user->name;
@@ -350,24 +381,26 @@ class KaryawanController extends Controller
                 'user_id' => $userId,
                 'user_name' => $userName,
                 'user_divisi' => $userDivisi,
+                'user_divisi_id' => $userDivisiId,
                 'role' => $user->role,
                 'timestamp' => now()->toDateTimeString(),
             ]);
 
             // PERBAIKAN UTAMA: Query yang lebih komprehensif
-            $tasks = Task::where(function ($query) use ($userId, $userDivisi) {
-                // 1. Tugas untuk user
-                $query->where('assigned_to', $userId);
-                
-                // 2. Tugas untuk divisi
-                if (Schema::hasColumn('tasks', 'target_type') && $userDivisi) {
-                    $query->orWhere(function ($q) use ($userDivisi) {
+            $tasks = Task::where(function ($query) use ($userId, $userDivisiId) {
+                // 1. Tugas untuk user - check both assigned_to dan assigned_to_ids (multi-assign)
+                $query->where('assigned_to', $userId)
+                      ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+
+                // 2. Tugas untuk divisi (by id)
+                if (Schema::hasColumn('tasks', 'target_type') && $userDivisiId) {
+                    $query->orWhere(function ($q) use ($userDivisiId) {
                         $q->where('target_type', 'divisi');
-                        if (Schema::hasColumn('tasks', 'target_divisi')) $q->where('target_divisi', $userDivisi);
-                        elseif (Schema::hasColumn('tasks', 'target_id')) $q->where('target_id', $userDivisi);
+                        if (Schema::hasColumn('tasks', 'target_divisi_id')) $q->where('target_divisi_id', $userDivisiId);
+                        elseif (Schema::hasColumn('tasks', 'target_id')) $q->where('target_id', $userDivisiId);
                     });
-                } elseif ($userDivisi && Schema::hasColumn('tasks', 'divisi')) {
-                     $query->orWhere('divisi', $userDivisi);
+                } elseif ($userDivisiId && Schema::hasColumn('tasks', 'divisi')) {
+                     $query->orWhere('divisi', $userDivisiId);
                 }
             })
             // PERBAIKAN KRUSIAL: Hanya select id dan name dari relasi User
@@ -447,7 +480,7 @@ class KaryawanController extends Controller
             $today = now()->toDateString();
             
             $absen = Absensi::where('user_id', $userId)
-                ->where('tanggal', $today)
+                ->whereDate('tanggal', $today)
                 ->first();
 
         $data = [
@@ -461,7 +494,7 @@ class KaryawanController extends Controller
             'keterangan' => null
         ];
 
-        if ($absen) {
+            if ($absen) {
             $data['jam_masuk'] = $absen->jam_masuk;
             $data['jam_pulang'] = $absen->jam_pulang;
             $data['approval_status'] = $absen->approval_status;
@@ -469,18 +502,19 @@ class KaryawanController extends Controller
             $data['keterangan'] = $absen->keterangan;
 
             if ($absen->jam_masuk) {
-                // Hitung keterlambatan
-                $jamMasuk = Carbon::parse($absen->jam_masuk);
-                $jamBatas = Carbon::parse('09:05'); // Sesuai logika check-in API
-                $data['status'] = $jamMasuk->gt($jamBatas) ? 'Terlambat' : 'Tepat Waktu';
-                $data['late_minutes'] = $jamMasuk->gt($jamBatas) ? $jamMasuk->diffInMinutes($jamBatas) : 0;
+                // Use late_minutes from database if available
+                $lateMin = $absen->late_minutes;
+                $data['status'] = (is_numeric($lateMin) && $lateMin > 0) ? 'Terlambat' : 'Tepat Waktu';
+                $data['late_minutes'] = is_numeric($lateMin) ? (int)$lateMin : 0;
+                Log::debug('getTodayStatusApi status check', ['late_minutes' => $data['late_minutes'], 'status' => $data['status']]);
             } elseif ($absen->jenis_ketidakhadiran) {
                 $data['status'] = match($absen->jenis_ketidakhadiran) {
                     'cuti' => 'Cuti',
                     'sakit' => 'Sakit',
                     'izin' => 'Izin',
                     'dinas-luar' => 'Dinas Luar',
-                    default => 'Tidak Hadir',
+                    'lainnya' => 'Lainnya',
+                    default => 'Lainnya',
                 };
             }
         }
@@ -550,10 +584,9 @@ class KaryawanController extends Controller
             $lateMinutes = 0;
 
             if ($item->jam_masuk) {
-                $jamMasuk = Carbon::parse($item->jam_masuk);
-                $jamBatas = Carbon::parse('09:05');
-                $status = $jamMasuk->gt($jamBatas) ? 'Terlambat' : 'Tepat Waktu';
-                $lateMinutes = $jamMasuk->gt($jamBatas) ? $jamMasuk->diffInMinutes($jamBatas) : 0;
+                // Use late_minutes from database if available
+                $lateMinutes = $item->late_minutes !== null ? $item->late_minutes : 0;
+                $status = $lateMinutes > 0 ? 'Terlambat' : 'Tepat Waktu';
             } elseif ($item->jenis_ketidakhadiran) {
                 $status = match($item->jenis_ketidakhadiran) {
                     'cuti' => 'Cuti',
@@ -595,59 +628,117 @@ class KaryawanController extends Controller
      */
     public function getDashboardData()
     {
-        $userId = Auth::id();
-        $today = now()->toDateString();
+        try {
+            $userId = Auth::id();
+            $today = now()->toDateString();
 
-        $absenToday = Absensi::where('user_id', $userId)
-            ->where('tanggal', $today)
-            ->first();
+            $absenToday = Absensi::where('user_id', $userId)
+                ->where('tanggal', $today)
+                ->first();
 
-        $attendanceStatus = 'Belum Absen';
-        if ($absenToday) {
-            if ($absenToday->jam_masuk) {
-                $jamMasuk = Carbon::parse($absenToday->jam_masuk);
-                $jamBatas = Carbon::parse('08:00');
-                $lateMinutes = $jamMasuk->gt($jamBatas) ? $jamMasuk->diffInMinutes($jamBatas) : 0;
-                $isLate = $lateMinutes > 0;
-                $attendanceStatus = $isLate ? 'Terlambat' : 'Tepat Waktu';
-            } elseif ($absenToday->jenis_ketidakhadiran) { // FIXED: undefined variable $absen
-                $attendanceStatus = match($absenToday->jenis_ketidakhadiran) {
-                    'cuti' => 'Cuti',
-                    'sakit' => 'Sakit',
-                    'izin' => 'Izin',
-                    'dinas-luar' => 'Dinas Luar',
-                    'lainnya' => 'Tidak Hadir',
-                    default => 'Tidak Hadir',
-                };
+            $attendanceStatus = 'Belum Absen';
+            if ($absenToday) {
+                if ($absenToday->jam_masuk) {
+                    $jamMasuk = Carbon::parse($absenToday->jam_masuk);
+                    $jamBatas = Carbon::parse('08:00');
+                    $lateMinutes = $jamMasuk->gt($jamBatas) ? $jamMasuk->diffInMinutes($jamBatas) : 0;
+                    $isLate = $lateMinutes > 0;
+                    $attendanceStatus = $isLate ? 'Terlambat' : 'Tepat Waktu';
+                } elseif ($absenToday->jenis_ketidakhadiran) {
+                    $attendanceStatus = match($absenToday->jenis_ketidakhadiran) {
+                        'cuti' => 'Cuti',
+                        'sakit' => 'Sakit',
+                        'izin' => 'Izin',
+                        'dinas-luar' => 'Dinas Luar',
+                        'lainnya' => 'Tidak Hadir',
+                        default => 'Tidak Hadir',
+                    };
+                }
             }
-        }
 
-        $ketidakhadiranCount = Absensi::where('user_id', $userId)
-                                ->where('approval_status', 'approved')
-                                ->whereIn('jenis_ketidakhadiran', ['cuti', 'sakit', 'izin'])
-                                ->count();
+            // Get today's attendance status
+            $absenHariIni = Absensi::where('user_id', $userId)
+                ->where('tanggal', $today)
+                ->first();
 
-        $userDivisi = Auth::user()->divisi;
-        $tugasCount = Task::where(function ($query) use ($userId, $userDivisi) {
-            $query->where('assigned_to', $userId);
-            if ($userDivisi) {
-                $query->orWhere(function ($q) use ($userDivisi) {
-                    $q->where('target_type', 'divisi')
-                        ->where('target_divisi', $userDivisi);
+            // Count statistics
+            $totalHadir = Absensi::where('user_id', $userId)
+                ->whereNotNull('jam_masuk')
+                ->where('approval_status', 'approved')
+                ->count();
+
+            $totalTerlambat = Absensi::where('user_id', $userId)
+                ->whereNotNull('jam_masuk')
+                ->where('approval_status', 'approved')
+                ->get()
+                ->filter(function ($record) {
+                    if (!$record->jam_masuk) return false;
+                    $jamMasuk = Carbon::parse($record->jam_masuk);
+                    $jamBatas = Carbon::parse('08:00');
+                    return $jamMasuk->gt($jamBatas);
+                })
+                ->count();
+
+            $totalIzin = Absensi::where('user_id', $userId)
+                ->where('jenis_ketidakhadiran', 'izin')
+                ->where('approval_status', 'approved')
+                ->count();
+
+            $totalSakit = Absensi::where('user_id', $userId)
+                ->where('jenis_ketidakhadiran', 'sakit')
+                ->where('approval_status', 'approved')
+                ->count();
+
+            $totalAbsen = Absensi::where('user_id', $userId)
+                ->where('jenis_ketidakhadiran', 'lainnya')
+                ->where('approval_status', 'approved')
+                ->count();
+
+            $totalCuti = Cuti::where('user_id', $userId)
+                ->where('status', 'approved')
+                ->get()
+                ->sum(function ($cuti) {
+                    return Carbon::parse($cuti->tanggal_mulai)
+                        ->diffInDays(Carbon::parse($cuti->tanggal_selesai)) + 1;
                 });
-            }
-        })
-            ->whereNotIn('status', ['selesai', 'dibatalkan'])
-            ->count();
 
-        return response()->json([
-            'success' => true,
-            'data' => [
+            $tugasCount = Task::where(function($q) use ($userId) {
+                    $q->where('assigned_to', $userId)
+                      ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+                })
+                ->whereNotIn('status', ['selesai', 'dibatalkan'])
+                ->count();
+
+            return response()->json([
                 'attendance_status' => $attendanceStatus,
-                'ketidakhadiran_count' => $ketidakhadiranCount,
+                'attendance_today' => $absenHariIni ? [
+                    'jam_masuk' => $absenHariIni->jam_masuk,
+                    'jam_pulang' => $absenHariIni->jam_pulang,
+                ] : null,
+                'total_hadir' => $totalHadir,
+                'total_terlambat' => $totalTerlambat,
+                'total_izin' => $totalIzin,
+                'total_sakit' => $totalSakit,
+                'total_absen' => $totalAbsen,
+                'total_cuti' => $totalCuti,
                 'tugas_count' => $tugasCount,
-            ]
-        ]);
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in getDashboardData: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return response()->json([
+                'error' => 'Error loading dashboard data',
+                'message' => $e->getMessage(),
+                'attendance_status' => 'Error',
+                'total_hadir' => 0,
+                'total_terlambat' => 0,
+                'total_izin' => 0,
+                'total_sakit' => 0,
+                'total_absen' => 0,
+                'total_cuti' => 0,
+                'tugas_count' => 0,
+            ], 500);
+        }
     }
 
     /**
@@ -665,39 +756,107 @@ class KaryawanController extends Controller
             }
 
             $user = auth()->user();
+            $userId = $user->id;
             $today = now()->format('Y-m-d');
 
             // Get today's attendance
-            $absensiHariIni = Absensi::where('user_id', $user->id)
+            $absensiHariIni = Absensi::where('user_id', $userId)
                 ->whereDate('tanggal', $today)
                 ->first();
 
             // Check if user is on leave
-            $onLeave = $this->checkIfOnLeaveToday($user->id);
+            $onLeave = $this->checkIfOnLeaveToday($userId);
 
-            // Get tasks statistics
-            $totalTasks = Task::where('assigned_to', $user->id)->count();
-            $pendingTasks = Task::where('assigned_to', $user->id)
+            // Count statistics for all time or month
+            $totalHadir = Absensi::where('user_id', $userId)
+                ->whereNotNull('jam_masuk')
+                ->where('approval_status', 'approved')
+                ->count();
+
+            $totalTerlambat = Absensi::where('user_id', $userId)
+                ->whereNotNull('jam_masuk')
+                ->where('approval_status', 'approved')
+                ->get()
+                ->filter(function ($record) {
+                    return $record->late_minutes && $record->late_minutes > 0;
+                })
+                ->count();
+
+            $totalIzin = Absensi::where('user_id', $userId)
+                ->where('jenis_ketidakhadiran', 'izin')
+                ->where('approval_status', 'approved')
+                ->count();
+
+            $totalSakit = Absensi::where('user_id', $userId)
+                ->where('jenis_ketidakhadiran', 'sakit')
+                ->where('approval_status', 'approved')
+                ->count();
+
+            $totalAbsen = Absensi::where('user_id', $userId)
+                ->where('jenis_ketidakhadiran', 'lainnya')
+                ->where('approval_status', 'approved')
+                ->count();
+
+            $totalCuti = Cuti::where('user_id', $userId)
+                ->where('status', 'approved')
+                ->get()
+                ->sum(function ($cuti) {
+                    return Carbon::parse($cuti->tanggal_mulai)
+                        ->diffInDays(Carbon::parse($cuti->tanggal_selesai)) + 1;
+                });
+
+            // Get tasks statistics - include both assigned_to and assigned_to_ids
+            $totalTasks = Task::where(function($q) use ($userId) {
+                    $q->where('assigned_to', $userId)
+                      ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+                })->count();
+            $pendingTasks = Task::where(function($q) use ($userId) {
+                    $q->where('assigned_to', $userId)
+                      ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+                })
                 ->where('status', '!=', 'selesai')
                 ->count();
-            $completedTasks = Task::where('assigned_to', $user->id)
+            $completedTasks = Task::where(function($q) use ($userId) {
+                    $q->where('assigned_to', $userId)
+                      ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+                })
                 ->where('status', 'selesai')
                 ->count();
 
             // Get leave requests
-            $pendingCuti = Cuti::where('user_id', $user->id)
+            $pendingCuti = Cuti::where('user_id', $userId)
                 ->where('status', 'pending')
                 ->count();
 
             return response()->json([
                 'success' => true,
+                'attendance_status' => $absensiHariIni && $absensiHariIni->jam_masuk ? (($absensiHariIni->late_minutes && $absensiHariIni->late_minutes > 0) ? 'Terlambat' : 'Tepat Waktu') : ($absensiHariIni && $absensiHariIni->jenis_ketidakhadiran ? $absensiHariIni->jenis_ketidakhadiran_label : 'Belum Absen'),
+                'attendance_today' => $absensiHariIni ? [
+                    'jam_masuk' => $absensiHariIni->jam_masuk,
+                    'jam_pulang' => $absensiHariIni->jam_pulang,
+                ] : null,
+                'total_hadir' => $totalHadir,
+                'total_terlambat' => $totalTerlambat,
+                'total_izin' => $totalIzin,
+                'total_sakit' => $totalSakit,
+                'total_absen' => $totalAbsen,
+                'total_cuti' => $totalCuti,
+                'tugas_count' => $pendingTasks,
                 'data' => [
                     'absensi_today' => $absensiHariIni ? [
-                        'status' => $absensiHariIni->status,
+                        // Use late_minutes from database to determine status
+                        'status' => $absensiHariIni->jam_masuk ? ((is_numeric($absensiHariIni->late_minutes) && $absensiHariIni->late_minutes > 0) ? 'Terlambat' : 'Tepat Waktu') : ($absensiHariIni->jenis_ketidakhadiran ? $absensiHariIni->jenis_ketidakhadiran_label : 'Belum Absen'),
                         'jam_masuk' => $absensiHariIni->jam_masuk,
                         'jam_pulang' => $absensiHariIni->jam_pulang,
-                        'keterangan' => $absensiHariIni->keterangan
-                    ] : null,
+                        'keterangan' => $absensiHariIni->keterangan,
+                        'late_minutes' => is_numeric($absensiHariIni->late_minutes) ? (int)$absensiHariIni->late_minutes : 0,
+                    ] : [
+                        'status' => 'Belum Absen',
+                        'jam_masuk' => null,
+                        'jam_pulang' => null,
+                        'keterangan' => null,
+                        'late_minutes' => 0,
+                    ],
                     'on_leave' => $onLeave['on_leave'],
                     'cuti_details' => $onLeave['on_leave'] ? [
                         'tanggal_mulai' => $onLeave['details']->tanggal_mulai,
@@ -716,7 +875,6 @@ class KaryawanController extends Controller
                     ],
                     'user' => [
                         'name' => $user->name,
-                        // Hati-hati memanggil divisi jika kolom tidak ada di users
                         'divisi' => $user->divisi ?? '-', 
                         'jabatan' => $user->jabatan ?? '-',
                         'email' => $user->email
@@ -890,6 +1048,33 @@ class KaryawanController extends Controller
             $user = Auth::user();
             $today = now()->toDateString();
 
+            // 0. Validasi: Cek apakah jam sekarang sudah mencapai jam kerja mulai (START_TIME)
+            $operationalHours = Setting::where('key', 'operational_hours')->first();
+            $startTime = '08:00';
+            if ($operationalHours) {
+                $settings = json_decode($operationalHours->value, true);
+                $startTime = $settings['start_time'] ?? '08:00';
+            }
+
+            // Parse start time
+            [$startHour, $startMin] = explode(':', $startTime);
+            $startSeconds = (int)$startHour * 3600 + (int)$startMin * 60;
+
+            // Get current time in WIB (UTC+7)
+            $nowWIB = now('Asia/Jakarta');
+            $currentSeconds = $nowWIB->hour * 3600 + $nowWIB->minute * 60 + $nowWIB->second;
+
+            if ($currentSeconds < $startSeconds) {
+                $secondsUntilStart = $startSeconds - $currentSeconds;
+                $hoursUntil = intdiv($secondsUntilStart, 3600);
+                $minutesUntil = intdiv($secondsUntilStart % 3600, 60);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => "Absen masuk baru bisa dilakukan mulai pukul {$startTime} WIB. Sisa waktu: {$hoursUntil} jam {$minutesUntil} menit."
+                ], 403);
+            }
+
             // 1. Cek apakah user sedang cuti hari ini
             $cutiCheck = $this->checkIfOnLeaveToday($user->id);
             if ($cutiCheck['on_leave']) {
@@ -948,7 +1133,9 @@ class KaryawanController extends Controller
                 [
                     'jam_masuk' => $nowLocal,
                     'approval_status' => 'approved',
-                    'status' => 'hadir'
+                    // Simpan status konkret (Terlambat/Tepat Waktu) sehingga konsisten saat dibaca kembali
+                    'status' => $status
+                    , 'late_minutes' => $lateMinutes
                 ]
             );
 
@@ -1183,7 +1370,7 @@ class KaryawanController extends Controller
                 if (Schema::hasColumn('tasks', 'target_type') && $userDivisi) {
                     $query->orWhere(function ($q) use ($userDivisi) {
                         $q->where('target_type', 'divisi');
-                        if (Schema::hasColumn('tasks', 'target_divisi')) $q->where('target_divisi', $userDivisi);
+                        if (Schema::hasColumn('tasks', 'target_divisi_id')) $q->where('target_divisi_id', $userDivisi);
                         elseif (Schema::hasColumn('tasks', 'target_id')) $q->where('target_id', $userDivisi);
                     });
                 } else {
@@ -1207,7 +1394,8 @@ class KaryawanController extends Controller
 
                 return [
                     'id' => $task->id,
-                    'judul' => $task->judul,
+                    'judul' => $task->judul ?: $task->nama_tugas,
+                    'nama_tugas' => $task->nama_tugas ?: $task->judul,
                     'deskripsi' => $task->deskripsi,
                     'deadline' => $task->deadline ? $task->deadline->format('Y-m-d H:i:s') : null,
                     'status' => $task->status,
@@ -1218,10 +1406,14 @@ class KaryawanController extends Controller
                 ];
             });
 
-            return response()->json(['success' => true, 'data' => $transformedTasks]);
+            return response()->json(['success' => true, 'data' => $transformedTasks->toArray()]);
         } catch (\Exception $e) {
-            Log::error('API Get Tasks Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Gagal memuat tugas'], 500);
+            Log::error('API Get Tasks Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            return response()->json(['success' => false, 'message' => 'Gagal memuat tugas: ' . $e->getMessage()], 500);
         }
     }
 
@@ -1241,11 +1433,11 @@ class KaryawanController extends Controller
                 return response()->json(['success' => true, 'dates' => []]);
             }
             
-            $dates = CatatanRapat::where('status', 'published')
-                ->select('tanggal_rapat') // Pastikan kolom ini ada
+            // Use `tanggal` column from CatatanRapat model
+            $dates = CatatanRapat::select('tanggal')
                 ->distinct()
-                ->orderBy('tanggal_rapat', 'desc')
-                ->pluck('tanggal_rapat')
+                ->orderBy('tanggal', 'desc')
+                ->pluck('tanggal')
                 ->map(function($date) { return Carbon::parse($date)->format('Y-m-d'); })
                 ->toArray();
             
@@ -1270,19 +1462,18 @@ class KaryawanController extends Controller
                 return response()->json(['success' => true, 'data' => []]);
             }
             
-            $meetingNotes = CatatanRapat::where('status', 'published')
-                ->whereDate('tanggal_rapat', $date)
+            $meetingNotes = CatatanRapat::whereDate('tanggal', $date)
                 ->orderBy('created_at', 'desc')
-                ->get(['id', 'judul', 'isi', 'tanggal_rapat', 'lokasi', 'created_at']);
-            
+                ->get(['id', 'topik', 'hasil_diskusi', 'keputusan', 'tanggal', 'created_at']);
+
             $formattedNotes = $meetingNotes->map(function ($note) {
                 return [
                     'id' => $note->id,
-                    'judul' => $note->judul,
-                    'isi' => $note->isi,
-                    'tanggal_rapat' => $note->tanggal_rapat,
-                    'formatted_tanggal' => Carbon::parse($note->tanggal_rapat)->translatedFormat('d F Y'),
-                    'lokasi' => $note->lokasi,
+                    'topik' => $note->topik,
+                    'hasil_diskusi' => $note->hasil_diskusi,
+                    'keputusan' => $note->keputusan,
+                    'tanggal' => $note->tanggal,
+                    'formatted_tanggal' => Carbon::parse($note->tanggal)->translatedFormat('d F Y'),
                     'created_at' => $note->created_at->format('Y-m-d H:i:s'),
                     'formatted_created_at' => $note->created_at->translatedFormat('d F Y H:i'),
                 ];
@@ -1307,17 +1498,55 @@ class KaryawanController extends Controller
                 return response()->json([]);
             }
             
-            $dates = CatatanRapat::where('status', 'published')
-                ->select('tanggal_rapat')
+            $dates = CatatanRapat::select('tanggal')
                 ->distinct()
-                ->orderBy('tanggal_rapat', 'desc')
-                ->pluck('tanggal_rapat')
+                ->orderBy('tanggal', 'desc')
+                ->pluck('tanggal')
                 ->map(function($date) { return Carbon::parse($date)->format('Y-m-d'); })
                 ->toArray();
                 
             return response()->json($dates);
         } catch (\Exception $e) {
             return response()->json([]);
+        }
+    }
+
+    /**
+     * API untuk mendapatkan catatan rapat berdasarkan tanggal
+     */
+    public function getMeetingNotes(Request $request)
+    {
+        try {
+            if (!auth()->check()) return response()->json(['success' => false], 401);
+            $date = $request->query('date');
+            if (!$date) return response()->json(['success' => false, 'message' => 'Date required'], 400);
+            
+            if (!Schema::hasTable('catatan_rapats')) {
+                return response()->json([]);
+            }
+            
+            $meetingNotes = CatatanRapat::whereDate('tanggal', $date)
+                ->orderBy('created_at', 'desc')
+                ->get(['id', 'topik', 'hasil_diskusi', 'keputusan', 'tanggal', 'created_at']);
+            
+            $formattedNotes = $meetingNotes->map(function ($note) {
+                return [
+                    'id' => $note->id,
+                    'topik' => $note->topik,
+                    'hasil_diskusi' => $note->hasil_diskusi,
+                    'keputusan' => $note->keputusan,
+                    'tanggal' => $note->tanggal,
+                    'formatted_tanggal' => Carbon::parse($note->tanggal)->translatedFormat('d F Y'),
+                    'created_at' => $note->created_at->format('Y-m-d H:i:s'),
+                    'formatted_created_at' => $note->created_at->translatedFormat('d F Y H:i'),
+                ];
+            });
+            
+            return response()->json($formattedNotes->toArray());
+            
+        } catch (\Exception $e) {
+            \Log::error('Error in getMeetingNotes: ' . $e->getMessage());
+            return response()->json(['error' => 'Something went wrong'], 500);
         }
     }
 
@@ -1330,11 +1559,11 @@ class KaryawanController extends Controller
             if (!auth()->check()) return response()->json(['success' => false], 401);
             if (!Schema::hasTable('pengumuman')) return response()->json(['success' => true, 'dates' => []]);
             
-            $dates = Pengumuman::where('status', 'published')
-                ->select('tanggal')
+            // Use created_at for announcement dates
+            $dates = Pengumuman::select('created_at')
                 ->distinct()
-                ->orderBy('tanggal', 'desc')
-                ->pluck('tanggal')
+                ->orderBy('created_at', 'desc')
+                ->pluck('created_at')
                 ->map(function($date) { return Carbon::parse($date)->format('Y-m-d'); })
                 ->toArray();
             
@@ -1353,18 +1582,17 @@ class KaryawanController extends Controller
             if (!auth()->check()) return response()->json(['success' => false], 401);
             if (!Schema::hasTable('pengumuman')) return response()->json(['success' => true, 'data' => []]);
             
-            $announcements = Pengumuman::where('status', 'published')
-                ->orderBy('created_at', 'desc')
+            $announcements = Pengumuman::orderBy('created_at', 'desc')
                 ->limit(20)
-                ->get(['id', 'judul', 'isi', 'tanggal', 'lampiran', 'created_at']);
-            
+                ->get(['id', 'judul', 'isi_pesan', 'lampiran', 'created_at']);
+
             $formattedAnnouncements = $announcements->map(function ($announcement) {
                 return [
                     'id' => $announcement->id,
                     'judul' => $announcement->judul,
-                    'isi' => $announcement->isi,
-                    'tanggal' => $announcement->tanggal,
-                    'formatted_tanggal' => Carbon::parse($announcement->tanggal)->translatedFormat('d F Y'),
+                    'isi' => $announcement->isi_pesan,
+                    'tanggal' => $announcement->created_at->format('Y-m-d'),
+                    'formatted_tanggal' => Carbon::parse($announcement->created_at)->translatedFormat('d F Y'),
                     'lampiran' => $announcement->lampiran,
                     'lampiran_url' => $announcement->lampiran ? asset('storage/' . $announcement->lampiran) : null,
                     'created_at' => $announcement->created_at->format('Y-m-d H:i:s'),
@@ -1390,15 +1618,74 @@ class KaryawanController extends Controller
                 return response()->json([]);
             }
             
-            $announcements = Pengumuman::where('status', 'published')
-                ->orderBy('created_at', 'desc')
+            $announcements = Pengumuman::orderBy('created_at', 'desc')
                 ->get();
                 
             $formattedAnnouncements = $announcements->map(function ($item) {
                 return [
                     'id' => $item->id,
                     'judul' => $item->judul,
-                    'isi_pesan' => $item->isi,
+                    'isi_pesan' => $item->isi_pesan,
+                    'ringkasan' => $item->ringkasan ?? null,
+                    'lampiran' => $item->lampiran,
+                    'lampiran_url' => $item->lampiran ? asset('storage/' . $item->lampiran) : null,
+                    'created_at' => $item->created_at->format('Y-m-d H:i:s'),
+                    'tanggal_indo' => $item->created_at->translatedFormat('d F Y'),
+                ];
+            });
+
+            return response()->json($formattedAnnouncements);
+        } catch (\Exception $e) {
+            return response()->json([]);
+        }
+    }
+
+    /**
+     * API untuk mendapatkan daftar tanggal yang memiliki pengumuman
+     */
+    public function getAnnouncementsDates()
+    {
+        try {
+            if (!Schema::hasTable('pengumuman')) {
+                return response()->json([]);
+            }
+            
+            $dates = Pengumuman::select('created_at')
+                ->distinct()
+                ->orderBy('created_at', 'desc')
+                ->pluck('created_at')
+                ->map(function($date) { return Carbon::parse($date)->format('Y-m-d'); })
+                ->toArray();
+            
+            return response()->json($dates);
+        } catch (\Exception $e) {
+            return response()->json([]);
+        }
+    }
+
+    /**
+     * API untuk mendapatkan pengumuman berdasarkan tanggal
+     */
+    public function getAnnouncementsByDate(Request $request)
+    {
+        try {
+            if (!auth()->check()) return response()->json(['success' => false], 401);
+            $date = $request->query('date');
+            if (!$date) return response()->json(['success' => false, 'message' => 'Date required'], 400);
+            
+            if (!Schema::hasTable('pengumuman')) {
+                return response()->json([]);
+            }
+            
+            $announcements = Pengumuman::whereDate('created_at', $date)
+                ->orderBy('created_at', 'desc')
+                ->get();
+            
+            $formattedAnnouncements = $announcements->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'judul' => $item->judul,
+                    'isi_pesan' => $item->isi_pesan,
                     'ringkasan' => $item->ringkasan ?? null,
                     'lampiran' => $item->lampiran,
                     'lampiran_url' => $item->lampiran ? asset('storage/' . $item->lampiran) : null,
@@ -1435,4 +1722,293 @@ class KaryawanController extends Controller
     {
         return response()->json(['status' => 'ok', 'message' => 'API endpoints are working.']);
     }
+
+    /**
+     * Get detail karyawan dengan file/dokumen
+     */
+    public function getDetailApi($id)
+    {
+        try {
+            $karyawan = User::with(['files'])->find($id);
+            
+            if (!$karyawan) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Karyawan tidak ditemukan'
+                ], 404);
+            }
+            
+            // Check if user is authorized to view this karyawan
+            $authUser = Auth::user();
+            if ($authUser->role === 'manager_divisi' && $karyawan->divisi_id !== $authUser->divisi_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses ke data karyawan ini'
+                ], 403);
+            }
+            
+            $data = [
+                'id' => $karyawan->id,
+                'nama' => $karyawan->name,
+                'name' => $karyawan->name,
+                'email' => $karyawan->email,
+                'role' => $karyawan->role,
+                'divisi' => $karyawan->divisi,
+                'divisi_id' => $karyawan->divisi_id,
+                'status_kerja' => $karyawan->status_kerja,
+                'status_karyawan' => $karyawan->status_karyawan,
+                'kontak' => $karyawan->kontak,
+                'alamat' => $karyawan->alamat,
+                'foto' => $karyawan->foto,
+                'files' => []
+            ];
+            
+            // Get files if relationship exists
+            if ($karyawan->files && count($karyawan->files) > 0) {
+                $data['files'] = $karyawan->files->map(function($file) {
+                    return [
+                        'id' => $file->id,
+                        'name' => $file->nama ?? $file->name ?? 'File',
+                        'nama' => $file->nama ?? $file->name ?? 'File',
+                        'url' => $file->url ?? '/storage/' . $file->path
+                    ];
+                })->toArray();
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error getting karyawan detail: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat detail karyawan'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get task acceptance status
+     * NOTE: Dengan design baru, setiap task hanya punya 1 assignee
+     * Method ini untuk backward compatibility dengan old multi-assign tasks
+     */
+    public function getAcceptanceStatus($taskId)
+    {
+        try {
+            $user = Auth::user();
+            
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User tidak terautentikasi'
+                ], 401);
+            }
+
+            $task = Task::find($taskId);
+            if (!$task) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tugas tidak ditemukan'
+                ], 404);
+            }
+
+            // Validasi bahwa user adalah yang ditugaskan
+            $isAssigned = $task->assigned_to == $user->id || 
+                         (is_array($task->assigned_to_ids) && in_array($user->id, $task->assigned_to_ids));
+            
+            if (!$isAssigned) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki izin untuk melihat status penerimaan tugas ini'
+                ], 403);
+            }
+
+            // Jika task hanya punya 1 assignee (new design), return simple response
+            if (!$task->assigned_to_ids || !is_array($task->assigned_to_ids) || count($task->assigned_to_ids) <= 1) {
+                return response()->json([
+                    'success' => true,
+                    'acceptance_status' => [
+                        'total' => 1,
+                        'accepted' => $task->status === 'proses' ? 1 : 0,
+                        'pending' => $task->status === 'pending' ? 1 : 0,
+                        'rejected' => 0,
+                        'percentage' => $task->status === 'proses' ? 100 : 0,
+                        'is_fully_accepted' => $task->status === 'proses',
+                        'is_any_accepted' => $task->status === 'proses',
+                        'is_any_rejected' => false
+                    ],
+                    'acceptance_details' => [
+                        [
+                            'user_id' => $task->assigned_to,
+                            'user_name' => $task->assignee->name ?? 'Unknown',
+                            'user_email' => $task->assignee->email ?? 'Unknown',
+                            'status' => $task->status === 'proses' ? 'accepted' : 'pending',
+                            'accepted_at' => $task->status === 'proses' ? now() : null,
+                            'notes' => null
+                        ]
+                    ]
+                ]);
+            }
+
+            // Untuk old multi-assign tasks: initialize jika belum ada
+            $this->initializeTaskAcceptances($task);
+
+            return response()->json([
+                'success' => true,
+                'acceptance_status' => $task->getAcceptanceStatus(),
+                'acceptance_details' => $task->getAcceptanceDetails()
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error getting acceptance status: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mendapatkan status penerimaan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Accept task - mengubah status dari pending menjadi proses
+     */
+    public function acceptTask(Request $request, $taskId)
+    {
+        try {
+            $user = Auth::user();
+            
+            // Validasi user
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User tidak terautentikasi'
+                ], 401);
+            }
+
+            // Cari task
+            $task = Task::find($taskId);
+            if (!$task) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tugas tidak ditemukan'
+                ], 404);
+            }
+
+            // Validasi bahwa user adalah yang ditugaskan
+            $isAssigned = $task->assigned_to == $user->id || 
+                         (is_array($task->assigned_to_ids) && in_array($user->id, $task->assigned_to_ids));
+            
+            if (!$isAssigned) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki izin untuk menerima tugas ini'
+                ], 403);
+            }
+
+            // NEW DESIGN: Setiap task hanya punya 1 assignee
+            // Jadi langsung ubah status menjadi proses tanpa menunggu assignee lain
+            $task->status = 'proses';
+            $task->save();
+
+            // OPTIONAL: Jika ada assigned_to_ids (old multi-assign task), track dengan task_acceptances
+            // Untuk backward compatibility
+            if ($task->assigned_to_ids && is_array($task->assigned_to_ids) && count($task->assigned_to_ids) > 1) {
+                // Initialize jika belum ada
+                if (!$task->acceptances()->exists()) {
+                    $this->initializeTaskAcceptances($task);
+                }
+
+                // Update status karyawan ini
+                $acceptance = TaskAcceptance::updateOrCreate(
+                    [
+                        'task_id' => $taskId,
+                        'user_id' => $user->id
+                    ],
+                    [
+                        'status' => 'accepted',
+                        'accepted_at' => now(),
+                        'notes' => $request->input('notes')
+                    ]
+                );
+
+                // Check apakah semua sudah accept
+                $acceptanceStatus = $task->getAcceptanceStatus();
+                if (!$acceptanceStatus['is_fully_accepted']) {
+                    // Update message jika belum semua accept
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Tugas berhasil diterima. Status sudah berubah menjadi Dalam Proses',
+                        'data' => [
+                            'task_id' => $task->id,
+                            'task_status' => $task->status,
+                            'acceptance_status' => $acceptanceStatus,
+                            'acceptance_details' => $task->getAcceptanceDetails()
+                        ]
+                    ]);
+                }
+            }
+
+            Log::info('Task accepted by karyawan', [
+                'task_id' => $taskId,
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'new_status' => 'proses'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tugas berhasil diterima. Status berubah menjadi Dalam Proses',
+                'data' => [
+                    'task_id' => $task->id,
+                    'task_status' => $task->status
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error accepting task: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menerima tugas: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Helper method untuk inisialisasi task acceptances
+    private function initializeTaskAcceptances($task)
+    {
+        // Cek apakah sudah ada acceptance records
+        if ($task->acceptances()->exists()) {
+            return;
+        }
+
+        // Get list of assignees
+        $assignees = [];
+        
+        if ($task->assigned_to) {
+            $assignees[] = $task->assigned_to;
+        }
+        
+        if ($task->assigned_to_ids && is_array($task->assigned_to_ids)) {
+            $assignees = array_merge($assignees, $task->assigned_to_ids);
+        }
+
+        // Remove duplicates
+        $assignees = array_unique($assignees);
+
+        // Create acceptance records untuk setiap assignee
+        foreach ($assignees as $userId) {
+            TaskAcceptance::firstOrCreate(
+                [
+                    'task_id' => $task->id,
+                    'user_id' => $userId
+                ],
+                [
+                    'status' => 'pending',
+                    'accepted_at' => null
+                ]
+            );
+        }
+    }
+
 }

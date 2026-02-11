@@ -550,10 +550,8 @@
         <th style="min-width: 120px;">Harga</th>
         <!-- Kolom Penanggung Jawab -->
         <th style="min-width: 150px;">Penanggung Jawab</th>
-        <th style="min-width: 120px;">Mulai Pengerjaan</th>
-        <th style="min-width: 120px;">Selesai Pengerjaan</th>
-        <th style="min-width: 120px;">Mulai Kerjasama</th>
-        <th style="min-width: 120px;">Selesai Kerjasama</th>
+        <th style="min-width: 200px;">Periode Pengerjaan</th>
+        <th style="min-width: 200px;">Periode Kerjasama</th>
         <th style="min-width: 120px;">Status Pengerjaan</th>
         <th style="min-width: 120px;">Status Kerjasama</th>
         <th style="min-width: 150px;">Progres</th>
@@ -592,25 +590,28 @@
                     <span class="text-gray-400">-</span>
                 @endif
             </td>
-                                                    <td style="min-width: 120px;">
-                                                        {{ optional($item->tanggal_mulai_pengerjaan)->format('Y-m-d') ?? '-' }}</td>
-                                                    <td style="min-width: 120px;">
-                                                        @if ($item->tanggal_selesai_pengerjaan)
-                                                            {{ $item->tanggal_selesai_pengerjaan->format('Y-m-d') }}
+                                                    <td style="min-width: 200px;">
+                                                        @php
+                                                            $startPengerjaan = $item->tanggal_mulai_pengerjaan ? $item->tanggal_mulai_pengerjaan->format('Y-m-d') : null;
+                                                            $endPengerjaan = $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : null;
+                                                        @endphp
+                                                        @if ($startPengerjaan && $endPengerjaan)
+                                                            {{ $startPengerjaan }} &mdash; {{ $endPengerjaan }}
+                                                        @elseif ($startPengerjaan)
+                                                            {{ $startPengerjaan }}
                                                         @else
                                                             <span class="text-gray-400">-</span>
                                                         @endif
                                                     </td>
-                                                    <td style="min-width: 120px;">
-                                                        @if ($item->tanggal_mulai_kerjasama)
-                                                            {{ $item->tanggal_mulai_kerjasama->format('Y-m-d') }}
-                                                        @else
-                                                            <span class="text-gray-400">-</span>
-                                                        @endif
-                                                    </td>
-                                                    <td style="min-width: 120px;">
-                                                        @if ($item->tanggal_selesai_kerjasama)
-                                                            {{ $item->tanggal_selesai_kerjasama->format('Y-m-d') }}
+                                                    <td style="min-width: 200px;">
+                                                        @php
+                                                            $startKerjasama = $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : null;
+                                                            $endKerjasama = $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : null;
+                                                        @endphp
+                                                        @if ($startKerjasama && $endKerjasama)
+                                                            {{ $startKerjasama }} &mdash; {{ $endKerjasama }}
+                                                        @elseif ($startKerjasama)
+                                                            {{ $startKerjasama }}
                                                         @else
                                                             <span class="text-gray-400">-</span>
                                                         @endif

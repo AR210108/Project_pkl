@@ -46,6 +46,10 @@ class Project extends Model
         'deadline' => 'datetime',
         'harga' => 'decimal:2', // Penting: Decimal agar uang presisi (contoh: 100000.50)
         'progres' => 'integer',
+        'tanggal_mulai_pengerjaan' => 'datetime',
+        'tanggal_selesai_pengerjaan' => 'datetime',
+        'tanggal_mulai_kerjasama' => 'datetime',
+        'tanggal_selesai_kerjasama' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -172,6 +176,43 @@ class Project extends Model
         ];
 
         return $statusMap[$lowerStatus] ?? ucfirst($rawStatus);
+    }
+
+    /**
+     * Accessor: Format status_pengerjaan untuk display
+     */
+    public function getStatusPengerjaanFormattedAttribute()
+    {
+        $rawStatus = $this->status_pengerjaan ?? null;
+
+        if (!$rawStatus) return '-';
+
+        $statusMap = [
+            'pending' => 'Pending',
+            'dalam_pengerjaan' => 'Dalam Pengerjaan',
+            'selesai' => 'Selesai',
+            'dibatalkan' => 'Dibatalkan',
+        ];
+
+        return $statusMap[$rawStatus] ?? ucfirst(str_replace('_', ' ', $rawStatus));
+    }
+
+    /**
+     * Accessor: Format status_kerjasama untuk display
+     */
+    public function getStatusKerjasamaFormattedAttribute()
+    {
+        $rawStatus = $this->status_kerjasama ?? null;
+
+        if (!$rawStatus) return '-';
+
+        $statusMap = [
+            'aktif' => 'Aktif',
+            'selesai' => 'Selesai',
+            'ditangguhkan' => 'Ditangguhkan',
+        ];
+
+        return $statusMap[$rawStatus] ?? ucfirst(str_replace('_', ' ', $rawStatus));
     }
 
     /**

@@ -39,6 +39,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123'),
                 'role' => 'admin',
                 'divisi_id' => null,
+                'gaji' => '5000000',
+                'alamat' => 'Jakarta',
+                'kontak' => '082000000001',
+                'status_kerja' => 'aktif',
+                'status_karyawan' => 'tetap',
             ],
             [
                 'name' => 'Owner Agency',
@@ -46,6 +51,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123'),
                 'role' => 'owner',
                 'divisi_id' => null,
+                'gaji' => '10000000',
+                'alamat' => 'Jakarta',
+                'kontak' => '082000000002',
+                'status_kerja' => 'aktif',
+                'status_karyawan' => 'tetap',
             ],
             [
                 'name' => 'General Manager',
@@ -53,6 +63,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123'),
                 'role' => 'general_manager',
                 'divisi_id' => null,
+                'gaji' => '8000000',
+                'alamat' => 'Jakarta',
+                'kontak' => '082000000003',
+                'status_kerja' => 'aktif',
+                'status_karyawan' => 'tetap',
             ],
             [
                 'name' => 'Finance Department',
@@ -60,6 +75,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123'),
                 'role' => 'finance',
                 'divisi_id' => null,
+                'gaji' => '4500000',
+                'alamat' => 'Jakarta',
+                'kontak' => '082000000004',
+                'status_kerja' => 'aktif',
+                'status_karyawan' => 'tetap',
             ],
             
             // Programmer Divisi
@@ -69,6 +89,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123'),
                 'role' => 'manager_divisi',
                 'divisi_id' => $programmer->id,
+                'gaji' => '6000000',
+                'alamat' => 'Jakarta',
+                'kontak' => '082000000005',
+                'status_kerja' => 'aktif',
+                'status_karyawan' => 'tetap',
             ],
             [
                 'name' => 'Dewi Lestari',
@@ -76,6 +101,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123'),
                 'role' => 'karyawan',
                 'divisi_id' => $programmer->id,
+                'gaji' => '4000000',
+                'alamat' => 'Depok',
+                'kontak' => '082000000006',
+                'status_kerja' => 'aktif',
+                'status_karyawan' => 'tetap',
             ],
             [
                 'name' => 'Rizki Pratama',
@@ -83,6 +113,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123'),
                 'role' => 'karyawan',
                 'divisi_id' => $programmer->id,
+                'gaji' => '4000000',
+                'alamat' => 'Bogor',
+                'kontak' => '082000000007',
+                'status_kerja' => 'aktif',
+                'status_karyawan' => 'tetap',
             ],
             
             // Digital Marketing Divisi
@@ -92,6 +127,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123'),
                 'role' => 'manager_divisi',
                 'divisi_id' => $digitalMarketing->id,
+                'gaji' => '5500000',
+                'alamat' => 'Jakarta',
+                'kontak' => '082000000008',
+                'status_kerja' => 'aktif',
+                'status_karyawan' => 'tetap',
             ],
             [
                 'name' => 'Lisa Marlina',
@@ -99,6 +139,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123'),
                 'role' => 'karyawan',
                 'divisi_id' => $digitalMarketing->id,
+                'gaji' => '3500000',
+                'alamat' => 'Jakarta',
+                'kontak' => '082000000009',
+                'status_kerja' => 'aktif',
+                'status_karyawan' => 'tetap',
             ],
             [
                 'name' => 'Budi Santoso',
@@ -106,6 +151,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123'),
                 'role' => 'karyawan',
                 'divisi_id' => $digitalMarketing->id,
+                'gaji' => '3500000',
+                'alamat' => 'Tangerang',
+                'kontak' => '082000000010',
+                'status_kerja' => 'aktif',
+                'status_karyawan' => 'tetap',
             ],
             
             // Desainer Divisi
@@ -115,6 +165,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123'),
                 'role' => 'manager_divisi',
                 'divisi_id' => $desainer->id,
+                'gaji' => '5500000',
+                'alamat' => 'Jakarta',
+                'kontak' => '082000000011',
+                'status_kerja' => 'aktif',
+                'status_karyawan' => 'tetap',
             ],
             [
                 'name' => 'Ferdy Kurniawan',
@@ -122,6 +177,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123'),
                 'role' => 'karyawan',
                 'divisi_id' => $desainer->id,
+                'gaji' => '3500000',
+                'alamat' => 'Bekasi',
+                'kontak' => '082000000012',
+                'status_kerja' => 'aktif',
+                'status_karyawan' => 'tetap',
             ],
             [
                 'name' => 'Sari Dewi',
@@ -129,6 +189,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123'),
                 'role' => 'karyawan',
                 'divisi_id' => $desainer->id,
+                'gaji' => '3500000',
+                'alamat' => 'Bandung',
+                'kontak' => '082000000013',
+                'status_kerja' => 'aktif',
+                'status_karyawan' => 'tetap',
             ],
             
             // Admin biasa
@@ -138,6 +203,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123'),
                 'role' => 'admin',
                 'divisi_id' => null,
+                'gaji' => '3000000',
+                'alamat' => 'Jakarta',
+                'kontak' => '082000000014',
+                'status_kerja' => 'aktif',
+                'status_karyawan' => 'tetap',
             ],
         ];
 

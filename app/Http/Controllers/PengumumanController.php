@@ -350,22 +350,17 @@ class PengumumanController extends Controller
             // Untuk admin, tampilkan semua pengumuman
             // Untuk non-admin, hanya tampilkan pengumuman yang ditugaskan ke user tersebut
             if ($user->role === 'admin') {
-                $datesQuery = Pengumuman::where('status', 'published')
-                    ->select('tanggal')
-                    ->distinct();
+                $datesQuery = Pengumuman::select('created_at')->distinct();
             } else {
-                $datesQuery = Pengumuman::where('status', 'published')
-                    ->whereHas('users', function ($query) use ($userId) {
+                $datesQuery = Pengumuman::whereHas('users', function ($query) use ($userId) {
                         $query->where('users.id', $userId);
-                    })
-                    ->select('tanggal')
-                    ->distinct();
+                    })->select('created_at')->distinct();
             }
 
-            // Get dates
-            $dates = $datesQuery->orderBy('tanggal', 'desc')
+            // Get dates (use created_at since pengumuman table does not have `tanggal` column)
+            $dates = $datesQuery->orderBy('created_at', 'desc')
                 ->get()
-                ->pluck('tanggal')
+                ->pluck('created_at')
                 ->map(function ($date) {
                     return Carbon::parse($date)->format('Y-m-d');
                 })
@@ -431,28 +426,21 @@ class PengumumanController extends Controller
             // Untuk admin, tampilkan semua pengumuman
             // Untuk non-admin, hanya tampilkan pengumuman yang ditugaskan ke user tersebut
             if ($user->role === 'admin') {
-                $announcementsQuery = Pengumuman::where('status', 'published')
-                    ->with(['creator:id,name']);
+                $announcementsQuery = Pengumuman::with(['creator:id,name']);
             } else {
-                $announcementsQuery = Pengumuman::where('status', 'published')
-                    ->whereHas('users', function ($query) use ($userId) {
+                $announcementsQuery = Pengumuman::whereHas('users', function ($query) use ($userId) {
                         $query->where('users.id', $userId);
-                    })
-                    ->with(['creator:id,name']);
+                    })->with(['creator:id,name']);
             }
 
-            // Get latest announcements
+            // Get latest announcements (select only existing columns)
             $announcements = $announcementsQuery->orderBy('created_at', 'desc')
                 ->limit(20)
                 ->get([
                     'id',
                     'judul',
                     'isi_pesan',
-                    'tanggal',
                     'lampiran',
-                    'is_important',
-                    'is_pinned',
-                    'status',
                     'user_id',
                     'created_at',
                     'updated_at'
@@ -467,16 +455,11 @@ class PengumumanController extends Controller
                     'judul' => $announcement->judul,
                     'isi' => $announcement->isi_pesan,
                     'ringkasan' => $this->getExcerpt($announcement->isi_pesan, 100),
-                    'tanggal' => $announcement->tanggal,
-                    'formatted_tanggal' => $announcement->tanggal ?
-                        Carbon::parse($announcement->tanggal)->translatedFormat('d F Y') :
-                        Carbon::parse($announcement->created_at)->translatedFormat('d F Y'),
+                    'tanggal' => $announcement->created_at->format('Y-m-d'),
+                    'formatted_tanggal' => $announcement->created_at->translatedFormat('d F Y'),
                     'lampiran' => $announcement->lampiran,
                     'lampiran_url' => $announcement->lampiran ?
                         asset('storage/' . $announcement->lampiran) : null,
-                    'is_important' => (bool) $announcement->is_important,
-                    'is_pinned' => (bool) $announcement->is_pinned,
-                    'status' => $announcement->status,
                     'creator_id' => $announcement->user_id,
                     'creator_name' => $announcement->creator ? $announcement->creator->name : 'System',
                     'created_at' => $announcement->created_at->format('Y-m-d H:i:s'),
@@ -548,14 +531,12 @@ class PengumumanController extends Controller
                 ]);
             }
 
-            // Query untuk mendapatkan pengumuman berdasarkan tanggal
+            // Query untuk mendapatkan pengumuman berdasarkan tanggal (gunakan created_at)
             if ($user->role === 'admin') {
-                $announcementsQuery = Pengumuman::where('status', 'published')
-                    ->whereDate('tanggal', $date)
+                $announcementsQuery = Pengumuman::whereDate('created_at', $date)
                     ->with(['creator:id,name']);
             } else {
-                $announcementsQuery = Pengumuman::where('status', 'published')
-                    ->whereDate('tanggal', $date)
+                $announcementsQuery = Pengumuman::whereDate('created_at', $date)
                     ->whereHas('users', function ($query) use ($userId) {
                         $query->where('users.id', $userId);
                     })
@@ -572,13 +553,11 @@ class PengumumanController extends Controller
                     'judul' => $announcement->judul,
                     'isi' => $announcement->isi_pesan,
                     'ringkasan' => $this->getExcerpt($announcement->isi_pesan, 100),
-                    'tanggal' => $announcement->tanggal,
-                    'formatted_tanggal' => Carbon::parse($announcement->tanggal)->translatedFormat('d F Y'),
+                    'tanggal' => $announcement->created_at->format('Y-m-d'),
+                    'formatted_tanggal' => $announcement->created_at->translatedFormat('d F Y'),
                     'lampiran' => $announcement->lampiran,
                     'lampiran_url' => $announcement->lampiran ?
                         asset('storage/' . $announcement->lampiran) : null,
-                    'is_important' => (bool) $announcement->is_important,
-                    'is_pinned' => (bool) $announcement->is_pinned,
                     'creator_name' => $announcement->creator ? $announcement->creator->name : 'System',
                     'created_at' => $announcement->created_at->format('Y-m-d H:i:s'),
                 ];
@@ -633,13 +612,12 @@ class PengumumanController extends Controller
             // Get counts
             $counts = [
                 'total_pengumuman' => Pengumuman::count(),
-                'published_pengumuman' => Pengumuman::where('status', 'published')->count(),
+                'published_pengumuman' => Pengumuman::count(),
                 'user_assigned_pengumuman' => $user->role === 'admin' ?
-                    Pengumuman::where('status', 'published')->count() :
-                    Pengumuman::where('status', 'published')
-                        ->whereHas('users', function ($query) use ($userId) {
-                            $query->where('users.id', $userId);
-                        })->count(),
+                    Pengumuman::count() :
+                    Pengumuman::whereHas('users', function ($query) use ($userId) {
+                        $query->where('users.id', $userId);
+                    })->count(),
             ];
 
             return response()->json([
@@ -717,13 +695,11 @@ class PengumumanController extends Controller
 
             // Query untuk mendapatkan pengumuman untuk user ini
             if ($user->role === 'admin') {
-                $announcements = Pengumuman::where('status', 'published')
-                    ->with(['creator:id,name'])
+                $announcements = Pengumuman::with(['creator:id,name'])
                     ->orderBy('created_at', 'desc')
                     ->get();
             } else {
-                $announcements = Pengumuman::where('status', 'published')
-                    ->whereHas('users', function ($query) use ($userId) {
+                $announcements = Pengumuman::whereHas('users', function ($query) use ($userId) {
                         $query->where('users.id', $userId);
                     })
                     ->with(['creator:id,name'])
@@ -736,8 +712,8 @@ class PengumumanController extends Controller
                     'id' => $announcement->id,
                     'judul' => $announcement->judul,
                     'isi' => $announcement->isi_pesan,
-                    'tanggal' => $announcement->tanggal,
-                    'formatted_tanggal' => Carbon::parse($announcement->tanggal)->translatedFormat('d F Y'),
+                    'tanggal' => $announcement->created_at->format('Y-m-d'),
+                    'formatted_tanggal' => $announcement->created_at->translatedFormat('d F Y'),
                     'lampiran' => $announcement->lampiran,
                     'lampiran_url' => $announcement->lampiran ?
                         asset('storage/' . $announcement->lampiran) : null,
@@ -783,24 +759,22 @@ class PengumumanController extends Controller
                 'user_role' => $user->role
             ]);
 
-            // Query untuk mendapatkan tanggal pengumuman untuk user ini
+            // Query untuk mendapatkan tanggal pengumuman untuk user ini (gunakan created_at)
             if ($user->role === 'admin') {
-                $dates = Pengumuman::where('status', 'published')
-                    ->select('tanggal')
+                $dates = Pengumuman::select('created_at')
                     ->distinct()
-                    ->orderBy('tanggal', 'desc')
+                    ->orderBy('created_at', 'desc')
                     ->get()
-                    ->pluck('tanggal');
+                    ->pluck('created_at');
             } else {
-                $dates = Pengumuman::where('status', 'published')
-                    ->whereHas('users', function ($query) use ($userId) {
+                $dates = Pengumuman::whereHas('users', function ($query) use ($userId) {
                         $query->where('users.id', $userId);
                     })
-                    ->select('tanggal')
+                    ->select('created_at')
                     ->distinct()
-                    ->orderBy('tanggal', 'desc')
+                    ->orderBy('created_at', 'desc')
                     ->get()
-                    ->pluck('tanggal');
+                    ->pluck('created_at');
             }
 
             $formattedDates = $dates->map(function ($date) {
@@ -943,7 +917,7 @@ class PengumumanController extends Controller
             // Get counts
             $counts = [
                 'total_pengumuman' => Pengumuman::count(),
-                'published_pengumuman' => Pengumuman::where('status', 'published')->count(),
+                'published_pengumuman' => Pengumuman::count(),
             ];
 
             return response()->json([

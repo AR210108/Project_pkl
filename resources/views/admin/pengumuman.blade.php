@@ -1219,45 +1219,72 @@
             // Load users data
             loadUsers();
             
-            // Event listeners
-            document.getElementById('createBtn').addEventListener('click', openCreateModal);
-            document.getElementById('createFirstBtn').addEventListener('click', openCreateModal);
-            document.getElementById('confirmBtn').addEventListener('click', handleConfirm);
-            document.getElementById('searchInput').addEventListener('input', filterData);
+            // Event listeners - with null checks
+            const createBtn = document.getElementById('createBtn');
+            if (createBtn) createBtn.addEventListener('click', openCreateModal);
+            
+            const createFirstBtn = document.getElementById('createFirstBtn');
+            if (createFirstBtn) createFirstBtn.addEventListener('click', openCreateModal);
+            
+            const confirmBtn = document.getElementById('confirmBtn');
+            if (confirmBtn) confirmBtn.addEventListener('click', handleConfirm);
+            
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.addEventListener('input', filterData);
             
             // Modal event listeners
-            document.getElementById('closeModal').addEventListener('click', closeModal);
-            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            const closeModal_ = document.getElementById('closeModal');
+            if (closeModal_) closeModal_.addEventListener('click', closeModal);
+            
+            const cancelBtn = document.getElementById('cancelBtn');
+            if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
             
             // Delete modal event listeners
-            document.getElementById('closeDeleteModal').addEventListener('click', closeDeleteModal);
-            document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteModal);
+            const closeDeleteModal_ = document.getElementById('closeDeleteModal');
+            if (closeDeleteModal_) closeDeleteModal_.addEventListener('click', closeDeleteModal);
+            
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+            if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', closeDeleteModal);
             
             // Attachment modal event listeners
-            document.getElementById('closeAttachmentModal').addEventListener('click', closeAttachmentModal);
-            document.getElementById('downloadAttachment').addEventListener('click', downloadAttachment);
-            document.getElementById('openNewTab').addEventListener('click', openInNewTab);
+            const closeAttachmentModal_ = document.getElementById('closeAttachmentModal');
+            if (closeAttachmentModal_) closeAttachmentModal_.addEventListener('click', closeAttachmentModal);
+            
+            const downloadAttachment_ = document.getElementById('downloadAttachment');
+            if (downloadAttachment_) downloadAttachment_.addEventListener('click', downloadAttachment);
+            
+            const openNewTab_ = document.getElementById('openNewTab');
+            if (openNewTab_) openNewTab_.addEventListener('click', openInNewTab);
             
             // Close modal when clicking outside
-            document.getElementById('modal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeModal();
-                }
-            });
+            const modal = document.getElementById('modal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeModal();
+                    }
+                });
+            }
             
             // Close delete modal when clicking outside
-            document.getElementById('deleteModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeDeleteModal();
-                }
-            });
+            const deleteModal = document.getElementById('deleteModal');
+            if (deleteModal) {
+                deleteModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeDeleteModal();
+                    }
+                });
+            }
             
             // Close attachment modal when clicking outside
-            document.getElementById('attachmentModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeAttachmentModal();
-                }
-            });
+            const attachmentModal = document.getElementById('attachmentModal');
+            if (attachmentModal) {
+                attachmentModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeAttachmentModal();
+                    }
+                });
+            }
             
             // Close modal with Escape key
             document.addEventListener('keydown', function(e) {
@@ -1269,9 +1296,12 @@
             });
             
             // Close notification when clicking the close button
-            document.querySelector('.minimal-popup-close').addEventListener('click', function() {
-                document.getElementById('notification').classList.remove('show');
-            });
+            const popupClose = document.querySelector('.minimal-popup-close');
+            if (popupClose) {
+                popupClose.addEventListener('click', function() {
+                    document.getElementById('notification').classList.remove('show');
+                });
+            }
             
             // Initialize filter
             initializeFilter();
@@ -1288,34 +1318,46 @@
         
         // Initialize pagination
         function initializePagination() {
-            // Add event listeners for pagination buttons
-            document.getElementById('prevPage').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    updatePagination();
-                }
-            });
+            // Add event listeners for pagination buttons - with null checks
+            const prevPage = document.getElementById('prevPage');
+            if (prevPage) {
+                prevPage.addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        updatePagination();
+                    }
+                });
+            }
             
-            document.getElementById('nextPage').addEventListener('click', () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    updatePagination();
-                }
-            });
+            const nextPage = document.getElementById('nextPage');
+            if (nextPage) {
+                nextPage.addEventListener('click', () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        updatePagination();
+                    }
+                });
+            }
             
-            document.getElementById('mobilePrevPage').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    updatePagination();
-                }
-            });
+            const mobilePrevPage = document.getElementById('mobilePrevPage');
+            if (mobilePrevPage) {
+                mobilePrevPage.addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        updatePagination();
+                    }
+                });
+            }
             
-            document.getElementById('mobileNextPage').addEventListener('click', () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    updatePagination();
-                }
-            });
+            const mobileNextPage = document.getElementById('mobileNextPage');
+            if (mobileNextPage) {
+                mobileNextPage.addEventListener('click', () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        updatePagination();
+                    }
+                });
+            }
             
             // Initial pagination update
             updatePagination();
@@ -2163,6 +2205,7 @@
                     showMinimalPopup('Berhasil', result.message || 'Pengumuman berhasil disimpan', 'success');
                     setTimeout(() => {
                         closeModal();
+                        // Reload page to get the latest data
                         window.location.reload();
                     }, 1500);
                 } else {
@@ -2239,6 +2282,12 @@
             const filterAll = document.getElementById('filterAll');
             const applyFilterBtn = document.getElementById('applyFilter');
             const resetFilterBtn = document.getElementById('resetFilter');
+            
+            // Return early if filter elements don't exist
+            if (!filterBtn || !filterDropdown || !filterAll || !applyFilterBtn || !resetFilterBtn) {
+                console.log('Filter elements not found, skipping filter initialization');
+                return;
+            }
             
             // Toggle filter dropdown
             filterBtn.addEventListener('click', function(e) {
@@ -2414,44 +2463,47 @@
         }
         
         // Delete form submission handler
-        document.getElementById('deleteForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const id = document.getElementById('deleteId').value;
-            
-            // Show loading state
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Menghapus...';
-            submitBtn.disabled = true;
-            
-            try {
-                const response = await fetch(`/pengumuman/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
+        const deleteForm = document.getElementById('deleteForm');
+        if (deleteForm) {
+            deleteForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const id = document.getElementById('deleteId').value;
+                
+                // Show loading state
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Menghapus...';
+                submitBtn.disabled = true;
+                
+                try {
+                    const response = await fetch(`/pengumuman/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showMinimalPopup('Berhasil', result.message || 'Pengumuman berhasil dihapus', 'success');
+                        closeDeleteModal();
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        showMinimalPopup('Error', result.message || 'Gagal menghapus pengumuman', 'error');
                     }
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showMinimalPopup('Berhasil', result.message || 'Pengumuman berhasil dihapus', 'success');
-                    closeDeleteModal();
-                    setTimeout(() => window.location.reload(), 1000);
-                } else {
-                    showMinimalPopup('Error', result.message || 'Gagal menghapus pengumuman', 'error');
+                } catch (error) {
+                    console.error('Error deleting pengumuman:', error);
+                    showMinimalPopup('Error', 'Gagal menghapus pengumuman', 'error');
+                } finally {
+                    // Reset button state
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
                 }
-            } catch (error) {
-                console.error('Error deleting pengumuman:', error);
-                showMinimalPopup('Error', 'Gagal menghapus pengumuman', 'error');
-            } finally {
-                // Reset button state
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
-        });
+            });
+        }
     </script>
 </body>
 </html>

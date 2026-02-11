@@ -83,7 +83,9 @@
             border: 1px solid #e2e8f0;
             border-radius: 0.5rem;
             padding: 0.75rem;
-            min-height: 400px;
+            min-height: 300px;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         trix-editor:focus {
@@ -124,127 +126,62 @@
             padding: 1.5rem;
         }
 
-        .minimal-popup {
+        /* Enhanced Modal styles with proper scrolling */
+        .modal-overlay {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 1000;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            max-width: 350px;
-            border-left: 4px solid #10b981;
-        }
-
-        .minimal-popup.show {
-            transform: translateX(0);
-        }
-
-        .minimal-popup.error {
-            border-left-color: #ef4444;
-        }
-
-        .minimal-popup.warning {
-            border-left-color: #f59e0b;
-        }
-
-        .minimal-popup-icon {
-            flex-shrink: 0;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-
-        .minimal-popup.success .minimal-popup-icon {
-            background-color: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-        }
-
-        .article-card {
-            border: 1px solid #e2e8f0;
-            border-radius: 0.75rem;
-            overflow: hidden;
-            transition: all 0.2s ease;
-        }
-
-        .article-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .article-image {
-            height: 200px;
-            background-color: #f1f5f9;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .article-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .article-content {
-            padding: 1rem;
-        }
-
-        .article-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-            padding: 0 1rem 1rem;
-        }
-
-        /* Modal styles - Modified for centering */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
             top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            overflow-y: auto;
-            /* Added for centering */
-            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding: 1rem;
             box-sizing: border-box;
         }
 
-        .modal-content {
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
             background-color: white;
-            margin: auto; /* Changed from 5% auto to auto for perfect centering */
-            padding: 0;
             border-radius: 0.75rem;
-            width: 90%;
+            width: 100%;
             max-width: 800px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            /* Added for vertical centering */
-            position: relative;
-            top: 50%;
-            transform: translateY(-50%);
+            max-height: 90vh;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
         }
 
         /* Delete modal specific styling */
-        #deleteModal .modal-content {
+        #deleteModal .modal {
             max-width: 500px;
+            max-height: 80vh;
         }
 
         .modal-header {
-            padding: 1rem 1.5rem;
+            padding: 1.5rem;
             border-bottom: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background-color: #f8fafc;
+            flex-shrink: 0;
         }
 
         .modal-title {
@@ -252,6 +189,9 @@
             font-weight: 600;
             color: #1e293b;
             margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .modal-close {
@@ -260,10 +200,25 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background-color: #f1f5f9;
+            color: #1e293b;
         }
 
         .modal-body {
             padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+            /* Make modal body scrollable */
         }
 
         .image-preview {
@@ -276,6 +231,7 @@
             justify-content: center;
             overflow: hidden;
             margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
         }
 
         .image-preview img {
@@ -350,7 +306,163 @@
             margin: 0 0.5rem;
         }
 
-        /* Mobile responsive adjustments for centered modal */
+        .article-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .article-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .article-image {
+            height: 200px;
+            background-color: #f1f5f9;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .article-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .article-content {
+            padding: 1rem;
+        }
+
+        .article-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 0 1rem 1rem;
+        }
+
+        /* Enhanced popup styles */
+        .minimal-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            max-width: 350px;
+            border-left: 4px solid #10b981;
+        }
+
+        .minimal-popup.show {
+            transform: translateX(0);
+        }
+
+        .minimal-popup.error {
+            border-left-color: #ef4444;
+        }
+
+        .minimal-popup.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .minimal-popup-icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .minimal-popup.success .minimal-popup-icon {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .minimal-popup.error .minimal-popup-icon {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .minimal-popup.warning .minimal-popup-icon {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .minimal-popup-content {
+            flex-grow: 1;
+        }
+
+        .minimal-popup-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .minimal-popup-message {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .minimal-popup-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .minimal-popup-close:hover {
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+
+        /* Form group styling */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            color: #1e293b;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        /* Mobile responsive adjustments */
         @media (max-width: 768px) {
             .app-container {
                 flex-direction: column;
@@ -365,15 +477,13 @@
                 width: 100%;
             }
 
-            /* PERUBAHAN PENTING DI SINI */
             .panel-header {
                 padding: 0.75rem 1rem;
-                flex-wrap: nowrap; /* CEGAH pembungkusan ke baris baru */
+                flex-wrap: nowrap;
                 align-items: center;
                 justify-content: space-between;
             }
 
-            /* Buat tombol sedikit lebih kecil agar muat */
             .panel-header button {
                 padding: 0.5rem 0.75rem;
                 font-size: 0.875rem;
@@ -385,24 +495,23 @@
 
             .panel-title {
                 font-size: 1rem;
-                /* Hapus margin-bottom yang ditambahkan sebelumnya */
             }
 
-            /* Modal adjustments */
-            .modal {
-                padding: 10px;
+            /* Modal adjustments for mobile */
+            .modal-overlay {
+                padding: 0.5rem;
             }
-            
-            .modal-content {
-                width: 95%;
-                /* Adjust centering for mobile */
-                top: 50%;
-                transform: translateY(-50%);
-                margin: auto;
+
+            .modal {
+                width: 100%;
+                max-width: none;
+                max-height: 95vh;
+                border-radius: 0.75rem 0.75rem 0 0;
+                margin: auto 0;
             }
 
             .modal-header {
-                padding: 0.75rem 1rem;
+                padding: 1rem;
             }
 
             .modal-body {
@@ -413,9 +522,10 @@
                 font-size: 1.1rem;
             }
 
-            /* Trix Editor adjustment */
+            /* Trix Editor adjustment for mobile */
             trix-editor {
-                min-height: 300px; /* Reduce height on mobile */
+                min-height: 250px;
+                max-height: 300px;
             }
 
             /* Form buttons in modal */
@@ -446,7 +556,6 @@
                 padding: 0.5rem 0.75rem;
             }
 
-            /* Buat tombol lebih kecil lagi di layar sangat kecil */
             .panel-header button {
                 padding: 0.5rem 0.5rem;
                 font-size: 0.8rem;
@@ -461,20 +570,19 @@
             }
 
             /* Further modal adjustments for very small screens */
-            .modal {
-                padding: 5px;
+            .modal-overlay {
+                padding: 0;
             }
-            
-            .modal-content {
-                width: 98%;
-                /* Ensure centering on very small screens */
-                top: 50%;
-                transform: translateY(-50%);
-                margin: auto;
+
+            .modal {
+                width: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+                height: 100vh;
             }
 
             .modal-header {
-                padding: 0.5rem 0.75rem;
+                padding: 0.75rem;
             }
 
             .modal-body {
@@ -487,7 +595,8 @@
 
             /* Further Trix Editor adjustment */
             trix-editor {
-                min-height: 250px; /* Further reduce height */
+                min-height: 200px;
+                max-height: 250px;
             }
 
             /* Further popup adjustments */
@@ -497,6 +606,11 @@
                 right: 10px;
                 padding: 12px 16px;
             }
+        }
+
+        /* Prevent body scroll when modal is open */
+        body.modal-open {
+            overflow: hidden;
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -559,11 +673,11 @@
                                         </div>
                                     </div>
                                     <div class="article-actions">
-                                        <button class="edit-article-btn p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                                        <button class="edit-article-btn p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                             data-id="{{ $article->id }}">
                                             <span class="material-icons-outlined">edit</span>
                                         </button>
-                                        <button class="delete-article-btn p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                                        <button class="delete-article-btn p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
                                             data-id="{{ $article->id }}">
                                             <span class="material-icons-outlined">delete</span>
                                         </button>
@@ -581,51 +695,53 @@
     </div>
 
     <!-- Modal Artikel -->
-    <div id="articleModal" class="modal">
-        <div class="modal-content">
+    <div id="articleModal" class="modal-overlay">
+        <div class="modal">
             <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">Tambah Artikel</h3>
-                <button class="modal-close" id="closeModal">&times;</button>
+                <h3 class="modal-title">
+                    <span class="material-icons-outlined text-primary">article</span>
+                    <span id="modalTitle">Tambah Artikel</span>
+                </h3>
+                <button class="modal-close" id="closeModal">
+                    <span class="material-icons-outlined">close</span>
+                </button>
             </div>
             <div class="modal-body">
                 <form id="articleForm">
                     @csrf
                     <input type="hidden" id="articleId" name="id">
-                    <!-- PERBAIKAN PENTING: Tambahkan input tersembunyi untuk _method -->
                     <input type="hidden" id="_method" name="_method" value="POST">
 
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Judul</label>
+                    <div class="form-group">
+                        <label class="form-label" for="titleInput">Judul</label>
                         <input type="text" name="title" id="titleInput"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                            required>
+                            class="form-control" required>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Ringkasan (Opsional)</label>
+                    <div class="form-group">
+                        <label class="form-label" for="excerptInput">Ringkasan (Opsional)</label>
                         <textarea name="excerpt" id="excerptInput"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input"
-                            rows="2"></textarea>
+                            class="form-control" rows="2"></textarea>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Konten</label>
+                    <div class="form-group">
+                        <label class="form-label" for="contentInput">Konten</label>
                         <input type="hidden" name="content" id="contentInput">
-                        <trix-editor input="contentInput" class="form-input rounded-lg"></trix-editor>
+                        <trix-editor input="contentInput" class="form-control"></trix-editor>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Gambar</label>
+                    <div class="form-group">
+                        <label class="form-label" for="imageInput">Gambar</label>
                         <div class="image-preview" id="imagePreview">
                             <span class="material-icons-outlined text-gray-400">image</span>
                         </div>
                         <input type="file" name="image" id="imageInput" accept="image/*"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input">
+                            class="form-control">
                     </div>
 
-                    <div class="mb-4">
+                    <div class="form-group">
                         <div class="flex items-center justify-between">
-                            <label class="block text-sm font-medium text-gray-700">Tampilkan di Halaman Utama</label>
+                            <label class="form-label mb-0">Tampilkan di Halaman Utama</label>
                             <label class="switch">
                                 <input type="checkbox" name="is_featured" id="isFeaturedInput">
                                 <span class="slider"></span>
@@ -633,10 +749,10 @@
                         </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Urutan Tampil</label>
+                    <div class="form-group">
+                        <label class="form-label" for="orderInput">Urutan Tampil</label>
                         <input type="number" name="order" id="orderInput" min="0" value="0"
-                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary form-input">
+                            class="form-control">
                     </div>
 
                     <div class="flex flex-col sm:flex-row justify-end gap-2">
@@ -648,12 +764,17 @@
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal - Added to match second file -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal">
             <div class="modal-header">
-                <h3 class="modal-title">Konfirmasi Hapus</h3>
-                <button class="modal-close" id="closeDeleteModal">&times;</button>
+                <h3 class="modal-title">
+                    <span class="material-icons-outlined text-danger">warning</span>
+                    Konfirmasi Hapus
+                </h3>
+                <button class="modal-close" id="closeDeleteModal">
+                    <span class="material-icons-outlined">close</span>
+                </button>
             </div>
             <div class="modal-body">
                 <form id="deleteForm" method="POST" action="">
@@ -693,18 +814,18 @@
         document.addEventListener('DOMContentLoaded', function () {
             // --- Deklarasi Semua Elemen yang Dibutuhkan ---
             const articleModal = document.getElementById('articleModal');
-            const deleteModal = document.getElementById('deleteModal'); // Added delete modal
+            const deleteModal = document.getElementById('deleteModal');
             const articleForm = document.getElementById('articleForm');
-            const deleteForm = document.getElementById('deleteForm'); // Added delete form
+            const deleteForm = document.getElementById('deleteForm');
             const addArticleBtn = document.getElementById('addArticleBtn');
             const closeModalBtn = document.getElementById('closeModal');
-            const closeDeleteModalBtn = document.getElementById('closeDeleteModal'); // Added close delete modal button
+            const closeDeleteModalBtn = document.getElementById('closeDeleteModal');
             const cancelBtn = document.getElementById('cancelBtn');
-            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn'); // Added cancel delete button
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
             const modalTitle = document.getElementById('modalTitle');
             const articleIdInput = document.getElementById('articleId');
-            const deleteIdInput = document.getElementById('deleteId'); // Added delete id input
-            const methodInput = document.getElementById('_method'); // Ambil elemen _method
+            const deleteIdInput = document.getElementById('deleteId');
+            const methodInput = document.getElementById('_method');
             const titleInput = document.getElementById('titleInput');
             const excerptInput = document.getElementById('excerptInput');
             const imageInput = document.getElementById('imageInput');
@@ -716,13 +837,13 @@
             // --- Cek Elemen Krusial ---
             if (!articleForm || !articleIdInput || !methodInput) {
                 alert('Error: Elemen form kritis tidak ditemukan. Pastikan input dengan id "articleId" dan "_method" ada di dalam form.');
-                return; // Hentikan eksekusi jika elemen penting hilang
+                return;
             }
 
             // --- Fungsi Helper untuk Popup ---
             function showMinimalPopup(title, message, type = 'success') {
                 const popup = document.getElementById('minimalPopup');
-                if (!popup) return; // Jangan eksekusi jika popup tidak ada
+                if (!popup) return;
 
                 const popupTitle = popup.querySelector('.minimal-popup-title');
                 const popupMessage = popup.querySelector('.minimal-popup-message');
@@ -739,6 +860,29 @@
                 setTimeout(() => popup.classList.remove('show'), 3000);
             }
 
+            // --- Fungsi untuk menampilkan modal dengan animasi ---
+            function showModal(modal) {
+                modal.classList.add('active');
+                document.body.classList.add('modal-open'); // Prevent body scroll
+                
+                // Add touch prevention for mobile
+                document.body.addEventListener('touchmove', preventScroll, { passive: false });
+            }
+
+            // --- Fungsi untuk menyembunyikan modal dengan animasi ---
+            function hideModal(modal) {
+                modal.classList.remove('active');
+                document.body.classList.remove('modal-open'); // Restore body scroll
+                
+                // Remove touch prevention
+                document.body.removeEventListener('touchmove', preventScroll, { passive: false });
+            }
+
+            // Prevent scroll function for mobile
+            function preventScroll(e) {
+                e.preventDefault();
+            }
+
             // --- Event Listeners ---
 
             // Buka Modal untuk Tambah
@@ -746,30 +890,28 @@
                 modalTitle.textContent = 'Tambah Artikel';
                 articleForm.reset();
                 articleIdInput.value = '';
-                methodInput.value = 'POST'; // Pastikan method adalah POST
+                methodInput.value = 'POST';
                 document.querySelector('trix-editor').innerHTML = '';
                 imagePreview.innerHTML = '<span class="material-icons-outlined text-gray-400">image</span>';
-                articleModal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
+                showModal(articleModal);
             });
 
             // Tutup Modal Artikel
-            const closeModal = () => {
-                articleModal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            };
-            closeModalBtn.addEventListener('click', closeModal);
-            cancelBtn.addEventListener('click', closeModal);
-            window.addEventListener('click', (event) => { if (event.target === articleModal) closeModal(); });
-
+            closeModalBtn.addEventListener('click', () => hideModal(articleModal));
+            cancelBtn.addEventListener('click', () => hideModal(articleModal));
+            
             // Tutup Modal Hapus
-            const closeDeleteModal = () => {
-                deleteModal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            };
-            closeDeleteModalBtn.addEventListener('click', closeDeleteModal);
-            cancelDeleteBtn.addEventListener('click', closeDeleteModal);
-            window.addEventListener('click', (event) => { if (event.target === deleteModal) closeDeleteModal(); });
+            closeDeleteModalBtn.addEventListener('click', () => hideModal(deleteModal));
+            cancelDeleteBtn.addEventListener('click', () => hideModal(deleteModal));
+            
+            // Tutup modal dengan klik di luar area modal
+            [articleModal, deleteModal].forEach(modal => {
+                modal.addEventListener('click', function(event) {
+                    if (event.target === modal) {
+                        hideModal(modal);
+                    }
+                });
+            });
 
             // Preview Gambar
             imageInput.addEventListener('change', function () {
@@ -803,8 +945,7 @@
                                 } else {
                                     imagePreview.innerHTML = '<span class="material-icons-outlined text-gray-400">image</span>';
                                 }
-                                articleModal.style.display = 'block';
-                                document.body.style.overflow = 'hidden';
+                                showModal(articleModal);
                             } else {
                                 showMinimalPopup('Error', data.message, 'error');
                             }
@@ -816,14 +957,13 @@
                 });
             });
 
-            // Hapus Artikel - Modified to use modal instead of confirm
+            // Hapus Artikel
             document.querySelectorAll('.delete-article-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
                     const idToDelete = this.getAttribute('data-id');
                     deleteIdInput.value = idToDelete;
                     deleteForm.action = `/admin/settings/articles/${idToDelete}`;
-                    deleteModal.style.display = 'block';
-                    document.body.style.overflow = 'hidden';
+                    showModal(deleteModal);
                 });
             });
 
@@ -835,7 +975,7 @@
                 contentInput.value = document.querySelector('trix-editor').innerHTML;
 
                 const isEdit = articleIdInput.value !== '';
-                methodInput.value = isEdit ? 'PUT' : 'POST'; // Atur method berdasarkan mode
+                methodInput.value = isEdit ? 'PUT' : 'POST';
                 
                 const formData = new FormData(this);
                 const url = isEdit ? `/admin/settings/articles/${articleIdInput.value}` : '/admin/settings/articles';
@@ -852,7 +992,7 @@
                 .then(data => {
                     if (data.success) {
                         showMinimalPopup('Berhasil', data.message, 'success');
-                        closeModal();
+                        hideModal(articleModal);
                         setTimeout(() => location.reload(), 1500);
                     } else {
                         showMinimalPopup('Error', data.message, 'error');
@@ -895,7 +1035,7 @@
                 .then(data => {
                     if (data.success) {
                         showMinimalPopup('Berhasil', data.message, 'success');
-                        closeDeleteModal();
+                        hideModal(deleteModal);
                         document.querySelector(`.article-card[data-id="${idToDelete}"]`).remove();
                     } else {
                         showMinimalPopup('Error', data.message, 'error');
@@ -915,6 +1055,18 @@
             // Tutup Popup
             document.querySelector('.minimal-popup-close')?.addEventListener('click', () => {
                 document.getElementById('minimalPopup')?.classList.remove('show');
+            });
+
+            // Handle escape key to close modals
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (articleModal.classList.contains('active')) {
+                        hideModal(articleModal);
+                    }
+                    if (deleteModal.classList.contains('active')) {
+                        hideModal(deleteModal);
+                    }
+                }
             });
         });
     </script>

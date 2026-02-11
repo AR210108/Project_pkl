@@ -502,7 +502,7 @@
                     <h2 class="text-xl sm:text-3xl font-bold mb-4 sm:mb-8">Data Project - Penetapan Penanggung Jawab</h2>
                     
 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-    <form method="GET" action="{{ route('general_manajer.data_project') }}" class="relative w-full md:w-1/3">
+    <form method="GET" action="{{ route('general_manajer.data_project.index') }}" class="relative w-full md:w-1/3">
         <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
             search
         </span>
@@ -608,9 +608,13 @@
                                                                     '{{ addslashes($item->nama) }}', 
                                                                     '{{ addslashes($item->deskripsi) }}', 
                                                                     '{{ $item->harga }}', 
-                                                                    '{{ $item->deadline ? $item->deadline->format('Y-m-d') : '' }}', 
+                            
+                                                                    '{{ $item->tanggal_selesai_pengerjaan ? $item->tanggal_selesai_pengerjaan->format('Y-m-d') : '' }}',
+                                                                    '{{ $item->tanggal_mulai_kerjasama ? $item->tanggal_mulai_kerjasama->format('Y-m-d') : '' }}',
+                                                                    '{{ $item->tanggal_selesai_kerjasama ? $item->tanggal_selesai_kerjasama->format('Y-m-d') : '' }}',
+                                                                    '{{ $item->status_pengerjaan }}', 
+                                                                    '{{ $item->status_kerjasama }}',
                                                                     {{ $item->progres }}, 
-                                                                    '{{ $item->status }}', 
                                                                     {{ $item->penanggung_jawab_id ?? 'null' }}
                                                                 )"
                                                                 title="Tentukan Penanggung Jawab">
@@ -626,7 +630,7 @@
                             </div>
                             
                             <!-- Desktop Pagination -->
-                            @if($project->lastPage() > 1)
+                            @if($projects->lastPage() > 1)
                             <div class="desktop-pagination">
                                 <button class="desktop-nav-btn" @if($projects->currentPage() == 1) disabled @endif onclick="window.location.href='{{ $projects->previousPageUrl() }}'">
                                     <span class="material-icons-outlined text-sm">chevron_left</span>
@@ -676,11 +680,7 @@
                         <input type="hidden" name="nama" id="editNama">
                     </div>
                     
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-500 mb-1">Deadline</label>
-                        <input type="text" id="editDeadlineDisplay" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700" readonly>
-                        <input type="hidden" name="deadline" id="editDeadline">
-                    </div>
+                   
                     
                     <!-- Field untuk mengubah penanggung jawab -->
                     <div class="mb-6">
@@ -711,9 +711,7 @@
                     
                     <!-- Fields hidden lainnya (tetap dikirim tapi tidak bisa diubah) -->
                     <input type="hidden" name="deskripsi" id="editDeskripsi">
-                    <input type="hidden" name="harga" id="editHarga">
-                    <input type="hidden" name="progres" id="editProgres">
-                    <input type="hidden" name="status" id="editStatus">
+                    <input type="hidden" name="status_kerjasama" id="editStatusKerjasama" value="aktif">
                     
                     <div class="flex justify-end gap-2">
                         <button type="button" class="close-modal px-4 py-2 btn-secondary rounded-lg">Batal</button>
@@ -866,21 +864,16 @@
     });
 
     // Open edit modal with data - untuk menetapkan penanggung jawab
-    function openEditModal(id, nama, deskripsi, harga, deadline, progres, status, penanggungJawabId) {
+    function openEditModal(id, nama, deskripsi, harga, tanggalMulaiPengerjaan, tanggalSelesaiPengerjaan, tanggalMulaiKerjasama, tanggalSelesaiKerjasama, statusPengerjaan, statusKerjasama, progres, penanggungJawabId) {
         document.getElementById('editId').value = id;
         
         // Tampilkan info project (readonly)
         document.getElementById('editNamaDisplay').value = nama;
         document.getElementById('editNama').value = nama;
         
-        document.getElementById('editDeadlineDisplay').value = deadline;
-        document.getElementById('editDeadline').value = deadline;
-        
-        // Set hidden fields lainnya
+        // Set minimal hidden fields yang diperlukan
         document.getElementById('editDeskripsi').value = deskripsi;
-        document.getElementById('editHarga').value = harga;
-        document.getElementById('editProgres').value = progres;
-        document.getElementById('editStatus').value = status;
+        document.getElementById('editStatusKerjasama').value = statusKerjasama || 'aktif';
         
         // Set penanggung jawab dropdown (focus utama)
         const penanggungJawabSelect = document.getElementById('editPenanggungJawab');

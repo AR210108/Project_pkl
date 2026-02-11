@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Invoice;
+
 use App\Models\Project;
 use App\Models\User;
 use App\Models\Layanan;
+use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -139,6 +140,48 @@ class DataProjectController extends Controller
     }
 
     /**
+     * API: Get all projects for authenticated user
+     * Returns projects for manager divisi (their own projects) or all projects for admin
+     */
+    public function getAllProjects(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not authenticated'
+                ], 401);
+            }
+            
+            // If manager_divisi, only return their projects
+            if ($user->role === 'manager_divisi') {
+                $projects = Project::where('penanggung_jawab_id', $user->id)
+                    ->whereNull('deleted_at')
+                    ->orderBy('nama', 'asc')
+                    ->get();
+            } else {
+                // Otherwise return all projects
+                $projects = Project::whereNull('deleted_at')
+                    ->orderBy('nama', 'asc')
+                    ->get();
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => $projects
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in getAllProjects: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data project: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * API: Get Projects Dropdown untuk Manager Divisi
      */
     public function getManagerProjectsDropdown()
@@ -233,16 +276,16 @@ class DataProjectController extends Controller
         // Debug: log semua data yang diterima
         Log::info('All request data:', $request->all());
         
-        // Validasi untuk semua field yang dikirim dari form edit General Manager
+        // Validasi untuk update project (include tanggal fields)
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'tanggal_mulai_pengerjaan' => 'required|date',
-            'tanggal_selesai_pengerjaan' => 'nullable|date|after:tanggal_mulai_pengerjaan',
-            'tanggal_mulai_kerjasama' => 'nullable|date',
-            'tanggal_selesai_kerjasama' => 'nullable|date|after:tanggal_mulai_kerjasama',
-            // Hapus pengeditan langsung untuk progres dan status_pengerjaan dari admin update
             'status_kerjasama' => 'required|in:aktif,selesai,ditangguhkan',
+            'penanggung_jawab_id' => 'nullable|exists:users,id',
+            'tanggal_mulai_pengerjaan' => 'nullable|date',
+            'tanggal_selesai_pengerjaan' => 'nullable|date',
+            'tanggal_mulai_kerjasama' => 'nullable|date',
+            'tanggal_selesai_kerjasama' => 'nullable|date',
         ]);
 
         if ($validator->fails()) {
@@ -277,20 +320,29 @@ class DataProjectController extends Controller
             
             // Debug: log data sebelum update
             Log::info('Data before update:', [
-                'old_penanggung_jawab_id' => $project->penanggung_jawab_id,
-                'new_penanggung_jawab_id' => $request->penanggung_jawab_id
+                'old_data' => $project->toArray(),
+                'incoming' => $request->all()
             ]);
             
+            // Build update payload from allowed fields present in the edit form
             $updateData = [
                 'nama' => $request->nama,
                 'deskripsi' => $request->deskripsi,
-                'harga' => $request->harga,
-                'deadline' => $request->deadline,
-                'progres' => $request->progres,
-                'status' => $request->status,
+                'status_kerjasama' => $request->status_kerjasama,
                 'penanggung_jawab_id' => $request->penanggung_jawab_id ?: null,
+                'tanggal_mulai_pengerjaan' => $request->tanggal_mulai_pengerjaan ?: null,
+                'tanggal_selesai_pengerjaan' => $request->tanggal_selesai_pengerjaan ?: null,
+                'tanggal_mulai_kerjasama' => $request->tanggal_mulai_kerjasama ?: null,
+                'tanggal_selesai_kerjasama' => $request->tanggal_selesai_kerjasama ?: null,
             ];
-            
+
+            // Filter out null values if you prefer to keep existing values when fields are empty
+            foreach ($updateData as $key => $value) {
+                if ($value === null) {
+                    unset($updateData[$key]);
+                }
+            }
+
             Log::info('Updating project with data', $updateData);
             
             $project->update($updateData);
@@ -349,7 +401,9 @@ class DataProjectController extends Controller
 
         $validator = Validator::make($request->all(), [
             'progres' => 'required|integer|min:0|max:100',
-            'status' => 'required|string', 
+            'status' => 'required|string|in:pending,dalam_pengerjaan,selesai,dibatalkan',
+            'tanggal_mulai_pengerjaan' => 'nullable|date',
+            'tanggal_selesai_pengerjaan' => 'nullable|date|after_or_equal:tanggal_mulai_pengerjaan',
         ]);
 
         if ($validator->fails()) {
@@ -360,40 +414,40 @@ class DataProjectController extends Controller
             ], 422);
         }
         
-        $statusRaw = $request->status;
-        $statusMap = [
-            'pending' => 'Pending',
-            'proses'  => 'Proses',
-            'selesai' => 'Selesai'
-        ];
-        
-        $statusFinal = $statusMap[strtolower($statusRaw)] ?? ucfirst(strtolower($statusRaw));
-        
-        $allowedStatus = ['Pending', 'Proses', 'Selesai'];
-        if (!in_array($statusFinal, $allowedStatus)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Status tidak valid. Pilihan: Pending, Proses, Selesai'
-            ], 422);
-        }
-
+        $status = strtolower($request->status);
         $progres = (int) $request->progres;
         
+        // Auto-adjust status berdasarkan progres jika perlu
         if ($progres == 100) {
-            $statusFinal = 'Selesai';
-        } elseif ($progres > 0 && $statusFinal === 'Pending') {
-            $statusFinal = 'Proses';
+            $status = 'selesai';
+        } elseif ($progres > 0 && $status === 'pending') {
+            $status = 'dalam_pengerjaan';
         }
         
-        $project->update([
+        // Prepare update data
+        $updateData = [
             'progres' => $progres,
-            'status' => $statusFinal,
-        ]);
+            'status_pengerjaan' => $status,
+        ];
+        
+        // Add tanggal_mulai_pengerjaan if provided
+        if ($request->has('tanggal_mulai_pengerjaan') && $request->tanggal_mulai_pengerjaan) {
+            $updateData['tanggal_mulai_pengerjaan'] = $request->tanggal_mulai_pengerjaan;
+        }
+        
+        // Add tanggal_selesai_pengerjaan if provided
+        if ($request->has('tanggal_selesai_pengerjaan') && $request->tanggal_selesai_pengerjaan) {
+            $updateData['tanggal_selesai_pengerjaan'] = $request->tanggal_selesai_pengerjaan;
+        }
+        
+        $project->update($updateData);
 
         Log::info('Project updated by manager divisi', [
             'project_id' => $project->id,
             'new_progres' => $progres,
-            'new_status' => $statusFinal,
+            'new_status' => $status,
+            'tanggal_mulai' => $updateData['tanggal_mulai_pengerjaan'] ?? null,
+            'tanggal_selesai' => $updateData['tanggal_selesai_pengerjaan'] ?? null,
             'updated_by' => auth()->id()
         ]);
         
@@ -525,12 +579,14 @@ class DataProjectController extends Controller
             $updatedCount = 0;
             
             foreach ($projects as $project) {
-                $project->update([
-                    'nama' => $layanan->nama_layanan,
-                    'deskripsi' => $layanan->deskripsi,
-                    'harga' => $layanan->harga,
-                ]);
-                $updatedCount++;
+                if ($project instanceof Project) {
+                    $project->update([
+                        'nama' => $layanan->nama_layanan,
+                        'deskripsi' => $layanan->deskripsi,
+                        'harga' => $layanan->harga,
+                    ]);
+                    $updatedCount++;
+                }
             }
             
             return response()->json([

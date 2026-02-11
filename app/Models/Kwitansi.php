@@ -14,18 +14,27 @@ class Kwitansi extends Model
     protected $fillable = [
         'invoice_id',
         'kwitansi_no',
+        'invoice_no',
         'tanggal',
         'nama_perusahaan',
-        'nomor_order',
+        'company_address',
+        'kontak',
+        'order_number',
         'nama_klien',
+        'nama_layanan',
+        'payment_method',
         'deskripsi',
         'harga',
         'sub_total',
+        'tax',
         'fee_maintenance',
         'total',
         'status',
         'bank',
-        'no_rekening'
+        'jenis_bank',
+        'no_rekening',
+        'keterangan_tambahan',
+        'kategori_pemasukan'
     ];
 
     /**
@@ -33,10 +42,13 @@ class Kwitansi extends Model
      */
     protected $casts = [
         'tanggal' => 'date',
-        'harga' => 'decimal:2',      // Ubah dari integer ke decimal
-        'sub_total' => 'decimal:2',  // Ubah dari integer ke decimal  
-        'fee_maintenance' => 'decimal:2', // Ubah dari integer ke decimal
-        'total' => 'decimal:2'       // Ubah dari integer ke decimal
+        'harga' => 'decimal:2',      
+        'sub_total' => 'decimal:2',  
+        'tax' => 'integer',
+        'fee_maintenance' => 'decimal:2',
+        'total' => 'decimal:2',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
     /**
