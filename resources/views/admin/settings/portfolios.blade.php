@@ -903,6 +903,9 @@
                 const isEdit = portfolioIdInput.value !== '';
                 const formData = new FormData(this);
                 const url = isEdit ? `/admin/settings/portfolios/${portfolioIdInput.value}` : '/admin/settings/portfolios';
+                if (isEdit) {
+                    formData.append('_method', 'PUT');
+                }
 
                 fetch(url, {
                     method: 'POST',

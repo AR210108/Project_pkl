@@ -57,88 +57,13 @@
             background: transparent;
         }
 
-        ::webkit-scrollbar-thumb {
+        ::-webkit-scrollbar-thumb {
             background-color: #cbd5e1;
             border-radius: 20px;
         }
 
         .dark ::-webkit-scrollbar-thumb {
             background-color: #475569;
-        }
-
-        /* ANIMASI FADE UNTUK CARD */
-        .fade-card {
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.6s ease forwards;
-        }
-
-        /* Animasi untuk setiap card dengan delay berbeda */
-        .fade-card:nth-child(1) {
-            animation-delay: 0.1s;
-        }
-
-        .fade-card:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .fade-card:nth-child(3) {
-            animation-delay: 0.3s;
-        }
-
-        .fade-card:nth-child(4) {
-            animation-delay: 0.4s;
-        }
-
-        /* Keyframes untuk animasi fade-in */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Animasi fade-in untuk panel */
-        .fade-panel {
-            opacity: 0;
-            animation: fadeIn 0.8s ease forwards;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        /* Animasi untuk calendar dan notes */
-        .fade-in-slide {
-            opacity: 0;
-            transform: translateX(-20px);
-            animation: slideFadeIn 0.6s ease forwards;
-        }
-
-        .notes-container {
-            opacity: 0;
-            transform: translateX(20px);
-            animation: slideFadeIn 0.6s ease forwards 0.3s;
-        }
-
-        @keyframes slideFadeIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
         }
 
         .card {
@@ -193,6 +118,7 @@
             width: 100%;
             border-collapse: collapse;
             min-width: 500px;
+            /* Ensure table has minimum width for horizontal scroll */
         }
 
         .data-table th,
@@ -234,6 +160,7 @@
             border-bottom: 2px solid #e2e8f0;
             margin-bottom: 1.5rem;
             overflow-x: auto;
+            /* Allow horizontal scroll on mobile */
         }
 
         .tab-button {
@@ -283,7 +210,30 @@
             padding: 2rem;
         }
 
-        /* Calendar Styles */
+        .calendar-animate {
+            transition: transform 0.35s ease, opacity 0.35s ease;
+        }
+
+        .calendar-slide-left {
+            transform: translateX(-20px);
+            opacity: 0;
+        }
+
+        .calendar-slide-right {
+            transform: translateX(20px);
+            opacity: 0;
+        }
+
+        .event-animate {
+            transition: all 0.3s ease;
+        }
+
+        .event-hidden {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        /* Compact Calendar Styles */
         .calendar-container {
             background: white;
             border-radius: 0.5rem;
@@ -405,7 +355,7 @@
             background: #1e40af;
         }
 
-        /* Notes Container */
+        /* Compact Notes Container */
         .notes-container {
             background: white;
             border-radius: 0.5rem;
@@ -476,8 +426,11 @@
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
             max-width: 600px;
+            /* Hapus margin: 0 auto; */
             margin-left: 0;
+            /* Tambahkan ini untuk memastikan rata kiri */
             margin-right: auto;
+            /* Tambahkan ini untuk menjaga responsivitas */
         }
 
         /* Mobile responsive */
@@ -511,6 +464,7 @@
                 font-size: 1rem;
             }
 
+            /* Adjust graph for mobile */
             .graph-container {
                 height: 200px !important;
             }
@@ -523,6 +477,7 @@
                 font-size: 0.65rem !important;
             }
 
+            /* Adjust calendar for mobile */
             .calendar-date {
                 padding: 0.25rem !important;
             }
@@ -535,6 +490,7 @@
                 font-size: 0.8rem !important;
             }
 
+            /* Adjust table for mobile */
             .data-table th,
             .data-table td {
                 padding: 8px 12px;
@@ -546,6 +502,7 @@
                 font-size: 0.7rem;
             }
 
+            /* Fix for mobile cards - ensure proper 2 column layout */
             .stat-card {
                 display: flex !important;
                 flex-direction: column !important;
@@ -578,6 +535,7 @@
                 margin-top: 0.25rem !important;
             }
 
+            /* Stack calendar and notes on mobile */
             .calendar-notes-container {
                 grid-template-columns: 1fr !important;
                 max-width: 100% !important;
@@ -591,6 +549,8 @@
         }
 
         @media (max-width: 480px) {
+
+            /* Extra small mobile adjustments */
             .content-wrapper {
                 padding: 0.75rem;
             }
@@ -634,6 +594,7 @@
                 width: 1.5rem !important;
             }
 
+            /* Adjust grid spacing for very small screens */
             .gap-3 {
                 gap: 0.5rem !important;
             }
@@ -642,11 +603,13 @@
                 gap: 0.75rem !important;
             }
 
+            /* Adjust footer for mobile */
             footer {
                 padding: 0.75rem 1rem !important;
             }
         }
 
+        /* Fix for desktop cards to maintain horizontal layout */
         @media (min-width: 769px) {
             .stat-card {
                 display: flex !important;
@@ -663,8 +626,10 @@
             .stat-card .card-content {
                 flex: 1;
             }
+
         }
         
+        /* Card-based layout for tables on mobile */
         .mobile-table-cards {
             display: none;
         }
@@ -676,15 +641,7 @@
             margin-bottom: 1rem;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
             border: 1px solid #e2e8f0;
-            opacity: 0;
-            animation: fadeInUp 0.4s ease forwards;
         }
-        
-        .mobile-table-card:nth-child(1) { animation-delay: 0.1s; }
-        .mobile-table-card:nth-child(2) { animation-delay: 0.15s; }
-        .mobile-table-card:nth-child(3) { animation-delay: 0.2s; }
-        .mobile-table-card:nth-child(4) { animation-delay: 0.25s; }
-        .mobile-table-card:nth-child(5) { animation-delay: 0.3s; }
         
         .mobile-table-card-header {
             font-weight: 600;
@@ -729,13 +686,12 @@
 
         <main class="main-content bg-gray-50">
             <div class="content-wrapper max-w-7xl mx-auto space-y-8">
-                <header class="mb-8 fade-panel">
+                <header class="mb-8">
                     <h2 class="font-display text-3xl font-bold text-gray-800">Dashboard</h2>
                 </header>
-                
-                <!-- Stat Cards dengan animasi fade -->
+                <!-- Modified grid: 2 columns on mobile, 4 columns on desktop -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-                    <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card fade-card">
+                    <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card">
                         <div class="icon-container bg-blue-100">
                             <span class="material-symbols-rounded text-blue-600">groups</span>
                         </div>
@@ -746,7 +702,7 @@
                             </p>
                         </div>
                     </div>
-                    <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card fade-card">
+                    <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card">
                         <div class="icon-container bg-green-100">
                             <span class="material-symbols-rounded text-green-600">person_check</span>
                         </div>
@@ -757,7 +713,7 @@
                             </p>
                         </div>
                     </div>
-                    <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card fade-card">
+                    <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card">
                         <div class="icon-container bg-purple-100">
                             <span class="material-symbols-rounded text-purple-600">design_services</span>
                         </div>
@@ -768,7 +724,7 @@
                             </p>
                         </div>
                     </div>
-                    <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card fade-card">
+                    <div class="card bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md stat-card">
                         <div class="icon-container bg-yellow-100">
                             <span class="material-symbols-rounded text-yellow-600">handshake</span>
                         </div>
@@ -781,9 +737,10 @@
                     </div>
                 </div>
 
-                <!-- Calendar and Notes dengan animasi slide -->
+                <!-- Compact Calendar and Notes Side by Side -->
                 <div class="calendar-notes-container">
-                    <div class="calendar-container fade-in-slide">
+                    <!-- Compact Calendar -->
+                    <div class="calendar-container">
                         <div class="calendar-header">
                             <button class="calendar-nav-button" onclick="prevMonth()">
                                 <span class="material-symbols-rounded">chevron_left</span>
@@ -809,6 +766,7 @@
                         </div>
                     </div>
 
+                    <!-- Compact Notes -->
                     <div class="notes-container">
                         <div class="notes-header">
                             <h3>Catatan Meeting</h3>
@@ -819,8 +777,8 @@
                     </div>
                 </div>
 
-                <!-- Tab Navigation -->
-                <div class="tab-nav fade-panel">
+                <!-- Tab Navigation for Meeting Notes and Announcements -->
+                <div class="tab-nav">
                     <button id="meetingTab" class="tab-button active" onclick="switchTab('meeting')">
                         <span class="material-symbols-rounded align-middle mr-1 md:mr-2">description</span>
                         <span class="hidden sm:inline">Catatan Meeting</span>
@@ -833,8 +791,8 @@
                     </button>
                 </div>
 
-                <!-- Catatan Meeting Panel dengan animasi fade -->
-                <div id="meetingPanel" class="panel mb-8 fade-panel">
+                <!-- Catatan Meeting Panel -->
+                <div id="meetingPanel" class="panel mb-8">
                     <div class="panel-header">
                         <h3 class="panel-title">
                             <span class="material-symbols-rounded text-primary">description</span>
@@ -860,28 +818,35 @@
                                     <tbody>
                                         @if ($catatanRapat->count() > 0)
                                             @foreach ($catatanRapat as $rapat)
-                                                <tr class="fade-table-row" style="animation-delay: {{ $loop->index * 0.05 }}s;">
+                                                <tr>
                                                     <td class="font-medium">{{ $loop->iteration }}</td>
+
                                                     <td>
                                                         {{ \Carbon\Carbon::parse($rapat->tanggal)->translatedFormat('d F Y') }}
                                                     </td>
+
                                                     <td class="text-center">
                                                         @foreach ($rapat->peserta as $user)
                                                             <span class="block">{{ $user->name }}</span>
                                                         @endforeach
                                                     </td>
+
                                                     <td class="text-center">{{ $rapat->topik }}</td>
+
                                                     <td class="text-center">
                                                         {{ Str::limit($rapat->hasil_diskusi, 30) }}
                                                     </td>
+
                                                     <td class="text-center">
                                                         {{ Str::limit($rapat->keputusan, 30) }}
                                                     </td>
+
                                                     <td class="text-center">
                                                         @foreach ($rapat->penugasan as $user)
                                                             <span class="block">{{ $user->name }}</span>
                                                         @endforeach
                                                     </td>
+
                                                 </tr>
                                             @endforeach
                                         @else
@@ -945,8 +910,8 @@
                     </div>
                 </div>
 
-                <!-- Pengumuman Terbaru Panel dengan animasi fade -->
-                <div id="announcementPanel" class="panel mb-8 hidden fade-panel">
+                <!-- Pengumuman Terbaru Panel (Initially Hidden) -->
+                <div id="announcementPanel" class="panel mb-8 hidden">
                     <div class="panel-header">
                         <h3 class="panel-title">
                             <span class="material-symbols-rounded text-primary">campaign</span>
@@ -970,13 +935,15 @@
                                     <tbody>
                                         @if ($pengumumanTerbaru->count() > 0)
                                             @foreach ($pengumumanTerbaru as $item)
-                                                <tr class="fade-table-row" style="animation-delay: {{ $loop->index * 0.05 }}s;">
+                                                <tr>
                                                     <td class="font-medium">
                                                         {{ $loop->iteration }}
                                                     </td>
                                                     <td class="font-medium">
                                                         {{ $item->judul }}
                                                     </td>
+
+
                                                     <td>
                                                         {{ \Illuminate\Support\Str::limit($item->isi_pesan, 50) }}
                                                     </td>
@@ -992,6 +959,7 @@
                                                             {{ $item->users->take(2)->pluck('name')->join(', ') }}
                                                         @endif
                                                     </td>
+
                                                     <td class="text-center">
                                                         @if ($item->lampiran)
                                                             <a href="{{ asset('storage/' . $item->lampiran) }}"
@@ -1074,34 +1042,8 @@
         </main>
     </div>
     <script>
-        // Tambahkan animasi untuk row table
-        document.addEventListener('DOMContentLoaded', function() {
-            // Animasi untuk rows table
-            const tableRows = document.querySelectorAll('.fade-table-row');
-            tableRows.forEach((row, index) => {
-                row.style.animationDelay = `${index * 0.05}s`;
-                row.classList.add('fade-card');
-            });
-
-            // Fungsi untuk menampilkan animasi saat tab diganti
-            window.animateTabSwitch = function(tabName) {
-                const panel = document.getElementById(tabName + 'Panel');
-                panel.classList.remove('fade-panel');
-                void panel.offsetWidth; // Trigger reflow
-                panel.classList.add('fade-panel');
-                
-                // Animate mobile cards if visible
-                setTimeout(() => {
-                    const mobileCards = panel.querySelectorAll('.mobile-table-card');
-                    mobileCards.forEach((card, index) => {
-                        card.style.animationDelay = `${index * 0.05}s`;
-                        card.classList.add('fade-card');
-                    });
-                }, 100);
-            };
-        });
-
         // Simple dark mode toggle logic for demonstration (optional)
+        // Check system preference on load
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.documentElement.classList.add('dark');
         }
@@ -1124,13 +1066,9 @@
             if (tabName === 'meeting') {
                 meetingPanel.classList.remove('hidden');
                 meetingTab.classList.add('active');
-                // Trigger animation
-                animateTabSwitch('meeting');
             } else if (tabName === 'announcement') {
                 announcementPanel.classList.remove('hidden');
                 announcementTab.classList.add('active');
-                // Trigger animation
-                animateTabSwitch('announcement');
             }
         }
 
@@ -1177,18 +1115,6 @@
                 dayElement.className = 'calendar-day';
                 dayElement.textContent = day;
 
-                // Add fade animation to calendar days
-                setTimeout(() => {
-                    dayElement.style.opacity = '0';
-                    dayElement.style.transform = 'translateY(5px)';
-                    dayElement.style.transition = 'all 0.3s ease';
-                    
-                    setTimeout(() => {
-                        dayElement.style.opacity = '1';
-                        dayElement.style.transform = 'translateY(0)';
-                    }, 10);
-                }, day * 10);
-
                 // Check if this day is today
                 const currentDate = new Date();
                 if (currentYear === currentDate.getFullYear() &&
@@ -1228,13 +1154,9 @@
             notesContainer.innerHTML = '';
 
             if (events[dateStr]) {
-                events[dateStr].forEach((event, index) => {
+                events[dateStr].forEach(event => {
                     const noteItem = document.createElement('div');
                     noteItem.className = 'note-item';
-                    
-                    // Add fade animation
-                    noteItem.style.animationDelay = `${index * 0.1}s`;
-                    noteItem.classList.add('fade-card');
 
                     const noteDate = document.createElement('div');
                     noteDate.className = 'note-date';
@@ -1256,7 +1178,7 @@
                 });
             } else {
                 const noEvents = document.createElement('div');
-                noEvents.className = 'text-center text-gray-500 py-4 text-xs fade-card';
+                noEvents.className = 'text-center text-gray-500 py-4 text-xs';
                 noEvents.textContent = 'Tidak ada catatan pada tanggal ini';
                 notesContainer.appendChild(noEvents);
             }
@@ -1278,6 +1200,11 @@
                 currentYear++;
             }
             renderCalendar();
+        }
+
+        function addNote() {
+            // This would typically open a modal or form to add a new note
+            alert('Fitur tambah catatan akan segera tersedia');
         }
 
         // Initialize calendar

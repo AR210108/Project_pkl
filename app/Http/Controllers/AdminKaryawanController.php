@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Karyawan;
 use App\Models\User;
 use App\Models\Divisi;
+use App\Models\Tim;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -19,8 +20,8 @@ class AdminKaryawanController extends Controller
     public function index(Request $request)
     {
         try {
-            // Query users dengan relasi karyawan dan divisi (data user lebih lengkap)
-            $query = User::with(['karyawan', 'divisi'])
+            // Query users dengan relasi karyawan (dengan tim), divisi
+            $query = User::with(['karyawan.tim', 'divisi'])
                 ->where('role', '!=', 'admin')  // Exclude admin role jika perlu
                 ->where('role', '!=', 'owner');  // Exclude owner role
 
@@ -47,7 +48,7 @@ class AdminKaryawanController extends Controller
 
             $divisis = Divisi::orderBy('divisi', 'asc')->get();
 
-            return view('admin.data_karyawan', compact('karyawan', 'users', 'divisis'));
+            return view('hr.data_karyawan', compact('karyawan', 'users', 'divisis'));
 
         } catch (\Exception $e) {
             \Log::error('Index karyawan error:', ['error' => $e->getMessage()]);
@@ -58,8 +59,8 @@ class AdminKaryawanController extends Controller
 public function karyawanGeneral(Request $request)
 {
     try {
-        // Query dari users dengan relasi karyawan & divisi (lebih reliable)
-        $query = User::with(['karyawan', 'divisi'])
+        // Query dari users dengan relasi karyawan (dengan tim) & divisi (lebih reliable)
+        $query = User::with(['karyawan.tim', 'divisi'])
                     ->where('role', 'karyawan');
 
         \Log::info('Karyawan General - Query started');
@@ -176,44 +177,84 @@ public function karyawanDivisi(Request $request)
             abort(403, 'Unauthorized');
         }
 
-        $divisiManager = $user->divisi;
+        // Prefer using divisi_id for filtering (manager's division)
+        $divisiId = $user->divisi_id;
 
-        $query = Karyawan::query();
+        // Build a users query filtered by role and manager's divisi_id
+        $usersQueryMain = User::with(['karyawan', 'divisi'])
+            ->where('role', 'karyawan');
 
-        // Search filter untuk semua field baru
+        // Apply search on user fields if provided
         if ($request->has('search')) {
             $searchTerm = $request->get('search');
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('nama', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('role', 'LIKE', "%{$searchTerm}%")
+            $usersQueryMain->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'LIKE', "%{$searchTerm}%")
                     ->orWhere('email', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('divisi', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('role', 'LIKE', "%{$searchTerm}%")
                     ->orWhere('alamat', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('kontak', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('status_kerja', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('status_karyawan', 'LIKE', "%{$searchTerm}%");
+                    ->orWhere('kontak', 'LIKE', "%{$searchTerm}%");
             });
         }
 
-        // ORDER BY nama secara ascending
-        $karyawan = $query->orderBy('nama', 'asc')->get();
+        if ($divisiId) {
+            $usersQueryMain->where('divisi_id', $divisiId);
+        }
 
-        // Ambil users yang belum menjadi karyawan untuk modal (jika dibutuhkan)
-        $usersQuery = User::where('role', 'karyawan')
+        $usersList = $usersQueryMain->orderBy('name', 'asc')->get();
+
+        // Map users to the karyawan shape expected by the view
+        $karyawan = $usersList->map(function ($user) {
+            // Determine divisi name with multiple fallbacks
+            $divisiName = null;
+            if ($user->divisi && isset($user->divisi->divisi)) {
+                $divisiName = $user->divisi->divisi;
+            } elseif (!empty($user->divisi_id)) {
+                // Fallback: try to find Divisi by id (covers cases where relation wasn't hydrated)
+                $divModel = \App\Models\Divisi::find($user->divisi_id);
+                if ($divModel) $divisiName = $divModel->divisi;
+            }
+
+            return (object) [
+                'id' => $user->karyawan ? $user->karyawan->id : null,
+                'user_id' => $user->id,
+                'nama' => $user->name,
+                'nama_lengkap' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'divisi' => $divisiName,
+                'divisi_id' => $user->divisi_id,
+                'alamat' => $user->alamat,
+                'kontak' => $user->kontak,
+                'foto' => $user->foto,
+                'gaji' => $user->gaji,
+                'status_kerja' => $user->status_kerja,
+                'status_karyawan' => $user->status_karyawan,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        });
+
+        // Users for modal (only karyawan in same divisi and not already karyawan)
+        $usersForModal = User::where('role', 'karyawan')
             ->whereNotIn('id', function ($query) {
                 $query->select('user_id')
                     ->from('karyawan')
                     ->whereNotNull('user_id');
             });
 
-        if ($divisiManager) {
-            $usersQuery->where('divisi_id', $divisiManager->id);
+        if ($divisiId) {
+            $usersForModal->where('divisi_id', $divisiId);
         }
 
-        $users = $usersQuery->orderBy('name', 'asc')
+        $users = $usersForModal->orderBy('name', 'asc')
             ->get(['id', 'name', 'email', 'divisi_id']);
 
-        $namaDivisiManager = $divisiManager ? $divisiManager->divisi : 'Tidak ada divisi';
+        // Determine division name for the header
+        $namaDivisiManager = 'Tidak ada divisi';
+        if ($divisiId) {
+            $divModel = Divisi::find($divisiId);
+            if ($divModel) $namaDivisiManager = $divModel->divisi;
+        }
 
         return view('manager_divisi.daftar_karyawan', compact('karyawan', 'users', 'namaDivisiManager'));
 
@@ -228,6 +269,14 @@ public function karyawanDivisi(Request $request)
      */
 public function store(Request $request)
 {
+    // Log incoming store request for debugging (exclude password)
+    \Log::info('AdminKaryawanController@store called', [
+        'user_id' => optional(auth()->user())->id,
+        'user_role' => optional(auth()->user())->role,
+        'ip' => $request->ip(),
+        'input_keys' => array_keys($request->except(['password']))
+    ]);
+
     try {
         $userRole = auth()->user()->role;
         
@@ -238,10 +287,13 @@ public function store(Request $request)
             'password' => 'required|min:6',
             'role' => 'required|in:owner,admin,general_manager,manager_divisi,finance,karyawan',
             'divisi_id' => 'nullable|exists:divisi,id',
+            'tim_id' => 'nullable|exists:tim,id',
             'alamat' => 'required|string',
             'kontak' => 'required|string|max:20',
-            'status_kerja' => 'required|in:aktif,resign,phk',
+            'status_kerja' => 'required|in:aktif,resign,phk,nonaktif',
             'status_karyawan' => 'required|in:tetap,kontrak,freelance',
+            'kontrak_mulai' => 'nullable|date',
+            'kontrak_selesai' => 'nullable|date|after_or_equal:kontrak_mulai',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ];
 
@@ -272,6 +324,18 @@ public function store(Request $request)
             'sisa_cuti' => 12
         ]);
 
+        // 1b. Jika status karyawan adalah kontrak dan tanggal selesai sudah lewat, set status_kerja nonaktif
+        if (($validated['status_karyawan'] ?? null) === 'kontrak' && !empty($validated['kontrak_selesai'])) {
+            try {
+                if (\Carbon\Carbon::parse($validated['kontrak_selesai'])->isPast()) {
+                    $user->status_kerja = 'nonaktif';
+                    $user->save();
+                }
+            } catch (\Exception $e) {
+                // ignore parsing errors
+            }
+        }
+
         // 2. Simpan foto user jika ada
         if ($request->hasFile('foto')) {
             $path = $request->file('foto')->store('users', 'public');
@@ -279,8 +343,33 @@ public function store(Request $request)
             $user->save();
         }
 
+        // 2b. Simpan kontrak fields ke karyawan table
+        if ($user->karyawan && ($validated['kontrak_mulai'] || $validated['kontrak_selesai'])) {
+            $user->karyawan->update([
+                'kontrak_mulai' => $validated['kontrak_mulai'] ?? null,
+                'kontrak_selesai' => $validated['kontrak_selesai'] ?? null
+            ]);
+        }
+
         // 3. Load karyawan yang sudah dibuat otomatis oleh User boot() event
         $user->load('karyawan');
+
+        // Jika tim dipilih, simpan tim_id ke karyawan dan tambahkan 1 ke jumlah_anggota tim tersebut
+        if ($request->filled('tim_id')) {
+            try {
+                $timId = $request->input('tim_id');
+                // Simpan tim_id ke karyawan
+                $user->karyawan->update(['tim_id' => $timId]);
+                
+                // Increment tim member count
+                $tim = Tim::find($timId);
+                if ($tim) {
+                    $tim->increment('jumlah_anggota');
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Gagal menambah jumlah anggota tim', ['tim_id' => $request->input('tim_id'), 'error' => $e->getMessage()]);
+            }
+        }
 
         DB::commit();
 
@@ -343,8 +432,10 @@ public function update(Request $request, $id)
             'divisi_id' => 'nullable|exists:divisi,id',
             'alamat' => 'required|string',
             'kontak' => 'required|string|max:20',
-            'status_kerja' => 'required|in:aktif,resign,phk',
+            'status_kerja' => 'required|in:aktif,resign,phk,nonaktif',
             'status_karyawan' => 'required|in:tetap,kontrak,freelance',
+            'kontrak_mulai' => 'nullable|date',
+            'kontrak_selesai' => 'nullable|date|after_or_equal:kontrak_mulai',
             'password' => 'nullable|min:6',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ];
@@ -376,6 +467,17 @@ public function update(Request $request, $id)
             $user->gaji = $validated['gaji'] ?? $user->gaji;
         }
 
+        // Check if status is kontrak and kontrak_selesai is in the past
+        if ($validated['status_karyawan'] === 'kontrak' && !empty($validated['kontrak_selesai'])) {
+            try {
+                if (\Carbon\Carbon::parse($validated['kontrak_selesai'])->isPast()) {
+                    $user->status_kerja = 'nonaktif';
+                }
+            } catch (\Exception $e) {
+                // ignore parsing errors
+            }
+        }
+
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
         }
@@ -390,6 +492,14 @@ public function update(Request $request, $id)
         }
 
         $user->save();  // Boot event updated() akan trigger sinkronisasi ke karyawan
+
+        // Update kontrak fields ke karyawan table
+        if ($user->karyawan) {
+            $user->karyawan->update([
+                'kontrak_mulai' => $validated['kontrak_mulai'] ?? $user->karyawan->kontrak_mulai,
+                'kontrak_selesai' => $validated['kontrak_selesai'] ?? $user->karyawan->kontrak_selesai
+            ]);
+        }
 
         DB::commit();
 
@@ -514,7 +624,8 @@ public function update(Request $request, $id)
             }
             
             // Cari dari User table dengan relasi karyawan (data user lebih lengkap)
-            $user = User::with('karyawan', 'divisi')->find($id);
+            // Pastikan juga memuat relasi tim untuk karyawan agar tim_id tersedia
+            $user = User::with(['karyawan.tim', 'divisi'])->find($id);
             
             if (!$user) {
                 \Log::warning('User not found for get data', ['id' => $id]);
@@ -537,9 +648,15 @@ public function update(Request $request, $id)
                 'kontak' => $user->kontak,
                 'status_kerja' => $user->status_kerja,
                 'status_karyawan' => $user->status_karyawan,
+                'kontrak_mulai' => $user->karyawan ? $user->karyawan->kontrak_mulai : null,
+                'kontrak_selesai' => $user->karyawan ? $user->karyawan->kontrak_selesai : null,
                 'sisa_cuti' => $user->sisa_cuti,
                 'foto' => $user->foto ? asset('storage/' . $user->foto) : null,
                 'karyawan_id' => $user->karyawan ? $user->karyawan->id : null
+                ,
+                // Tim info (agar modal edit dapat men-set pilihan Tim)
+                'tim_id' => $user->karyawan ? ($user->karyawan->tim_id ?? null) : null,
+                'tim_name' => $user->karyawan && $user->karyawan->tim ? $user->karyawan->tim->tim : null,
             ];
 
             return response()->json([

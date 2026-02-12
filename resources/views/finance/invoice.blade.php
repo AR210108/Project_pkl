@@ -1561,7 +1561,7 @@ async function loadDataPerusahaan() {
     try {
         console.log('Memuat data perusahaan dari endpoint...');
 
-        const response = await fetch('/api/perusahaan/finance', {
+        const response = await fetch('/finance/api/perusahaan', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',

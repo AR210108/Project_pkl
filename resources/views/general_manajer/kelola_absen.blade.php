@@ -1094,7 +1094,11 @@
                 }
 
                 try {
-                    const response = await fetch(`/api/admin/absensi/${id}/verify`, {
+                    const endpoint = status === 'approved'
+                        ? `/general_manajer/absensi/${id}/approve`
+                        : `/general_manajer/absensi/${id}/reject`;
+
+                    const response = await fetch(endpoint, {
                         method: 'POST',
                         headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), 'Accept': 'application/json' },
                         body: formData

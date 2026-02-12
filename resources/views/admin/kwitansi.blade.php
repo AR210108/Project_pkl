@@ -1138,9 +1138,11 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Status Pembayaran</label>
-                                <input type="text" id="statusPembayaran" name="status_display"
-                                    class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-600 cursor-not-allowed"
-                                    readonly>
+                                <select id="statusPembayaran" name="status"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <option value="Pembayaran Awal">Down Payment</option>
+                                    <option value="Lunas">Lunas</option>
+                                </select>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
@@ -1175,7 +1177,6 @@
                     <!-- Hidden fields for numeric values -->
                     <input type="hidden" id="totalHidden" name="total">
                     <input type="hidden" id="subTotalHidden" name="sub_total">
-                    <input type="hidden" id="statusHidden" name="status" value="Pembayaran Awal">
 
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" id="cancelBtn"
@@ -1234,7 +1235,7 @@
                             class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                             required>
                             <option value="">Pilih Status</option>
-                            <option value="Pembayaran Awal">Pembayaran Awal</option>
+                            <option value="Pembayaran Awal">Down Payment</option>
                             <option value="Lunas">Lunas</option>
                         </select>
                     </div>
@@ -1283,23 +1284,19 @@
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h3>
-                    <button id="closeDeleteModalBtn" class="text-gray-800 hover:text-gray-500">
+                    <button type="button" class="text-gray-800 hover:text-gray-500 btn-close-delete-modal">
                         <span class="material-icons-outlined">close</span>
                     </button>
                 </div>
-                <form id="deleteKwitansiForm" class="space-y-4">
-                    <div class="mb-6">
-                        <p class="text-gray-700 mb-2">Apakah Anda yakin ingin menghapus kwitansi untuk <span
-                        <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
-                        <input type="hidden" id="deleteKwitansiId" name="id">
-                    </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" id="cancelDeleteBtn"
-                            class="px-4 py-2 btn-secondary rounded-lg">Batal</button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Hapus</button>
-                    </div>
-                </form>
+                <div class="mb-6">
+                    <p class="text-gray-700 mb-2 delete-message">Apakah Anda yakin ingin menghapus kwitansi untuk <span id="deleteKwitansiNama" class="font-semibold">?</span>?</p>
+                    <p class="text-sm text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
+                    <input type="hidden" id="deleteKwitansiId" name="id">
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" class="btn-secondary btn-cancel-delete-modal">Batal</button>
+                    <button type="button" class="btn-primary btn-delete-confirm">Hapus</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1390,7 +1387,7 @@
             if (kwitansi.status === 'Lunas') {
                 statusBadge = '<span class="status-badge-print status-lunas">Lunas</span>';
             } else {
-                statusBadge = '<span class="status-badge-print status-pembayaran-awal">Pembayaran Awal</span>';
+                statusBadge = '<span class="status-badge-print status-pembayaran-awal">Down Payment</span>';
             }
 
             // Create print HTML
@@ -1537,20 +1534,29 @@
         // Add print functionality
         function setupPrintFunctionality() {
             // Print button in modal
-            document.getElementById('printBtn').addEventListener('click', function() {
-                window.print();
-            });
+            const printBtn = document.getElementById('printBtn');
+            if (printBtn) {
+                printBtn.addEventListener('click', function() {
+                    window.print();
+                });
+            }
 
-            // Close print modal buttons
-            document.getElementById('closeCetakModalBtn').addEventListener('click', closePrintModal);
-            document.getElementById('cancelCetakBtn').addEventListener('click', closePrintModal);
+            // Close print modal buttons (guarded)
+            const closeCetakModalBtn = document.getElementById('closeCetakModalBtn');
+            if (closeCetakModalBtn) closeCetakModalBtn.addEventListener('click', closePrintModal);
+
+            const cancelCetakBtn = document.getElementById('cancelCetakBtn');
+            if (cancelCetakBtn) cancelCetakBtn.addEventListener('click', closePrintModal);
 
             // Close modal when clicking outside
-            document.getElementById('cetakKwitansiModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closePrintModal();
-                }
-            });
+            const cetakModalEl = document.getElementById('cetakKwitansiModal');
+            if (cetakModalEl) {
+                cetakModalEl.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closePrintModal();
+                    }
+                });
+            }
         }
 
         // Initialize print functionality
@@ -1602,23 +1608,26 @@
 
             // Event listener for filter button
             const filterBtn = document.getElementById('filterBtn');
+            const filterDropdown = document.getElementById('filterDropdown');
             if (filterBtn) {
                 filterBtn.addEventListener('click', function() {
-                    document.getElementById('filterDropdown').classList.toggle('show');
+                    if (filterDropdown) filterDropdown.classList.toggle('show');
                 });
             }
 
             // Close filter dropdown when clicking outside
             document.addEventListener('click', function(event) {
                 if (!event.target.closest('#filterDropdown') && !event.target.closest('#filterBtn')) {
-                    document.getElementById('filterDropdown').classList.remove('show');
+                    if (filterDropdown) filterDropdown.classList.remove('show');
                 }
             });
 
             // Prevent dropdown from closing when clicking inside
-            document.getElementById('filterDropdown').addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
+            if (filterDropdown) {
+                filterDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
 
             // Event listener for Buat Kwitansi button
             const buatKwitansiBtn = document.getElementById('buatKwitansiBtn');
@@ -1629,24 +1638,33 @@
                 });
             }
 
-            // Close modal when clicking outside
-            document.getElementById('buatKwitansiModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeBuatKwitansiModal();
-                }
-            });
+            // Close modal when clicking outside (guarded)
+            const buatModalEl = document.getElementById('buatKwitansiModal');
+            if (buatModalEl) {
+                buatModalEl.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeBuatKwitansiModal();
+                    }
+                });
+            }
 
-            document.getElementById('editKwitansiModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeEditKwitansiModal();
-                }
-            });
+            const editModalEl = document.getElementById('editKwitansiModal');
+            if (editModalEl) {
+                editModalEl.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeEditKwitansiModal();
+                    }
+                });
+            }
 
-            document.getElementById('deleteKwitansiModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeDeleteKwitansiModal();
-                }
-            });
+            const deleteModalEl = document.getElementById('deleteKwitansiModal');
+            if (deleteModalEl) {
+                deleteModalEl.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeDeleteKwitansiModal();
+                    }
+                });
+            }
             document.querySelectorAll('.cetak-kwitansi-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id = this.getAttribute('data-id');
@@ -1670,34 +1688,59 @@
             });
 
             // Close popup when clicking the close button
-            document.querySelector('.minimal-popup-close').addEventListener('click', function() {
-                document.getElementById('minimalPopup').classList.remove('show');
-            });
+            const minimalCloseBtn = document.querySelector('.minimal-popup-close');
+            if (minimalCloseBtn) {
+                minimalCloseBtn.addEventListener('click', function() {
+                    const mp = document.getElementById('minimalPopup');
+                    if (mp) mp.classList.remove('show');
+                });
+            }
 
-            // Modal close buttons
-            document.getElementById('closeModalBtn').addEventListener('click', closeBuatKwitansiModal);
-            document.getElementById('cancelBtn').addEventListener('click', closeBuatKwitansiModal);
-            document.getElementById('closeEditModalBtn').addEventListener('click', closeEditKwitansiModal);
-            document.getElementById('cancelEditBtn').addEventListener('click', closeEditKwitansiModal);
-            document.getElementById('closeDeleteModalBtn').addEventListener('click', closeDeleteKwitansiModal);
-            document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteKwitansiModal);
+            // Modal close buttons (guarded)
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            if (closeModalBtn) closeModalBtn.addEventListener('click', closeBuatKwitansiModal);
 
-            // Form submissions
-            document.getElementById('buatKwitansiForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                submitBuatKwitansi();
-            });
+            const cancelBtn = document.getElementById('cancelBtn');
+            if (cancelBtn) cancelBtn.addEventListener('click', closeBuatKwitansiModal);
 
-            document.getElementById('editKwitansiForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                submitEditKwitansi();
-            });
+            const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+            if (closeEditModalBtn) closeEditModalBtn.addEventListener('click', closeEditKwitansiModal);
 
-            document.getElementById('deleteKwitansiForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const id = document.getElementById('deleteKwitansiId').value;
-                deleteKwitansi(id);
-            });
+            const cancelEditBtn = document.getElementById('cancelEditBtn');
+            if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeEditKwitansiModal);
+
+            // Delete modal close/cancel may be using class selectors (added earlier)
+            const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn') || document.querySelector('.btn-close-delete-modal');
+            if (closeDeleteModalBtn) closeDeleteModalBtn.addEventListener('click', closeDeleteKwitansiModal);
+
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn') || document.querySelector('.btn-cancel-delete-modal');
+            if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', closeDeleteKwitansiModal);
+
+            // Form submissions (guarded)
+            const buatForm = document.getElementById('buatKwitansiForm');
+            if (buatForm) {
+                buatForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    submitBuatKwitansi();
+                });
+            }
+
+            const editForm = document.getElementById('editKwitansiForm');
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    submitEditKwitansi();
+                });
+            }
+
+            const deleteForm = document.getElementById('deleteKwitansiForm');
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const id = document.getElementById('deleteKwitansiId') ? document.getElementById('deleteKwitansiId').value : null;
+                    if (id) deleteKwitansi(id);
+                });
+            }
 
             // Initialize filter
             initializeFilter();
@@ -1905,139 +1948,6 @@
                 });
         }
 
-        // Event listener untuk pilih invoice
-        const pilihInvoice2 = document.getElementById('pilihInvoice');
-        if (pilihInvoice2) {
-            pilihInvoice2.addEventListener('change', function() {
-                const invoiceId = this.value;
-                if (invoiceId) {
-                    console.log('Fetching invoice details for ID:', invoiceId);
-                    
-                    // Tampilkan loading
-                    const namaPerusahaanField = document.getElementById('namaPerusahaan');
-                    const originalValue = namaPerusahaanField.value;
-                    namaPerusahaanField.value = 'Memuat data...';
-
-                    // Fetch invoice details dari API admin
-                    fetch(`/admin/api/invoice-for-kwitansi/${invoiceId}`, {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                    'content'),
-                                'Accept': 'application/json'
-                            },
-                            credentials: 'same-origin'
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`Server error: ${response.status} ${response.statusText}`);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            console.log('Invoice detail received:', data);
-
-                            if (data.success && data.data) {
-                                // Helper untuk set value dengan logging
-                                const setValue = (id, value) => {
-                                    const elem = document.getElementById(id);
-                                    if (elem) {
-                                        elem.value = value || '';
-                                        console.log(`✓ Set ${id}:`, value);
-                                    } else {
-                                        console.warn(`✗ Element not found: ${id}`);
-                                    }
-                                };
-
-                                // Populate form dengan data invoice
-                                setValue('namaPerusahaan', data.data.company_name);
-                                setValue('kontakPerusahaan', data.data.kontak);
-                                setValue('namaKlien', data.data.client_name);
-                                setValue('alamatPerusahaan', data.data.company_address);
-                                setValue('namaLayanan', data.data.nama_layanan);
-                                setValue('invoiceNo', data.data.invoice_no);
-                                setValue('metodePembayaran', data.data.payment_method);
-
-                                // Calculate values
-                                const subtotal = parseFloat(data.data.subtotal) || 0;
-                                const tax = parseFloat(data.data.tax) || 0;
-                                const feeMaintenance = parseFloat(data.data.fee_maintenance) || 0;
-                                const total = subtotal + tax + feeMaintenance;
-
-                                console.log('Calculated totals:', {
-                                    subtotal,
-                                    tax,
-                                    feeMaintenance,
-                                    total
-                                });
-
-                                // Deskripsi: gabungkan description dan nama_layanan
-                                let deskripsi = '';
-                                if (data.data.description) deskripsi += data.data.description;
-                                if (data.data.nama_layanan) {
-                                    if (deskripsi) deskripsi += ' - ';
-                                    deskripsi += data.data.nama_layanan;
-                                }
-                                setValue('deskripsi', deskripsi);
-
-                                // Data harga
-                                setValue('hargaLayanan', subtotal);
-                                setValue('harga', subtotal);
-                                setValue('pajak', tax);
-                                setValue('feeMaintenance', feeMaintenance);
-                                setValue('totalHidden', total);
-                                setValue('subTotalHidden', subtotal);
-
-                                // Payment info
-                                setValue('jenisBank', data.data.jenis_bank);
-                                setValue('kategoriPemasukan', data.data.kategori_pemasukan);
-                                setValue('keteranganTambahan', data.data.keterangan_tambahan);
-
-                                // Display total in formatted rupiah
-                                setValue('total', formatToRupiah(total));
-
-                                // Set status display dan hidden value
-                                const statusDisplay = document.getElementById('statusPembayaran');
-                                const statusHidden = document.getElementById('statusHidden');
-                                if (data.data.status_pembayaran === 'lunas') {
-                                    if(statusDisplay) statusDisplay.value = 'Lunas';
-                                    if(statusHidden) statusHidden.value = 'Lunas';
-                                } else {
-                                    if(statusDisplay) statusDisplay.value = 'Pembayaran Awal';
-                                    if(statusHidden) statusHidden.value = 'Pembayaran Awal';
-                                }
-
-                                console.log('Form population completed successfully');
-                                showMinimalPopup('Berhasil', 'Data invoice berhasil dimuat', 'success');
-                            } else {
-                                namaPerusahaanField.value = originalValue;
-                                console.error('API Error:', data.message);
-                                showMinimalPopup('Error', data.message || 'Gagal mengambil data invoice',
-                                    'error');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error fetching invoice details:', error);
-                            namaPerusahaanField.value = originalValue;
-                            showMinimalPopup('Error', 'Terjadi kesalahan saat mengambil data invoice: ' + error
-                                .message, 'error');
-                        });
-                } else {
-                    // Kosongkan form jika tidak ada invoice yang dipilih
-                    document.getElementById('namaPerusahaan').value = '';
-                    document.getElementById('hargaLayanan').value = '';
-                    document.getElementById('namaKlien').value = '';
-                    document.getElementById('deskripsi').value = '';
-                    document.getElementById('harga').value = '';
-                    document.getElementById('pajak').value = '';
-                    document.getElementById('feeMaintenance').value = '';
-                    document.getElementById('total').value = '';
-                    document.getElementById('statusPembayaran').value = '';
-                }
-            });
-        }
-
         // Load kwitansi data from database
         function loadKwitansiData() {
             const loadingRow = document.getElementById('loadingRow');
@@ -2125,7 +2035,7 @@
                                 statusBadge = '<span class="status-badge status-paid">Lunas</span>';
                             } else if (kwitansi.status === 'Pembayaran Awal') {
                                 statusBadge =
-                                    '<span class="status-badge status-pending">Pembayaran Awal</span>';
+                                    '<span class="status-badge status-pending">Down Payment</span>';
                             } else {
                                 statusBadge = '<span class="status-badge status-unpaid">Unpaid</span>';
                             }
@@ -2177,7 +2087,7 @@
                                     </button>
                                     <button class="delete-kwitansi-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
                                         data-id="${kwitansi.id}"
-                                        data-nama-perusahaan="${kwitansi.nama_perusahaan}"
+                                        data-nama-perusahaan="${kwitansi.nama_perusahaan}">
                                         <span class="material-icons-outlined">delete</span>
                                     </button>
                                 </div>
@@ -2204,7 +2114,7 @@
                                     '<span class="status-badge status-paid text-xs">Lunas</span>';
                             } else if (kwitansi.status === 'Pembayaran Awal') {
                                 mobileStatusBadge =
-                                    '<span class="status-badge status-pending text-xs">Pembayaran Awal</span>';
+                                    '<span class="status-badge status-pending text-xs">Down Payment</span>';
                             } else {
                                 mobileStatusBadge =
                                     '<span class="status-badge status-unpaid text-xs">Unpaid</span>';
@@ -2245,7 +2155,7 @@
                                     </button>
                                     <button class="delete-kwitansi-btn p-1 rounded-full hover:bg-red-500/20 text-gray-700" 
                                         data-id="${kwitansi.id}"
-                                        data-nama-perusahaan="${kwitansi.nama_perusahaan}"
+                                        data-nama-perusahaan="${kwitansi.nama_perusahaan}">
                                         <span class="material-icons-outlined">delete</span>
                                     </button>
                                 </div>
@@ -2309,7 +2219,7 @@
                         document.querySelectorAll('.cetak-kwitansi-btn').forEach(btn => {
                             btn.addEventListener('click', function() {
                                 const id = this.getAttribute('data-id');
-                                openPrintModal(id); // Langsung buka modal cetak
+                                openPrintModal(id); // Langsung buka modal
                             });
                         });
 
@@ -2319,13 +2229,12 @@
                                 const id = this.getAttribute('data-id');
                                 const namaPerusahaan = this.getAttribute('data-nama-perusahaan');
 
-                                document.getElementById('deleteKwitansiId').value = id;
-                                document.getElementById('deleteKwitansiNama').textContent =
-                                    namaPerusahaan;
+                                // Use unified opener to wire confirm button
+                                openDeleteKwitansiModal(id);
 
-                                document.getElementById('deleteKwitansiModal').classList.remove(
-                                    'hidden');
-                                document.body.style.overflow = 'hidden';
+                                // Also set displayed name if available
+                                const nameEl = document.getElementById('deleteKwitansiNama');
+                                if (nameEl) nameEl.textContent = namaPerusahaan || '?';
                             });
                         });
 
@@ -2544,8 +2453,7 @@
             document.getElementById('invoiceNo').value = '';
             // clear moved payment method field
             document.getElementById('metodePembayaran').value = '';
-            document.getElementById('statusPembayaran').value = '';
-            document.getElementById('statusHidden').value = 'Pembayaran Awal';
+            document.getElementById('statusPembayaran').value = 'Pembayaran Awal';
             document.getElementById('harga').value = '';
             document.getElementById('pajak').value = '';
             document.getElementById('feeMaintenance').value = '';
@@ -2568,9 +2476,38 @@
         }
 
         // Modal functions for Delete Kwitansi
+        function openDeleteKwitansiModal(id) {
+            const modal = document.getElementById('deleteKwitansiModal');
+            if (!modal) return;
+
+            const confirmBtn = modal.querySelector('.btn-delete-confirm');
+            const message = modal.querySelector('.delete-message');
+            const inputId = modal.querySelector('#deleteKwitansiId');
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+
+            if (confirmBtn) {
+                confirmBtn.onclick = function() {
+                    deleteKwitansi(id);
+                };
+            }
+            if (message) {
+                message.textContent = 'Apakah Anda yakin ingin menghapus kwitansi ini?';
+            }
+            if (inputId) {
+                inputId.value = id;
+            }
+        }
+
         function closeDeleteKwitansiModal() {
-            document.getElementById('deleteKwitansiModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
+            const modal = document.getElementById('deleteKwitansiModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.style.overflow = 'auto';
+            }
         }
 
         // Function to calculate total in create form

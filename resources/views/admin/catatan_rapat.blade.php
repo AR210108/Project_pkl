@@ -61,6 +61,31 @@
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
         
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Table styles */
+        .order-table {
+            transition: all 0.2s ease;
+        }
+        
+        .order-table tr:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        
+        /* Button styles */
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        
         .btn-secondary {
             background-color: #f1f5f9;
             color: #64748b;
@@ -69,7 +94,7 @@
         
         .btn-secondary:hover {
             background-color: #e2e8f0;
-        
+        }
         
         /* Action button styles - Perbesar dan warna abu-abu */
         .action-btn {
@@ -1983,7 +2008,6 @@ function loadCatatanRapatData() {
                     });
                 }
             });
-
             // Handle other checkboxes
             document.querySelectorAll('.filter-option input[type="checkbox"]:not(#filterAll)').forEach(cb => {
                 cb.addEventListener('change', function() {

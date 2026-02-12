@@ -166,7 +166,8 @@ class KwitansiController extends Controller
             // Validasi input awal - hanya tanggal dan invoice_id yang required
             $validated = $request->validate([
                 'invoice_id' => 'required|exists:invoices,id',
-                'tanggal' => 'required|date'
+                'tanggal' => 'required|date',
+                'status' => 'nullable|in:Pembayaran Awal,Lunas'
             ]);
 
             // Ambil data invoice
@@ -186,6 +187,8 @@ class KwitansiController extends Controller
             $kwitansiNo = "KW-$year-$nextNumber";
 
             // Populate kwitansi data dari invoice
+            $status = $request->input('status', 'Pembayaran Awal');
+
             $kwitansiData = [
                 'kwitansi_no' => $kwitansiNo,
                 'invoice_id' => $invoice->id,
@@ -212,8 +215,8 @@ class KwitansiController extends Controller
                 'fee_maintenance' => $invoice->fee_maintenance ?? 0,
                 'total' => $invoice->total ?? 0,
                 
-                // Status pembayaran dari invoice - default ke Pembayaran Awal
-                'status' => 'Pembayaran Awal',
+                // Status pembayaran dari form (default: Pembayaran Awal)
+                'status' => $status,
                 
                 // Data bank - gunakan jenis_bank dari invoice atau default
                 'bank' => $invoice->jenis_bank ?? 'BCA',
@@ -239,7 +242,7 @@ class KwitansiController extends Controller
             ]);
 
             // Update invoice status if needed (jika kwitansi dibuat dengan status Lunas)
-            if ($request->status === 'Lunas') {
+            if ($status === 'Lunas') {
                 $invoice->status_pembayaran = 'lunas';
                 $invoice->save();
             }

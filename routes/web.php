@@ -1,3 +1,4 @@
+
 <?php
 
 use App\Http\Controllers\CashflowController;
@@ -68,6 +69,7 @@ Route::prefix('api')->name('api.public.')->group(function () {
     Route::get('/articles', [SettingController::class, 'getArticlesData'])->name('articles');
     Route::get('/portfolios', [SettingController::class, 'getPortfoliosData'])->name('portfolios');
     Route::get('/layanan', [LayananController::class, 'index'])->name('layanan.public');
+    Route::get('/operational-hours', [SettingController::class, 'getOperationalHours'])->name('operational.hours');
 
     // Test API untuk finance (temporary)
     Route::get('/finance/layanan-test', function () {
@@ -81,9 +83,6 @@ Route::prefix('api')->name('api.public.')->group(function () {
             'message' => 'Data dummy untuk testing finance layanan'
         ]);
     })->name('api.finance.layanan.test');
-
-    // DEBUG: Public endpoint to inspect owner dashboard stats (no auth)
-    Route::get('/owner-dashboard-stats', [\App\Http\Controllers\OwnerController::class, 'getDashboardStats'])->name('api.debug.owner.dashboard');
 });
 
 // Auth routes
@@ -152,15 +151,13 @@ Route::middleware('auth')->group(function () {
     // Pengumuman & Catatan Rapat (Global)
     Route::resource('pengumuman', PengumumanController::class);
 
-    // Catatan Rapat Routes (Authenticated)
-    Route::prefix('catatan-rapat')->name('catatan_rapat.')->group(function () {
+Route::prefix('catatan-rapat')->name('catatan_rapat.')->group(function () {
         Route::get('/', [CatatanRapatController::class, 'index'])->name('index');
         Route::post('/', [CatatanRapatController::class, 'store'])->name('store');
-        // Data route HARUS SEBELUM /{id} agar tidak ter-match sebagai ID
         Route::get('/data', [CatatanRapatController::class, 'getData'])->name('data');
-        Route::get('/{id}', [CatatanRapatController::class, 'show'])->name('show');
-        Route::put('/{id}', [CatatanRapatController::class, 'update'])->name('update');
-        Route::delete('/{id}', [CatatanRapatController::class, 'destroy'])->name('destroy');
+        Route::put('/{id}', [CatatanRapatController::class, 'update'])->name('update')->whereNumber('id');
+        Route::delete('/{id}', [CatatanRapatController::class, 'destroy'])->name('destroy')->whereNumber('id');
+        Route::get('/{id}', [CatatanRapatController::class, 'show'])->name('show')->whereNumber('id');
     });
 
     // =========== GLOBAL API ROUTES ===========
@@ -236,11 +233,10 @@ Route::middleware('auth')->group(function () {
         // Owner API
         Route::prefix('owner')->middleware(['role:owner'])->name('owner.')->group(function () {
             Route::get('/data', [OwnerController::class, 'getData'])->name('data');
-            // Additional owner APIs
-            Route::get('/attendance-percentage', [OwnerController::class, 'getAttendancePercentage']);
-            Route::get('/attendance-by-division', [OwnerController::class, 'getAttendanceByDivision']);
-            Route::get('/service-count', [OwnerController::class, 'getServiceCount']);
-            Route::get('/dashboard-stats', [OwnerController::class, 'getDashboardStats']);
+            Route::get('/service-count', [OwnerController::class, 'getServiceCount'])->name('service.count');
+            Route::get('/attendance-percentage', [OwnerController::class, 'getAttendancePercentage'])->name('attendance.percentage');
+            Route::get('/attendance-by-division', [OwnerController::class, 'getAttendanceByDivision'])->name('attendance.by-division');
+            Route::get('/dashboard-stats', [OwnerController::class, 'getDashboardStats'])->name('dashboard.stats');
             // Owner Specific APIs for Meeting/Announcements
             Route::get('/meeting-notes-dates', [CatatanRapatController::class, 'getMeetingNotesDatesForOwner']);
             Route::get('/meeting-notes', [CatatanRapatController::class, 'getMeetingNotesByDateForOwner']);
@@ -283,8 +279,8 @@ Route::middleware('auth')->group(function () {
         Route::prefix('finance')->middleware(['role:finance'])->name('finance.')->group(function () {
             Route::get('/layanan', [LayananController::class, 'financeApi'])->name('layanan.api');
             Route::get('/invoices', [InvoiceController::class, 'getFinanceInvoices'])->name('invoices.api');
-            // Allow finance UI to create kwitansi via POST /finance/kwitansi
-            Route::post('/kwitansi', [KwitansiController::class, 'store'])->name('kwitansi.store');
+            // Kwitansi print data (used by finance kwitansi blade JS)
+            Route::get('/kwitansi/{id}/cetak-data', [KwitansiController::class, 'getKwitansiForPrint'])->name('kwitansi.cetak.data');
         });
 
         // ============== PERBAIKAN: Tambahkan Kwitansi API Routes di sini ==============
@@ -325,7 +321,7 @@ Route::middleware(['auth', 'role:admin'])
 
         // API untuk data
         Route::get('/catatan_rapat/data', [CatatanRapatController::class, 'getData'])->name('catatan_rapat.data');
-        Route::get('/users/data', [UserController::class, 'getData'])->name('users.data');
+        Route::get('/users/data', [UserController::class, 'getData']);
 
         // USER MANAGEMENT
         Route::get('/user', [UserController::class, 'index'])->name('user');
@@ -452,15 +448,6 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/invoice/perusahaan-data', [InvoiceController::class, 'getPerusahaanData'])
             ->name('invoice.perusahaan.data');
 
-        // API ENDPOINTS UNTUK ADMIN INVOICES & KWITANSI
-        Route::prefix('api')->name('api.')->group(function () {
-            // API untuk mendapatkan semua invoices (untuk admin dashboard)
-            Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
-            Route::get('/invoices-for-kwitansi', [InvoiceController::class, 'getInvoicesForKwitansi'])->name('invoices.kwitansi');
-            Route::get('/invoice-for-kwitansi/{id}', [InvoiceController::class, 'getInvoiceDetailForKwitansi'])->name('invoice.kwitansi.detail');
-            Route::get('/invoice-detail/{id}', [KwitansiController::class, 'getInvoiceDetail'])->name('invoice.detail');
-        });
-
         // KWITANSI MANAGEMENT
         Route::prefix('kwitansi')->name('kwitansi.')->group(function () {
             Route::get('/', [KwitansiController::class, 'index'])->name('index');
@@ -473,30 +460,6 @@ Route::middleware(['auth', 'role:admin'])
             Route::delete('/{id}', [KwitansiController::class, 'destroy'])->name('destroy');
         });
 
-        // CUTI MANAGEMENT
-        Route::prefix('cuti')->name('cuti.')->group(function () {
-            Route::get('/', [CutiController::class, 'index'])->name('index');
-            Route::get('/data', [CutiController::class, 'getData'])->name('data');
-            Route::get('/stats', [CutiController::class, 'stats'])->name('stats');
-            Route::get('/quota-info', [CutiController::class, 'getQuotaInfo'])->name('quota.info');
-            Route::post('/reset-quota', [CutiController::class, 'resetQuota'])->name('reset.quota');
-            Route::get('/create', [CutiController::class, 'create'])->name('create');
-            Route::post('/', [CutiController::class, 'store'])->name('store');
-            Route::post('/{cuti}/approve', [CutiController::class, 'approve'])->name('approve');
-            Route::post('/{cuti}/reject', [CutiController::class, 'reject'])->name('reject');
-            Route::post('/{cuti}/cancel-refund', [CutiController::class, 'cancelWithRefund'])->name('cancel.refund');
-            Route::get('/{cuti}', [CutiController::class, 'show'])->name('show');
-            Route::get('/{cuti}/edit', [CutiController::class, 'edit'])->name('edit');
-            Route::put('/{cuti}', [CutiController::class, 'update'])->name('update');
-            Route::delete('/{cuti}', [CutiController::class, 'destroy'])->name('destroy');
-            Route::get('/{cuti}/history', [CutiController::class, 'getHistory'])->name('history');
-            Route::get('/summary', [CutiController::class, 'getSummary'])->name('summary');
-            Route::get('/export', [CutiController::class, 'export'])->name('export');
-            Route::get('/report', [CutiController::class, 'report'])->name('report');
-            Route::post('/calculate-duration', [CutiController::class, 'calculateDuration'])->name('calculate-duration');
-            Route::get('/karyawan-by-divisi', [CutiController::class, 'getKaryawanByDivisi'])->name('karyawan.by-divisi');
-            Route::get('/check-leave-status', [CutiController::class, 'checkLeaveStatusApi'])->name('check-leave-status');
-        });
 
         // Settings
         Route::prefix('settings')->name('settings.')->group(function () {
@@ -526,17 +489,30 @@ Route::middleware(['auth', 'role:admin'])
             Route::put('/portfolios/{id}', [SettingController::class, 'updatePortfolio'])->name('portfolios.update');
             Route::delete('/portfolios/{id}', [SettingController::class, 'deletePortfolio'])->name('portfolios.delete');
 
+            // Operational Hours
+            Route::get('/operational-hours', [SettingController::class, 'getOperationalHours'])->name('operational.hours');
+            Route::post('/operational-hours', [SettingController::class, 'saveOperationalHours'])->name('operational.hours.save');
         });
-    // Catatan Rapat
-    Route::get('/catatan-rapat', [CatatanRapatController::class, 'index'])->name('catatan_rapat.index');
-    Route::post('/catatan-rapat', [CatatanRapatController::class, 'store'])->name('catatan_rapat.store');
-    Route::put('/catatan-rapat/{id}', [CatatanRapatController::class, 'update'])->name('catatan_rapat.update');
-    Route::delete('/catatan-rapat/{id}', [CatatanRapatController::class, 'destroy'])->name('catatan_rapat.destroy');
-    Route::get('/catatan-rapat/{id}', [CatatanRapatController::class, 'show'])->name('catatan_rapat.show');
-    // PASTIKAN INI ADA dan menggunakan GET method
-    Route::get('/data', [CatatanRapatController::class, 'getData'])->name('data');
-    // Pengumuman
-                Route::get('/pengumuman', function () {
+
+        // API ENDPOINTS UNTUK ADMIN
+        Route::prefix('api')->name('api.')->group(function () {
+            // API untuk invoices admin (JSON response)
+            Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.api');
+            
+            // API untuk perusahaan dropdown (untuk finance)
+            Route::get('/perusahaan', [PerusahaanController::class, 'getDataForDropdown'])->name('perusahaan.api');
+            
+            // API untuk layanan dropdown
+            Route::get('/layanan', [LayananController::class, 'getLayananData'])->name('layanan.api');
+
+                Route::get('/invoices-for-kwitansi', [InvoiceController::class, 'getInvoicesForKwitansiAdmin']);
+    Route::get('/invoice-for-kwitansi/{id}', [InvoiceController::class, 'getInvoiceDetailForKwitansiAdmin']);
+        });
+
+        Route::get('/catatan_rapat', function () {
+            return redirect()->route('catatan_rapat.index');
+        });
+        Route::get('/pengumuman', function () {
             return redirect()->route('pengumuman.index');
         });
     });
@@ -590,6 +566,8 @@ Route::middleware(['auth', 'role:karyawan'])
             Route::post('/{id}/upload-file', [TaskController::class, 'uploadTaskFile'])->name('upload.file');
             Route::post('/{id}/complete', [TaskController::class, 'markAsComplete'])->name('complete');
             Route::post('/{id}/status', [TaskController::class, 'updateTaskStatus'])->name('update.status');
+            Route::put('/{id}/accept', [KaryawanController::class, 'acceptTask'])->name('accept');
+            Route::get('/{id}/acceptance-status', [KaryawanController::class, 'getAcceptanceStatus'])->name('acceptance.status');
             Route::get('/{id}/comments', [TaskController::class, 'getComments'])->name('comments');
             Route::post('/{id}/comments', [TaskController::class, 'storeComment'])->name('comments.store');
             Route::get('/{id}/files', [TaskController::class, 'getTaskFiles'])->name('files');
@@ -703,11 +681,11 @@ Route::middleware(['auth', 'role:general_manager'])
         Route::get('/kelola-absen', [AbsensiController::class, 'kelolaAbsenGeneral'])->name('kelola_absen');
 
         // Action untuk approve/reject
-        Route::post('/general-manajer/absensi/{id}/approve', [AbsensiController::class, 'approveAbsensi'])
-            ->name('general_manajer.absensi.approve');
+        Route::post('/absensi/{id}/approve', [AbsensiController::class, 'approveAbsensi'])
+            ->name('absensi.approve');
 
-        Route::post('/general-manajer/absensi/{id}/reject', [AbsensiController::class, 'rejectAbsensi'])
-            ->name('general_manajer.absensi.reject');
+        Route::post('/absensi/{id}/reject', [AbsensiController::class, 'rejectAbsensi'])
+            ->name('absensi.reject');
 
         Route::get('/tim_dan_divisi', function () {
             return view('general_manajer.tim_dan_divisi');
@@ -823,98 +801,57 @@ Route::middleware(['auth', 'role:finance'])
             Route::put('/{id}', [InvoiceController::class, 'update'])->name('update');
             Route::delete('/{id}', [InvoiceController::class, 'destroy'])->name('destroy');
             Route::get('/{id}/print', [InvoiceController::class, 'print'])->name('print');
-            // Tambahan untuk invoice page
-            Route::get('/page', function() {
-                return view('finance.invoice');
-            })->name('page');
         });
 
         // CASHFLOW MANAGEMENT
         Route::prefix('cashflow')->name('cashflow.')->group(function () {
             Route::get('/', [CashflowController::class, 'index'])->name('index');
             Route::post('/', [CashflowController::class, 'store'])->name('store');
-            // Update and destroy routes for cashflow (used by JS edit/delete)
             Route::put('/{id}', [CashflowController::class, 'update'])->name('update');
             Route::delete('/{id}', [CashflowController::class, 'destroy'])->name('destroy');
         });
 
         // KWITANSI MANAGEMENT - FINANCE
         Route::prefix('kwitansi')->name('kwitansi.')->group(function () {
-            Route::get('/', [KwitansiController::class, 'financeIndex'])->name('index');
+            Route::get('/', [KwitansiController::class, 'financeIndex'])->name('finance.kwitansi.index');
             Route::post('/', [KwitansiController::class, 'store'])->name('store');
             Route::put('/{id}', [KwitansiController::class, 'update'])->name('update');
             Route::delete('/{id}', [KwitansiController::class, 'destroy'])->name('destroy');
             Route::get('/{id}/cetak', [KwitansiController::class, 'cetak'])->name('cetak');
-            Route::get('/{id}/cetak-data', [KwitansiController::class, 'getKwitansiForPrint'])->name('cetak.data');
-            Route::get('/{id}', [KwitansiController::class, 'show'])->name('show');
-            Route::get('/data', [KwitansiController::class, 'getKwitansiData'])->name('data');
         });
-        
-        // API ENDPOINTS UNTUK FINANCE - DIPERBAIKI
-        Route::prefix('api')->name('api.')->group(function () {
-            // API untuk invoices finance (JSON response) - TAMBAHKAN METHOD
+
+                Route::prefix('api')->name('api.')->group(function () {
+            // Route untuk invoice options kwitansi (tanpa prefix /api di URL)
+            Route::get('/invoices-for-kwitansi', [InvoiceController::class, 'getInvoicesForKwitansi']);
+            Route::get('/invoice-for-kwitansi/{id}', [InvoiceController::class, 'getInvoiceDetailForKwitansi']);
+            // Test endpoint
+            Route::get('/test-json', function() {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Finance API is working',
+                    'timestamp' => now()
+                ], 200, [], JSON_UNESCAPED_UNICODE);
+            })->name('test');
+
+            // API untuk perusahaan dropdown
+            Route::get('/perusahaan', [PerusahaanController::class, 'getDataForDropdown'])->name('perusahaan.api');
+            
+            // API untuk layanan finance (JSON response)
+            Route::get('/layanan', [LayananController::class, 'financeApi'])->name('layanan.api');
+            
+            // API untuk layanan dropdown
+            Route::get('/layanan-dropdown', [InvoiceController::class, 'getLayananForDropdown'])->name('layanan.dropdown');
+
+            // API untuk invoices finance (JSON response)
             Route::get('/invoices', [InvoiceController::class, 'getFinanceInvoices'])->name('invoices.api');
-            
-            // API untuk invoice detail
-            Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
-            
-            // API untuk update invoice
-            Route::put('/invoices/{id}', [InvoiceController::class, 'update'])->name('invoices.update');
-            
-            // API untuk delete invoice
-            Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy'])->name('invoices.delete');
-            
-            // API untuk layanan dropdown - GUNAKAN CONTROLLER YANG TEPAT
-            Route::get('/layanan/dropdown', [LayananController::class, 'getLayananForDropdown'])->name('layanan.dropdown');
-            
-            // API untuk perusahaan dropdown - GUNAKAN CONTROLLER YANG TEPAT
-            Route::get('/perusahaan/dropdown', [GMPerusahaanController::class, 'getPerusahaanForFinance'])->name('perusahaan.dropdown');
-            
-            // API untuk status pembayaran
-            Route::get('/status-pembayaran', [InvoiceController::class, 'getStatusPembayaranList'])->name('status.pembayaran');
-            
-            // API untuk list layanan dari invoice
-            Route::get('/layanan-list', [InvoiceController::class, 'getLayananList'])->name('layanan.list');
-            
-            // TAMBAHKAN INI: API khusus untuk frontend invoice finance
-            Route::get('/finance-invoices', [InvoiceController::class, 'getFinanceDashboardData'])->name('finance.invoices');
-            
-            // API ENDPOINTS UNTUK KWITANSI FINANCE
-            Route::get('/invoices-for-kwitansi', [InvoiceController::class, 'getInvoicesForKwitansi'])->name('invoices.kwitansi');
-            Route::get('/invoice-for-kwitansi/{id}', [InvoiceController::class, 'getInvoiceDetailForKwitansi'])->name('invoice.kwitansi.detail');
-            Route::get('/invoice-detail/{id}', [KwitansiController::class, 'getInvoiceDetail'])->name('invoice.detail');
+
+            // API untuk kategori cashflow
+            Route::get('/kategori/{tipe}', [CashflowController::class, 'getKategoriByType'])->name('kategori.by.type');
         });
     });
 
-// API Routes untuk finance frontend (layanan dan perusahaan)
-Route::middleware(['auth'])->prefix('api')->group(function () {
-    // Layanan for Finance Dropdown
-    Route::get('/layanan/finance', [LayananController::class, 'getLayananForDropdown'])->name('api.layanan.finance');
-    
-    // Perusahaan for Finance Dropdown
-    Route::get('/perusahaan/finance', [GMPerusahaanController::class, 'getPerusahaanForFinance'])->name('api.perusahaan.finance');
-    
-    // DEBUG: Check database raw data
-    if (config('app.debug')) {
-        Route::get('/debug/layanan-raw', function () {
-            $layanans = \App\Models\Layanan::all(['id', 'nama_layanan', 'harga', 'deskripsi', 'hpp', 'foto']);
-            return response()->json([
-                'total' => $layanans->count(),
-                'data' => $layanans,
-                'sample_first_3' => $layanans->take(3)->toArray()
-            ]);
-        })->name('api.debug.layanan.raw');
-        
-        Route::get('/debug/perusahaan-raw', function () {
-            $perusahaans = \App\Models\Perusahaan::all(['id', 'nama_perusahaan', 'klien', 'alamat', 'kontak', 'jumlah_kerjasama']);
-            return response()->json([
-                'total' => $perusahaans->count(),
-                'data' => $perusahaans,
-                'sample_first_3' => $perusahaans->take(3)->toArray()
-            ]);
-        })->name('api.debug.perusahaan.raw');
-    }
-});
+// Pastikan import ini ada di paling atas file:
+// use App\Http\Controllers\ManagerDivisi\MDPerusahaanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -1113,9 +1050,9 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
     });
 
     // Karyawan API
-    Route::get('/karyawan/history', [KaryawanController::class, 'getHistory'])->name('api.karyawan.history');
-    Route::get('/karyawan/dashboard-data', [KaryawanController::class, 'getDashboardData'])->name('api.karyawan.dashboard-data');
-    Route::get('/karyawan/today-status', [KaryawanController::class, 'getTodayStatus'])->name('api.karyawan.today-status');
+    Route::get('/karyawan/history', [KaryawanController::class, 'getHistoryApi'])->name('api.karyawan.history');
+    Route::get('/karyawan/dashboard-data', [KaryawanController::class, 'getDashboardDataApi'])->name('api.karyawan.dashboard-data');
+    Route::get('/karyawan/today-status', [KaryawanController::class, 'getTodayStatusApi'])->name('api.karyawan.today-status');
     Route::get('/karyawan/{id}/detail', [KaryawanController::class, 'getDetailApi'])->name('api.karyawan.detail');
 
     // Absensi actions
@@ -1129,7 +1066,6 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
 
     /* ABSENSI API */
     Route::prefix('karyawan')->name('karyawan.')->group(function () {
-        Route::get('/dashboard-data', [AbsensiController::class, 'apiTodayStatus'])->name('dashboard-data');
         Route::get('/today-status', [AbsensiController::class, 'apiTodayStatus'])->name('today-status');
         Route::get('/history', [AbsensiController::class, 'apiHistory'])->name('history');
         Route::post('/absen-masuk', [AbsensiController::class, 'apiAbsenMasuk'])->name('absen-masuk');
@@ -1140,11 +1076,11 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
     /* =====================================================
      |  API MEETING NOTES & ANNOUNCEMENTS
      ===================================================== */
-    Route::get('/karyawan/meeting-notes', [KaryawanController::class, 'getMeetingNotes']);
-    Route::get('/karyawan/meeting-notes-dates', [KaryawanController::class, 'getMeetingNotesDates']);
-    Route::get('/karyawan/announcements', [KaryawanController::class, 'getAnnouncements']);
-    Route::get('/karyawan/announcements-by-date', [KaryawanController::class, 'getAnnouncementsByDate']);
-    Route::get('/karyawan/announcements-dates', [KaryawanController::class, 'getAnnouncementsDates']);
+    Route::get('karyawan/meeting-notes', [KaryawanController::class, 'getMeetingNotes']);
+    Route::get('karyawan/meeting-notes-dates', [KaryawanController::class, 'getMeetingNotesDates']);
+    Route::get('karyawan/announcements', [KaryawanController::class, 'getAnnouncements']);
+    Route::get('karyawan/announcements-by-date', [KaryawanController::class, 'getAnnouncementsByDate']);
+    Route::get('karyawan/announcements-dates', [KaryawanController::class, 'getAnnouncementsDates']);
     Route::get('/karyawan/calendar-dates', [KaryawanController::class, 'getCalendarDates']);
 
     /* TASKS API */
@@ -1208,11 +1144,18 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
+    // Catatan Rapat
+    Route::get('/catatan-rapat', [CatatanRapatController::class, 'index'])->name('catatan_rapat.index');
+    Route::post('/catatan-rapat', [CatatanRapatController::class, 'store'])->name('catatan_rapat.store');
+    Route::put('/catatan-rapat/{id}', [CatatanRapatController::class, 'update'])->name('catatan_rapat.update')->whereNumber('id');
+    Route::delete('/catatan-rapat/{id}', [CatatanRapatController::class, 'destroy'])->name('catatan_rapat.destroy')->whereNumber('id');
+    Route::get('/catatan-rapat/{id}', [CatatanRapatController::class, 'show'])->name('catatan_rapat.show')->whereNumber('id');
 
+    // Pengumuman
     Route::resource('pengumuman', PengumumanController::class);
 
     // API endpoints
-    Route::get('/users/data', [UserController::class, 'getData'])->name('users.data');
+    Route::get('/users/data', [UserController::class, 'getData']);
     Route::get('/divisis/list', [UserController::class, 'getDivisis'])->name('divisis.list');
 });
 
@@ -1498,6 +1441,199 @@ if (env('APP_DEBUG', false)) {
             ]);
         });
 
+        // DEBUG: Check latest task with multi-assign
+        Route::get('/debug/latest-task', function () {
+            try {
+                $latestTask = \App\Models\Task::latest('id')->first();
+                
+                if (!$latestTask) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No tasks found'
+                    ]);
+                }
+
+                // Get raw database value
+                $rawData = \DB::table('tasks')->where('id', $latestTask->id)->first();
+
+                // Test query with both methods
+                $testUser7Old = \App\Models\Task::where('id', $latestTask->id)
+                    ->whereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [7])
+                    ->count();
+
+                $testUser7New = \App\Models\Task::where('id', $latestTask->id)
+                    ->whereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [7])
+                    ->count();
+
+                $rawSql = \DB::select("
+                    SELECT 
+                        assigned_to_ids,
+                        JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(7)) as contains_7,
+                        JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(6)) as contains_6
+                    FROM tasks
+                    WHERE id = ?
+                ", [$latestTask->id]);
+
+                return response()->json([
+                    'success' => true,
+                    'task_id' => $latestTask->id,
+                    'judul' => $latestTask->judul,
+                    'nama_tugas' => $latestTask->nama_tugas,
+                    'assigned_to' => $latestTask->assigned_to,
+                    'assigned_to_ids' => $latestTask->assigned_to_ids,
+                    'assigned_to_ids_count' => is_array($latestTask->assigned_to_ids) ? count($latestTask->assigned_to_ids) : 0,
+                    'raw_assigned_to_ids' => $rawData ? $rawData->assigned_to_ids : null,
+                    'is_broadcast' => $latestTask->is_broadcast ?? false,
+                    'created_at' => $latestTask->created_at,
+                    'query_tests' => [
+                        'test_user_7_with_old_json_contains' => $testUser7Old,
+                        'test_user_7_with_new_json_search' => $testUser7New,
+                    ],
+                    'raw_sql_debug' => $rawSql,
+                    'message' => 'Latest task retrieved successfully'
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        });
+
+        // DEBUG: Check which users can see a specific task
+        Route::get('/debug/task-visibility/{taskId}', function ($taskId) {
+            try {
+                $task = \App\Models\Task::find($taskId);
+                
+                if (!$task) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Task not found'
+                    ]);
+                }
+
+                // Get all users
+                $allUsers = \App\Models\User::whereIn('role', ['karyawan', 'manager_divisi', 'admin'])->get();
+                
+                $canSeeTask = [];
+                $cannotSeeTask = [];
+
+                foreach ($allUsers as $user) {
+                    // Test the same query as karyawanTasks with NEW JSON_CONTAINS(JSON_ARRAY()) method
+                    $taskCount = \App\Models\Task::where('id', $taskId)
+                        ->where(function($q) use ($user) {
+                            $q->where('assigned_to', $user->id)
+                                ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$user->id]);
+                        })
+                        ->count();
+
+                    if ($taskCount > 0) {
+                        $canSeeTask[] = [
+                            'id' => $user->id,
+                            'name' => $user->name,
+                            'role' => $user->role
+                        ];
+                    } else {
+                        $cannotSeeTask[] = [
+                            'id' => $user->id,
+                            'name' => $user->name,
+                            'role' => $user->role
+                        ];
+                    }
+                }
+
+                // Also test raw SQL to debug
+                $rawSql = \DB::select("
+                    SELECT 
+                        id, 
+                        assigned_to, 
+                        assigned_to_ids,
+                        JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(7)) as contains_7_new,
+                        JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(6)) as contains_6_new
+                    FROM tasks
+                    WHERE id = ?
+                ", [$taskId]);
+
+                return response()->json([
+                    'success' => true,
+                    'task_id' => $taskId,
+                    'task_assigned_to' => $task->assigned_to,
+                    'task_assigned_to_ids' => $task->assigned_to_ids,
+                    'can_see_count' => count($canSeeTask),
+                    'can_see' => $canSeeTask,
+                    'cannot_see_count' => count($cannotSeeTask),
+                    'cannot_see' => $cannotSeeTask,
+                    'raw_sql_debug' => $rawSql,
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        });
+
+        // DEBUG: Manual test untuk karyawan 7 lihat task 17
+        Route::get('/debug/karyawan-7-see-task-17', function () {
+            try {
+                $userId = 7;
+                $taskId = 17;
+
+                $task = \App\Models\Task::find($taskId);
+                if (!$task) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Task tidak ditemukan'
+                    ]);
+                }
+
+                // Test query 1: assigned_to check
+                $canSee1 = $task->assigned_to == $userId;
+
+                // Test query 2: JSON_CONTAINS
+                $canSee2 = \DB::selectOne("
+                    SELECT JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?)) as result
+                    FROM tasks
+                    WHERE id = ?
+                ", [$userId, $taskId]);
+
+                // Test query 3: Full where clause
+                $count = \App\Models\Task::where('id', $taskId)
+                    ->where(function($q) use ($userId) {
+                        $q->where('assigned_to', $userId)
+                            ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+                    })
+                    ->count();
+
+                return response()->json([
+                    'success' => true,
+                    'user_id' => $userId,
+                    'task_id' => $taskId,
+                    'task_data' => [
+                        'assigned_to' => $task->assigned_to,
+                        'assigned_to_ids' => $task->assigned_to_ids,
+                    ],
+                    'tests' => [
+                        'assigned_to_match' => $canSee1,
+                        'json_contains_result' => $canSee2->result ?? null,
+                        'full_query_count' => $count,
+                    ],
+                    'should_see' => $canSee1 || ($canSee2 && $canSee2->result),
+                    'message' => ($canSee1 || ($canSee2 && $canSee2->result)) 
+                        ? 'User 7 SHOULD be able to see this task' 
+                        : 'User 7 should NOT see this task'
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        });
+
         Route::get('/test/edit-cuti/{id}', function ($id) {
             try {
                 $cuti = \App\Models\Cuti::find($id);
@@ -1671,14 +1807,95 @@ Route::prefix('owner/api')->middleware(['auth', 'role:owner'])->group(function (
     Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsForOwner']);
 });
 
-// Route untuk pengaturan jam operasional
-Route::post('/admin/settings/operational-hours', [App\Http\Controllers\SettingController::class, 'saveOperationalHours'])->name('admin.settings.operational-hours');
-Route::get('/admin/settings/operational-hours', [App\Http\Controllers\SettingController::class, 'getOperationalHours'])->name('admin.settings.operational-hours.get');
-// Route untuk API jam operasional
-Route::get('/api/operational-hours', [App\Http\Controllers\AbsensiController::class, 'apiGetOperationalHours']);
+// DEBUG: Test karyawanTasks for current user (protected by auth)
+Route::middleware('auth')->group(function () {
+    Route::get('/debug/current-user-tasks', function () {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Not authenticated'], 401);
+        }
+        
+        $userId = $user->id;
+        $tasks = \App\Models\Task::with(['creator', 'assigner', 'comments', 'files', 'project', 'targetDivisi'])
+                                    ->where(function($q) use ($userId) {
+                                            $q->where('assigned_to', $userId)
+                                                ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+                                    })
+                                    ->orderBy('deadline', 'asc')
+                                    ->get();
+        
+        return response()->json([
+            'current_user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+            'query_result_count' => $tasks->count(),
+            'tasks' => $tasks->map(function($t) {
+                return [
+                    'id' => $t->id,
+                    'judul' => $t->judul,
+                    'assigned_to' => $t->assigned_to,
+                    'assigned_to_ids' => $t->assigned_to_ids,
+                ];
+            }),
+        ]);
+    });
 
-// Finance API routes
-Route::middleware(['auth', 'role:finance'])->prefix('finance/api')->group(function () {
-    Route::get('/meeting-notes', [CatatanRapatController::class, 'getMeetingNotesForFinance']);
-    Route::get('/announcements', [PengumumanController::class, 'getAnnouncementsForFinance']);
-});
+    // DEBUG: Incrementally test to see where query breaks
+    Route::get('/debug/test-tasks-step/{step}', function ($step) {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Not authenticated'], 401);
+        }
+        
+        $userId = $user->id;
+        
+        switch ($step) {
+            case 1:
+                $tasks = \App\Models\Task::where('assigned_to', $userId)->get();
+                $label = "Only assigned_to = {$userId}";
+                break;
+                
+            case 2:
+                $tasks = \App\Models\Task::whereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId])->get();
+                $label = "Only JSON_CONTAINS for {$userId}";
+                break;
+                
+            case 3:
+                $tasks = \App\Models\Task::where(function($q) use ($userId) {
+                    $q->where('assigned_to', $userId)
+                      ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+                })->get();
+                $label = "Combined where clause (assigned_to OR JSON_CONTAINS)";
+                break;
+                
+            case 4:
+                $tasks = \App\Models\Task::where(function($q) use ($userId) {
+                    $q->where('assigned_to', $userId)
+                      ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+                })->with('creator')->get();
+                $label = "Combined where + with creator";
+                break;
+                
+            case 5:
+                $tasks = \App\Models\Task::where(function($q) use ($userId) {
+                    $q->where('assigned_to', $userId)
+                      ->orWhereRaw("JSON_CONTAINS(assigned_to_ids, JSON_ARRAY(?))", [$userId]);
+                })->with(['creator', 'assigner', 'comments', 'files', 'project', 'targetDivisi'])->get();
+                $label = "Full relationships";
+                break;
+                
+            default:
+                return response()->json(['error' => 'Invalid step'], 400);
+        }
+        
+        return response()->json([
+            'step' => $step,
+            'label' => $label,
+            'user_id' => $userId,
+            'count' => $tasks->count(),
+            'ids' => $tasks->pluck('id')->values()->toArray(),
+        ]);
+    });
+});;

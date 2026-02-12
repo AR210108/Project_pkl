@@ -3852,8 +3852,9 @@ function resetCreateForm() {
         }
 
         function showLoading(show) {
-            if (loadingRow) {
-                loadingRow.style.display = show ? '' : 'none';
+            const loadingRowEl = document.getElementById('loadingRow');
+            if (loadingRowEl) {
+                loadingRowEl.style.display = show ? '' : 'none';
             }
         }
 

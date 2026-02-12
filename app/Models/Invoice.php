@@ -58,12 +58,22 @@ class Invoice extends Model
 
     public function layanan()
     {
-        return $this->belongsTo(Layanan::class, 'nama_layanan', 'nama_layanan');
+        try {
+            return $this->belongsTo(Layanan::class, 'nama_layanan', 'nama_layanan');
+        } catch (\Exception $e) {
+            Log::error('Error loading layanan: ' . $e->getMessage());
+            return null;
+        }
     }
 
     public function perusahaan()
     {
-        return $this->belongsTo(Perusahaan::class, 'company_name', 'nama_perusahaan');
+        try {
+            return $this->belongsTo(Perusahaan::class, 'company_name', 'nama_perusahaan');
+        } catch (\Exception $e) {
+            Log::error('Error loading perusahaan: ' . $e->getMessage());
+            return null;
+        }
     }
 
     public function orders()
@@ -111,8 +121,13 @@ class Invoice extends Model
             return $this->description;
         }
         
-        if ($this->layanan && !empty($this->layanan->deskripsi)) {
-            return $this->layanan->deskripsi;
+        try {
+            $layanan = $this->layanan;
+            if ($layanan && !empty($layanan->deskripsi)) {
+                return $layanan->deskripsi;
+            }
+        } catch (\Exception $e) {
+            Log::error('Error in getDeskripsiAttribute: ' . $e->getMessage());
         }
         
         return $this->nama_layanan ? 'Layanan: ' . $this->nama_layanan : 'Tidak ada deskripsi';

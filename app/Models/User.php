@@ -296,8 +296,7 @@ class User extends Authenticatable
             $karyawan->nama = $this->name;
             $karyawan->email = $this->email;
             
-            // Perbaikan: Mengakses relasi divisi dengan () agar mengembalikan object query builder
-            // Kemudian menggunakan ->first() untuk mendapatkan data modelnya
+            // Ambil nama divisi dari relasi
             if ($this->divisi) {
                 $karyawan->divisi = $this->divisi->divisi;
             }

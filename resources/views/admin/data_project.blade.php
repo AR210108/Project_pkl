@@ -1235,7 +1235,8 @@
         }
 
         function getStatusPengerjaanClass(status) {
-            return `status-${status.replace('_', '-')}`;
+            const safeStatus = (status || 'pending').toString();
+            return `status-${safeStatus.replace('_', '-')}`;
         }
 
         function getStatusKerjasamaClass(status) {
@@ -1254,36 +1255,90 @@
                 return;
             }
 
+            if (nama === undefined) {
+                fetch(`/admin/project/${id}`, {
+                    headers: { 'Accept': 'application/json' }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.success || !data.data) {
+                        throw new Error('Data project tidak ditemukan');
+                    }
+                    const project = data.data;
+                    const formattedHarga = project.harga !== null && project.harga !== undefined
+                        ? new Intl.NumberFormat('id-ID').format(project.harga)
+                        : '-';
+                    const statusP = project.status_pengerjaan || project.status || 'pending';
+                    const statusK = project.status_kerjasama || 'aktif';
+                    const invoiceLabel = project.invoice_no ? `Invoice #${project.invoice_no}` : (project.invoice_id ? `Invoice #${project.invoice_id}` : '');
+
+                    openDetailModal(
+                        project.id,
+                        project.nama,
+                        project.deskripsi,
+                        formattedHarga,
+                        project.tanggal_mulai_pengerjaan || '',
+                        project.tanggal_selesai_pengerjaan || '',
+                        project.tanggal_mulai_kerjasama || '',
+                        project.tanggal_selesai_kerjasama || '',
+                        statusP,
+                        statusK,
+                        project.progres ?? 0,
+                        invoiceLabel
+                    );
+                })
+                .catch(error => {
+                    console.error('Detail fetch error:', error);
+                    showMinimalPopup('Error', 'Gagal memuat detail project', 'error');
+                });
+                return;
+            }
+
+            const safeText = (value, fallback = '-') => {
+                if (value === undefined || value === null || value === '') return fallback;
+                return value;
+            };
+
+            const safeNumber = (value, fallback = 0) => {
+                if (value === undefined || value === null || value === '' || isNaN(value)) return fallback;
+                return value;
+            };
+
             // Set basic info
             document.getElementById('detailId').textContent = '#' + id;
-            document.getElementById('detailNama').textContent = nama;
-            document.getElementById('detailDeskripsi').textContent = deskripsi;
-            document.getElementById('detailHarga').textContent = harga;
-            document.getElementById('detailInvoice').textContent = invoice || '-';
-            document.getElementById('detailTanggalMulaiPengerjaan').textContent = tanggalMulaiPengerjaan;
-            document.getElementById('detailTanggalSelesaiPengerjaan').textContent = tanggalSelesaiPengerjaan || '-';
-            document.getElementById('detailTanggalMulaiKerjasama').textContent = tanggalMulaiKerjasama || '-';
-            document.getElementById('detailTanggalSelesaiKerjasama').textContent = tanggalSelesaiKerjasama || '-';
-            document.getElementById('detailProgres').textContent = progres + '%';
+            document.getElementById('detailNama').textContent = safeText(nama);
+            document.getElementById('detailDeskripsi').textContent = safeText(deskripsi);
+            document.getElementById('detailHarga').textContent = safeText(harga);
+            document.getElementById('detailInvoice').textContent = safeText(invoice);
+            document.getElementById('detailTanggalMulaiPengerjaan').textContent = safeText(tanggalMulaiPengerjaan);
+            document.getElementById('detailTanggalSelesaiPengerjaan').textContent = safeText(tanggalSelesaiPengerjaan);
+            document.getElementById('detailTanggalMulaiKerjasama').textContent = safeText(tanggalMulaiKerjasama);
+            document.getElementById('detailTanggalSelesaiKerjasama').textContent = safeText(tanggalSelesaiKerjasama);
+            document.getElementById('detailProgres').textContent = safeNumber(progres) + '%';
 
             // Set status pengerjaan badge
             const statusPengerjaanElement = document.getElementById('detailStatusPengerjaan');
             const pengerjaanClass = getStatusPengerjaanClass(statusPengerjaan);
-            const pengerjaanLabel = getStatusPengerjaanLabel(statusPengerjaan);
+            const pengerjaanLabel = getStatusPengerjaanLabel(statusPengerjaan || 'pending');
             statusPengerjaanElement.innerHTML = `<span class="status-badge ${pengerjaanClass}">${pengerjaanLabel}</span>`;
 
             // Set status kerjasama badge
             const statusKerjasamaElement = document.getElementById('detailStatusKerjasama');
-            const kerjasamaClass = getStatusKerjasamaClass(statusKerjasama);
-            const kerjasamaLabel = getStatusKerjasamaLabel(statusKerjasama);
+            const kerjasamaClass = getStatusKerjasamaClass(statusKerjasama || 'aktif');
+            const kerjasamaLabel = getStatusKerjasamaLabel(statusKerjasama || 'aktif');
             statusKerjasamaElement.innerHTML = `<span class="status-badge ${kerjasamaClass}">${kerjasamaLabel}</span>`;
 
             // Set progress bar
             const progressBar = document.getElementById('detailProgressBar');
             let progressColor = '';
-            if (progres < 50) {
+            if (safeNumber(progres) < 50) {
                 progressColor = 'bg-red-500';
-            } else if (progres < 80) {
+            } else if (safeNumber(progres) < 80) {
                 progressColor = 'bg-yellow-500';
             } else {
                 progressColor = 'bg-green-500';

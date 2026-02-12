@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('kwitansis', function (Blueprint $table) {
-            // Make nomor_order nullable
-            $table->string('nomor_order')->nullable()->change();
+        Schema::table('tim', function (Blueprint $table) {
+            // Change string column to integer with default 0
+            $table->integer('jumlah_anggota')->default(0)->change();
         });
     }
 
@@ -22,9 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('kwitansis', function (Blueprint $table) {
-            // Revert to not nullable
-            $table->string('nomor_order')->nullable(false)->change();
+        Schema::table('tim', function (Blueprint $table) {
+            // Revert back to string
+            $table->string('jumlah_anggota')->change();
         });
     }
 };

@@ -64,7 +64,7 @@ class InvoiceController extends Controller
                     'success' => true,
                     'message' => 'Data invoice berhasil diambil',
                     'data' => $invoices
-                ]);
+                ], 200, ['Content-Type' => 'application/json']);
             } catch (\Exception $e) {
                 Log::error('API Invoice Index Error: ' . $e->getMessage(), [
                     'trace' => $e->getTraceAsString()
@@ -74,7 +74,7 @@ class InvoiceController extends Controller
                     'success' => false,
                     'message' => 'Gagal memuat data invoice',
                     'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-                ], 500);
+                ], 500, ['Content-Type' => 'application/json']);
             }
         }
 
@@ -208,13 +208,17 @@ class InvoiceController extends Controller
             $validated['total'] = (float) $validated['total'];
             $validated['fee_maintenance'] = (float) ($validated['fee_maintenance'] ?? 0);
 
-            // Update perusahaan kontak counter
-            $perusahaan = Perusahaan::where('nama_perusahaan', $validated['company_name'])->first();
+            // Update jumlah kerjasama perusahaan saat invoice dibuat
+            $companyName = trim($validated['company_name']);
+            $perusahaan = Perusahaan::where('nama_perusahaan', $companyName)->first();
+            if (!$perusahaan) {
+                $perusahaan = Perusahaan::whereRaw('TRIM(nama_perusahaan) = ?', [$companyName])->first();
+            }
             if ($perusahaan) {
-                $currentKontak = (int) ($perusahaan->kontak ?? 0);
-                $perusahaan->update([
-                    'kontak' => $currentKontak + 1
-                ]);
+                $perusahaan->jumlah_kerjasama = ($perusahaan->jumlah_kerjasama ?? 0) + 1;
+                $perusahaan->save();
+            } else {
+                Log::warning('Perusahaan not found for increment jumlah_kerjasama', ['company_name' => $companyName]);
             }
 
             Log::info('Creating invoice with data:', $validated);
@@ -260,7 +264,7 @@ class InvoiceController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Invoice berhasil dibuat',
-                    'data' => $invoice->load(['layanan', 'perusahaan'])
+                    'data' => $invoice->fresh()
                 ], 201);
             }
 
@@ -461,6 +465,25 @@ class InvoiceController extends Controller
                 'invoice_no' => $invoice->invoice_no,
                 'deleted_by' => Auth::id()
             ]);
+
+            // Decrement jumlah kerjasama perusahaan terkait (min 0)
+            if (!empty($invoice->company_name)) {
+                $companyName = trim($invoice->company_name);
+                $perusahaan = Perusahaan::where('nama_perusahaan', $companyName)->first();
+                if (!$perusahaan) {
+                    $perusahaan = Perusahaan::whereRaw('TRIM(nama_perusahaan) = ?', [$companyName])->first();
+                }
+                if ($perusahaan) {
+                    $current = (int) ($perusahaan->jumlah_kerjasama ?? 0);
+                    $perusahaan->jumlah_kerjasama = max(0, $current - 1);
+                    $perusahaan->save();
+                } else {
+                    Log::warning('Perusahaan not found for decrement jumlah_kerjasama', [
+                        'company_name' => $companyName,
+                        'invoice_id' => $invoice->id
+                    ]);
+                }
+            }
 
             $invoice->delete();
             DB::commit();
@@ -702,95 +725,46 @@ public function getFinanceDashboardData(Request $request)
     }
 }
 
-    /**
-     * API: Get invoices for kwitansi
-     */
-    public function getInvoicesForKwitansi(Request $request)
-    {
-        try {
-            Log::info('Admin API: getInvoicesForKwitansi called', [
-                'user_id' => Auth::id(),
-                'user_role' => Auth::user()->role ?? 'guest'
-            ]);
-
-            // Query semua invoice yang belum lunas
-            $query = Invoice::with(['perusahaan', 'layanan'])
-                ->where('status_pembayaran', 'down payment')
-                ->orderBy('created_at', 'desc');
-
-            // Filter pencarian
-            if ($request->filled('search')) {
-                $search = $request->search;
-                $query->where(function ($q) use ($search) {
-                    $q->where('company_name', 'like', "%{$search}%")
-                        ->orWhere('client_name', 'like', "%{$search}%")
-                        ->orWhere('invoice_no', 'like', "%{$search}%")
-                        ->orWhere('order_number', 'like', "%{$search}%");
-                });
-            }
-
-            $invoices = $query->get()->map(function ($invoice) {
-                return [
-                    'id' => $invoice->id,
-                    'invoice_no' => $invoice->invoice_no ?? '',
-                    'order_number' => $invoice->order_number ?? '',
-                    'company_name' => $invoice->company_name ?? '',
-                    'company_address' => $invoice->company_address ?? '',
-                    'kontak' => $invoice->kontak ?? '',
-                    'client_name' => $invoice->client_name ?? '',
-                    'description' => $invoice->description ?? '',
-                    'nama_layanan' => $invoice->nama_layanan ?? '',
-                    'invoice_date' => $invoice->invoice_date ?? '',
-                    'payment_method' => $invoice->payment_method ?? '',
-                    'subtotal' => $invoice->subtotal ?? 0,
-                    'tax' => $invoice->tax ?? 0,
-                    'fee_maintenance' => $invoice->fee_maintenance ?? 0,
-                    'total' => $invoice->total ?? 0,
-                    'status_pembayaran' => $invoice->status_pembayaran ?? 'down payment',
-                    'jenis_bank' => $invoice->jenis_bank ?? '',
-                    'kategori_pemasukan' => $invoice->kategori_pemasukan ?? 'layanan',
-                    'keterangan_tambahan' => $invoice->keterangan_tambahan ?? '',
-                ];
-            });
-
-            Log::info('Admin API: Invoices data returned', [
-                'count' => $invoices->count()
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Data invoice untuk kwitansi berhasil diambil',
-                'data' => $invoices,
-                'total' => $invoices->count()
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error in getInvoicesForKwitansi: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengambil data invoice untuk kwitansi',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-            ], 500);
-        }
+/**
+ * API: Get invoices for kwitansi
+ */
+public function getInvoicesForKwitansi(Request $request)
+{
+    // Cek login dan role
+    if (!Auth::check()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized: not logged in'
+        ], 401);
+    }
+    
+    $user = Auth::user();
+    if ($user->role !== 'finance') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Forbidden: wrong role'
+        ], 403);
     }
 
-    /**
-     * API: Get invoice detail for kwitansi form
-     */
-    public function getInvoiceDetailForKwitansi($id)
-    {
-        try {
-            Log::info('Admin API: getInvoiceDetailForKwitansi called', [
-                'invoice_id' => $id,
-                'user_id' => Auth::id()
-            ]);
+    try {
+        // HAPUS with(['perusahaan', 'layanan']) - karena relasi tidak ada
+        $query = Invoice::where('status_pembayaran', 'down payment')
+                ->orWhere('status_pembayaran', 'pembayaran awal')
+                ->orderBy('created_at', 'desc');
 
-            $invoice = Invoice::with(['perusahaan', 'layanan'])->findOrFail($id);
+        // Filter pencarian
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('company_name', 'like', "%{$search}%")
+                    ->orWhere('client_name', 'like', "%{$search}%")
+                    ->orWhere('invoice_no', 'like', "%{$search}%")
+                    ->orWhere('order_number', 'like', "%{$search}%");
+            });
+        }
 
-            // Format data untuk form kwitansi
-            $invoiceData = [
+        $invoices = $query->get()->map(function ($invoice) {
+            return [
                 'id' => $invoice->id,
                 'invoice_no' => $invoice->invoice_no ?? '',
                 'order_number' => $invoice->order_number ?? '',
@@ -798,50 +772,105 @@ public function getFinanceDashboardData(Request $request)
                 'company_address' => $invoice->company_address ?? '',
                 'kontak' => $invoice->kontak ?? '',
                 'client_name' => $invoice->client_name ?? '',
-                'nama_layanan' => $invoice->nama_layanan ?? '',
                 'description' => $invoice->description ?? '',
+                'nama_layanan' => $invoice->nama_layanan ?? '',
                 'invoice_date' => $invoice->invoice_date ?? '',
                 'payment_method' => $invoice->payment_method ?? '',
-                'subtotal' => $invoice->subtotal ?? 0,
-                'tax' => $invoice->tax ?? 0,
-                'fee_maintenance' => $invoice->fee_maintenance ?? 0,
-                'total' => $invoice->total ?? 0,
+                'subtotal' => (float) ($invoice->subtotal ?? 0),
+                'tax' => (float) ($invoice->tax ?? 0),
+                'fee_maintenance' => (float) ($invoice->fee_maintenance ?? 0),
+                'total' => (float) ($invoice->total ?? 0),
                 'status_pembayaran' => $invoice->status_pembayaran ?? 'down payment',
                 'jenis_bank' => $invoice->jenis_bank ?? '',
                 'kategori_pemasukan' => $invoice->kategori_pemasukan ?? 'layanan',
                 'keterangan_tambahan' => $invoice->keterangan_tambahan ?? '',
             ];
+        });
 
-            Log::info('Admin API: Invoice detail returned', [
-                'invoice_id' => $id,
-                'data' => $invoiceData
-            ]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Data invoice untuk kwitansi berhasil diambil',
+            'data' => $invoices,
+            'total' => $invoices->count()
+        ]);
+        
+    } catch (\Exception $e) {
+        Log::error('Error in getInvoicesForKwitansi: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString()
+        ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Data invoice berhasil diambil',
-                'data' => $invoiceData
-            ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            Log::error('Admin API: Invoice not found: ' . $id);
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengambil data invoice: ' . $e->getMessage()
+        ], 500);
+    }
+}
 
+    /**
+     * API: Get invoice detail for kwitansi form
+     */
+/**
+ * API: Get invoice detail for kwitansi form
+ */
+public function getInvoiceDetailForKwitansi($id)
+{
+    try {
+        // Ambil invoice tanpa relasi dulu
+        $invoice = Invoice::find($id);
+        
+        if (!$invoice) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invoice tidak ditemukan'
             ], 404);
-        } catch (\Exception $e) {
-            Log::error('Error in getInvoiceDetailForKwitansi: ' . $e->getMessage(), [
-                'invoice_id' => $id,
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengambil detail invoice',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-            ], 500);
         }
+        
+        // Ambil data perusahaan dari field langsung, bukan relasi
+        $company_name = $invoice->company_name ?? '';
+        $kontak = $invoice->kontak ?? '';
+        $company_address = $invoice->company_address ?? '';
+        
+        // Ambil data layanan dari field langsung
+        $nama_layanan = $invoice->nama_layanan ?? '';
+        
+        // Ambil data client dari field langsung
+        $client_name = $invoice->client_name ?? '';
+        
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $invoice->id,
+                'invoice_no' => $invoice->invoice_no ?? '',
+                'company_name' => $company_name,
+                'kontak' => $kontak,
+                'company_address' => $company_address,
+                'client_name' => $client_name,
+                'nama_layanan' => $nama_layanan,
+                'description' => $invoice->description ?? '',
+                'subtotal' => (float) ($invoice->subtotal ?? 0),
+                'tax' => (float) ($invoice->tax ?? 0),
+                'fee_maintenance' => (float) ($invoice->fee_maintenance ?? 0),
+                'total' => (float) ($invoice->total ?? 0),
+                'payment_method' => $invoice->payment_method ?? '',
+                'jenis_bank' => $invoice->jenis_bank ?? '',
+                'kategori_pemasukan' => $invoice->kategori_pemasukan ?? '',
+                'keterangan_tambahan' => $invoice->keterangan_tambahan ?? '',
+                'status_pembayaran' => $invoice->status_pembayaran ?? ''
+            ]
+        ]);
+        
+    } catch (\Exception $e) {
+        Log::error('Error in getInvoiceDetailForKwitansi: ' . $e->getMessage(), [
+            'id' => $id,
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     /**
      * API: Get all invoices - untuk kwitansi dropdown
@@ -1056,4 +1085,112 @@ public function getFinanceDashboardData(Request $request)
             ], 500);
         }
     }
+
+    public function getInvoicesForKwitansiAdmin(Request $request)
+{
+    // Cek login dan role
+    if (!Auth::check()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized: not logged in'
+        ], 401);
+    }
+    
+    $user = Auth::user();
+    if ($user->role !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Forbidden: wrong role'
+        ], 403);
+    }
+
+    try {
+        // Query semua invoice (admin bisa lihat semua)
+        $query = Invoice::orderBy('created_at', 'desc');
+
+        // Filter pencarian
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('company_name', 'like', "%{$search}%")
+                    ->orWhere('client_name', 'like', "%{$search}%")
+                    ->orWhere('invoice_no', 'like', "%{$search}%");
+            });
+        }
+
+        $invoices = $query->get()->map(function ($invoice) {
+            return [
+                'id' => $invoice->id,
+                'invoice_no' => $invoice->invoice_no ?? '',
+                'company_name' => $invoice->company_name ?? '',
+                'client_name' => $invoice->client_name ?? '',
+                'total' => (float) ($invoice->total ?? 0),
+                'status_pembayaran' => $invoice->status_pembayaran ?? ''
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data invoice untuk kwitansi admin berhasil diambil',
+            'data' => $invoices,
+            'total' => $invoices->count()
+        ]);
+        
+    } catch (\Exception $e) {
+        Log::error('Error in getInvoicesForKwitansiAdmin: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengambil data invoice: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * API: Get invoice detail for kwitansi form - ADMIN VERSION
+ */
+public function getInvoiceDetailForKwitansiAdmin($id)
+{
+    try {
+        $invoice = Invoice::find($id);
+        
+        if (!$invoice) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invoice tidak ditemukan'
+            ], 404);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $invoice->id,
+                'invoice_no' => $invoice->invoice_no ?? '',
+                'company_name' => $invoice->company_name ?? '',
+                'kontak' => $invoice->kontak ?? '',
+                'company_address' => $invoice->company_address ?? '',
+                'client_name' => $invoice->client_name ?? '',
+                'nama_layanan' => $invoice->nama_layanan ?? '',
+                'description' => $invoice->description ?? '',
+                'subtotal' => (float) ($invoice->subtotal ?? 0),
+                'tax' => (float) ($invoice->tax ?? 0),
+                'fee_maintenance' => (float) ($invoice->fee_maintenance ?? 0),
+                'total' => (float) ($invoice->total ?? 0),
+                'payment_method' => $invoice->payment_method ?? '',
+                'jenis_bank' => $invoice->jenis_bank ?? '',
+                'kategori_pemasukan' => $invoice->kategori_pemasukan ?? '',
+                'keterangan_tambahan' => $invoice->keterangan_tambahan ?? '',
+                'status_pembayaran' => $invoice->status_pembayaran ?? ''
+            ]
+        ]);
+        
+    } catch (\Exception $e) {
+        Log::error('Error in getInvoiceDetailForKwitansiAdmin: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ], 500);
+    }
+}
 }

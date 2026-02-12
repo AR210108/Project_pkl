@@ -27,6 +27,10 @@ return new class extends Migration
                 $table->string('kontak')->nullable()->after('company_address');
             }
             
+            if (!Schema::hasColumn('kwitansis', 'order_number')) {
+                $table->string('order_number')->nullable()->after('kontak');
+            }
+            
             if (!Schema::hasColumn('kwitansis', 'nama_layanan')) {
                 $table->string('nama_layanan')->nullable()->after('nama_klien');
             }

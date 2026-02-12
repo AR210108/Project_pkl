@@ -314,7 +314,7 @@
             </div>
             <!-- Catatan Rapat -->
             <a class="nav-item flex items-center gap-3 sidebar-nav-item text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                href="/admin/catatan-rapat" data-page="catatan_rapat">
+                href="/admin/catatan_rapat" data-page="catatan_rapat">
                 <span class="material-icons sidebar-icon">note</span>
                 <span class="sidebar-text">Catatan Rapat</span>
             </a>

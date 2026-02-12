@@ -1242,22 +1242,45 @@ class CutiController extends Controller
             $startDate = Carbon::parse($cuti->tanggal_mulai);
             $endDate = Carbon::parse($cuti->tanggal_selesai);
             
+            // Map cuti jenis to absensi jenis_ketidakhadiran
+            $jenisMap = [
+                'tahunan' => 'cuti',
+                'sakit' => 'sakit',
+                'penting' => 'izin',
+                'melahirkan' => 'cuti',
+                'lainnya' => 'cuti'
+            ];
+
+            $absensiType = $jenisMap[$cuti->jenis_cuti] ?? 'cuti';
+
+            // First, bulk-update any existing Absensi rows in the date range to approved
+            Absensi::where('user_id', $cuti->user_id)
+                ->whereBetween('tanggal', [$cuti->tanggal_mulai, $cuti->tanggal_selesai])
+                ->update([
+                    'jenis_ketidakhadiran' => $absensiType,
+                    'keterangan' => $cuti->keterangan . ' (Disetujui)',
+                    'approval_status' => 'approved',
+                    'approved_by' => $this->user->id,
+                    'approved_at' => Carbon::now()
+                ]);
+
+            // Ensure an Absensi row exists for each non-weekend date; create if missing
             for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
-                if (!$date->isWeekend()) {
-                    Absensi::updateOrCreate(
-                        [
-                            'user_id' => $cuti->user_id,
-                            'tanggal' => $date->format('Y-m-d')
-                        ],
-                        [
-                            'jenis_ketidakhadiran' => 'cuti',
-                            'keterangan' => $cuti->keterangan . ' (Disetujui)',
-                            'approval_status' => 'approved',
-                            'approved_by' => $this->user->id,
-                            'approved_at' => Carbon::now()
-                        ]
-                    );
-                }
+                if ($date->isWeekend()) continue;
+
+                Absensi::updateOrCreate(
+                    [
+                        'user_id' => $cuti->user_id,
+                        'tanggal' => $date->format('Y-m-d')
+                    ],
+                    [
+                        'jenis_ketidakhadiran' => $absensiType,
+                        'keterangan' => $cuti->keterangan . ' (Disetujui)',
+                        'approval_status' => 'approved',
+                        'approved_by' => $this->user->id,
+                        'approved_at' => Carbon::now()
+                    ]
+                );
             }
             
             DB::commit();
@@ -1419,9 +1442,12 @@ class CutiController extends Controller
             $cuti->dibatalkan_pada = Carbon::now();
             $cuti->save();
             
+            // Delete related absensi entries during the cancelled leave range
+            // Use a broader cleanup to avoid stale approved absences blocking check-in
             Absensi::where('user_id', $cuti->user_id)
                 ->whereBetween('tanggal', [$cuti->tanggal_mulai, $cuti->tanggal_selesai])
-                ->where('jenis_ketidakhadiran', 'cuti')
+                ->whereNotNull('jenis_ketidakhadiran')
+                ->whereIn('approval_status', ['pending', 'approved'])
                 ->delete();
 
             CutiHistory::create([

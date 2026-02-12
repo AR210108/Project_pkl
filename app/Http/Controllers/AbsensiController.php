@@ -138,8 +138,8 @@ public function kelolaAbsenGeneral()
                 'user_name' => $absen->user->name,
                 'divisi' => $absen->user->divisi ?? '-',
                 'tanggal' => $absen->tanggal,
-                'jam_masuk' => substr($absen->jam_masuk, 0, 5),
-                'jam_pulang' => $absen->jam_pulang ? substr($absen->jam_pulang, 0, 5) : '-',
+                'jam_masuk' => $this->formatTime($absen->jam_masuk),
+                'jam_pulang' => $this->formatTime($absen->jam_pulang),
                 'jenis_ketidakhadiran' => $absen->jenis_ketidakhadiran,
                 'keterangan' => $absen->keterangan,
                 'approval_status' => $absen->approval_status,
@@ -297,8 +297,8 @@ public function rekapAbsensi()
                 'user_name' => $absen->user->name,
                 'divisi' => $absen->user->divisi ?? '-',
                 'tanggal' => $absen->tanggal,
-                'jam_masuk' => substr($absen->jam_masuk, 0, 5),
-                'jam_pulang' => $absen->jam_pulang ? substr($absen->jam_pulang, 0, 5) : '-',
+                'jam_masuk' => $this->formatTime($absen->jam_masuk),
+                'jam_pulang' => $this->formatTime($absen->jam_pulang),
                 'jenis_ketidakhadiran' => $absen->jenis_ketidakhadiran,
                 'keterangan' => $absen->keterangan,
                 'approval_status' => $absen->approval_status,
@@ -415,7 +415,8 @@ public function kelolaAbsenManajer()
         // 1. AMBIL FILTER DARI URL
         $startDate = request('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
         $endDate = request('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
-        $selectedDivision = $user->divisi; // Manager hanya bisa melihat divisinya sendiri
+        $selectedDivision = $user->divisi; // Manager hanya bisa melihat divisinya sendiri (nama)
+        $selectedDivisionId = $user->divisi_id; // gunakan divisi_id untuk filter DB
         $statusFilter = request('status');
 
         // 2. INISIALISASI SEMUA VARIABLE YANG AKAN DIKIRIM KE VIEW
@@ -427,7 +428,7 @@ public function kelolaAbsenManajer()
         $query = Absensi::with(['user:id,name,divisi', 'approver:id,name'])
             ->join('users', 'absensis.user_id', '=', 'users.id')
             ->whereBetween('absensis.tanggal', [$startDate, $endDate])
-            ->where('users.divisi', $selectedDivision) // Filter hanya divisi manager
+            ->where('users.divisi_id', $selectedDivisionId) // Filter hanya divisi manager (by id)
             ->select('absensis.*', 'users.name as user_name', 'users.divisi as user_divisi')
             ->orderBy('absensis.tanggal', 'desc')
             ->orderBy('absensis.created_at', 'desc');
@@ -532,8 +533,8 @@ public function kelolaAbsenManajer()
                 'user_name' => $absen->user->name ?? $absen->user_name,
                 'divisi' => $absen->user->divisi ?? $absen->user_divisi,
                 'tanggal' => $absen->tanggal,
-                'jam_masuk' => $absen->jam_masuk ? substr($absen->jam_masuk, 0, 5) : '-',
-                'jam_pulang' => $absen->jam_pulang ? substr($absen->jam_pulang, 0, 5) : '-',
+                'jam_masuk' => $this->formatTime($absen->jam_masuk),
+                'jam_pulang' => $this->formatTime($absen->jam_pulang),
                 'jenis_ketidakhadiran' => $absen->jenis_ketidakhadiran,
                 'keterangan' => $absen->keterangan ?? $absen->reason,
                 'alasan' => $alasan,
@@ -555,14 +556,14 @@ public function kelolaAbsenManajer()
         $ketidakhadiran = Absensi::with(['user:id,name', 'approver:id,name'])
             ->join('users', 'absensis.user_id', '=', 'users.id')
             ->whereBetween('absensis.tanggal', [$startDate, $endDate])
-            ->where('users.divisi', $selectedDivision)
+            ->where('users.divisi_id', $selectedDivisionId)
             ->whereNotNull('absensis.jenis_ketidakhadiran')
             ->select('absensis.*', 'users.name as user_name')
             ->orderBy('absensis.tanggal', 'desc')
             ->get();
 
         // 8. DATA USER (untuk dropdown di modal)
-        $users = User::where('divisi', $selectedDivision)
+        $users = User::where('divisi_id', $selectedDivisionId)
             ->where('role', 'karyawan')
             ->get();
 
@@ -590,6 +591,7 @@ public function kelolaAbsenManajer()
         $absensiPaginator = null;
         $absenceCount = 0;
         $selectedDivision = $user->divisi ?? null;
+        $selectedDivisionId = $user->divisi_id ?? null;
         $statusFilter = request('status') ?? null;
         $startDate = $startDate ?? Carbon::now()->startOfMonth()->format('Y-m-d');
         $endDate = $endDate ?? Carbon::now()->endOfMonth()->format('Y-m-d');
@@ -603,6 +605,7 @@ public function kelolaAbsenManajer()
         'ketidakhadiran',
         'users',
         'selectedDivision',
+        'selectedDivisionId',
         'statusFilter',
         'startDate',
         'endDate',
@@ -631,12 +634,25 @@ private function getStatusKehadiran($absen)
     }
     
     if ($absen->jam_masuk) {
-        $jamMasuk = strtotime($absen->jam_masuk);
-        $batasTerlambat = strtotime($limitTime . ':00');
-        
-        if ($jamMasuk <= $batasTerlambat) {
-            return ['label' => 'Tepat Waktu', 'class' => 'status-hadir'];
-        } else {
+        try {
+            $jamMasukCarbon = ($absen->jam_masuk instanceof Carbon) ? $absen->jam_masuk : Carbon::parse($absen->jam_masuk);
+
+            // Compare only time-of-day to avoid date-related parsing issues
+            $jamMasukSeconds = $jamMasukCarbon->hour * 3600 + $jamMasukCarbon->minute * 60 + $jamMasukCarbon->second;
+            $batasSeconds = $operationalHours->late_limit_hour * 3600 + $operationalHours->late_limit_minute * 60;
+
+            if ($jamMasukSeconds <= $batasSeconds) {
+                return ['label' => 'Tepat Waktu', 'class' => 'status-hadir'];
+            }
+            return ['label' => 'Terlambat', 'class' => 'status-terlambat'];
+        } catch (\Exception $e) {
+            // Fallback to previous behavior but log the parsing issue
+            \Log::warning('getStatusKehadiran: gagal parse jam_masuk "' . ($absen->jam_masuk ?? '') . '": ' . $e->getMessage());
+            $jamMasuk = strtotime($absen->jam_masuk);
+            $batasTerlambat = strtotime($limitTime . ':00');
+            if ($jamMasuk !== false && $jamMasuk <= $batasTerlambat) {
+                return ['label' => 'Tepat Waktu', 'class' => 'status-hadir'];
+            }
             return ['label' => 'Terlambat', 'class' => 'status-terlambat'];
         }
     }
@@ -655,17 +671,113 @@ public function kelolaAbsensiManagerDivisi()
     public function approve($id)
     {
         try {
-            DB::table('attendances')
-                ->where('id', $id)
+            // Cari record absensi yang akan di-approve
+            $absen = Absensi::findOrFail($id);
+            // Approve semua record dengan user_id dan rentang tanggal yang sama, status pending
+            Absensi::where('user_id', $absen->user_id)
+                ->where('jenis_ketidakhadiran', $absen->jenis_ketidakhadiran)
+                ->where('approval_status', 'pending')
+                ->whereDate('tanggal', '>=', $absen->tanggal)
+                ->whereDate('tanggal', '<=', $absen->tanggal_akhir)
                 ->update([
                     'approval_status' => 'approved',
                     'approved_by' => auth()->id(),
                     'approved_at' => Carbon::now()
                 ]);
-            
-            return back()->with('success', 'Permohonan berhasil di-approve.');
+            return back()->with('success', 'Semua hari dalam pengajuan berhasil di-approve.');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal approve: ' . $e->getMessage());
+        }
+    }
+
+    public function approveAbsensi($id)
+    {
+        try {
+            $absen = Absensi::findOrFail($id);
+
+            if (!$absen->jenis_ketidakhadiran) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya data ketidakhadiran yang dapat diverifikasi.'
+                ], 400);
+            }
+
+            $startDate = $absen->tanggal;
+            $endDate = $absen->tanggal_akhir ?: $absen->tanggal;
+
+            $updated = Absensi::where('user_id', $absen->user_id)
+                ->where('jenis_ketidakhadiran', $absen->jenis_ketidakhadiran)
+                ->where('approval_status', 'pending')
+                ->whereDate('tanggal', '>=', $startDate)
+                ->whereDate('tanggal', '<=', $endDate)
+                ->update([
+                    'approval_status' => 'approved',
+                    'approved_by' => auth()->id(),
+                    'approved_at' => Carbon::now()
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Semua hari dalam pengajuan berhasil di-approve.',
+                'updated' => $updated
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal approve: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function rejectAbsensi(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'rejection_reason' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $absen = Absensi::findOrFail($id);
+
+            if (!$absen->jenis_ketidakhadiran) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya data ketidakhadiran yang dapat diverifikasi.'
+                ], 400);
+            }
+
+            $startDate = $absen->tanggal;
+            $endDate = $absen->tanggal_akhir ?: $absen->tanggal;
+
+            $updated = Absensi::where('user_id', $absen->user_id)
+                ->where('jenis_ketidakhadiran', $absen->jenis_ketidakhadiran)
+                ->where('approval_status', 'pending')
+                ->whereDate('tanggal', '>=', $startDate)
+                ->whereDate('tanggal', '<=', $endDate)
+                ->update([
+                    'approval_status' => 'rejected',
+                    'rejection_reason' => $validator->validated()['rejection_reason'],
+                    'approved_by' => auth()->id(),
+                    'approved_at' => Carbon::now()
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Semua hari dalam pengajuan berhasil di-reject.',
+                'updated' => $updated
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal reject: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -1617,6 +1729,24 @@ public function apiIndexKetidakhadiran(Request $request)
         ], 500);
     }
 }
+
+    /**
+     * Format waktu jam masuk/jam pulang menjadi string 'H:i'.
+     * Handles Carbon instances and plain strings safely.
+     */
+    private function formatTime($time)
+    {
+        if (!$time) return '-';
+        try {
+            if ($time instanceof \Carbon\Carbon) {
+                return $time->format('H:i');
+            }
+            return Carbon::parse($time)->format('H:i');
+        } catch (\Exception $e) {
+            // Fallback: cast to string and take first 5 chars
+            return substr((string)$time, 0, 5);
+        }
+    }
 
     public function apiStore(Request $request)
     {

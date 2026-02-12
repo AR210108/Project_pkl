@@ -990,7 +990,7 @@
                                             </div>
                                             <div>
                                                 <p class="text-text-muted-light">Divisi</p>
-                                                <p class="font-medium">{{ $item->divisi }}</p>
+                                                <p class="font-medium">{{ $item->divisi ? $item->divisi->divisi : ($item->karyawan && $item->karyawan->divisi ? $item->karyawan->divisi : '-') }}</p>
                                             </div>
                                             <div>
                                                 <p class="text-text-muted-light">Alamat</p>

@@ -49,7 +49,7 @@ public function storeTim(Request $request)
         $validated = $request->validate([
             'tim' => 'required|string|max:255',
             'divisi' => 'required|string|max:255',
-            'jumlah_anggota' => 'required|string|max:10'
+            'jumlah_anggota' => 'nullable|integer|min:0'
         ]);
 
         \Log::info('Validated data:', $validated);
@@ -70,7 +70,7 @@ public function storeTim(Request $request)
         $timId = DB::table('tim')->insertGetId([
             'tim' => $validated['tim'],
             'divisi' => $validated['divisi'],
-            'jumlah_anggota' => $validated['jumlah_anggota'],
+            'jumlah_anggota' => $validated['jumlah_anggota'] ?? 0,
             'created_at' => now(),
             'updated_at' => now()
         ]);
@@ -116,11 +116,17 @@ public function storeTim(Request $request)
         $validated = $request->validate([
             'tim' => 'required|string|max:255',
             'divisi' => 'required|string|max:255',
-            'jumlah_anggota' => 'required|string|max:10'
+            'jumlah_anggota' => 'nullable|integer|min:0'
         ]);
 
         $tim = Tim::findOrFail($id);
-        $tim->update($validated);
+        // Only update jumlah_anggota if provided and not null
+        $tim->tim = $validated['tim'];
+        $tim->divisi = $validated['divisi'];
+        if (array_key_exists('jumlah_anggota', $validated) && $validated['jumlah_anggota'] !== null) {
+            $tim->jumlah_anggota = $validated['jumlah_anggota'];
+        }
+        $tim->save();
         
         return response()->json([
             'success' => true,
@@ -258,5 +264,25 @@ public function storeTim(Request $request)
             'success' => true,
             'data' => $divisis
         ]);
+    }
+
+    /**
+     * Get tims by divisi id for dropdowns.
+     * Route: /tims/by-divisi/{id}
+     */
+    public function getTimsByDivisi($id)
+    {
+        try {
+            $divisi = Divisi::find($id);
+            if (!$divisi) {
+                return response()->json(['success' => false, 'message' => 'Divisi tidak ditemukan'], 404);
+            }
+
+            $tims = Tim::where('divisi', $divisi->divisi)->get(['id', 'tim']);
+
+            return response()->json(['success' => true, 'data' => $tims]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 }

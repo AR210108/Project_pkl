@@ -491,7 +491,6 @@
                                             <tr>
                                                 <th style="min-width: 60px;">No</th>
                                                 <th style="min-width: 200px;">Nama Project</th>
-                                                <th style="min-width: 200px;">Judul Tugas</th>
                                                 <th style="min-width: 200px;">Nama Tugas</th>
                                                 <th style="min-width: 250px;">Deskripsi</th>
                                                 <th style="min-width: 150px;">Deadline</th>
@@ -561,7 +560,6 @@
                                             <tr>
                                                 <th style="min-width: 60px;">No</th>
                                                 <th style="min-width: 200px;">Nama Project</th>
-                                                <th style="min-width: 200px;">Judul Tugas</th>
                                                 <th style="min-width: 200px;">Nama Tugas</th>
                                                 <th style="min-width: 250px;">Deskripsi</th>
                                                 <th style="min-width: 150px;">Deadline</th>
@@ -761,7 +759,6 @@ const utils = {
         const setupProjectAutoFill = () => {
             const projectSelect = modalClone.querySelector('select[name="project_id"]');
             const namaTugasInput = modalClone.querySelector('input[name="nama_tugas"]');
-            const judulInput = modalClone.querySelector('input[name="judul"]');
             const deskripsiTextarea = modalClone.querySelector('textarea[name="deskripsi"]');
             const deadlineInput = modalClone.querySelector('input[name="deadline"]');
             
@@ -773,13 +770,6 @@ const utils = {
                         const projectData = state.projectDetails[projectId];
                         
                         if (projectData) {
-                            // Gunakan nama project untuk field "Judul Tugas" jika user belum mengisi
-                            if (judulInput) {
-                                if (!judulInput.value || judulInput.value.trim() === '') {
-                                    judulInput.value = projectData.nama;
-                                }
-                            }
-                            
                             // Beri saran untuk field "Nama Tugas"
                             if (namaTugasInput && (!namaTugasInput.value || namaTugasInput.value.trim() === '')) {
                                 namaTugasInput.placeholder = `Contoh: Melakukan analisis untuk ${projectData.nama}`;
@@ -835,9 +825,6 @@ const utils = {
                             namaTugasInput.placeholder = 'Masukkan nama tugas';
                             namaTugasInput.removeAttribute('data-project-name');
                         }
-                        if (judulInput) {
-                            judulInput.value = '';
-                        }
                     }
                 });
                 
@@ -847,25 +834,6 @@ const utils = {
                         projectSelect.dispatchEvent(new Event('change'));
                     }, 200);
                 }
-
-                // Attach input listeners to manage relation between nama_tugas and judul
-                if (judulInput) {
-                    judulInput.addEventListener('input', () => {
-                        judulInput.dataset.userEdited = 'true';
-                    });
-                }
-
-                if (namaTugasInput) {
-                    namaTugasInput.addEventListener('input', () => {
-                        if (!judulInput) return;
-                        if (!judulInput.dataset.userEdited || judulInput.dataset.userEdited !== 'true') {
-                            // only sync if judul hasn't been edited by user
-                            if (namaTugasInput.value && namaTugasInput.value.trim() !== '') {
-                                judulInput.value = namaTugasInput.value;
-                            }
-                        }
-                    });
-                }
             }
         };
         
@@ -874,7 +842,39 @@ const utils = {
             if (form) {
                 form.addEventListener('submit', async (e) => {
                     e.preventDefault();
+                    
+                    // Validate that at least one karyawan is selected
+                    const checkboxes = form.querySelectorAll('input[name="assigned_to[]"]:checked');
+                    console.log('All checkboxes:', form.querySelectorAll('input[name="assigned_to[]"]').length);
+                    console.log('Checked checkboxes:', checkboxes.length);
+                    checkboxes.forEach((cb, idx) => {
+                        console.log(`  Checkbox ${idx}:`, cb.value, 'checked:', cb.checked);
+                    });
+                    
+                    if (checkboxes.length === 0) {
+                        utils.showToast('Pilih minimal satu karyawan untuk ditugaskan', 'warning');
+                        return;
+                    }
+                    
+                    console.log('Karyawan selected:', checkboxes.length);
+                    
                     const formData = new FormData(form);
+                    
+                    // Debug: Log all form data
+                    console.log('=== FULL FORM DATA ===');
+                    for (let [key, value] of formData.entries()) {
+                        console.log(`${key}:`, value);
+                    }
+                    
+                    // Get assigned_to[] values (form checkboxes are already using assigned_to[])
+                    const assignedToValues = formData.getAll('assigned_to[]');
+                    console.log('Assigned to values:', assignedToValues.length, assignedToValues);
+                    
+                    // Verify FormData has all correct fields
+                    console.log('=== FINAL FORM DATA ===');
+                    for (let [key, value] of formData.entries()) {
+                        console.log(`${key}:`, value);
+                    }
                     
                     try {
                         await onSubmit(formData);
@@ -950,7 +950,9 @@ const utils = {
             'pending': 'Pending',
             'proses': 'Dalam Proses',
             'selesai': 'Selesai',
-            'dibatalkan': 'Dibatalkan'
+            'dibatalkan': 'Dibatalkan',
+            'submitted': 'Menunggu',
+            'menunggu': 'Menunggu'
         };
         return statusMap[status] || status;
     },
@@ -1005,25 +1007,105 @@ const utils = {
 
     // FUNGSI BARU: Pencarian Nama Assignee yang Cerdas
     getAssigneeName: (task) => {
-        // 1. Coba dari relasi API (Eager Loading)
+        // 0. Direct field from API (backend computed names) - THIS IS THE FASTEST PATH
+        if (task.assigned_names && typeof task.assigned_names === 'string') {
+            console.log(`[getAssigneeName] Task ${task.id}: Using assigned_names field:`, task.assigned_names);
+            return task.assigned_names;
+        }
+        
+        // If we get here, assigned_names wasn't in API response
+        if (task.assigned_to_ids && Array.isArray(task.assigned_to_ids) && task.assigned_to_ids.length > 1) {
+            console.warn(`[getAssigneeName] Task ${task.id}: assigned_names NOT in API! Using fallback to parse assigned_to_ids`);
+        }
+        
+        console.log('getAssigneeName called for task:', {
+            id: task.id,
+            assigned_to_ids: task.assigned_to_ids,
+            assigned_to_ids_type: typeof task.assigned_to_ids,
+            assigned_to: task.assigned_to,
+            assigned_names: task.assigned_names,
+            karyawanListCount: state.karyawanList.length
+        });
+        
+        // Parse assigned_to_ids - bisa dari berbagai format
+        let assignedIds = [];
+        if (task.assigned_to_ids) {
+            if (Array.isArray(task.assigned_to_ids)) {
+                assignedIds = task.assigned_to_ids;
+            } else if (typeof task.assigned_to_ids === 'string') {
+                try {
+                    assignedIds = JSON.parse(task.assigned_to_ids);
+                    if (!Array.isArray(assignedIds)) assignedIds = [];
+                } catch (e) {
+                    console.log('Failed to parse assigned_to_ids as JSON:', e);
+                    assignedIds = [];
+                }
+            }
+        }
+        
+        console.log('Parsed assignedIds:', assignedIds);
+        
+        // 1. Jika ada multiple assigned_to_ids, cari di karyawanList
+        if (assignedIds.length > 0) {
+            console.log('Processing assignedIds:', assignedIds);
+            let names = [];
+            
+            assignedIds.forEach(id => {
+                // First try: Cari di karyawanList
+                const karyawan = state.karyawanList.find(k => k.id == id);
+                if (karyawan) {
+                    names.push(karyawan.name || karyawan.nama);
+                    console.log(`Found in karyawanList ${id}:`, karyawan.name);
+                    return;
+                }
+                
+                // If not found yet, skip for now - will try API data below
+                console.log(`Karyawan ${id} not found in karyawanList (list has ${state.karyawanList.length} items)`);
+            });
+            
+            // Jika berhasil find di karyawanList
+            if (names.length > 0) {
+                const result = names.join(', ');
+                console.log('Multiple assignees from karyawanList:', result);
+                return result;
+            }
+        }
+        
+        // 2. Jika assigned_to_ids tidak ditemukan di karyawanList, coba dari API relasi
+        // Check if API returned assignees array langsung
+        if (task.assignees && Array.isArray(task.assignees)) {
+            const assigneeNames = task.assignees
+                .map(a => a.name || a.nama)
+                .filter(n => n);
+            if (assigneeNames.length > 0) {
+                console.log('Found from task.assignees array:', assigneeNames.join(', '));
+                return assigneeNames.join(', ');
+            }
+        }
+        
+        // 3. Coba dari single assignee relasi (untuk task lama/single assignment)
         if (task.assignee && task.assignee.name) {
+            console.log('Found from task.assignee:', task.assignee.name);
             return task.assignee.name;
         }
         
-        // 2. Coba dari data API alternatif
+        // 4. Coba dari data API string fields
         if (task.assignee_name) return task.assignee_name;
         if (task.assigned_to_name) return task.assigned_to_name;
         
-        // 3. Fallback: Cari di local state (karyawanList)
+        // 5. Fallback: Cari assigned_to (single ID) di local state
         if (task.assigned_to && state.karyawanList.length > 0) {
             const karyawan = state.karyawanList.find(k => k.id == task.assigned_to);
             if (karyawan) {
+                console.log('Found single assigned_to:', karyawan.name);
                 return karyawan.name || karyawan.nama;
             }
         }
         
-        // 4. Jika tidak ketemu sama sekali, return string debug
-        return `Unknown (ID: ${task.assigned_to || '?'})`;
+        // 6. Last resort - return debug string
+        const debugId = assignedIds.length > 0 ? assignedIds.join(', ') : task.assigned_to || '?';
+        console.log('Returning debug string:', debugId);
+        return `Unknown (${debugId})`;
     },
     
     // Fungsi untuk mendapatkan nama pembuat tugas dari karyawan
@@ -1059,7 +1141,7 @@ const utils = {
             };
         }
         return { 
-            type: 'Tugas Regular', 
+            type: 'Tugas Regular',
             color: 'badge-task-regular', 
             icon: 'assignment',
             indicator: 'task-type-regular'
@@ -1282,7 +1364,6 @@ const api = {
     request: async (url, options = {}) => {
         const defaultOptions = {
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': csrfToken,
                 "X-Requested-With": "XMLHttpRequest"
@@ -1292,18 +1373,49 @@ const api = {
         
         const mergedOptions = { ...defaultOptions, ...options };
         
-        if (options.body instanceof FormData) {
+        // Only set Content-Type for non-FormData requests
+        if (!(options.body instanceof FormData)) {
+            mergedOptions.headers['Content-Type'] = 'application/json';
+            
+            if (typeof options.body === 'object' && options.body !== null) {
+                mergedOptions.body = JSON.stringify(options.body);
+            }
+        } else {
+            // For FormData, let the browser set Content-Type with boundary
             delete mergedOptions.headers['Content-Type'];
-        } else if (typeof options.body === 'object' && options.body !== null) {
-            mergedOptions.body = JSON.stringify(options.body);
         }
         
         try {
             const response = await fetch(url, mergedOptions);
             
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                const contentType = response.headers.get('content-type');
+                let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                
+                // Try to parse JSON error response
+                if (contentType && contentType.includes('application/json')) {
+                    try {
+                        const errorData = await response.json();
+                        console.error('Server validation errors:', errorData);
+                        
+                        // For 422 Validation errors, show field-specific errors
+                        if (response.status === 422 && errorData.errors) {
+                            const fieldErrors = Object.entries(errorData.errors)
+                                .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+                                .join('\n');
+                            errorMessage = `Validasi gagal:\n${fieldErrors}`;
+                        } else if (errorData.message) {
+                            errorMessage = errorData.message;
+                        }
+                    } catch (parseError) {
+                        console.error('Could not parse error JSON:', parseError);
+                    }
+                }
+                
+                const error = new Error(errorMessage);
+                error.status = response.status;
+                error.response = response;
+                throw error;
             }
             
             const contentType = response.headers.get('content-type');
@@ -1348,6 +1460,17 @@ const api = {
             
             console.log('Loaded tasks:', tasks.length);
             
+            // Debug: Log assigned_names for tasks with multiple assignees
+            tasks.forEach((task, index) => {
+                if (task.assigned_to_ids && Array.isArray(task.assigned_to_ids) && task.assigned_to_ids.length > 1) {
+                    console.log(`Task ${index + 1} (ID: ${task.id}) - Multi-assigned:`, {
+                        assigned_to_ids: task.assigned_to_ids,
+                        assigned_names: task.assigned_names,
+                        assignee_name: task.assignee_name
+                    });
+                }
+            });
+            
             // Process tasks
             tasks.forEach((task) => {
                 task.is_overdue = utils.checkOverdue(task.deadline, task.status);
@@ -1387,6 +1510,10 @@ const api = {
             // Update tab counts
             document.getElementById('tabRegularCount').textContent = state.tasksRegular.length;
         document.getElementById('tabKaryawanCount').textContent = state.tasksKaryawan.length;
+            
+            // Render table dengan data terbaru
+            render.renderTable();
+            
             try {
                 await api.fetchStatistics();
             } catch(e) {
@@ -1541,19 +1668,61 @@ const api = {
     
     createTask: async (formData) => {
         try {
-            const data = {};
-            formData.forEach((value, key) => {
-                data[key] = value;
-            });
+            // Check if there's a file attachment
+            const attachment = formData.get('attachment');
             
-            // Do not overwrite nama_tugas with judul on client-side; allow user to provide distinct nama_tugas
-            // If server needs to default, it will handle it. Keep client payload as-is.
+            // Build final data - keep FormData if there's attachment, otherwise convert to object
+            let finalData = formData;
             
-            if (!data.target_divisi_id || data.target_divisi_id === '') {
-                data.target_divisi_id = state.currentUser.divisi_id;
+            if (!attachment) {
+                // No file attachment - convert FormData to object
+                const data = {};
+                const assignedToArray = [];
+                
+                formData.forEach((value, key) => {
+                    if (key === 'assigned_to[]') {
+                        assignedToArray.push(value);
+                    } else {
+                        data[key] = value;
+                    }
+                });
+                
+                if (assignedToArray.length > 0) {
+                    data['assigned_to'] = assignedToArray;
+                }
+                
+                if (!data.target_divisi_id || data.target_divisi_id === '') {
+                    data.target_divisi_id = state.currentUser.divisi_id;
+                }
+                
+                console.log('Sending task data (no attachment):', data);
+                console.log('Assigned to count:', assignedToArray.length);
+                finalData = data;
+            } else {
+                // Has file attachment - rebuild FormData with converted assigned_to array
+                const newFormData = new FormData();
+                const assignedToArray = [];
+                
+                formData.forEach((value, key) => {
+                    if (key === 'assigned_to[]') {
+                        assignedToArray.push(value);
+                    } else {
+                        newFormData.append(key, value);
+                    }
+                });
+                
+                if (assignedToArray.length > 0) {
+                    newFormData.append('assigned_to', JSON.stringify(assignedToArray));
+                }
+                
+                if (!formData.get('target_divisi_id') || formData.get('target_divisi_id') === '') {
+                    newFormData.set('target_divisi_id', state.currentUser.divisi_id);
+                }
+                
+                console.log('Sending task data (with attachment)');
+                console.log('Assigned to count:', assignedToArray.length);
+                finalData = newFormData;
             }
-            
-            console.log('Sending task data:', data);
             
             const endpoint = api.getCreateTaskEndpoint();
             
@@ -1563,10 +1732,13 @@ const api = {
             
             const response = await api.request(endpoint, {
                 method: 'POST',
-                body: data
+                body: finalData
             });
             
-            utils.showToast('Tugas berhasil dibuat', 'success');
+            const message = response.message || 'Tugas berhasil dibuat';
+            utils.showToast(message, 'success');
+            
+            console.log('Task creation response:', response);
             await api.fetchTasks();
             
             return response;
@@ -1804,7 +1976,7 @@ const render = {
         render.renderTable();
         
         // Update panel titles
-        let panelTitleRegular = 'Tugas Regular';
+     
         let panelTitleKaryawan = 'Tugas dari Karyawan';
         
         if (selectedProjectId !== 'all') {
@@ -1812,7 +1984,7 @@ const render = {
             if (selectedProject) {
                 const projectName = selectedProject.nama || selectedProject.name || selectedProject.nama_project || `Project ${selectedProjectId}`;
                 const truncatedName = utils.truncateText(projectName, 30);
-                panelTitleRegular = `Tugas Regular: ${truncatedName}`;
+        
                 panelTitleKaryawan = `Tugas dari Karyawan: ${truncatedName}`;
             }
         }
@@ -1871,27 +2043,58 @@ const render = {
             row.className = 'hover:bg-gray-50';
             
             const namaTugas = task.nama_tugas || task.judul || '';
-            const judulTugas = task.judul || task.nama_tugas || '';
-            const assigneeName = utils.getAssigneeName(task);
-            const isAssigneeUnknown = assigneeName.includes('Unknown');
+            
+            // BARU: Build assignee name yang pasti handle multiple assignees
+            let assigneeName = 'Belum ditugaskan';
+            
+            // 1. Jika ada assigned_names dari backend (sudah comma-separated)
+            if (task.assigned_names && typeof task.assigned_names === 'string' && task.assigned_names.trim()) {
+                assigneeName = task.assigned_names;
+                console.log(`[Table] Task ${task.id}: Using assigned_names from backend:`, assigneeName);
+            }
+            // 2. Jika ada assigned_to_ids array dengan multiple entries
+            else if (task.assigned_to_ids && Array.isArray(task.assigned_to_ids) && task.assigned_to_ids.length > 0) {
+                let names = [];
+                task.assigned_to_ids.forEach(id => {
+                    // Cari nama di karyawanList
+                    const karyawan = state.karyawanList.find(k => k.id == id);
+                    if (karyawan) {
+                        names.push(karyawan.name || karyawan.nama);
+                    } else {
+                        names.push(`ID: ${id}`);
+                    }
+                });
+                if (names.length > 0) {
+                    assigneeName = names.join(', ');
+                    console.log(`[Table] Task ${task.id}: Built from assigned_to_ids array:`, assigneeName);
+                }
+            }
+            // 3. Fallback ke assignee_name dari API
+            else if (task.assignee_name && task.assignee_name.trim()) {
+                assigneeName = task.assignee_name;
+                console.log(`[Table] Task ${task.id}: Using assignee_name:`, assigneeName);
+            }
+            // 4. Fallback ke assigned_to lookup di karyawanList
+            else if (task.assigned_to && state.karyawanList.length > 0) {
+                const karyawan = state.karyawanList.find(k => k.id == task.assigned_to);
+                if (karyawan) {
+                    assigneeName = karyawan.name || karyawan.nama;
+                    console.log(`[Table] Task ${task.id}: Using assigned_to lookup:`, assigneeName);
+                }
+            }
+            
+            const isAssigneeUnknown = assigneeName.includes('Unknown') || assigneeName === 'Belum ditugaskan';
             const taskTypeInfo = utils.getTaskTypeLabel(task);
 
             row.innerHTML = `
                 <td class="text-center">
                     ${rowNumber}
-                    <div class="mt-1">
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${taskTypeInfo.color}">
-                            <span class="material-icons-outlined text-xs">${taskTypeInfo.icon}</span>
-                            ${taskTypeInfo.type}
-                        </span>
-                    </div>
                 </td>
                 <td class="font-medium text-gray-900">
                     <div class="truncate-text" title="${utils.escapeHtml(task.project_name || 'Tidak ada Project')}">
                         ${utils.escapeHtml(task.project_name || 'Tidak ada Project')}
                     </div>
                 </td>
-                <td class="font-medium text-gray-900">${utils.escapeHtml(judulTugas)}</td>
                 <td class="font-medium text-gray-900">${utils.escapeHtml(namaTugas)}</td>
                 <td title="${utils.escapeHtml(task.deskripsi || '')}">
                     <div class="truncate-text">${utils.truncateText(task.deskripsi || '', 50)}</div>
@@ -1943,14 +2146,9 @@ const render = {
                             <div class="text-xs text-primary font-medium">
                                 ${utils.escapeHtml(task.project_name || 'Tidak ada Project')}
                             </div>
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${taskTypeInfo.color}">
-                                <span class="material-icons-outlined text-xs">${taskTypeInfo.icon}</span>
-                                ${taskTypeInfo.type}
-                            </span>
                         </div>
                         <h4 class="font-semibold text-gray-900 mb-1">
-                            <div class="text-sm text-gray-600">Judul: ${utils.escapeHtml(task.judul || task.nama_tugas || '')}</div>
-                            <div class="text-sm font-medium mt-1">Tugas: ${utils.escapeHtml(task.nama_tugas || task.judul || '')}</div>
+                            <div class="text-sm font-medium">Tugas: ${utils.escapeHtml(task.nama_tugas || task.judul || '')}</div>
                         </h4>
                         <div class="flex items-center gap-2 mt-2">
                             <span class="badge ${utils.getStatusClass(task.status)}">
@@ -2017,7 +2215,6 @@ const render = {
             row.className = 'hover:bg-gray-50';
             
             const namaTugas = task.nama_tugas || task.judul || '';
-            const judulTugas = task.judul || task.nama_tugas || '';
             const assigneeName = utils.getAssigneeName(task);
             const createdByName = utils.getCreatedByName(task);
             const taskTypeInfo = utils.getTaskTypeLabel(task);
@@ -2025,19 +2222,12 @@ const render = {
             row.innerHTML = `
                 <td class="text-center">
                     ${rowNumber}
-                    <div class="mt-1">
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${taskTypeInfo.color}">
-                            <span class="material-icons-outlined text-xs">${taskTypeInfo.icon}</span>
-                            ${taskTypeInfo.type}
-                        </span>
-                    </div>
                 </td>
                 <td class="font-medium text-gray-900">
                     <div class="truncate-text" title="${utils.escapeHtml(task.project_name || 'Tidak ada Project')}">
                         ${utils.escapeHtml(task.project_name || 'Tidak ada Project')}
                     </div>
                 </td>
-                <td class="font-medium text-gray-900">${utils.escapeHtml(judulTugas)}</td>
                 <td class="font-medium text-gray-900">${utils.escapeHtml(namaTugas)}</td>
                 <td title="${utils.escapeHtml(task.deskripsi || '')}">
                     <div class="truncate-text">${utils.truncateText(task.deskripsi || '', 50)}</div>
@@ -2064,7 +2254,7 @@ const render = {
                         </button>
                         
                         ${state.currentUser.role !== 'karyawan' ? `
-                        <button onclick="approveTask(${task.id})" class="p-2 rounded-full hover:bg-green-50 transition-colors" title="Approve">
+                        <button onclick="approveTask(${task.id})" class="p-2 rounded-full hover:bg-green-50 transition-colors" title="Approve" ${task.status === 'selesai' ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
                             <span class="material-icons-outlined text-green-700 text-lg">check_circle</span>
                         </button>
                         ` : ''}
@@ -2089,14 +2279,9 @@ const render = {
                             <div class="text-xs text-amber-600 font-medium">
                                 ${utils.escapeHtml(task.project_name || 'Tidak ada Project')}
                             </div>
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${taskTypeInfo.color}">
-                                <span class="material-icons-outlined text-xs">${taskTypeInfo.icon}</span>
-                                ${taskTypeInfo.type}
-                            </span>
                         </div>
                         <h4 class="font-semibold text-gray-900 mb-1">
-                            <div class="text-sm text-gray-600">Judul: ${utils.escapeHtml(task.judul || task.nama_tugas || '')}</div>
-                            <div class="text-sm font-medium mt-1">Tugas: ${utils.escapeHtml(task.nama_tugas || task.judul || '')}</div>
+                            <div class="text-sm font-medium">Tugas: ${utils.escapeHtml(task.nama_tugas || task.judul || '')}</div>
                         </h4>
                         <div class="flex items-center gap-2 mt-2">
                             <span class="badge ${utils.getStatusClass(task.status)}">
@@ -2112,7 +2297,7 @@ const render = {
                             <span class="material-icons-outlined text-blue-600">visibility</span>
                         </button>
                         ${state.currentUser.role !== 'karyawan' ? `
-                        <button onclick="approveTask(${task.id})" class="p-1 hover:bg-green-50 rounded" title="Approve">
+                        <button onclick="approveTask(${task.id})" class="p-1 hover:bg-green-50 rounded" title="Approve" ${task.status === 'selesai' ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
                             <span class="material-icons-outlined text-green-700">check_circle</span>
                         </button>
                         ` : ''}
@@ -2243,31 +2428,19 @@ const modal = {
             }
             
             const namaTugas = task.nama_tugas || task.judul || '';
-            const judulTugas = task.judul || task.nama_tugas || '';
             const assigneeName = utils.getAssigneeName(task);
             const createdByName = utils.getCreatedByName(task);
-            const taskTypeInfo = utils.getTaskTypeLabel(task);
             
             const isFromKaryawan = task.type === 'task_from_karyawan';
             
             const modalContent = `
                 <div class="space-y-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <h4 class="text-lg font-semibold text-gray-900">Detail Tugas</h4>
-                        <span class="badge ${taskTypeInfo.color}">
-                            <span class="material-icons-outlined text-xs mr-1">${taskTypeInfo.icon}</span>
-                            ${taskTypeInfo.type}
-                        </span>
-                    </div>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Detail Tugas</h4>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Nama Project</h4>
                             <p class="font-medium text-gray-900">${utils.escapeHtml(projectName || 'Tidak ada Project')}</p>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Judul Tugas</h4>
-                            <p class="font-medium text-gray-900">${utils.escapeHtml(judulTugas)}</p>
                         </div>
                         <div>
                             <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Nama Tugas</h4>
@@ -2324,7 +2497,7 @@ const modal = {
                     ${isFromKaryawan && state.currentUser.role !== 'karyawan' && task.status !== 'selesai' ? `
                     <div class="pt-4 border-t flex gap-2">
                         <button class="close-modal btn-secondary flex-1 py-2">Tutup</button>
-                        <button onclick="approveTask(${task.id})" class="btn-primary flex-1 py-2">Approve</button>
+                        <button onclick="approveTask(${task.id})" class="btn-primary flex-1 py-2" ${task.status === 'selesai' ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>Approve</button>
                     </div>
                     ` : `
                     <div class="pt-4 border-t">
@@ -2342,14 +2515,31 @@ const modal = {
                     const filesContainer = document.getElementById('filesContainer');
                     if (!filesContainer) return;
                     
-                    const response = await fetch(`/api/tasks/${id}/files`);
-                    if (!response.ok) {
-                        filesContainer.innerHTML = '<p class="text-gray-500 text-sm">Tidak ada file yang diunggah</p>';
-                        return;
-                    }
+                    let files = [];
                     
-                    const data = await response.json();
-                    const files = data.files || [];
+                    // For karyawan tasks, use submission_file directly
+                    if (isFromKaryawan && task.submission_file) {
+                        files = [{
+                            path: task.submission_file,
+                            url: task.submission_url,
+                            filename: task.submission_file.split('/').pop() || 'submission_file'
+                        }];
+                    } else {
+                        // For regular tasks, try files from response
+                        files = task.files || [];
+                        
+                        // If no files in main response, try to fetch from separate endpoint
+                        if (!files || files.length === 0) {
+                            const response = await fetch(`/api/tasks/${id}/files`);
+                            if (!response.ok) {
+                                filesContainer.innerHTML = '<p class="text-gray-500 text-sm">Tidak ada file yang diunggah</p>';
+                                return;
+                            }
+                            
+                            const data = await response.json();
+                            files = data.files || [];
+                        }
+                    }
                     
                     if (files.length === 0) {
                         filesContainer.innerHTML = '<p class="text-gray-500 text-sm">Tidak ada file yang diunggah</p>';
@@ -2359,13 +2549,21 @@ const modal = {
                     let filesHTML = '';
                     files.forEach(file => {
                         const fileName = file.filename || file.name || 'File';
-                        const filePath = file.path || file.url || '#';
-                        const fileSize = file.size ? `(${(file.size / 1024).toFixed(2)} KB)` : '';
+                        // Use submission_url, download_url if available, otherwise construct from path
+                        let filePath = file.submission_url || file.download_url || file.url || file.path || '#';
+                        
+                        // If path is relative, make it absolute
+                        if (filePath.startsWith('tugas_karyawan/') || filePath.startsWith('tasks/') || (!filePath.startsWith('http') && !filePath.startsWith('/'))) {
+                            filePath = '/storage/' + filePath;
+                        }
+                        
+                        const fileSize = file.size ? `(${typeof file.size === 'string' ? file.size : (file.size / 1024).toFixed(2) + ' KB'})` : '';
                         const mimeType = file.mime_type || '';
                         
-                        // Determine if file is image
-                        const isImage = mimeType.startsWith('image/');
-                        const icon = isImage ? 'image' : 'attach_file';
+                        // Determine if file is image based on extension or mime type
+                        const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+                        const isImage = mimeType.startsWith('image/') || 
+                                       imageExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
                         
                         if (isImage) {
                             filesHTML += `
@@ -2421,10 +2619,15 @@ const modal = {
             let hasKaryawanInDivisi = false;
             
             if (state.karyawanList.length > 0) {
+                // Handle both single value and array for assigned_to
+                const assignedIds = Array.isArray(task.assigned_to) 
+                    ? task.assigned_to 
+                    : (task.assigned_to ? [task.assigned_to] : []);
+                
                 state.karyawanList.forEach((k) => {
                     const karyawanName = k.name || k.nama || 'Tanpa Nama';
                     const karyawanId = k.id || k.user_id;
-                    const isSelected = task.assigned_to == karyawanId ? 'selected' : '';
+                    const isSelected = assignedIds.includes(karyawanId.toString()) || assignedIds.includes(karyawanId) ? 'selected' : '';
                     
                     karyawanOptions += `
                         <option value="${karyawanId}" ${isSelected}>
@@ -2448,7 +2651,6 @@ const modal = {
             
             const formattedDeadline = task.deadline ? utils.formatDateForInput(task.deadline) : '';
             const namaTugasValue = task.nama_tugas || '';
-            const judulTugasValue = task.judul || '';
             
             const modalContent = `
                 <form>
@@ -2468,13 +2670,6 @@ const modal = {
                                 ${projectOptions}
                             </select>
                             <p class="text-xs text-gray-500 mt-1">Pilih project terkait (Opsional)</p>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Judul Tugas <span class="text-red-500">*</span></label>
-                            <input type="text" name="judul" value="${utils.escapeHtml(judulTugasValue)}" 
-                                   class="form-input" required placeholder="Judul tugas (akan diisi otomatis dari nama project)">
-                            <p class="text-xs text-gray-500 mt-1">Judul akan diisi otomatis saat memilih project</p>
                         </div>
                         
                         <div>
@@ -2498,11 +2693,20 @@ const modal = {
                         
                         ${hasKaryawanInDivisi ? `
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Ditugaskan Kepada <span class="text-red-500">*</span></label>
-                            <select name="assigned_to" class="form-input w-full" required>
-                                <option value="">-- Pilih Karyawan --</option>
-                                ${karyawanOptions}
-                            </select>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Ditugaskan Kepada <span class="text-red-500">*</span></label>
+                            <div class="space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                ${state.karyawanList.map(karyawan => `
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="assigned_to[]" value="${karyawan.id}" 
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                           id="karyawan_${karyawan.id}">
+                                    <label for="karyawan_${karyawan.id}" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                                        ${utils.escapeHtml(karyawan.name)}
+                                    </label>
+                                </div>
+                                `).join('')}
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Pilih satu atau lebih karyawan</p>
                         </div>
                         ` : `
                         <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
@@ -2528,6 +2732,16 @@ const modal = {
                                 <option value="proses" ${task.status === 'proses' ? 'selected' : ''}>Dalam Proses</option>
                                 <option value="selesai" ${task.status === 'selesai' ? 'selected' : ''}>Selesai</option>
                                 <option value="dibatalkan" ${task.status === 'dibatalkan' ? 'selected' : ''}>Dibatalkan</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Prioritas <span class="text-red-500">*</span></label>
+                            <select name="priority" class="form-input" required>
+                                <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Rendah</option>
+                                <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Sedang</option>
+                                <option value="high" ${task.priority === 'high' ? 'selected' : ''}>Tinggi</option>
+                                <option value="urgent" ${task.priority === 'urgent' ? 'selected' : ''}>Sangat Mendesak</option>
                             </select>
                         </div>
                         
@@ -2558,6 +2772,9 @@ const modal = {
     
     showCreate: () => {
         try {
+            // Initialize assignedIds as empty array for new task creation
+            const assignedIds = [];
+            
             let karyawanOptions = '';
             let hasKaryawanInDivisi = false;
             
@@ -2598,13 +2815,6 @@ const modal = {
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Judul Tugas <span class="text-red-500">*</span></label>
-                            <input type="text" name="judul" class="form-input" required 
-                                   placeholder="Judul tugas (akan diisi otomatis dari nama project)">
-                            <p class="text-xs text-gray-500 mt-1">Akan diisi otomatis dengan nama project yang dipilih</p>
-                        </div>
-                        
-                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Tugas <span class="text-red-500">*</span></label>
                             <input type="text" name="nama_tugas" class="form-input" required 
                                    placeholder="Masukkan nama tugas spesifik">
@@ -2625,14 +2835,23 @@ const modal = {
                         
                         ${hasKaryawanInDivisi ? `
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Ditugaskan Kepada <span class="text-red-500">*</span></label>
-                            <select name="assigned_to" class="form-input w-full" required>
-                                <option value="">-- Pilih Karyawan --</option>
-                                ${karyawanOptions}
-                            </select>
-                            <p class="text-xs text-gray-500 mt-1">
-                                <span class="font-medium">${state.karyawanList.length} karyawan</span> tersedia
-                            </p>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Ditugaskan Kepada <span class="text-red-500">*</span></label>
+                            <div class="space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
+                                ${state.karyawanList.map(karyawan => {
+                                    const isChecked = assignedIds.includes(karyawan.id) ? 'checked' : '';
+                                    return `
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="assigned_to[]" value="${karyawan.id}" 
+                                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                               id="karyawan_edit_${karyawan.id}" ${isChecked}>
+                                        <label for="karyawan_edit_${karyawan.id}" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                                            ${utils.escapeHtml(karyawan.name)}
+                                        </label>
+                                    </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Pilih satu atau lebih karyawan (<span class="font-medium">${state.karyawanList.length} karyawan</span> tersedia)</p>
                         </div>
                         ` : `
                         <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
@@ -2663,9 +2882,25 @@ const modal = {
                         </div>
                         
                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Prioritas <span class="text-red-500">*</span></label>
+                            <select name="priority" class="form-input" required>
+                                <option value="low">Rendah</option>
+                                <option value="medium" selected>Sedang</option>
+                                <option value="high">Tinggi</option>
+                                <option value="urgent">Sangat Mendesak</option>
+                            </select>
+                        </div>
+                        
+                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
                             <textarea name="catatan" rows="2" class="form-input" 
                                       placeholder="Tambahkan catatan (opsional)"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">File Lampiran (Opsional)</label>
+                            <input type="file" name="attachment" class="form-input" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+                            <p class="text-xs text-gray-500 mt-1">Format: Gambar, PDF, Word, Excel, PowerPoint | Maks: 100MB</p>
                         </div>
                         
                         <input type="hidden" name="target_divisi_id" value="${state.currentUser.divisi_id}">
@@ -2841,7 +3076,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm('Apakah Anda yakin ingin menghapus tugas ini?')) {
             try {
                 await api.deleteTask(id);
-                utils.showToast('Tugas berhasil dihapus', 'success');
+                // api.deleteTask already shows success toast
             } catch (error) {
                 console.error('Error deleting task:', error);
                 utils.showToast('Gagal menghapus tugas: ' + error.message, 'error');
